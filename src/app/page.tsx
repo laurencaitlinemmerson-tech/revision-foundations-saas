@@ -113,9 +113,74 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="bg-[var(--lilac)] py-12 text-center text-sm text-[var(--plum-dark)]/60">
-        © 2025 Revision Foundations
+     <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
+        <div className="mx-auto flex max-w-6xl flex-col gap-10">
+          <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+            <div className="space-y-4">
+              <div className="font-serif text-2xl font-semibold text-[var(--plum)]">
+                Revision Foundations
+              </div>
+              <p className="text-sm">Made with 💜 by Lauren</p>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-[var(--plum)]">Products</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/osce" className="transition hover:text-[var(--plum)]">
+                  OSCE Tool
+                </Link>
+                <Link href="/quiz" className="transition hover:text-[var(--plum)]">
+                  Core Quiz
+                </Link>
+                <Link href="/pricing" className="transition hover:text-[var(--plum)]">
+                  Pricing
+                </Link>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-[var(--plum)]">Company</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/about" className="transition hover:text-[var(--plum)]">
+                  About
+                </Link>
+                <Link href="/contact" className="transition hover:text-[var(--plum)]">
+                  Contact
+                </Link>
+                <Link href="/privacy" className="transition hover:text-[var(--plum)]">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="transition hover:text-[var(--plum)]">
+                  Terms of Service
+                </Link>
+                <Link href="/delete-data" className="transition hover:text-[var(--plum)]">
+                  Delete My Data
+                </Link>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-[var(--plum)]">Account</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/sign-in" className="transition hover:text-[var(--plum)]">
+                  Sign In
+                </Link>
+                <Link href="/sign-up" className="transition hover:text-[var(--plum)]">
+                  Sign Up
+                </Link>
+                <Link href="/dashboard" className="transition hover:text-[var(--plum)]">
+                  Dashboard
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[var(--lavender)]/40 pt-6 text-center text-sm">
+            © 2026 Revision Foundations
+          </div>
+        </div>
       </footer>
     </div>
   );
-}
+}     
+ 
