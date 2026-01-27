@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { product } = body as { product: ProductKey };
 
-    if (!product || !['osce', 'quiz'].includes(product)) {
+    if (!product || !['osce', 'quiz', 'bundle'].includes(product)) {
       return NextResponse.json(
         { error: 'Invalid product' },
         { status: 400 }
@@ -48,7 +48,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate price IDs are configured
-    const priceIdEnvVar = product === 'osce' ? 'STRIPE_OSCE_PRICE_ID' : 'STRIPE_QUIZ_PRICE_ID';
+    const priceIdEnvVar = product === 'osce'
+      ? 'STRIPE_OSCE_PRICE_ID'
+      : product === 'quiz'
+      ? 'STRIPE_QUIZ_PRICE_ID'
+      : 'STRIPE_BUNDLE_PRICE_ID';
     const priceId = process.env[priceIdEnvVar];
     if (!priceId) {
       console.error(`${priceIdEnvVar} is not configured`);

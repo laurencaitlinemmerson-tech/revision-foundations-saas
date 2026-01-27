@@ -30,6 +30,12 @@ export const PRODUCTS = {
     priceId: process.env.STRIPE_QUIZ_PRICE_ID!,
     price: 4.99,
   },
+  bundle: {
+    name: 'Complete Nursing Bundle',
+    description: 'Full access to BOTH the OSCE Tool and Theory Quiz - best value!',
+    priceId: process.env.STRIPE_BUNDLE_PRICE_ID!,
+    price: 7.99,
+  },
 } as const;
 
 export type ProductKey = keyof typeof PRODUCTS;

@@ -5,14 +5,14 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play } from 'lucide-react';
+import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Star, Gift } from 'lucide-react';
 
 export default function PricingPage() {
   const { isSignedIn } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handlePurchase = async (product: 'osce' | 'quiz') => {
+  const handlePurchase = async (product: 'osce' | 'quiz' | 'bundle') => {
     if (!isSignedIn) {
       router.push('/sign-up');
       return;
@@ -42,49 +42,12 @@ export default function PricingPage() {
     }
   };
 
-  const products = [
-    {
-      id: 'osce' as const,
-      name: "Children's OSCE Tool",
-      emoji: '📋',
-      price: '£4.99',
-      description: 'Practice OSCE stations with checklists and guidance',
-      icon: ClipboardCheck,
-      features: [
-        'All OSCE stations',
-        'Detailed checklists',
-        'Timer & exam mode',
-        'Progress tracking',
-        'Self-assessment',
-        'Mobile friendly',
-        'Lifetime access',
-      ],
-    },
-    {
-      id: 'quiz' as const,
-      name: 'Nursing Theory Quiz',
-      emoji: '📚',
-      price: '£4.99',
-      description: 'Topic-based quizzes with instant feedback',
-      icon: BookOpen,
-      features: [
-        '17 topic categories',
-        'Hundreds of questions',
-        'Instant feedback',
-        'Explanations',
-        'Progress tracking',
-        'Mobile friendly',
-        'Lifetime access',
-      ],
-    },
-  ];
-
   return (
     <div className="min-h-screen">
       <Navbar />
 
       <main className="pt-28 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-14">
             <span className="badge badge-purple mb-4">
@@ -97,19 +60,33 @@ export default function PricingPage() {
             </p>
           </div>
 
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            {products.map((product) => (
-              <div key={product.id} className="card relative">
-                <div className="text-5xl mb-5">{product.emoji}</div>
-                <span className="badge mb-4">{product.price} · Lifetime</span>
-                <h3 className="mb-3 text-[var(--text-dark)]">{product.name}</h3>
-                <p className="text-[var(--text-medium)] text-sm mb-6">
-                  {product.description}
-                </p>
-
-                <div className="space-y-2.5 mb-8">
-                  {product.features.map((feature) => (
+          {/* Bundle - Featured */}
+          <div className="card mb-8 relative overflow-hidden border-2 border-[var(--lavender-dark)]">
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender-dark)] to-[var(--pink-dark)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
+              BEST VALUE ✨
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center gap-8">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="icon-box">
+                    <Gift className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl text-[var(--text-dark)]" style={{ fontFamily: 'Fraunces, serif' }}>
+                      Complete Nursing Bundle
+                    </h2>
+                    <p className="text-[var(--text-medium)] text-sm">Both tools in one!</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {[
+                    'OSCE Tool included',
+                    'Quiz Tool included',
+                    'All features unlocked',
+                    'Lifetime access',
+                    'Save £2!',
+                    'Best for exam prep',
+                  ].map((feature) => (
                     <div key={feature} className="feature-check">
                       <div className="check-icon">
                         <Check className="w-3.5 h-3.5 text-green-600" />
@@ -118,13 +95,21 @@ export default function PricingPage() {
                     </div>
                   ))}
                 </div>
-
+              </div>
+              <div className="text-center md:text-right">
+                <div className="mb-2">
+                  <span className="text-[var(--text-light)] line-through text-lg">£9.98</span>
+                </div>
+                <div className="text-4xl font-bold text-[var(--text-dark)] mb-1" style={{ fontFamily: 'Fraunces, serif' }}>
+                  £7.99
+                </div>
+                <p className="text-sm text-[var(--text-medium)] mb-4">one-time payment</p>
                 <button
-                  onClick={() => handlePurchase(product.id)}
+                  onClick={() => handlePurchase('bundle')}
                   disabled={loading !== null}
-                  className="btn-primary w-full"
+                  className="btn-primary px-8"
                 >
-                  {loading === product.id ? (
+                  {loading === 'bundle' ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
                       Processing...
@@ -132,12 +117,93 @@ export default function PricingPage() {
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5" />
-                      Get {product.name}
+                      Get the Bundle
                     </>
                   )}
                 </button>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* Individual Products */}
+          <div className="text-center mb-6">
+            <p className="text-[var(--text-light)] text-sm">Or buy individually:</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-16">
+            {/* OSCE Card */}
+            <div className="card">
+              <div className="text-4xl mb-4">📋</div>
+              <span className="badge mb-3">£4.99 · Lifetime</span>
+              <h3 className="mb-2 text-[var(--text-dark)]">Children's OSCE Tool</h3>
+              <p className="text-[var(--text-medium)] text-sm mb-5">
+                Practice stations with checklists and guidance
+              </p>
+              <div className="space-y-2 mb-6">
+                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map((f) => (
+                  <div key={f} className="feature-check">
+                    <div className="check-icon">
+                      <Check className="w-3.5 h-3.5 text-green-600" />
+                    </div>
+                    <span className="text-sm text-[var(--text-dark)]">{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => handlePurchase('osce')}
+                disabled={loading !== null}
+                className="btn-secondary w-full"
+              >
+                {loading === 'osce' ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <ClipboardCheck className="w-5 h-5" />
+                    Get OSCE Tool
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Quiz Card */}
+            <div className="card">
+              <div className="text-4xl mb-4">📚</div>
+              <span className="badge mb-3">£4.99 · Lifetime</span>
+              <h3 className="mb-2 text-[var(--text-dark)]">Nursing Theory Quiz</h3>
+              <p className="text-[var(--text-medium)] text-sm mb-5">
+                Topic-based quizzes with instant feedback
+              </p>
+              <div className="space-y-2 mb-6">
+                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map((f) => (
+                  <div key={f} className="feature-check">
+                    <div className="check-icon">
+                      <Check className="w-3.5 h-3.5 text-green-600" />
+                    </div>
+                    <span className="text-sm text-[var(--text-dark)]">{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => handlePurchase('quiz')}
+                disabled={loading !== null}
+                className="btn-secondary w-full"
+              >
+                {loading === 'quiz' ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="w-5 h-5" />
+                    Get Quiz Tool
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* FAQ */}
