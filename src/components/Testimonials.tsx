@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Star, Heart } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 interface Review {
   id: string;
