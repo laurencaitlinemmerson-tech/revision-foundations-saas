@@ -36,7 +36,7 @@ export default function PricingPage() {
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Failed to start checkout. Please try again.');
+      alert('Oops! Something went wrong. Please try again or contact support if this keeps happening.');
     } finally {
       setLoading(null);
     }
