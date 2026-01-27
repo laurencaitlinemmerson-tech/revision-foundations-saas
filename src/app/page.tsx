@@ -96,6 +96,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Why Us Section */}
+      <section className="bg-cream section">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <span className="badge badge-purple mb-4 inline-flex">Why Us?</span>
+          <h2 className="mb-12 text-[var(--plum-dark)]">Made With Love</h2>
+          <div className="grid gap-10 md:grid-cols-3">
+            {[
+              {
+                icon: '👩‍🎓',
+                title: 'By a Student',
+                copy: 'Created by a nursing student who knows exactly what you need.',
+              },
+              {
+                icon: '⚡',
+                title: 'Easy to Use',
+                copy: 'Simple, pretty interface that makes revision actually fun.',
+              },
+              {
+                icon: '🎁',
+                title: 'Pay Once',
+                copy: 'No subscriptions! One payment, lifetime access forever.',
+              },
+            ].map((item) => (
+              <div key={item.title} className="space-y-3">
+                <div className="text-4xl">{item.icon}</div>
+                <h3 className="text-[var(--plum)]">{item.title}</h3>
+                <p className="text-[var(--plum-dark)]/70">{item.copy}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="bg-cream pb-24 relative">
         <Testimonials />
@@ -113,7 +146,28 @@ export default function HomePage() {
         </div>
       </section>
 
-     <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
+    {/* CTA Section */}
+      <section className="gradient-hero section relative overflow-hidden">
+        <div className="blob blob-1" />
+        <div className="blob blob-2" />
+        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+          <div className="text-3xl mb-4">✨</div>
+          <h2 className="mb-4 text-[var(--plum)]">Ready to Start?</h2>
+          <p className="text-lg md:text-xl text-[var(--plum-dark)]/70 mb-10">
+            Your nursing exams don&apos;t stand a chance.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/pricing" className="btn-primary text-lg px-8 py-4">
+              <Sparkles className="w-5 h-5" /> Get Started - £4.99
+            </Link>
+            <Link href="/quiz" className="btn-secondary text-lg px-8 py-4">
+              <Play className="w-5 h-5" /> Free Preview
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
         <div className="mx-auto flex max-w-6xl flex-col gap-10">
           <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
             <div className="space-y-4">
