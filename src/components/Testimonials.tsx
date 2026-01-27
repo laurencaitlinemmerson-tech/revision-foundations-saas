@@ -18,7 +18,6 @@ export default function HomePage() {
 
         <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            {/* The Badge Style you liked */}
             <div className="fade-in inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full text-sm font-medium mb-8 border border-[var(--lavender)]/30">
               <Sparkles className="w-4 h-4 text-[var(--purple)]" />
               <span className="text-[var(--plum)]">For Children's Nursing Students</span>
@@ -107,87 +106,4 @@ export default function HomePage() {
                 {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Track your progress'].map((f) => (
                   <div key={f} className="feature-check">
                     <div className="check-icon">
-                      <Check className="w-3.5 h-3.5 text-green-600" />
-                    </div>
-                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
-                  </div>
-                ))}
-              </div>
-              <Link href="/osce" className="btn-primary w-full">
-                <Play className="w-4 h-4" />
-                Try OSCE Tool
-              </Link>
-            </div>
-
-            <div className="card">
-              <div className="flex justify-between items-start mb-5">
-                <div className="icon-box">
-                  <BookOpen className="w-8 h-8 text-white" />
-                </div>
-                <span className="badge">£4.99 · Lifetime</span>
-              </div>
-              <h3 className="mb-3">Core Nursing Quiz</h3>
-              <p className="text-[var(--plum-dark)]/70 mb-6">
-                17 topic areas covering the theory you need for exams. Instant feedback + explanations.
-              </p>
-              <div className="space-y-2 mb-6">
-                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Works on mobile'].map((f) => (
-                  <div key={f} className="feature-check">
-                    <div className="check-icon">
-                      <Check className="w-3.5 h-3.5 text-green-600" />
-                    </div>
-                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
-                  </div>
-                ))}
-              </div>
-              <Link href="/quiz" className="btn-primary w-full">
-                <Play className="w-4 h-4" />
-                Try Quiz Tool
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials & Styled Review Button */}
-      <section className="bg-cream pb-24 relative overflow-hidden">
-        <Testimonials />
-        
-        {/* BUTTON NOW LINKS TO /review AND HAS CORRECT STYLE */}
-        <div className="flex justify-center -mt-16 mb-8 relative z-20">
-          <Link 
-            href="/review" 
-            className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-6 py-2.5 rounded-full text-sm font-medium border border-[var(--lavender)]/30 transition-all hover:bg-white hover:scale-105 active:scale-95 shadow-sm"
-          >
-            <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-            <span className="text-[var(--plum)]">Leave your own review</span>
-            <Heart className="w-4 h-4 text-[var(--pink)]" />
-          </Link>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="gradient-hero section relative overflow-hidden">
-        <div className="blob blob-1" />
-        <div className="max-w-2xl mx-auto px-6 text-center relative z-10">
-          <div className="text-4xl mb-6">✨</div>
-          <h2 className="mb-4 text-white">Ready to Start?</h2>
-          <p className="text-white/80 mb-8">Your nursing exams don't stand a chance.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/pricing" className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90">
-              <Sparkles className="w-5 h-5" />
-              Get Started - £4.99
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-[var(--lilac)] py-12">
-        <div className="max-w-5xl mx-auto px-6 text-center text-sm text-[var(--plum-dark)]/60">
-          © 2025 Revision Foundations
-        </div>
-      </footer>
-    </div>
-  );
-}
+                      <Check className="w-3.5 h-3.5 text
