@@ -109,9 +109,11 @@ export default function PrivacyPage() {
                   <li>Request deletion of your data</li>
                   <li>Withdraw consent for marketing (if applicable)</li>
                 </ul>
-                <p className="mt-3">
-                  Just drop me a message and I'll sort it out for you!
-                </p>
+                <div className="mt-4">
+                  <Link href="/delete-data" className="text-[var(--purple)] hover:underline text-sm">
+                    Request data deletion →
+                  </Link>
+                </div>
               </section>
 
               <section>

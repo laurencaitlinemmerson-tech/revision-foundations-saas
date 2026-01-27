@@ -262,6 +262,7 @@ export default function HomePage() {
                 <li><Link href="/contact" className="hover:text-[var(--purple)]">Contact</Link></li>
                 <li><Link href="/privacy" className="hover:text-[var(--purple)]">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-[var(--purple)]">Terms of Service</Link></li>
+                <li><Link href="/delete-data" className="hover:text-[var(--purple)]">Delete My Data</Link></li>
               </ul>
             </div>
             <div>
