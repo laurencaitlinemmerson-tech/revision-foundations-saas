@@ -318,6 +318,7 @@
     let sessionStations = [];
     let currentIndex = 0;
     let sessionAnswers = [];
+    let sessionSubmitted = [];
     let sessionMode = 'quiz';
     let oscePracticeMode = 'practice';
     let stationCount = 3;
@@ -338,8 +339,27 @@
     let quizQuestionCount = 10; // 10, 20, 30, 60, or 'all'
     let quizMode = 'practice'; // 'practice' or 'exam'
     let quizDifficulty = 'mixed'; // 'mixed', 'easy', 'medium', 'hard'
+
+    // Timing
+    // - Practice: optional per-question timer (1m or 3m)
+    // - Exam: optional overall timer (default 45m) — more realistic than per-question
     let quizTimerEnabled = false;
-    let quizTimeLimit = 0; // seconds
+    let quizPerQuestionSeconds = 60; // 60 (1 min) or 180 (3 min)
+    let quizExamSeconds = 2700; // 45 mins
+    let quizTimeLimit = 0; // seconds (computed at start)
+
+    // ==================== DEEPER INSIGHTS: SESSION TRACKING ====================
+    // Per-question telemetry for diagnostics and adaptive planning
+    let sessionMeta = []; // [{ startAtMs, timeSpentSec, changes, firstAnswer, confidence }]
+    let currentQuestionEnteredAtMs = 0;
+
+    // Confidence levels for calibration insights
+    const CONFIDENCE_LEVELS = ['low', 'med', 'high'];
+
+    // Local history storage (client-side only)
+    const HISTORY_KEY = 'ntq_history_v1';
+    const HISTORY_MAX_EVENTS = 2000; // cap to keep localStorage sane
+
 
     // ==================== UTILITY FUNCTIONS ====================
     function shuffleArray(array) {
@@ -350,6 +370,126 @@
       }
       return arr;
     }
+
+    // ==================== DEEPER INSIGHTS: HELPERS ====================
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function safeJsonParse(str, fallback) {
+      try { return JSON.parse(str); } catch { return fallback; }
+    }
+
+    function loadHistory() {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      const data = safeJsonParse(raw, []);
+      return Array.isArray(data) ? data : [];
+    }
+
+    function saveHistory(events) {
+      const trimmed = events.slice(-HISTORY_MAX_EVENTS);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+    }
+
+    // Infer concept tags from the question text (works even if your bank has no explicit tags)
+    function inferConceptTags(q) {
+      if (!q) return [];
+      if (Array.isArray(q.concepts) && q.concepts.length) return q.concepts.slice(0, 5);
+
+      const text = String(q.question || '').toLowerCase();
+      const tags = new Set();
+
+      const rules = [
+        ['consent', ['consent', 'informed-consent']],
+        ['capacity', ['capacity', 'mental-capacity']],
+        ['confidential', ['confidentiality', 'information-governance']],
+        ['gdpr', ['information-governance']],
+        ['safeguard', ['safeguarding', 'escalation']],
+        ['abuse', ['safeguarding']],
+        ['duty of candour', ['duty-of-candour', 'professionalism']],
+        ['whistle', ['whistleblowing', 'escalation']],
+        ['incident', ['incident-reporting', 'patient-safety']],
+        ['risk', ['risk-assessment', 'patient-safety']],
+        ['handover', ['handover', 'communication']],
+        ['sb ar', ['sbar', 'communication']],
+        ['sbar', ['sbar', 'communication']],
+        ['documentation', ['documentation', 'professionalism']],
+        ['record', ['documentation', 'information-governance']],
+        ['infection', ['infection-control']],
+        ['hand hygiene', ['infection-control']],
+        ['ppe', ['infection-control']],
+        ['medication', ['medication-safety']],
+        ['drug', ['medication-safety']],
+        ['anaphyl', ['anaphylaxis', 'patient-safety']],
+        ['resus', ['resuscitation', 'patient-safety']],
+        ['delegat', ['delegation', 'accountability']],
+        ['accountab', ['accountability', 'professionalism']],
+        ['scope', ['scope-of-practice', 'professionalism']],
+        ['escalat', ['escalation', 'patient-safety']],
+        ['child', ['paediatrics']],
+        ['parent', ['family-centred-care', 'communication']],
+        ['privacy', ['confidentiality']],
+        ['ethic', ['ethics', 'professionalism']],
+      ];
+
+      rules.forEach(([needle, out]) => {
+        if (text.includes(needle)) out.forEach(t => tags.add(t));
+      });
+
+      // fallback tag so every question has at least one concept
+      if (tags.size === 0) tags.add(q.topic || 'general');
+
+      return Array.from(tags).slice(0, 5);
+    }
+
+    function computeMultiselectDiagnostics(correctArr, chosenArr) {
+      const correct = new Set(Array.isArray(correctArr) ? correctArr : []);
+      const chosen = new Set(Array.isArray(chosenArr) ? chosenArr : []);
+
+      let correctSelected = 0;
+      chosen.forEach(i => { if (correct.has(i)) correctSelected++; });
+
+      const totalCorrect = correct.size || 1;
+      const totalChosen = chosen.size || 1;
+
+      const precision = correctSelected / totalChosen;
+      const recall = correctSelected / totalCorrect;
+      const f1 = (precision + recall) > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+
+      return {
+        correctSelected,
+        totalCorrect: correct.size,
+        totalChosen: chosen.size,
+        precision,
+        recall,
+        f1,
+        missed: Array.from(correct).filter(i => !chosen.has(i)),
+        extras: Array.from(chosen).filter(i => !correct.has(i)),
+      };
+    }
+
+    // Mastery score per concept from recent history + current session
+    function computeConceptMastery(events) {
+      const stats = {}; // tag -> { attempts, correct, recent: [0/1] }
+      events.forEach(ev => {
+        (ev.concepts || []).forEach(tag => {
+          if (!stats[tag]) stats[tag] = { attempts: 0, correct: 0, recent: [] };
+          stats[tag].attempts += 1;
+          stats[tag].correct += ev.correct ? 1 : 0;
+          stats[tag].recent.push(ev.correct ? 1 : 0);
+          if (stats[tag].recent.length > 6) stats[tag].recent.shift();
+        });
+      });
+
+      const out = Object.entries(stats).map(([tag, s]) => {
+        const acc = s.attempts ? (s.correct / s.attempts) : 0;
+        const streak = s.recent.slice(-3).reduce((a, b) => a + b, 0) / 3;
+        const mastery = clamp(0.6 * acc + 0.4 * streak, 0, 1);
+        return { tag, attempts: s.attempts, accuracy: acc, mastery };
+      });
+
+      out.sort((a, b) => a.mastery - b.mastery);
+      return out;
+    }
+
 
     // UPGRADE 1 & 2: Helper to shuffle and pick N items from an array
     function shuffleAndPickN(array, n) {
@@ -390,6 +530,22 @@
         timerInterval = null;
       }
     }
+
+    // Track total quiz time for results stats (Time + Avg Pace cards)
+    function finalizeQuizTime() {
+      // If timer mode is enabled, derive elapsed from limit/remaining.
+      if (typeof quizTimerEnabled !== 'undefined' && quizTimerEnabled && typeof quizTimeLimit === 'number') {
+        const elapsed = Math.max(0, Math.round(quizTimeLimit - (timeRemaining || 0)));
+        window.quizTimeSeconds = elapsed;
+        return;
+      }
+      // Otherwise, use wall-clock time from when the session started.
+      const startedAt = Number(window.quizStartedAt || 0);
+      if (startedAt > 0) {
+        window.quizTimeSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+      }
+    }
+
 
     function createParticles() {
       const particlesContainer = document.getElementById('particles');
@@ -8473,12 +8629,17 @@
 
     function renderQuiz(container) {
       const currentQuestion = sessionQuestions[currentIndex];
-      const answered = sessionAnswers[currentIndex] !== null;
-      const isCorrect = answered && sessionAnswers[currentIndex] === currentQuestion.correct;
-      
-      // In exam mode, don't show correct/incorrect until finished
-      const showFeedback = quizMode === 'practice' && answered;
-      
+      const isMulti = currentQuestion?.type === 'multiselect';
+      const userAnswer = sessionAnswers[currentIndex];
+      const confidence = sessionMeta?.[currentIndex]?.confidence || null;
+      const submitted = Array.isArray(sessionSubmitted) && sessionSubmitted[currentIndex] === true;
+      const hasSelection = isMulti ? (Array.isArray(userAnswer) && userAnswer.length > 0) : (userAnswer !== null && userAnswer !== undefined);
+
+      // In practice mode, show feedback only after the user submits (needed for multi-select)
+      const showFeedback = (quizMode === 'practice') && (isMulti ? submitted : (hasSelection && submitted));
+      const isCorrect = showFeedback && window.isAnswerCorrect(currentQuestion, userAnswer);
+      const multiDiag = (showFeedback && isMulti) ? computeMultiselectDiagnostics(currentQuestion.correct, userAnswer) : null;
+
       container.innerHTML = `
         <div class="fade-in max-w-4xl mx-auto">
           <div class="glass-card rounded-2xl p-8 mb-6">
@@ -8515,13 +8676,20 @@
             
             <div class="space-y-3 mb-8">
               ${currentQuestion.options.map((option, idx) => {
-                const isSelected = sessionAnswers[currentIndex] === idx;
-                const showCorrect = showFeedback && idx === currentQuestion.correct;
-                const showIncorrect = showFeedback && isSelected && idx !== currentQuestion.correct;
-                
+                const isSelected = isMulti
+                  ? (Array.isArray(userAnswer) && userAnswer.includes(idx))
+                  : (userAnswer === idx);
+
+                const correctSet = isMulti
+                  ? new Set(Array.isArray(currentQuestion.correct) ? currentQuestion.correct : [])
+                  : new Set([currentQuestion.correct]);
+
+                const showCorrect = showFeedback && correctSet.has(idx);
+                const showIncorrect = showFeedback && isSelected && !correctSet.has(idx);
+
                 return `
                   <button 
-                    onclick="answerQuestion(${idx})" 
+                    onclick="${isMulti ? `toggleMultiAnswer(${idx})` : `answerQuestion(${idx})`}" 
                     ${showFeedback ? 'disabled' : ''}
                     class="w-full p-4 rounded-xl text-left transition-all ${
                       showCorrect ? 'bg-green-500 bg-opacity-20 border-2 border-green-500' :
@@ -8538,12 +8706,16 @@
                         isSelected ? 'bg-purple-500' :
                         'bg-white bg-opacity-10'
                       }">
-                        ${showCorrect ? '<i data-lucide="check" class="w-5 h-5 text-white"></i>' :
-                          showIncorrect ? '<i data-lucide="x" class="w-5 h-5 text-white"></i>' :
-                          `<span class="text-white font-semibold">${String.fromCharCode(65 + idx)}</span>`
+                        ${showCorrect
+                          ? '<i data-lucide="check" class="w-5 h-5 text-white"></i>'
+                          : showIncorrect
+                            ? '<i data-lucide="x" class="w-5 h-5 text-white"></i>'
+                            : isSelected
+                              ? '<i data-lucide="check" class="w-5 h-5 text-white"></i>'
+                              : '<span class="text-slate-300 text-sm font-bold">' + String.fromCharCode(65 + idx) + '</span>'
                         }
                       </div>
-                      <span class="text-white text-lg">${option}</span>
+                      <div class="text-white">${option}</div>
                     </div>
                   </button>
                 `;
@@ -8557,11 +8729,40 @@
                   <div>
                     <h3 class="text-white font-bold mb-2">${isCorrect ? 'Correct!' : 'Explanation'}</h3>
                     <p class="text-slate-300">${currentQuestion.explanation}</p>
+                    ${multiDiag ? `
+                      <div class="mt-3 p-3 rounded-xl bg-white bg-opacity-5 border border-white border-opacity-10">
+                        <div class="text-slate-200 text-sm font-semibold mb-1">Multi-select breakdown</div>
+                        <div class="text-slate-300 text-sm">
+                          You selected <span class="text-white font-bold">${multiDiag.correctSelected}</span> / <span class="text-white font-bold">${multiDiag.totalCorrect}</span> correct.
+                          ${multiDiag.extras.length ? `<br><span class="text-red-300">Extra options picked:</span> ${multiDiag.extras.map(i => currentQuestion.options?.[i]).join(', ')}` : ''}
+                          ${multiDiag.missed.length ? `<br><span class="text-yellow-200">Correct options missed:</span> ${multiDiag.missed.map(i => currentQuestion.options?.[i]).join(', ')}` : ''}
+                          <br><span class="text-slate-400">Precision:</span> ${(multiDiag.precision*100).toFixed(0)}% · <span class="text-slate-400">Recall:</span> ${(multiDiag.recall*100).toFixed(0)}%
+                        </div>
+                      </div>
+                    ` : ''}
                   </div>
                 </div>
               </div>
             ` : ''}
             
+
+            <div class="mt-6 mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-slate-300 text-sm">Confidence (optional)</span>
+                <span class="text-slate-400 text-xs">${confidence ? confidence.toUpperCase() : '—'}</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="setConfidence('low')" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all ${confidence === 'low' ? 'bg-red-500 bg-opacity-30 text-red-200 border border-red-400 border-opacity-50' : 'bg-white bg-opacity-5 text-slate-300 hover:bg-opacity-10 border border-white border-opacity-10'}">
+                  Low
+                </button>
+                <button onclick="setConfidence('med')" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all ${confidence === 'med' ? 'bg-yellow-500 bg-opacity-25 text-yellow-200 border border-yellow-400 border-opacity-50' : 'bg-white bg-opacity-5 text-slate-300 hover:bg-opacity-10 border border-white border-opacity-10'}">
+                  Medium
+                </button>
+                <button onclick="setConfidence('high')" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all ${confidence === 'high' ? 'bg-green-500 bg-opacity-25 text-green-200 border border-green-400 border-opacity-50' : 'bg-white bg-opacity-5 text-slate-300 hover:bg-opacity-10 border border-white border-opacity-10'}">
+                  High
+                </button>
+              </div>
+            </div>
             <div class="flex justify-between items-center">
               <button 
                 onclick="previousQuestion()" 
@@ -8571,7 +8772,26 @@
                 <i data-lucide="chevron-left" class="w-5 h-5 inline mr-1"></i>
                 Previous
               </button>
-              
+
+              ${isMulti && quizMode === 'practice' ? `
+                <div class="flex items-center gap-2">
+                  ${submitted ? `
+                    <button onclick="editMultiAnswer()" class="btn-secondary px-4 py-3 rounded-xl text-white">
+                      Edit selection
+                    </button>
+                  ` : `
+                    <button 
+                      onclick="submitMultiAnswer()" 
+                      ${!hasSelection ? 'disabled' : ''}
+                      class="btn-gradient px-5 py-3 rounded-xl text-white font-bold disabled:opacity-40"
+                    >
+                      Check answer
+                      <i data-lucide="check-circle" class="w-5 h-5 inline ml-2"></i>
+                    </button>
+                  `}
+                </div>
+              ` : ''}
+
               ${currentIndex === sessionQuestions.length - 1 ? `
                 <button 
                   onclick="finishQuiz()" 
@@ -8629,7 +8849,7 @@
 
   const correctCount = questions.reduce((acc, q, idx) => {
     const a = answers[idx];
-    return acc + ((a !== null && a !== undefined && a === q.correct) ? 1 : 0);
+    return acc + (window.isAnswerCorrect(q, a) ? 1 : 0);
   }, 0);
 
   const incorrectCount = totalQ - correctCount;
@@ -8650,7 +8870,7 @@
     topicAnalysis[t].total++;
 
     const a = answers[idx];
-    if (a !== null && a !== undefined && a === q.correct) topicAnalysis[t].correct++;
+    if (window.isAnswerCorrect(q, a)) topicAnalysis[t].correct++;
   });
 
   const topicPerformance = Object.entries(topicAnalysis)
@@ -8708,7 +8928,7 @@
     .map((q, idx) => ({ q, idx }))
     .filter(({ q, idx }) => {
       const a = answers[idx];
-      return a === null || a === undefined || a !== q.correct;
+      return !window.isAnswerCorrect(q, a);
     });
 
   const flaggedSet = new Set(flaggedQuestions.map(Number).filter(Number.isFinite));
@@ -8746,8 +8966,10 @@
     currentView = 'selection';
     sessionQuestions = [];
     sessionAnswers = [];
+    sessionSubmitted = [];
     currentIndex = 0;
     window.quizTimeSeconds = 0;
+    window.quizStartedAt = 0;
     flaggedQuestions.length = 0;
     render();
   };
@@ -8761,6 +8983,287 @@
     ? `<li class="flex items-start gap-2"><span class="text-purple-400 font-bold flex-shrink-0">•</span><span><strong>${safe(weakest.topic.name)}:</strong> Focus on ${weakest.total - weakest.correct} missed question${(weakest.total - weakest.correct) !== 1 ? 's' : ''} — review explanations thoroughly</span></li>`
     : `<li class="flex items-start gap-2"><span class="text-purple-400 font-bold flex-shrink-0">•</span><span><strong>Keep going:</strong> Re-test a small set daily to build retention</span></li>`;
 
+
+
+  // ---------- DEEPER INSIGHTS ----------
+  // Build per-question events for this session
+  const nowIso = new Date().toISOString();
+  const approxPerQ = (totalQ && totalSeconds > 0) ? (totalSeconds / totalQ) : 0;
+
+  const sessionEvents = questions.map((q, idx) => {
+    const a = answers[idx];
+    const correct = window.isAnswerCorrect(q, a);
+    const meta = Array.isArray(sessionMeta) ? sessionMeta[idx] : null;
+
+    const timeSecRaw = meta && typeof meta.timeSpentSec === 'number' ? meta.timeSpentSec : 0;
+    const timeSec = timeSecRaw > 0 ? timeSecRaw : approxPerQ;
+
+    const confidence = meta?.confidence || null;
+    const changes = meta?.changes || 0;
+    const concepts = inferConceptTags(q);
+
+    // Multi-select diagnostics for Practice mode: missing vs extra
+    let multiselectDiag = null;
+    if (q?.type === 'multiselect') {
+      multiselectDiag = computeMultiselectDiagnostics(q.correct, a);
+    }
+
+    return {
+      at: nowIso,
+      id: q.id || `q_${idx}`,
+      topic: q.topic || 'unknown',
+      difficulty: q.difficulty || 'mixed',
+      type: (q.type || 'mcq'),
+      correct,
+      timeSec,
+      confidence,
+      changes,
+      concepts,
+      multiselectDiag,
+    };
+  });
+
+  // Persist to history (localStorage)
+  const history = loadHistory();
+  saveHistory(history.concat(sessionEvents));
+
+  const allEvents = history.concat(sessionEvents);
+
+  // Speed/accuracy diagnostics
+  const times = sessionEvents.map(e => e.timeSec || 0);
+  const avgTimeSec = totalQ ? (times.reduce((a,b)=>a+b,0) / totalQ) : 0;
+
+  const fastWrong = sessionEvents.filter(e => !e.correct && e.timeSec > 0 && e.timeSec <= 8);
+  const slowWrong = sessionEvents.filter(e => !e.correct && e.timeSec >= 40);
+  const slowRight = sessionEvents.filter(e => e.correct && e.timeSec >= 40);
+
+  const totalChanges = sessionEvents.reduce((acc, e) => acc + (e.changes || 0), 0);
+
+  // Confidence calibration
+  const confBuckets = { low: { total: 0, correct: 0 }, med: { total: 0, correct: 0 }, high: { total: 0, correct: 0 } };
+  sessionEvents.forEach(e => {
+    if (!e.confidence || !confBuckets[e.confidence]) return;
+    confBuckets[e.confidence].total += 1;
+    if (e.correct) confBuckets[e.confidence].correct += 1;
+  });
+
+  // Concept mastery from all attempts
+  const conceptMastery = computeConceptMastery(allEvents);
+
+  const weakestConcepts = conceptMastery
+    .filter(c => c.attempts >= 3)
+    .slice(0, 6);
+
+  const strongestConcepts = conceptMastery
+    .filter(c => c.attempts >= 3)
+    .slice(-4)
+    .reverse();
+
+  // Build a next-session plan: focus on 2 weakest concepts with enough data, else weakest topics
+  const planConcepts = weakestConcepts.slice(0, 2).map(x => x.tag);
+  const planFocus = planConcepts.length ? planConcepts : (topicPerformance || [])
+    .filter(tp => tp.total >= 4)
+    .sort((a,b)=>a.percentage-b.percentage)
+    .slice(0,2)
+    .map(tp => tp.topic?.name || tp.topicId);
+
+  const planText = planFocus.length
+    ? `Focus next on: <span class="text-white font-bold">${planFocus.map(safe).join('</span>, <span class="text-white font-bold">')}</span>.`
+    : `Do a short mixed set next to build a clearer profile.`;
+
+  // Question-type performance (best performing type appears first)
+  const typeLabels = { mcq: 'MCQ', tf: 'True/False', multiselect: 'Select all that apply' };
+  const typeStats = { mcq: { total: 0, correct: 0 }, tf: { total: 0, correct: 0 }, multiselect: { total: 0, correct: 0 } };
+  sessionEvents.forEach(e => {
+    const t = (e.type && typeStats[e.type]) ? e.type : 'mcq';
+    typeStats[t].total += 1;
+    if (e.correct) typeStats[t].correct += 1;
+  });
+
+  const typePerf = Object.entries(typeStats)
+    .filter(([_, v]) => v.total > 0)
+    .map(([k, v]) => ({
+      key: k,
+      label: typeLabels[k] || k,
+      total: v.total,
+      correct: v.correct,
+      pct: Math.round((v.correct / v.total) * 100)
+    }))
+    .sort((a,b) => b.pct - a.pct);
+
+  const typeBarsHtml = typePerf.length ? `
+    <div class="mt-6 bg-white bg-opacity-5 rounded-2xl p-6 border border-white/10">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-white font-bold flex items-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-5 h-5 text-pink-400"></i>
+          Best performing question type
+        </div>
+        <div class="text-slate-400 text-xs">This session</div>
+      </div>
+
+      <div class="space-y-3">
+        ${typePerf.map(t => `
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-slate-200 font-semibold">${safe(t.label)}</span>
+              <span class="text-slate-300">${t.pct}% <span class="text-slate-500">(${t.correct}/${t.total})</span></span>
+            </div>
+            <div class="h-2 rounded-full bg-white bg-opacity-10 overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-400" style="width:${t.pct}%;"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="text-slate-400 text-xs mt-3">
+        Tip: if one type is consistently lower, do a short set focusing on that style to boost exam reliability.
+      </div>
+    </div>
+  ` : '';
+
+
+  const deepInsightsHtml = `
+    <!-- DEEP INSIGHTS -->
+    <div class="glass-card rounded-2xl p-8 mb-8">
+      <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
+        <i data-lucide="brain" class="w-7 h-7 text-pink-400"></i>
+        Deep Insights
+      </h2>
+
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white bg-opacity-5 rounded-2xl p-5 border border-white border-opacity-10">
+          <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Avg time / Q</div>
+          <div class="text-white text-2xl font-extrabold">${avgTimeSec ? `${Math.floor(avgTimeSec/60)}:${String(Math.round(avgTimeSec%60)).padStart(2,'0')}` : '—'}</div>
+          <div class="text-slate-400 text-xs mt-1">Speed signal, not a grade.</div>
+        </div>
+
+        <div class="bg-white bg-opacity-5 rounded-2xl p-5 border border-white border-opacity-10">
+          <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Fast wrong</div>
+          <div class="text-white text-2xl font-extrabold">${fastWrong.length}</div>
+          <div class="text-slate-400 text-xs mt-1">≤ 8s (likely guessing / misread)</div>
+        </div>
+
+        <div class="bg-white bg-opacity-5 rounded-2xl p-5 border border-white border-opacity-10">
+          <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Slow wrong</div>
+          <div class="text-white text-2xl font-extrabold">${slowWrong.length}</div>
+          <div class="text-slate-400 text-xs mt-1">≥ 40s (confusion / gap)</div>
+        </div>
+
+        <div class="bg-white bg-opacity-5 rounded-2xl p-5 border border-white border-opacity-10">
+          <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Answer edits</div>
+          <div class="text-white text-2xl font-extrabold">${totalChanges}</div>
+          <div class="text-slate-400 text-xs mt-1">Higher in Exam mode.</div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white bg-opacity-5 rounded-2xl p-6 border border-white border-opacity-10">
+          <div class="flex items-center justify-between mb-3">
+            <div class="text-white font-bold flex items-center gap-2">
+              <i data-lucide="target" class="w-5 h-5 text-purple-400"></i>
+              Concept mastery (weakest)
+            </div>
+            <div class="text-slate-400 text-xs">Based on your recent attempts</div>
+          </div>
+
+          ${weakestConcepts.length ? `
+            <div class="space-y-3">
+              ${weakestConcepts.map(c => {
+                const pct = Math.round(c.mastery * 100);
+                return `
+                  <div>
+                    <div class="flex items-center justify-between text-sm mb-1">
+                      <span class="text-slate-200 font-semibold">${safe(c.tag)}</span>
+                      <span class="text-slate-400">${pct}% · ${c.attempts} attempts</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-white bg-opacity-10 overflow-hidden">
+                      <div class="h-full rounded-full bg-purple-400" style="width:${pct}%;"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : `
+            <div class="text-slate-300 text-sm">
+              Do a couple more sessions and this will become much more accurate (needs ≥ 3 attempts per concept).
+            </div>
+          `}
+        </div>
+
+        <div class="bg-white bg-opacity-5 rounded-2xl p-6 border border-white border-opacity-10">
+          <div class="text-white font-bold flex items-center gap-2 mb-3">
+            <i data-lucide="activity" class="w-5 h-5 text-cyan-400"></i>
+            Confidence calibration
+          </div>
+
+          <div class="space-y-3">
+            ${['high','med','low'].map(level => {
+              const b = confBuckets[level];
+              const acc = b.total ? Math.round((b.correct/b.total)*100) : null;
+              const label = level === 'high' ? 'High' : level === 'med' ? 'Medium' : 'Low';
+              return `
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-slate-200">${label}</span>
+                  <span class="text-slate-400">
+                    ${b.total ? `${acc}% correct (${b.correct}/${b.total})` : '—'}
+                  </span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="mt-4 text-slate-300 text-sm">
+            Goal: when you select <span class="text-white font-semibold">High</span>, your accuracy should climb over time.
+            If High is often wrong → revisit core rules (overconfidence). If Low is often right → push exam timing.
+          </div>
+
+          <div class="mt-5 p-4 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/10">
+            <div class="text-white font-bold mb-1">Next session plan</div>
+            <div class="text-slate-200 text-sm">${planText}</div>
+            <div class="text-slate-400 text-xs mt-2">
+              Suggested: 12–18 questions · Practice mode (explanations) if slow-wrong dominates; Exam mode (45m) if accuracy is strong but timing is slow.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      ${strongestConcepts.length ? `
+        <div class="mt-8">
+          <div class="text-slate-300 text-sm mb-3">Strong areas (keep warm):</div>
+          <div class="flex flex-wrap gap-2">
+            ${strongestConcepts.map(c => `<span class="px-3 py-1 rounded-full bg-white bg-opacity-5 border border-white/10 text-slate-200 text-sm">${safe(c.tag)} · ${Math.round(c.mastery*100)}%</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${(fastWrong.length || slowWrong.length || slowRight.length) ? `
+        <div class="mt-8">
+          <div class="text-white font-bold mb-3 flex items-center gap-2">
+            <i data-lucide="list-checks" class="w-5 h-5 text-yellow-300"></i>
+            Question behavior signals
+          </div>
+          <div class="grid md:grid-cols-3 gap-4">
+            <div class="bg-white bg-opacity-5 rounded-2xl p-5 border border-white/10">
+              <div class="text-slate-200 font-semibold mb-1">Fast wrong</div>
+              <div class="text-slate-400 text-xs mb-3">Often: misread / rushing / guessing</div>
+              <div class="text-slate-300 text-sm">${fastWrong.slice(0,5).map(e => safe(questions.find(q=>q.id===e.id)?.question || e.id)).join('<br>') || '—'}</div>
+            </div>
+            <div class="bg-white bg-opacity-5 rounded-2xl p-5 border border-white/10">
+              <div class="text-slate-200 font-semibold mb-1">Slow wrong</div>
+              <div class="text-slate-400 text-xs mb-3">Often: concept gap / confusion</div>
+              <div class="text-slate-300 text-sm">${slowWrong.slice(0,5).map(e => safe(questions.find(q=>q.id===e.id)?.question || e.id)).join('<br>') || '—'}</div>
+            </div>
+            <div class="bg-white bg-opacity-5 rounded-2xl p-5 border border-white/10">
+              <div class="text-slate-200 font-semibold mb-1">Slow but right</div>
+              <div class="text-slate-400 text-xs mb-3">Knowledge OK — work on speed</div>
+              <div class="text-slate-300 text-sm">${slowRight.slice(0,5).map(e => safe(questions.find(q=>q.id===e.id)?.question || e.id)).join('<br>') || '—'}</div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+      ${typeBarsHtml}
+    </div>
+  `;
   // ---------- UI ----------
   container.innerHTML = `
     <div class="fade-in max-w-6xl mx-auto">
@@ -8811,7 +9314,7 @@
 
         <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
           <i data-lucide="zap" class="w-5 h-5 text-yellow-400 mb-2"></i>
-          <div class="text-3xl font-extrabold text-yellow-400 mb-1">${avgPace ? `${avgPace}s` : '—'}</div>
+          <div class="text-3xl font-extrabold text-yellow-400 mb-1">${avgPace ? `${Math.floor(avgPace/60)}:${String(avgPace%60).padStart(2,'0')}` : '—'}</div>
           <div class="text-slate-400 text-xs uppercase tracking-wider">Avg Pace</div>
         </div>
 
@@ -8846,6 +9349,8 @@
           </div>
         </div>
       ` : ''}
+
+      ${deepInsightsHtml}
 
       <!-- PERFORMANCE BY TOPIC -->
       <div class="glass-card rounded-2xl p-8 mb-8">
@@ -9034,9 +9539,15 @@
         <div class="space-y-4">
           ${reviewList.map(({ q, idx }) => {
             const userAns = answers[idx];
-            const isCorrect = (userAns !== null && userAns !== undefined && userAns === q.correct);
+            const isCorrect = window.isAnswerCorrect(q, userAns);
             const topic = topics.find(t => t.id === q.topic) || { name: q.topic || 'Topic', color: '#a855f7' };
             const isFlagged = flaggedSet.has(idx);
+            const correctText = (q.type === 'multiselect')
+              ? (Array.isArray(q.correct) ? q.correct.map(i => q.options?.[i]).filter(Boolean).join(', ') : '—')
+              : (q.options?.[q.correct] ?? '—');
+            const yourText = (q.type === 'multiselect')
+              ? (Array.isArray(userAns) ? userAns.map(i => q.options?.[i]).filter(Boolean).join(', ') : '—')
+              : (q.options?.[userAns] ?? '—');
 
             return `
               <div class="rounded-xl border-2 ${isCorrect ? 'border-green-500 border-opacity-25' : 'border-red-500 border-opacity-35'} bg-white bg-opacity-5 overflow-hidden">
@@ -9064,11 +9575,11 @@
                 <div class="px-4 pb-4">
                   <div class="bg-white bg-opacity-5 rounded-lg p-4">
                     <div class="text-xs text-slate-400 mb-2">Correct answer:</div>
-                    <div class="text-green-300 font-semibold text-sm mb-3">${safe(q.options?.[q.correct])}</div>
+                    <div class="text-green-300 font-semibold text-sm mb-3">${safe(correctText)}</div>
 
                     ${!isCorrect ? `
                       <div class="text-xs text-slate-400 mb-2">Your answer:</div>
-                      <div class="text-red-300 font-semibold text-sm mb-3">${safe(q.options?.[userAns])}</div>
+                      <div class="text-red-300 font-semibold text-sm mb-3">${safe(yourText)}</div>
                     ` : ''}
 
                     <div class="text-xs text-slate-400 mb-2">Explanation:</div>
@@ -9984,6 +10495,7 @@ function renderOSCE(container) {
               <!-- Timer -->
               <div>
                 <label class="block text-slate-300 text-sm font-medium mb-3">Timer</label>
+
                 <button 
                   onclick="toggleQuizTimer()"
                   class="flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${quizTimerEnabled ? 'bg-purple-500' : 'bg-white bg-opacity-10'}"
@@ -9993,7 +10505,27 @@ function renderOSCE(container) {
                   </div>
                   <span class="text-sm font-medium ${quizTimerEnabled ? 'text-white' : 'text-slate-300'}">${quizTimerEnabled ? 'On' : 'Off'}</span>
                 </button>
-                ${quizTimerEnabled ? '<p class="text-slate-500 text-xs mt-2">1 min per question</p>' : ''}
+
+                ${quizTimerEnabled ? `
+                  <div class="mt-3 space-y-2">
+                    ${quizMode === 'exam' ? `
+                      <div class="text-xs text-slate-400">Overall exam timer</div>
+                      <div class="flex flex-wrap gap-2">
+                        <button onclick="setQuizExamSeconds(1800)" class="px-3 py-2 rounded-lg text-xs font-semibold transition-all ${quizExamSeconds === 1800 ? 'bg-purple-500 text-white' : 'bg-white bg-opacity-10 text-slate-300 hover:bg-opacity-20'}">30m</button>
+                        <button onclick="setQuizExamSeconds(2700)" class="px-3 py-2 rounded-lg text-xs font-semibold transition-all ${quizExamSeconds === 2700 ? 'bg-purple-500 text-white' : 'bg-white bg-opacity-10 text-slate-300 hover:bg-opacity-20'}">45m</button>
+                        <button onclick="setQuizExamSeconds(3600)" class="px-3 py-2 rounded-lg text-xs font-semibold transition-all ${quizExamSeconds === 3600 ? 'bg-purple-500 text-white' : 'bg-white bg-opacity-10 text-slate-300 hover:bg-opacity-20'}">60m</button>
+                      </div>
+                      <p class="text-slate-500 text-xs">Exam mode uses an overall timer (recommended).</p>
+                    ` : `
+                      <div class="text-xs text-slate-400">Per-question timer</div>
+                      <div class="flex flex-wrap gap-2">
+                        <button onclick="setQuizPerQuestionSeconds(60)" class="px-3 py-2 rounded-lg text-xs font-semibold transition-all ${quizPerQuestionSeconds === 60 ? 'bg-purple-500 text-white' : 'bg-white bg-opacity-10 text-slate-300 hover:bg-opacity-20'}">1m</button>
+                        <button onclick="setQuizPerQuestionSeconds(180)" class="px-3 py-2 rounded-lg text-xs font-semibold transition-all ${quizPerQuestionSeconds === 180 ? 'bg-purple-500 text-white' : 'bg-white bg-opacity-10 text-slate-300 hover:bg-opacity-20'}">3m</button>
+                      </div>
+                      <p class="text-slate-500 text-xs">Keeps you moving without rushing.</p>
+                    `}
+                  </div>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -10121,9 +10653,42 @@ function renderOSCE(container) {
     
     // Quiz Settings Handlers
     window.setQuizQuestionCount = (count) => { quizQuestionCount = count; render(); };
-    window.setQuizMode = (mode) => { quizMode = mode; render(); };
+
+    window.setQuizMode = (mode) => {
+      quizMode = mode;
+      // Nice default: Exam mode is typically timed (45 mins)
+      if (quizMode === 'exam') {
+        if (typeof quizExamSeconds !== 'number' || !Number.isFinite(quizExamSeconds) || quizExamSeconds <= 0) {
+          quizExamSeconds = 2700;
+        }
+        // auto-enable timer for exam to match expectation
+        quizTimerEnabled = true;
+      }
+      render();
+    };
+
     window.setQuizDifficulty = (diff) => { quizDifficulty = diff; render(); };
-    window.toggleQuizTimer = () => { quizTimerEnabled = !quizTimerEnabled; render(); };
+
+    window.toggleQuizTimer = () => {
+      quizTimerEnabled = !quizTimerEnabled;
+      // If turning timer on while in exam mode, ensure an exam duration is set
+      if (quizTimerEnabled && quizMode === 'exam') {
+        if (typeof quizExamSeconds !== 'number' || !Number.isFinite(quizExamSeconds) || quizExamSeconds <= 0) quizExamSeconds = 2700;
+      }
+      render();
+    };
+
+    window.setQuizPerQuestionSeconds = (secs) => {
+      const s = Number(secs);
+      if (s === 60 || s === 180) quizPerQuestionSeconds = s;
+      render();
+    };
+
+    window.setQuizExamSeconds = (secs) => {
+      const s = Number(secs);
+      if ([1800, 2700, 3600].includes(s)) quizExamSeconds = s;
+      render();
+    };
     
     window.startSession = () => {
       if (selectedTopics.length === 0) return;
@@ -10142,23 +10707,83 @@ function renderOSCE(container) {
           return; 
         }
         
-        // Shuffle all available questions
-        let shuffledQuestions = shuffleArray(availableQuestions);
-        
-        // Pick the requested number of questions
-        if (quizQuestionCount !== 'all') {
-          shuffledQuestions = shuffledQuestions.slice(0, quizQuestionCount);
+        // Build a mixed set with variety by question type (mcq / tf / multiselect)
+        // Weighting is adjusted to availability so it never fails.
+        const desiredCount = (quizQuestionCount === 'all') ? availableQuestions.length : Number(quizQuestionCount);
+        const n = Math.max(1, Math.min(desiredCount || 10, availableQuestions.length));
+
+        const pools = {
+          mcq: shuffleArray(availableQuestions.filter(q => (q.type || 'mcq') === 'mcq')),
+          tf: shuffleArray(availableQuestions.filter(q => q.type === 'tf')),
+          multiselect: shuffleArray(availableQuestions.filter(q => q.type === 'multiselect')),
+        };
+
+        function pull(type, count, picked) {
+          const arr = pools[type] || [];
+          while (count > 0 && arr.length > 0) {
+            picked.push(arr.shift());
+            count--;
+          }
         }
-        
-        sessionQuestions = shuffledQuestions;
+
+        if (quizQuestionCount === 'all') {
+          sessionQuestions = shuffleArray(availableQuestions);
+        } else {
+          const picked = [];
+          const weights = { mcq: 0.6, tf: 0.2, multiselect: 0.2 };
+
+          // Targets (rounded), then adjusted to total n
+          let tfTarget = Math.round(n * weights.tf);
+          let msTarget = Math.round(n * weights.multiselect);
+          let mcqTarget = n - tfTarget - msTarget;
+
+          // Ensure at least some variety when available
+          if (pools.tf.length > 0) tfTarget = Math.max(1, tfTarget);
+          if (pools.multiselect.length > 0) msTarget = Math.max(1, msTarget);
+          mcqTarget = Math.max(0, n - tfTarget - msTarget);
+
+          pull('tf', tfTarget, picked);
+          pull('multiselect', msTarget, picked);
+          pull('mcq', mcqTarget, picked);
+
+          // Fill any remainder from whatever is left (dedup by id)
+          const allShuffled = shuffleArray(availableQuestions);
+          for (const q of allShuffled) {
+            if (picked.length >= n) break;
+            if (!picked.some(x => x.id === q.id)) picked.push(q);
+          }
+
+          sessionQuestions = shuffleArray(picked).slice(0, n);
+        }
         sessionAnswers = new Array(sessionQuestions.length).fill(null);
+        sessionSubmitted = new Array(sessionQuestions.length).fill(false);
+        // Deeper insights telemetry per question
+        sessionMeta = sessionQuestions.map(() => ({ startAtMs: 0, timeSpentSec: 0, changes: 0, firstAnswer: null, confidence: null }));
         currentIndex = 0;
+        currentQuestionEnteredAtMs = Date.now();
+        if (sessionMeta[0]) sessionMeta[0].startAtMs = currentQuestionEnteredAtMs;
+        window.quizStartedAt = Date.now();
+        window.quizTimeSeconds = 0;
         
-        // Setup timer if enabled (1 min per question)
+        // Track wall-clock start for results (used when timer is off)
+        window.quizStartedAt = Date.now();
+
+        // Setup timer if enabled
         if (quizTimerEnabled) {
-          quizTimeLimit = sessionQuestions.length * 60;
+          if (quizMode === 'exam') {
+            // Overall exam timer (default 45 mins)
+            quizTimeLimit = Number(quizExamSeconds) || 2700;
+          } else {
+            // Per-question timer (1m or 3m)
+            const perQ = (Number(quizPerQuestionSeconds) === 180) ? 180 : 60;
+            quizTimeLimit = sessionQuestions.length * perQ;
+          }
           timeRemaining = quizTimeLimit;
           startQuizTimer();
+        } else {
+          quizTimeLimit = 0;
+          timeRemaining = 0;
+          stopQuizTimer();
         }
         
         currentView = 'quiz';
@@ -10197,16 +10822,134 @@ function renderOSCE(container) {
       renderNavigator();
     };
 
-    window.answerQuestion = (optionIndex) => { sessionAnswers[currentIndex] = optionIndex; render(); };
-    window.nextQuestion = () => { if (currentIndex < sessionQuestions.length - 1) { currentIndex++; render(); } };
-    window.previousQuestion = () => { if (currentIndex > 0) { currentIndex--; render(); } };
-    window.finishQuiz = () => { stopQuizTimer(); currentView = 'quizResults'; render(); };
+    window.isAnswerCorrect = (question, userAnswer) => {
+      if (!question) return false;
+      if (userAnswer === null || userAnswer === undefined) return false;
+
+      if (question.type === 'multiselect') {
+        const correct = Array.isArray(question.correct) ? [...question.correct].sort((a,b)=>a-b) : [];
+        const chosen = Array.isArray(userAnswer) ? [...userAnswer].sort((a,b)=>a-b) : [];
+        return JSON.stringify(correct) === JSON.stringify(chosen);
+      }
+
+      // tf & mcq both stored as single values
+      return userAnswer === question.correct;
+    };
+
+    window.toggleMultiAnswer = (optionIndex) => {
+      const q = sessionQuestions[currentIndex];
+      if (!q || q.type !== 'multiselect') return;
+
+      if (!Array.isArray(sessionAnswers[currentIndex])) sessionAnswers[currentIndex] = [];
+      const selected = sessionAnswers[currentIndex];
+
+      // Track "changes" as selection edits
+      const meta = sessionMeta?.[currentIndex];
+      if (meta) meta.changes += 1;
+
+      if (selected.includes(optionIndex)) {
+        sessionAnswers[currentIndex] = selected.filter(x => x !== optionIndex);
+      } else {
+        sessionAnswers[currentIndex] = [...selected, optionIndex].sort((a,b)=>a-b);
+      }
+
+      // Capture the first non-empty selection snapshot
+      if (meta && (meta.firstAnswer === null || meta.firstAnswer === undefined) && Array.isArray(sessionAnswers[currentIndex]) && sessionAnswers[currentIndex].length) {
+        meta.firstAnswer = sessionAnswers[currentIndex].slice();
+      }
+
+      render();
+    };
+    window.submitMultiAnswer = () => {
+      const q = sessionQuestions[currentIndex];
+      if (!q || q.type !== 'multiselect') return;
+      if (!Array.isArray(sessionSubmitted)) sessionSubmitted = [];
+      sessionSubmitted[currentIndex] = true;
+      render();
+    };
+
+    window.editMultiAnswer = () => {
+      const q = sessionQuestions[currentIndex];
+      if (!q || q.type !== 'multiselect') return;
+      if (!Array.isArray(sessionSubmitted)) sessionSubmitted = [];
+      sessionSubmitted[currentIndex] = false;
+      render();
+    };
+
+    window.answerQuestion = (optionIndex) => {
+      const q = sessionQuestions[currentIndex];
+      const prev = sessionAnswers[currentIndex];
+
+      // Track answer changes (mostly relevant for Exam mode where answers can change)
+      const meta = sessionMeta?.[currentIndex];
+      if (meta) {
+        if (meta.firstAnswer === null || meta.firstAnswer === undefined) meta.firstAnswer = prev;
+        if (prev !== null && prev !== undefined && prev !== optionIndex) meta.changes += 1;
+      }
+
+      sessionAnswers[currentIndex] = optionIndex;
+
+      if (!Array.isArray(sessionSubmitted)) sessionSubmitted = [];
+      // single-select questions submit immediately (Practice + Exam)
+      if (!q || q.type !== 'multiselect') sessionSubmitted[currentIndex] = true;
+      render();
+    };    
+
+    window.setConfidence = (level) => {
+      if (!CONFIDENCE_LEVELS.includes(level)) return;
+      const meta = sessionMeta?.[currentIndex];
+      if (meta) meta.confidence = level;
+      render();
+    };
+function recordTimeOnCurrentQuestion() {
+      const meta = sessionMeta?.[currentIndex];
+      if (!meta) return;
+      const now = Date.now();
+      if (meta.startAtMs && now >= meta.startAtMs) {
+        meta.timeSpentSec += (now - meta.startAtMs) / 1000;
+      }
+      meta.startAtMs = now;
+      currentQuestionEnteredAtMs = now;
+    }
+
+    function enterQuestion(index) {
+      const meta = sessionMeta?.[index];
+      const now = Date.now();
+      if (meta) meta.startAtMs = now;
+      currentQuestionEnteredAtMs = now;
+    }
+
+    window.nextQuestion = () => {
+      recordTimeOnCurrentQuestion();
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        enterQuestion(currentIndex);
+        render();
+      }
+    };
+    window.previousQuestion = () => {
+      recordTimeOnCurrentQuestion();
+      if (currentIndex > 0) {
+        currentIndex--;
+        enterQuestion(currentIndex);
+        render();
+      }
+    };
+    window.finishQuiz = () => {
+      recordTimeOnCurrentQuestion();
+      stopQuizTimer();
+      finalizeQuizTime();
+      currentView = 'quizResults';
+      render();
+    };
     
     window.exitToSelection = () => {
+      stopQuizTimer();
       currentView = 'selection';
       selectedTopics = [];
       sessionQuestions = [];
       sessionAnswers = [];
+      sessionSubmitted = [];
       sessionStations = [];
       currentIndex = 0;
       currentStationChecklist = {};
