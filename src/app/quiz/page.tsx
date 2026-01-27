@@ -71,7 +71,7 @@ export default function QuizPage() {
         src="/apps/quiz.html"
         className="w-full border-0 fixed inset-0"
         style={{ height: '100vh', width: '100vw' }}
-        title="Nursing Theory Quiz"
+        title="Core Nursing Quiz"
       />
     );
   }
@@ -88,7 +88,7 @@ export default function QuizPage() {
           <div className="space-y-3">
             <Link href="/pricing?product=quiz" className="btn-primary w-full">
               <Sparkles className="w-5 h-5" />
-              Unlock for £4.99
+              Unlock for £8.99
             </Link>
             <Link href="/" className="btn-secondary w-full">
               <ArrowLeft className="w-4 h-4" />
@@ -126,7 +126,7 @@ export default function QuizPage() {
           src="/apps/quiz.html"
           className="w-full border-0 fixed left-0 right-0 bottom-0"
           style={{ top: '44px', height: 'calc(100vh - 44px)' }}
-          title="Nursing Theory Quiz"
+          title="Core Nursing Quiz"
         />
       </div>
     );
@@ -136,14 +136,14 @@ export default function QuizPage() {
     <div className="min-h-screen gradient-hero flex items-center justify-center p-6">
       <div className="card max-w-sm text-center">
         <div className="text-5xl mb-4">📚</div>
-        <h2 className="text-xl mb-3">Nursing Theory Quiz</h2>
+        <h2 className="text-xl mb-3">Core Nursing Quiz</h2>
         <p className="text-[var(--plum-dark)]/70 text-sm mb-6">
           17 topics, instant feedback, and detailed explanations to help you ace your exams!
         </p>
         <div className="space-y-3">
           <Link href="/pricing?product=quiz" className="btn-primary w-full">
             <Sparkles className="w-5 h-5" />
-            Unlock for £4.99
+            Unlock for £8.99
           </Link>
           <button onClick={() => setShowPreview(true)} className="btn-secondary w-full">
             <Play className="w-4 h-4" />

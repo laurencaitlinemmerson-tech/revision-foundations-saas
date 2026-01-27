@@ -35,7 +35,10 @@ export default function AboutPage() {
                 These tools started as my personal study notes and checklists. When my coursemates kept asking to use them, I realised they might help other nursing students too.
               </p>
               <p>
-                Everything here is made with love (and lots of coffee ☕) by just me - no big team, no fancy office. Just a nursing student who wants to help other nursing students succeed!
+                Everything here is made with love by just me - no big team, no fancy office. Just a nursing student who wants to help other nursing students succeed!
+              </p>
+              <p>
+                I'm fuelled by Pepsi Max Cherry 🍒
               </p>
             </div>
           </div>
@@ -44,7 +47,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 gap-4 mb-8">
             {[
               { emoji: '📚', text: "Children's Nursing Student" },
-              { emoji: '☕', text: 'Fuelled by coffee' },
+              { emoji: '🍒', text: 'Fuelled by Pepsi Max Cherry' },
               { emoji: '💜', text: 'Obsessed with purple' },
               { emoji: '✨', text: 'Making revision cute' },
             ].map((fact, i) => (

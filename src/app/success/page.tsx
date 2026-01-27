@@ -15,7 +15,7 @@ function SuccessContent() {
     product === 'osce'
       ? "Children's OSCE Tool"
       : product === 'quiz'
-      ? 'Nursing Theory Quiz'
+      ? 'Core Nursing Quiz'
       : product === 'bundle'
       ? 'Complete Nursing Bundle'
       : 'your product';

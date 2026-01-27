@@ -22,19 +22,19 @@ export const PRODUCTS = {
     name: "Children's OSCE Tool",
     description: 'Full access to all OSCE stations, checklists, and exam mode',
     priceId: process.env.STRIPE_OSCE_PRICE_ID!,
-    price: 4.99,
+    price: 8.99,
   },
   quiz: {
-    name: 'Nursing Theory Quiz',
+    name: 'Core Nursing Quiz',
     description: 'Full access to all quiz topics, questions, and progress tracking',
     priceId: process.env.STRIPE_QUIZ_PRICE_ID!,
-    price: 4.99,
+    price: 8.99,
   },
   bundle: {
     name: 'Complete Nursing Bundle',
-    description: 'Full access to BOTH the OSCE Tool and Theory Quiz - best value!',
+    description: 'Full access to BOTH the OSCE Tool and Core Quiz - best value!',
     priceId: process.env.STRIPE_BUNDLE_PRICE_ID!,
-    price: 7.99,
+    price: 14.99,
   },
 } as const;
 

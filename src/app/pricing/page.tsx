@@ -98,10 +98,10 @@ export default function PricingPage() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {[
                     'OSCE Tool included',
-                    'Quiz Tool included',
+                    'Core Quiz included',
                     'All features unlocked',
                     'Lifetime access',
-                    'Save £2!',
+                    'Save £3!',
                     'Best for exam prep',
                   ].map((feature) => (
                     <div key={feature} className="feature-check">
@@ -115,9 +115,9 @@ export default function PricingPage() {
               </div>
               <div className="text-center md:text-right">
                 <div className="mb-2">
-                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£9.98</span>
+                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£17.98</span>
                 </div>
-                <div className="stat-number mb-1">£7.99</div>
+                <div className="stat-number mb-1">£14.99</div>
                 <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment</p>
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
@@ -171,10 +171,10 @@ export default function PricingPage() {
             {/* OSCE Card */}
             <div className="card">
               <div className="text-4xl mb-4">📋</div>
-              <span className="badge mb-3">£4.99 · Lifetime</span>
+              <span className="badge mb-3">£8.99 · Lifetime</span>
               <h3 className="mb-2">Children's OSCE Tool</h3>
               <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
-                Practice stations with checklists and guidance
+                Walk into your placement OSCE feeling prepared
               </p>
               <div className="space-y-2 mb-6">
                 {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map((f) => (
@@ -230,10 +230,10 @@ export default function PricingPage() {
             {/* Quiz Card */}
             <div className="card">
               <div className="text-4xl mb-4">📚</div>
-              <span className="badge mb-3">£4.99 · Lifetime</span>
-              <h3 className="mb-2">Nursing Theory Quiz</h3>
+              <span className="badge mb-3">£8.99 · Lifetime</span>
+              <h3 className="mb-2">Core Nursing Quiz</h3>
               <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
-                Topic-based quizzes with instant feedback
+                17 topic areas covering the theory you need
               </p>
               <div className="space-y-2 mb-6">
                 {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map((f) => (
