@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Lock, Sparkles, ArrowLeft, Play, Clock } from 'lucide-react';
+import { saveLastActivity, recordSessionStart } from '@/components/DashboardWidgets';
 
 const PREVIEW_TIME = 180; // 3 minutes
 
@@ -64,6 +65,18 @@ export default function QuizPage() {
       </div>
     );
   }
+
+  // Track session when tool loads
+  useEffect(() => {
+    if (hasPremium || showPreview) {
+      recordSessionStart('quiz');
+      saveLastActivity({
+        toolName: 'quiz',
+        path: '/quiz',
+        label: 'Core Quiz Practice',
+      });
+    }
+  }, [hasPremium, showPreview]);
 
   if (hasPremium) {
     return (
