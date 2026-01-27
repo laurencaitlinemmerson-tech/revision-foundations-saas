@@ -37,9 +37,6 @@ export default function AboutPage() {
               <p>
                 Everything here is made with love by just me - no big team, no fancy office. Just a nursing student who wants to help other nursing students succeed!
               </p>
-              <p>
-                I'm fuelled by Pepsi Max Cherry 🍒
-              </p>
             </div>
           </div>
 
