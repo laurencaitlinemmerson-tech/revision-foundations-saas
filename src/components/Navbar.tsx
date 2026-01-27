@@ -28,52 +28,45 @@ export default function Navbar() {
 
   const authLinks = [
     { href: '/dashboard', label: 'Dashboard' },
-    { href: '/account', label: 'Account' },
   ];
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/95 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+      scrolled
+        ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-purple-500/5'
+        : 'bg-white/40 backdrop-blur-md'
     }`}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--lavender-dark)] to-[var(--pink-dark)] flex items-center justify-center shadow-lg shadow-purple-500/25 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-5 h-5 text-white sparkle" />
             </div>
-            <span className="font-display text-lg text-[var(--plum)]" style={{ fontFamily: 'Shrikhand' }}>
+            <span className="font-display text-lg font-semibold text-[var(--text-dark)]" style={{ fontFamily: 'Fraunces, serif' }}>
               Revision Foundations
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors ${
-                  isActive(link.href)
-                    ? 'text-[var(--purple)]'
-                    : 'text-[var(--plum-dark)]/70 hover:text-[var(--purple)]'
-                }`}
+                className={`nav-link text-sm ${isActive(link.href) ? 'active' : ''}`}
               >
                 {link.label}
               </Link>
             ))}
 
             <SignedIn>
-              <div className="w-px h-4 bg-[var(--lilac-medium)]" />
+              <div className="w-px h-5 bg-[var(--lavender)]/50" />
               {authLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors ${
-                    isActive(link.href)
-                      ? 'text-[var(--purple)]'
-                      : 'text-[var(--plum-dark)]/70 hover:text-[var(--purple)]'
-                  }`}
+                  className={`nav-link text-sm ${isActive(link.href) ? 'active' : ''}`}
                 >
                   {link.label}
                 </Link>
@@ -82,7 +75,7 @@ export default function Navbar() {
                 afterSwitchSessionUrl="/"
                 appearance={{
                   elements: {
-                    avatarBox: 'w-8 h-8 ring-2 ring-[var(--lilac)]',
+                    avatarBox: 'w-9 h-9 ring-2 ring-[var(--lavender)] ring-offset-2',
                   },
                 }}
               />
@@ -91,11 +84,11 @@ export default function Navbar() {
             <SignedOut>
               <Link
                 href="/sign-in"
-                className="text-sm font-medium text-[var(--plum-dark)]/70 hover:text-[var(--purple)]"
+                className="nav-link text-sm"
               >
                 Sign In
               </Link>
-              <Link href="/sign-up" className="btn-primary text-sm px-5 py-2">
+              <Link href="/sign-up" className="btn-primary text-sm px-5 py-2.5">
                 <Sparkles className="w-4 h-4" />
                 Get Started
               </Link>
@@ -104,13 +97,14 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 rounded-xl hover:bg-white/50 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-[var(--plum)]" />
+              <X className="w-6 h-6 text-[var(--text-dark)]" />
             ) : (
-              <Menu className="w-6 h-6 text-[var(--plum)]" />
+              <Menu className="w-6 h-6 text-[var(--text-dark)]" />
             )}
           </button>
         </div>
@@ -118,14 +112,16 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-[var(--lilac)]">
-          <div className="px-6 py-4 space-y-3">
+        <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-[var(--lavender)]/20">
+          <div className="px-6 py-4 space-y-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`block py-2 text-sm font-medium ${
-                  isActive(link.href) ? 'text-[var(--purple)]' : 'text-[var(--plum-dark)]'
+                className={`block py-3 px-4 rounded-xl text-sm font-medium transition-colors ${
+                  isActive(link.href)
+                    ? 'bg-[var(--lavender)]/10 text-[var(--purple-accent)]'
+                    : 'text-[var(--text-dark)] hover:bg-[var(--lavender)]/5'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -134,13 +130,15 @@ export default function Navbar() {
             ))}
 
             <SignedIn>
-              <div className="border-t border-[var(--lilac)] my-2" />
+              <div className="border-t border-[var(--lavender)]/20 my-3" />
               {authLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`block py-2 text-sm font-medium ${
-                    isActive(link.href) ? 'text-[var(--purple)]' : 'text-[var(--plum-dark)]'
+                  className={`block py-3 px-4 rounded-xl text-sm font-medium transition-colors ${
+                    isActive(link.href)
+                      ? 'bg-[var(--lavender)]/10 text-[var(--purple-accent)]'
+                      : 'text-[var(--text-dark)] hover:bg-[var(--lavender)]/5'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -150,19 +148,20 @@ export default function Navbar() {
             </SignedIn>
 
             <SignedOut>
-              <div className="border-t border-[var(--lilac)] my-2" />
+              <div className="border-t border-[var(--lavender)]/20 my-3" />
               <Link
                 href="/sign-in"
-                className="block py-2 text-sm font-medium text-[var(--plum-dark)]"
+                className="block py-3 px-4 rounded-xl text-sm font-medium text-[var(--text-dark)] hover:bg-[var(--lavender)]/5"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Sign In
               </Link>
               <Link
                 href="/sign-up"
-                className="btn-primary w-full text-center mt-2"
+                className="btn-primary w-full justify-center mt-3"
                 onClick={() => setMobileMenuOpen(false)}
               >
+                <Sparkles className="w-4 h-4" />
                 Get Started
               </Link>
             </SignedOut>

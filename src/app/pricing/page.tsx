@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Heart } from 'lucide-react';
+import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play } from 'lucide-react';
 
 export default function PricingPage() {
   const { isSignedIn } = useUser();
@@ -80,16 +80,19 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen">
       <Navbar />
 
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-14">
-            <span className="badge badge-purple mb-4">Pricing</span>
-            <h1 className="mb-4">Simple Pricing</h1>
-            <p className="text-[var(--plum-dark)]/70 max-w-lg mx-auto">
+            <span className="badge badge-purple mb-4">
+              <Sparkles className="w-3.5 h-3.5" />
+              Pricing
+            </span>
+            <h1 className="mb-4 text-[var(--text-dark)]">Simple Pricing</h1>
+            <p className="text-[var(--text-medium)] max-w-lg mx-auto">
               Pay once, use forever! No sneaky subscriptions 💜
             </p>
           </div>
@@ -98,20 +101,20 @@ export default function PricingPage() {
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             {products.map((product) => (
               <div key={product.id} className="card relative">
-                <div className="text-4xl mb-4">{product.emoji}</div>
-                <span className="badge mb-3">{product.price} · Lifetime</span>
-                <h3 className="mb-2">{product.name}</h3>
-                <p className="text-[var(--plum-dark)]/70 text-sm mb-6">
+                <div className="text-5xl mb-5">{product.emoji}</div>
+                <span className="badge mb-4">{product.price} · Lifetime</span>
+                <h3 className="mb-3 text-[var(--text-dark)]">{product.name}</h3>
+                <p className="text-[var(--text-medium)] text-sm mb-6">
                   {product.description}
                 </p>
 
-                <div className="space-y-2 mb-8">
+                <div className="space-y-2.5 mb-8">
                   {product.features.map((feature) => (
                     <div key={feature} className="feature-check">
                       <div className="check-icon">
                         <Check className="w-3.5 h-3.5 text-green-600" />
                       </div>
-                      <span className="text-sm text-[var(--plum-dark)]">{feature}</span>
+                      <span className="text-sm text-[var(--text-dark)]">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -138,9 +141,9 @@ export default function PricingPage() {
           </div>
 
           {/* FAQ */}
-          <div className="card-glass">
+          <div className="card">
             <div className="text-center mb-8">
-              <h2 className="text-xl">Questions?</h2>
+              <h2 className="text-xl text-[var(--text-dark)]">Questions?</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               {[
@@ -149,9 +152,9 @@ export default function PricingPage() {
                 { q: 'What payment methods?', a: 'All major cards via Stripe 💳' },
                 { q: 'Can I get a refund?', a: 'Yes, within 7 days if not happy!' },
               ].map((faq, i) => (
-                <div key={i}>
-                  <h4 className="font-semibold text-[var(--plum)] text-sm mb-1">{faq.q}</h4>
-                  <p className="text-sm text-[var(--plum-dark)]/70">{faq.a}</p>
+                <div key={i} className="p-4 rounded-xl bg-white/50">
+                  <h4 className="font-semibold text-[var(--text-dark)] text-sm mb-2">{faq.q}</h4>
+                  <p className="text-sm text-[var(--text-medium)]">{faq.a}</p>
                 </div>
               ))}
             </div>
@@ -159,10 +162,11 @@ export default function PricingPage() {
 
           {/* Free preview */}
           <div className="text-center mt-12">
-            <p className="text-[var(--plum-dark)]/60 text-sm mb-3">
+            <p className="text-[var(--text-light)] text-sm mb-4">
               Not sure yet? Try it first!
             </p>
             <Link href="/quiz" className="btn-secondary text-sm">
+              <Play className="w-4 h-4" />
               Try Free Preview
             </Link>
           </div>
