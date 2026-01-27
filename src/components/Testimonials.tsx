@@ -97,12 +97,7 @@ export default function Testimonials() {
           ))}
         </div>
 
-        {/* Leave a review CTA */}
-        <div className="text-center mt-10">
-          <Link
-            href="/review"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition text-sm"
-          >
-          
+       </div>
+    </section>
   );
 }
