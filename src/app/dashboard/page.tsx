@@ -243,13 +243,10 @@ export default async function DashboardPage() {
               <Heart className="w-6 h-6 text-[var(--pink)] mx-auto mb-2 group-hover:scale-110 transition" />
               <p className="text-sm font-medium text-[var(--plum)]">Say Hi!</p>
             </a>
-            <a
-              href="mailto:hello@revisionfoundations.com?subject=My Review"
-              className="card text-center py-5 hover:border-[var(--lavender)] transition group"
-            >
+            <Link href="/review" className="card text-center py-5 hover:border-[var(--lavender)] transition group">
               <Star className="w-6 h-6 text-yellow-500 mx-auto mb-2 group-hover:scale-110 transition" />
               <p className="text-sm font-medium text-[var(--plum)]">Leave Review</p>
-            </a>
+            </Link>
           </div>
 
           {/* Study Tip */}

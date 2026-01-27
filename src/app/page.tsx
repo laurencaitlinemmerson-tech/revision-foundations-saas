@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Sparkles, BookOpen, ClipboardCheck, Star, Heart, Check, Play, Users, Zap, Gift } from 'lucide-react';
+import Testimonials from '@/components/Testimonials';
+import { Sparkles, BookOpen, ClipboardCheck, Heart, Check, Play, Users, Zap, Gift } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -194,66 +195,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="gradient-hero section relative overflow-hidden">
-        <div className="blob blob-2" />
-
-        <div className="max-w-5xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-14">
-            <span className="badge mb-4">Reviews</span>
-            <h2 className="mb-4">Students Love It</h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                name: 'Javine',
-                text: "It's quick and easy revision which is practically accessible on the go!",
-              },
-              {
-                name: 'Sarah',
-                text: 'The OSCE tool helped me feel so much more confident before my exam.',
-              },
-              {
-                name: 'Emily',
-                text: 'These tools break everything down into manageable chunks. Perfect!',
-              },
-            ].map((t, i) => (
-              <div key={i} className="testimonial-card">
-                <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-[var(--plum-dark)]/80 text-sm mb-4">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center text-white text-sm font-semibold">
-                    {t.name[0]}
-                  </div>
-                  <span className="font-medium text-sm text-[var(--plum)]">{t.name}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Leave a Review */}
-      <section className="bg-cream section">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <div className="text-4xl mb-4">💬</div>
-          <h2 className="mb-4">Leave a Review</h2>
-          <p className="text-[var(--plum-dark)]/70 mb-6">
-            Loved the tools? Your feedback means the world! Share your experience and help other nursing students find their study bestie.
-          </p>
-          <a
-            href="mailto:hello@revisionfoundations.com?subject=My Review"
-            className="btn-secondary"
-          >
-            <Heart className="w-4 h-4" />
-            Share Your Experience
-          </a>
-        </div>
-      </section>
+      <Testimonials />
 
       {/* CTA */}
       <section className="gradient-hero section relative overflow-hidden">
