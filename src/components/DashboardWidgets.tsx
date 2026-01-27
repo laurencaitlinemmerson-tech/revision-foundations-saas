@@ -105,9 +105,9 @@ export function WeeklyProgress() {
   if (count === null) return null;
 
   return (
-    <p className="text-sm text-[var(--plum-dark)]/50 mt-1">
+    <p className="text-sm text-[var(--plum-dark)]/70 mt-1">
       {count > 0 ? (
-        <>You've practised <span className="font-medium text-[var(--purple)]">{count} time{count !== 1 ? 's' : ''}</span> this week 🎉</>
+        <>You've practised <span className="font-semibold text-[var(--purple)]">{count} time{count !== 1 ? 's' : ''}</span> this week 🎉</>
       ) : (
         <>Ready when you are — try a quick 5-minute session.</>
       )}
@@ -135,8 +135,8 @@ export function ContinueCard() {
   return (
     <div className="card mb-6 border border-[var(--lilac-medium)] hover:border-[var(--lavender)] transition-all duration-200">
       <div className="flex items-center gap-2 mb-3">
-        <Clock className="w-4 h-4 text-[var(--plum-dark)]/50" />
-        <h3 className="text-sm font-medium text-[var(--plum-dark)]/70">Continue where you left off</h3>
+        <Clock className="w-4 h-4 text-[var(--purple)]" />
+        <h3 className="text-sm font-semibold text-[var(--plum)]">Continue where you left off</h3>
       </div>
 
       {activity ? (
@@ -150,7 +150,7 @@ export function ContinueCard() {
             </div>
             <div>
               <p className="font-medium text-[var(--plum)]">{activity.label}</p>
-              <p className="text-xs text-[var(--plum-dark)]/50">
+              <p className="text-xs text-[var(--plum-dark)]/70">
                 {activity.toolName === 'osce' ? 'OSCE Tool' : 'Core Quiz'}
               </p>
             </div>
@@ -161,7 +161,7 @@ export function ContinueCard() {
           </div>
         </Link>
       ) : (
-        <p className="text-sm text-[var(--plum-dark)]/50 italic">
+        <p className="text-sm text-[var(--plum-dark)]/70">
           Your next session will appear here after you start a tool.
         </p>
       )}
@@ -187,7 +187,7 @@ export function StudyTipCard() {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-[var(--plum)]">Study Tip</h3>
-            <span className="text-[10px] uppercase tracking-wide text-[var(--plum-dark)]/40 bg-[var(--lilac-soft)] px-2 py-0.5 rounded-full">
+            <span className="text-[10px] uppercase tracking-wide text-[var(--purple)] bg-[var(--lilac)] px-2 py-0.5 rounded-full font-medium">
               New tip daily
             </span>
           </div>

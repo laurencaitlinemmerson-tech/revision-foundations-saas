@@ -48,9 +48,10 @@ export default function PricingPage() {
       } else {
         throw new Error(data.error || 'No checkout URL returned');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout error:', error);
-      alert('Oops! Something went wrong. Please try again.');
+      const message = error?.message || 'Something went wrong. Please try again or contact support.';
+      alert(`Oops! ${message}`);
     } finally {
       setLoading(null);
     }

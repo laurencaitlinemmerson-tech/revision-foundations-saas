@@ -90,10 +90,19 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Checkout error:', error);
+
+    // Provide more specific error messages
+    let errorMessage = 'Failed to create checkout session';
+    if (error?.message?.includes('price')) {
+      errorMessage = 'Product price not configured correctly';
+    } else if (error?.message?.includes('No such price')) {
+      errorMessage = 'Invalid price configuration - please contact support';
+    }
+
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: errorMessage, details: error?.message },
       { status: 500 }
     );
   }
