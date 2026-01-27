@@ -1,7 +1,8 @@
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { createOrUpdateEntitlement, cancelEntitlement } from '@/lib/entitlements';
+import { createOrUpdateEntitlement } from '@/lib/entitlements';
+import { createServiceClient } from '@/lib/supabase';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -38,40 +39,67 @@ export async function POST(request: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
 
         const clerkUserId = session.metadata?.clerk_user_id;
-        const product = session.metadata?.product as 'osce' | 'quiz';
+        const guestEmail = session.metadata?.guest_email || session.customer_email;
+        const product = session.metadata?.product as 'osce' | 'quiz' | 'bundle';
 
-        if (!clerkUserId || !product) {
-          console.error('Missing metadata in checkout session');
+        if (!product) {
+          console.error('Missing product in checkout session metadata');
           break;
         }
 
-        await createOrUpdateEntitlement(
-          clerkUserId,
-          product,
-          session.customer as string,
-          session.subscription as string | null,
-          null // Lifetime access for one-time payment
-        );
+        // Handle bundle - create entitlements for both products
+        const productsToCreate = product === 'bundle'
+          ? ['osce', 'quiz', 'bundle'] as const
+          : [product] as const;
 
-        console.log(`Entitlement created for user ${clerkUserId}, product ${product}`);
-        break;
-      }
+        const supabase = createServiceClient();
 
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
+        for (const p of productsToCreate) {
+          if (clerkUserId) {
+            // Signed-in user purchase
+            await createOrUpdateEntitlement(
+              clerkUserId,
+              p,
+              session.customer as string,
+              null, // No subscription for one-time
+              null  // Lifetime access
+            );
+            console.log(`Entitlement created for user ${clerkUserId}, product ${p}`);
+          } else if (guestEmail) {
+            // Guest purchase - store with email
+            const { error } = await supabase
+              .from('entitlements')
+              .upsert({
+                clerk_user_id: `guest_${guestEmail}`, // Prefix to identify guest
+                product: p,
+                status: 'active',
+                stripe_customer_id: session.customer as string,
+                stripe_payment_intent_id: session.payment_intent as string,
+              }, {
+                onConflict: 'clerk_user_id,product'
+              });
 
-        if (subscription.status === 'active') {
-          // Subscription renewed or updated
-          console.log(`Subscription ${subscription.id} updated to active`);
+            if (error) {
+              console.error('Error creating guest entitlement:', error);
+            } else {
+              console.log(`Guest entitlement created for ${guestEmail}, product ${p}`);
+            }
+          }
         }
+
+        // TODO: Send access email to guest users
+        if (guestEmail && !clerkUserId) {
+          console.log(`Should send access email to ${guestEmail}`);
+          // In future: integrate with email service (Resend, SendGrid, etc.)
+        }
+
         break;
       }
 
       case 'customer.subscription.deleted': {
+        // Not needed for one-time payments, but keeping for future
         const subscription = event.data.object as Stripe.Subscription;
-
-        await cancelEntitlement(subscription.id);
-        console.log(`Subscription ${subscription.id} cancelled`);
+        console.log(`Subscription ${subscription.id} event received (not applicable for one-time)`);
         break;
       }
 

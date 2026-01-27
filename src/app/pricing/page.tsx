@@ -2,29 +2,45 @@
 
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Star, Gift } from 'lucide-react';
+import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Gift, Mail } from 'lucide-react';
 
 export default function PricingPage() {
   const { isSignedIn } = useUser();
-  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [guestEmail, setGuestEmail] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState('');
+
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
   const handlePurchase = async (product: 'osce' | 'quiz' | 'bundle') => {
-    if (!isSignedIn) {
-      router.push('/sign-up');
+    // If not signed in and no email entered yet, show email input
+    if (!isSignedIn && !guestEmail) {
+      setShowEmailInput(product);
+      return;
+    }
+
+    // Validate email for guest checkout
+    if (!isSignedIn && guestEmail && !validateEmail(guestEmail)) {
+      setEmailError('Please enter a valid email address');
       return;
     }
 
     setLoading(product);
+    setEmailError('');
 
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product }),
+        body: JSON.stringify({
+          product,
+          guestEmail: !isSignedIn ? guestEmail : undefined,
+        }),
       });
 
       const data = await response.json();
@@ -32,7 +48,7 @@ export default function PricingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error('No checkout URL returned');
+        throw new Error(data.error || 'No checkout URL returned');
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -40,6 +56,14 @@ export default function PricingPage() {
     } finally {
       setLoading(null);
     }
+  };
+
+  const handleGuestCheckout = (product: 'osce' | 'quiz' | 'bundle') => {
+    if (!validateEmail(guestEmail)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+    handlePurchase(product);
   };
 
   return (
@@ -56,7 +80,7 @@ export default function PricingPage() {
             </span>
             <h1 className="mb-4 text-[var(--text-dark)]">Simple Pricing</h1>
             <p className="text-[var(--text-medium)] max-w-lg mx-auto">
-              Pay once, use forever! No sneaky subscriptions 💜
+              Pay once, use forever! No account needed 💜
             </p>
           </div>
 
@@ -104,23 +128,45 @@ export default function PricingPage() {
                   £7.99
                 </div>
                 <p className="text-sm text-[var(--text-medium)] mb-4">one-time payment</p>
-                <button
-                  onClick={() => handlePurchase('bundle')}
-                  disabled={loading !== null}
-                  className="btn-primary px-8"
-                >
-                  {loading === 'bundle' ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5" />
-                      Get the Bundle
-                    </>
-                  )}
-                </button>
+
+                {showEmailInput === 'bundle' && !isSignedIn ? (
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
+                      <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={guestEmail}
+                        onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none text-sm"
+                      />
+                    </div>
+                    {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
+                    <button
+                      onClick={() => handleGuestCheckout('bundle')}
+                      disabled={loading !== null}
+                      className="btn-primary w-full"
+                    >
+                      {loading === 'bundle' ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                      ) : (
+                        <><Sparkles className="w-5 h-5" /> Continue to Payment</>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handlePurchase('bundle')}
+                    disabled={loading !== null}
+                    className="btn-primary px-8"
+                  >
+                    {loading === 'bundle' ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                    ) : (
+                      <><Sparkles className="w-5 h-5" /> Get the Bundle</>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -149,23 +195,45 @@ export default function PricingPage() {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => handlePurchase('osce')}
-                disabled={loading !== null}
-                className="btn-secondary w-full"
-              >
-                {loading === 'osce' ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <ClipboardCheck className="w-5 h-5" />
-                    Get OSCE Tool
-                  </>
-                )}
-              </button>
+
+              {showEmailInput === 'osce' && !isSignedIn ? (
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={guestEmail}
+                      onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none text-sm"
+                    />
+                  </div>
+                  {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
+                  <button
+                    onClick={() => handleGuestCheckout('osce')}
+                    disabled={loading !== null}
+                    className="btn-secondary w-full"
+                  >
+                    {loading === 'osce' ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                    ) : (
+                      <><ClipboardCheck className="w-5 h-5" /> Continue to Payment</>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handlePurchase('osce')}
+                  disabled={loading !== null}
+                  className="btn-secondary w-full"
+                >
+                  {loading === 'osce' ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                  ) : (
+                    <><ClipboardCheck className="w-5 h-5" /> Get OSCE Tool</>
+                  )}
+                </button>
+              )}
             </div>
 
             {/* Quiz Card */}
@@ -186,23 +254,45 @@ export default function PricingPage() {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => handlePurchase('quiz')}
-                disabled={loading !== null}
-                className="btn-secondary w-full"
-              >
-                {loading === 'quiz' ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <BookOpen className="w-5 h-5" />
-                    Get Quiz Tool
-                  </>
-                )}
-              </button>
+
+              {showEmailInput === 'quiz' && !isSignedIn ? (
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={guestEmail}
+                      onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none text-sm"
+                    />
+                  </div>
+                  {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
+                  <button
+                    onClick={() => handleGuestCheckout('quiz')}
+                    disabled={loading !== null}
+                    className="btn-secondary w-full"
+                  >
+                    {loading === 'quiz' ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                    ) : (
+                      <><BookOpen className="w-5 h-5" /> Continue to Payment</>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handlePurchase('quiz')}
+                  disabled={loading !== null}
+                  className="btn-secondary w-full"
+                >
+                  {loading === 'quiz' ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                  ) : (
+                    <><BookOpen className="w-5 h-5" /> Get Quiz Tool</>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -214,7 +304,7 @@ export default function PricingPage() {
             <div className="grid md:grid-cols-2 gap-6">
               {[
                 { q: 'Is this a subscription?', a: 'Nope! Pay once, access forever ✨' },
-                { q: 'Can I try before buying?', a: 'Yes! We have a free 3-minute preview.' },
+                { q: 'Do I need an account?', a: 'No! Just enter your email at checkout.' },
                 { q: 'What payment methods?', a: 'All major cards via Stripe 💳' },
                 { q: 'Can I get a refund?', a: 'Yes, within 7 days if not happy!' },
               ].map((faq, i) => (
