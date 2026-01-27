@@ -69,7 +69,8 @@ export default function OscePage() {
     return (
       <iframe
         src="/apps/osce.html"
-        className="w-full h-screen border-0"
+        className="w-full border-0 fixed inset-0"
+        style={{ height: '100vh', width: '100vw' }}
         title="Children's OSCE Tool"
       />
     );
@@ -123,8 +124,8 @@ export default function OscePage() {
         </div>
         <iframe
           src="/apps/osce.html"
-          className="w-full border-0"
-          style={{ marginTop: '44px', height: 'calc(100vh - 44px)' }}
+          className="w-full border-0 fixed left-0 right-0 bottom-0"
+          style={{ top: '44px', height: 'calc(100vh - 44px)' }}
           title="Children's OSCE Tool"
         />
       </div>

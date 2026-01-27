@@ -69,7 +69,8 @@ export default function QuizPage() {
     return (
       <iframe
         src="/apps/quiz.html"
-        className="w-full h-screen border-0"
+        className="w-full border-0 fixed inset-0"
+        style={{ height: '100vh', width: '100vw' }}
         title="Nursing Theory Quiz"
       />
     );
@@ -123,8 +124,8 @@ export default function QuizPage() {
         </div>
         <iframe
           src="/apps/quiz.html"
-          className="w-full border-0"
-          style={{ marginTop: '44px', height: 'calc(100vh - 44px)' }}
+          className="w-full border-0 fixed left-0 right-0 bottom-0"
+          style={{ top: '44px', height: 'calc(100vh - 44px)' }}
           title="Nursing Theory Quiz"
         />
       </div>

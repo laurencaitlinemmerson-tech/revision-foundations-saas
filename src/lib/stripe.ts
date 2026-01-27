@@ -1,9 +1,21 @@
 import Stripe from 'stripe';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Validate Stripe configuration
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeSecretKey) {
+  console.error('STRIPE_SECRET_KEY environment variable is not set');
+}
+
+export const stripe = new Stripe(stripeSecretKey || '', {
   apiVersion: '2025-12-15.clover',
   typescript: true,
 });
+
+// Log Stripe mode on initialization (useful for debugging)
+if (stripeSecretKey) {
+  const mode = stripeSecretKey.startsWith('sk_live_') ? 'LIVE' : 'TEST';
+  console.log(`Stripe initialized in ${mode} mode`);
+}
 
 export const PRODUCTS = {
   osce: {

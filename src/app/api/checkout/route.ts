@@ -4,6 +4,22 @@ import { createCheckoutSession, ProductKey } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate Stripe keys are configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Payment system not configured' },
+        { status: 500 }
+      );
+    }
+
+    // Warn if using test keys in production
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isTestKey = process.env.STRIPE_SECRET_KEY.startsWith('sk_test_');
+    if (isProduction && isTestKey) {
+      console.warn('WARNING: Using Stripe TEST keys in production environment');
+    }
+
     const { userId } = await auth();
 
     if (!userId) {
@@ -28,6 +44,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid product' },
         { status: 400 }
+      );
+    }
+
+    // Validate price IDs are configured
+    const priceIdEnvVar = product === 'osce' ? 'STRIPE_OSCE_PRICE_ID' : 'STRIPE_QUIZ_PRICE_ID';
+    const priceId = process.env[priceIdEnvVar];
+    if (!priceId) {
+      console.error(`${priceIdEnvVar} is not configured`);
+      return NextResponse.json(
+        { error: 'Product pricing not configured' },
+        { status: 500 }
       );
     }
 
