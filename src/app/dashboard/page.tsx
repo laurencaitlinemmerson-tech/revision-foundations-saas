@@ -149,7 +149,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-[var(--plum-dark)]/70 mb-4">
                 {totalOwned === 0
                   ? 'Unlock your revision tools and start studying!'
-                  : 'Get the bundle and save £3!'}
+                  : 'Get the bundle and save £1!'}
               </p>
               <Link href="/pricing" className="btn-primary">
                 <Sparkles className="w-4 h-4" />

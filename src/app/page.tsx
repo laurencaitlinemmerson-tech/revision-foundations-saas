@@ -39,7 +39,7 @@ export default function HomePage() {
             <div className="fade-in flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/pricing" className="btn-primary text-lg px-8 py-4">
                 <Sparkles className="w-5 h-5" />
-                Get Started - £8.99
+                Get Started - £4.99
               </Link>
               <Link href="/quiz" className="btn-secondary text-lg px-8 py-4">
                 <Play className="w-5 h-5" />
@@ -97,7 +97,7 @@ export default function HomePage() {
                 <div className="icon-box">
                   <ClipboardCheck className="w-8 h-8 text-white" />
                 </div>
-                <span className="badge">£8.99 · Lifetime</span>
+                <span className="badge">£4.99 · Lifetime</span>
               </div>
               <h3 className="mb-3">Children's OSCE Tool</h3>
               <p className="text-[var(--plum-dark)]/70 mb-6">
@@ -125,7 +125,7 @@ export default function HomePage() {
                 <div className="icon-box">
                   <BookOpen className="w-8 h-8 text-white" />
                 </div>
-                <span className="badge">£8.99 · Lifetime</span>
+                <span className="badge">£4.99 · Lifetime</span>
               </div>
               <h3 className="mb-3">Core Nursing Quiz</h3>
               <p className="text-[var(--plum-dark)]/70 mb-6">
@@ -263,7 +263,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/pricing" className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90">
               <Sparkles className="w-5 h-5" />
-              Get Started - £8.99
+              Get Started - £4.99
             </Link>
             <Link href="/quiz" className="btn-secondary px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30">
               <Play className="w-5 h-5" />

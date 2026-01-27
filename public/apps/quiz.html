@@ -245,6 +245,33 @@
   .pulse-red-badge {
     animation: redPulseGlow 1.3s ease-in-out infinite;
   }
+
+/* Difficulty + Type Pills */
+.pill-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.04em;
+  border:1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  text-transform: uppercase;
+}
+.pill-badge .dot{
+  width:8px; height:8px; border-radius:999px;
+  background: rgba(255,255,255,0.55);
+}
+.pill-easy .dot{ background: rgba(34,197,94,0.95); }
+.pill-medium .dot{ background: rgba(250,204,21,0.95); }
+.pill-hard .dot{ background: rgba(244,63,94,0.95); }
+.pill-mcq .dot{ background: rgba(34,211,238,0.95); }
+.pill-tf .dot{ background: rgba(168,85,247,0.95); }
+.pill-multiselect .dot{ background: rgba(236,72,153,0.95); }
+
 </style>
 
 
@@ -268,6 +295,27 @@
    <main id="main-content" class="relative p-4 md:p-6 lg:p-8 min-h-screen"></main>
   </div>
   <script>
+
+function getQuestionTypeLabel(q){
+  if(!q) return "MCQ";
+  if(q.type === "multiselect") return "Multi-select";
+  if(q.type === "tf") return "True/False";
+  return "MCQ";
+}
+function getQuestionTypeClass(q){
+  if(!q) return "pill-mcq";
+  if(q.type === "multiselect") return "pill-multiselect";
+  if(q.type === "tf") return "pill-tf";
+  return "pill-mcq";
+}
+function getDifficultyClass(q){
+  const d = (q && q.difficulty ? String(q.difficulty) : "medium").toLowerCase();
+  if(d.includes("hard")) return "pill-hard";
+  if(d.includes("easy")) return "pill-easy";
+  return "pill-medium";
+}
+
+
     // ==================== CONFIGURATION ====================
     const defaultConfig = {
       app_title: "Nursing Theory Quiz",

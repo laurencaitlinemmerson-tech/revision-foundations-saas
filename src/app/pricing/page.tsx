@@ -101,7 +101,7 @@ export default function PricingPage() {
                     'Core Quiz included',
                     'All features unlocked',
                     'Lifetime access',
-                    'Save £3!',
+                    'Save £1!',
                     'Best for exam prep',
                   ].map((feature) => (
                     <div key={feature} className="feature-check">
@@ -115,9 +115,9 @@ export default function PricingPage() {
               </div>
               <div className="text-center md:text-right">
                 <div className="mb-2">
-                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£17.98</span>
+                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£9.98</span>
                 </div>
-                <div className="stat-number mb-1">£14.99</div>
+                <div className="stat-number mb-1">£8.99</div>
                 <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment</p>
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
@@ -171,7 +171,7 @@ export default function PricingPage() {
             {/* OSCE Card */}
             <div className="card">
               <div className="text-4xl mb-4">📋</div>
-              <span className="badge mb-3">£8.99 · Lifetime</span>
+              <span className="badge mb-3">£4.99 · Lifetime</span>
               <h3 className="mb-2">Children's OSCE Tool</h3>
               <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
                 Walk into your placement OSCE feeling prepared
@@ -230,7 +230,7 @@ export default function PricingPage() {
             {/* Quiz Card */}
             <div className="card">
               <div className="text-4xl mb-4">📚</div>
-              <span className="badge mb-3">£8.99 · Lifetime</span>
+              <span className="badge mb-3">£4.99 · Lifetime</span>
               <h3 className="mb-2">Core Nursing Quiz</h3>
               <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
                 17 topic areas covering the theory you need
