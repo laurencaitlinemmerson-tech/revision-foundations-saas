@@ -102,14 +102,14 @@ export default function HomePage() {
         
         {/* Corrected "Leave your own review" button */}
         <div className="flex justify-center -mt-16 mb-8 relative z-20">
-          <Link 
-            href="/review" 
+          <a
+            href="/review"
             className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-6 py-2.5 rounded-full text-sm font-medium border border-[var(--lavender)]/30 transition-all hover:bg-white hover:scale-105 active:scale-95 shadow-sm"
           >
             <Sparkles className="w-4 h-4 text-[var(--purple)]" />
             <span className="text-[var(--plum)]">Leave your own review</span>
             <Heart className="w-4 h-4 text-[var(--pink)]" />
-          </Link>
+          </a>
         </div>
       </section>
 
