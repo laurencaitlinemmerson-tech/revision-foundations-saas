@@ -65,10 +65,10 @@ export default function HomePage() {
           <div className="card">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
-                { num: '500+', label: 'Happy Students', icon: '💜' },
                 { num: '17', label: 'Quiz Topics', icon: '📚' },
                 { num: '50+', label: 'OSCE Stations', icon: '✨' },
-                { num: '4.9', label: 'Star Rating', icon: '⭐' },
+                { num: '∞', label: 'Lifetime Access', icon: '💜' },
+                { num: '£4.99', label: 'Per Tool', icon: '✨' },
               ].map((s, i) => (
                 <div key={i} className="fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
                   <span className="text-3xl mb-3 block">{s.icon}</span>
