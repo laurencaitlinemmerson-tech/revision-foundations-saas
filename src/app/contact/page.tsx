@@ -186,7 +186,7 @@ export default function ContactPage() {
               className="inline-flex items-center gap-2 text-[var(--lavender-primary)] font-medium hover:underline"
             >
               <Mail className="w-4 h-4" />
-              hello@revisionfoundations.com
+              lauren@revisionfoundations.com
             </a>
           </div>
         </div>
