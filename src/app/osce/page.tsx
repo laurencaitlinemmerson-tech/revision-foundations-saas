@@ -59,8 +59,8 @@ export default function OscePage() {
 
   if (!isLoaded || checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[var(--text-dark)] text-lg">Loading...</div>
+      <div className="min-h-screen gradient-hero flex items-center justify-center">
+        <div className="text-[var(--plum)] text-lg">Loading...</div>
       </div>
     );
   }
@@ -78,11 +78,11 @@ export default function OscePage() {
 
   if (previewExpired) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="min-h-screen gradient-hero flex items-center justify-center p-6">
         <div className="card max-w-sm text-center">
-          <div className="text-5xl mb-5">⏰</div>
-          <h2 className="text-xl mb-3 text-[var(--text-dark)]">Preview Ended!</h2>
-          <p className="text-[var(--text-medium)] text-sm mb-6">
+          <div className="text-5xl mb-4">⏰</div>
+          <h2 className="text-xl mb-3">Preview Ended!</h2>
+          <p className="text-[var(--plum-dark)]/70 text-sm mb-6">
             Your free preview has finished. Unlock to keep using the OSCE Tool!
           </p>
           <div className="space-y-3">
@@ -103,20 +103,19 @@ export default function OscePage() {
   if (showPreview) {
     return (
       <div className="relative">
-        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-[var(--lavender-dark)] to-[var(--pink-dark)] text-white py-3 px-4 z-50 shadow-lg">
+        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white py-2.5 px-4 z-50">
           <div className="max-w-6xl mx-auto flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 sparkle" />
-              <span className="font-medium">Free Preview</span>
+              <span>✨ Free Preview</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm">
-                <Clock className="w-4 h-4" />
-                <span className="font-mono font-bold">{formatTime(timeLeft)}</span>
+              <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1 rounded-full">
+                <Clock className="w-3.5 h-3.5" />
+                <span className="font-mono font-semibold">{formatTime(timeLeft)}</span>
               </div>
               <Link
                 href="/pricing?product=osce"
-                className="bg-white text-[var(--purple-accent)] px-4 py-1.5 rounded-full font-semibold hover:bg-white/90 transition text-sm shadow-md"
+                className="bg-white text-[var(--purple)] px-4 py-1 rounded-full font-semibold hover:bg-white/90 transition text-sm"
               >
                 Unlock Full Access
               </Link>
@@ -126,7 +125,7 @@ export default function OscePage() {
         <iframe
           src="/apps/osce.html"
           className="w-full border-0 fixed left-0 right-0 bottom-0"
-          style={{ top: '52px', height: 'calc(100vh - 52px)' }}
+          style={{ top: '44px', height: 'calc(100vh - 44px)' }}
           title="Children's OSCE Tool"
         />
       </div>
@@ -134,11 +133,11 @@ export default function OscePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen gradient-hero flex items-center justify-center p-6">
       <div className="card max-w-sm text-center">
-        <div className="text-5xl mb-5">📋</div>
-        <h2 className="text-xl mb-3 text-[var(--text-dark)]">Children's OSCE Tool</h2>
-        <p className="text-[var(--text-medium)] text-sm mb-6">
+        <div className="text-5xl mb-4">📋</div>
+        <h2 className="text-xl mb-3">Children's OSCE Tool</h2>
+        <p className="text-[var(--plum-dark)]/70 text-sm mb-6">
           Practice all OSCE stations with detailed checklists and step-by-step guidance!
         </p>
         <div className="space-y-3">
@@ -150,7 +149,7 @@ export default function OscePage() {
             <Play className="w-4 h-4" />
             Try 3-Min Preview
           </button>
-          <Link href="/" className="text-sm text-[var(--text-light)] hover:text-[var(--purple-accent)] inline-flex items-center gap-1 mt-3 transition-colors">
+          <Link href="/" className="text-sm text-[var(--plum-dark)]/50 hover:text-[var(--purple)] inline-flex items-center gap-1 mt-2">
             <ArrowLeft className="w-3 h-3" />
             Back home
           </Link>

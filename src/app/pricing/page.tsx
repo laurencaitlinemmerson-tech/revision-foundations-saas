@@ -18,13 +18,11 @@ export default function PricingPage() {
   };
 
   const handlePurchase = async (product: 'osce' | 'quiz' | 'bundle') => {
-    // If not signed in and no email entered yet, show email input
     if (!isSignedIn && !guestEmail) {
       setShowEmailInput(product);
       return;
     }
 
-    // Validate email for guest checkout
     if (!isSignedIn && guestEmail && !validateEmail(guestEmail)) {
       setEmailError('Please enter a valid email address');
       return;
@@ -52,7 +50,7 @@ export default function PricingPage() {
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Oops! Something went wrong. Please try again or contact support if this keeps happening.');
+      alert('Oops! Something went wrong. Please try again.');
     } finally {
       setLoading(null);
     }
@@ -67,26 +65,23 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-cream">
       <Navbar />
 
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-14">
-            <span className="badge badge-purple mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
-              Pricing
-            </span>
-            <h1 className="mb-4 text-[var(--text-dark)]">Simple Pricing</h1>
-            <p className="text-[var(--text-medium)] max-w-lg mx-auto">
+          <div className="text-center mb-12">
+            <span className="badge badge-purple mb-4">Pricing</span>
+            <h1 className="mb-4">Simple Pricing</h1>
+            <p className="text-[var(--plum-dark)]/70 max-w-lg mx-auto">
               Pay once, use forever! No account needed 💜
             </p>
           </div>
 
           {/* Bundle - Featured */}
-          <div className="card mb-8 relative overflow-hidden border-2 border-[var(--lavender-dark)]">
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender-dark)] to-[var(--pink-dark)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
+          <div className="card mb-8 relative overflow-hidden border-[var(--lavender)] border-2">
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
               BEST VALUE ✨
             </div>
             <div className="flex flex-col md:flex-row md:items-center gap-8">
@@ -96,10 +91,8 @@ export default function PricingPage() {
                     <Gift className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl text-[var(--text-dark)]" style={{ fontFamily: 'Fraunces, serif' }}>
-                      Complete Nursing Bundle
-                    </h2>
-                    <p className="text-[var(--text-medium)] text-sm">Both tools in one!</p>
+                    <h2>Complete Nursing Bundle</h2>
+                    <p className="text-[var(--plum-dark)]/70 text-sm">Both tools in one!</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -115,30 +108,28 @@ export default function PricingPage() {
                       <div className="check-icon">
                         <Check className="w-3.5 h-3.5 text-green-600" />
                       </div>
-                      <span className="text-sm text-[var(--text-dark)]">{feature}</span>
+                      <span className="text-sm text-[var(--plum-dark)]">{feature}</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="text-center md:text-right">
                 <div className="mb-2">
-                  <span className="text-[var(--text-light)] line-through text-lg">£9.98</span>
+                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£9.98</span>
                 </div>
-                <div className="text-4xl font-bold text-[var(--text-dark)] mb-1" style={{ fontFamily: 'Fraunces, serif' }}>
-                  £7.99
-                </div>
-                <p className="text-sm text-[var(--text-medium)] mb-4">one-time payment</p>
+                <div className="stat-number mb-1">£7.99</div>
+                <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment</p>
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
                   <div className="space-y-3">
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
                       <input
                         type="email"
                         placeholder="Enter your email"
                         value={guestEmail}
                         onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none text-sm"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
                       />
                     </div>
                     {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
@@ -173,7 +164,7 @@ export default function PricingPage() {
 
           {/* Individual Products */}
           <div className="text-center mb-6">
-            <p className="text-[var(--text-light)] text-sm">Or buy individually:</p>
+            <p className="text-[var(--plum-dark)]/60 text-sm">Or buy individually:</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-16">
@@ -181,8 +172,8 @@ export default function PricingPage() {
             <div className="card">
               <div className="text-4xl mb-4">📋</div>
               <span className="badge mb-3">£4.99 · Lifetime</span>
-              <h3 className="mb-2 text-[var(--text-dark)]">Children's OSCE Tool</h3>
-              <p className="text-[var(--text-medium)] text-sm mb-5">
+              <h3 className="mb-2">Children's OSCE Tool</h3>
+              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
                 Practice stations with checklists and guidance
               </p>
               <div className="space-y-2 mb-6">
@@ -191,7 +182,7 @@ export default function PricingPage() {
                     <div className="check-icon">
                       <Check className="w-3.5 h-3.5 text-green-600" />
                     </div>
-                    <span className="text-sm text-[var(--text-dark)]">{f}</span>
+                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
                   </div>
                 ))}
               </div>
@@ -199,13 +190,13 @@ export default function PricingPage() {
               {showEmailInput === 'osce' && !isSignedIn ? (
                 <div className="space-y-3">
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
                     <input
                       type="email"
                       placeholder="Enter your email"
                       value={guestEmail}
                       onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
                     />
                   </div>
                   {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
@@ -217,7 +208,7 @@ export default function PricingPage() {
                     {loading === 'osce' ? (
                       <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
                     ) : (
-                      <><ClipboardCheck className="w-5 h-5" /> Continue to Payment</>
+                      <><ClipboardCheck className="w-5 h-5" /> Continue</>
                     )}
                   </button>
                 </div>
@@ -240,8 +231,8 @@ export default function PricingPage() {
             <div className="card">
               <div className="text-4xl mb-4">📚</div>
               <span className="badge mb-3">£4.99 · Lifetime</span>
-              <h3 className="mb-2 text-[var(--text-dark)]">Nursing Theory Quiz</h3>
-              <p className="text-[var(--text-medium)] text-sm mb-5">
+              <h3 className="mb-2">Nursing Theory Quiz</h3>
+              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
                 Topic-based quizzes with instant feedback
               </p>
               <div className="space-y-2 mb-6">
@@ -250,7 +241,7 @@ export default function PricingPage() {
                     <div className="check-icon">
                       <Check className="w-3.5 h-3.5 text-green-600" />
                     </div>
-                    <span className="text-sm text-[var(--text-dark)]">{f}</span>
+                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
                   </div>
                 ))}
               </div>
@@ -258,13 +249,13 @@ export default function PricingPage() {
               {showEmailInput === 'quiz' && !isSignedIn ? (
                 <div className="space-y-3">
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
                     <input
                       type="email"
                       placeholder="Enter your email"
                       value={guestEmail}
                       onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
                     />
                   </div>
                   {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
@@ -276,7 +267,7 @@ export default function PricingPage() {
                     {loading === 'quiz' ? (
                       <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
                     ) : (
-                      <><BookOpen className="w-5 h-5" /> Continue to Payment</>
+                      <><BookOpen className="w-5 h-5" /> Continue</>
                     )}
                   </button>
                 </div>
@@ -298,27 +289,27 @@ export default function PricingPage() {
 
           {/* FAQ */}
           <div className="card">
-            <div className="text-center mb-8">
-              <h2 className="text-xl text-[var(--text-dark)]">Questions?</h2>
+            <div className="text-center mb-6">
+              <h2 className="text-xl">Questions?</h2>
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-4">
               {[
                 { q: 'Is this a subscription?', a: 'Nope! Pay once, access forever ✨' },
                 { q: 'Do I need an account?', a: 'No! Just enter your email at checkout.' },
                 { q: 'What payment methods?', a: 'All major cards via Stripe 💳' },
                 { q: 'Can I get a refund?', a: 'Yes, within 7 days if not happy!' },
               ].map((faq, i) => (
-                <div key={i} className="p-4 rounded-xl bg-white/50">
-                  <h4 className="font-semibold text-[var(--text-dark)] text-sm mb-2">{faq.q}</h4>
-                  <p className="text-sm text-[var(--text-medium)]">{faq.a}</p>
+                <div key={i} className="p-4 rounded-xl bg-[var(--lilac-soft)]">
+                  <h4 className="font-semibold text-[var(--plum)] text-sm mb-1">{faq.q}</h4>
+                  <p className="text-sm text-[var(--plum-dark)]/70">{faq.a}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Free preview */}
-          <div className="text-center mt-12">
-            <p className="text-[var(--text-light)] text-sm mb-4">
+          <div className="text-center mt-10">
+            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">
               Not sure yet? Try it first!
             </p>
             <Link href="/quiz" className="btn-secondary text-sm">

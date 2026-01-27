@@ -2,32 +2,29 @@
 
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
-import { Sparkles, Heart } from 'lucide-react';
+import { Sparkles, Heart, BookOpen, Coffee, Star } from 'lucide-react';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-cream">
       <Navbar />
 
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <span className="badge badge-purple mb-4">
-              <Heart className="w-3.5 h-3.5" />
-              About
-            </span>
-            <h1 className="mb-4 text-[var(--text-dark)]">Hey, I'm Lauren! 👋</h1>
-            <p className="text-[var(--text-medium)]">
+            <span className="badge badge-purple mb-4">About</span>
+            <h1 className="mb-4">Hey, I'm Lauren! 👋</h1>
+            <p className="text-[var(--plum-dark)]/70">
               The girl behind Revision Foundations
             </p>
           </div>
 
           {/* Main Card */}
           <div className="card mb-8">
-            <div className="text-5xl mb-5">💜</div>
-            <h3 className="mb-4 text-[var(--text-dark)]">My Story</h3>
-            <div className="space-y-4 text-[var(--text-medium)] leading-relaxed">
+            <div className="text-4xl mb-4">💜</div>
+            <h3 className="mb-4">My Story</h3>
+            <div className="space-y-4 text-[var(--plum-dark)]/80">
               <p>
                 I'm a children's nursing student who got tired of searching for revision tools that actually worked for our course!
               </p>
@@ -51,17 +48,17 @@ export default function AboutPage() {
               { emoji: '💜', text: 'Obsessed with purple' },
               { emoji: '✨', text: 'Making revision cute' },
             ].map((fact, i) => (
-              <div key={i} className="card text-center py-5">
-                <span className="text-3xl block mb-3">{fact.emoji}</span>
-                <span className="text-sm text-[var(--text-medium)]">{fact.text}</span>
+              <div key={i} className="card text-center py-4">
+                <span className="text-2xl block mb-2">{fact.emoji}</span>
+                <span className="text-sm text-[var(--plum-dark)]/70">{fact.text}</span>
               </div>
             ))}
           </div>
 
           {/* Why I Made This */}
           <div className="card mb-8">
-            <h3 className="mb-5 text-[var(--text-dark)]">Why I Made This</h3>
-            <ul className="space-y-4">
+            <h3 className="mb-4">Why I Made This</h3>
+            <ul className="space-y-3">
               {[
                 'I wanted revision tools that were actually nice to look at',
                 'OSCE prep was stressing me out and I needed a system',
@@ -69,18 +66,18 @@ export default function AboutPage() {
                 'I believe studying should be less painful!',
               ].map((reason, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="text-[var(--pink-dark)] text-lg">♥</span>
-                  <span className="text-[var(--text-medium)] text-sm">{reason}</span>
+                  <span className="text-[var(--pink)]">♥</span>
+                  <span className="text-[var(--plum-dark)]/80 text-sm">{reason}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Promise */}
-          <div className="card text-center mb-8">
-            <div className="text-4xl mb-4">🤙</div>
-            <h3 className="text-lg mb-3 text-[var(--text-dark)]">My Promise</h3>
-            <p className="text-[var(--text-medium)] text-sm">
+          <div className="card-glass text-center mb-8">
+            <div className="text-3xl mb-3">🤙</div>
+            <h3 className="text-lg mb-2">My Promise</h3>
+            <p className="text-[var(--plum-dark)]/70 text-sm">
               No subscriptions, no sneaky fees. Pay once, use forever.
               And if you're not happy, just message me!
             </p>
@@ -88,10 +85,10 @@ export default function AboutPage() {
 
           {/* CTA */}
           <div className="text-center">
-            <p className="text-[var(--text-light)] text-sm mb-5">
+            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">
               Questions? Want to say hi?
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-3 justify-center">
               <Link href="/contact" className="btn-primary">
                 <Heart className="w-4 h-4" />
                 Get in Touch

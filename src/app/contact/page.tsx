@@ -19,6 +19,7 @@ export default function ContactPage() {
     setLoading(true);
 
     // Simulate form submission
+    // In production, this would send to an API endpoint
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setLoading(false);
@@ -27,33 +28,35 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen gradient-bg-light">
       <Navbar />
 
-      <main className="pt-28 pb-20 px-6">
+      <main className="pt-24 pb-16 px-4">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="icon-box mx-auto mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--purple-gradient-start)] to-[var(--purple-gradient-end)] flex items-center justify-center mx-auto mb-6">
               <MessageSquare className="w-8 h-8 text-white" />
             </div>
-            <h1 className="mb-4 text-[var(--text-dark)]">Get in Touch</h1>
-            <p className="text-[var(--text-medium)]">
-              Have a question or feedback? I&apos;d love to hear from you.
+            <h1 className="font-display text-4xl font-bold text-[var(--plum-text)] mb-4">
+              Get in Touch
+            </h1>
+            <p className="text-[var(--plum-text)]/70">
+              Have a question or feedback? We&apos;d love to hear from you.
             </p>
           </div>
 
           {submitted ? (
             /* Success Message */
-            <div className="card text-center">
+            <div className="glass-card p-8 text-center">
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-2xl mb-3 text-[var(--text-dark)]" style={{ fontFamily: 'Fraunces, serif' }}>
+              <h2 className="font-display text-2xl font-bold text-[var(--plum-text)] mb-2">
                 Message Sent!
               </h2>
-              <p className="text-[var(--text-medium)] mb-6">
-                Thanks for reaching out. I&apos;ll get back to you as soon as possible.
+              <p className="text-[var(--plum-text)]/70 mb-6">
+                Thanks for reaching out. We&apos;ll get back to you as soon as possible.
               </p>
               <button
                 onClick={() => setSubmitted(false)}
@@ -64,13 +67,13 @@ export default function ContactPage() {
             </div>
           ) : (
             /* Contact Form */
-            <div className="card">
+            <div className="glass-card p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-[var(--text-dark)] mb-2"
+                      className="block text-sm font-medium text-[var(--plum-text)] mb-2"
                     >
                       Name
                     </label>
@@ -82,14 +85,14 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-3 rounded-2xl border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[var(--glass-border)] bg-white focus:border-[var(--lavender-primary)] focus:outline-none transition-colors"
                       placeholder="Your name"
                     />
                   </div>
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-sm font-medium text-[var(--text-dark)] mb-2"
+                      className="block text-sm font-medium text-[var(--plum-text)] mb-2"
                     >
                       Email
                     </label>
@@ -101,7 +104,7 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full px-4 py-3 rounded-2xl border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[var(--glass-border)] bg-white focus:border-[var(--lavender-primary)] focus:outline-none transition-colors"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -110,7 +113,7 @@ export default function ContactPage() {
                 <div>
                   <label
                     htmlFor="subject"
-                    className="block text-sm font-medium text-[var(--text-dark)] mb-2"
+                    className="block text-sm font-medium text-[var(--plum-text)] mb-2"
                   >
                     Subject
                   </label>
@@ -121,7 +124,7 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--glass-border)] bg-white focus:border-[var(--lavender-primary)] focus:outline-none transition-colors"
                   >
                     <option value="">Select a subject</option>
                     <option value="general">General Enquiry</option>
@@ -135,7 +138,7 @@ export default function ContactPage() {
                 <div>
                   <label
                     htmlFor="message"
-                    className="block text-sm font-medium text-[var(--text-dark)] mb-2"
+                    className="block text-sm font-medium text-[var(--plum-text)] mb-2"
                   >
                     Message
                   </label>
@@ -147,15 +150,15 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, message: e.target.value })
                     }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-[var(--lavender)]/30 bg-white/80 focus:border-[var(--lavender-dark)] focus:outline-none transition-all resize-none"
-                    placeholder="How can I help you?"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--glass-border)] bg-white focus:border-[var(--lavender-primary)] focus:outline-none transition-colors resize-none"
+                    placeholder="How can we help you?"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full"
+                  className="btn-gradient w-full justify-center disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -174,13 +177,13 @@ export default function ContactPage() {
           )}
 
           {/* Alternative Contact */}
-          <div className="mt-10 text-center">
-            <p className="text-[var(--text-medium)] mb-3">
-              Prefer email? Reach me directly at:
+          <div className="mt-8 text-center">
+            <p className="text-[var(--plum-text)]/70 mb-2">
+              Prefer email? Reach us directly at:
             </p>
             <a
               href="mailto:hello@revisionfoundations.com"
-              className="inline-flex items-center gap-2 text-[var(--purple-accent)] font-medium hover:underline"
+              className="inline-flex items-center gap-2 text-[var(--lavender-primary)] font-medium hover:underline"
             >
               <Mail className="w-4 h-4" />
               hello@revisionfoundations.com
