@@ -102,7 +102,7 @@ export default function PricingPage() {
                     'Core Quiz included',
                     'All features unlocked',
                     'Lifetime access',
-                    'Save £1!',
+                    'One simple payment',
                     'Best for exam prep',
                   ].map((feature) => (
                     <div key={feature} className="feature-check">
@@ -118,7 +118,7 @@ export default function PricingPage() {
                 <div className="mb-2">
                   <span className="text-[var(--plum-dark)]/50 line-through text-lg">£9.98</span>
                 </div>
-                <div className="stat-number mb-1">£8.99</div>
+                <div className="stat-number mb-1">£9.99</div>
                 <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment</p>
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (

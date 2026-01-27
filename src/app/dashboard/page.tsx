@@ -142,7 +142,7 @@ export default async function DashboardPage() {
                   <div>
                     <h3 className="font-semibold text-[var(--plum)]">Want both tools?</h3>
                     <p className="text-sm text-[var(--plum-dark)]/70">
-                      Get the bundle and save £1!
+                      Get both tools in one easy purchase!
                     </p>
                   </div>
                 </div>

@@ -34,7 +34,7 @@ export const PRODUCTS = {
     name: 'Complete Nursing Bundle',
     description: 'Full access to BOTH the OSCE Tool and Core Quiz - best value!',
     priceId: process.env.STRIPE_BUNDLE_PRICE_ID!,
-    price: 8.99,
+    price: 9.99,
   },
 } as const;
 
