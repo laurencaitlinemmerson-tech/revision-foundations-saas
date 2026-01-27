@@ -134,7 +134,7 @@ export default function HomePage() {
         <Testimonials />
         
         {/* Corrected "Leave your own review" button */}
-        <div className="flex justify-center -mt-16 mb-12 relative z-20">
+        <div className="flex justify-center -mt-6 mb-12 relative z-20">
           <a
             href="/review"
             className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-6 py-2.5 rounded-full text-sm font-medium border border-[var(--lavender)]/30 transition-all hover:bg-white hover:scale-105 active:scale-95 shadow-sm"
