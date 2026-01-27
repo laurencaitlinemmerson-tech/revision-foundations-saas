@@ -30,7 +30,7 @@ export default function HomePage() {
 
             <p className="fade-in text-lg md:text-xl text-[var(--plum-dark)]/80 mb-10 max-w-2xl mx-auto">
               Cute, simple revision tools to help you ace your nursing exams.
-              Made by students who've been there!
+              Made by a student who's been there! 💜
             </p>
 
             <div className="fade-in flex flex-col sm:flex-row gap-4 justify-center">
@@ -154,8 +154,8 @@ export default function HomePage() {
               {
                 icon: Users,
                 emoji: '👩‍🎓',
-                title: 'By Students',
-                desc: 'Created by nursing students who know exactly what you need.',
+                title: 'By a Student',
+                desc: 'Created by a nursing student who knows exactly what you need.',
               },
               {
                 icon: Zap,
@@ -251,7 +251,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-4 gap-8 mb-10">
             <div>
               <h3 className="text-lg mb-3">Revision Foundations</h3>
-              <p className="text-sm text-[var(--plum-dark)]/70">Made with 💜 by nursing students.</p>
+              <p className="text-sm text-[var(--plum-dark)]/70">Made with 💜 by Lauren</p>
             </div>
             <div>
               <h4 className="font-semibold text-[var(--plum)] mb-3 text-sm">Products</h4>

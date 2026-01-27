@@ -2,105 +2,102 @@
 
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
-import { Heart, BookOpen, Users, Sparkles, GraduationCap } from 'lucide-react';
+import { Sparkles, Heart, BookOpen, Coffee, Star } from 'lucide-react';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen gradient-bg-light">
+    <div className="min-h-screen bg-cream">
       <Navbar />
 
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-4xl mx-auto">
+      <main className="pt-28 pb-20 px-6">
+        <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-16">
-            <span className="inline-block bg-[var(--lilac-tint)] text-[var(--lavender-primary)] px-4 py-1 rounded-full text-sm font-semibold mb-4">
-              ABOUT US
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-[var(--plum-text)] mb-6">
-              Built by Students,<br />For Students
-            </h1>
-            <p className="text-lg text-[var(--plum-text)]/70 max-w-2xl mx-auto">
-              We understand the challenges of nursing education because we&apos;ve been there.
+          <div className="text-center mb-12">
+            <span className="badge badge-purple mb-4">About</span>
+            <h1 className="mb-4">Hey, I'm Lauren! 👋</h1>
+            <p className="text-[var(--plum-dark)]/70">
+              The girl behind Revision Foundations
             </p>
           </div>
 
-          {/* Story Section */}
-          <div className="glass-card p-8 mb-12">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--purple-gradient-start)] to-[var(--purple-gradient-end)] flex items-center justify-center">
-                <Heart className="w-7 h-7 text-white" />
-              </div>
-              <h2 className="font-display text-2xl font-bold text-[var(--plum-text)]">
-                Our Story
-              </h2>
-            </div>
-            <div className="space-y-4 text-[var(--plum-text)]/80">
+          {/* Main Card */}
+          <div className="card mb-8">
+            <div className="text-4xl mb-4">💜</div>
+            <h3 className="mb-4">My Story</h3>
+            <div className="space-y-4 text-[var(--plum-dark)]/80">
               <p>
-                Revision Foundations was born out of a real need. As first-year children&apos;s nursing
-                students, we found ourselves overwhelmed by the sheer volume of content to learn
-                and the pressure of upcoming OSCE exams.
+                I'm a children's nursing student who got tired of searching for revision tools that actually worked for our course!
               </p>
               <p>
-                We searched for revision tools that were specifically designed for our course,
-                but couldn&apos;t find anything that hit the mark. So, we decided to create our own.
+                So I made my own ✨
               </p>
               <p>
-                What started as personal study aids quickly grew into something bigger. Our
-                classmates loved them, and we realised these tools could help nursing students
-                everywhere.
+                These tools started as my personal study notes and checklists. When my coursemates kept asking to use them, I realised they might help other nursing students too.
+              </p>
+              <p>
+                Everything here is made with love (and lots of coffee ☕) by just me - no big team, no fancy office. Just a nursing student who wants to help other nursing students succeed!
               </p>
             </div>
           </div>
 
-          {/* Values */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
+          {/* Fun Facts */}
+          <div className="grid grid-cols-2 gap-4 mb-8">
             {[
-              {
-                icon: GraduationCap,
-                title: 'Student-Focused',
-                description: 'Every feature is designed with the student experience in mind.',
-              },
-              {
-                icon: BookOpen,
-                title: 'Quality Content',
-                description: 'Carefully crafted questions and checklists aligned with nursing curricula.',
-              },
-              {
-                icon: Users,
-                title: 'Community',
-                description: 'Built to support nursing students on their journey to becoming qualified nurses.',
-              },
-            ].map((value, i) => (
-              <div key={i} className="glass-card p-6 text-center">
-                <div className="w-12 h-12 rounded-xl bg-[var(--lilac-tint)] flex items-center justify-center mx-auto mb-4">
-                  <value.icon className="w-6 h-6 text-[var(--lavender-primary)]" />
-                </div>
-                <h3 className="font-semibold text-[var(--plum-text)] mb-2">{value.title}</h3>
-                <p className="text-sm text-[var(--plum-text)]/70">{value.description}</p>
+              { emoji: '📚', text: "Children's Nursing Student" },
+              { emoji: '☕', text: 'Fuelled by coffee' },
+              { emoji: '💜', text: 'Obsessed with purple' },
+              { emoji: '✨', text: 'Making revision cute' },
+            ].map((fact, i) => (
+              <div key={i} className="card text-center py-4">
+                <span className="text-2xl block mb-2">{fact.emoji}</span>
+                <span className="text-sm text-[var(--plum-dark)]/70">{fact.text}</span>
               </div>
             ))}
           </div>
 
-          {/* Mission */}
-          <div className="glass-card p-8 bg-gradient-to-r from-[var(--purple-gradient-start)]/10 to-[var(--purple-gradient-end)]/10 border-[var(--lavender-primary)]/30">
-            <h2 className="font-display text-xl font-bold text-[var(--plum-text)] mb-4 text-center">
-              Our Mission
-            </h2>
-            <p className="text-center text-[var(--plum-text)]/80 max-w-2xl mx-auto">
-              To provide accessible, high-quality revision tools that help nursing students
-              feel confident and prepared for their exams, without breaking the bank.
+          {/* Why I Made This */}
+          <div className="card mb-8">
+            <h3 className="mb-4">Why I Made This</h3>
+            <ul className="space-y-3">
+              {[
+                'I wanted revision tools that were actually nice to look at',
+                'OSCE prep was stressing me out and I needed a system',
+                "I couldn't find anything specific to children's nursing",
+                'I believe studying should be less painful!',
+              ].map((reason, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="text-[var(--pink)]">♥</span>
+                  <span className="text-[var(--plum-dark)]/80 text-sm">{reason}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Promise */}
+          <div className="card-glass text-center mb-8">
+            <div className="text-3xl mb-3">🤙</div>
+            <h3 className="text-lg mb-2">My Promise</h3>
+            <p className="text-[var(--plum-dark)]/70 text-sm">
+              No subscriptions, no sneaky fees. Pay once, use forever.
+              And if you're not happy, just message me!
             </p>
           </div>
 
           {/* CTA */}
-          <div className="text-center mt-12">
-            <p className="text-[var(--plum-text)]/70 mb-4">
-              Ready to start your revision journey?
+          <div className="text-center">
+            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">
+              Questions? Want to say hi?
             </p>
-            <Link href="/pricing" className="btn-gradient inline-flex items-center gap-2">
-              <Sparkles className="w-5 h-5" />
-              View Our Tools
-            </Link>
+            <div className="flex gap-3 justify-center">
+              <Link href="/contact" className="btn-primary">
+                <Heart className="w-4 h-4" />
+                Get in Touch
+              </Link>
+              <Link href="/pricing" className="btn-secondary">
+                <Sparkles className="w-4 h-4" />
+                View Tools
+              </Link>
+            </div>
           </div>
         </div>
       </main>
