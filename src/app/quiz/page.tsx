@@ -17,6 +17,7 @@ export default function QuizPage() {
   const [previewExpired, setPreviewExpired] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Check premium access
   useEffect(() => {
     const checkPremium = async () => {
       if (!isLoaded) return;
@@ -34,6 +35,7 @@ export default function QuizPage() {
     checkPremium();
   }, [isSignedIn, isLoaded]);
 
+  // Preview timer
   useEffect(() => {
     if (showPreview && !hasPremium && timeLeft > 0) {
       timerRef.current = setInterval(() => {
@@ -52,6 +54,18 @@ export default function QuizPage() {
     };
   }, [showPreview, hasPremium, timeLeft]);
 
+  // Track session when tool loads (must be before any returns)
+  useEffect(() => {
+    if (hasPremium || showPreview) {
+      recordSessionStart('quiz');
+      saveLastActivity({
+        toolName: 'quiz',
+        path: '/quiz',
+        label: 'Core Quiz Practice',
+      });
+    }
+  }, [hasPremium, showPreview]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -65,18 +79,6 @@ export default function QuizPage() {
       </div>
     );
   }
-
-  // Track session when tool loads
-  useEffect(() => {
-    if (hasPremium || showPreview) {
-      recordSessionStart('quiz');
-      saveLastActivity({
-        toolName: 'quiz',
-        path: '/quiz',
-        label: 'Core Quiz Practice',
-      });
-    }
-  }, [hasPremium, showPreview]);
 
   if (hasPremium) {
     return (
