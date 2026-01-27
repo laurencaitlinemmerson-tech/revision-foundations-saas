@@ -250,7 +250,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/pricing" className="btn-primary px-8 py-4">
                 <Sparkles className="w-5 h-5" />
-                Get Started - £4.99
+                Get Started
               </Link>
               <Link href="/quiz" className="btn-secondary px-8 py-4">
                 <Play className="w-5 h-5" />
@@ -295,7 +295,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="border-t border-[var(--lavender)]/30 pt-6 text-center text-sm text-[var(--text-light)]">
-              © 2025 Revision Foundations
+              © {new Date().getFullYear()} Revision Foundations
             </div>
           </div>
         </div>
