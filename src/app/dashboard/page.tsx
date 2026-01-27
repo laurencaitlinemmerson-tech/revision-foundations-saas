@@ -168,7 +168,7 @@ export default async function DashboardPage() {
                   <Sparkles className="w-5 h-5" />
                   Get Started - £4.99
                 </Link>
-                <Link href="/osce" className="btn-secondary focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2">
+                <Link href="/osce?preview=1" className="btn-secondary focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2">
                   <Play className="w-4 h-4" />
                   Try Free Preview
                 </Link>
