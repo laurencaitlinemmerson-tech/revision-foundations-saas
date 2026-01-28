@@ -16,6 +16,8 @@ import {
   Lock,
   Zap,
   BookOpen,
+  HelpCircle,
+  ChevronRight,
 } from 'lucide-react';
 
 // Hub content items
@@ -448,6 +450,32 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
             </div>
           </section>
         )}
+
+        {/* Q&A Board Section */}
+        <section className="bg-white py-12 border-y border-[var(--lilac-medium)]">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center">
+                  <HelpCircle className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl font-semibold text-[var(--plum)] mb-2">Q&A Board</h3>
+                <p className="text-[var(--plum-dark)]/70">
+                  Got a nursing question? Ask the community! Browse questions from other students or post your own.
+                </p>
+              </div>
+              <Link
+                href="/hub/questions"
+                className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex-shrink-0"
+              >
+                Browse Q&A
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* Need Help */}
         <section className="bg-[var(--lilac-soft)] py-12">

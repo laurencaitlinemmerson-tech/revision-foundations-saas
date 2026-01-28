@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import ResourceDiscussion from '@/components/ResourceDiscussion';
 import { getUserEntitlements } from '@/lib/entitlements';
 import { ArrowLeft, CheckCircle2, AlertTriangle, Lightbulb, FileText, Clock } from 'lucide-react';
 
@@ -695,6 +696,9 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
               </div>
             ))}
           </div>
+
+          {/* Discussion */}
+          <ResourceDiscussion slug={slug} />
 
           {/* Footer CTA */}
           <div className="mt-12 text-center">
