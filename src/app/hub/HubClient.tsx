@@ -1,8 +1,31 @@
+Yes — **that’s the Hub page code** 👍
+But there’s one big “Next.js app router” gotcha:
+
+### If this file is `src/app/hub/page.tsx`
+
+It **cannot** be written like this:
+
+```ts
+export default function HubClient({ isPro, isSignedIn }: { ... })
+```
+
+because **`page.tsx` doesn’t receive custom props** (unless you wrap it with a separate server component).
+
+So you have 2 clean options:
+
+---
+
+## Option A (easiest): make `page.tsx` fully self-contained
+
+Paste this **as your `src/app/hub/page.tsx`** (it uses Clerk directly and won’t break builds):
+
+```tsx
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import Navbar from '@/components/Navbar';
 import { ToastProvider, useToast } from '@/components/Toast';
 import {
@@ -35,7 +58,8 @@ const hubItems: HubItem[] = [
   {
     id: '1',
     title: 'Paeds Respiratory Assessment',
-    description: 'Complete guide to assessing respiratory function in children including work of breathing and red flags.',
+    description:
+      'Complete guide to assessing respiratory function in children including work of breathing and red flags.',
     tags: ['OSCE', 'Paeds', 'Assessment'],
     difficulty: 'Moderate',
     isLocked: false,
@@ -145,15 +169,15 @@ const filterTags = [
   'Emergency/ABCDE',
 ];
 
-const difficultyStyles = {
+const difficultyStyles: Record<HubItem['difficulty'], string> = {
   'Quick Win': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Moderate': 'bg-amber-50 text-amber-700 border-amber-200',
+  Moderate: 'bg-amber-50 text-amber-700 border-amber-200',
   'Deep Dive': 'bg-purple-50 text-purple-700 border-purple-200',
 };
 
-const difficultyIcons = {
+const difficultyIcons: Record<HubItem['difficulty'], any> = {
   'Quick Win': Zap,
-  'Moderate': BookOpen,
+  Moderate: BookOpen,
   'Deep Dive': Sparkles,
 };
 
@@ -171,13 +195,11 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
       return;
     }
 
-    // Locked content logic
     if (!isSignedIn) {
       router.push('/sign-in');
       return;
     }
 
-    // Signed in but not Pro
     showToast("That's a Pro resource 💜", 'info');
     router.push('/pricing');
   };
@@ -194,7 +216,6 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
     >
-      {/* Locked overlay */}
       {!canAccess && (
         <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center rounded-2xl">
           <div className="w-12 h-12 rounded-full bg-[var(--lilac)] flex items-center justify-center mb-2">
@@ -206,32 +227,24 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
         </div>
       )}
 
-      {/* Status badge */}
       <div className="flex items-center justify-between mb-3">
         <span
           className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-            item.isLocked
-              ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
-              : 'bg-emerald-50 text-emerald-700'
+            item.isLocked ? 'bg-[var(--purple)]/10 text-[var(--purple)]' : 'bg-emerald-50 text-emerald-700'
           }`}
         >
           {item.isLocked ? 'PREMIUM' : 'FREE'}
         </span>
+
         <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${difficultyStyles[item.difficulty]}`}>
           <DifficultyIcon className="w-3 h-3" />
           {item.difficulty}
         </span>
       </div>
 
-      {/* Content */}
-      <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">
-        {item.title}
-      </h3>
-      <p className="text-sm text-[var(--plum-dark)]/70 mb-4 line-clamp-2">
-        {item.description}
-      </p>
+      <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">{item.title}</h3>
+      <p className="text-sm text-[var(--plum-dark)]/70 mb-4 line-clamp-2">{item.description}</p>
 
-      {/* Tags */}
       <div className="flex flex-wrap gap-1.5 mb-4">
         {item.tags.slice(0, 3).map((tag) => (
           <span
@@ -243,14 +256,10 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
         ))}
       </div>
 
-      {/* CTA */}
       <div
         className={`
           w-full py-2 rounded-full text-sm font-semibold text-center transition-all
-          ${canAccess
-            ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
-            : 'bg-[var(--lilac)] text-[var(--purple)]'
-          }
+          ${canAccess ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]' : 'bg-[var(--lilac)] text-[var(--purple)]'}
         `}
       >
         {canAccess ? 'Open Resource' : 'Unlock'}
@@ -259,36 +268,34 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
   );
 }
 
-// Main Client Component
-export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSignedIn: boolean }) {
+export default function HubPage() {
+  const { isSignedIn } = useUser();
+
+  // ✅ TEMP for now: set true once you wire up purchase checks
+  const isPro = false;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {
       const next = new Set(prev);
-      if (next.has(tag)) {
-        next.delete(tag);
-      } else {
-        next.add(tag);
-      }
+      next.has(tag) ? next.delete(tag) : next.add(tag);
       return next;
     });
   };
 
   const filteredItems = useMemo(() => {
     return hubItems.filter((item) => {
-      // Search filter
-      const matchesSearch =
-        searchQuery === '' ||
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      const q = searchQuery.toLowerCase();
 
-      // Tag filter
-      const matchesTags =
-        selectedTags.size === 0 ||
-        item.tags.some((tag) => selectedTags.has(tag));
+      const matchesSearch =
+        q === '' ||
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(q));
+
+      const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag));
 
       return matchesSearch && matchesTags;
     });
@@ -319,17 +326,11 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="#resources"
-                className="btn-secondary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
-              >
+              <a href="#resources" className="btn-secondary text-lg px-8 py-4 inline-flex items-center justify-center gap-2">
                 <ArrowDown className="w-5 h-5" />
                 Browse free resources
               </a>
-              <Link
-                href="/pricing"
-                className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
-              >
+              <Link href="/pricing" className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2">
                 <Sparkles className="w-5 h-5" />
                 Unlock everything
               </Link>
@@ -340,7 +341,6 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
         {/* Search & Filters */}
         <section id="resources" className="bg-cream py-10">
           <div className="max-w-6xl mx-auto px-6">
-            {/* Search */}
             <div className="relative max-w-md mx-auto mb-6">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--plum-dark)]/40" />
               <input
@@ -352,7 +352,6 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
               />
             </div>
 
-            {/* Filter chips */}
             <div className="flex flex-wrap justify-center gap-2 mb-6">
               {filterTags.map((tag) => (
                 <button
@@ -377,7 +376,6 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
               )}
             </div>
 
-            {/* Legend */}
             <div className="flex justify-center gap-6 text-sm text-[var(--plum-dark)]/60 mb-8">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-emerald-500" />
@@ -410,14 +408,14 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredItems.map((item) => (
-                  <HubCard key={item.id} item={item} isPro={isPro} isSignedIn={isSignedIn} />
+                  <HubCard key={item.id} item={item} isPro={isPro} isSignedIn={!!isSignedIn} />
                 ))}
               </div>
             )}
           </div>
         </section>
 
-        {/* Premium Upsell - Hide if already Pro */}
+        {/* Premium Upsell */}
         {!isPro && (
           <section className="py-16">
             <div className="max-w-4xl mx-auto px-6">
@@ -460,7 +458,7 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
           </section>
         )}
 
-        {/* Q&A Board Section */}
+        {/* Q&A Board */}
         <section className="bg-white py-12 border-y border-[var(--lilac-medium)]">
           <div className="max-w-4xl mx-auto px-6">
             <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
@@ -469,12 +467,14 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                   <HelpCircle className="w-8 h-8 text-white" />
                 </div>
               </div>
+
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-xl font-semibold text-[var(--plum)] mb-2">Q&A Board</h3>
                 <p className="text-[var(--plum-dark)]/70">
                   Got a nursing question? Ask the community! Browse questions from other students or post your own.
                 </p>
               </div>
+
               <Link
                 href="/hub/questions"
                 className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex-shrink-0"
@@ -506,16 +506,33 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="bg-[var(--lilac)] px-6 py-8 text-center text-[var(--plum-dark)]/70 text-sm">
           <p>Made with love by Lauren</p>
           <div className="flex justify-center gap-4 mt-3">
-            <Link href="/privacy" className="hover:text-[var(--plum)]">Privacy</Link>
-            <Link href="/terms" className="hover:text-[var(--plum)]">Terms</Link>
-            <Link href="/about" className="hover:text-[var(--plum)]">About</Link>
+            <Link href="/privacy" className="hover:text-[var(--plum)]">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-[var(--plum)]">
+              Terms
+            </Link>
+            <Link href="/about" className="hover:text-[var(--plum)]">
+              About
+            </Link>
           </div>
         </footer>
       </div>
     </ToastProvider>
   );
 }
+```
+
+**Paste location:** `src/app/hub/page.tsx`
+
+---
+
+## Option B (more “proper”): keep this as `HubClient.tsx` and have a server `page.tsx`
+
+If you already had a server wrapper passing `isPro`, tell me and I’ll give you the exact 2-file setup.
+
+If you say “I want hub locked/unlocked based on purchases”, I can wire `isPro` properly next.
+
