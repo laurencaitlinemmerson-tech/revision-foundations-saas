@@ -504,3 +504,48 @@
 .animate-on-scroll.animate-in {
   will-change: auto;
 }
+/* ---------- Global background vibes ---------- */
+.rf-bg {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.rf-blob {
+  position: fixed;
+  z-index: 0;
+  width: 520px;
+  height: 520px;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.35;
+  pointer-events: none;
+  animation: rfFloat 9s ease-in-out infinite;
+}
+
+.rf-blob-1 { top: -160px; left: -160px; background: rgba(255, 160, 200, 0.55); }
+.rf-blob-2 { top: -120px; right: -180px; background: rgba(170, 150, 255, 0.55); animation-delay: 1.5s; }
+.rf-blob-3 { bottom: -180px; left: 20%; background: rgba(255, 210, 180, 0.55); animation-delay: 3s; }
+
+@keyframes rfFloat {
+  0% { transform: translate3d(0,0,0) scale(1); }
+  50% { transform: translate3d(18px, -22px, 0) scale(1.05); }
+  100% { transform: translate3d(0,0,0) scale(1); }
+}
+
+/* Ensure page content sits above blobs */
+.rf-bg > * { position: relative; z-index: 1; }
+
+/* ---------- Scroll reveal (auto-applied) ---------- */
+.rf-reveal {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity 600ms ease, transform 600ms ease;
+  will-change: opacity, transform;
+}
+
+.rf-in {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
