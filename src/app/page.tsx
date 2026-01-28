@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Testimonials from '@/components/Testimonials';
-import { Sparkles, Heart, Play } from 'lucide-react';
+import { Sparkles, Heart, Play, ArrowRight } from 'lucide-react';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
+import { useEntitlements } from '@/lib/hooks/useEntitlements';
 
 export default function HomePage() {
   useScrollAnimation();
+  const { isPro, isLoading: accessLoading } = useEntitlements();
   
   const [counters, setCounters] = useState<Record<string, number>>({});
   const statsRef = useRef<HTMLDivElement>(null);
@@ -105,17 +107,28 @@ export default function HomePage() {
             </p>
 
             <div className="hero-cta-group">
-              <Link href="/pricing" className="btn-primary btn-hover text-lg px-8 py-4">
-                <Sparkles className="w-5 h-5" /> Get Started – £4.99 one-time
-              </Link>
-
-              <Link href="/osce" className="btn-secondary btn-hover text-lg px-8 py-4">
-                <Play className="w-5 h-5" /> Try OSCE
-              </Link>
-
-              <Link href="/quiz" className="btn-secondary btn-hover text-lg px-8 py-4">
-                <Play className="w-5 h-5" /> Try Quiz
-              </Link>
+              {!accessLoading && isPro ? (
+                <>
+                  <Link href="/hub" className="btn-primary btn-hover text-lg px-8 py-4">
+                    <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-5 h-5" />
+                  </Link>
+                  <Link href="/dashboard" className="btn-secondary btn-hover text-lg px-8 py-4">
+                    Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/pricing" className="btn-primary btn-hover text-lg px-8 py-4">
+                    <Sparkles className="w-5 h-5" /> Get Started – £4.99
+                  </Link>
+                  <Link href="/osce" className="btn-secondary btn-hover text-lg px-8 py-4">
+                    <Play className="w-5 h-5" /> Try OSCE
+                  </Link>
+                  <Link href="/quiz" className="btn-secondary btn-hover text-lg px-8 py-4">
+                    <Play className="w-5 h-5" /> Try Quiz
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -176,17 +189,29 @@ export default function HomePage() {
             <div className="card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-left">
               <h3 className="mb-3 text-[var(--plum-dark)]">Children&apos;s OSCE Tool</h3>
               <p className="mb-6 text-[var(--plum-dark)]/70">Prepared for placements. 50+ stations.</p>
-              <Link href="/osce" className="btn-primary btn-hover w-full block text-center">
-                Try OSCE Tool
-              </Link>
+              {isPro ? (
+                <Link href="/hub" className="btn-primary btn-hover w-full block text-center">
+                  <ArrowRight className="w-4 h-4 inline mr-2" />Open in Hub
+                </Link>
+              ) : (
+                <Link href="/osce" className="btn-primary btn-hover w-full block text-center">
+                  Try OSCE Tool
+                </Link>
+              )}
             </div>
 
             <div className="card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-right">
               <h3 className="mb-3 text-[var(--plum-dark)]">Core Nursing Quiz</h3>
               <p className="mb-6 text-[var(--plum-dark)]/70">17 topic areas for exam success.</p>
-              <Link href="/quiz" className="btn-primary btn-hover w-full block text-center">
-                Try Quiz Tool
-              </Link>
+              {isPro ? (
+                <Link href="/hub" className="btn-primary btn-hover w-full block text-center">
+                  <ArrowRight className="w-4 h-4 inline mr-2" />Open in Hub
+                </Link>
+              ) : (
+                <Link href="/quiz" className="btn-primary btn-hover w-full block text-center">
+                  Try Quiz Tool
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -260,21 +285,33 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-on-scroll">
-            <Link
-              href="/pricing"
-              className="btn-primary btn-hover px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
-            >
-              <Sparkles className="w-5 h-5" />
-              Get Started – £4.99 one-time
-            </Link>
-
-            <Link
-              href="/quiz"
-              className="btn-secondary btn-hover px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30"
-            >
-              <Play className="w-5 h-5" />
-              Free Preview
-            </Link>
+            {isPro ? (
+              <Link
+                href="/hub"
+                className="btn-primary btn-hover px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
+              >
+                <Sparkles className="w-5 h-5" />
+                Go to Hub
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/pricing"
+                  className="btn-primary btn-hover px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Get Started – £4.99
+                </Link>
+                <Link
+                  href="/quiz"
+                  className="btn-secondary btn-hover px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30"
+                >
+                  <Play className="w-5 h-5" />
+                  Free Preview
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
