@@ -1,5 +1,8 @@
 import HubClient from './HubClient';
 
 export default function HubPage() {
-  return <HubClient />;
+  const isSignedIn = false;
+  const isPro = false;
+
+  return <HubClient isPro={isPro} isSignedIn={isSignedIn} />;
 }
