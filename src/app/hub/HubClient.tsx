@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
@@ -176,13 +176,11 @@ function HubCard({
       return;
     }
 
-    // Locked content logic
     if (!isSignedIn) {
       router.push('/sign-in');
       return;
     }
 
-    // Signed in but not Pro
     showToast("That's a Pro resource 💜", 'info');
     router.push('/pricing');
   };
@@ -191,7 +189,7 @@ function HubCard({
     <div
       onClick={handleClick}
       className={`
-        relative card cursor-pointer transition-all duration-300
+        relative card card-lift cursor-pointer transition-all duration-300
         hover:-translate-y-1 hover:shadow-lg
         focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2
         ${!canAccess ? 'overflow-hidden' : ''}
@@ -216,9 +214,7 @@ function HubCard({
       <div className="flex items-center justify-between mb-3">
         <span
           className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-            item.isLocked
-              ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
-              : 'bg-emerald-50 text-emerald-700'
+            item.isLocked ? 'bg-[var(--purple)]/10 text-[var(--purple)]' : 'bg-emerald-50 text-emerald-700'
           }`}
         >
           {item.isLocked ? 'PREMIUM' : 'FREE'}
@@ -252,10 +248,7 @@ function HubCard({
       <div
         className={`
           w-full py-2 rounded-full text-sm font-semibold text-center transition-all
-          ${canAccess
-            ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
-            : 'bg-[var(--lilac)] text-[var(--purple)]'
-          }
+          ${canAccess ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]' : 'bg-[var(--lilac)] text-[var(--purple)]'}
         `}
       >
         {canAccess ? 'Open Resource' : 'Unlock'}
@@ -265,9 +258,99 @@ function HubCard({
 }
 
 // Main Client Component
-export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSignedIn: boolean }) {
+export default function HubClient({
+  isPro = false,
+  isSignedIn = false,
+}: {
+  isPro?: boolean;
+  isSignedIn?: boolean;
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+
+  const freeCount = hubItems.filter((i) => !i.isLocked).length;
+  const premiumCount = hubItems.filter((i) => i.isLocked).length;
+
+  // --- Home-style scroll + count-up animations ---
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [counters, setCounters] = useState<Record<string, number>>({});
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  const intervalRef = useRef<number | null>(null);
+
+  const animateCounter = useCallback((id: string, target: number, duration: number) => {
+    if (intervalRef.current !== null) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    const steps = 60;
+    const increment = target / steps;
+    const stepDuration = duration / steps;
+    let current = 0;
+
+    intervalRef.current = window.setInterval(() => {
+      current += increment;
+
+      if (current >= target) {
+        setCounters((prev) => ({ ...prev, [id]: target }));
+
+        if (intervalRef.current !== null) {
+          window.clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      } else {
+        setCounters((prev) => ({ ...prev, [id]: Math.floor(current) }));
+      }
+    }, stepDuration);
+  }, []);
+
+  // Scroll animations (same as home)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).dataset.animate = 'in';
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  // Counter animation trigger
+  useEffect(() => {
+    if (!statsRef.current || hasAnimated) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHasAnimated(true);
+          animateCounter('total', hubItems.length, 1200);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(statsRef.current);
+    return () => observer.disconnect();
+  }, [hasAnimated, animateCounter]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {
@@ -294,46 +377,98 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
     });
   }, [searchQuery, selectedTags]);
 
-  const freeCount = hubItems.filter((i) => !i.isLocked).length;
-  const premiumCount = hubItems.filter((i) => i.isLocked).length;
-
   return (
     <ToastProvider>
       <div className="min-h-screen bg-cream">
         <Navbar />
 
-        {/* Hero */}
-        <section className="gradient-hero pt-28 pb-16 relative overflow-hidden">
+        {/* Hero (full screen like Home) */}
+        <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center">
           <div className="blob blob-1" />
           <div className="blob blob-2" />
+          <div className="blob blob-3" />
 
-          <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full text-sm font-medium mb-6 border border-[var(--lavender)]/30">
-              <Stethoscope className="w-4 h-4 text-[var(--purple)]" />
-              <span className="text-[var(--plum)]">Content Library</span>
+          <div className="max-w-6xl mx-auto px-6 py-32 relative z-10 w-full">
+            <div className="text-center max-w-3xl mx-auto">
+              <div className="animate-on-scroll hero-badge">
+                <Stethoscope className="w-4 h-4 text-[var(--purple)]" />
+                <span className="text-[var(--plum)]">Content Library</span>
+                <Sparkles className="w-4 h-4 text-[var(--pink)] icon-pulse" />
+              </div>
+
+              <h1 className="animate-on-scroll mb-2 hero-title">
+                <span className="gradient-text">Nursing Hub</span>
+              </h1>
+
+              <p className="animate-on-scroll hero-subtitle">
+                Your Nursing Bestie for OSCEs, exams & placement survival
+              </p>
+
+              <p className="animate-on-scroll hero-description">
+                Free checklists, printable templates, and deep-dive guides — with premium resources when you’re ready.
+              </p>
+
+              <div className="animate-on-scroll hero-cta-group">
+                <a
+                  href="#resources"
+                  className="btn-secondary btn-hover text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+                >
+                  <ArrowDown className="w-5 h-5" />
+                  Browse free resources
+                </a>
+
+                <Link
+                  href="/pricing"
+                  className="btn-primary btn-hover text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Unlock everything
+                </Link>
+              </div>
             </div>
+          </div>
 
-            <h1 className="mb-4">Nursing Hub</h1>
-            <p className="text-lg md:text-xl text-[var(--plum-dark)]/80 mb-8 max-w-2xl mx-auto">
-              Your Nursing Bestie for OSCEs, exams & placement survival
-            </p>
+          {/* Wave divider like Home */}
+          <div className="wave-divider">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path
+                d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,150.63,69.29,321.39,56.44Z"
+                fill="var(--cream)"
+              />
+            </svg>
+          </div>
+        </section>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="#resources"
-                className="btn-secondary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
-              >
-                <ArrowDown className="w-5 h-5" />
-                Browse free resources
-              </a>
+        {/* Stats (home vibe) */}
+        <section className="bg-cream py-12" ref={statsRef}>
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              {[
+                { id: 'total', label: 'Resources', icon: '📚', value: hubItems.length },
+                { id: 'free', label: 'Free resources', icon: '🆓', value: freeCount },
+                { id: 'premium', label: 'Premium resources', icon: '✨', value: premiumCount },
+                { id: 'updates', label: 'Updated weekly', icon: '🗓️', value: '✓' },
+              ].map((s, i) => (
+                <div
+                  key={s.id}
+                  className="animate-on-scroll stat-card"
+                  style={{ animationDelay: i * 0.1 + 's' }}
+                >
+                  <span className="text-2xl mb-2 block emoji-float" style={{ animationDelay: i * 0.2 + 's' }}>
+                    {s.icon}
+                  </span>
 
-              <Link
-                href="/pricing"
-                className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
-              >
-                <Sparkles className="w-5 h-5" />
-                Unlock everything
-              </Link>
+                  <div className="stat-number">
+                    {typeof s.value === 'number'
+                      ? s.id === 'total'
+                        ? counters.total ?? 0
+                        : s.value
+                      : s.value}
+                  </div>
+
+                  <p className="text-[var(--plum-dark)]/60 text-sm mt-1">{s.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -342,7 +477,7 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
         <section id="resources" className="bg-cream py-10">
           <div className="max-w-6xl mx-auto px-6">
             {/* Search */}
-            <div className="relative max-w-md mx-auto mb-6">
+            <div className="animate-on-scroll relative max-w-md mx-auto mb-6">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--plum-dark)]/40" />
               <input
                 type="text"
@@ -354,7 +489,7 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
             </div>
 
             {/* Filter chips */}
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
+            <div className="animate-on-scroll flex flex-wrap justify-center gap-2 mb-6">
               {filterTags.map((tag) => (
                 <button
                   key={tag}
@@ -382,7 +517,7 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
             </div>
 
             {/* Legend */}
-            <div className="flex justify-center gap-6 text-sm text-[var(--plum-dark)]/60 mb-8">
+            <div className="animate-on-scroll flex justify-center gap-6 text-sm text-[var(--plum-dark)]/60 mb-8">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-emerald-500" />
                 FREE ({freeCount})
@@ -414,8 +549,14 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredItems.map((item) => (
-                  <HubCard key={item.id} item={item} isPro={isPro} isSignedIn={isSignedIn} />
+                {filteredItems.map((item, i) => (
+                  <div
+                    key={item.id}
+                    className="animate-on-scroll fade-in-up"
+                    style={{ animationDelay: i * 0.06 + 's' }}
+                  >
+                    <HubCard item={item} isPro={isPro} isSignedIn={isSignedIn} />
+                  </div>
                 ))}
               </div>
             )}
@@ -430,9 +571,9 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                 <div className="blob blob-1" style={{ opacity: 0.3 }} />
 
                 <div className="relative z-10">
-                  <div className="text-4xl mb-4">✨</div>
-                  <h2 className="text-white mb-4">Unlock the Full Library</h2>
-                  <p className="text-white/80 mb-8 max-w-lg mx-auto">
+                  <div className="animate-on-scroll text-4xl mb-4 emoji-float">✨</div>
+                  <h2 className="animate-on-scroll text-white mb-4">Unlock the Full Library</h2>
+                  <p className="animate-on-scroll text-white/80 mb-8 max-w-lg mx-auto">
                     Get instant access to every resource, updated weekly with new content.
                   </p>
 
@@ -444,8 +585,12 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                       'Printable checklists & guides',
                       'New content added weekly',
                       'Lifetime access, one payment',
-                    ].map((feature) => (
-                      <div key={feature} className="flex items-start gap-2 text-white/90">
+                    ].map((feature, i) => (
+                      <div
+                        key={feature}
+                        className="animate-on-scroll fade-in-up flex items-start gap-2 text-white/90"
+                        style={{ animationDelay: i * 0.06 + 's' }}
+                      >
                         <CheckCircle2 className="w-5 h-5 mt-0.5 text-white" />
                         <span>{feature}</span>
                       </div>
@@ -454,13 +599,15 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
 
                   <Link
                     href="/pricing"
-                    className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+                    className="animate-on-scroll btn-primary btn-hover text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-5 h-5" />
                     Upgrade to Pro
                   </Link>
 
-                  <p className="text-white/70 text-sm mt-4">One payment • Lifetime access • Cancel anytime</p>
+                  <p className="animate-on-scroll text-white/70 text-sm mt-4">
+                    One payment • Lifetime access • Cancel anytime
+                  </p>
                 </div>
               </div>
             </div>
@@ -470,4 +617,3 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
     </ToastProvider>
   );
 }
-
