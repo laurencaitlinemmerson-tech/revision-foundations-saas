@@ -37,7 +37,7 @@ const hubItems: HubItem[] = [
     tags: ['OSCE', 'Paeds', 'Assessment'],
     difficulty: 'Moderate',
     isLocked: false,
-    href: '/osce',
+    href: '/hub/resources/paeds-respiratory-assessment',
   },
   {
     id: '2',
@@ -46,7 +46,7 @@ const hubItems: HubItem[] = [
     tags: ['Emergency/ABCDE', 'Adult Nursing', 'Critical Care'],
     difficulty: 'Deep Dive',
     isLocked: true,
-    href: '/osce',
+    href: '/hub/resources/sepsis-6-escalation',
   },
   {
     id: '3',
@@ -55,7 +55,7 @@ const hubItems: HubItem[] = [
     tags: ['Adult Nursing', 'Placement', 'Practical'],
     difficulty: 'Moderate',
     isLocked: false,
-    href: '/quiz',
+    href: '/hub/resources/wound-care-infection-control',
   },
   {
     id: '4',
@@ -64,7 +64,7 @@ const hubItems: HubItem[] = [
     tags: ['OSCE', 'Meds & Calculations'],
     difficulty: 'Deep Dive',
     isLocked: true,
-    href: '/osce',
+    href: '/hub/resources/medicines-management-osce',
   },
   {
     id: '5',
@@ -73,7 +73,7 @@ const hubItems: HubItem[] = [
     tags: ['Placement', 'Communication'],
     difficulty: 'Quick Win',
     isLocked: false,
-    href: '/how-to-use',
+    href: '/hub/resources/sbar-handover',
   },
   {
     id: '6',
@@ -82,7 +82,7 @@ const hubItems: HubItem[] = [
     tags: ['Adult Nursing', 'Emergency/ABCDE', 'Critical Care'],
     difficulty: 'Deep Dive',
     isLocked: true,
-    href: '/quiz',
+    href: '/hub/resources/iv-fluids-vitals',
   },
   {
     id: '7',
@@ -91,7 +91,7 @@ const hubItems: HubItem[] = [
     tags: ['Adult Nursing', 'Assessment', 'Emergency/ABCDE'],
     difficulty: 'Quick Win',
     isLocked: false,
-    href: '/quiz',
+    href: '/hub/resources/news2-guide',
   },
   {
     id: '8',
@@ -100,7 +100,7 @@ const hubItems: HubItem[] = [
     tags: ['Adult Nursing', 'Placement', 'Care Planning'],
     difficulty: 'Moderate',
     isLocked: true,
-    href: '/quiz',
+    href: '/hub/resources/pressure-area-care',
   },
   {
     id: '9',
@@ -109,7 +109,7 @@ const hubItems: HubItem[] = [
     tags: ['OSCE', 'Emergency/ABCDE', 'Assessment'],
     difficulty: 'Quick Win',
     isLocked: false,
-    href: '/osce',
+    href: '/hub/resources/ae-assessment',
   },
   {
     id: '10',
@@ -118,7 +118,7 @@ const hubItems: HubItem[] = [
     tags: ['Mental Health', 'Palliative', 'Communication'],
     difficulty: 'Deep Dive',
     isLocked: true,
-    href: '/how-to-use',
+    href: '/hub/resources/end-of-life-communication',
   },
 ];
 
