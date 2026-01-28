@@ -11,13 +11,9 @@ import {
   ArrowDown,
   CheckCircle2,
   Stethoscope,
-  Heart,
-  MessageCircle,
   Lock,
   Zap,
   BookOpen,
-  HelpCircle,
-  ChevronRight,
 } from 'lucide-react';
 
 // Hub content items
@@ -35,7 +31,8 @@ const hubItems: HubItem[] = [
   {
     id: '1',
     title: 'Paeds Respiratory Assessment',
-    description: 'Complete guide to assessing respiratory function in children including work of breathing and red flags.',
+    description:
+      'Complete guide to assessing respiratory function in children including work of breathing and red flags.',
     tags: ['OSCE', 'Paeds', 'Assessment'],
     difficulty: 'Moderate',
     isLocked: false,
@@ -143,22 +140,30 @@ const filterTags = [
   'Placement',
   'Revision Plans',
   'Emergency/ABCDE',
-];
+] as const;
 
-const difficultyStyles = {
+const difficultyStyles: Record<HubItem['difficulty'], string> = {
   'Quick Win': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Moderate': 'bg-amber-50 text-amber-700 border-amber-200',
+  Moderate: 'bg-amber-50 text-amber-700 border-amber-200',
   'Deep Dive': 'bg-purple-50 text-purple-700 border-purple-200',
 };
 
-const difficultyIcons = {
+const difficultyIcons: Record<HubItem['difficulty'], React.ComponentType<{ className?: string }>> = {
   'Quick Win': Zap,
-  'Moderate': BookOpen,
+  Moderate: BookOpen,
   'Deep Dive': Sparkles,
 };
 
 // Hub Card Component
-function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; isSignedIn: boolean }) {
+function HubCard({
+  item,
+  isPro,
+  isSignedIn,
+}: {
+  item: HubItem;
+  isPro: boolean;
+  isSignedIn: boolean;
+}) {
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -193,6 +198,7 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
       `}
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      role="button"
     >
       {/* Locked overlay */}
       {!canAccess && (
@@ -210,26 +216,23 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
       <div className="flex items-center justify-between mb-3">
         <span
           className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-            item.isLocked
-              ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
-              : 'bg-emerald-50 text-emerald-700'
+            item.isLocked ? 'bg-[var(--purple)]/10 text-[var(--purple)]' : 'bg-emerald-50 text-emerald-700'
           }`}
         >
           {item.isLocked ? 'PREMIUM' : 'FREE'}
         </span>
-        <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${difficultyStyles[item.difficulty]}`}>
+
+        <span
+          className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${difficultyStyles[item.difficulty]}`}
+        >
           <DifficultyIcon className="w-3 h-3" />
           {item.difficulty}
         </span>
       </div>
 
       {/* Content */}
-      <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">
-        {item.title}
-      </h3>
-      <p className="text-sm text-[var(--plum-dark)]/70 mb-4 line-clamp-2">
-        {item.description}
-      </p>
+      <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">{item.title}</h3>
+      <p className="text-sm text-[var(--plum-dark)]/70 mb-4 line-clamp-2">{item.description}</p>
 
       {/* Tags */}
       <div className="flex flex-wrap gap-1.5 mb-4">
@@ -247,10 +250,7 @@ function HubCard({ item, isPro, isSignedIn }: { item: HubItem; isPro: boolean; i
       <div
         className={`
           w-full py-2 rounded-full text-sm font-semibold text-center transition-all
-          ${canAccess
-            ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
-            : 'bg-[var(--lilac)] text-[var(--purple)]'
-          }
+          ${canAccess ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]' : 'bg-[var(--lilac)] text-[var(--purple)]'}
         `}
       >
         {canAccess ? 'Open Resource' : 'Unlock'}
@@ -267,28 +267,23 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {
       const next = new Set(prev);
-      if (next.has(tag)) {
-        next.delete(tag);
-      } else {
-        next.add(tag);
-      }
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
       return next;
     });
   };
 
   const filteredItems = useMemo(() => {
-    return hubItems.filter((item) => {
-      // Search filter
-      const matchesSearch =
-        searchQuery === '' ||
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = searchQuery.trim().toLowerCase();
 
-      // Tag filter
-      const matchesTags =
-        selectedTags.size === 0 ||
-        item.tags.some((tag) => selectedTags.has(tag));
+    return hubItems.filter((item) => {
+      const matchesSearch =
+        q === '' ||
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(q));
+
+      const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag));
 
       return matchesSearch && matchesTags;
     });
@@ -326,6 +321,7 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                 <ArrowDown className="w-5 h-5" />
                 Browse free resources
               </a>
+
               <Link
                 href="/pricing"
                 className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
@@ -363,14 +359,17 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                       ? 'bg-[var(--purple)] text-white'
                       : 'bg-[var(--lilac-soft)] text-[var(--plum-dark)]/70 hover:bg-[var(--lilac)]'
                   }`}
+                  type="button"
                 >
                   {tag}
                 </button>
               ))}
+
               {selectedTags.size > 0 && (
                 <button
                   onClick={() => setSelectedTags(new Set())}
                   className="px-4 py-2 rounded-full text-sm font-medium text-[var(--purple)] hover:underline"
+                  type="button"
                 >
                   Clear all
                 </button>
@@ -403,6 +402,7 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                     setSelectedTags(new Set());
                   }}
                   className="mt-4 text-[var(--purple)] font-medium hover:underline"
+                  type="button"
                 >
                   Clear filters
                 </button>
@@ -439,3 +439,31 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                       'Printable checklists & guides',
                       'New content added weekly',
                       'Lifetime access, one payment',
+                    ].map((feature) => (
+                      <div key={feature} className="flex items-start gap-2 text-white/90">
+                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-white" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Link
+                    href="/pricing"
+                    className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    Upgrade to Pro
+                  </Link>
+
+                  <p className="text-white/70 text-sm mt-4">
+                    One payment • Lifetime access • Cancel anytime
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+    </ToastProvider>
+  );
+}
