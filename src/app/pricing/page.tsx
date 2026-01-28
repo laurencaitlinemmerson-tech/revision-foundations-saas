@@ -93,19 +93,20 @@ export default function PricingPage() {
                     <Gift className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h2>Complete Nursing Bundle</h2>
-                    <p className="text-[var(--plum-dark)]/70 text-sm">Both tools in one!</p>
-                  </div>
+                    <h2>Full Hub Access</h2>
+<p className="text-[var(--plum-dark)]/70 text-sm">Everything included — OSCE + Quiz + future updates</p>
+
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {[
-                    'OSCE Tool included',
-                    'Core Quiz included',
-                    'All features unlocked',
-                    'Lifetime access',
-                    'One simple payment',
-                    'Best for exam prep',
-                  ].map((feature) => (
+  'Full access to the Revision Hub',
+  'OSCE Tool included',
+  'Core Nursing Quiz included',
+  'Everything unlocked',
+  'Future tools included',
+  'Lifetime access',
+].map((feature) => (
+
                     <div key={feature} className="feature-check">
                       <div className="check-icon">
                         <Check className="w-3.5 h-3.5 text-green-600" />
@@ -126,6 +127,10 @@ export default function PricingPage() {
 <p className="text-xs text-[var(--plum-dark)]/55 mb-4">
   Launch offer for early supporters 💜
 </p>
+                <p className="text-xs text-[var(--plum-dark)]/55 mb-4">
+  Best for serious revision + new tools added over time 💜
+</p>
+
 
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
