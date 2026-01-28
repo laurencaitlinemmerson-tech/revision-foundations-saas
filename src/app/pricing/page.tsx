@@ -1,24 +1,19 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import {
-  Check,
   Sparkles,
-  BookOpen,
+  Gift,
   ClipboardCheck,
+  BookOpen,
+  Check,
+  Mail,
   Loader2,
   Play,
-  Gift,
-  Mail,
   ArrowRight,
-  ShieldCheck,
-  Clock,
-  Zap,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 
 type Product = 'osce' | 'quiz' | 'bundle';
@@ -31,68 +26,109 @@ function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function Feature({ children }: { children: React.ReactNode }) {
+function FeatureRow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2">
+    <li className="flex items-start gap-2">
+      <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+        <Check className="h-3.5 w-3.5 text-emerald-600" />
+      </span>
+      <span className="text-sm text-white/90 md:text-[15px]">{children}</span>
+    </li>
+  );
+}
+
+function LightFeatureRow({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-2">
       <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
         <Check className="h-3.5 w-3.5 text-emerald-600" />
       </span>
       <span className="text-sm text-[var(--plum-dark)]">{children}</span>
-    </div>
+    </li>
   );
 }
 
-function SectionTitle({
+function PricingCard({
+  name,
+  price,
+  description,
+  features,
   badge,
-  title,
-  subtitle,
+  highlighted,
+  perfectFor,
+  ctaText,
+  onClick,
+  rightSlot,
 }: {
-  badge: string;
-  title: React.ReactNode;
-  subtitle: React.ReactNode;
+  name: string;
+  price: string;
+  description: string;
+  features: string[];
+  badge?: string;
+  highlighted?: boolean;
+  perfectFor: string;
+  ctaText: string;
+  onClick?: () => void;
+  rightSlot?: React.ReactNode;
 }) {
   return (
-    <div className="text-center !mb-5 md:!mb-6">
-      <span className="animate-on-scroll badge badge-purple !mb-2 inline-flex">{badge}</span>
-
-      <h1 className="animate-on-scroll !mb-2 leading-[1.03] tracking-tight">
-        {title}
-      </h1>
-
-      <p className="animate-on-scroll text-[var(--plum-dark)]/70 max-w-lg mx-auto text-sm md:text-base">
-        {subtitle}
-      </p>
-
-      <p className="animate-on-scroll text-[11px] text-[var(--plum-dark)]/55 !mt-2">
-        Full Hub Access includes everything (and future updates) ✨
-      </p>
-    </div>
-  );
-}
-
-function FAQItem({ q, a, i }: { q: string; a: string; i: number }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <button
-      type="button"
-      onClick={() => setOpen((v) => !v)}
+    <div
       className={cx(
-        'animate-on-scroll w-full text-left rounded-2xl border border-[var(--lilac-medium)] bg-white px-5 py-4 card-lift',
-        open && 'shadow-sm'
+        'relative rounded-3xl border bg-white/90 backdrop-blur p-6 md:p-7',
+        'transition-all duration-300 hover:-translate-y-1 hover:shadow-lg',
+        highlighted
+          ? 'border-[var(--lavender)] shadow-[0_18px_50px_rgba(120,80,180,0.12)]'
+          : 'border-[var(--lilac-medium)]'
       )}
-      style={{ animationDelay: `${i * 0.06}s` }}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="font-semibold text-[var(--plum)]">{q}</p>
-          {open && <p className="mt-2 text-sm text-[var(--plum-dark)]/70">{a}</p>}
+      {badge && (
+        <div className="absolute top-4 right-4 text-[11px] font-bold px-3 py-1 rounded-full bg-[var(--purple)] text-white">
+          {badge}
         </div>
-        <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--lilac-soft)] text-[var(--plum)]">
-          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </span>
+      )}
+
+      <div className="mb-5">
+        <p className="text-sm font-semibold text-[var(--purple)]">{description}</p>
+        <h3 className="text-xl md:text-2xl font-bold text-[var(--plum)] mt-1">{name}</h3>
+        <div className="mt-3 flex items-end gap-2">
+          <p className="text-4xl font-bold text-[var(--plum)]">{price}</p>
+          <p className="text-sm text-[var(--plum-dark)]/60 pb-1">one-time</p>
+        </div>
       </div>
-    </button>
+
+      <ul className="space-y-2 mb-6">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-2">
+            <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+              <Check className="h-3.5 w-3.5 text-emerald-600" />
+            </span>
+            <span className="text-sm text-[var(--plum-dark)]">{f}</span>
+          </li>
+        ))}
+      </ul>
+
+      <p className="text-sm text-[var(--plum-dark)]/70 mb-5">
+        <span className="font-semibold text-[var(--plum)]">Perfect for:</span> {perfectFor}
+      </p>
+
+      {rightSlot ? (
+        rightSlot
+      ) : (
+        <button
+          onClick={onClick}
+          className={cx(
+            'w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-5 py-3 transition-all',
+            highlighted
+              ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
+              : 'bg-[var(--lilac-soft)] text-[var(--purple)] hover:bg-[var(--lilac)]'
+          )}
+          type="button"
+        >
+          <Sparkles className="h-5 w-5" />
+          {ctaText}
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -106,23 +142,7 @@ export default function PricingPage() {
 
   const isPro = Boolean(user?.publicMetadata?.isPro);
 
-  const bundlePrice = 9.99;
-  const oldBundlePrice = 14.99;
-  const saveAmount = useMemo(
-    () => Math.max(0, oldBundlePrice - bundlePrice),
-    [oldBundlePrice, bundlePrice]
-  );
-
-  const trustItems = useMemo(
-    () => [
-      { icon: ShieldCheck, title: 'Secure checkout', desc: 'Powered by Stripe' },
-      { icon: Zap, title: 'Instant access', desc: 'Unlock straight away' },
-      { icon: Clock, title: 'Lifetime access', desc: 'One-time payment' },
-    ],
-    []
-  );
-
-  // Animate-on-scroll
+  // Scroll reveal (keeps your “dynamic” feel without needing Lenis)
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -140,47 +160,6 @@ export default function PricingPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Count-up stat
-  const statRef = useRef<HTMLDivElement>(null);
-  const [statValue, setStatValue] = useState(0);
-  const [statAnimated, setStatAnimated] = useState(false);
-
-  const animateNumber = useCallback((target: number, durationMs: number) => {
-    const steps = 50;
-    const increment = target / steps;
-    const stepDuration = Math.max(10, Math.floor(durationMs / steps));
-    let current = 0;
-
-    const t = window.setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setStatValue(target);
-        window.clearInterval(t);
-      } else {
-        setStatValue(Math.floor(current));
-      }
-    }, stepDuration);
-  }, []);
-
-  useEffect(() => {
-    if (!statRef.current || statAnimated) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setStatAnimated(true);
-          animateNumber(Math.round(saveAmount), 900);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(statRef.current);
-    return () => observer.disconnect();
-  }, [animateNumber, saveAmount, statAnimated]);
-
-  // Checkout logic (unchanged)
   const handlePurchase = async (product: Product) => {
     if (!isSignedIn && !guestEmail) {
       setShowEmailInput(product);
@@ -215,29 +194,14 @@ export default function PricingPage() {
       throw new Error(data?.error || 'No checkout URL returned');
     } catch (error: any) {
       console.error('Checkout error:', error);
-      const message =
-        error?.message || 'Something went wrong. Please try again or contact support.';
+      const message = error?.message || 'Something went wrong. Please try again or contact support.';
       alert(`Oops! ${message}`);
     } finally {
       setLoading(null);
     }
   };
 
-  const handleGuestCheckout = (product: Product) => {
-    if (!validateEmail(guestEmail)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-    handlePurchase(product);
-  };
-
-  const EmailInput = ({
-    product,
-    variant,
-  }: {
-    product: Product;
-    variant: 'primary' | 'secondary';
-  }) => (
+  const EmailInput = ({ product, variant }: { product: Product; variant: 'primary' | 'secondary' }) => (
     <div className="space-y-3">
       <div className="relative">
         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
@@ -249,343 +213,346 @@ export default function PricingPage() {
             setGuestEmail(e.target.value);
             setEmailError('');
           }}
-          className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
         />
       </div>
       {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
 
       <button
-        onClick={() => handleGuestCheckout(product)}
+        onClick={() => handlePurchase(product)}
         disabled={loading !== null}
         className={cx(
-          variant === 'primary' ? 'btn-primary w-full' : 'btn-secondary w-full',
-          'inline-flex items-center justify-center gap-2'
+          'w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-5 py-3 transition-all',
+          variant === 'primary'
+            ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
+            : 'bg-[var(--lilac-soft)] text-[var(--purple)] hover:bg-[var(--lilac)]'
         )}
+        type="button"
       >
         {loading === product ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+            <Loader2 className="h-5 w-5 animate-spin" /> Processing...
           </>
         ) : (
           <>
-            <Sparkles className="w-5 h-5" /> Continue to Payment
+            <Sparkles className="h-5 w-5" /> Continue to payment
           </>
         )}
       </button>
     </div>
   );
 
+  const packages = useMemo(
+    () => [
+      {
+        name: 'Full Hub Access',
+        price: '£9.99',
+        description: 'Best Value',
+        features: [
+          'Full access to the Revision Hub',
+          'Children’s OSCE Tool included',
+          'Core Nursing Quiz included',
+          'Everything unlocked',
+          'Future tools included',
+          'Lifetime access',
+        ],
+        badge: isPro ? 'Purchased ✓' : 'Most Popular',
+        highlighted: true,
+        perfectFor: 'Students who want everything in one go',
+        ctaText: isPro ? 'Go to Hub' : 'Get Full Hub Access',
+        product: 'bundle' as const,
+      },
+      {
+        name: "Children’s OSCE Tool",
+        price: '£4.99',
+        description: 'Placement Ready',
+        features: ['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'],
+        perfectFor: 'OSCE practice + paeds placement confidence',
+        ctaText: 'Get OSCE Tool',
+        product: 'osce' as const,
+      },
+      {
+        name: 'Core Nursing Quiz',
+        price: '£4.99',
+        description: 'Exam Ready',
+        features: ['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'],
+        perfectFor: 'Revision in little pockets of time',
+        ctaText: 'Get Quiz Tool',
+        product: 'quiz' as const,
+      },
+    ],
+    [isPro]
+  );
+
+  const addOns = useMemo(
+    () => [
+      { name: 'Printable checklists pack', price: 'Included in Hub' },
+      { name: 'New resources weekly', price: 'Included in Hub' },
+      { name: 'OSCE station templates', price: 'Included in Hub' },
+      { name: 'Revision plans', price: 'Included in Hub' },
+      { name: 'Progress tracking', price: 'Included in Hub' },
+      { name: 'Lifetime updates', price: 'Included in Hub' },
+    ],
+    []
+  );
+
+  const faqs = useMemo(
+    () => [
+      { q: 'Is this a subscription?', a: 'No — one-time payment with lifetime access ✨' },
+      { q: 'Do I need an account?', a: 'No. Guests can checkout with email, and you can make an account later.' },
+      { q: 'What payment methods do you accept?', a: 'All major cards via Stripe 💳' },
+      { q: 'Can I get a refund?', a: 'Yes — within 7 days if you’re not happy.' },
+      { q: 'Already purchased?', a: 'If you’re signed in, you’ll see “Purchased” / “Go to Hub” automatically.' },
+    ],
+    []
+  );
+
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      <main className="pt-24 pb-14 px-6">
-        {/* Hero (less bulky + more “banner”) */}
-        <section className="gradient-hero !rounded-2xl overflow-hidden relative border border-white/50">
-          <div className="blob blob-1" style={{ opacity: 0.12 }} />
-          <div className="blob blob-2" style={{ opacity: 0.12 }} />
+      {/* HEADER — same structure as his, but your palette */}
+      <section className="gradient-hero text-[var(--plum)] py-16 md:py-24 relative overflow-hidden">
+        <div className="blob blob-1" style={{ opacity: 0.18 }} />
+        <div className="blob blob-2" style={{ opacity: 0.18 }} />
 
-          <div className="px-6 !py-6 md:!py-8 max-w-5xl mx-auto relative z-10">
-            <SectionTitle
-              badge="Pricing"
-              title={
-                <>
-                  Simple pricing that <span className="gradient-text">actually helps</span>
-                </>
-              }
-              subtitle={<>One-time payment • lifetime access • no subscriptions 💜</>}
-            />
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="animate-on-scroll badge badge-purple mb-4 inline-flex">Pricing</div>
 
-            {/* Trust strip (smaller + tighter) */}
-            <div className="grid sm:grid-cols-3 gap-2 md:gap-3 -mt-1">
-              {trustItems.map((t, i) => {
-                const Icon = t.icon;
-                return (
-                  <div
-                    key={t.title}
-                    className="animate-on-scroll !rounded-xl bg-white/65 backdrop-blur border border-white/40 !px-4 !py-2.5 flex items-center gap-3"
-                    style={{ animationDelay: `${i * 0.08}s` }}
-                  >
-                    <span className="h-8 w-8 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
-                      <Icon className="h-4 w-4 text-[var(--purple)]" />
-                    </span>
-                    <div>
-                      <p className="font-semibold text-[var(--plum)] text-sm leading-tight">
-                        {t.title}
-                      </p>
-                      <p className="text-xs text-[var(--plum-dark)]/70 leading-tight">{t.desc}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+            <h1 className="animate-on-scroll text-4xl md:text-6xl font-bold mb-5 leading-[1.02] tracking-tight">
+              Unlock your{' '}
+              <span className="gradient-text">exam-ready</span> hub
+            </h1>
 
-        <div className="max-w-5xl mx-auto mt-0">
-          {/* Featured bundle (layered/overlapping = cleaner Framer feel) */}
-          <div className="animate-on-scroll card -mt-5 md:-mt-7 mb-7 relative overflow-hidden border-[var(--lavender)] border-2 fade-in-up shadow-[0_14px_40px_rgba(90,60,140,0.10)]">
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">
-              {isPro ? 'PURCHASED ✓' : `BEST VALUE • SAVE £${saveAmount.toFixed(0)} ✨`}
-            </div>
-
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="icon-box">
-                    <Gift className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="leading-tight">Full Hub Access</h2>
-                    <p className="text-[var(--plum-dark)]/70 text-sm leading-tight">
-                      Everything included — OSCE + Quiz + future updates
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  {[
-                    'Full access to the Revision Hub',
-                    'OSCE Tool included',
-                    'Core Nursing Quiz included',
-                    'Everything unlocked',
-                    'Future tools included',
-                    'Lifetime access',
-                  ].map((feature, i) => (
-                    <div
-                      key={feature}
-                      className="animate-on-scroll feature-check"
-                      style={{ animationDelay: `${0.1 + i * 0.035}s` }}
-                    >
-                      <div className="check-icon">
-                        <Check className="h-3.5 w-3.5 text-green-600" />
-                      </div>
-                      <span className="text-sm text-[var(--plum-dark)] leading-snug">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div
-                  ref={statRef}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--lilac-soft)] border border-[var(--lilac-medium)] px-4 py-2"
-                >
-                  <Sparkles className="h-4 w-4 text-[var(--purple)]" />
-                  <span className="text-sm text-[var(--plum)] font-semibold">Save £{statValue}</span>
-                  <span className="text-xs text-[var(--plum-dark)]/60">when you get Full Hub Access</span>
-                </div>
-              </div>
-
-              <div className="text-center md:text-right md:w-[240px]">
-                {isPro ? (
-                  <>
-                    <div className="mb-3">
-                      <span className="text-emerald-600 font-semibold">You own this!</span>
-                    </div>
-                    <Link
-                      href="/hub"
-                      className="btn-primary px-8 inline-flex items-center gap-2 justify-center w-full md:w-auto"
-                    >
-                      <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <div className="mb-1">
-                      <span className="text-[var(--plum-dark)]/50 line-through text-base">
-                        £{oldBundlePrice.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className="stat-number !text-4xl mb-1">£{bundlePrice.toFixed(2)}</div>
-                    <p className="text-sm text-[var(--plum-dark)]/70 mb-3 leading-tight">
-                      one-time payment • lifetime access
-                    </p>
-
-                    {showEmailInput === 'bundle' && !isSignedIn ? (
-                      <EmailInput product="bundle" variant="primary" />
-                    ) : (
-                      <button
-                        onClick={() => handlePurchase('bundle')}
-                        disabled={loading !== null}
-                        className="btn-primary px-8 inline-flex items-center gap-2 justify-center w-full md:w-auto"
-                      >
-                        {loading === 'bundle' ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-5 h-5" /> Get Full Hub Access
-                          </>
-                        )}
-                      </button>
-                    )}
-
-                    {!isSignedIn && (
-                      <p className="mt-2 text-xs text-[var(--plum-dark)]/60">
-                        No account needed — checkout with email ✨
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Individual Products */}
-          <div className="animate-on-scroll text-center mb-5 fade-in-up">
-            <p className="text-[var(--plum-dark)]/60 text-sm">Or buy individually:</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
-            <div className="animate-on-scroll card card-lift fade-in-up" style={{ animationDelay: '0.05s' }}>
-              <div className="text-4xl mb-3">📋</div>
-              <span className="badge mb-3">£4.99 · Lifetime</span>
-              <h3 className="mb-2">Children&apos;s OSCE Tool</h3>
-              <p className="text-[var(--plum-dark)]/70 text-sm mb-4 leading-snug">
-                Walk into your placement OSCE feeling prepared
-              </p>
-
-              <div className="space-y-2 mb-5">
-                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map(
-                  (f, i) => (
-                    <div key={f} className="animate-on-scroll" style={{ animationDelay: `${0.06 + i * 0.03}s` }}>
-                      <Feature>{f}</Feature>
-                    </div>
-                  )
-                )}
-              </div>
-
-              {showEmailInput === 'osce' && !isSignedIn ? (
-                <EmailInput product="osce" variant="secondary" />
-              ) : (
-                <button
-                  onClick={() => handlePurchase('osce')}
-                  disabled={loading !== null}
-                  className="btn-secondary w-full inline-flex items-center justify-center gap-2"
-                >
-                  {loading === 'osce' ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-                    </>
-                  ) : (
-                    <>
-                      <ClipboardCheck className="w-5 h-5" /> Get OSCE Tool
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-
-            <div className="animate-on-scroll card card-lift fade-in-up" style={{ animationDelay: '0.1s' }}>
-              <div className="text-4xl mb-3">📚</div>
-              <span className="badge mb-3">£4.99 · Lifetime</span>
-              <h3 className="mb-2">Core Nursing Quiz</h3>
-              <p className="text-[var(--plum-dark)]/70 text-sm mb-4 leading-snug">
-                17 topic areas covering the theory you need
-              </p>
-
-              <div className="space-y-2 mb-5">
-                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map(
-                  (f, i) => (
-                    <div key={f} className="animate-on-scroll" style={{ animationDelay: `${0.06 + i * 0.03}s` }}>
-                      <Feature>{f}</Feature>
-                    </div>
-                  )
-                )}
-              </div>
-
-              {showEmailInput === 'quiz' && !isSignedIn ? (
-                <EmailInput product="quiz" variant="secondary" />
-              ) : (
-                <button
-                  onClick={() => handlePurchase('quiz')}
-                  disabled={loading !== null}
-                  className="btn-secondary w-full inline-flex items-center justify-center gap-2"
-                >
-                  {loading === 'quiz' ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-                    </>
-                  ) : (
-                    <>
-                      <BookOpen className="w-5 h-5" /> Get Quiz Tool
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* FAQ */}
-          <div className="card">
-            <div className="animate-on-scroll text-center mb-5">
-              <h2 className="text-xl">Questions?</h2>
-              <p className="text-sm text-[var(--plum-dark)]/60 mt-1">Click to expand</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              {[
-                { q: 'Is this a subscription?', a: 'No! One-time payment with lifetime access ✨' },
-                { q: 'Do I need an account?', a: 'No! Just enter your email at checkout.' },
-                { q: 'What payment methods?', a: 'All major cards via Stripe 💳' },
-                { q: 'Can I get a refund?', a: 'Yes, within 7 days if not happy!' },
-                { q: 'Already purchased?', a: "You'll see 'Go to Hub' automatically when signed in." },
-              ].map((faq, i) => (
-                <FAQItem key={faq.q} q={faq.q} a={faq.a} i={i} />
-              ))}
-            </div>
-          </div>
-
-          {/* Free preview */}
-          <div className="text-center mt-8">
-            <p className="animate-on-scroll text-[var(--plum-dark)]/60 text-sm mb-4">
-              Not sure yet? Try it first!
+            <p className="animate-on-scroll text-lg md:text-xl text-[var(--plum-dark)]/70 mb-8">
+              One-time payment • lifetime access • no subscriptions 💜
             </p>
 
-            <div className="animate-on-scroll flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/quiz" className="btn-secondary text-sm inline-flex items-center gap-2 justify-center">
-                <Play className="w-4 h-4" />
+            <button
+              onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
+              className="animate-on-scroll inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/15"
+              type="button"
+            >
+              <Sparkles className="w-5 h-5" />
+              See packages
+            </button>
+
+            <p className="animate-on-scroll mt-3 text-xs text-[var(--plum-dark)]/55">
+              Full Hub Access includes everything (and future updates) ✨
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* PACKAGES */}
+      <section id="packages" className="py-16 md:py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-14">
+            {packages.map((pkg) => (
+              <PricingCard
+                key={pkg.product}
+                name={pkg.name}
+                price={pkg.price}
+                description={pkg.description}
+                features={pkg.features}
+                badge={pkg.badge}
+                highlighted={pkg.highlighted}
+                perfectFor={pkg.perfectFor}
+                ctaText={pkg.ctaText}
+                rightSlot={
+                  pkg.product === 'bundle' && isPro ? (
+                    <Link
+                      href="/hub"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-5 py-3 transition-all bg-[var(--purple)] text-white hover:bg-[var(--plum)]"
+                    >
+                      <Sparkles className="h-5 w-5" />
+                      Go to Hub
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  ) : showEmailInput === pkg.product && !isSignedIn ? (
+                    <EmailInput product={pkg.product as Product} variant={pkg.highlighted ? 'primary' : 'secondary'} />
+                  ) : (
+                    <button
+                      onClick={() => handlePurchase(pkg.product as Product)}
+                      disabled={loading !== null}
+                      className={cx(
+                        'w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-5 py-3 transition-all',
+                        pkg.highlighted
+                          ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
+                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] hover:bg-[var(--lilac)]'
+                      )}
+                      type="button"
+                    >
+                      {loading === pkg.product ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" /> Processing...
+                        </>
+                      ) : pkg.product === 'bundle' ? (
+                        <>
+                          <Gift className="h-5 w-5" /> {pkg.ctaText}
+                        </>
+                      ) : pkg.product === 'osce' ? (
+                        <>
+                          <ClipboardCheck className="h-5 w-5" /> {pkg.ctaText}
+                        </>
+                      ) : (
+                        <>
+                          <BookOpen className="h-5 w-5" /> {pkg.ctaText}
+                        </>
+                      )}
+                    </button>
+                  )
+                }
+              />
+            ))}
+          </div>
+
+          {/* FEATURED CALLOUT (his “Season Pass” style) — yours */}
+          <div className="animate-on-scroll rounded-3xl p-8 md:p-12 text-white relative overflow-hidden bg-gradient-to-r from-[var(--purple)] to-[var(--plum)]">
+            <div className="text-center max-w-3xl mx-auto relative z-10">
+              <h3 className="text-3xl font-bold mb-4">Full Hub Access</h3>
+              <div className="text-5xl font-bold mb-4">£9.99</div>
+              <p className="mb-6 text-white/85">
+                Everything included — OSCE + Quiz + future updates. One payment. Lifetime access.
+              </p>
+
+              <ul className="text-left max-w-2xl mx-auto mb-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  'OSCE Tool included',
+                  'Core Nursing Quiz included',
+                  'Printable checklists & guides',
+                  'New content added weekly',
+                  'Progress tracking dashboard',
+                  'Lifetime updates',
+                ].map((f) => (
+                  <FeatureRow key={f}>{f}</FeatureRow>
+                ))}
+              </ul>
+
+              <p className="text-sm mb-6 text-white/80">Perfect for: students who want the full library</p>
+
+              {isPro ? (
+                <Link
+                  href="/hub"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-6 py-3 bg-white text-[var(--purple)] hover:bg-white/90 transition-all"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  Go to Hub
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : showEmailInput === 'bundle' && !isSignedIn ? (
+                <div className="max-w-md mx-auto text-left">
+                  <EmailInput product="bundle" variant="primary" />
+                </div>
+              ) : (
+                <button
+                  onClick={() => handlePurchase('bundle')}
+                  disabled={loading !== null}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-6 py-3 bg-white text-[var(--purple)] hover:bg-white/90 transition-all"
+                  type="button"
+                >
+                  {loading === 'bundle' ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" /> Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-5 w-5" /> Get Full Hub Access
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ADD-ONS (your version) */}
+      <section className="py-16 bg-white/60 border-y border-[var(--lilac-medium)]">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[var(--plum)]">
+            What you get inside
+          </h2>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
+            {addOns.map((addon, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 rounded-2xl border border-[var(--lilac-medium)] text-center card-lift"
+              >
+                <p className="font-semibold text-sm mb-1 text-[var(--plum)]">{addon.name}</p>
+                <p className="text-[var(--purple)] font-bold text-sm">{addon.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[var(--plum)]">
+            Frequently asked questions
+          </h2>
+
+          <div className="max-w-3xl mx-auto space-y-4">
+            {faqs.map((faq) => (
+              <div key={faq.q} className="card">
+                <h3 className="font-bold text-lg mb-2 text-[var(--plum)]">{faq.q}</h3>
+                <p className="text-[var(--plum-dark)]/70">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="py-16 bg-white/60 border-t border-[var(--lilac-medium)]">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--plum)]">
+              Not sure yet?
+            </h2>
+            <p className="text-xl text-[var(--plum-dark)]/70 mb-8">
+              Try a preview or get in touch 💜
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/quiz"
+                className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] text-white font-semibold py-3 px-6 rounded-xl transition-all hover:bg-[var(--plum)]"
+              >
+                <Play className="w-5 h-5" />
                 Try Quiz Preview
               </Link>
 
-              <Link href="/osce" className="btn-secondary text-sm inline-flex items-center gap-2 justify-center">
-                <Play className="w-4 h-4" />
+              <Link
+                href="/osce"
+                className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] text-[var(--purple)] font-semibold py-3 px-6 rounded-xl transition-all hover:bg-[var(--lilac)]"
+              >
+                <Play className="w-5 h-5" />
                 Try OSCE Preview
+              </Link>
+
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 bg-white border border-[var(--lilac-medium)] text-[var(--plum)] font-semibold py-3 px-6 rounded-xl transition-all hover:shadow-md"
+              >
+                Contact
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
         </div>
-      </main>
+      </section>
 
-      {!isPro && (
-        <div className="fixed bottom-4 left-0 right-0 px-4 z-50 md:hidden">
-          <div className="rounded-2xl bg-white/90 backdrop-blur border border-[var(--lilac-medium)] shadow-lg p-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-[var(--plum)]">Full Hub Access</p>
-              <p className="text-xs text-[var(--plum-dark)]/60">
-                £{bundlePrice.toFixed(2)} • lifetime
-              </p>
-            </div>
-            <button
-              onClick={() => handlePurchase('bundle')}
-              disabled={loading !== null}
-              className="btn-primary px-5 py-2 text-sm inline-flex items-center gap-2 justify-center"
-            >
-              {loading === 'bundle' ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> ...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" /> Get it
-                </>
-              )}
-            </button>
-          </div>
+      {/* Small note for guest checkout */}
+      {!isSignedIn && (
+        <div className="pb-10 text-center text-xs text-[var(--plum-dark)]/55">
+          No account needed — checkout with email ✨
         </div>
       )}
     </div>
   );
 }
-
