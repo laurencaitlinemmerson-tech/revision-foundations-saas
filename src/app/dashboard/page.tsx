@@ -73,25 +73,25 @@ export default async function DashboardPage() {
               {hasOsce && (
                 <Link
                   href="/osce"
-                  className="md:col-span-3 group card card-glow gradient-hero hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2"
+                  className="md:col-span-3 group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    <span className="inline-flex items-center gap-1.5 bg-[var(--purple)]/15 text-[var(--purple)] text-xs font-semibold px-3 py-1 rounded-full">
                       <Award className="w-3 h-3" />
                       Most popular
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <ClipboardCheck className="w-7 h-7 text-white" />
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--purple)]/15 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <ClipboardCheck className="w-7 h-7 text-[var(--purple)]" />
                       </div>
                       <div>
-                        <h3 className="text-white text-lg font-semibold">OSCE Tool</h3>
-                        <p className="text-white/70 text-sm">Timed stations • examiner checklists • feedback</p>
+                        <h3 className="text-[var(--plum)] text-lg font-semibold">OSCE Tool</h3>
+                        <p className="text-[var(--plum-dark)]/70 text-sm">Timed stations • examiner checklists • feedback</p>
                       </div>
                     </div>
-                    <div className="bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm group-hover:bg-[var(--plum)] transition-all flex items-center gap-2 group-hover:gap-3 shadow-sm">
+                    <div className="bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm group-hover:bg-[var(--plum)] transition-all flex items-center gap-2 group-hover:gap-3">
                       Launch
                       <ArrowRight className="w-4 h-4" />
                     </div>
