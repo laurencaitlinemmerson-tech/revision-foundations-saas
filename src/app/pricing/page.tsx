@@ -4,14 +4,17 @@ import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Gift, Mail } from 'lucide-react';
+import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Gift, Mail, ArrowRight } from 'lucide-react';
 
 export default function PricingPage() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const [loading, setLoading] = useState<string | null>(null);
   const [guestEmail, setGuestEmail] = useState('');
   const [showEmailInput, setShowEmailInput] = useState<string | null>(null);
   const [emailError, setEmailError] = useState('');
+
+  // Check if user already has Pro access
+  const isPro = Boolean(user?.publicMetadata?.isPro);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -85,7 +88,7 @@ export default function PricingPage() {
           {/* Bundle - Featured */}
           <div className="card mb-8 relative overflow-hidden border-[var(--lavender)] border-2">
             <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
-              SAVE £5 ✨
+              {isPro ? 'PURCHASED ✓' : 'SAVE £5 ✨'}
             </div>
 
             <div className="flex flex-col md:flex-row md:items-center gap-8">
@@ -122,54 +125,67 @@ export default function PricingPage() {
               </div>
 
               <div className="text-center md:text-right">
-                <div className="mb-2">
-                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£14.99</span>
-                </div>
-
-                <div className="stat-number mb-1">£9.99</div>
-                <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment • lifetime access</p>
-
-                {showEmailInput === 'bundle' && !isSignedIn ? (
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
-                      <input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={guestEmail}
-                        onChange={(e) => {
-                          setGuestEmail(e.target.value);
-                          setEmailError('');
-                        }}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
-                      />
+                {isPro ? (
+                  <>
+                    <div className="mb-4">
+                      <span className="text-emerald-600 font-semibold">You own this!</span>
                     </div>
-                    {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
-
-                    <button onClick={() => handleGuestCheckout('bundle')} disabled={loading !== null} className="btn-primary w-full">
-                      {loading === 'bundle' ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-5 h-5" /> Continue to Payment
-                        </>
-                      )}
-                    </button>
-                  </div>
+                    <Link href="/hub" className="btn-primary px-8">
+                      <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </>
                 ) : (
-                  <button onClick={() => handlePurchase('bundle')} disabled={loading !== null} className="btn-primary px-8">
-                    {loading === 'bundle' ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-                      </>
+                  <>
+                    <div className="mb-2">
+                      <span className="text-[var(--plum-dark)]/50 line-through text-lg">£14.99</span>
+                    </div>
+
+                    <div className="stat-number mb-1">£9.99</div>
+                    <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment • lifetime access</p>
+
+                    {showEmailInput === 'bundle' && !isSignedIn ? (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
+                          <input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={guestEmail}
+                            onChange={(e) => {
+                              setGuestEmail(e.target.value);
+                              setEmailError('');
+                            }}
+                            className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
+                          />
+                        </div>
+                        {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
+
+                        <button onClick={() => handleGuestCheckout('bundle')} disabled={loading !== null} className="btn-primary w-full">
+                          {loading === 'bundle' ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-5 h-5" /> Continue to Payment
+                            </>
+                          )}
+                        </button>
+                      </div>
                     ) : (
-                      <>
-                        <Sparkles className="w-5 h-5" /> Get Full Hub Access
-                      </>
+                      <button onClick={() => handlePurchase('bundle')} disabled={loading !== null} className="btn-primary px-8">
+                        {loading === 'bundle' ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" /> Get Full Hub Access
+                          </>
+                        )}
+                      </button>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </div>
@@ -315,10 +331,11 @@ export default function PricingPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {[
-                { q: 'Is this a subscription?', a: 'No — it’s a one-time payment with lifetime access ✨' },
+                { q: 'Is this a subscription?', a: 'No! One-time payment with lifetime access ✨' },
                 { q: 'Do I need an account?', a: 'No! Just enter your email at checkout.' },
                 { q: 'What payment methods?', a: 'All major cards via Stripe 💳' },
                 { q: 'Can I get a refund?', a: 'Yes, within 7 days if not happy!' },
+                { q: 'Already purchased?', a: "You'll see 'Go to Hub' automatically when signed in." },
               ].map((faq, i) => (
                 <div key={i} className="p-4 rounded-xl bg-[var(--lilac-soft)]">
                   <h4 className="font-semibold text-[var(--plum)] text-sm mb-1">{faq.q}</h4>
