@@ -36,6 +36,10 @@ export default function HubClient() {
   }, [isLoaded, user]);
 
   useEffect(() => {
+    if (!isLoaded || loading) {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
         entries.forEach((entry) => {
@@ -52,7 +56,7 @@ export default function HubClient() {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [isLoaded, loading, user]);
 
   const hasProduct = (product: Product) => {
     return entitlements.some((e) => e.product === product && e.status === 'active');
