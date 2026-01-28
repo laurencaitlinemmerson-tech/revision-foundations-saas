@@ -255,7 +255,7 @@ export default async function DashboardPage() {
             <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Quick actions</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Link
-                href="/about"
+                href="/how-to-use"
                 className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2"
               >
                 <HelpCircle className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
