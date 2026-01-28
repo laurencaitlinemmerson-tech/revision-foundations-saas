@@ -52,31 +52,25 @@ function SectionTitle({
   subtitle: React.ReactNode;
 }) {
   return (
-    <div className="text-center mb-7 md:mb-8">
-      <span className="animate-on-scroll badge badge-purple mb-3 inline-flex">{badge}</span>
+    <div className="text-center !mb-6 md:!mb-7">
+      <span className="animate-on-scroll badge badge-purple !mb-2 inline-flex">{badge}</span>
 
-      <h1 className="animate-on-scroll mb-3 leading-[1.05] tracking-tight">{title}</h1>
+      <h1 className="animate-on-scroll !mb-2 leading-[1.05] tracking-tight">
+        {title}
+      </h1>
 
       <p className="animate-on-scroll text-[var(--plum-dark)]/70 max-w-lg mx-auto text-sm md:text-base">
         {subtitle}
       </p>
 
-      <p className="animate-on-scroll text-[11px] text-[var(--plum-dark)]/55 mt-2">
+      <p className="animate-on-scroll text-[11px] text-[var(--plum-dark)]/55 !mt-2">
         Full Hub Access includes everything (and future updates) ✨
       </p>
     </div>
   );
 }
 
-function FAQItem({
-  q,
-  a,
-  i,
-}: {
-  q: string;
-  a: string;
-  i: number;
-}) {
+function FAQItem({ q, a, i }: { q: string; a: string; i: number }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -114,7 +108,7 @@ export default function PricingPage() {
 
   const bundlePrice = 9.99;
   const oldBundlePrice = 14.99;
-  const saveAmount = useMemo(() => Math.max(0, oldBundlePrice - bundlePrice), [bundlePrice, oldBundlePrice]);
+  const saveAmount = useMemo(() => Math.max(0, oldBundlePrice - bundlePrice), [oldBundlePrice, bundlePrice]);
 
   const trustItems = useMemo(
     () => [
@@ -183,7 +177,7 @@ export default function PricingPage() {
     return () => observer.disconnect();
   }, [animateNumber, saveAmount, statAnimated]);
 
-  // Checkout logic
+  // Checkout logic (unchanged)
   const handlePurchase = async (product: Product) => {
     if (!isSignedIn && !guestEmail) {
       setShowEmailInput(product);
@@ -275,13 +269,14 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
+      {/* reduced overall padding */}
       <main className="pt-24 pb-16 px-6">
-        {/* Hero (slimmed) */}
-        <section className="gradient-hero rounded-2xl overflow-hidden relative">
-          <div className="blob blob-1" style={{ opacity: 0.18 }} />
-          <div className="blob blob-2" style={{ opacity: 0.18 }} />
+        {/* Hero (FORCED slim) */}
+        <section className="gradient-hero !rounded-2xl overflow-hidden relative">
+          <div className="blob blob-1" style={{ opacity: 0.14 }} />
+          <div className="blob blob-2" style={{ opacity: 0.14 }} />
 
-          <div className="px-6 py-8 md:py-10 max-w-5xl mx-auto relative z-10">
+          <div className="px-6 !py-8 md:!py-10 max-w-5xl mx-auto relative z-10">
             <SectionTitle
               badge="Pricing"
               title={
@@ -292,14 +287,14 @@ export default function PricingPage() {
               subtitle={<>One-time payment • lifetime access • no subscriptions 💜</>}
             />
 
-            {/* Trust strip (slimmed) */}
+            {/* Trust strip (FORCED slim) */}
             <div className="grid sm:grid-cols-3 gap-2 md:gap-3 -mt-1">
               {trustItems.map((t, i) => {
                 const Icon = t.icon;
                 return (
                   <div
                     key={t.title}
-                    className="animate-on-scroll rounded-xl bg-white/70 backdrop-blur border border-white/40 px-4 py-3 flex items-center gap-3"
+                    className="animate-on-scroll !rounded-xl bg-white/70 backdrop-blur border border-white/40 !px-4 !py-3 flex items-center gap-3"
                     style={{ animationDelay: `${i * 0.08}s` }}
                   >
                     <span className="h-9 w-9 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
@@ -352,7 +347,7 @@ export default function PricingPage() {
                       style={{ animationDelay: `${0.12 + i * 0.04}s` }}
                     >
                       <div className="check-icon">
-                        <Check className="w-3.5 w-3.5 text-green-600" />
+                        <Check className="h-3.5 w-3.5 text-green-600" />
                       </div>
                       <span className="text-sm text-[var(--plum-dark)]">{feature}</span>
                     </div>
@@ -375,19 +370,14 @@ export default function PricingPage() {
                     <div className="mb-4">
                       <span className="text-emerald-600 font-semibold">You own this!</span>
                     </div>
-                    <Link
-                      href="/hub"
-                      className="btn-primary px-8 inline-flex items-center gap-2 justify-center"
-                    >
+                    <Link href="/hub" className="btn-primary px-8 inline-flex items-center gap-2 justify-center">
                       <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-4 h-4" />
                     </Link>
                   </>
                 ) : (
                   <>
                     <div className="mb-2">
-                      <span className="text-[var(--plum-dark)]/50 line-through text-lg">
-                        £{oldBundlePrice.toFixed(2)}
-                      </span>
+                      <span className="text-[var(--plum-dark)]/50 line-through text-lg">£{oldBundlePrice.toFixed(2)}</span>
                     </div>
 
                     <div className="stat-number mb-1">£{bundlePrice.toFixed(2)}</div>
@@ -432,14 +422,11 @@ export default function PricingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-16">
-            {/* OSCE Card */}
             <div className="animate-on-scroll card card-lift fade-in-up" style={{ animationDelay: '0.05s' }}>
               <div className="text-4xl mb-4">📋</div>
               <span className="badge mb-3">£4.99 · Lifetime</span>
               <h3 className="mb-2">Children&apos;s OSCE Tool</h3>
-              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
-                Walk into your placement OSCE feeling prepared
-              </p>
+              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">Walk into your placement OSCE feeling prepared</p>
 
               <div className="space-y-2 mb-6">
                 {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map((f, i) => (
@@ -470,14 +457,11 @@ export default function PricingPage() {
               )}
             </div>
 
-            {/* Quiz Card */}
             <div className="animate-on-scroll card card-lift fade-in-up" style={{ animationDelay: '0.1s' }}>
               <div className="text-4xl mb-4">📚</div>
               <span className="badge mb-3">£4.99 · Lifetime</span>
               <h3 className="mb-2">Core Nursing Quiz</h3>
-              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
-                17 topic areas covering the theory you need
-              </p>
+              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">17 topic areas covering the theory you need</p>
 
               <div className="space-y-2 mb-6">
                 {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map((f, i) => (
@@ -509,7 +493,6 @@ export default function PricingPage() {
             </div>
           </div>
 
-          {/* FAQ */}
           <div className="card">
             <div className="animate-on-scroll text-center mb-6">
               <h2 className="text-xl">Questions?</h2>
@@ -529,11 +512,8 @@ export default function PricingPage() {
             </div>
           </div>
 
-          {/* Free preview */}
           <div className="text-center mt-10">
-            <p className="animate-on-scroll text-[var(--plum-dark)]/60 text-sm mb-4">
-              Not sure yet? Try it first!
-            </p>
+            <p className="animate-on-scroll text-[var(--plum-dark)]/60 text-sm mb-4">Not sure yet? Try it first!</p>
 
             <div className="animate-on-scroll flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/quiz" className="btn-secondary text-sm inline-flex items-center gap-2 justify-center">
@@ -550,7 +530,6 @@ export default function PricingPage() {
         </div>
       </main>
 
-      {/* Sticky mobile CTA */}
       {!isPro && (
         <div className="fixed bottom-4 left-0 right-0 px-4 z-50 md:hidden">
           <div className="rounded-2xl bg-white/90 backdrop-blur border border-[var(--lilac-medium)] shadow-lg p-3 flex items-center justify-between gap-3">
