@@ -5,8 +5,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Testimonials from '@/components/Testimonials';
 import { Sparkles, Heart, Play } from 'lucide-react';
+import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 
 export default function HomePage() {
+  useScrollAnimation();
+  
   const [counters, setCounters] = useState<Record<string, number>>({});
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -39,28 +42,6 @@ export default function HomePage() {
         setCounters((prev) => ({ ...prev, [id]: Math.floor(current) }));
       }
     }, stepDuration);
-  }, []);
-
-  // Scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const target = entry.target as HTMLElement;
-            target.dataset.animate = 'in';
-            observer.unobserve(target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-      observer.observe(el);
-    });
-
-    return () => observer.disconnect();
   }, []);
 
   // Counter animation trigger

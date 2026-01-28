@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { ToastProvider, useToast } from '@/components/Toast';
+import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import {
   Search,
   Sparkles,
@@ -271,29 +272,13 @@ export default function HubClient({
   isPro?: boolean;
   isSignedIn?: boolean;
 }) {
+  useScrollAnimation();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
   const freeCount = hubItems.filter((i) => !i.isLocked).length;
   const premiumCount = hubItems.filter((i) => i.isLocked).length;
-
-  // Scroll animations (kept)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            (entry.target as HTMLElement).dataset.animate = 'in';
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {

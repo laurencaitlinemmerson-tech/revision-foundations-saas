@@ -1,8 +1,15 @@
+import { Metadata } from 'next';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import DashboardClient from './DashboardClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Your personal dashboard - track your progress and access your purchased content.',
+};
+
 import {
   BookOpen,
   ClipboardCheck,

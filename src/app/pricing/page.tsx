@@ -6,8 +6,11 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Mail, ArrowRight } from 'lucide-react';
+import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 
 export default function PricingPage() {
+  useScrollAnimation();
+  
   const { isSignedIn, user } = useUser();
   const [loading, setLoading] = useState<string | null>(null);
   const [guestEmail, setGuestEmail] = useState('');
@@ -67,24 +70,6 @@ export default function PricingPage() {
     }
     handlePurchase(product);
   };
-
-  // Scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            (entry.target as HTMLElement).dataset.animate = 'in';
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <div className="min-h-screen bg-cream">
