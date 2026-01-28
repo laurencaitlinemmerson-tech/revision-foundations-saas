@@ -36,11 +36,17 @@ export default function HubClient() {
   }, [isLoaded, user]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+     if (!isLoaded || loading) {
+      return;
+    }
+    
+          const observer = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            (entry.target as HTMLElement).classList.add('animate-in');
+           const target = entry.target as HTMLElement;
+            target.dataset.animate = 'in';
+            observer.unobserve(target);
           }
         });
       },
@@ -52,7 +58,7 @@ export default function HubClient() {
     });
 
     return () => observer.disconnect();
-  }, []);
+}, [isLoaded, loading, user]);
 
   const hasProduct = (product: Product) => {
     return entitlements.some((e) => e.product === product && e.status === 'active');
