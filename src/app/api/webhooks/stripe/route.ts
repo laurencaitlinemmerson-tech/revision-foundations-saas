@@ -34,66 +34,74 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
 
-      const clerkUserId = session.metadata?.clerk_user_id ?? null;
-      const product = session.metadata?.product as Product | undefined;
+        // ---- pull metadata ----
+        const rawClerkUserId = session.metadata?.clerk_user_id;
+        const clerkUserId =
+          rawClerkUserId && rawClerkUserId.trim().length > 0
+            ? rawClerkUserId
+            : null;
 
-      if (!product) {
-        console.error("Missing product in checkout session metadata");
-        return NextResponse.json({ received: true });
-      }
-
-      const productsToCreate =
-        product === "bundle"
-          ? (["osce", "quiz", "bundle"] as const)
-          : ([product] as const);
-
-      const supabase = createServiceClient();
-
-      // Resolve customer_name
-      let customerName: string | null = null;
-
-      if (clerkUserId) {
-        try {
-          const clerk = await clerkClient();
-          const user = await clerk.users.getUser(clerkUserId);
-
-          customerName =
-            [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-            user.username ||
-            null;
-        } catch (e) {
-          console.error("Failed to fetch Clerk user for name:", e);
-          customerName = null;
+        const product = session.metadata?.product as Product | undefined;
+        if (!product) {
+          console.error("Missing product in checkout session metadata");
+          break;
         }
-      }
 
-      // Fallback for guests (or if Clerk has no name)
-      if (!customerName) {
-        customerName = session.customer_details?.name ?? null;
-      }
+        // ---- decide entitlements ----
+        const productsToCreate =
+          product === "bundle"
+            ? (["osce", "quiz", "bundle"] as const)
+            : ([product] as const);
 
-      const guestEmail =
-        session.metadata?.guest_email ??
-        session.customer_email ??
-        session.customer_details?.email ??
-        null;
+        const supabase = createServiceClient();
 
-      for (const p of productsToCreate) {
+        // ---- resolve customer_name ----
+        // Signed-in: from Clerk
+        // Guest: from Stripe customer_details.name
+        let customerName: string | null = null;
+
         if (clerkUserId) {
-          // Create/ensure entitlement
-          await createOrUpdateEntitlement(
-            clerkUserId,
-            p,
-            session.customer as string,
-            null,
-            null
-          );
+          try {
+            const clerk = await clerkClient();
+            const user = await clerk.users.getUser(clerkUserId);
+            customerName =
+              [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+              user.username ||
+              null;
+          } catch (e) {
+            console.error("Failed to fetch Clerk user for name:", e);
+            customerName = null;
+          }
+        }
 
-          // Save name on that entitlement row
-          if (customerName) {
+        if (!customerName) {
+          customerName = session.customer_details?.name ?? null;
+        }
+
+        // ---- email for guests (your existing pattern) ----
+        const guestEmail =
+          session.metadata?.guest_email ??
+          session.customer_email ??
+          session.customer_details?.email ??
+          null;
+
+        // ---- create/update entitlements ----
+        for (const p of productsToCreate) {
+          if (clerkUserId) {
+            // Create/ensure entitlement
+            await createOrUpdateEntitlement(
+              clerkUserId,
+              p,
+              (session.customer as string) ?? null,
+              null,
+              null
+            );
+
+            // Write customer_name into this entitlement row
             const { error } = await supabase
               .from("entitlements")
               .update({ customer_name: customerName })
@@ -103,38 +111,40 @@ export async function POST(request: NextRequest) {
             if (error) {
               console.error("Error updating customer_name (signed-in):", error);
             }
-          }
+          } else if (guestEmail) {
+            // Guest entitlement (store name directly in upsert)
+            const { error } = await supabase.from("entitlements").upsert(
+              {
+                clerk_user_id: "guest_" + guestEmail,
+                product: p,
+                status: "active",
+                stripe_customer_id: (session.customer as string) ?? null,
+                stripe_payment_intent_id: (session.payment_intent as string) ?? null,
+                customer_name: customerName,
+              },
+              { onConflict: "clerk_user_id,product" }
+            );
 
-          console.log("Entitlement created for user", clerkUserId, "product", p);
-        } else if (guestEmail) {
-          // Guest entitlement
-          const { error } = await supabase.from("entitlements").upsert(
-            {
-              clerk_user_id: "guest_" + guestEmail,
-              product: p,
-              status: "active",
-              stripe_customer_id: session.customer as string,
-              stripe_payment_intent_id: session.payment_intent as string,
-              customer_name: customerName,
-            },
-            { onConflict: "clerk_user_id,product" }
-          );
-
-          if (error) {
-            console.error("Error creating guest entitlement:", error);
-          } else {
-            console.log("Guest entitlement created for", guestEmail, "product", p);
+            if (error) {
+              console.error("Error creating guest entitlement:", error);
+            }
           }
         }
+
+        break;
       }
-    } else if (event.type === "customer.subscription.deleted") {
-      const subscription = event.data.object as Stripe.Subscription;
-      console.log(
-        "Subscription event received (not applicable for one-time):",
-        subscription.id
-      );
-    } else {
-      console.log("Unhandled event type:", event.type);
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object as Stripe.Subscription;
+        console.log(
+          "Subscription event received (not applicable for one-time):",
+          subscription.id
+        );
+        break;
+      }
+
+      default:
+        console.log("Unhandled event type:", event.type);
     }
 
     return NextResponse.json({ received: true });
@@ -146,3 +156,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
