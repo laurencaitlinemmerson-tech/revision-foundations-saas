@@ -37,7 +37,7 @@ export default function Navbar() {
       scrolled ? 'bg-white/95 backdrop-blur-lg shadow-sm' : 'bg-transparent'
     }`}>
       <div className="container">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center">

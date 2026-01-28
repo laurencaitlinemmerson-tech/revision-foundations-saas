@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import DashboardClient from './DashboardClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 import {
   BookOpen,
@@ -45,30 +45,21 @@ export default async function DashboardPage() {
   const hasAnyTool = hasOsce || hasQuiz;
 
   return (
-    <div className="min-h-screen bg-cream">
-      <Navbar />
+    <DashboardClient firstName={firstName}>
+      {/* Weekly Progress */}
+      <div className="mb-8 animate-on-scroll">
+        <WeeklyProgress />
+      </div>
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-5xl mx-auto">
+      {/* Progress Stats - Only show if user has tools */}
+      {hasAnyTool && <div className="animate-on-scroll"><ProgressStatsRow /></div>}
 
-          {/* Welcome Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-1">
-              <WavingHand />
-              <h1 className="text-2xl md:text-3xl">Hey, {firstName}!</h1>
-            </div>
-            <WeeklyProgress />
-          </div>
+      {/* Continue Card - Only show if user has tools */}
+      {hasAnyTool && <div className="animate-on-scroll"><ContinueCard /></div>}
 
-          {/* Progress Stats - Only show if user has tools */}
-          {hasAnyTool && <ProgressStatsRow />}
-
-          {/* Continue Card - Only show if user has tools */}
-          {hasAnyTool && <ContinueCard />}
-
-          {/* Quick Launch - Only show if user has tools */}
-          {hasAnyTool && (
-            <div className="grid md:grid-cols-5 gap-4 mb-10">
+      {/* Quick Launch - Only show if user has tools */}
+      {hasAnyTool && (
+        <div className="grid md:grid-cols-5 gap-4 mb-10 animate-on-scroll">
               {/* OSCE Tool - Primary/Larger */}
               {hasOsce && (
                 <Link
@@ -133,7 +124,7 @@ export default async function DashboardPage() {
 
           {/* Status Banner */}
           {(hasOsce && hasQuiz) ? (
-            <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)] mb-10 hover:shadow-md transition-all duration-200">
+            <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)] mb-10 hover:shadow-md transition-all duration-200 animate-on-scroll">
               <div className="flex items-center gap-4">
                 <div className="text-4xl">🎉</div>
                 <div className="flex-1">
@@ -148,7 +139,7 @@ export default async function DashboardPage() {
               </div>
             </div>
           ) : hasAnyTool ? (
-            <div className="card bg-[var(--lilac-soft)] border border-[var(--lavender)] mb-10 hover:shadow-md transition-all duration-200">
+            <div className="card bg-[var(--lilac-soft)] border border-[var(--lavender)] mb-10 hover:shadow-md transition-all duration-200 animate-on-scroll">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-4">
                   <div className="text-3xl">🎁</div>
@@ -170,7 +161,7 @@ export default async function DashboardPage() {
           {/* Tools Section - Show locked tools or get started */}
           {!hasAnyTool ? (
             // No tools yet - show get started
-            <div className="card text-center py-12 mb-10 hover:shadow-md transition-all duration-200">
+            <div className="card text-center py-12 mb-10 hover:shadow-md transition-all duration-200 animate-on-scroll">
               <div className="text-6xl mb-4">✨</div>
               <h2 className="text-xl mb-2">Ready to start revising?</h2>
               <p className="text-[var(--plum-dark)]/70 mb-6 max-w-md mx-auto">
@@ -189,7 +180,7 @@ export default async function DashboardPage() {
             </div>
           ) : (!hasOsce || !hasQuiz) ? (
             // Has one tool, show the locked one
-            <div className="mb-10">
+            <div className="mb-10 animate-on-scroll">
               <h2 className="text-lg mb-4 text-[var(--plum-dark)]/70">Unlock more tools</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {!hasOsce && (
@@ -244,14 +235,14 @@ export default async function DashboardPage() {
 
           {/* Today's Plan + Focus Areas (2-column on desktop) */}
           {hasAnyTool && (
-            <div className="grid md:grid-cols-2 gap-6 mb-10">
+            <div className="grid md:grid-cols-2 gap-6 mb-10 animate-on-scroll">
               <TodaysPlanCard />
               <FocusAreasCard />
             </div>
           )}
 
           {/* Quick Actions */}
-          <div className="mb-10">
+          <div className="mb-10 animate-on-scroll">
             <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Quick actions</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Link
@@ -292,10 +283,9 @@ export default async function DashboardPage() {
           </div>
 
           {/* Study Tip */}
-          <StudyTipCard />
-
-        </div>
-      </main>
-    </div>
+          <div className="animate-on-scroll">
+            <StudyTipCard />
+          </div>
+    </DashboardClient>
   );
 }

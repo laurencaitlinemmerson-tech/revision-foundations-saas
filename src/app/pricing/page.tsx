@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -68,32 +68,51 @@ export default function PricingPage() {
     handlePurchase(product);
   };
 
+  // Scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).dataset.animate = 'in';
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Hero Section */}
-          <div className="relative rounded-2xl bg-gradient-to-br from-[var(--lilac-soft)] to-white py-8 md:py-10 px-6 md:px-10 mb-10 overflow-hidden">
-            {/* Background Blobs */}
-            <div className="absolute top-0 left-0 w-64 h-64 bg-[var(--lavender)] rounded-full blur-3xl opacity-[0.18] -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 right-0 w-72 h-72 bg-[var(--pink)] rounded-full blur-3xl opacity-[0.18] translate-x-1/3 translate-y-1/3" />
-            
-            {/* Content */}
-            <div className="relative z-10 text-center mb-7 md:mb-8">
-              <span className="badge badge-purple mb-4">Pricing</span>
-              <h1 className="mb-3 leading-[1.05] tracking-tight">Simple Pricing</h1>
-              <p className="text-sm md:text-base text-[var(--plum-dark)]/70 max-w-lg mx-auto">
-                One-time payment • lifetime access • no subscriptions 💜
-              </p>
-              <p className="text-[11px] text-[var(--plum-dark)]/55 mt-2">
-                Full Hub Access includes everything (and future updates) ✨
-              </p>
+      {/* Hero Section */}
+      <section className="gradient-hero pt-32 pb-12 relative overflow-hidden">
+        <div className="blob blob-1" style={{ opacity: 0.25 }} />
+        <div className="blob blob-2" style={{ opacity: 0.25 }} />
+
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="animate-on-scroll hero-badge">
+              <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+              <span className="text-[var(--plum)]">Pricing</span>
+              <Gift className="w-4 h-4 text-[var(--pink)] icon-pulse" />
             </div>
 
+            <h1 className="animate-on-scroll mb-2 hero-title">
+              <span className="gradient-text">Simple Pricing</span>
+            </h1>
+
+            <p className="animate-on-scroll hero-description !mb-6">
+              One-time payment • lifetime access • no subscriptions 💜
+            </p>
+
             {/* Trust Strip */}
-            <div className="relative z-10 flex flex-wrap justify-center gap-2 md:gap-3">
+            <div className="animate-on-scroll flex flex-wrap justify-center gap-2 md:gap-3">
               {[
                 { icon: '🔒', label: 'Secure Checkout' },
                 { icon: '⚡', label: 'Instant Access' },
@@ -111,9 +130,14 @@ export default function PricingPage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <main className="pb-20 px-6">
+        <div className="max-w-5xl mx-auto">
 
           {/* Bundle - Featured */}
-          <div className="card mb-8 relative overflow-hidden border-[var(--lavender)] border-2">
+          <div className="card mb-8 relative overflow-hidden border-[var(--lavender)] border-2 animate-on-scroll">
             <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
               {isPro ? 'PURCHASED ✓' : 'SAVE £5 ✨'}
             </div>

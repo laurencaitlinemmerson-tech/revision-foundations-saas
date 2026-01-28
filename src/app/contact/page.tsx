@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Mail, MessageSquare, Send, Loader2, CheckCircle } from 'lucide-react';
+import { Mail, MessageSquare, Send, Loader2, CheckCircle, Sparkles, Heart } from 'lucide-react';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +14,24 @@ export default function ContactPage() {
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).dataset.animate = 'in';
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,31 +50,43 @@ export default function ContactPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--purple-gradient-start)] to-[var(--purple-gradient-end)] flex items-center justify-center mx-auto mb-6">
-              <MessageSquare className="w-8 h-8 text-white" />
+      {/* Hero Section */}
+      <section className="gradient-hero pt-32 pb-12 relative overflow-hidden">
+        <div className="blob blob-1" style={{ opacity: 0.25 }} />
+        <div className="blob blob-2" style={{ opacity: 0.25 }} />
+
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="animate-on-scroll hero-badge">
+              <MessageSquare className="w-4 h-4 text-[var(--purple)]" />
+              <span className="text-[var(--plum)]">Contact</span>
+              <Heart className="w-4 h-4 text-[var(--pink)] icon-pulse" />
             </div>
-            <h1 className="font-display text-4xl font-bold text-[var(--plum-text)] mb-4">
-              Get in Touch
+
+            <h1 className="animate-on-scroll mb-2 hero-title">
+              <span className="gradient-text">Get in Touch</span>
             </h1>
-            <p className="text-[var(--plum-text)]/70">
-              Have a question or feedback? We&apos;d love to hear from you.
+
+            <p className="animate-on-scroll hero-description !mb-6">
+              Have a question or feedback? We&apos;d love to hear from you 💜
             </p>
           </div>
+        </div>
+      </section>
+
+      <main className="pb-20 px-6">
+        <div className="max-w-2xl mx-auto">
 
           {submitted ? (
             /* Success Message */
-            <div className="glass-card p-8 text-center">
+            <div className="card p-8 text-center animate-on-scroll">
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="font-display text-2xl font-bold text-[var(--plum-text)] mb-2">
+              <h2 className="text-2xl font-semibold text-[var(--plum)] mb-2">
                 Message Sent!
               </h2>
-              <p className="text-[var(--plum-text)]/70 mb-6">
+              <p className="text-[var(--plum-dark)]/70 mb-6">
                 Thanks for reaching out. We&apos;ll get back to you as soon as possible.
               </p>
               <button
@@ -68,7 +98,7 @@ export default function ContactPage() {
             </div>
           ) : (
             /* Contact Form */
-            <div className="glass-card p-8">
+            <div className="card p-8 animate-on-scroll">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>

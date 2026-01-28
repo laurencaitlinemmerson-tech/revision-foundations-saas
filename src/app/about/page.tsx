@@ -1,28 +1,63 @@
 'use client';
 
+import { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { Sparkles, Heart } from 'lucide-react';
 
 export default function AboutPage() {
+  // Scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).dataset.animate = 'in';
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <span className="badge badge-purple mb-4">About</span>
-            <h1 className="mb-4">Hey, I'm Lauren! 👋</h1>
-            <p className="text-[var(--plum-dark)]/70">
-              The girl behind Revision Foundations
+      {/* Hero Section */}
+      <section className="gradient-hero pt-32 pb-12 relative overflow-hidden">
+        <div className="blob blob-1" style={{ opacity: 0.25 }} />
+        <div className="blob blob-2" style={{ opacity: 0.25 }} />
+
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="animate-on-scroll hero-badge">
+              <Heart className="w-4 h-4 text-[var(--pink)]" />
+              <span className="text-[var(--plum)]">About</span>
+              <Sparkles className="w-4 h-4 text-[var(--purple)] icon-pulse" />
+            </div>
+
+            <h1 className="animate-on-scroll mb-2 hero-title">
+              <span className="gradient-text">Hey, I'm Lauren!</span>
+            </h1>
+
+            <p className="animate-on-scroll hero-description !mb-6">
+              The girl behind Revision Foundations 👋
             </p>
           </div>
+        </div>
+      </section>
+
+      <main className="pb-20 px-6">
+        <div className="max-w-2xl mx-auto">
 
           {/* Main Card */}
-          <div className="card mb-8">
+          <div className="card mb-8 animate-on-scroll">
             <div className="text-4xl mb-4">💜</div>
             <h3 className="mb-4">My Story</h3>
             <div className="space-y-4 text-[var(--plum-dark)]/80">
@@ -42,7 +77,7 @@ export default function AboutPage() {
           </div>
 
           {/* Fun Facts */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 mb-8 animate-on-scroll">
             {[
               { emoji: '📚', text: "Children's Nursing Student" },
               { emoji: '🍒', text: 'Fuelled by Pepsi Max Cherry' },
@@ -57,7 +92,7 @@ export default function AboutPage() {
           </div>
 
           {/* Why I Made This */}
-          <div className="card mb-8">
+          <div className="card mb-8 animate-on-scroll">
             <h3 className="mb-4">Why I Made This</h3>
             <ul className="space-y-3">
               {[
@@ -75,7 +110,7 @@ export default function AboutPage() {
           </div>
 
           {/* Promise */}
-          <div className="card-glass text-center mb-8">
+          <div className="card-glass text-center mb-8 animate-on-scroll">
             <div className="text-3xl mb-3">🤙</div>
             <h3 className="text-lg mb-2">My Promise</h3>
             <p className="text-[var(--plum-dark)]/70 text-sm">
