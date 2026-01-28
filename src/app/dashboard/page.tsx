@@ -91,7 +91,7 @@ export default async function DashboardPage() {
                         <p className="text-white/70 text-sm">Timed stations • examiner checklists • feedback</p>
                       </div>
                     </div>
-                    <div className="bg-white text-[var(--purple)] px-5 py-2.5 rounded-full font-semibold text-sm group-hover:bg-white/95 transition-all flex items-center gap-2 group-hover:gap-3">
+                    <div className="bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm group-hover:bg-[var(--plum)] transition-all flex items-center gap-2 group-hover:gap-3 shadow-sm">
                       Launch
                       <ArrowRight className="w-4 h-4" />
                     </div>
