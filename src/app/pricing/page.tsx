@@ -83,8 +83,9 @@ export default function PricingPage() {
           {/* Bundle - Featured */}
           <div className="card mb-8 relative overflow-hidden border-[var(--lavender)] border-2">
             <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
-              BEST VALUE ✨
-            </div>
+  SAVE £5 ✨
+</div>
+
             <div className="flex flex-col md:flex-row md:items-center gap-8">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
@@ -116,10 +117,16 @@ export default function PricingPage() {
               </div>
               <div className="text-center md:text-right">
                 <div className="mb-2">
-                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£9.98</span>
-                </div>
-                <div className="stat-number mb-1">£9.99</div>
-                <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment</p>
+  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£14.99</span>
+</div>
+<div className="stat-number mb-1">£9.99</div>
+<p className="text-sm text-[var(--plum-dark)]/70 mb-4">
+  one-time payment • lifetime access
+</p>
+<p className="text-xs text-[var(--plum-dark)]/55 mb-4">
+  Launch offer for early supporters 💜
+</p>
+
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
                   <div className="space-y-3">
