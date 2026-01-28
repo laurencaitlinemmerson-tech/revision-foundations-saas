@@ -216,7 +216,9 @@ function HubCard({
       <div className="flex items-center justify-between mb-3">
         <span
           className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-            item.isLocked ? 'bg-[var(--purple)]/10 text-[var(--purple)]' : 'bg-emerald-50 text-emerald-700'
+            item.isLocked
+              ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
+              : 'bg-emerald-50 text-emerald-700'
           }`}
         >
           {item.isLocked ? 'PREMIUM' : 'FREE'}
@@ -250,7 +252,10 @@ function HubCard({
       <div
         className={`
           w-full py-2 rounded-full text-sm font-semibold text-center transition-all
-          ${canAccess ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]' : 'bg-[var(--lilac)] text-[var(--purple)]'}
+          ${canAccess
+            ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
+            : 'bg-[var(--lilac)] text-[var(--purple)]'
+          }
         `}
       >
         {canAccess ? 'Open Resource' : 'Unlock'}
@@ -455,9 +460,7 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
                     Upgrade to Pro
                   </Link>
 
-                  <p className="text-white/70 text-sm mt-4">
-                    One payment • Lifetime access • Cancel anytime
-                  </p>
+                  <p className="text-white/70 text-sm mt-4">One payment • Lifetime access • Cancel anytime</p>
                 </div>
               </div>
             </div>
@@ -467,3 +470,4 @@ export default function HubClient({ isPro, isSignedIn }: { isPro: boolean; isSig
     </ToastProvider>
   );
 }
+
