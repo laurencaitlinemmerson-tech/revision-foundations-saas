@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -52,11 +52,16 @@ function SectionTitle({
   subtitle: React.ReactNode;
 }) {
   return (
-    <div className="text-center mb-12">
-      <span className="animate-on-scroll badge badge-purple mb-4 inline-flex">{badge}</span>
-      <h1 className="animate-on-scroll mb-4">{title}</h1>
-      <p className="animate-on-scroll text-[var(--plum-dark)]/70 max-w-lg mx-auto">{subtitle}</p>
-      <p className="animate-on-scroll text-xs text-[var(--plum-dark)]/55 mt-3">
+    <div className="text-center mb-7 md:mb-8">
+      <span className="animate-on-scroll badge badge-purple mb-3 inline-flex">{badge}</span>
+
+      <h1 className="animate-on-scroll mb-3 leading-[1.05] tracking-tight">{title}</h1>
+
+      <p className="animate-on-scroll text-[var(--plum-dark)]/70 max-w-lg mx-auto text-sm md:text-base">
+        {subtitle}
+      </p>
+
+      <p className="animate-on-scroll text-[11px] text-[var(--plum-dark)]/55 mt-2">
         Full Hub Access includes everything (and future updates) ✨
       </p>
     </div>
@@ -105,13 +110,12 @@ export default function PricingPage() {
   const [showEmailInput, setShowEmailInput] = useState<string | null>(null);
   const [emailError, setEmailError] = useState('');
 
-  // Your original "isPro"
   const isPro = Boolean(user?.publicMetadata?.isPro);
 
-  // Counts / values (for UI)
   const bundlePrice = 9.99;
   const oldBundlePrice = 14.99;
-  const saveAmount = useMemo(() => Math.max(0, oldBundlePrice - bundlePrice), []);
+  const saveAmount = useMemo(() => Math.max(0, oldBundlePrice - bundlePrice), [bundlePrice, oldBundlePrice]);
+
   const trustItems = useMemo(
     () => [
       { icon: ShieldCheck, title: 'Secure checkout', desc: 'Powered by Stripe' },
@@ -121,7 +125,7 @@ export default function PricingPage() {
     []
   );
 
-  // ---- Animate-on-scroll (same idea as your Hub) ----
+  // Animate-on-scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -139,7 +143,7 @@ export default function PricingPage() {
     return () => observer.disconnect();
   }, []);
 
-  // ---- Optional: count-up for a single hero stat ----
+  // Count-up stat
   const statRef = useRef<HTMLDivElement>(null);
   const [statValue, setStatValue] = useState(0);
   const [statAnimated, setStatAnimated] = useState(false);
@@ -179,7 +183,7 @@ export default function PricingPage() {
     return () => observer.disconnect();
   }, [animateNumber, saveAmount, statAnimated]);
 
-  // ---- Checkout logic (UNCHANGED) ----
+  // Checkout logic
   const handlePurchase = async (product: Product) => {
     if (!isSignedIn && !guestEmail) {
       setShowEmailInput(product);
@@ -271,44 +275,39 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      <main className="pt-28 pb-20 px-6">
-        {/* Hero */}
-        <section className="gradient-hero rounded-3xl overflow-hidden relative">
-          <div className="blob blob-1" style={{ opacity: 0.35 }} />
-          <div className="blob blob-2" style={{ opacity: 0.35 }} />
+      <main className="pt-24 pb-16 px-6">
+        {/* Hero (slimmed) */}
+        <section className="gradient-hero rounded-2xl overflow-hidden relative">
+          <div className="blob blob-1" style={{ opacity: 0.18 }} />
+          <div className="blob blob-2" style={{ opacity: 0.18 }} />
 
-          <div className="px-6 py-12 md:py-14 max-w-5xl mx-auto relative z-10">
+          <div className="px-6 py-8 md:py-10 max-w-5xl mx-auto relative z-10">
             <SectionTitle
               badge="Pricing"
               title={
                 <>
-                  Simple pricing that{' '}
-                  <span className="gradient-text">actually helps</span>
+                  Simple pricing that <span className="gradient-text">actually helps</span>
                 </>
               }
-              subtitle={
-                <>
-                  One-time payment • lifetime access • no subscriptions 💜
-                </>
-              }
+              subtitle={<>One-time payment • lifetime access • no subscriptions 💜</>}
             />
 
-            {/* Trust strip */}
-            <div className="grid sm:grid-cols-3 gap-3 md:gap-4 -mt-2 mb-2">
+            {/* Trust strip (slimmed) */}
+            <div className="grid sm:grid-cols-3 gap-2 md:gap-3 -mt-1">
               {trustItems.map((t, i) => {
                 const Icon = t.icon;
                 return (
                   <div
                     key={t.title}
-                    className="animate-on-scroll rounded-2xl bg-white/80 backdrop-blur border border-white/40 px-5 py-4 flex items-center gap-3"
+                    className="animate-on-scroll rounded-xl bg-white/70 backdrop-blur border border-white/40 px-4 py-3 flex items-center gap-3"
                     style={{ animationDelay: `${i * 0.08}s` }}
                   >
-                    <span className="h-10 w-10 rounded-2xl bg-[var(--lilac-soft)] flex items-center justify-center">
-                      <Icon className="h-5 w-5 text-[var(--purple)]" />
+                    <span className="h-9 w-9 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
+                      <Icon className="h-4 w-4 text-[var(--purple)]" />
                     </span>
                     <div>
-                      <p className="font-semibold text-[var(--plum)] text-sm">{t.title}</p>
-                      <p className="text-xs text-[var(--plum-dark)]/70">{t.desc}</p>
+                      <p className="font-semibold text-[var(--plum)] text-sm leading-tight">{t.title}</p>
+                      <p className="text-xs text-[var(--plum-dark)]/70 leading-tight">{t.desc}</p>
                     </div>
                   </div>
                 );
@@ -317,7 +316,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto mt-10">
+        <div className="max-w-5xl mx-auto mt-6">
           {/* Featured bundle */}
           <div className="animate-on-scroll card mb-8 relative overflow-hidden border-[var(--lavender)] border-2 fade-in-up">
             <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
@@ -353,19 +352,19 @@ export default function PricingPage() {
                       style={{ animationDelay: `${0.12 + i * 0.04}s` }}
                     >
                       <div className="check-icon">
-                        <Check className="w-3.5 h-3.5 text-green-600" />
+                        <Check className="w-3.5 w-3.5 text-green-600" />
                       </div>
                       <span className="text-sm text-[var(--plum-dark)]">{feature}</span>
                     </div>
                   ))}
                 </div>
 
-                {/* animated save stat */}
-                <div ref={statRef} className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--lilac-soft)] border border-[var(--lilac-medium)] px-4 py-2">
+                <div
+                  ref={statRef}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--lilac-soft)] border border-[var(--lilac-medium)] px-4 py-2"
+                >
                   <Sparkles className="h-4 w-4 text-[var(--purple)]" />
-                  <span className="text-sm text-[var(--plum)] font-semibold">
-                    Save £{statValue}
-                  </span>
+                  <span className="text-sm text-[var(--plum)] font-semibold">Save £{statValue}</span>
                   <span className="text-xs text-[var(--plum-dark)]/60">when you get Full Hub Access</span>
                 </div>
               </div>
@@ -376,14 +375,19 @@ export default function PricingPage() {
                     <div className="mb-4">
                       <span className="text-emerald-600 font-semibold">You own this!</span>
                     </div>
-                    <Link href="/hub" className="btn-primary px-8 inline-flex items-center gap-2 justify-center">
+                    <Link
+                      href="/hub"
+                      className="btn-primary px-8 inline-flex items-center gap-2 justify-center"
+                    >
                       <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-4 h-4" />
                     </Link>
                   </>
                 ) : (
                   <>
                     <div className="mb-2">
-                      <span className="text-[var(--plum-dark)]/50 line-through text-lg">£{oldBundlePrice.toFixed(2)}</span>
+                      <span className="text-[var(--plum-dark)]/50 line-through text-lg">
+                        £{oldBundlePrice.toFixed(2)}
+                      </span>
                     </div>
 
                     <div className="stat-number mb-1">£{bundlePrice.toFixed(2)}</div>
@@ -546,7 +550,7 @@ export default function PricingPage() {
         </div>
       </main>
 
-      {/* Sticky mobile CTA (only when NOT pro) */}
+      {/* Sticky mobile CTA */}
       {!isPro && (
         <div className="fixed bottom-4 left-0 right-0 px-4 z-50 md:hidden">
           <div className="rounded-2xl bg-white/90 backdrop-blur border border-[var(--lilac-medium)] shadow-lg p-3 flex items-center justify-between gap-3">
@@ -575,4 +579,3 @@ export default function PricingPage() {
     </div>
   );
 }
-
