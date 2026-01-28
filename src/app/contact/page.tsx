@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { Mail, MessageSquare, Send, Loader2, CheckCircle } from 'lucide-react';
 
 export default function ContactPage() {
@@ -28,10 +29,10 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen gradient-bg-light">
+    <div className="min-h-screen bg-cream">
       <Navbar />
 
-      <main className="pt-24 pb-16 px-4">
+      <main className="pt-28 pb-20 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
@@ -191,6 +192,8 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

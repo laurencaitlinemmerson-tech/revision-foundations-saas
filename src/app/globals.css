@@ -42,3 +42,74 @@
     font-size: clamp(2.7rem, 9vw, 3.6rem);
   }
 }
+
+/* Layout helpers for RootLayout and blobs */
+.rf-bg {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.rf-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.rf-blob-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--lavender);
+  top: -120px;
+  right: -120px;
+}
+
+.rf-blob-2 {
+  width: 360px;
+  height: 360px;
+  background: var(--pink-soft);
+  bottom: -80px;
+  left: -80px;
+}
+
+.rf-blob-3 {
+  width: 260px;
+  height: 260px;
+  background: var(--peach);
+  top: 45%;
+  left: 12%;
+  transform: translateY(-50%);
+}
+
+/* Container utility */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Auto reveal utilities used by AutoAnimate */
+.rf-reveal {
+  opacity: 0;
+  transform: translateY(18px) scale(0.996);
+  transition: opacity 700ms cubic-bezier(.2,.9,.2,1), transform 700ms cubic-bezier(.2,.9,.2,1);
+  will-change: opacity, transform;
+}
+
+.rf-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .rf-reveal, .card, .btn-primary, .btn-secondary, .fade-in, .float {
+    transition: none !important;
+    animation: none !important;
+  }
+}

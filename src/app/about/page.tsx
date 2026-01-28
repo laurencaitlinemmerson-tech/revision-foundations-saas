@@ -1,8 +1,9 @@
 'use client';
 
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { Sparkles, Heart, BookOpen, Coffee, Star } from 'lucide-react';
+import { Sparkles, Heart } from 'lucide-react';
 
 export default function AboutPage() {
   return (
@@ -101,6 +102,8 @@ export default function AboutPage() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
