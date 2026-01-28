@@ -152,14 +152,14 @@ export default function PricingPage() {
             setGuestEmail(e.target.value);
             setEmailError('');
           }}
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-4 focus:ring-[var(--lavender)]/50 focus:border-[var(--purple)]"
         />
       </div>
       {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
       <button
         onClick={() => handlePurchase(product)}
         disabled={loading !== null}
-        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group"
+        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group disabled:opacity-60 disabled:cursor-not-allowed"
         type="button"
       >
         {loading === product ? (
@@ -180,23 +180,29 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* THINNER TOP BIT — keeps his structure but tighter */}
+      {/* HERO */}
       <section className="gradient-hero text-[var(--plum)] py-10 md:py-14 relative overflow-hidden">
         <div className="blob blob-1" style={{ opacity: 0.18 }} />
         <div className="blob blob-2" style={{ opacity: 0.18 }} />
 
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 font-heading">
-              PRICING
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/60 px-4 py-2 text-xs text-[var(--plum-dark)]/70 mb-5">
+              <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+              One-time payment • Lifetime access • No subscription
+            </div>
+
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 font-heading tracking-tight">
+              Pricing
             </h1>
-            <p className="text-base md:text-lg text-[var(--plum-dark)]/70 mb-6">
-              One-time payment • lifetime access • no subscriptions 💜
+
+            <p className="text-base md:text-lg text-[var(--plum-dark)]/70 mb-7">
+              Pick a tool, or grab Full Hub Access and unlock everything 💜
             </p>
 
             <button
               onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group"
+              className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group"
               type="button"
             >
               <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -210,7 +216,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* SAME GRID + SPACING AS HIS */}
+      {/* PACKAGES */}
       <section id="packages" className="py-16 md:py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -220,31 +226,44 @@ export default function PricingPage() {
               return (
                 <div
                   key={pkg.product}
-                  className={`
-                    relative bg-white p-7 rounded-lg border transition-all duration-300
-                    hover:shadow-lg
-                    ${pkg.highlighted ? 'border-[var(--lavender)]' : 'border-[var(--lilac-medium)]'}
-                  `}
+                  className={`relative bg-white p-7 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 ${
+                    pkg.highlighted
+                      ? 'border-[var(--lavender)] ring-1 ring-[var(--lavender)]/40 shadow-[0_12px_40px_-18px_rgba(84,38,150,0.35)]'
+                      : 'border-[var(--lilac-medium)]'
+                  }`}
                 >
                   {pkg.badge && (
-                    <div className="absolute top-4 right-4 text-[11px] font-bold px-3 py-1 rounded-full bg-[var(--purple)] text-white">
+                    <div
+                      className={`absolute top-4 right-4 text-[11px] font-bold px-3 py-1 rounded-full ${
+                        pkg.highlighted
+                          ? 'bg-[var(--purple)] text-white shadow-sm'
+                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] border border-[var(--lilac-medium)]'
+                      }`}
+                    >
                       {pkg.badge}
                     </div>
                   )}
 
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="h-10 w-10 rounded-lg bg-[var(--lilac-soft)] flex items-center justify-center">
+                    <div
+                      className={`h-11 w-11 rounded-xl flex items-center justify-center ${
+                        pkg.highlighted ? 'bg-[var(--lavender)]' : 'bg-[var(--lilac-soft)]'
+                      }`}
+                    >
                       <Icon className="h-5 w-5 text-[var(--purple)]" />
                     </div>
                     <div>
                       <p className="text-sm text-[var(--plum-dark)]/70">{pkg.description}</p>
-                      <h3 className="text-xl font-bold text-[var(--plum)]">{pkg.name}</h3>
+                      <h3 className="text-xl font-bold text-[var(--plum)] leading-tight">{pkg.name}</h3>
                     </div>
                   </div>
 
-                  <div className="text-4xl font-bold text-[var(--plum)] mb-2">{pkg.price}</div>
+                  <div className="flex items-end justify-between gap-4 mb-4">
+                    <div className="text-4xl font-bold text-[var(--plum)] tracking-tight">{pkg.price}</div>
+                    <div className="text-xs text-[var(--plum-dark)]/60">one-time</div>
+                  </div>
 
-                  <ul className="space-y-2 mb-6">
+                  <ul className="space-y-2.5 mb-6">
                     {pkg.features.map((f) => (
                       <li key={f} className="flex items-start gap-2">
                         <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
@@ -255,14 +274,16 @@ export default function PricingPage() {
                     ))}
                   </ul>
 
-                  <p className="text-sm text-[var(--plum-dark)]/70 mb-6">
-                    <span className="font-semibold text-[var(--plum)]">Perfect for:</span> {pkg.perfectFor}
-                  </p>
+                  <div className="rounded-xl bg-[var(--lilac-soft)]/55 border border-[var(--lilac-medium)] px-4 py-3 mb-6">
+                    <p className="text-sm text-[var(--plum-dark)]/75">
+                      <span className="font-semibold text-[var(--plum)]">Perfect for:</span> {pkg.perfectFor}
+                    </p>
+                  </div>
 
                   {pkg.product === 'bundle' && isPro ? (
                     <Link
                       href="/hub"
-                      className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all w-full group"
+                      className="inline-flex items-center justify-center gap-2 w-full font-semibold py-3 px-6 rounded-xl transition-all group bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-lg hover:shadow-[var(--purple)]/25"
                     >
                       <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
                       Go to Hub <ArrowRight className="w-4 h-4" />
@@ -273,12 +294,11 @@ export default function PricingPage() {
                     <button
                       onClick={() => handlePurchase(pkg.product)}
                       disabled={loading !== null}
-                      className={cx(
-                        'inline-flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-lg transition-all duration-300 w-full group',
+                      className={`inline-flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-xl transition-all duration-300 w-full group disabled:opacity-60 disabled:cursor-not-allowed ${
                         pkg.highlighted
                           ? 'bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-lg hover:shadow-[var(--purple)]/25'
-                          : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)]'
-                      )}
+                          : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)]'
+                      }`}
                       type="button"
                     >
                       {loading === pkg.product ? (
@@ -298,14 +318,17 @@ export default function PricingPage() {
             })}
           </div>
 
-          {/* ADD-ONS — identical section structure */}
-          <section className="py-16 bg-white/60 rounded-lg border border-[var(--lilac-medium)]">
+          {/* ADD-ONS */}
+          <section className="py-16 bg-white/60 rounded-2xl border border-[var(--lilac-medium)]">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading text-[var(--plum)]">
-              ADD-ONS
+              Add-ons
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto px-6">
               {addOns.map((addon, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg border border-[var(--lilac-medium)] text-center">
+                <div
+                  key={index}
+                  className="bg-white p-4 rounded-xl border border-[var(--lilac-medium)] text-center hover:shadow-md transition-shadow"
+                >
                   <p className="font-semibold text-sm mb-1 text-[var(--plum)]">{addon.name}</p>
                   <p className="text-[var(--purple)] font-bold">{addon.price}</p>
                 </div>
@@ -313,14 +336,17 @@ export default function PricingPage() {
             </div>
           </section>
 
-          {/* FAQ — same vibe */}
+          {/* FAQ */}
           <section className="py-16">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading text-[var(--plum)]">
-              FREQUENTLY ASKED QUESTIONS
+              Frequently asked questions
             </h2>
             <div className="max-w-3xl mx-auto space-y-6">
               {faqs.map((faq) => (
-                <div key={faq.question} className="card">
+                <div
+                  key={faq.question}
+                  className="bg-white rounded-2xl border border-[var(--lilac-medium)] p-6 hover:shadow-md transition-shadow"
+                >
                   <h3 className="font-bold text-lg mb-2 text-[var(--plum)]">{faq.question}</h3>
                   <p className="text-[var(--plum-dark)]/70">{faq.answer}</p>
                 </div>
@@ -328,26 +354,24 @@ export default function PricingPage() {
             </div>
           </section>
 
-          {/* FINAL CTA — same structure */}
-          <section className="py-16 bg-white/60 rounded-lg border border-[var(--lilac-medium)]">
+          {/* FINAL CTA */}
+          <section className="py-16 bg-white/60 rounded-2xl border border-[var(--lilac-medium)]">
             <div className="text-center max-w-2xl mx-auto px-6">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--plum)]">
-                Not sure whichς which package is right for you?
+                Not sure which package is right for you?
               </h2>
-              <p className="text-xl text-[var(--plum-dark)]/70 mb-8">
-                Try a preview first 💜
-              </p>
+              <p className="text-xl text-[var(--plum-dark)]/70 mb-8">Try a preview first 💜</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/quiz"
-                  className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-xl transition-all hover:shadow-lg hover:shadow-[var(--purple)]/25"
                 >
                   <Play className="w-5 h-5" />
                   Try Quiz Preview
                 </Link>
                 <Link
                   href="/osce"
-                  className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] font-semibold py-3 px-6 rounded-lg transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)] font-semibold py-3 px-6 rounded-xl transition-all"
                 >
                   <Play className="w-5 h-5" />
                   Try OSCE Preview
