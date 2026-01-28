@@ -1,25 +1,3 @@
-Yes — **that’s the Hub page code** 👍
-But there’s one big “Next.js app router” gotcha:
-
-### If this file is `src/app/hub/page.tsx`
-
-It **cannot** be written like this:
-
-```ts
-export default function HubClient({ isPro, isSignedIn }: { ... })
-```
-
-because **`page.tsx` doesn’t receive custom props** (unless you wrap it with a separate server component).
-
-So you have 2 clean options:
-
----
-
-## Option A (easiest): make `page.tsx` fully self-contained
-
-Paste this **as your `src/app/hub/page.tsx`** (it uses Clerk directly and won’t break builds):
-
-```tsx
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -524,15 +502,3 @@ export default function HubPage() {
     </ToastProvider>
   );
 }
-```
-
-**Paste location:** `src/app/hub/page.tsx`
-
----
-
-## Option B (more “proper”): keep this as `HubClient.tsx` and have a server `page.tsx`
-
-If you already had a server wrapper passing `isPro`, tell me and I’ll give you the exact 2-file setup.
-
-If you say “I want hub locked/unlocked based on purchases”, I can wire `isPro` properly next.
-
