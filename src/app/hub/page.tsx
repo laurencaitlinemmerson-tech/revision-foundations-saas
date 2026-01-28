@@ -1,18 +1,17 @@
-// src/app/hub/page.tsx
-import { auth } from "@clerk/nextjs/server";
-import { getIsPro } from "@/lib/getIsPro"; // whatever your path is
+import { auth } from '@clerk/nextjs/server';
+import { getUserEntitlements } from '@/lib/entitlements';
+import HubClient from './HubClient';
 
 export default async function HubPage() {
-  const { userId } = await auth(); // ✅ await
+  const { userId } = await auth();
 
-  const isSignedIn = Boolean(userId);
-  const isPro = userId ? await getIsPro(userId) : false;
+  let isPro = false;
 
-  return (
-    <main>
-      {/* your UI */}
-      <div>Signed in: {String(isSignedIn)}</div>
-      <div>Pro: {String(isPro)}</div>
-    </main>
-  );
+  if (userId) {
+    const entitlements = await getUserEntitlements(userId);
+    // User is "Pro" if they have any active entitlement (osce, quiz, or bundle)
+    isPro = entitlements.length > 0;
+  }
+
+  return <HubClient isPro={isPro} isSignedIn={!!userId} />;
 }
