@@ -17,6 +17,7 @@ export default function HubClient() {
   const { user, isLoaded } = useUser();
   const [entitlements, setEntitlements] = useState<Entitlement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoaded || !user) {
@@ -31,28 +32,35 @@ export default function HubClient() {
           setEntitlements(data.entitlements);
         }
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error('Error fetching entitlements:', err);
+        setError('Failed to load entitlements');
+      })
       .finally(() => setLoading(false));
   }, [isLoaded, user]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            (entry.target as HTMLElement).classList.add('animate-in');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    try {
+      const observer = new IntersectionObserver(
+        (entries: IntersectionObserverEntry[]) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              (entry.target as HTMLElement).classList.add('animate-in');
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
 
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-      observer.observe(el);
-    });
+      document.querySelectorAll('.animate-on-scroll').forEach((el) => {
+        observer.observe(el);
+      });
 
-    return () => observer.disconnect();
-  }, []);
+      return () => observer.disconnect();
+    } catch (err) {
+      console.error('Animation observer error:', err);
+    }
+  }, [loading]);
 
   const hasProduct = (product: Product) => {
     return entitlements.some((e) => e.product === product && e.status === 'active');
@@ -60,12 +68,31 @@ export default function HubClient() {
 
   const hasAnyAccess = hasProduct('osce') || hasProduct('quiz') || hasProduct('bundle');
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button onClick={() => window.location.reload()} className="btn-primary">
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isLoaded || loading) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4 animate-on-scroll emoji-float">✨</div>
-          <p className="text-[var(--plum)] animate-on-scroll">Loading your dashboard...</p>
+      <div className="min-h-screen bg-cream">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="text-4xl mb-4">✨</div>
+            <p className="text-[var(--plum)]">Loading your dashboard...</p>
+          </div>
         </div>
       </div>
     );
@@ -81,14 +108,14 @@ export default function HubClient() {
           <div className="blob blob-3" />
 
           <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
-            <div className="text-4xl mb-6 animate-on-scroll emoji-float">🔒</div>
-            <h1 className="mb-4 hero-title animate-on-scroll">
+            <div className="text-4xl mb-6">🔒</div>
+            <h1 className="mb-4 hero-title">
               <span className="gradient-text">Please Sign In</span>
             </h1>
-            <p className="hero-description animate-on-scroll mb-8">
+            <p className="hero-description mb-8">
               Sign in to access your revision tools and continue your nursing journey.
             </p>
-            <Link href="/sign-in" className="btn-primary btn-hover text-lg px-8 py-4 animate-on-scroll">
+            <Link href="/sign-in" className="btn-primary btn-hover text-lg px-8 py-4">
               <Sparkles className="w-5 h-5" />
               Sign In
             </Link>
@@ -109,17 +136,17 @@ export default function HubClient() {
 
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="hero-badge animate-on-scroll">
-              <Sparkles className="w-4 h-4 text-[var(--purple)] icon-spin" />
+            <div className="hero-badge">
+              <Sparkles className="w-4 h-4 text-[var(--purple)]" />
               <span className="text-[var(--plum)]">Welcome Back</span>
-              <Heart className="w-4 h-4 text-[var(--pink)] icon-pulse" />
+              <Heart className="w-4 h-4 text-[var(--pink)]" />
             </div>
 
-            <h1 className="mb-4 hero-title animate-on-scroll">
+            <h1 className="mb-4 hero-title">
               <span className="gradient-text">Your Dashboard</span>
             </h1>
 
-            <p className="hero-subtitle animate-on-scroll">
+            <p className="hero-subtitle">
               Hey {user.firstName || 'there'}! Ready to revise?
             </p>
           </div>
@@ -135,8 +162,8 @@ export default function HubClient() {
       <section className="bg-cream py-16">
         <div className="max-w-6xl mx-auto px-6">
           {!hasAnyAccess ? (
-            <div className="text-center mb-12 animate-on-scroll">
-              <div className="text-4xl mb-4 emoji-float">🎁</div>
+            <div className="text-center mb-12">
+              <div className="text-4xl mb-4">🎁</div>
               <h2 className="mb-4 text-[var(--plum-dark)]">Ready to Get Started?</h2>
               <p className="text-[var(--plum-dark)]/70 mb-8 max-w-2xl mx-auto">
                 Unlock both OSCE and Quiz tools for just £9.99 one-time. No subscription, lifetime access!
@@ -147,14 +174,14 @@ export default function HubClient() {
               </Link>
             </div>
           ) : (
-            <div className="text-center mb-12 animate-on-scroll">
-              <span className="badge badge-purple mb-4 badge-shimmer">Your Tools</span>
+            <div className="text-center mb-12">
+              <span className="badge badge-purple mb-4">Your Tools</span>
               <h2 className="mb-4 text-[var(--plum-dark)]">Choose Your Tool</h2>
             </div>
           )}
 
           <div className="grid md:grid-cols-2 gap-8 mt-12">
-            <div className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-left ${!hasProduct('osce') && !hasProduct('bundle') ? 'opacity-60' : ''}`}>
+            <div className={`card bg-white p-8 rounded-2xl shadow-sm ${!hasProduct('osce') && !hasProduct('bundle') ? 'opacity-60' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="icon-box-soft">
                   <BookOpen className="w-6 h-6 text-[var(--purple)]" />
@@ -179,7 +206,7 @@ export default function HubClient() {
               )}
             </div>
 
-            <div className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-right ${!hasProduct('quiz') && !hasProduct('bundle') ? 'opacity-60' : ''}`}>
+            <div className={`card bg-white p-8 rounded-2xl shadow-sm ${!hasProduct('quiz') && !hasProduct('bundle') ? 'opacity-60' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="icon-box-soft">
                   <FileText className="w-6 h-6 text-[var(--purple)]" />
@@ -207,12 +234,11 @@ export default function HubClient() {
         </div>
       </section>
 
-      <section className="bg-lilac section relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.3 }} />
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
+      <section className="bg-lilac py-16">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <span className="badge badge-purple mb-4 animate-on-scroll badge-shimmer">Study Tips</span>
-            <h2 className="mb-4 text-[var(--plum-dark)] animate-on-scroll">Make the Most of Your Revision</h2>
+            <span className="badge badge-purple mb-4">Study Tips</span>
+            <h2 className="mb-4 text-[var(--plum-dark)]">Make the Most of Your Revision</h2>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -220,9 +246,9 @@ export default function HubClient() {
               { icon: '📅', title: 'Practice Daily', copy: 'Even 15 minutes a day builds confidence and retention.' },
               { icon: '🎯', title: 'Focus on Weak Areas', copy: 'Use the tools to identify and strengthen your weak spots.' },
               { icon: '✨', title: 'Stay Consistent', copy: 'Regular practice beats cramming every time.' },
-            ].map((item, i) => (
-              <div key={item.title} className="card bg-white p-6 text-center animate-on-scroll fade-in-up" style={{ animationDelay: i * 0.1 + 's' }}>
-                <div className="text-4xl mb-3 emoji-float" style={{ animationDelay: i * 0.3 + 's' }}>{item.icon}</div>
+            ].map((item) => (
+              <div key={item.title} className="card bg-white p-6 text-center">
+                <div className="text-4xl mb-3">{item.icon}</div>
                 <h3 className="text-[var(--plum)] mb-2">{item.title}</h3>
                 <p className="text-[var(--plum-dark)]/70 text-sm">{item.copy}</p>
               </div>
@@ -233,13 +259,13 @@ export default function HubClient() {
 
       <section className="bg-cream py-16">
         <div className="max-w-2xl mx-auto px-6 text-center">
-          <div className="text-4xl mb-4 animate-on-scroll emoji-float">💬</div>
-          <h2 className="mb-4 text-[var(--plum-dark)] animate-on-scroll">Need Help?</h2>
-          <p className="text-[var(--plum-dark)]/70 mb-6 animate-on-scroll">Got questions or feedback? I am always happy to chat!</p>
-          <Link href="https://wa.me/447572650980" target="_blank" rel="noopener noreferrer" className="whatsapp-btn animate-on-scroll">
+          <div className="text-4xl mb-4">💬</div>
+          <h2 className="mb-4 text-[var(--plum-dark)]">Need Help?</h2>
+          <p className="text-[var(--plum-dark)]/70 mb-6">Got questions or feedback? I am always happy to chat!</p>
+          <a href="https://wa.me/447572650980" target="_blank" rel="noopener noreferrer" className="whatsapp-btn inline-flex items-center gap-2">
             <MessageCircle className="w-4 h-4" />
-            WhatsApp Me
-          </Link>
+            <span>WhatsApp Me</span>
+          </a>
         </div>
       </section>
 
@@ -274,7 +300,6 @@ export default function HubClient() {
               <p className="font-semibold text-[var(--plum)]">Account</p>
               <div className="flex flex-col gap-2">
                 <Link href="/dashboard" className="footer-link">Dashboard</Link>
-                <Link href="/sign-out" className="footer-link">Sign Out</Link>
               </div>
             </div>
           </div>
