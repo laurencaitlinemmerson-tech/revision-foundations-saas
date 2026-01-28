@@ -488,7 +488,8 @@ const resources: Record<string, {
           'Heart rate and rhythm (manual pulse)',
           'Blood pressure',
           'Capillary refill time (<2 seconds normal)',
-          'Skin colour, temperature, moisture',
+          'Skin colour and moisture',
+          'Temperature',
           'Urine output (if catheterised)',
           'Look for bleeding (visible and consider hidden)',
           'IV access if unwell, take bloods, consider fluids',
@@ -510,7 +511,6 @@ const resources: Record<string, {
         title: 'E - Exposure',
         type: 'checklist',
         content: [
-          'Temperature',
           'Full body inspection (maintain dignity)',
           'Look for rashes, wounds, swelling, bruising',
           'Check behind/underneath patient',
