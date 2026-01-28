@@ -1,19 +1,24 @@
+```ts
 import { clerkClient } from "@clerk/nextjs/server";
-import { headers } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
-import { createOrUpdateEntitlement } from '@/lib/entitlements';
-import { createServiceClient } from '@/lib/supabase';
-import Stripe from 'stripe';
+import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
+import { createOrUpdateEntitlement } from "@/lib/entitlements";
+import { createServiceClient } from "@/lib/supabase";
+import Stripe from "stripe";
+
+export const runtime = "nodejs";
+
+type Product = "osce" | "quiz" | "bundle";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const headersList = await headers();
-  const signature = headersList.get('stripe-signature');
+  const signature = headersList.get("stripe-signature");
 
   if (!signature) {
     return NextResponse.json(
-      { error: 'Missing stripe-signature header' },
+      { error: "Missing stripe-signature header" },
       { status: 400 }
     );
   }
@@ -27,33 +32,55 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
-    return NextResponse.json(
-      { error: 'Invalid signature' },
-      { status: 400 }
-    );
+    console.error("Webhook signature verification failed:", err);
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   try {
     switch (event.type) {
-      case 'checkout.session.completed': {
+      case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
 
-        const clerkUserId = session.metadata?.clerk_user_id;
-        const guestEmail = session.metadata?.guest_email || session.customer_email;
-        const product = session.metadata?.product as 'osce' | 'quiz' | 'bundle';
+        const clerkUserId = session.metadata?.clerk_user_id ?? null;
+        const guestEmail =
+          session.metadata?.guest_email ??
+          session.customer_email ??
+          session.customer_details?.email ??
+          null;
 
+        const product = session.metadata?.product as Product | undefined;
         if (!product) {
-          console.error('Missing product in checkout session metadata');
+          console.error("Missing product in checkout session metadata");
           break;
         }
 
-        // Handle bundle - create entitlements for both products
-        const productsToCreate = product === 'bundle'
-          ? ['osce', 'quiz', 'bundle'] as const
-          : [product] as const;
+        // Decide which entitlements to create
+        const productsToCreate =
+          product === "bundle"
+            ? (["osce", "quiz", "bundle"] as const)
+            : ([product] as const);
 
         const supabase = createServiceClient();
+
+        // Resolve customer_name:
+        // - Signed-in users: pull from Clerk
+        // - Guests: pull from Stripe customer_details
+        let customerName: string | null = null;
+
+        if (clerkUserId) {
+          try {
+            const user = await clerkClient.users.getUser(clerkUserId);
+            customerName =
+              [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+              user.username ||
+              null;
+          } catch (e) {
+            console.error("Failed to fetch Clerk user for name:", e);
+            customerName = null;
+          }
+        } else {
+          customerName = session.customer_details?.name ?? null;
+        }
 
         for (const p of productsToCreate) {
           if (clerkUserId) {
@@ -63,27 +90,45 @@ export async function POST(request: NextRequest) {
               p,
               session.customer as string,
               null, // No subscription for one-time
-              null  // Lifetime access
+              null // Lifetime access
             );
-            console.log(`Entitlement created for user ${clerkUserId}, product ${p}`);
+
+            // Store name on the entitlement row (you added customer_name column)
+            if (customerName) {
+              const { error } = await supabase
+                .from("entitlements")
+                .update({ customer_name: customerName })
+                .eq("clerk_user_id", clerkUserId)
+                .eq("product", p);
+
+              if (error) {
+                console.error("Error updating customer_name (signed-in):", error);
+              }
+            }
+
+            console.log(
+              `Entitlement created for user ${clerkUserId}, product ${p}`
+            );
           } else if (guestEmail) {
-            // Guest purchase - store with email
-            const { error } = await supabase
-              .from('entitlements')
-              .upsert({
-                clerk_user_id: `guest_${guestEmail}`, // Prefix to identify guest
+            // Guest purchase - store with email in clerk_user_id as you currently do
+            const { error } = await supabase.from("entitlements").upsert(
+              {
+                clerk_user_id: `guest_${guestEmail}`,
                 product: p,
-                status: 'active',
+                status: "active",
                 stripe_customer_id: session.customer as string,
                 stripe_payment_intent_id: session.payment_intent as string,
-              }, {
-                onConflict: 'clerk_user_id,product'
-              });
+                customer_name: customerName,
+              },
+              { onConflict: "clerk_user_id,product" }
+            );
 
             if (error) {
-              console.error('Error creating guest entitlement:', error);
+              console.error("Error creating guest entitlement:", error);
             } else {
-              console.log(`Guest entitlement created for ${guestEmail}, product ${p}`);
+              console.log(
+                `Guest entitlement created for ${guestEmail}, product ${p}`
+              );
             }
           }
         }
@@ -91,16 +136,17 @@ export async function POST(request: NextRequest) {
         // TODO: Send access email to guest users
         if (guestEmail && !clerkUserId) {
           console.log(`Should send access email to ${guestEmail}`);
-          // In future: integrate with email service (Resend, SendGrid, etc.)
         }
 
         break;
       }
 
-      case 'customer.subscription.deleted': {
+      case "customer.subscription.deleted": {
         // Not needed for one-time payments, but keeping for future
         const subscription = event.data.object as Stripe.Subscription;
-        console.log(`Subscription ${subscription.id} event received (not applicable for one-time)`);
+        console.log(
+          `Subscription ${subscription.id} event received (not applicable for one-time)`
+        );
         break;
       }
 
@@ -110,10 +156,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    console.error("Webhook processing error:", error);
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      { error: "Webhook processing failed" },
       { status: 500 }
     );
   }
 }
+```
