@@ -16,6 +16,7 @@ import {
   Check,
   ChevronDown,
 } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
 
 type Product = 'osce' | 'quiz' | 'bundle';
 
@@ -23,8 +24,15 @@ function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(' ');
+}
+
+const easeOut = [0.16, 1, 0.3, 1] as const;
+
 export default function PricingPage() {
   const { isSignedIn, user } = useUser();
+  const reduce = useReducedMotion();
 
   const [loading, setLoading] = useState<Product | null>(null);
   const [guestEmail, setGuestEmail] = useState('');
@@ -142,7 +150,12 @@ export default function PricingPage() {
   };
 
   const EmailBlock = ({ product }: { product: Product }) => (
-    <div className="mt-3 space-y-2.5">
+    <motion.div
+      initial={reduce ? undefined : { opacity: 0, y: 6 }}
+      animate={reduce ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: easeOut }}
+      className="mt-3 space-y-2.5"
+    >
       <div className="relative">
         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/45" />
         <input
@@ -156,7 +169,9 @@ export default function PricingPage() {
           className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-4 focus:ring-[var(--lavender)]/40 focus:border-[var(--purple)] text-sm"
         />
       </div>
+
       {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
+
       <button
         onClick={() => handlePurchase(product)}
         disabled={loading !== null}
@@ -174,81 +189,150 @@ export default function PricingPage() {
           </>
         )}
       </button>
-    </div>
+    </motion.div>
   );
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-cream relative overflow-hidden">
       <Navbar />
 
-      {/* HERO (tighter) */}
+      {/* Ambient animated background layer (Hub/Home vibe) */}
+      <div className="pointer-events-none absolute inset-0 -z-0">
+        {/* Soft grain */}
+        <div className="absolute inset-0 opacity-[0.06] mix-blend-multiply bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.25)_1px,transparent_0)] [background-size:18px_18px]" />
+
+        {/* Animated blobs */}
+        <motion.div
+          aria-hidden
+          className="absolute -top-24 -left-24 h-[380px] w-[380px] rounded-full blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle at 30% 30%, rgba(168,85,247,0.32), transparent 60%), radial-gradient(circle at 70% 70%, rgba(236,72,153,0.22), transparent 60%)',
+          }}
+          animate={
+            reduce
+              ? undefined
+              : {
+                  x: [0, 28, -10, 0],
+                  y: [0, 18, -14, 0],
+                  scale: [1, 1.08, 0.98, 1],
+                }
+          }
+          transition={reduce ? undefined : { duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
+        <motion.div
+          aria-hidden
+          className="absolute -bottom-28 -right-28 h-[420px] w-[420px] rounded-full blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle at 40% 40%, rgba(99,102,241,0.22), transparent 62%), radial-gradient(circle at 70% 60%, rgba(168,85,247,0.24), transparent 62%)',
+          }}
+          animate={
+            reduce
+              ? undefined
+              : {
+                  x: [0, -26, 12, 0],
+                  y: [0, -10, 16, 0],
+                  scale: [1, 0.98, 1.06, 1],
+                }
+          }
+          transition={reduce ? undefined : { duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+
+      {/* HERO */}
       <section className="gradient-hero text-[var(--plum)] py-8 md:py-10 relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.12 }} />
-        <div className="blob blob-2" style={{ opacity: 0.12 }} />
+        <div className="blob blob-1" style={{ opacity: 0.10 }} />
+        <div className="blob blob-2" style={{ opacity: 0.10 }} />
+
+        {/* shimmer line */}
+        <motion.div
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-px opacity-60"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, rgba(168,85,247,0.6), rgba(236,72,153,0.35), transparent)',
+          }}
+          animate={reduce ? undefined : { opacity: [0.25, 0.6, 0.25] }}
+          transition={reduce ? undefined : { duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
+        />
 
         <div className="max-w-5xl mx-auto px-6 relative z-10">
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/60 px-3 py-1.5 text-[11px] text-[var(--plum-dark)]/70 mb-4">
+          <motion.div
+            initial={reduce ? undefined : { opacity: 0, y: 10 }}
+            animate={reduce ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: easeOut }}
+            className="max-w-2xl mx-auto text-center"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/70 px-3 py-1.5 text-[11px] text-[var(--plum-dark)]/70 mb-4">
               <Sparkles className="w-3.5 h-3.5 text-[var(--purple)]" />
               One-time payment • Lifetime access • No subscription
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold font-heading tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold font-heading tracking-tight text-[var(--plum)] leading-[0.95]">
               Pricing
             </h1>
-            <p className="text-sm md:text-base text-[var(--plum-dark)]/70 mt-2">
+
+            <p className="mt-3 text-sm md:text-base text-[var(--plum-dark)]/70">
               Grab one tool, or unlock everything with Full Hub Access 💜
             </p>
 
-            <div className="mt-5 flex items-center justify-center gap-3">
-              <button
-                onClick={() =>
-                  document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })
-                }
+            <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <motion.button
+                whileHover={reduce ? undefined : { y: -1 }}
+                whileTap={reduce ? undefined : { scale: 0.98 }}
+                onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
                 className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm"
                 type="button"
               >
                 <Sparkles className="w-4 h-4" />
                 See options
-              </button>
+              </motion.button>
 
-              <Link
-                href="/hub"
-                className="inline-flex items-center gap-2 border border-[var(--lilac-medium)] bg-white/70 hover:bg-white text-[var(--plum)] font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm"
-              >
-                What’s inside? <ArrowRight className="w-4 h-4" />
-              </Link>
+              <motion.div whileHover={reduce ? undefined : { y: -1 }} whileTap={reduce ? undefined : { scale: 0.98 }}>
+                <Link
+                  href="/hub"
+                  className="inline-flex items-center gap-2 border border-[var(--lilac-medium)] bg-white/70 hover:bg-white text-[var(--plum)] font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm"
+                >
+                  What’s inside? <ArrowRight className="w-4 h-4" />
+                </Link>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* PACKAGES (compact) */}
-      <section id="packages" className="py-10 md:py-12">
+      {/* PACKAGES */}
+      <section id="packages" className="py-10 md:py-12 relative z-10">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {packages.map((pkg) => {
+            {packages.map((pkg, idx) => {
               const Icon = pkg.icon;
 
               return (
-                <div
+                <motion.div
                   key={pkg.product}
-                  className={[
+                  initial={reduce ? undefined : { opacity: 0, y: 10 }}
+                  animate={reduce ? undefined : { opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, delay: reduce ? 0 : 0.05 * idx, ease: easeOut }}
+                  whileHover={reduce ? undefined : { y: -3 }}
+                  className={cn(
                     'relative bg-white rounded-2xl border transition-all duration-200',
-                    'p-5 hover:shadow-lg hover:-translate-y-0.5',
+                    'p-5 hover:shadow-lg',
                     pkg.highlighted
                       ? 'border-[var(--lavender)] ring-1 ring-[var(--lavender)]/40 shadow-[0_10px_30px_-18px_rgba(84,38,150,0.35)]'
-                      : 'border-[var(--lilac-medium)]',
-                  ].join(' ')}
+                      : 'border-[var(--lilac-medium)]'
+                  )}
                 >
                   {pkg.badge && (
                     <div
-                      className={[
+                      className={cn(
                         'absolute top-3 right-3 text-[11px] font-semibold px-2.5 py-1 rounded-full',
                         pkg.highlighted
                           ? 'bg-[var(--purple)] text-white'
-                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] border border-[var(--lilac-medium)]',
-                      ].join(' ')}
+                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] border border-[var(--lilac-medium)]'
+                      )}
                     >
                       {pkg.badge}
                     </div>
@@ -256,10 +340,10 @@ export default function PricingPage() {
 
                   <div className="flex items-start gap-3">
                     <div
-                      className={[
+                      className={cn(
                         'h-10 w-10 rounded-xl flex items-center justify-center shrink-0',
-                        pkg.highlighted ? 'bg-[var(--lavender)]' : 'bg-[var(--lilac-soft)]',
-                      ].join(' ')}
+                        pkg.highlighted ? 'bg-[var(--lavender)]' : 'bg-[var(--lilac-soft)]'
+                      )}
                     >
                       <Icon className="h-5 w-5 text-[var(--purple)]" />
                     </div>
@@ -310,13 +394,13 @@ export default function PricingPage() {
                       <button
                         onClick={() => handlePurchase(pkg.product)}
                         disabled={loading !== null}
-                        className={[
+                        className={cn(
                           'inline-flex items-center justify-center gap-2 w-full font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm',
                           'disabled:opacity-60 disabled:cursor-not-allowed',
                           pkg.highlighted
                             ? 'bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-md hover:shadow-[var(--purple)]/20'
-                            : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)]',
-                        ].join(' ')}
+                            : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)]'
+                        )}
                         type="button"
                       >
                         {loading === pkg.product ? (
@@ -332,12 +416,12 @@ export default function PricingPage() {
                       </button>
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
 
-          {/* ADD-ONS (chips, not a giant box) */}
+          {/* ADD-ONS */}
           <section className="mt-10 md:mt-12">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-xl md:text-2xl font-bold font-heading text-[var(--plum)]">
@@ -359,7 +443,7 @@ export default function PricingPage() {
             </div>
           </section>
 
-          {/* FAQ (accordion, compact) */}
+          {/* FAQ */}
           <section className="mt-10 md:mt-12">
             <h2 className="text-xl md:text-2xl font-bold font-heading text-[var(--plum)]">
               FAQs
@@ -383,15 +467,13 @@ export default function PricingPage() {
             </div>
           </section>
 
-          {/* FINAL CTA (smaller) */}
+          {/* FINAL CTA */}
           <section className="mt-10 md:mt-12">
             <div className="bg-white/70 border border-[var(--lilac-medium)] rounded-2xl p-6 text-center">
               <h3 className="text-lg md:text-xl font-bold text-[var(--plum)]">
                 Not sure which package is right for you?
               </h3>
-              <p className="text-sm text-[var(--plum-dark)]/70 mt-1">
-                Try a preview first 💜
-              </p>
+              <p className="text-sm text-[var(--plum-dark)]/70 mt-1">Try a preview first 💜</p>
 
               <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
