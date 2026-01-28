@@ -66,8 +66,7 @@ export async function POST(request: NextRequest) {
 
         if (clerkUserId) {
           try {
-            const clerk = await clerkClient();
-            const user = await clerk.users.getUser(clerkUserId);
+             const user = await clerkClient.users.getUser(clerkUserId);
             customerName =
               [user.firstName, user.lastName].filter(Boolean).join(" ") ||
               user.username ||
