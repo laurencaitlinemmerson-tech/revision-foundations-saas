@@ -692,11 +692,12 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
   };
 
   const getSectionStyle = (type?: string) => {
+    const hoverStyle = 'transition-all duration-200 hover:border-[var(--purple)] hover:shadow-md hover:-translate-y-0.5 cursor-default';
     switch (type) {
-      case 'checklist': return 'bg-emerald-50/50 border-emerald-200';
-      case 'warning': return 'bg-amber-50/50 border-amber-200';
-      case 'tip': return 'bg-[var(--lilac-soft)] border-[var(--lavender)]';
-      default: return 'bg-white border-[var(--lilac-medium)]';
+      case 'checklist': return `bg-emerald-50/50 border-emerald-200 ${hoverStyle}`;
+      case 'warning': return `bg-amber-50/50 border-amber-200 ${hoverStyle}`;
+      case 'tip': return `bg-[var(--lilac-soft)] border-[var(--lavender)] ${hoverStyle}`;
+      default: return `bg-white border-[var(--lilac-medium)] ${hoverStyle}`;
     }
   };
 
@@ -747,7 +748,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
                 </div>
                 <ul className="space-y-2">
                   {section.content.map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
+                    <li key={i} className="flex items-start gap-3 p-2 -mx-2 rounded-lg transition-colors hover:bg-[var(--purple)]/5">
                       {section.type === 'checklist' ? (
                         <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-1 flex-shrink-0" />
                       ) : (
