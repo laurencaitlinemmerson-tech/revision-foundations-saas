@@ -4,7 +4,7 @@ import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
-import { Sparkles, BookOpen, FileText, Crown, Heart } from 'lucide-react';
+import { Sparkles, BookOpen, FileText, Crown, Heart, MessageCircle } from 'lucide-react';
 
 type Product = 'osce' | 'quiz' | 'bundle';
 
@@ -127,10 +127,7 @@ export default function HubClient() {
 
         <div className="wave-divider">
           <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path
-              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,150.63,69.29,321.39,56.44Z"
-              fill="var(--cream)"
-            ></path>
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,150.63,69.29,321.39,56.44Z" fill="var(--cream)"></path>
           </svg>
         </div>
       </section>
@@ -157,11 +154,7 @@ export default function HubClient() {
           )}
 
           <div className="grid md:grid-cols-2 gap-8 mt-12">
-            <div
-              className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-left ${
-                !hasProduct('osce') && !hasProduct('bundle') ? 'opacity-60' : ''
-              }`}
-            >
+            <div className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-left ${!hasProduct('osce') && !hasProduct('bundle') ? 'opacity-60' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="icon-box-soft">
                   <BookOpen className="w-6 h-6 text-[var(--purple)]" />
@@ -186,11 +179,7 @@ export default function HubClient() {
               )}
             </div>
 
-            <div
-              className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-right ${
-                !hasProduct('quiz') && !hasProduct('bundle') ? 'opacity-60' : ''
-              }`}
-            >
+            <div className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-right ${!hasProduct('quiz') && !hasProduct('bundle') ? 'opacity-60' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="icon-box-soft">
                   <FileText className="w-6 h-6 text-[var(--purple)]" />
@@ -228,12 +217,71 @@ export default function HubClient() {
 
           <div className="grid gap-8 md:grid-cols-3">
             {[
-              {
-                icon: '📅',
-                title: 'Practice Daily',
-                copy: 'Even 15 minutes a day builds confidence and retention.',
-              },
-              {
-                icon: '🎯',
-                title: 'Focus on Weak Areas',
-                copy: 'Use the tools to identify and strengthen
+              { icon: '📅', title: 'Practice Daily', copy: 'Even 15 minutes a day builds confidence and retention.' },
+              { icon: '🎯', title: 'Focus on Weak Areas', copy: 'Use the tools to identify and strengthen your weak spots.' },
+              { icon: '✨', title: 'Stay Consistent', copy: 'Regular practice beats cramming every time.' },
+            ].map((item, i) => (
+              <div key={item.title} className="card bg-white p-6 text-center animate-on-scroll fade-in-up" style={{ animationDelay: i * 0.1 + 's' }}>
+                <div className="text-4xl mb-3 emoji-float" style={{ animationDelay: i * 0.3 + 's' }}>{item.icon}</div>
+                <h3 className="text-[var(--plum)] mb-2">{item.title}</h3>
+                <p className="text-[var(--plum-dark)]/70 text-sm">{item.copy}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-cream py-16">
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <div className="text-4xl mb-4 animate-on-scroll emoji-float">💬</div>
+          <h2 className="mb-4 text-[var(--plum-dark)] animate-on-scroll">Need Help?</h2>
+          <p className="text-[var(--plum-dark)]/70 mb-6 animate-on-scroll">Got questions or feedback? I am always happy to chat!</p>
+          <Link href="https://wa.me/447572650980" target="_blank" rel="noopener noreferrer" className="whatsapp-btn animate-on-scroll">
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp Me
+          </Link>
+        </div>
+      </section>
+
+      <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
+        <div className="mx-auto flex max-w-6xl flex-col gap-10">
+          <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+            <div className="space-y-4">
+              <div className="font-serif text-2xl font-semibold text-[var(--plum)]">Revision Foundations</div>
+              <p className="text-sm">Made with 💜 by Lauren</p>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-[var(--plum)]">Products</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/osce" className="footer-link">OSCE Tool</Link>
+                <Link href="/quiz" className="footer-link">Core Quiz</Link>
+                <Link href="/pricing" className="footer-link">Pricing</Link>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-[var(--plum)]">Company</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/about" className="footer-link">About</Link>
+                <Link href="/contact" className="footer-link">Contact</Link>
+                <Link href="/privacy" className="footer-link">Privacy Policy</Link>
+                <Link href="/terms" className="footer-link">Terms of Service</Link>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-[var(--plum)]">Account</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/dashboard" className="footer-link">Dashboard</Link>
+                <Link href="/sign-out" className="footer-link">Sign Out</Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[var(--lavender)]/40 pt-6 text-center text-sm">© 2026 Revision Foundations</div>
+        </div>
+      </footer>
+    </div>
+  );
+}
