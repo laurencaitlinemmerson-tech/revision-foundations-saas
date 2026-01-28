@@ -15,6 +15,7 @@ import {
   Mail,
   Check,
   ChevronDown,
+  Stethoscope,
 } from 'lucide-react';
 
 type Product = 'osce' | 'quiz' | 'bundle';
@@ -64,7 +65,7 @@ export default function PricingPage() {
         badge: isPro ? 'Purchased ✓' : 'Most popular',
         highlighted: true,
         perfectFor: 'Students who want everything in one go',
-        ctaText: isPro ? 'Go to Hub' : 'Get Full Hub Access',
+        ctaText: isPro ? 'Go to Hub' : 'Unlock everything',
         product: 'bundle' as const,
         icon: Gift,
       },
@@ -187,54 +188,72 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream relative overflow-hidden">
       <Navbar />
 
-      {/* CSS-only animated vibe */}
+      {/* ✅ SAME HUB BACKGROUND VIBE */}
       <div className="pointer-events-none absolute inset-0 -z-0">
-        {/* subtle grain */}
         <div className="absolute inset-0 opacity-[0.06] mix-blend-multiply bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.25)_1px,transparent_0)] [background-size:18px_18px]" />
-
-        {/* animated blobs */}
         <div className="blob-anim blob-a" />
         <div className="blob-anim blob-b" />
-
-        {/* shimmer line */}
-        <div className="absolute inset-x-0 top-0 h-px opacity-60 shimmer-line" />
       </div>
 
-      {/* HERO */}
-      <section className="gradient-hero text-[var(--plum)] py-8 md:py-10 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 relative z-10">
-          <div className="max-w-2xl mx-auto text-center animate-fadeUp">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/70 px-3 py-1.5 text-[11px] text-[var(--plum-dark)]/70 mb-4">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--purple)]" />
-              One-time payment • Lifetime access • No subscription
-            </div>
+      {/* ✅ HUB-STYLE HERO */}
+      <section className="relative overflow-hidden py-16 md:py-20">
+        <div className="absolute inset-0 bg-[radial-gradient(1100px_450px_at_50%_0%,rgba(236,72,153,0.22),transparent_55%),radial-gradient(900px_520px_at_90%_30%,rgba(168,85,247,0.20),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.00),rgba(255,255,255,0.50))]" />
 
-            <h1 className="text-4xl md:text-5xl font-bold font-heading tracking-tight text-[var(--plum)] leading-[0.95]">
-              Pricing
-            </h1>
-
-            <p className="mt-3 text-sm md:text-base text-[var(--plum-dark)]/70">
-              Grab one tool, or unlock everything with Full Hub Access 💜
-            </p>
-
-            <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm hover:-translate-y-[1px]"
-                type="button"
-              >
-                <Sparkles className="w-4 h-4" />
-                See options
-              </button>
-
-              <Link
-                href="/hub"
-                className="inline-flex items-center gap-2 border border-[var(--lilac-medium)] bg-white/70 hover:bg-white text-[var(--plum)] font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm hover:-translate-y-[1px]"
-              >
-                What’s inside? <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+        <div className="relative max-w-5xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/70 px-4 py-2 text-xs text-[var(--plum-dark)]/70 shadow-sm">
+            <Stethoscope className="w-4 h-4 text-[var(--purple)]" />
+            Pricing <span className="text-[var(--plum-dark)]/40">✦</span>{' '}
+            One-time payment • Lifetime access
+            <Sparkles className="w-4 h-4 text-pink-500/70" />
           </div>
+
+          <h1 className="mt-10 text-5xl md:text-6xl font-heading font-bold tracking-tight text-[var(--plum)] leading-[0.95] animate-fadeUp">
+            Pricing
+          </h1>
+
+          <p className="mt-4 text-base md:text-lg text-[var(--plum-dark)]/70 max-w-2xl mx-auto animate-fadeUp">
+            Pick one tool, or unlock everything with <span className="font-semibold">Full Hub Access</span> 💜
+          </p>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fadeUp">
+            {/* outlined button like hub */}
+            <button
+              onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[var(--lavender)] bg-white/70 hover:bg-white text-[var(--purple)] font-semibold px-8 py-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md"
+              type="button"
+            >
+              <ArrowRight className="w-5 h-5 rotate-90" />
+              Browse options
+            </button>
+
+            {/* gradient CTA like hub */}
+            <button
+              onClick={() => handlePurchase('bundle')}
+              disabled={loading !== null}
+              className={cn(
+                'inline-flex items-center justify-center gap-2 rounded-full font-semibold px-8 py-3 transition-all duration-200',
+                'text-white hover:-translate-y-[1px] hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed',
+                'bg-[linear-gradient(90deg,#A855F7_0%,#EC4899_100%)]'
+              )}
+              type="button"
+            >
+              {loading === 'bundle' ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  Unlock everything
+                </>
+              )}
+            </button>
+          </div>
+
+          <p className="mt-5 text-xs text-[var(--plum-dark)]/55">
+            Guests can checkout with email — no account needed ✨
+          </p>
         </div>
       </section>
 
@@ -359,7 +378,9 @@ export default function PricingPage() {
               <h2 className="text-xl md:text-2xl font-bold font-heading text-[var(--plum)]">
                 Add-ons
               </h2>
-              <span className="text-xs text-[var(--plum-dark)]/60">Included with Full Hub Access</span>
+              <span className="text-xs text-[var(--plum-dark)]/60">
+                Included with Full Hub Access
+              </span>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -400,7 +421,7 @@ export default function PricingPage() {
           </section>
 
           {/* FINAL CTA */}
-          <section className="mt-10 md:mt-12">
+          <section className="mt-10 md:mt-12 pb-10">
             <div className="bg-white/70 border border-[var(--lilac-medium)] rounded-2xl p-6 text-center">
               <h3 className="text-lg md:text-xl font-bold text-[var(--plum)]">
                 Not sure which package is right for you?
@@ -425,16 +446,10 @@ export default function PricingPage() {
               </div>
             </div>
           </section>
-
-          {!isSignedIn && (
-            <div className="pt-8 text-center text-xs text-[var(--plum-dark)]/55">
-              No account needed — checkout with email ✨
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Local CSS for animation vibes */}
+      {/* ✅ CSS animations: same floaty blob vibe as hub */}
       <style jsx global>{`
         @keyframes floatA {
           0% {
@@ -466,18 +481,6 @@ export default function PricingPage() {
           }
         }
 
-        @keyframes shimmer {
-          0% {
-            opacity: 0.15;
-          }
-          50% {
-            opacity: 0.65;
-          }
-          100% {
-            opacity: 0.15;
-          }
-        }
-
         @keyframes fadeUp {
           0% {
             opacity: 0;
@@ -501,8 +504,8 @@ export default function PricingPage() {
           left: -96px;
           height: 380px;
           width: 380px;
-          background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.28), transparent 62%),
-            radial-gradient(circle at 70% 70%, rgba(236, 72, 153, 0.2), transparent 62%);
+          background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.22), transparent 62%),
+            radial-gradient(circle at 70% 70%, rgba(168, 85, 247, 0.18), transparent 62%);
           animation: floatA 14s ease-in-out infinite;
         }
 
@@ -511,20 +514,9 @@ export default function PricingPage() {
           right: -120px;
           height: 420px;
           width: 420px;
-          background: radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.2), transparent 62%),
-            radial-gradient(circle at 70% 60%, rgba(168, 85, 247, 0.22), transparent 62%);
+          background: radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.16), transparent 62%),
+            radial-gradient(circle at 70% 60%, rgba(168, 85, 247, 0.18), transparent 62%);
           animation: floatB 16s ease-in-out infinite;
-        }
-
-        .shimmer-line {
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(168, 85, 247, 0.55),
-            rgba(236, 72, 153, 0.35),
-            transparent
-          );
-          animation: shimmer 3.8s ease-in-out infinite;
         }
 
         .animate-fadeUp {
@@ -534,7 +526,6 @@ export default function PricingPage() {
         @media (prefers-reduced-motion: reduce) {
           .blob-a,
           .blob-b,
-          .shimmer-line,
           .animate-fadeUp {
             animation: none !important;
           }
