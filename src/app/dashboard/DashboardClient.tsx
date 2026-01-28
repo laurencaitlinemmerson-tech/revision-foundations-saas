@@ -3,7 +3,8 @@
 import { useEffect, ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Sparkles, Heart } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 interface DashboardClientProps {
   children: ReactNode;
@@ -33,26 +34,25 @@ export default function DashboardClient({ children, firstName }: DashboardClient
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="gradient-hero pt-32 pb-12 relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.25 }} />
-        <div className="blob blob-2" style={{ opacity: 0.25 }} />
-
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="animate-on-scroll hero-badge">
-              <Heart className="w-4 h-4 text-[var(--pink)]" />
-              <span className="text-[var(--plum)]">Dashboard</span>
-              <Sparkles className="w-4 h-4 text-[var(--purple)] icon-pulse" />
+      {/* Compact Hero */}
+      <section className="pt-28 pb-6 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="animate-on-scroll text-2xl md:text-3xl font-display text-[var(--plum-dark)]">
+                Hey, {firstName}! 👋
+              </h1>
+              <p className="animate-on-scroll text-[var(--plum)] mt-1">
+                Ready to smash your revision today?
+              </p>
             </div>
-
-            <h1 className="animate-on-scroll mb-2 hero-title">
-              <span className="gradient-text">Hey, {firstName}!</span>
-            </h1>
-
-            <p className="animate-on-scroll hero-description !mb-6">
-              Ready to smash your revision today? 💜
-            </p>
+            <Link 
+              href="/hub" 
+              className="animate-on-scroll btn-primary inline-flex items-center gap-2 w-fit"
+            >
+              Go to Hub
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>

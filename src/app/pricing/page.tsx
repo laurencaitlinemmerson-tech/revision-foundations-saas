@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Gift, Mail, ArrowRight } from 'lucide-react';
+import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Mail, ArrowRight } from 'lucide-react';
 
 export default function PricingPage() {
   const { isSignedIn, user } = useUser();
@@ -90,45 +90,19 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="gradient-hero pt-32 pb-12 relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.25 }} />
-        <div className="blob blob-2" style={{ opacity: 0.25 }} />
-
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="animate-on-scroll hero-badge">
-              <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-              <span className="text-[var(--plum)]">Pricing</span>
-              <Gift className="w-4 h-4 text-[var(--pink)] icon-pulse" />
-            </div>
-
-            <h1 className="animate-on-scroll mb-2 hero-title">
-              <span className="gradient-text">Simple Pricing</span>
-            </h1>
-
-            <p className="animate-on-scroll hero-description !mb-6">
-              One-time payment • lifetime access • no subscriptions 💜
-            </p>
-
-            {/* Trust Strip */}
-            <div className="animate-on-scroll flex flex-wrap justify-center gap-2 md:gap-3">
-              {[
-                { icon: '🔒', label: 'Secure Checkout' },
-                { icon: '⚡', label: 'Instant Access' },
-                { icon: '💜', label: 'Lifetime Updates' },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/80 backdrop-blur-sm shadow-sm"
-                >
-                  <div className="h-9 w-9 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
-                    <span className="h-4 w-4 flex items-center justify-center text-sm">{item.icon}</span>
-                  </div>
-                  <span className="text-sm font-medium text-[var(--plum-dark)]">{item.label}</span>
-                </div>
-              ))}
-            </div>
+      {/* Compact Hero */}
+      <section className="pt-28 pb-8 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h1 className="animate-on-scroll text-3xl md:text-4xl font-display text-[var(--plum-dark)] mb-2">
+            Simple Pricing 💜
+          </h1>
+          <p className="animate-on-scroll text-[var(--plum)] text-lg mb-4">
+            One-time payment • lifetime access • no subscriptions
+          </p>
+          <div className="animate-on-scroll flex flex-wrap justify-center gap-3 text-sm text-[var(--plum)]">
+            <span className="flex items-center gap-1">🔒 Secure</span>
+            <span className="flex items-center gap-1">⚡ Instant Access</span>
+            <span className="flex items-center gap-1">♾️ Lifetime Updates</span>
           </div>
         </div>
       </section>

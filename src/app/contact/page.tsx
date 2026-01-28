@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Mail, MessageSquare, Send, Loader2, CheckCircle, Sparkles, Heart } from 'lucide-react';
+import { Mail, Send, Loader2, CheckCircle } from 'lucide-react';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -50,27 +50,15 @@ export default function ContactPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="gradient-hero pt-32 pb-12 relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.25 }} />
-        <div className="blob blob-2" style={{ opacity: 0.25 }} />
-
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="animate-on-scroll hero-badge">
-              <MessageSquare className="w-4 h-4 text-[var(--purple)]" />
-              <span className="text-[var(--plum)]">Contact</span>
-              <Heart className="w-4 h-4 text-[var(--pink)] icon-pulse" />
-            </div>
-
-            <h1 className="animate-on-scroll mb-2 hero-title">
-              <span className="gradient-text">Get in Touch</span>
-            </h1>
-
-            <p className="animate-on-scroll hero-description !mb-6">
-              Have a question or feedback? We&apos;d love to hear from you 💜
-            </p>
-          </div>
+      {/* Compact Hero */}
+      <section className="pt-28 pb-8 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h1 className="animate-on-scroll text-3xl md:text-4xl font-display text-[var(--plum-dark)] mb-2">
+            Get in Touch 💬
+          </h1>
+          <p className="animate-on-scroll text-[var(--plum)] text-lg">
+            Have a question or feedback? We&apos;d love to hear from you
+          </p>
         </div>
       </section>
 
