@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import { Heart } from 'lucide-react';
 
 export default function AboutPage() {
   // Scroll animations
