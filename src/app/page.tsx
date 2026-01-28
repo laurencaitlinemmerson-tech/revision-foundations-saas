@@ -92,8 +92,12 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-cream">
-      <Navbar />
+  <div className="min-h-screen">
+    <Navbar />
+    ...
+  </div>
+);
+
 
       {/* Hero Section */}
       <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center">
