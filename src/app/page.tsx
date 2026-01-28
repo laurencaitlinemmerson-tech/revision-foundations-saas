@@ -92,12 +92,8 @@ export default function HomePage() {
   }, []);
 
   return (
-  <div className="min-h-screen">
-    <Navbar />
-    ...
-  </div>
-);
-
+    <div className="min-h-screen bg-cream">
+      <Navbar />
 
       {/* Hero Section */}
       <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center">
@@ -163,11 +159,11 @@ export default function HomePage() {
               <div
                 key={s.id}
                 className="animate-on-scroll stat-card"
-                style={{ animationDelay: (i * 0.1) + 's' }}
+                style={{ animationDelay: i * 0.1 + 's' }}
               >
                 <span
                   className="text-2xl mb-2 block emoji-float"
-                  style={{ animationDelay: (i * 0.2) + 's' }}
+                  style={{ animationDelay: i * 0.2 + 's' }}
                 >
                   {s.icon}
                 </span>
@@ -195,9 +191,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-left">
               <h3 className="mb-3 text-[var(--plum-dark)]">Children&apos;s OSCE Tool</h3>
-              <p className="mb-6 text-[var(--plum-dark)]/70">
-                Prepared for placements. 50+ stations.
-              </p>
+              <p className="mb-6 text-[var(--plum-dark)]/70">Prepared for placements. 50+ stations.</p>
               <Link href="/osce" className="btn-primary btn-hover w-full block text-center">
                 Try OSCE Tool
               </Link>
@@ -243,12 +237,9 @@ export default function HomePage() {
               <div
                 key={item.title}
                 className="space-y-3 animate-on-scroll fade-in-up"
-                style={{ animationDelay: (i * 0.1) + 's' }}
+                style={{ animationDelay: i * 0.1 + 's' }}
               >
-                <div
-                  className="text-4xl emoji-float"
-                  style={{ animationDelay: (i * 0.3) + 's' }}
-                >
+                <div className="text-4xl emoji-float" style={{ animationDelay: i * 0.3 + 's' }}>
                   {item.icon}
                 </div>
                 <h3 className="text-[var(--plum)]">{item.title}</h3>
@@ -321,6 +312,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Footer */}
       <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
         <div className="mx-auto flex max-w-6xl flex-col gap-10">
           <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
