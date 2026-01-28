@@ -305,7 +305,7 @@ export default function HubClient({
     }, stepDuration);
   }, []);
 
-  // Scroll animations (same as home)
+  // Scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -323,7 +323,7 @@ export default function HubClient({
     return () => observer.disconnect();
   }, []);
 
-  // Counter animation trigger
+  // Counter trigger
   useEffect(() => {
     if (!statsRef.current || hasAnimated) return;
 
@@ -382,13 +382,12 @@ export default function HubClient({
       <div className="min-h-screen bg-cream">
         <Navbar />
 
-        {/* Hero (full screen like Home) */}
-        <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center">
-          <div className="blob blob-1" />
-          <div className="blob blob-2" />
-          <div className="blob blob-3" />
+        {/* Smaller Hero */}
+        <section className="gradient-hero pt-28 pb-12 relative overflow-hidden">
+          <div className="blob blob-1" style={{ opacity: 0.25 }} />
+          <div className="blob blob-2" style={{ opacity: 0.25 }} />
 
-          <div className="max-w-6xl mx-auto px-6 py-32 relative z-10 w-full">
+          <div className="max-w-6xl mx-auto px-6 relative z-10">
             <div className="text-center max-w-3xl mx-auto">
               <div className="animate-on-scroll hero-badge">
                 <Stethoscope className="w-4 h-4 text-[var(--purple)]" />
@@ -400,26 +399,22 @@ export default function HubClient({
                 <span className="gradient-text">Nursing Hub</span>
               </h1>
 
-              <p className="animate-on-scroll hero-subtitle">
-                Your Nursing Bestie for OSCEs, exams & placement survival
+              <p className="animate-on-scroll hero-description !mb-6">
+                Find exactly what you need for OSCEs, exams & placement survival.
               </p>
 
-              <p className="animate-on-scroll hero-description">
-                Free checklists, printable templates, and deep-dive guides — with premium resources when you’re ready.
-              </p>
-
-              <div className="animate-on-scroll hero-cta-group">
+              <div className="animate-on-scroll flex flex-col sm:flex-row gap-4 justify-center">
                 <a
                   href="#resources"
-                  className="btn-secondary btn-hover text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+                  className="btn-secondary btn-hover text-base px-7 py-3 inline-flex items-center justify-center gap-2"
                 >
                   <ArrowDown className="w-5 h-5" />
-                  Browse free resources
+                  Browse resources
                 </a>
 
                 <Link
                   href="/pricing"
-                  className="btn-primary btn-hover text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+                  className="btn-primary btn-hover text-base px-7 py-3 inline-flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
                   Unlock everything
@@ -427,20 +422,10 @@ export default function HubClient({
               </div>
             </div>
           </div>
-
-          {/* Wave divider like Home */}
-          <div className="wave-divider">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-              <path
-                d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,150.63,69.29,321.39,56.44Z"
-                fill="var(--cream)"
-              />
-            </svg>
-          </div>
         </section>
 
-        {/* Stats (home vibe) */}
-        <section className="bg-cream py-12" ref={statsRef}>
+        {/* Stats */}
+        <section className="bg-cream py-10" ref={statsRef}>
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
@@ -454,7 +439,10 @@ export default function HubClient({
                   className="animate-on-scroll stat-card"
                   style={{ animationDelay: i * 0.1 + 's' }}
                 >
-                  <span className="text-2xl mb-2 block emoji-float" style={{ animationDelay: i * 0.2 + 's' }}>
+                  <span
+                    className="text-2xl mb-2 block emoji-float"
+                    style={{ animationDelay: i * 0.2 + 's' }}
+                  >
                     {s.icon}
                   </span>
 
@@ -476,7 +464,6 @@ export default function HubClient({
         {/* Search & Filters */}
         <section id="resources" className="bg-cream py-10">
           <div className="max-w-6xl mx-auto px-6">
-            {/* Search */}
             <div className="animate-on-scroll relative max-w-md mx-auto mb-6">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--plum-dark)]/40" />
               <input
@@ -488,7 +475,6 @@ export default function HubClient({
               />
             </div>
 
-            {/* Filter chips */}
             <div className="animate-on-scroll flex flex-wrap justify-center gap-2 mb-6">
               {filterTags.map((tag) => (
                 <button
@@ -516,7 +502,6 @@ export default function HubClient({
               )}
             </div>
 
-            {/* Legend */}
             <div className="animate-on-scroll flex justify-center gap-6 text-sm text-[var(--plum-dark)]/60 mb-8">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-emerald-500" />
@@ -563,7 +548,7 @@ export default function HubClient({
           </div>
         </section>
 
-        {/* Premium Upsell - Hide if already Pro */}
+        {/* Premium Upsell */}
         {!isPro && (
           <section className="py-16">
             <div className="max-w-4xl mx-auto px-6">
