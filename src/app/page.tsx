@@ -10,11 +10,9 @@ export default function HomePage() {
   const [counters, setCounters] = useState<Record<string, number>>({});
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
-
   const intervalRef = useRef<number | null>(null);
 
   const animateCounter = useCallback((id: string, target: number, duration: number) => {
-    // clear any existing interval
     if (intervalRef.current !== null) {
       window.clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -27,10 +25,8 @@ export default function HomePage() {
 
     intervalRef.current = window.setInterval(() => {
       current += increment;
-
       if (current >= target) {
         setCounters((prev) => ({ ...prev, [id]: target }));
-
         if (intervalRef.current !== null) {
           window.clearInterval(intervalRef.current);
           intervalRef.current = null;
@@ -41,7 +37,6 @@ export default function HomePage() {
     }, stepDuration);
   }, []);
 
-  // Scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
@@ -61,7 +56,6 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
-  // Counter animation trigger
   useEffect(() => {
     if (!statsRef.current || hasAnimated) return;
 
@@ -77,11 +71,9 @@ export default function HomePage() {
     );
 
     observer.observe(statsRef.current);
-
     return () => observer.disconnect();
   }, [hasAnimated, animateCounter]);
 
-  // Cleanup any running interval on unmount
   useEffect(() => {
     return () => {
       if (intervalRef.current !== null) {
@@ -95,13 +87,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center pt-20">
+      <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
         <div className="blob blob-3" />
 
-        <div className="max-w-6xl mx-auto px-6 py-16 relative z-10">
+        <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
             <div className="hero-badge">
               <Sparkles className="w-4 h-4 text-[var(--purple)] icon-spin" />
@@ -116,8 +107,7 @@ export default function HomePage() {
             <p className="hero-subtitle">Your Nursing Bestie for OSCEs & Exams</p>
 
             <p className="hero-description">
-              Know what to revise, how to revise, and feel confident walking into placements and
-              assessments.
+              Know what to revise, how to revise, and feel confident walking into placements and assessments.
             </p>
 
             <div className="hero-cta-group">
@@ -146,7 +136,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats */}
       <section className="bg-cream py-16" ref={statsRef}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -179,7 +168,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Tools Section */}
       <section className="bg-lilac section relative overflow-hidden">
         <div className="blob blob-1" style={{ opacity: 0.3 }} />
         <div className="max-w-6xl mx-auto px-6 relative z-10">
@@ -208,7 +196,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Us Section */}
       <section className="bg-cream section">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <span className="badge badge-purple mb-4 inline-flex animate-on-scroll badge-shimmer">
@@ -250,10 +237,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
       <Testimonials />
 
-      {/* Leave Review Section */}
       <section className="bg-cream py-12">
         <div className="flex justify-center">
           <a href="/review" className="review-link">
@@ -264,7 +249,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="gradient-hero section relative overflow-hidden">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
@@ -295,7 +279,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* WhatsApp CTA */}
       <section className="bg-cream py-12">
         <div className="max-w-2xl mx-auto px-6 text-center">
           <p className="text-[var(--plum-dark)]/70 mb-4 animate-on-scroll">
@@ -312,7 +295,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
         <div className="mx-auto flex max-w-6xl flex-col gap-10">
           <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
