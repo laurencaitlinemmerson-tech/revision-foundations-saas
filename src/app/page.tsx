@@ -47,7 +47,9 @@ export default function HomePage() {
       (entries: IntersectionObserverEntry[]) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            (entry.target as HTMLElement).classList.add('animate-in');
+            const target = entry.target as HTMLElement;
+            target.dataset.animate = 'in';
+            observer.unobserve(target);
           }
         });
       },
