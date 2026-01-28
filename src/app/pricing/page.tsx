@@ -4,16 +4,7 @@ import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import {
-  Check,
-  Sparkles,
-  BookOpen,
-  ClipboardCheck,
-  Loader2,
-  Play,
-  Gift,
-  Mail,
-} from 'lucide-react';
+import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Gift, Mail } from 'lucide-react';
 
 export default function PricingPage() {
   const { isSignedIn } = useUser();
@@ -58,8 +49,7 @@ export default function PricingPage() {
       throw new Error(data?.error || 'No checkout URL returned');
     } catch (error: any) {
       console.error('Checkout error:', error);
-      const message =
-        error?.message || 'Something went wrong. Please try again or contact support.';
+      const message = error?.message || 'Something went wrong. Please try again or contact support.';
       alert(`Oops! ${message}`);
     } finally {
       setLoading(null);
@@ -133,15 +123,11 @@ export default function PricingPage() {
 
               <div className="text-center md:text-right">
                 <div className="mb-2">
-                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">
-                    £14.99
-                  </span>
+                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£14.99</span>
                 </div>
 
                 <div className="stat-number mb-1">£9.99</div>
-                <p className="text-sm text-[var(--plum-dark)]/70 mb-4">
-                  one-time payment • lifetime access
-                </p>
+                <p className="text-sm text-[var(--plum-dark)]/70 mb-4">one-time payment • lifetime access</p>
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
                   <div className="space-y-3">
@@ -159,11 +145,8 @@ export default function PricingPage() {
                       />
                     </div>
                     {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
-                    <button
-                      onClick={() => handleGuestCheckout('bundle')}
-                      disabled={loading !== null}
-                      className="btn-primary w-full"
-                    >
+
+                    <button onClick={() => handleGuestCheckout('bundle')} disabled={loading !== null} className="btn-primary w-full">
                       {loading === 'bundle' ? (
                         <>
                           <Loader2 className="w-5 h-5 animate-spin" /> Processing...
@@ -176,11 +159,7 @@ export default function PricingPage() {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => handlePurchase('bundle')}
-                    disabled={loading !== null}
-                    className="btn-primary px-8"
-                  >
+                  <button onClick={() => handlePurchase('bundle')} disabled={loading !== null} className="btn-primary px-8">
                     {loading === 'bundle' ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" /> Processing...
@@ -212,16 +191,14 @@ export default function PricingPage() {
               </p>
 
               <div className="space-y-2 mb-6">
-                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map(
-                  (f) => (
-                    <div key={f} className="feature-check">
-                      <div className="check-icon">
-                        <Check className="w-3.5 h-3.5 text-green-600" />
-                      </div>
-                      <span className="text-sm text-[var(--plum-dark)]">{f}</span>
+                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map((f) => (
+                  <div key={f} className="feature-check">
+                    <div className="check-icon">
+                      <Check className="w-3.5 h-3.5 text-green-600" />
                     </div>
-                  )
-                )}
+                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
+                  </div>
+                ))}
               </div>
 
               {showEmailInput === 'osce' && !isSignedIn ? (
@@ -240,11 +217,7 @@ export default function PricingPage() {
                     />
                   </div>
                   {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
-                  <button
-                    onClick={() => handleGuestCheckout('osce')}
-                    disabled={loading !== null}
-                    className="btn-secondary w-full"
-                  >
+                  <button onClick={() => handleGuestCheckout('osce')} disabled={loading !== null} className="btn-secondary w-full">
                     {loading === 'osce' ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" /> Processing...
@@ -257,11 +230,7 @@ export default function PricingPage() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => handlePurchase('osce')}
-                  disabled={loading !== null}
-                  className="btn-secondary w-full"
-                >
+                <button onClick={() => handlePurchase('osce')} disabled={loading !== null} className="btn-secondary w-full">
                   {loading === 'osce' ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" /> Processing...
@@ -285,16 +254,14 @@ export default function PricingPage() {
               </p>
 
               <div className="space-y-2 mb-6">
-                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map(
-                  (f) => (
-                    <div key={f} className="feature-check">
-                      <div className="check-icon">
-                        <Check className="w-3.5 h-3.5 text-green-600" />
-                      </div>
-                      <span className="text-sm text-[var(--plum-dark)]">{f}</span>
+                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map((f) => (
+                  <div key={f} className="feature-check">
+                    <div className="check-icon">
+                      <Check className="w-3.5 h-3.5 text-green-600" />
                     </div>
-                  )
-                )}
+                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
+                  </div>
+                ))}
               </div>
 
               {showEmailInput === 'quiz' && !isSignedIn ? (
@@ -313,11 +280,7 @@ export default function PricingPage() {
                     />
                   </div>
                   {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
-                  <button
-                    onClick={() => handleGuestCheckout('quiz')}
-                    disabled={loading !== null}
-                    className="btn-secondary w-full"
-                  >
+                  <button onClick={() => handleGuestCheckout('quiz')} disabled={loading !== null} className="btn-secondary w-full">
                     {loading === 'quiz' ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" /> Processing...
@@ -330,11 +293,7 @@ export default function PricingPage() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => handlePurchase('quiz')}
-                  disabled={loading !== null}
-                  className="btn-secondary w-full"
-                >
+                <button onClick={() => handlePurchase('quiz')} disabled={loading !== null} className="btn-secondary w-full">
                   {loading === 'quiz' ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" /> Processing...
@@ -356,22 +315,10 @@ export default function PricingPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {[
-                {
-                  q: 'Is this a subscription?',
-                  a: 'No — it’s a one-time payment with lifetime access ✨',
-                },
-                {
-                  q: 'Do I need an account?',
-                  a: 'No! Just enter your email at checkout.',
-                },
-                {
-                  q: 'What payment methods?',
-                  a: 'All major cards via Stripe 💳',
-                },
-                {
-                  q: 'Can I get a refund?',
-                  a: 'Yes, within 7 days if not happy!',
-                },
+                { q: 'Is this a subscription?', a: 'No — it’s a one-time payment with lifetime access ✨' },
+                { q: 'Do I need an account?', a: 'No! Just enter your email at checkout.' },
+                { q: 'What payment methods?', a: 'All major cards via Stripe 💳' },
+                { q: 'Can I get a refund?', a: 'Yes, within 7 days if not happy!' },
               ].map((faq, i) => (
                 <div key={i} className="p-4 rounded-xl bg-[var(--lilac-soft)]">
                   <h4 className="font-semibold text-[var(--plum)] text-sm mb-1">{faq.q}</h4>
@@ -383,20 +330,22 @@ export default function PricingPage() {
 
           {/* Free preview */}
           <div className="text-center mt-10">
-  <p className="text-[var(--plum-dark)]/60 text-sm mb-4">
-    Not sure yet? Try it first!
-  </p>
+            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">Not sure yet? Try it first!</p>
 
-  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-    <Link href="/quiz" className="btn-secondary text-sm">
-      <Play className="w-4 h-4" />
-      Try Quiz Preview
-    </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/quiz" className="btn-secondary text-sm">
+                <Play className="w-4 h-4" />
+                Try Quiz Preview
+              </Link>
 
-    <Link href="/osce" className="btn-secondary text-sm">
-      <Play className="w-4 h-4" />
-      Try OSCE Preview
-    </Link>
-  </div>
-</div>
-
+              <Link href="/osce" className="btn-secondary text-sm">
+                <Play className="w-4 h-4" />
+                Try OSCE Preview
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
