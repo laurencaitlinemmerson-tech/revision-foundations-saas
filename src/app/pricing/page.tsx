@@ -1,12 +1,26 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Sparkles, Gift, ClipboardCheck, BookOpen, Play, ArrowRight, Loader2, Mail } from 'lucide-react';
+import {
+  Sparkles,
+  Gift,
+  ClipboardCheck,
+  BookOpen,
+  Play,
+  ArrowRight,
+  Loader2,
+  Mail,
+  Check,
+} from 'lucide-react';
 
 type Product = 'osce' | 'quiz' | 'bundle';
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(' ');
+}
 
 function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -150,6 +164,7 @@ export default function PricingPage() {
         onClick={() => handlePurchase(product)}
         disabled={loading !== null}
         className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold py-3 px-6 bg-[var(--purple)] text-white hover:bg-[var(--plum)] transition-all"
+        type="button"
       >
         {loading === product ? (
           <>
@@ -168,19 +183,15 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* HERO — same as his, just your palette */}
+      {/* HERO */}
       <section className="gradient-hero py-16 md:py-24 relative overflow-hidden">
         <div className="blob blob-1" style={{ opacity: 0.2 }} />
         <div className="blob blob-2" style={{ opacity: 0.2 }} />
 
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-heading text-[var(--plum)]">
-              PRICING
-            </h1>
-            <p className="text-xl text-[var(--plum-dark)]/70 mb-8">
-              One-time payment • lifetime access • no subscriptions 💜
-            </p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-heading text-[var(--plum)]">PRICING</h1>
+            <p className="text-xl text-[var(--plum-dark)]/70 mb-8">One-time payment • lifetime access • no subscriptions 💜</p>
 
             <button
               onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
@@ -191,14 +202,12 @@ export default function PricingPage() {
               See options
             </button>
 
-            <p className="text-xs text-[var(--plum-dark)]/55 mt-3">
-              Full Hub Access includes everything (and future updates) ✨
-            </p>
+            <p className="text-xs text-[var(--plum-dark)]/55 mt-3">Full Hub Access includes everything (and future updates) ✨</p>
           </div>
         </div>
       </section>
 
-      {/* CARDS — same grid */}
+      {/* CARDS */}
       <section id="packages" className="py-16 md:py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -208,11 +217,10 @@ export default function PricingPage() {
               return (
                 <div
                   key={pkg.product}
-                  className={`
-                    relative rounded-3xl bg-white border p-7
-                    ${pkg.highlighted ? 'border-[var(--lavender)] shadow-lg' : 'border-[var(--lilac-medium)]'}
-                    transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
-                  `}
+                  className={cx(
+                    'relative rounded-3xl bg-white border p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl',
+                    pkg.highlighted ? 'border-[var(--lavender)] shadow-lg' : 'border-[var(--lilac-medium)]'
+                  )}
                 >
                   {pkg.badge && (
                     <div className="absolute top-4 right-4 text-[11px] font-bold px-3 py-1 rounded-full bg-[var(--purple)] text-white">
@@ -329,12 +337,8 @@ export default function PricingPage() {
       <section className="py-16 bg-white/60 border-t border-[var(--lilac-medium)]">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--plum)] font-heading">
-              Not sure yet?
-            </h2>
-            <p className="text-xl text-[var(--plum-dark)]/70 mb-8">
-              Try a preview first 💜
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--plum)] font-heading">Not sure yet?</h2>
+            <p className="text-xl text-[var(--plum-dark)]/70 mb-8">Try a preview first 💜</p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
