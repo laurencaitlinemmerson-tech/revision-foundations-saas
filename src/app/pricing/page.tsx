@@ -157,4 +157,389 @@ export default function PricingPage() {
             setGuestEmail(e.target.value);
             setEmailError('');
           }}
-          className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-[var(--lilac-medium)] bg-white focus:outline-none foc
+          className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-4 focus:ring-[var(--lavender)]/40 focus:border-[var(--purple)] text-sm"
+        />
+      </div>
+
+      {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
+
+      <button
+        onClick={() => handlePurchase(product)}
+        disabled={loading !== null}
+        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 disabled:opacity-60 disabled:cursor-not-allowed text-sm"
+        type="button"
+      >
+        {loading === product ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" /> Processing...
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-4 h-4" />
+            Continue to payment
+          </>
+        )}
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-cream relative overflow-hidden">
+      <Navbar />
+
+      {/* CSS-only animated vibe */}
+      <div className="pointer-events-none absolute inset-0 -z-0">
+        {/* subtle grain */}
+        <div className="absolute inset-0 opacity-[0.06] mix-blend-multiply bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.25)_1px,transparent_0)] [background-size:18px_18px]" />
+
+        {/* animated blobs */}
+        <div className="blob-anim blob-a" />
+        <div className="blob-anim blob-b" />
+
+        {/* shimmer line */}
+        <div className="absolute inset-x-0 top-0 h-px opacity-60 shimmer-line" />
+      </div>
+
+      {/* HERO */}
+      <section className="gradient-hero text-[var(--plum)] py-8 md:py-10 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6 relative z-10">
+          <div className="max-w-2xl mx-auto text-center animate-fadeUp">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/70 px-3 py-1.5 text-[11px] text-[var(--plum-dark)]/70 mb-4">
+              <Sparkles className="w-3.5 h-3.5 text-[var(--purple)]" />
+              One-time payment • Lifetime access • No subscription
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold font-heading tracking-tight text-[var(--plum)] leading-[0.95]">
+              Pricing
+            </h1>
+
+            <p className="mt-3 text-sm md:text-base text-[var(--plum-dark)]/70">
+              Grab one tool, or unlock everything with Full Hub Access 💜
+            </p>
+
+            <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm hover:-translate-y-[1px]"
+                type="button"
+              >
+                <Sparkles className="w-4 h-4" />
+                See options
+              </button>
+
+              <Link
+                href="/hub"
+                className="inline-flex items-center gap-2 border border-[var(--lilac-medium)] bg-white/70 hover:bg-white text-[var(--plum)] font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm hover:-translate-y-[1px]"
+              >
+                What’s inside? <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PACKAGES */}
+      <section id="packages" className="py-10 md:py-12 relative z-10">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {packages.map((pkg, idx) => {
+              const Icon = pkg.icon;
+
+              return (
+                <div
+                  key={pkg.product}
+                  className={cn(
+                    'relative bg-white rounded-2xl border transition-all duration-200 p-5 hover:shadow-lg hover:-translate-y-1',
+                    'animate-fadeUp',
+                    pkg.highlighted
+                      ? 'border-[var(--lavender)] ring-1 ring-[var(--lavender)]/40 shadow-[0_10px_30px_-18px_rgba(84,38,150,0.35)]'
+                      : 'border-[var(--lilac-medium)]'
+                  )}
+                  style={{ animationDelay: `${idx * 70}ms` }}
+                >
+                  {pkg.badge && (
+                    <div
+                      className={cn(
+                        'absolute top-3 right-3 text-[11px] font-semibold px-2.5 py-1 rounded-full',
+                        pkg.highlighted
+                          ? 'bg-[var(--purple)] text-white'
+                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] border border-[var(--lilac-medium)]'
+                      )}
+                    >
+                      {pkg.badge}
+                    </div>
+                  )}
+
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={cn(
+                        'h-10 w-10 rounded-xl flex items-center justify-center shrink-0',
+                        pkg.highlighted ? 'bg-[var(--lavender)]' : 'bg-[var(--lilac-soft)]'
+                      )}
+                    >
+                      <Icon className="h-5 w-5 text-[var(--purple)]" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-wide text-[var(--plum-dark)]/60">
+                        {pkg.description}
+                      </p>
+                      <h3 className="text-lg font-bold text-[var(--plum)] leading-snug">
+                        {pkg.name}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-end justify-between">
+                    <div className="text-3xl font-bold text-[var(--plum)]">{pkg.price}</div>
+                    <div className="text-[11px] text-[var(--plum-dark)]/55">one-time</div>
+                  </div>
+
+                  <ul className="mt-4 space-y-2">
+                    {pkg.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        </span>
+                        <span className="text-sm text-[var(--plum-dark)]">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p className="mt-4 text-sm text-[var(--plum-dark)]/75">
+                    <span className="font-semibold text-[var(--plum)]">Perfect for:</span>{' '}
+                    {pkg.perfectFor}
+                  </p>
+
+                  <div className="mt-4">
+                    {pkg.product === 'bundle' && isPro ? (
+                      <Link
+                        href="/hub"
+                        className="inline-flex items-center justify-center gap-2 w-full font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        Go to Hub <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    ) : showEmailInput === pkg.product && !isSignedIn ? (
+                      <EmailBlock product={pkg.product} />
+                    ) : (
+                      <button
+                        onClick={() => handlePurchase(pkg.product)}
+                        disabled={loading !== null}
+                        className={cn(
+                          'inline-flex items-center justify-center gap-2 w-full font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm',
+                          'disabled:opacity-60 disabled:cursor-not-allowed',
+                          pkg.highlighted
+                            ? 'bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-md hover:shadow-[var(--purple)]/20'
+                            : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)]'
+                        )}
+                        type="button"
+                      >
+                        {loading === pkg.product ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" /> Processing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            {pkg.ctaText}
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ADD-ONS */}
+          <section className="mt-10 md:mt-12">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl md:text-2xl font-bold font-heading text-[var(--plum)]">
+                Add-ons
+              </h2>
+              <span className="text-xs text-[var(--plum-dark)]/60">Included with Full Hub Access</span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {addOns.map((label) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--lilac-medium)] bg-white/70 px-3 py-1.5 text-sm text-[var(--plum)]"
+                >
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </section>
+
+          {/* FAQ */}
+          <section className="mt-10 md:mt-12">
+            <h2 className="text-xl md:text-2xl font-bold font-heading text-[var(--plum)]">
+              FAQs
+            </h2>
+
+            <div className="mt-4 space-y-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="group bg-white rounded-2xl border border-[var(--lilac-medium)] px-5 py-3 hover:shadow-md transition-shadow"
+                >
+                  <summary className="list-none cursor-pointer flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[var(--plum)] text-sm md:text-base">
+                      {faq.question}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-[var(--plum-dark)]/60 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-2 text-sm text-[var(--plum-dark)]/75">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          {/* FINAL CTA */}
+          <section className="mt-10 md:mt-12">
+            <div className="bg-white/70 border border-[var(--lilac-medium)] rounded-2xl p-6 text-center">
+              <h3 className="text-lg md:text-xl font-bold text-[var(--plum)]">
+                Not sure which package is right for you?
+              </h3>
+              <p className="text-sm text-[var(--plum-dark)]/70 mt-1">Try a preview first 💜</p>
+
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/quiz"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm"
+                >
+                  <Play className="w-4 h-4" />
+                  Try Quiz Preview
+                </Link>
+                <Link
+                  href="/osce"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)] font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm"
+                >
+                  <Play className="w-4 h-4" />
+                  Try OSCE Preview
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {!isSignedIn && (
+            <div className="pt-8 text-center text-xs text-[var(--plum-dark)]/55">
+              No account needed — checkout with email ✨
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Local CSS for animation vibes */}
+      <style jsx global>{`
+        @keyframes floatA {
+          0% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          33% {
+            transform: translate3d(22px, 14px, 0) scale(1.06);
+          }
+          66% {
+            transform: translate3d(-14px, -10px, 0) scale(0.98);
+          }
+          100% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+
+        @keyframes floatB {
+          0% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          33% {
+            transform: translate3d(-18px, -12px, 0) scale(0.98);
+          }
+          66% {
+            transform: translate3d(14px, 16px, 0) scale(1.07);
+          }
+          100% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+
+        @keyframes shimmer {
+          0% {
+            opacity: 0.15;
+          }
+          50% {
+            opacity: 0.65;
+          }
+          100% {
+            opacity: 0.15;
+          }
+        }
+
+        @keyframes fadeUp {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .blob-anim {
+          position: absolute;
+          border-radius: 9999px;
+          filter: blur(44px);
+          opacity: 1;
+        }
+
+        .blob-a {
+          top: -96px;
+          left: -96px;
+          height: 380px;
+          width: 380px;
+          background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.28), transparent 62%),
+            radial-gradient(circle at 70% 70%, rgba(236, 72, 153, 0.2), transparent 62%);
+          animation: floatA 14s ease-in-out infinite;
+        }
+
+        .blob-b {
+          bottom: -120px;
+          right: -120px;
+          height: 420px;
+          width: 420px;
+          background: radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.2), transparent 62%),
+            radial-gradient(circle at 70% 60%, rgba(168, 85, 247, 0.22), transparent 62%);
+          animation: floatB 16s ease-in-out infinite;
+        }
+
+        .shimmer-line {
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(168, 85, 247, 0.55),
+            rgba(236, 72, 153, 0.35),
+            transparent
+          );
+          animation: shimmer 3.8s ease-in-out infinite;
+        }
+
+        .animate-fadeUp {
+          animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .blob-a,
+          .blob-b,
+          .shimmer-line,
+          .animate-fadeUp {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
