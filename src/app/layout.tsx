@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import "./premium-animations-vanilla.css";
+
 
 export const metadata: Metadata = {
   title: "Revision Foundations | OSCE & Exam-Ready Nursing Revision",
