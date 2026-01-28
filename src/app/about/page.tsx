@@ -3,7 +3,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import { Heart, Sparkles } from 'lucide-react';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 
 export default function AboutPage() {
