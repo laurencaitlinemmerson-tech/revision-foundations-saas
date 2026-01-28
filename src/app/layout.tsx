@@ -20,14 +20,7 @@ export default function RootLayout({
       <html lang="en">
         <body className="antialiased">
           <AutoAnimate />
-
-          <div className="rf-bg">
-            <div className="rf-blob rf-blob-1" />
-            <div className="rf-blob rf-blob-2" />
-            <div className="rf-blob rf-blob-3" />
-
-            {children}
-          </div>
+          {children}
         </body>
       </html>
     </ClerkProvider>
