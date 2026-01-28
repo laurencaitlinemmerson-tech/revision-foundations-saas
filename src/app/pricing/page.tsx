@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -17,10 +17,6 @@ import {
 } from 'lucide-react';
 
 type Product = 'osce' | 'quiz' | 'bundle';
-
-function cx(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(' ');
-}
 
 function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -156,14 +152,14 @@ export default function PricingPage() {
             setGuestEmail(e.target.value);
             setEmailError('');
           }}
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
         />
       </div>
       {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
       <button
         onClick={() => handlePurchase(product)}
         disabled={loading !== null}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold py-3 px-6 bg-[var(--purple)] text-white hover:bg-[var(--plum)] transition-all"
+        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group"
         type="button"
       >
         {loading === product ? (
@@ -172,7 +168,8 @@ export default function PricingPage() {
           </>
         ) : (
           <>
-            <Sparkles className="w-5 h-5" /> Continue to Payment
+            <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            Continue to Payment
           </>
         )}
       </button>
@@ -183,31 +180,37 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* HERO */}
-      <section className="gradient-hero py-16 md:py-24 relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.2 }} />
-        <div className="blob blob-2" style={{ opacity: 0.2 }} />
+      {/* THINNER TOP BIT — keeps his structure but tighter */}
+      <section className="gradient-hero text-[var(--plum)] py-10 md:py-14 relative overflow-hidden">
+        <div className="blob blob-1" style={{ opacity: 0.18 }} />
+        <div className="blob blob-2" style={{ opacity: 0.18 }} />
 
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-heading text-[var(--plum)]">PRICING</h1>
-            <p className="text-xl text-[var(--plum-dark)]/70 mb-8">One-time payment • lifetime access • no subscriptions 💜</p>
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 font-heading">
+              PRICING
+            </h1>
+            <p className="text-base md:text-lg text-[var(--plum-dark)]/70 mb-6">
+              One-time payment • lifetime access • no subscriptions 💜
+            </p>
 
             <button
               onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/20"
+              className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group"
               type="button"
             >
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
               See options
             </button>
 
-            <p className="text-xs text-[var(--plum-dark)]/55 mt-3">Full Hub Access includes everything (and future updates) ✨</p>
+            <p className="text-xs text-[var(--plum-dark)]/55 mt-3">
+              Full Hub Access includes everything (and future updates) ✨
+            </p>
           </div>
         </div>
       </section>
 
-      {/* CARDS */}
+      {/* SAME GRID + SPACING AS HIS */}
       <section id="packages" className="py-16 md:py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -217,10 +220,11 @@ export default function PricingPage() {
               return (
                 <div
                   key={pkg.product}
-                  className={cx(
-                    'relative rounded-3xl bg-white border p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl',
-                    pkg.highlighted ? 'border-[var(--lavender)] shadow-lg' : 'border-[var(--lilac-medium)]'
-                  )}
+                  className={`
+                    relative bg-white p-7 rounded-lg border transition-all duration-300
+                    hover:shadow-lg
+                    ${pkg.highlighted ? 'border-[var(--lavender)]' : 'border-[var(--lilac-medium)]'}
+                  `}
                 >
                   {pkg.badge && (
                     <div className="absolute top-4 right-4 text-[11px] font-bold px-3 py-1 rounded-full bg-[var(--purple)] text-white">
@@ -229,7 +233,7 @@ export default function PricingPage() {
                   )}
 
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="h-10 w-10 rounded-2xl bg-[var(--lilac-soft)] flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-lg bg-[var(--lilac-soft)] flex items-center justify-center">
                       <Icon className="h-5 w-5 text-[var(--purple)]" />
                     </div>
                     <div>
@@ -238,8 +242,7 @@ export default function PricingPage() {
                     </div>
                   </div>
 
-                  <div className="text-4xl font-bold text-[var(--plum)] mb-1">{pkg.price}</div>
-                  <p className="text-sm text-[var(--plum-dark)]/60 mb-6">one-time • lifetime</p>
+                  <div className="text-4xl font-bold text-[var(--plum)] mb-2">{pkg.price}</div>
 
                   <ul className="space-y-2 mb-6">
                     {pkg.features.map((f) => (
@@ -259,9 +262,9 @@ export default function PricingPage() {
                   {pkg.product === 'bundle' && isPro ? (
                     <Link
                       href="/hub"
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold py-3 px-6 bg-[var(--purple)] text-white hover:bg-[var(--plum)] transition-all"
+                      className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all w-full group"
                     >
-                      <Sparkles className="w-5 h-5" />
+                      <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
                       Go to Hub <ArrowRight className="w-4 h-4" />
                     </Link>
                   ) : showEmailInput === pkg.product && !isSignedIn ? (
@@ -271,10 +274,10 @@ export default function PricingPage() {
                       onClick={() => handlePurchase(pkg.product)}
                       disabled={loading !== null}
                       className={cx(
-                        'w-full inline-flex items-center justify-center gap-2 rounded-xl font-semibold py-3 px-6 transition-all',
+                        'inline-flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-lg transition-all duration-300 w-full group',
                         pkg.highlighted
-                          ? 'bg-[var(--purple)] text-white hover:bg-[var(--plum)]'
-                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] hover:bg-[var(--lilac)]'
+                          ? 'bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-lg hover:shadow-[var(--purple)]/25'
+                          : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)]'
                       )}
                       type="button"
                     >
@@ -284,7 +287,8 @@ export default function PricingPage() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-5 h-5" /> {pkg.ctaText}
+                          <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                          {pkg.ctaText}
                         </>
                       )}
                     </button>
@@ -294,72 +298,71 @@ export default function PricingPage() {
             })}
           </div>
 
-          {/* ADD-ONS */}
-          <div className="bg-white/60 border border-[var(--lilac-medium)] rounded-3xl p-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-[var(--plum)] font-heading">
-              What you get inside
+          {/* ADD-ONS — identical section structure */}
+          <section className="py-16 bg-white/60 rounded-lg border border-[var(--lilac-medium)]">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading text-[var(--plum)]">
+              ADD-ONS
             </h2>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto px-6">
               {addOns.map((addon, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-4 rounded-2xl border border-[var(--lilac-medium)] text-center"
-                >
+                <div key={index} className="bg-white p-4 rounded-lg border border-[var(--lilac-medium)] text-center">
                   <p className="font-semibold text-sm mb-1 text-[var(--plum)]">{addon.name}</p>
                   <p className="text-[var(--purple)] font-bold">{addon.price}</p>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* FAQ */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading text-[var(--plum)]">
-            Frequently asked questions
-          </h2>
-
-          <div className="max-w-3xl mx-auto space-y-4">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="card">
-                <h3 className="font-bold text-lg mb-2 text-[var(--plum)]">{faq.question}</h3>
-                <p className="text-[var(--plum-dark)]/70">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 bg-white/60 border-t border-[var(--lilac-medium)]">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--plum)] font-heading">Not sure yet?</h2>
-            <p className="text-xl text-[var(--plum-dark)]/70 mb-8">Try a preview first 💜</p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/quiz"
-                className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-xl transition-all"
-              >
-                <Play className="w-5 h-5" />
-                Try Quiz Preview
-              </Link>
-
-              <Link
-                href="/osce"
-                className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] font-semibold py-3 px-6 rounded-xl transition-all"
-              >
-                <Play className="w-5 h-5" />
-                Try OSCE Preview
-              </Link>
+          {/* FAQ — same vibe */}
+          <section className="py-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading text-[var(--plum)]">
+              FREQUENTLY ASKED QUESTIONS
+            </h2>
+            <div className="max-w-3xl mx-auto space-y-6">
+              {faqs.map((faq) => (
+                <div key={faq.question} className="card">
+                  <h3 className="font-bold text-lg mb-2 text-[var(--plum)]">{faq.question}</h3>
+                  <p className="text-[var(--plum-dark)]/70">{faq.answer}</p>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
+
+          {/* FINAL CTA — same structure */}
+          <section className="py-16 bg-white/60 rounded-lg border border-[var(--lilac-medium)]">
+            <div className="text-center max-w-2xl mx-auto px-6">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--plum)]">
+                Not sure whichς which package is right for you?
+              </h2>
+              <p className="text-xl text-[var(--plum-dark)]/70 mb-8">
+                Try a preview first 💜
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/quiz"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-lg transition-all"
+                >
+                  <Play className="w-5 h-5" />
+                  Try Quiz Preview
+                </Link>
+                <Link
+                  href="/osce"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] font-semibold py-3 px-6 rounded-lg transition-all"
+                >
+                  <Play className="w-5 h-5" />
+                  Try OSCE Preview
+                </Link>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
+
+      {!isSignedIn && (
+        <div className="pb-10 text-center text-xs text-[var(--plum-dark)]/55">
+          No account needed — checkout with email ✨
+        </div>
+      )}
     </div>
   );
 }
