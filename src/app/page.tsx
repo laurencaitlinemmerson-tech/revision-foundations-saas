@@ -111,9 +111,10 @@ export default function HomePage() {
               <Heart className="w-4 h-4 text-[var(--pink)] icon-pulse" />
             </div>
 
-            <h1 className="mb-2 hero-title">
-              <span className="gradient-text">Revision Foundations</span>
-            </h1>
+            <h1 className="hero-title">
+  <span className="gradient-text">Revision Foundations</span>
+</h1>
+
 
             <p className="hero-subtitle">Your Nursing Bestie for OSCEs & Exams</p>
 
