@@ -14,6 +14,7 @@ import {
   Loader2,
   Mail,
   Check,
+  ChevronDown,
 } from 'lucide-react';
 
 type Product = 'osce' | 'quiz' | 'bundle';
@@ -56,7 +57,7 @@ export default function PricingPage() {
           'Future tools included',
           'Lifetime access',
         ],
-        badge: isPro ? 'Purchased ✓' : 'Most Popular',
+        badge: isPro ? 'Purchased ✓' : 'Most popular',
         highlighted: true,
         perfectFor: 'Students who want everything in one go',
         ctaText: isPro ? 'Go to Hub' : 'Get Full Hub Access',
@@ -79,12 +80,12 @@ export default function PricingPage() {
 
   const addOns = useMemo(
     () => [
-      { name: 'Printable checklists', price: 'Included' },
-      { name: 'New resources weekly', price: 'Included' },
-      { name: 'OSCE templates', price: 'Included' },
-      { name: 'Revision plans', price: 'Included' },
-      { name: 'Progress tracking', price: 'Included' },
-      { name: 'Lifetime updates', price: 'Included' },
+      'Printable checklists',
+      'New resources weekly',
+      'OSCE templates',
+      'Revision plans',
+      'Progress tracking',
+      'Lifetime updates',
     ],
     []
   );
@@ -141,35 +142,35 @@ export default function PricingPage() {
   };
 
   const EmailBlock = ({ product }: { product: Product }) => (
-    <div className="mt-4 space-y-3">
+    <div className="mt-3 space-y-2.5">
       <div className="relative">
-        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
+        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/45" />
         <input
           type="email"
-          placeholder="Enter your email"
+          placeholder="Email for receipt + access"
           value={guestEmail}
           onChange={(e) => {
             setGuestEmail(e.target.value);
             setEmailError('');
           }}
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-4 focus:ring-[var(--lavender)]/50 focus:border-[var(--purple)]"
+          className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-4 focus:ring-[var(--lavender)]/40 focus:border-[var(--purple)] text-sm"
         />
       </div>
       {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
       <button
         onClick={() => handlePurchase(product)}
         disabled={loading !== null}
-        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 disabled:opacity-60 disabled:cursor-not-allowed text-sm"
         type="button"
       >
         {loading === product ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+            <Loader2 className="w-4 h-4 animate-spin" /> Processing...
           </>
         ) : (
           <>
-            <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            Continue to Payment
+            <Sparkles className="w-4 h-4" />
+            Continue to payment
           </>
         )}
       </button>
@@ -180,90 +181,105 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* HERO */}
-      <section className="gradient-hero text-[var(--plum)] py-10 md:py-14 relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.18 }} />
-        <div className="blob blob-2" style={{ opacity: 0.18 }} />
+      {/* HERO (tighter) */}
+      <section className="gradient-hero text-[var(--plum)] py-8 md:py-10 relative overflow-hidden">
+        <div className="blob blob-1" style={{ opacity: 0.12 }} />
+        <div className="blob blob-2" style={{ opacity: 0.12 }} />
 
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/60 px-4 py-2 text-xs text-[var(--plum-dark)]/70 mb-5">
-              <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+        <div className="max-w-5xl mx-auto px-6 relative z-10">
+          <div className="text-center max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lilac-medium)] bg-white/60 px-3 py-1.5 text-[11px] text-[var(--plum-dark)]/70 mb-4">
+              <Sparkles className="w-3.5 h-3.5 text-[var(--purple)]" />
               One-time payment • Lifetime access • No subscription
             </div>
 
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 font-heading tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold font-heading tracking-tight">
               Pricing
             </h1>
-
-            <p className="text-base md:text-lg text-[var(--plum-dark)]/70 mb-7">
-              Pick a tool, or grab Full Hub Access and unlock everything 💜
+            <p className="text-sm md:text-base text-[var(--plum-dark)]/70 mt-2">
+              Grab one tool, or unlock everything with Full Hub Access 💜
             </p>
 
-            <button
-              onClick={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[var(--purple)]/25 group"
-              type="button"
-            >
-              <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              See options
-            </button>
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <button
+                onClick={() =>
+                  document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' })
+                }
+                className="inline-flex items-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm"
+                type="button"
+              >
+                <Sparkles className="w-4 h-4" />
+                See options
+              </button>
 
-            <p className="text-xs text-[var(--plum-dark)]/55 mt-3">
-              Full Hub Access includes everything (and future updates) ✨
-            </p>
+              <Link
+                href="/hub"
+                className="inline-flex items-center gap-2 border border-[var(--lilac-medium)] bg-white/70 hover:bg-white text-[var(--plum)] font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm"
+              >
+                What’s inside? <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* PACKAGES */}
-      <section id="packages" className="py-16 md:py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      {/* PACKAGES (compact) */}
+      <section id="packages" className="py-10 md:py-12">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {packages.map((pkg) => {
               const Icon = pkg.icon;
 
               return (
                 <div
                   key={pkg.product}
-                  className={`relative bg-white p-7 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 ${
+                  className={[
+                    'relative bg-white rounded-2xl border transition-all duration-200',
+                    'p-5 hover:shadow-lg hover:-translate-y-0.5',
                     pkg.highlighted
-                      ? 'border-[var(--lavender)] ring-1 ring-[var(--lavender)]/40 shadow-[0_12px_40px_-18px_rgba(84,38,150,0.35)]'
-                      : 'border-[var(--lilac-medium)]'
-                  }`}
+                      ? 'border-[var(--lavender)] ring-1 ring-[var(--lavender)]/40 shadow-[0_10px_30px_-18px_rgba(84,38,150,0.35)]'
+                      : 'border-[var(--lilac-medium)]',
+                  ].join(' ')}
                 >
                   {pkg.badge && (
                     <div
-                      className={`absolute top-4 right-4 text-[11px] font-bold px-3 py-1 rounded-full ${
+                      className={[
+                        'absolute top-3 right-3 text-[11px] font-semibold px-2.5 py-1 rounded-full',
                         pkg.highlighted
-                          ? 'bg-[var(--purple)] text-white shadow-sm'
-                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] border border-[var(--lilac-medium)]'
-                      }`}
+                          ? 'bg-[var(--purple)] text-white'
+                          : 'bg-[var(--lilac-soft)] text-[var(--purple)] border border-[var(--lilac-medium)]',
+                      ].join(' ')}
                     >
                       {pkg.badge}
                     </div>
                   )}
 
-                  <div className="flex items-center gap-3 mb-5">
+                  <div className="flex items-start gap-3">
                     <div
-                      className={`h-11 w-11 rounded-xl flex items-center justify-center ${
-                        pkg.highlighted ? 'bg-[var(--lavender)]' : 'bg-[var(--lilac-soft)]'
-                      }`}
+                      className={[
+                        'h-10 w-10 rounded-xl flex items-center justify-center shrink-0',
+                        pkg.highlighted ? 'bg-[var(--lavender)]' : 'bg-[var(--lilac-soft)]',
+                      ].join(' ')}
                     >
                       <Icon className="h-5 w-5 text-[var(--purple)]" />
                     </div>
-                    <div>
-                      <p className="text-sm text-[var(--plum-dark)]/70">{pkg.description}</p>
-                      <h3 className="text-xl font-bold text-[var(--plum)] leading-tight">{pkg.name}</h3>
+
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-wide text-[var(--plum-dark)]/60">
+                        {pkg.description}
+                      </p>
+                      <h3 className="text-lg font-bold text-[var(--plum)] leading-snug">
+                        {pkg.name}
+                      </h3>
                     </div>
                   </div>
 
-                  <div className="flex items-end justify-between gap-4 mb-4">
-                    <div className="text-4xl font-bold text-[var(--plum)] tracking-tight">{pkg.price}</div>
-                    <div className="text-xs text-[var(--plum-dark)]/60">one-time</div>
+                  <div className="mt-4 flex items-end justify-between">
+                    <div className="text-3xl font-bold text-[var(--plum)]">{pkg.price}</div>
+                    <div className="text-[11px] text-[var(--plum-dark)]/55">one-time</div>
                   </div>
 
-                  <ul className="space-y-2.5 mb-6">
+                  <ul className="mt-4 space-y-2">
                     {pkg.features.map((f) => (
                       <li key={f} className="flex items-start gap-2">
                         <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
@@ -274,119 +290,135 @@ export default function PricingPage() {
                     ))}
                   </ul>
 
-                  <div className="rounded-xl bg-[var(--lilac-soft)]/55 border border-[var(--lilac-medium)] px-4 py-3 mb-6">
-                    <p className="text-sm text-[var(--plum-dark)]/75">
-                      <span className="font-semibold text-[var(--plum)]">Perfect for:</span> {pkg.perfectFor}
-                    </p>
-                  </div>
+                  <p className="mt-4 text-sm text-[var(--plum-dark)]/75">
+                    <span className="font-semibold text-[var(--plum)]">Perfect for:</span>{' '}
+                    {pkg.perfectFor}
+                  </p>
 
-                  {pkg.product === 'bundle' && isPro ? (
-                    <Link
-                      href="/hub"
-                      className="inline-flex items-center justify-center gap-2 w-full font-semibold py-3 px-6 rounded-xl transition-all group bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-lg hover:shadow-[var(--purple)]/25"
-                    >
-                      <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      Go to Hub <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  ) : showEmailInput === pkg.product && !isSignedIn ? (
-                    <EmailBlock product={pkg.product} />
-                  ) : (
-                    <button
-                      onClick={() => handlePurchase(pkg.product)}
-                      disabled={loading !== null}
-                      className={`inline-flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-xl transition-all duration-300 w-full group disabled:opacity-60 disabled:cursor-not-allowed ${
-                        pkg.highlighted
-                          ? 'bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-lg hover:shadow-[var(--purple)]/25'
-                          : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)]'
-                      }`}
-                      type="button"
-                    >
-                      {loading === pkg.product ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                          {pkg.ctaText}
-                        </>
-                      )}
-                    </button>
-                  )}
+                  <div className="mt-4">
+                    {pkg.product === 'bundle' && isPro ? (
+                      <Link
+                        href="/hub"
+                        className="inline-flex items-center justify-center gap-2 w-full font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        Go to Hub <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    ) : showEmailInput === pkg.product && !isSignedIn ? (
+                      <EmailBlock product={pkg.product} />
+                    ) : (
+                      <button
+                        onClick={() => handlePurchase(pkg.product)}
+                        disabled={loading !== null}
+                        className={[
+                          'inline-flex items-center justify-center gap-2 w-full font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm',
+                          'disabled:opacity-60 disabled:cursor-not-allowed',
+                          pkg.highlighted
+                            ? 'bg-[var(--purple)] hover:bg-[var(--plum)] text-white hover:shadow-md hover:shadow-[var(--purple)]/20'
+                            : 'bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)]',
+                        ].join(' ')}
+                        type="button"
+                      >
+                        {loading === pkg.product ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" /> Processing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            {pkg.ctaText}
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* ADD-ONS */}
-          <section className="py-16 bg-white/60 rounded-2xl border border-[var(--lilac-medium)]">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading text-[var(--plum)]">
-              Add-ons
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto px-6">
-              {addOns.map((addon, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-4 rounded-xl border border-[var(--lilac-medium)] text-center hover:shadow-md transition-shadow"
-                >
-                  <p className="font-semibold text-sm mb-1 text-[var(--plum)]">{addon.name}</p>
-                  <p className="text-[var(--purple)] font-bold">{addon.price}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* FAQ */}
-          <section className="py-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading text-[var(--plum)]">
-              Frequently asked questions
-            </h2>
-            <div className="max-w-3xl mx-auto space-y-6">
-              {faqs.map((faq) => (
-                <div
-                  key={faq.question}
-                  className="bg-white rounded-2xl border border-[var(--lilac-medium)] p-6 hover:shadow-md transition-shadow"
-                >
-                  <h3 className="font-bold text-lg mb-2 text-[var(--plum)]">{faq.question}</h3>
-                  <p className="text-[var(--plum-dark)]/70">{faq.answer}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* FINAL CTA */}
-          <section className="py-16 bg-white/60 rounded-2xl border border-[var(--lilac-medium)]">
-            <div className="text-center max-w-2xl mx-auto px-6">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--plum)]">
-                Not sure which package is right for you?
+          {/* ADD-ONS (chips, not a giant box) */}
+          <section className="mt-10 md:mt-12">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl md:text-2xl font-bold font-heading text-[var(--plum)]">
+                Add-ons
               </h2>
-              <p className="text-xl text-[var(--plum-dark)]/70 mb-8">Try a preview first 💜</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <span className="text-xs text-[var(--plum-dark)]/60">Included with Full Hub Access</span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {addOns.map((label) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--lilac-medium)] bg-white/70 px-3 py-1.5 text-sm text-[var(--plum)]"
+                >
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </section>
+
+          {/* FAQ (accordion, compact) */}
+          <section className="mt-10 md:mt-12">
+            <h2 className="text-xl md:text-2xl font-bold font-heading text-[var(--plum)]">
+              FAQs
+            </h2>
+
+            <div className="mt-4 space-y-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="group bg-white rounded-2xl border border-[var(--lilac-medium)] px-5 py-3 hover:shadow-md transition-shadow"
+                >
+                  <summary className="list-none cursor-pointer flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[var(--plum)] text-sm md:text-base">
+                      {faq.question}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-[var(--plum-dark)]/60 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-2 text-sm text-[var(--plum-dark)]/75">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          {/* FINAL CTA (smaller) */}
+          <section className="mt-10 md:mt-12">
+            <div className="bg-white/70 border border-[var(--lilac-medium)] rounded-2xl p-6 text-center">
+              <h3 className="text-lg md:text-xl font-bold text-[var(--plum)]">
+                Not sure which package is right for you?
+              </h3>
+              <p className="text-sm text-[var(--plum-dark)]/70 mt-1">
+                Try a preview first 💜
+              </p>
+
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   href="/quiz"
-                  className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-3 px-6 rounded-xl transition-all hover:shadow-lg hover:shadow-[var(--purple)]/25"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--purple)] hover:bg-[var(--plum)] text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:shadow-[var(--purple)]/20 text-sm"
                 >
-                  <Play className="w-5 h-5" />
+                  <Play className="w-4 h-4" />
                   Try Quiz Preview
                 </Link>
                 <Link
                   href="/osce"
-                  className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)] font-semibold py-3 px-6 rounded-xl transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--lilac-soft)] hover:bg-[var(--lilac)] text-[var(--purple)] border border-[var(--lilac-medium)] font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm"
                 >
-                  <Play className="w-5 h-5" />
+                  <Play className="w-4 h-4" />
                   Try OSCE Preview
                 </Link>
               </div>
             </div>
           </section>
+
+          {!isSignedIn && (
+            <div className="pt-8 text-center text-xs text-[var(--plum-dark)]/55">
+              No account needed — checkout with email ✨
+            </div>
+          )}
         </div>
       </section>
-
-      {!isSignedIn && (
-        <div className="pb-10 text-center text-xs text-[var(--plum-dark)]/55">
-          No account needed — checkout with email ✨
-        </div>
-      )}
     </div>
   );
 }
