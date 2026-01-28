@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
@@ -14,6 +14,10 @@ import {
   Lock,
   Zap,
   BookOpen,
+  HelpCircle,
+  ChevronRight,
+  Heart,
+  MessageCircle,
 } from 'lucide-react';
 
 // Hub content items
@@ -214,7 +218,9 @@ function HubCard({
       <div className="flex items-center justify-between mb-3">
         <span
           className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-            item.isLocked ? 'bg-[var(--purple)]/10 text-[var(--purple)]' : 'bg-emerald-50 text-emerald-700'
+            item.isLocked
+              ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
+              : 'bg-emerald-50 text-emerald-700'
           }`}
         >
           {item.isLocked ? 'PREMIUM' : 'FREE'}
@@ -271,41 +277,7 @@ export default function HubClient({
   const freeCount = hubItems.filter((i) => !i.isLocked).length;
   const premiumCount = hubItems.filter((i) => i.isLocked).length;
 
-  // --- Home-style scroll + count-up animations ---
-  const statsRef = useRef<HTMLDivElement>(null);
-  const [counters, setCounters] = useState<Record<string, number>>({});
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  const intervalRef = useRef<number | null>(null);
-
-  const animateCounter = useCallback((id: string, target: number, duration: number) => {
-    if (intervalRef.current !== null) {
-      window.clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    const steps = 60;
-    const increment = target / steps;
-    const stepDuration = duration / steps;
-    let current = 0;
-
-    intervalRef.current = window.setInterval(() => {
-      current += increment;
-
-      if (current >= target) {
-        setCounters((prev) => ({ ...prev, [id]: target }));
-
-        if (intervalRef.current !== null) {
-          window.clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      } else {
-        setCounters((prev) => ({ ...prev, [id]: Math.floor(current) }));
-      }
-    }, stepDuration);
-  }, []);
-
-  // Scroll animations
+  // Scroll animations (kept)
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -321,35 +293,6 @@ export default function HubClient({
 
     document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
-
-  // Counter trigger
-  useEffect(() => {
-    if (!statsRef.current || hasAnimated) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setHasAnimated(true);
-          animateCounter('total', hubItems.length, 1200);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(statsRef.current);
-    return () => observer.disconnect();
-  }, [hasAnimated, animateCounter]);
-
-  // Cleanup interval on unmount
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current !== null) {
-        window.clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
   }, []);
 
   const toggleTag = (tag: string) => {
@@ -400,7 +343,7 @@ export default function HubClient({
               </h1>
 
               <p className="animate-on-scroll hero-description !mb-6">
-                Find exactly what you need for OSCEs, exams & placement survival.
+                Find exactly what you need for OSCEs, exams &amp; placement survival.
               </p>
 
               <div className="animate-on-scroll flex flex-col sm:flex-row gap-4 justify-center">
@@ -420,43 +363,6 @@ export default function HubClient({
                   Unlock everything
                 </Link>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats */}
-        <section className="bg-cream py-10" ref={statsRef}>
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {[
-                { id: 'total', label: 'Resources', icon: '📚', value: hubItems.length },
-                { id: 'free', label: 'Free resources', icon: '🆓', value: freeCount },
-                { id: 'premium', label: 'Premium resources', icon: '✨', value: premiumCount },
-                { id: 'updates', label: 'Updated weekly', icon: '🗓️', value: '✓' },
-              ].map((s, i) => (
-                <div
-                  key={s.id}
-                  className="animate-on-scroll stat-card"
-                  style={{ animationDelay: i * 0.1 + 's' }}
-                >
-                  <span
-                    className="text-2xl mb-2 block emoji-float"
-                    style={{ animationDelay: i * 0.2 + 's' }}
-                  >
-                    {s.icon}
-                  </span>
-
-                  <div className="stat-number">
-                    {typeof s.value === 'number'
-                      ? s.id === 'total'
-                        ? counters.total ?? 0
-                        : s.value
-                      : s.value}
-                  </div>
-
-                  <p className="text-[var(--plum-dark)]/60 text-sm mt-1">{s.label}</p>
-                </div>
-              ))}
             </div>
           </div>
         </section>
@@ -548,6 +454,32 @@ export default function HubClient({
           </div>
         </section>
 
+        {/* Q&A Board Section */}
+        <section className="bg-white py-12 border-y border-[var(--lilac-medium)]">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center">
+                  <HelpCircle className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl font-semibold text-[var(--plum)] mb-2">Q&amp;A Board</h3>
+                <p className="text-[var(--plum-dark)]/70">
+                  Got a nursing question? Ask the community! Browse questions from other students or post your own.
+                </p>
+              </div>
+              <Link
+                href="/hub/questions"
+                className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex-shrink-0"
+              >
+                Browse Q&amp;A
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Premium Upsell */}
         {!isPro && (
           <section className="py-16">
@@ -598,6 +530,42 @@ export default function HubClient({
             </div>
           </section>
         )}
+
+        {/* Need Help */}
+        <section className="bg-[var(--lilac-soft)] py-12">
+          <div className="max-w-2xl mx-auto px-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Heart className="w-5 h-5 text-[var(--pink)]" />
+              <h3 className="text-[var(--plum)]">Need help?</h3>
+            </div>
+            <p className="text-[var(--plum-dark)]/70 mb-6">
+              Got questions about the resources or need study advice? I&apos;m here to help!
+            </p>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Get in Touch
+            </Link>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-[var(--lilac)] px-6 py-8 text-center text-[var(--plum-dark)]/70 text-sm">
+          <p>Made with love by Lauren</p>
+          <div className="flex justify-center gap-4 mt-3">
+            <Link href="/privacy" className="hover:text-[var(--plum)]">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-[var(--plum)]">
+              Terms
+            </Link>
+            <Link href="/about" className="hover:text-[var(--plum)]">
+              About
+            </Link>
+          </div>
+        </footer>
       </div>
     </ToastProvider>
   );
