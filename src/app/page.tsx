@@ -1,8 +1,7 @@
-```tsx
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Testimonials from '@/components/Testimonials';
 import { Sparkles, Heart, Play } from 'lucide-react';
@@ -12,6 +11,37 @@ export default function HomePage() {
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
 
+  const intervalRef = useRef<number | null>(null);
+
+  const animateCounter = useCallback((id: string, target: number, duration: number) => {
+    // clear any existing interval
+    if (intervalRef.current !== null) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    const steps = 60;
+    const increment = target / steps;
+    const stepDuration = duration / steps;
+    let current = 0;
+
+    intervalRef.current = window.setInterval(() => {
+      current += increment;
+
+      if (current >= target) {
+        setCounters((prev) => ({ ...prev, [id]: target }));
+
+        if (intervalRef.current !== null) {
+          window.clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      } else {
+        setCounters((prev) => ({ ...prev, [id]: Math.floor(current) }));
+      }
+    }, stepDuration);
+  }, []);
+
+  // Scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
@@ -31,6 +61,7 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
+  // Counter animation trigger
   useEffect(() => {
     if (!statsRef.current || hasAnimated) return;
 
@@ -38,7 +69,6 @@ export default function HomePage() {
       (entries: IntersectionObserverEntry[]) => {
         if (entries[0]?.isIntersecting) {
           setHasAnimated(true);
-          // Animate counter for "17"
           animateCounter('quiz', 17, 2000);
           observer.disconnect();
         }
@@ -49,27 +79,17 @@ export default function HomePage() {
     observer.observe(statsRef.current);
 
     return () => observer.disconnect();
-  }, [hasAnimated]);
+  }, [hasAnimated, animateCounter]);
 
-  const animateCounter = (id: string, target: number, duration: number) => {
-    const steps = 60;
-    const increment = target / steps;
-    const stepDuration = duration / steps;
-    let current = 0;
-
-    const interval = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCounters((prev) => ({ ...prev, [id]: target }));
-        clearInterval(interval);
-      } else {
-        setCounters((prev) => ({ ...prev, [id]: Math.floor(current) }));
+  // Cleanup any running interval on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-    }, stepDuration);
-
-    // Safety: clear on unmount is handled by page lifecycle; interval ends quickly anyway
-    return () => clearInterval(interval);
-  };
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -139,11 +159,11 @@ export default function HomePage() {
               <div
                 key={s.id}
                 className="animate-on-scroll stat-card"
-                style={{ animationDelay: `${i * 0.1}s` }}
+                style={{ animationDelay: (i * 0.1) + 's' }}
               >
                 <span
                   className="text-2xl mb-2 block emoji-float"
-                  style={{ animationDelay: `${i * 0.2}s` }}
+                  style={{ animationDelay: (i * 0.2) + 's' }}
                 >
                   {s.icon}
                 </span>
@@ -219,9 +239,12 @@ export default function HomePage() {
               <div
                 key={item.title}
                 className="space-y-3 animate-on-scroll fade-in-up"
-                style={{ animationDelay: `${i * 0.1}s` }}
+                style={{ animationDelay: (i * 0.1) + 's' }}
               >
-                <div className="text-4xl emoji-float" style={{ animationDelay: `${i * 0.3}s` }}>
+                <div
+                  className="text-4xl emoji-float"
+                  style={{ animationDelay: (i * 0.3) + 's' }}
+                >
                   {item.icon}
                 </div>
                 <h3 className="text-[var(--plum)]">{item.title}</h3>
@@ -364,4 +387,3 @@ export default function HomePage() {
     </div>
   );
 }
-```
