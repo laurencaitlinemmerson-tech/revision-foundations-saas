@@ -1,4 +1,4 @@
-
+```ts
 import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -42,19 +42,13 @@ export async function POST(request: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
 
         const clerkUserId = session.metadata?.clerk_user_id ?? null;
-        const guestEmail =
-          session.metadata?.guest_email ??
-          session.customer_email ??
-          session.customer_details?.email ??
-          null;
-
         const product = session.metadata?.product as Product | undefined;
+
         if (!product) {
           console.error("Missing product in checkout session metadata");
           break;
         }
 
-        // Decide which entitlements to create
         const productsToCreate =
           product === "bundle"
             ? (["osce", "quiz", "bundle"] as const)
@@ -62,14 +56,14 @@ export async function POST(request: NextRequest) {
 
         const supabase = createServiceClient();
 
-        // Resolve customer_name:
-        // - Signed-in users: pull from Clerk
-        // - Guests: pull from Stripe customer_details
+        // Resolve name from Clerk for signed-in users; fallback to Stripe for guests
         let customerName: string | null = null;
 
         if (clerkUserId) {
           try {
-            const user = await clerkClient.users.getUser(clerkUserId);
+            const clerk = await clerkClient(); // IMPORTANT: clerkClient is async in your setup
+            const user = await clerk.users.getUser(clerkUserId);
+
             customerName =
               [user.firstName, user.lastName].filter(Boolean).join(" ") ||
               user.username ||
@@ -78,9 +72,17 @@ export async function POST(request: NextRequest) {
             console.error("Failed to fetch Clerk user for name:", e);
             customerName = null;
           }
-        } else {
+        }
+
+        if (!customerName) {
           customerName = session.customer_details?.name ?? null;
         }
+
+        const guestEmail =
+          session.metadata?.guest_email ??
+          session.customer_email ??
+          session.customer_details?.email ??
+          null;
 
         for (const p of productsToCreate) {
           if (clerkUserId) {
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
               null // Lifetime access
             );
 
-            // Store name on the entitlement row (you added customer_name column)
+            // Save name on the entitlement row (requires customer_name column)
             if (customerName) {
               const { error } = await supabase
                 .from("entitlements")
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
               `Entitlement created for user ${clerkUserId}, product ${p}`
             );
           } else if (guestEmail) {
-            // Guest purchase - store with email in clerk_user_id as you currently do
+            // Guest purchase - store with email (your current pattern)
             const { error } = await supabase.from("entitlements").upsert(
               {
                 clerk_user_id: `guest_${guestEmail}`,
@@ -163,3 +165,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+```
