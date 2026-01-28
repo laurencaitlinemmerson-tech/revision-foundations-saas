@@ -96,6 +96,15 @@ const hubItems: HubItem[] = [
     href: '/hub/resources/news2-guide',
   },
   {
+    id: '11',
+    title: 'PEWS - Paediatric Early Warning Score',
+    description: 'Age-appropriate early warning scoring for children with escalation triggers.',
+    tags: ['Paeds', 'Assessment', 'Emergency/ABCDE'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/pews-guide',
+  },
+  {
     id: '8',
     title: 'Pressure Area Care Plan',
     description: 'Waterlow scoring, prevention strategies, and SSKIN bundle implementation.',

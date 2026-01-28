@@ -396,6 +396,70 @@ const resources: Record<string, {
       },
     ],
   },
+  'pews-guide': {
+    title: 'PEWS - Paediatric Early Warning Score',
+    description: 'Age-appropriate early warning scoring for children with escalation triggers and response guidance.',
+    isLocked: false,
+    readTime: '5 min read',
+    sections: [
+      {
+        title: 'PEWS Parameters',
+        type: 'checklist',
+        content: [
+          'Behaviour: Playing/appropriate, Sleeping, Irritable, Lethargic/confused, Reduced response to pain',
+          'Cardiovascular: Pink, cap refill 1-2s → Pale/grey, cap refill 3s → Mottled, cap refill 4s → Mottled/tachycardic, cap refill ≥5s',
+          'Respiratory: Normal RR, no recession → Raised RR, using accessory muscles → RR >20 above normal or 5 below, retractions → Requires 40%+ O2 or 4L/min',
+        ],
+      },
+      {
+        title: 'Normal Vital Signs by Age',
+        type: 'checklist',
+        content: [
+          'Infant (0-12 months): HR 110-160, RR 30-40, Systolic BP 70-90',
+          'Toddler (1-2 years): HR 100-150, RR 25-35, Systolic BP 80-95',
+          'Preschool (3-5 years): HR 95-140, RR 20-30, Systolic BP 80-100',
+          'School age (6-12 years): HR 80-120, RR 15-25, Systolic BP 90-110',
+          'Adolescent (13+ years): HR 60-100, RR 12-20, Systolic BP 100-120',
+        ],
+      },
+      {
+        title: 'Response Triggers',
+        type: 'normal',
+        content: [
+          'Score 1: Increase observation frequency, inform nurse in charge',
+          'Score 2: Nurse in charge to review, consider medical review',
+          'Score 3: Urgent medical review within 30 minutes',
+          'Score 4+: Immediate medical review, consider PICU/resus team',
+          'Any score of 3 in a single parameter: Immediate review required',
+        ],
+      },
+      {
+        title: 'Red Flags - Escalate Immediately',
+        type: 'warning',
+        content: [
+          'Unresponsive or only responds to pain',
+          'Severe respiratory distress or apnoea',
+          'Central cyanosis',
+          'Weak/absent pulses, cap refill >5 seconds',
+          'Significant bradycardia for age',
+          'Parental concern that child is "not themselves"',
+          'Staff "gut feeling" that something is wrong',
+        ],
+      },
+      {
+        title: 'Key Differences from Adult NEWS2',
+        type: 'tip',
+        content: [
+          'Vital signs must be interpreted using age-appropriate ranges',
+          'Behaviour is a key parameter - children compensate then deteriorate rapidly',
+          'Parental concern should always be taken seriously',
+          'Children can maintain BP until very late - watch for subtle signs',
+          'Work of breathing is more important than respiratory rate alone',
+          'Always consider safeguarding if presentation doesn\'t fit history',
+        ],
+      },
+    ],
+  },
   'pressure-area-care': {
     title: 'Pressure Area Care Plan',
     description: 'Waterlow scoring, prevention strategies, and SSKIN bundle implementation.',
