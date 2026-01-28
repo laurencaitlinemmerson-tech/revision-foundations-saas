@@ -96,12 +96,12 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center">
+      <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center pt-20">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
         <div className="blob blob-3" />
 
-        <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
+        <div className="max-w-6xl mx-auto px-6 py-16 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
             <div className="hero-badge">
               <Sparkles className="w-4 h-4 text-[var(--purple)] icon-spin" />
@@ -301,7 +301,7 @@ export default function HomePage() {
           <p className="text-[var(--plum-dark)]/70 mb-4 animate-on-scroll">
             Got questions? I&apos;m always happy to chat!
           </p>
-          <a
+          
             href="https://wa.me/447572650980"
             target="_blank"
             rel="noopener noreferrer"
