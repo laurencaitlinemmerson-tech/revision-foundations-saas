@@ -1,3 +1,4 @@
+import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
