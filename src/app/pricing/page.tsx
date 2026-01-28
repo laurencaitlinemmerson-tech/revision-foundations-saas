@@ -383,14 +383,20 @@ export default function PricingPage() {
 
           {/* Free preview */}
           <div className="text-center mt-10">
-            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">Not sure yet? Try it first!</p>
-            <Link href="/quiz" className="btn-secondary text-sm">
-              <Play className="w-4 h-4" />
-              Try Free Preview
-            </Link>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
+  <p className="text-[var(--plum-dark)]/60 text-sm mb-4">
+    Not sure yet? Try it first!
+  </p>
+
+  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+    <Link href="/quiz" className="btn-secondary text-sm">
+      <Play className="w-4 h-4" />
+      Try Quiz Preview
+    </Link>
+
+    <Link href="/osce" className="btn-secondary text-sm">
+      <Play className="w-4 h-4" />
+      Try OSCE Preview
+    </Link>
+  </div>
+</div>
+
