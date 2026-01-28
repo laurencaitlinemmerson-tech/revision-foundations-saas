@@ -62,42 +62,43 @@ export default function Testimonials() {
   }, []);
 
   return (
-    <section className="gradient-hero section relative overflow-hidden">
+    <section className="gradient-hero py-16 md:py-20 relative overflow-hidden">
       <div className="blob blob-2" />
 
       <div className="max-w-5xl mx-auto px-6 relative z-10">
-        <div className="text-center mb-14">
+        <div className="text-center mb-10">
           <span className="badge mb-4">Reviews</span>
-          <h2 className="mb-4">Students Love It</h2>
+          <h2>Students Love It</h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {reviews.slice(0, 3).map((review) => (
-            <div key={review.id} className="testimonial-card">
-              <div className="flex gap-1 mb-3">
-                {[...Array(5)].map((_, j) => (
-                  <Star
-                    key={j}
-                    className={`w-4 h-4 ${
-                      j < review.rating
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="text-[var(--plum-dark)]/80 text-sm mb-4">"{review.text}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center text-white text-sm font-semibold">
-                  {review.name[0]}
+        <div className="flex flex-col items-center gap-8">
+          <div className="grid md:grid-cols-3 gap-6 w-full">
+            {reviews.slice(0, 3).map((review) => (
+              <div key={review.id} className="testimonial-card">
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, j) => (
+                    <Star
+                      key={j}
+                      className={`w-4 h-4 ${
+                        j < review.rating
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
                 </div>
-                <span className="font-medium text-sm text-[var(--plum)]">{review.name}</span>
+                <p className="text-[var(--plum-dark)]/80 text-sm mb-4">"{review.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center text-white text-sm font-semibold">
+                    {review.name[0]}
+                  </div>
+                  <span className="font-medium text-sm text-[var(--plum)]">{review.name}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-
-       </div>
+      </div>
     </section>
   );
 }

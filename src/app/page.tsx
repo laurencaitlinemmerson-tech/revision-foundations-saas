@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Testimonials from '@/components/Testimonials';
-import { Sparkles, BookOpen, ClipboardCheck, Heart, Check, Play, Users, Zap, Gift } from 'lucide-react';
+import { Sparkles, Heart, Play } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -20,7 +20,7 @@ export default function HomePage() {
           <div className="text-center max-w-3xl mx-auto">
             <div className="fade-in inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full text-sm font-medium mb-8 border border-[var(--lavender)]/30">
               <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-              <span className="text-[var(--plum)]">For  Nursing Students</span>
+              <span className="text-[var(--plum)]">For Nursing Students</span>
               <Heart className="w-4 h-4 text-[var(--pink)]" />
             </div>
 
@@ -79,11 +79,11 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-14">
             <span className="badge badge-purple mb-4">Our Tools</span>
-            <h2 className="mb-4 text-[var(--plum-dark)]">What's Inside?</h2>
+            <h2 className="mb-4 text-[var(--plum-dark)]">What&apos;s Inside?</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="card bg-white p-8 rounded-2xl shadow-sm">
-              <h3 className="mb-3 text-[var(--plum-dark)]">Children's OSCE Tool</h3>
+              <h3 className="mb-3 text-[var(--plum-dark)]">Children&apos;s OSCE Tool</h3>
               <p className="mb-6 text-[var(--plum-dark)]/70">Prepared for placements. 50+ stations.</p>
               <Link href="/osce" className="btn-primary w-full">Try OSCE Tool</Link>
             </div>
@@ -129,15 +129,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="bg-cream pb-24 relative">
-        <Testimonials />
-        
-        {/* Corrected "Leave your own review" button */}
-        <div className="flex justify-center -mt-6 mb-12 relative z-20">
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* Leave Review Section */}
+      <section className="bg-cream py-12">
+        <div className="flex justify-center">
           <a
             href="/review"
-            className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-6 py-2.5 rounded-full text-sm font-medium border border-[var(--lavender)]/30 transition-all hover:bg-white hover:scale-105 active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-full text-sm font-semibold border-2 border-[var(--lavender)] transition-all hover:bg-[var(--lilac-soft)] hover:scale-105 active:scale-95 shadow-sm"
           >
             <Sparkles className="w-4 h-4 text-[var(--purple)]" />
             <span className="text-[var(--plum)]">Leave your own review</span>
@@ -146,24 +146,43 @@ export default function HomePage() {
         </div>
       </section>
 
-    {/* CTA Section */}
+      {/* CTA Section */}
       <section className="gradient-hero section relative overflow-hidden">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
         <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
-          <div className="text-3xl mb-4">✨</div>
-          <h2 className="mb-4 text-[var(--plum)]">Ready to Start?</h2>
-          <p className="text-lg md:text-xl text-[var(--plum-dark)]/70 mb-10">
+          <div className="text-4xl mb-6">✨</div>
+          <h2 className="mb-4 text-white">Ready to Start?</h2>
+          <p className="text-white text-lg mb-8">
             Your nursing exams don&apos;t stand a chance.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/pricing" className="btn-primary text-lg px-8 py-4">
-              <Sparkles className="w-5 h-5" /> Get Started - £4.99
+            <Link href="/pricing" className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90">
+              <Sparkles className="w-5 h-5" />
+              Get Started - £4.99
             </Link>
-            <Link href="/quiz" className="btn-secondary text-lg px-8 py-4">
-              <Play className="w-5 h-5" /> Free Preview
+            <Link href="/quiz" className="btn-secondary px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30">
+              <Play className="w-5 h-5" />
+              Free Preview
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* WhatsApp CTA */}
+      <section className="bg-cream py-12">
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <p className="text-[var(--plum-dark)]/70 mb-4">
+            Got questions? I&apos;m always happy to chat!
+          </p>
+          <a
+            href="https://wa.me/447572650980"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all"
+          >
+            💬 WhatsApp Me
+          </a>
         </div>
       </section>
 
@@ -236,5 +255,4 @@ export default function HomePage() {
       </footer>
     </div>
   );
-}     
- 
+}
