@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import AutoAnimate from "@/components/AutoAnimate";
 import "./globals.css";
 import "./premium-animations-vanilla.css";
 
@@ -17,7 +18,17 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="antialiased">{children}</body>
+        <body className="antialiased">
+          <AutoAnimate />
+
+          <div className="rf-bg">
+            <div className="rf-blob rf-blob-1" />
+            <div className="rf-blob rf-blob-2" />
+            <div className="rf-blob rf-blob-3" />
+
+            {children}
+          </div>
+        </body>
       </html>
     </ClerkProvider>
   );
