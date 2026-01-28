@@ -20,7 +20,7 @@ export default function HomePage() {
           <div className="text-center max-w-3xl mx-auto">
             <div className="fade-in inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full text-sm font-medium mb-8 border border-[var(--lavender)]/30">
               <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-              <span className="text-[var(--plum)]">For Children's Nursing Students</span>
+              <span className="text-[var(--plum)]">For  Nursing and Students</span>
               <Heart className="w-4 h-4 text-[var(--pink)]" />
             </div>
 
