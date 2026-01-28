@@ -307,7 +307,7 @@
   transform: translateX(30px);
 }
 
-slide-in-right.animate-in,
+.slide-in-right.animate-in,
 .slide-in-right[data-animate='in'] {
   transform: translateX(0);
 }
@@ -318,8 +318,7 @@ slide-in-right.animate-in,
   transform: translateY(30px);
 }
 
-
-  fade-in-up.animate-in,
+.fade-in-up.animate-in,
 .fade-in-up[data-animate='in'] {
   opacity: 1;
   transform: translateY(0);
