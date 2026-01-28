@@ -4,7 +4,16 @@ import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Play, Gift, Mail } from 'lucide-react';
+import {
+  Check,
+  Sparkles,
+  BookOpen,
+  ClipboardCheck,
+  Loader2,
+  Play,
+  Gift,
+  Mail,
+} from 'lucide-react';
 
 export default function PricingPage() {
   const { isSignedIn } = useUser();
@@ -13,9 +22,7 @@ export default function PricingPage() {
   const [showEmailInput, setShowEmailInput] = useState<string | null>(null);
   const [emailError, setEmailError] = useState('');
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handlePurchase = async (product: 'osce' | 'quiz' | 'bundle') => {
     if (!isSignedIn && !guestEmail) {
@@ -43,14 +50,16 @@ export default function PricingPage() {
 
       const data = await response.json();
 
-      if (data.url) {
+      if (data?.url) {
         window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'No checkout URL returned');
+        return;
       }
+
+      throw new Error(data?.error || 'No checkout URL returned');
     } catch (error: any) {
       console.error('Checkout error:', error);
-      const message = error?.message || 'Something went wrong. Please try again or contact support.';
+      const message =
+        error?.message || 'Something went wrong. Please try again or contact support.';
       alert(`Oops! ${message}`);
     } finally {
       setLoading(null);
@@ -76,15 +85,18 @@ export default function PricingPage() {
             <span className="badge badge-purple mb-4">Pricing</span>
             <h1 className="mb-4">Simple Pricing</h1>
             <p className="text-[var(--plum-dark)]/70 max-w-lg mx-auto">
-              Pay once, use forever! No account needed 💜
+              One-time payment • lifetime access • no subscriptions 💜
+            </p>
+            <p className="text-xs text-[var(--plum-dark)]/55 mt-3">
+              Full Hub Access includes everything (and future updates) ✨
             </p>
           </div>
 
           {/* Bundle - Featured */}
           <div className="card mb-8 relative overflow-hidden border-[var(--lavender)] border-2">
             <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
-  SAVE £5 ✨
-</div>
+              SAVE £5 ✨
+            </div>
 
             <div className="flex flex-col md:flex-row md:items-center gap-8">
               <div className="flex-1">
@@ -94,19 +106,21 @@ export default function PricingPage() {
                   </div>
                   <div>
                     <h2>Full Hub Access</h2>
-<p className="text-[var(--plum-dark)]/70 text-sm">Everything included — OSCE + Quiz + future updates</p>
-
+                    <p className="text-[var(--plum-dark)]/70 text-sm">
+                      Everything included — OSCE + Quiz + future updates
+                    </p>
+                  </div>
                 </div>
+
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {[
-  'Full access to the Revision Hub',
-  'OSCE Tool included',
-  'Core Nursing Quiz included',
-  'Everything unlocked',
-  'Future tools included',
-  'Lifetime access',
-].map((feature) => (
-
+                    'Full access to the Revision Hub',
+                    'OSCE Tool included',
+                    'Core Nursing Quiz included',
+                    'Everything unlocked',
+                    'Future tools included',
+                    'Lifetime access',
+                  ].map((feature) => (
                     <div key={feature} className="feature-check">
                       <div className="check-icon">
                         <Check className="w-3.5 h-3.5 text-green-600" />
@@ -116,22 +130,18 @@ export default function PricingPage() {
                   ))}
                 </div>
               </div>
+
               <div className="text-center md:text-right">
                 <div className="mb-2">
-  <span className="text-[var(--plum-dark)]/50 line-through text-lg">£14.99</span>
-</div>
-<div className="stat-number mb-1">£9.99</div>
-<p className="text-sm text-[var(--plum-dark)]/70 mb-4">
-  one-time payment • lifetime access
-</p>
-<p className="text-xs text-[var(--plum-dark)]/55 mb-4">
-  Launch offer for early supporters 💜
-</p>
-                <p className="text-xs text-[var(--plum-dark)]/55 mb-4">
-  Best for serious revision + new tools added over time 💜
-</p>
+                  <span className="text-[var(--plum-dark)]/50 line-through text-lg">
+                    £14.99
+                  </span>
+                </div>
 
-
+                <div className="stat-number mb-1">£9.99</div>
+                <p className="text-sm text-[var(--plum-dark)]/70 mb-4">
+                  one-time payment • lifetime access
+                </p>
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
                   <div className="space-y-3">
@@ -141,7 +151,10 @@ export default function PricingPage() {
                         type="email"
                         placeholder="Enter your email"
                         value={guestEmail}
-                        onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
+                        onChange={(e) => {
+                          setGuestEmail(e.target.value);
+                          setEmailError('');
+                        }}
                         className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
                       />
                     </div>
@@ -152,9 +165,13 @@ export default function PricingPage() {
                       className="btn-primary w-full"
                     >
                       {loading === 'bundle' ? (
-                        <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                        </>
                       ) : (
-                        <><Sparkles className="w-5 h-5" /> Continue to Payment</>
+                        <>
+                          <Sparkles className="w-5 h-5" /> Continue to Payment
+                        </>
                       )}
                     </button>
                   </div>
@@ -165,9 +182,13 @@ export default function PricingPage() {
                     className="btn-primary px-8"
                   >
                     {loading === 'bundle' ? (
-                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                      </>
                     ) : (
-                      <><Sparkles className="w-5 h-5" /> Get the Bundle</>
+                      <>
+                        <Sparkles className="w-5 h-5" /> Get Full Hub Access
+                      </>
                     )}
                   </button>
                 )}
@@ -185,19 +206,22 @@ export default function PricingPage() {
             <div className="card">
               <div className="text-4xl mb-4">📋</div>
               <span className="badge mb-3">£4.99 · Lifetime</span>
-              <h3 className="mb-2">Children's OSCE Tool</h3>
+              <h3 className="mb-2">Children&apos;s OSCE Tool</h3>
               <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
                 Walk into your placement OSCE feeling prepared
               </p>
+
               <div className="space-y-2 mb-6">
-                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map((f) => (
-                  <div key={f} className="feature-check">
-                    <div className="check-icon">
-                      <Check className="w-3.5 h-3.5 text-green-600" />
+                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map(
+                  (f) => (
+                    <div key={f} className="feature-check">
+                      <div className="check-icon">
+                        <Check className="w-3.5 h-3.5 text-green-600" />
+                      </div>
+                      <span className="text-sm text-[var(--plum-dark)]">{f}</span>
                     </div>
-                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
 
               {showEmailInput === 'osce' && !isSignedIn ? (
@@ -208,7 +232,10 @@ export default function PricingPage() {
                       type="email"
                       placeholder="Enter your email"
                       value={guestEmail}
-                      onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
+                      onChange={(e) => {
+                        setGuestEmail(e.target.value);
+                        setEmailError('');
+                      }}
                       className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
                     />
                   </div>
@@ -219,9 +246,13 @@ export default function PricingPage() {
                     className="btn-secondary w-full"
                   >
                     {loading === 'osce' ? (
-                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                      </>
                     ) : (
-                      <><ClipboardCheck className="w-5 h-5" /> Continue</>
+                      <>
+                        <ClipboardCheck className="w-5 h-5" /> Continue
+                      </>
                     )}
                   </button>
                 </div>
@@ -232,9 +263,13 @@ export default function PricingPage() {
                   className="btn-secondary w-full"
                 >
                   {loading === 'osce' ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                    </>
                   ) : (
-                    <><ClipboardCheck className="w-5 h-5" /> Get OSCE Tool</>
+                    <>
+                      <ClipboardCheck className="w-5 h-5" /> Get OSCE Tool
+                    </>
                   )}
                 </button>
               )}
@@ -248,15 +283,18 @@ export default function PricingPage() {
               <p className="text-[var(--plum-dark)]/70 text-sm mb-5">
                 17 topic areas covering the theory you need
               </p>
+
               <div className="space-y-2 mb-6">
-                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map((f) => (
-                  <div key={f} className="feature-check">
-                    <div className="check-icon">
-                      <Check className="w-3.5 h-3.5 text-green-600" />
+                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map(
+                  (f) => (
+                    <div key={f} className="feature-check">
+                      <div className="check-icon">
+                        <Check className="w-3.5 h-3.5 text-green-600" />
+                      </div>
+                      <span className="text-sm text-[var(--plum-dark)]">{f}</span>
                     </div>
-                    <span className="text-sm text-[var(--plum-dark)]">{f}</span>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
 
               {showEmailInput === 'quiz' && !isSignedIn ? (
@@ -267,7 +305,10 @@ export default function PricingPage() {
                       type="email"
                       placeholder="Enter your email"
                       value={guestEmail}
-                      onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
+                      onChange={(e) => {
+                        setGuestEmail(e.target.value);
+                        setEmailError('');
+                      }}
                       className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none text-sm"
                     />
                   </div>
@@ -278,9 +319,13 @@ export default function PricingPage() {
                     className="btn-secondary w-full"
                   >
                     {loading === 'quiz' ? (
-                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                      </>
                     ) : (
-                      <><BookOpen className="w-5 h-5" /> Continue</>
+                      <>
+                        <BookOpen className="w-5 h-5" /> Continue
+                      </>
                     )}
                   </button>
                 </div>
@@ -291,9 +336,13 @@ export default function PricingPage() {
                   className="btn-secondary w-full"
                 >
                   {loading === 'quiz' ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                    </>
                   ) : (
-                    <><BookOpen className="w-5 h-5" /> Get Quiz Tool</>
+                    <>
+                      <BookOpen className="w-5 h-5" /> Get Quiz Tool
+                    </>
                   )}
                 </button>
               )}
@@ -307,10 +356,22 @@ export default function PricingPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {[
-                { q: 'Is this a subscription?', a: 'Nope! Pay once, access forever ✨' },
-                { q: 'Do I need an account?', a: 'No! Just enter your email at checkout.' },
-                { q: 'What payment methods?', a: 'All major cards via Stripe 💳' },
-                { q: 'Can I get a refund?', a: 'Yes, within 7 days if not happy!' },
+                {
+                  q: 'Is this a subscription?',
+                  a: 'No — it’s a one-time payment with lifetime access ✨',
+                },
+                {
+                  q: 'Do I need an account?',
+                  a: 'No! Just enter your email at checkout.',
+                },
+                {
+                  q: 'What payment methods?',
+                  a: 'All major cards via Stripe 💳',
+                },
+                {
+                  q: 'Can I get a refund?',
+                  a: 'Yes, within 7 days if not happy!',
+                },
               ].map((faq, i) => (
                 <div key={i} className="p-4 rounded-xl bg-[var(--lilac-soft)]">
                   <h4 className="font-semibold text-[var(--plum)] text-sm mb-1">{faq.q}</h4>
@@ -322,9 +383,7 @@ export default function PricingPage() {
 
           {/* Free preview */}
           <div className="text-center mt-10">
-            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">
-              Not sure yet? Try it first!
-            </p>
+            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">Not sure yet? Try it first!</p>
             <Link href="/quiz" className="btn-secondary text-sm">
               <Play className="w-4 h-4" />
               Try Free Preview
