@@ -34,7 +34,8 @@ export default function HomePage() {
 
             <div className="fade-in flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/pricing" className="btn-primary text-lg px-8 py-4">
-                <Sparkles className="w-5 h-5" /> Get Started - £4.99
+                <Sparkles className="w-5 h-5" /> Get Started – £4.99 one-time
+
               </Link>
               <Link href="/osce" className="btn-secondary text-lg px-8 py-4">
                 <Play className="w-5 h-5" /> Try OSCE
@@ -57,12 +58,13 @@ export default function HomePage() {
       <section className="bg-cream py-16">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { num: '17', label: 'Quiz Topics', icon: '📚' },
-              { num: '50+', label: 'OSCE Stations', icon: '✨' },
-              { num: '∞', label: 'Lifetime Access', icon: '💜' },
-              { num: '4.9', label: 'Star Rating', icon: '⭐' },
-            ].map((s, i) => (
+           {[
+  { num: '17', label: 'Quiz Topics', icon: '📚' },
+  { num: '50+', label: 'OSCE Stations', icon: '✨' },
+  { num: '£4.99', label: 'One-time access', icon: '💜' },
+  { num: '∞', label: 'Lifetime updates', icon: '⭐' },
+].map((s, i) => (
+
               <div key={i} className="fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
                 <span className="text-2xl mb-2 block">{s.icon}</span>
                 <div className="stat-number">{s.num}</div>
@@ -114,10 +116,11 @@ export default function HomePage() {
                 copy: 'Simple, pretty interface that makes revision actually fun.',
               },
               {
-                icon: '🎁',
-                title: 'Pay Once',
-                copy: 'No subscriptions! One payment, lifetime access forever.',
-              },
+  icon: '🎁',
+  title: 'Pay Once',
+  copy: 'One-time payment. Lifetime access. No subscription.',
+},
+
             ].map((item) => (
               <div key={item.title} className="space-y-3">
                 <div className="text-4xl">{item.icon}</div>
@@ -159,7 +162,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/pricing" className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90">
               <Sparkles className="w-5 h-5" />
-              Get Started - £4.99
+              Get Started – £4.99 one-time
             </Link>
             <Link href="/quiz" className="btn-secondary px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30">
               <Play className="w-5 h-5" />
