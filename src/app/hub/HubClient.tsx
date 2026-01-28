@@ -35,7 +35,6 @@ export default function HubClient() {
       .finally(() => setLoading(false));
   }, [isLoaded, user]);
 
-  // Scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
@@ -103,7 +102,6 @@ export default function HubClient() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* Hero Section */}
       <section className="gradient-hero relative overflow-hidden pt-32 pb-20">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
@@ -122,7 +120,7 @@ export default function HubClient() {
             </h1>
 
             <p className="hero-subtitle animate-on-scroll">
-              Hey {user.firstName || 'there'}! Ready to revise? 💜
+              Hey {user.firstName || 'there'}! Ready to revise?
             </p>
           </div>
         </div>
@@ -137,7 +135,6 @@ export default function HubClient() {
         </div>
       </section>
 
-      {/* Access Cards Section */}
       <section className="bg-cream py-16">
         <div className="max-w-6xl mx-auto px-6">
           {!hasAnyAccess ? (
@@ -145,7 +142,7 @@ export default function HubClient() {
               <div className="text-4xl mb-4 emoji-float">🎁</div>
               <h2 className="mb-4 text-[var(--plum-dark)]">Ready to Get Started?</h2>
               <p className="text-[var(--plum-dark)]/70 mb-8 max-w-2xl mx-auto">
-                Unlock both OSCE and Quiz tools for just £4.99 one-time. No subscription, lifetime access!
+                Unlock both OSCE and Quiz tools for just £9.99 one-time. No subscription, lifetime access!
               </p>
               <Link href="/pricing" className="btn-primary btn-hover text-lg px-8 py-4">
                 <Crown className="w-5 h-5" />
@@ -160,7 +157,6 @@ export default function HubClient() {
           )}
 
           <div className="grid md:grid-cols-2 gap-8 mt-12">
-            {/* OSCE Card */}
             <div
               className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-left ${
                 !hasProduct('osce') && !hasProduct('bundle') ? 'opacity-60' : ''
@@ -170,7 +166,7 @@ export default function HubClient() {
                 <div className="icon-box-soft">
                   <BookOpen className="w-6 h-6 text-[var(--purple)]" />
                 </div>
-                <h3 className="text-[var(--plum-dark)]">Children's OSCE Tool</h3>
+                <h3 className="text-[var(--plum-dark)]">Children&apos;s OSCE Tool</h3>
               </div>
 
               <p className="text-[var(--plum-dark)]/70 mb-6">
@@ -190,7 +186,6 @@ export default function HubClient() {
               )}
             </div>
 
-            {/* Quiz Card */}
             <div
               className={`card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-right ${
                 !hasProduct('quiz') && !hasProduct('bundle') ? 'opacity-60' : ''
@@ -223,7 +218,6 @@ export default function HubClient() {
         </div>
       </section>
 
-      {/* Tips Section */}
       <section className="bg-lilac section relative overflow-hidden">
         <div className="blob blob-1" style={{ opacity: 0.3 }} />
         <div className="max-w-6xl mx-auto px-6 relative z-10">
@@ -242,111 +236,4 @@ export default function HubClient() {
               {
                 icon: '🎯',
                 title: 'Focus on Weak Areas',
-                copy: 'Use the tools to identify and strengthen your weak spots.',
-              },
-              {
-                icon: '✨',
-                title: 'Stay Consistent',
-                copy: 'Regular practice beats cramming every time.',
-              },
-            ].map((item, i) => (
-              <div
-                key={item.title}
-                className="card bg-white p-6 text-center animate-on-scroll fade-in-up"
-                style={{ animationDelay: i * 0.1 + 's' }}
-              >
-                <div className="text-4xl mb-3 emoji-float" style={{ animationDelay: i * 0.3 + 's' }}>
-                  {item.icon}
-                </div>
-                <h3 className="text-[var(--plum)] mb-2">{item.title}</h3>
-                <p className="text-[var(--plum-dark)]/70 text-sm">{item.copy}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Support CTA */}
-      <section className="bg-cream py-16">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <div className="text-4xl mb-4 animate-on-scroll emoji-float">💬</div>
-          <h2 className="mb-4 text-[var(--plum-dark)] animate-on-scroll">Need Help?</h2>
-          <p className="text-[var(--plum-dark)]/70 mb-6 animate-on-scroll">
-            Got questions or feedback? I'm always happy to chat!
-          </p>
-          
-            href="https://wa.me/447572650980"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="whatsapp-btn animate-on-scroll"
-          >
-            💬 WhatsApp Me
-          </a>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
-        <div className="mx-auto flex max-w-6xl flex-col gap-10">
-          <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-            <div className="space-y-4">
-              <div className="font-serif text-2xl font-semibold text-[var(--plum)]">
-                Revision Foundations
-              </div>
-              <p className="text-sm">Made with 💜 by Lauren</p>
-            </div>
-
-            <div className="space-y-3 text-sm">
-              <p className="font-semibold text-[var(--plum)]">Products</p>
-              <div className="flex flex-col gap-2">
-                <Link href="/osce" className="footer-link">
-                  OSCE Tool
-                </Link>
-                <Link href="/quiz" className="footer-link">
-                  Core Quiz
-                </Link>
-                <Link href="/pricing" className="footer-link">
-                  Pricing
-                </Link>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-sm">
-              <p className="font-semibold text-[var(--plum)]">Company</p>
-              <div className="flex flex-col gap-2">
-                <Link href="/about" className="footer-link">
-                  About
-                </Link>
-                <Link href="/contact" className="footer-link">
-                  Contact
-                </Link>
-                <Link href="/privacy" className="footer-link">
-                  Privacy Policy
-                </Link>
-                <Link href="/terms" className="footer-link">
-                  Terms of Service
-                </Link>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-sm">
-              <p className="font-semibold text-[var(--plum)]">Account</p>
-              <div className="flex flex-col gap-2">
-                <Link href="/dashboard" className="footer-link">
-                  Dashboard
-                </Link>
-                <Link href="/sign-out" className="footer-link">
-                  Sign Out
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-[var(--lavender)]/40 pt-6 text-center text-sm">
-            © 2026 Revision Foundations
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-}
+                copy: 'Use the tools to identify and strengthen
