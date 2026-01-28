@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* --- Hero title: match the screenshot gradient wordmark --- */
 .hero-title {
   margin-bottom: 0.35rem;
