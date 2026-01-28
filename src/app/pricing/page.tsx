@@ -52,10 +52,10 @@ function SectionTitle({
   subtitle: React.ReactNode;
 }) {
   return (
-    <div className="text-center !mb-6 md:!mb-7">
+    <div className="text-center !mb-5 md:!mb-6">
       <span className="animate-on-scroll badge badge-purple !mb-2 inline-flex">{badge}</span>
 
-      <h1 className="animate-on-scroll !mb-2 leading-[1.05] tracking-tight">
+      <h1 className="animate-on-scroll !mb-2 leading-[1.03] tracking-tight">
         {title}
       </h1>
 
@@ -108,7 +108,10 @@ export default function PricingPage() {
 
   const bundlePrice = 9.99;
   const oldBundlePrice = 14.99;
-  const saveAmount = useMemo(() => Math.max(0, oldBundlePrice - bundlePrice), [oldBundlePrice, bundlePrice]);
+  const saveAmount = useMemo(
+    () => Math.max(0, oldBundlePrice - bundlePrice),
+    [oldBundlePrice, bundlePrice]
+  );
 
   const trustItems = useMemo(
     () => [
@@ -212,7 +215,8 @@ export default function PricingPage() {
       throw new Error(data?.error || 'No checkout URL returned');
     } catch (error: any) {
       console.error('Checkout error:', error);
-      const message = error?.message || 'Something went wrong. Please try again or contact support.';
+      const message =
+        error?.message || 'Something went wrong. Please try again or contact support.';
       alert(`Oops! ${message}`);
     } finally {
       setLoading(null);
@@ -227,7 +231,13 @@ export default function PricingPage() {
     handlePurchase(product);
   };
 
-  const EmailInput = ({ product, variant }: { product: Product; variant: 'primary' | 'secondary' }) => (
+  const EmailInput = ({
+    product,
+    variant,
+  }: {
+    product: Product;
+    variant: 'primary' | 'secondary';
+  }) => (
     <div className="space-y-3">
       <div className="relative">
         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--plum-dark)]/50" />
@@ -269,14 +279,13 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* reduced overall padding */}
-      <main className="pt-24 pb-16 px-6">
-        {/* Hero (FORCED slim) */}
-        <section className="gradient-hero !rounded-2xl overflow-hidden relative">
-          <div className="blob blob-1" style={{ opacity: 0.14 }} />
-          <div className="blob blob-2" style={{ opacity: 0.14 }} />
+      <main className="pt-24 pb-14 px-6">
+        {/* Hero (less bulky + more “banner”) */}
+        <section className="gradient-hero !rounded-2xl overflow-hidden relative border border-white/50">
+          <div className="blob blob-1" style={{ opacity: 0.12 }} />
+          <div className="blob blob-2" style={{ opacity: 0.12 }} />
 
-          <div className="px-6 !py-8 md:!py-10 max-w-5xl mx-auto relative z-10">
+          <div className="px-6 !py-6 md:!py-8 max-w-5xl mx-auto relative z-10">
             <SectionTitle
               badge="Pricing"
               title={
@@ -287,21 +296,23 @@ export default function PricingPage() {
               subtitle={<>One-time payment • lifetime access • no subscriptions 💜</>}
             />
 
-            {/* Trust strip (FORCED slim) */}
+            {/* Trust strip (smaller + tighter) */}
             <div className="grid sm:grid-cols-3 gap-2 md:gap-3 -mt-1">
               {trustItems.map((t, i) => {
                 const Icon = t.icon;
                 return (
                   <div
                     key={t.title}
-                    className="animate-on-scroll !rounded-xl bg-white/70 backdrop-blur border border-white/40 !px-4 !py-3 flex items-center gap-3"
+                    className="animate-on-scroll !rounded-xl bg-white/65 backdrop-blur border border-white/40 !px-4 !py-2.5 flex items-center gap-3"
                     style={{ animationDelay: `${i * 0.08}s` }}
                   >
-                    <span className="h-9 w-9 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
+                    <span className="h-8 w-8 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
                       <Icon className="h-4 w-4 text-[var(--purple)]" />
                     </span>
                     <div>
-                      <p className="font-semibold text-[var(--plum)] text-sm leading-tight">{t.title}</p>
+                      <p className="font-semibold text-[var(--plum)] text-sm leading-tight">
+                        {t.title}
+                      </p>
                       <p className="text-xs text-[var(--plum-dark)]/70 leading-tight">{t.desc}</p>
                     </div>
                   </div>
@@ -311,28 +322,28 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto mt-6">
-          {/* Featured bundle */}
-          <div className="animate-on-scroll card mb-8 relative overflow-hidden border-[var(--lavender)] border-2 fade-in-up">
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
+        <div className="max-w-5xl mx-auto mt-0">
+          {/* Featured bundle (layered/overlapping = cleaner Framer feel) */}
+          <div className="animate-on-scroll card -mt-5 md:-mt-7 mb-7 relative overflow-hidden border-[var(--lavender)] border-2 fade-in-up shadow-[0_14px_40px_rgba(90,60,140,0.10)]">
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">
               {isPro ? 'PURCHASED ✓' : `BEST VALUE • SAVE £${saveAmount.toFixed(0)} ✨`}
             </div>
 
-            <div className="flex flex-col md:flex-row md:items-center gap-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-3">
                   <div className="icon-box">
                     <Gift className="w-7 h-7 text-white" />
                   </div>
-                  <div>
-                    <h2>Full Hub Access</h2>
-                    <p className="text-[var(--plum-dark)]/70 text-sm">
+                  <div className="min-w-0">
+                    <h2 className="leading-tight">Full Hub Access</h2>
+                    <p className="text-[var(--plum-dark)]/70 text-sm leading-tight">
                       Everything included — OSCE + Quiz + future updates
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-2 gap-2.5">
                   {[
                     'Full access to the Revision Hub',
                     'OSCE Tool included',
@@ -344,12 +355,12 @@ export default function PricingPage() {
                     <div
                       key={feature}
                       className="animate-on-scroll feature-check"
-                      style={{ animationDelay: `${0.12 + i * 0.04}s` }}
+                      style={{ animationDelay: `${0.1 + i * 0.035}s` }}
                     >
                       <div className="check-icon">
                         <Check className="h-3.5 w-3.5 text-green-600" />
                       </div>
-                      <span className="text-sm text-[var(--plum-dark)]">{feature}</span>
+                      <span className="text-sm text-[var(--plum-dark)] leading-snug">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -364,24 +375,29 @@ export default function PricingPage() {
                 </div>
               </div>
 
-              <div className="text-center md:text-right">
+              <div className="text-center md:text-right md:w-[240px]">
                 {isPro ? (
                   <>
-                    <div className="mb-4">
+                    <div className="mb-3">
                       <span className="text-emerald-600 font-semibold">You own this!</span>
                     </div>
-                    <Link href="/hub" className="btn-primary px-8 inline-flex items-center gap-2 justify-center">
+                    <Link
+                      href="/hub"
+                      className="btn-primary px-8 inline-flex items-center gap-2 justify-center w-full md:w-auto"
+                    >
                       <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-4 h-4" />
                     </Link>
                   </>
                 ) : (
                   <>
-                    <div className="mb-2">
-                      <span className="text-[var(--plum-dark)]/50 line-through text-lg">£{oldBundlePrice.toFixed(2)}</span>
+                    <div className="mb-1">
+                      <span className="text-[var(--plum-dark)]/50 line-through text-base">
+                        £{oldBundlePrice.toFixed(2)}
+                      </span>
                     </div>
 
-                    <div className="stat-number mb-1">£{bundlePrice.toFixed(2)}</div>
-                    <p className="text-sm text-[var(--plum-dark)]/70 mb-4">
+                    <div className="stat-number !text-4xl mb-1">£{bundlePrice.toFixed(2)}</div>
+                    <p className="text-sm text-[var(--plum-dark)]/70 mb-3 leading-tight">
                       one-time payment • lifetime access
                     </p>
 
@@ -391,7 +407,7 @@ export default function PricingPage() {
                       <button
                         onClick={() => handlePurchase('bundle')}
                         disabled={loading !== null}
-                        className="btn-primary px-8 inline-flex items-center gap-2 justify-center"
+                        className="btn-primary px-8 inline-flex items-center gap-2 justify-center w-full md:w-auto"
                       >
                         {loading === 'bundle' ? (
                           <>
@@ -406,7 +422,7 @@ export default function PricingPage() {
                     )}
 
                     {!isSignedIn && (
-                      <p className="mt-3 text-xs text-[var(--plum-dark)]/60">
+                      <p className="mt-2 text-xs text-[var(--plum-dark)]/60">
                         No account needed — checkout with email ✨
                       </p>
                     )}
@@ -417,23 +433,27 @@ export default function PricingPage() {
           </div>
 
           {/* Individual Products */}
-          <div className="animate-on-scroll text-center mb-6 fade-in-up">
+          <div className="animate-on-scroll text-center mb-5 fade-in-up">
             <p className="text-[var(--plum-dark)]/60 text-sm">Or buy individually:</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-16">
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
             <div className="animate-on-scroll card card-lift fade-in-up" style={{ animationDelay: '0.05s' }}>
-              <div className="text-4xl mb-4">📋</div>
+              <div className="text-4xl mb-3">📋</div>
               <span className="badge mb-3">£4.99 · Lifetime</span>
               <h3 className="mb-2">Children&apos;s OSCE Tool</h3>
-              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">Walk into your placement OSCE feeling prepared</p>
+              <p className="text-[var(--plum-dark)]/70 text-sm mb-4 leading-snug">
+                Walk into your placement OSCE feeling prepared
+              </p>
 
-              <div className="space-y-2 mb-6">
-                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map((f, i) => (
-                  <div key={f} className="animate-on-scroll" style={{ animationDelay: `${0.08 + i * 0.04}s` }}>
-                    <Feature>{f}</Feature>
-                  </div>
-                ))}
+              <div className="space-y-2 mb-5">
+                {['All OSCE stations', 'Detailed checklists', 'Timer & exam mode', 'Progress tracking'].map(
+                  (f, i) => (
+                    <div key={f} className="animate-on-scroll" style={{ animationDelay: `${0.06 + i * 0.03}s` }}>
+                      <Feature>{f}</Feature>
+                    </div>
+                  )
+                )}
               </div>
 
               {showEmailInput === 'osce' && !isSignedIn ? (
@@ -458,17 +478,21 @@ export default function PricingPage() {
             </div>
 
             <div className="animate-on-scroll card card-lift fade-in-up" style={{ animationDelay: '0.1s' }}>
-              <div className="text-4xl mb-4">📚</div>
+              <div className="text-4xl mb-3">📚</div>
               <span className="badge mb-3">£4.99 · Lifetime</span>
               <h3 className="mb-2">Core Nursing Quiz</h3>
-              <p className="text-[var(--plum-dark)]/70 text-sm mb-5">17 topic areas covering the theory you need</p>
+              <p className="text-[var(--plum-dark)]/70 text-sm mb-4 leading-snug">
+                17 topic areas covering the theory you need
+              </p>
 
-              <div className="space-y-2 mb-6">
-                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map((f, i) => (
-                  <div key={f} className="animate-on-scroll" style={{ animationDelay: `${0.08 + i * 0.04}s` }}>
-                    <Feature>{f}</Feature>
-                  </div>
-                ))}
+              <div className="space-y-2 mb-5">
+                {['17 topic categories', 'Instant feedback', 'Detailed explanations', 'Mobile friendly'].map(
+                  (f, i) => (
+                    <div key={f} className="animate-on-scroll" style={{ animationDelay: `${0.06 + i * 0.03}s` }}>
+                      <Feature>{f}</Feature>
+                    </div>
+                  )
+                )}
               </div>
 
               {showEmailInput === 'quiz' && !isSignedIn ? (
@@ -493,8 +517,9 @@ export default function PricingPage() {
             </div>
           </div>
 
+          {/* FAQ */}
           <div className="card">
-            <div className="animate-on-scroll text-center mb-6">
+            <div className="animate-on-scroll text-center mb-5">
               <h2 className="text-xl">Questions?</h2>
               <p className="text-sm text-[var(--plum-dark)]/60 mt-1">Click to expand</p>
             </div>
@@ -512,8 +537,11 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div className="text-center mt-10">
-            <p className="animate-on-scroll text-[var(--plum-dark)]/60 text-sm mb-4">Not sure yet? Try it first!</p>
+          {/* Free preview */}
+          <div className="text-center mt-8">
+            <p className="animate-on-scroll text-[var(--plum-dark)]/60 text-sm mb-4">
+              Not sure yet? Try it first!
+            </p>
 
             <div className="animate-on-scroll flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/quiz" className="btn-secondary text-sm inline-flex items-center gap-2 justify-center">
@@ -535,7 +563,9 @@ export default function PricingPage() {
           <div className="rounded-2xl bg-white/90 backdrop-blur border border-[var(--lilac-medium)] shadow-lg p-3 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-[var(--plum)]">Full Hub Access</p>
-              <p className="text-xs text-[var(--plum-dark)]/60">£{bundlePrice.toFixed(2)} • lifetime</p>
+              <p className="text-xs text-[var(--plum-dark)]/60">
+                £{bundlePrice.toFixed(2)} • lifetime
+              </p>
             </div>
             <button
               onClick={() => handlePurchase('bundle')}
@@ -558,3 +588,4 @@ export default function PricingPage() {
     </div>
   );
 }
+
