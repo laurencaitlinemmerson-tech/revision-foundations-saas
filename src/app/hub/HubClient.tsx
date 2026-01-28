@@ -17,6 +17,7 @@ export default function HubClient() {
   const { user, isLoaded } = useUser();
   const [entitlements, setEntitlements] = useState<Entitlement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!isLoaded || !user) {
@@ -25,13 +26,20 @@ export default function HubClient() {
     }
 
     fetch('/api/entitlements/check')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
       .then((data) => {
         if (data.entitlements) {
           setEntitlements(data.entitlements);
         }
+        setError(false);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error('Entitlements error:', err);
+        setError(true);
+      })
       .finally(() => setLoading(false));
   }, [isLoaded, user]);
 
@@ -84,7 +92,13 @@ export default function HubClient() {
             <p className="text-xl">Hey {user.firstName || 'there'}! Ready to revise?</p>
           </div>
 
-          {!hasAnyAccess && (
+          {error && (
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 mb-8 text-center">
+              <p className="text-yellow-800 mb-4">Unable to load your entitlements. You can still try the tools!</p>
+            </div>
+          )}
+
+          {!hasAnyAccess && !error && (
             <div className="text-center mb-12 p-8 bg-white rounded-2xl">
               <div className="text-4xl mb-4">🎁</div>
               <h2 className="text-2xl mb-4">Ready to Get Started?</h2>
@@ -107,8 +121,8 @@ export default function HubClient() {
                   Start OSCE Practice
                 </Link>
               ) : (
-                <Link href="/pricing" className="btn-secondary w-full block text-center">
-                  Unlock Access
+                <Link href="/osce" className="btn-secondary w-full block text-center">
+                  Try OSCE Tool
                 </Link>
               )}
             </div>
@@ -124,8 +138,8 @@ export default function HubClient() {
                   Start Quiz Practice
                 </Link>
               ) : (
-                <Link href="/pricing" className="btn-secondary w-full block text-center">
-                  Unlock Access
+                <Link href="/quiz" className="btn-secondary w-full block text-center">
+                  Try Quiz Tool
                 </Link>
               )}
             </div>
@@ -133,14 +147,14 @@ export default function HubClient() {
 
           <div className="text-center">
             <p className="mb-4">Got questions? I'm always happy to chat!</p>
-            
-              href="https://wa.me/447572650980"
+            <Link 
+              href="https://wa.me/447572650980" 
+              className="btn-primary inline-block"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary inline-block"
             >
               WhatsApp Me
-            </a>
+            </Link>
           </div>
         </div>
       </div>
