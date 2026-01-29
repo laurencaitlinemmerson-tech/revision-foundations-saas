@@ -1,31 +1,35 @@
 import { clerkClient } from '@clerk/nextjs/server';
 import { createServiceClient } from './supabase';
 
+interface UpsertUserParams {
+  clerkUserId: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  fullName: string | null;
+  username: string | null;
+}
+
 /**
  * Upserts a Clerk user into the Supabase users table
  * This ensures user data is synced between Clerk and Supabase
  */
-export async function upsertClerkUser(clerkUserId: string) {
+export async function upsertClerkUser(params: UpsertUserParams) {
   try {
-    const client = await clerkClient();
-    const user = await client.users.getUser(clerkUserId);
+    const { clerkUserId, email, firstName, lastName, fullName, username } = params;
     
-    if (!user) {
-      console.error('User not found in Clerk:', clerkUserId);
-      return null;
-    }
-
     const supabase = createServiceClient();
     
     // Upsert user into Supabase
     const { data, error } = await supabase
       .from('users')
       .upsert({
-        id: user.id,
-        email: user.emailAddresses[0]?.emailAddress || '',
-        first_name: user.firstName || '',
-        last_name: user.lastName || '',
-        image_url: user.imageUrl || '',
+        id: clerkUserId,
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        full_name: fullName,
+        username: username,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'id',
