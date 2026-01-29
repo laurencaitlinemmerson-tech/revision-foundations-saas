@@ -140,12 +140,9 @@ export default function HomePage() {
                   <Link href="/pricing" className="btn-primary btn-hover text-lg px-8 py-4">
                     <Sparkles className="w-5 h-5" /> Get Started – £4.99
                   </Link>
-                  <Link href="/osce" className="btn-secondary btn-hover text-lg px-8 py-4">
-                    <Play className="w-5 h-5" /> Try OSCE
-                  </Link>
-                  <Link href="/quiz" className="btn-secondary btn-hover text-lg px-8 py-4">
-                    <Play className="w-5 h-5" /> Try Quiz
-                  </Link>
+                  <a href="#whats-inside" className="btn-secondary btn-hover text-lg px-8 py-4">
+                    See What's Inside <ArrowRight className="w-5 h-5" />
+                  </a>
                 </>
               )}
             </div>
@@ -196,7 +193,7 @@ export default function HomePage() {
       </section>
 
       {/* Tools Section - Horizontal Scroll */}
-      <HorizontalScrollSection className="bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lilac-soft)]">
+      <HorizontalScrollSection id="whats-inside" className="bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lilac-soft)]">
         {/* Intro Card */}
         <HorizontalCard className="flex items-center">
           <div className="card bg-white/90 backdrop-blur-sm p-10 h-full flex flex-col justify-center">
@@ -280,10 +277,10 @@ export default function HomePage() {
             </div>
             <h3 className="text-2xl mb-3">Nursing Hub</h3>
             <p className="text-white/80 mb-6 flex-1">
-              Your central study space. Access all resources, track progress, join discussions, and connect with other students.
+              Your all-in-one study headquarters. Access curated Y1 child nursing resources, downloadable guides, and community discussions. Plus a personalised dashboard to track your progress, streaks, and see how you compare to other students.
             </p>
             <ul className="space-y-2 mb-6">
-              {['Y1 Resources', 'Study guides', 'Community Q&A', 'Progress dashboard'].map((feature) => (
+              {['Y1 Child Nursing Resources', 'Personalised Dashboard', 'Community Q&A', 'Progress & Streaks'].map((feature) => (
                 <li key={feature} className="flex items-center gap-2 text-sm text-white/80">
                   <Zap className="w-4 h-4 text-[var(--pink)]" />
                   {feature}

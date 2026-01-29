@@ -130,9 +130,10 @@ export function StaggerItem({ children, className = '' }: { children: ReactNode;
 interface HorizontalScrollProps {
   children: ReactNode;
   className?: string;
+  id?: string;
 }
 
-export function HorizontalScrollSection({ children, className = '' }: HorizontalScrollProps) {
+export function HorizontalScrollSection({ children, className = '', id }: HorizontalScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -140,7 +141,7 @@ export function HorizontalScrollSection({ children, className = '' }: Horizontal
   });
 
   return (
-    <section ref={containerRef} className={`relative ${className}`} style={{ height: '300vh' }}>
+    <section ref={containerRef} id={id} className={`relative ${className}`} style={{ height: '300vh' }}>
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         <motion.div 
           className="flex gap-8 pl-[10vw]"
