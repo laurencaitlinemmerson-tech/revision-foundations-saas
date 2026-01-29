@@ -33,6 +33,9 @@ import {
   ProgressStatsRow,
   TodaysPlanCard,
   FocusAreasCard,
+  CommunityStatsCard,
+  StreakCalendar,
+  QuickAchievement,
 } from '@/components/DashboardWidgets';
 
 export default async function DashboardPage() {
@@ -245,6 +248,21 @@ export default async function DashboardPage() {
             <div className="grid md:grid-cols-2 gap-6 mb-10 animate-on-scroll">
               <TodaysPlanCard />
               <FocusAreasCard />
+            </div>
+          )}
+
+          {/* Community Stats + Streak Calendar */}
+          {hasAnyTool && (
+            <div className="grid md:grid-cols-2 gap-6 mb-10 animate-on-scroll">
+              <CommunityStatsCard />
+              <StreakCalendar />
+            </div>
+          )}
+
+          {/* Achievement Banner */}
+          {hasAnyTool && (
+            <div className="mb-10 animate-on-scroll">
+              <QuickAchievement />
             </div>
           )}
 

@@ -15,6 +15,12 @@ import {
   Circle,
   Target,
   Play,
+  Users,
+  Trophy,
+  Zap,
+  Star,
+  ArrowUp,
+  Sparkles,
 } from 'lucide-react';
 
 // ============ localStorage Helpers ============
@@ -466,6 +472,241 @@ export function FocusAreasCard() {
       <p className="text-xs text-[var(--plum-dark)]/50 mt-4 text-center">
         Based on your recent quiz performance
       </p>
+    </div>
+  );
+}
+
+// ============ Community Stats - Compare vs Other Users ============
+
+interface CommunityStats {
+  yourSessions: number;
+  avgSessions: number;
+  percentile: number;
+  totalUsers: number;
+  topUserSessions: number;
+}
+
+// Simulated community stats - in production, this would come from an API
+function getCommunityStats(userSessions: number): CommunityStats {
+  // These would be fetched from the backend in production
+  const avgSessions = 4.2;
+  const totalUsers = 847;
+  const topUserSessions = 14;
+  
+  // Calculate percentile based on user's sessions
+  let percentile = 50;
+  if (userSessions >= 10) percentile = 95;
+  else if (userSessions >= 7) percentile = 85;
+  else if (userSessions >= 5) percentile = 70;
+  else if (userSessions >= 3) percentile = 50;
+  else if (userSessions >= 1) percentile = 30;
+  else percentile = 10;
+  
+  return {
+    yourSessions: userSessions,
+    avgSessions,
+    percentile,
+    totalUsers,
+    topUserSessions,
+  };
+}
+
+export function CommunityStatsCard() {
+  const [stats, setStats] = useState<CommunityStats | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const weeklyCount = getWeeklySessionCount();
+    setStats(getCommunityStats(weeklyCount));
+  }, []);
+
+  if (!mounted || !stats) return null;
+
+  const isAboveAverage = stats.yourSessions > stats.avgSessions;
+  const isTopPerformer = stats.percentile >= 80;
+
+  return (
+    <div className="card bg-gradient-to-br from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/30 border-[var(--lavender)] hover:shadow-lg transition-all duration-300">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <Users className="w-5 h-5 text-[var(--purple)]" />
+          <h3 className="font-semibold text-[var(--plum)]">How you compare</h3>
+        </div>
+        <span className="text-xs text-[var(--plum-dark)]/50 bg-white/60 px-2.5 py-1 rounded-full">
+          This week
+        </span>
+      </div>
+
+      {/* Main Comparison */}
+      <div className="grid grid-cols-2 gap-4 mb-5">
+        <div className="bg-white/70 rounded-2xl p-4 text-center">
+          <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Your sessions</p>
+          <p className="text-3xl font-bold text-[var(--purple)]">{stats.yourSessions}</p>
+          {isAboveAverage && (
+            <div className="flex items-center justify-center gap-1 mt-1 text-emerald-600">
+              <ArrowUp className="w-3 h-3" />
+              <span className="text-xs font-medium">Above avg</span>
+            </div>
+          )}
+        </div>
+        <div className="bg-white/70 rounded-2xl p-4 text-center">
+          <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Community avg</p>
+          <p className="text-3xl font-bold text-[var(--plum-dark)]/70">{stats.avgSessions}</p>
+          <p className="text-xs text-[var(--plum-dark)]/50 mt-1">{stats.totalUsers} students</p>
+        </div>
+      </div>
+
+      {/* Percentile Bar */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-[var(--plum-dark)]/70">Your ranking</span>
+          <span className="text-xs font-semibold text-[var(--purple)]">Top {100 - stats.percentile}%</span>
+        </div>
+        <div className="h-3 bg-white/60 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-[var(--lavender)] to-[var(--purple)] rounded-full transition-all duration-1000 ease-out"
+            style={{ width: `${stats.percentile}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Achievement Badge */}
+      {isTopPerformer ? (
+        <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
+            <Trophy className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-amber-800">Top Performer! 🏆</p>
+            <p className="text-xs text-amber-700/70">You're in the top {100 - stats.percentile}% of all students</p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 bg-[var(--lilac-soft)] rounded-xl p-3">
+          <div className="w-10 h-10 rounded-full bg-[var(--lavender)]/30 flex items-center justify-center">
+            <Zap className="w-5 h-5 text-[var(--purple)]" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-[var(--plum)]">
+              {5 - stats.yourSessions > 0 
+                ? `${5 - stats.yourSessions} more to beat the average!`
+                : 'Keep up the great work!'}
+            </p>
+            <p className="text-xs text-[var(--plum-dark)]/60">Top students do {stats.topUserSessions}+ sessions/week</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============ Streak Calendar ============
+
+export function StreakCalendar() {
+  const [activityDays, setActivityDays] = useState<Set<string>>(new Set());
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.sessionEvents);
+      if (stored) {
+        const events: SessionEvent[] = JSON.parse(stored);
+        const days = new Set(events.map(e => new Date(e.timestamp).toDateString()));
+        setActivityDays(days);
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  if (!mounted) return null;
+
+  // Generate last 7 days
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    return date;
+  });
+
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  return (
+    <div className="card hover:border-[var(--lavender)] hover:shadow-md transition-all duration-200">
+      <div className="flex items-center gap-2 mb-4">
+        <Flame className="w-5 h-5 text-orange-500" />
+        <h3 className="font-semibold text-[var(--plum)]">Your streak</h3>
+      </div>
+
+      <div className="flex justify-between gap-2">
+        {days.map((date, i) => {
+          const isActive = activityDays.has(date.toDateString());
+          const isToday = date.toDateString() === new Date().toDateString();
+          
+          return (
+            <div key={i} className="flex flex-col items-center gap-1.5">
+              <span className="text-xs text-[var(--plum-dark)]/50">{dayNames[date.getDay()]}</span>
+              <div 
+                className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-medium transition-all ${
+                  isActive 
+                    ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md' 
+                    : isToday 
+                      ? 'bg-[var(--lilac)] text-[var(--purple)] border-2 border-dashed border-[var(--lavender)]'
+                      : 'bg-[var(--lilac-soft)] text-[var(--plum-dark)]/50'
+                }`}
+              >
+                {isActive ? <Star className="w-4 h-4" /> : date.getDate()}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="text-xs text-[var(--plum-dark)]/50 mt-4 text-center">
+        {activityDays.size > 0 
+          ? `🔥 ${activityDays.size} day${activityDays.size !== 1 ? 's' : ''} this week!`
+          : 'Start a session to build your streak!'}
+      </p>
+    </div>
+  );
+}
+
+// ============ Quick Achievement ============
+
+export function QuickAchievement() {
+  const [achievement, setAchievement] = useState<{ title: string; emoji: string; desc: string } | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const sessions = getWeeklySessionCount();
+    
+    if (sessions >= 10) {
+      setAchievement({ title: 'Revision Legend', emoji: '👑', desc: '10+ sessions this week!' });
+    } else if (sessions >= 7) {
+      setAchievement({ title: 'Week Warrior', emoji: '⚔️', desc: 'Practised every day!' });
+    } else if (sessions >= 5) {
+      setAchievement({ title: 'Consistent', emoji: '💪', desc: '5+ sessions - nice streak!' });
+    } else if (sessions >= 3) {
+      setAchievement({ title: 'Getting Started', emoji: '🌱', desc: 'Building good habits!' });
+    } else if (sessions >= 1) {
+      setAchievement({ title: 'First Step', emoji: '👣', desc: 'You showed up - that matters!' });
+    }
+  }, []);
+
+  if (!mounted || !achievement) return null;
+
+  return (
+    <div className="flex items-center gap-3 bg-gradient-to-r from-[var(--lilac-soft)] to-[var(--pink-soft)]/50 rounded-2xl p-4 border border-[var(--lavender)]/50">
+      <div className="text-3xl">{achievement.emoji}</div>
+      <div>
+        <div className="flex items-center gap-2">
+          <p className="font-semibold text-[var(--plum)]">{achievement.title}</p>
+          <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+        </div>
+        <p className="text-xs text-[var(--plum-dark)]/70">{achievement.desc}</p>
+      </div>
     </div>
   );
 }
