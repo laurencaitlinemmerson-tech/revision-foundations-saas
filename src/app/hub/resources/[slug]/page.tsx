@@ -1375,7 +1375,7 @@ const resources: Record<string, {
       },
     ],
   },
-};
+}
 
 // Map slug to resource
 function getResourceBySlug(slug: string) {
