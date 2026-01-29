@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-
+import { upsertClerkUser } from '@/lib/clerkUsers';
 // Lauren's Clerk user ID - update this with your actual ID
 const LAUREN_USER_ID = process.env.LAUREN_CLERK_USER_ID || '';
 
@@ -44,6 +44,21 @@ export async function POST(
   const userName = user?.firstName || 'Anonymous';
   const isFromLauren = userId === LAUREN_USER_ID;
 
+   if (user) {
+    const email = user.emailAddresses?.[0]?.emailAddress ?? null;
+    const firstName = user.firstName ?? null;
+    const lastName = user.lastName ?? null;
+    const username = user.username ?? null;
+    const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
+    await upsertClerkUser({
+      clerkUserId: userId,
+      email,
+      firstName,
+      lastName,
+      fullName,
+      username,
+    });
+  }
   const body = await request.json();
   const { body: answerBody } = body;
 
