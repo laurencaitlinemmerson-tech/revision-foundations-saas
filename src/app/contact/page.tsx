@@ -37,13 +37,15 @@ export default function ContactPage() {
 
       {/* Compact Hero */}
       <section className="pt-28 pb-8 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h1 className="animate-on-scroll text-3xl md:text-4xl font-display text-[var(--plum-dark)] mb-2">
-            Get in Touch 💬
-          </h1>
-          <p className="animate-on-scroll text-[var(--plum)] text-lg">
-            Have a question or feedback? We&apos;d love to hear from you
-          </p>
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="hero-center">
+            <h1 className="animate-on-scroll brand-title brand-title-lg mb-2">
+              Get in Touch 💬
+            </h1>
+            <p className="animate-on-scroll text-[var(--plum)] text-lg">
+              Have a question or feedback? We&apos;d love to hear from you
+            </p>
+          </div>
         </div>
       </section>
 

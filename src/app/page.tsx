@@ -7,10 +7,12 @@ import Testimonials from '@/components/Testimonials';
 import { Sparkles, Heart, Play, ArrowRight } from 'lucide-react';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
+import { useParallax } from '@/lib/hooks/useParallax';
 
 export default function HomePage() {
   useScrollAnimation();
   const { isPro, isLoading: accessLoading } = useEntitlements();
+  const { ref: parallaxRef, offset: parallaxOffset } = useParallax({ speed: 0.3 });
   
   const [counters, setCounters] = useState<Record<string, number>>({});
   const statsRef = useRef<HTMLDivElement>(null);
@@ -81,13 +83,20 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center">
-        <div className="blob blob-1" />
-        <div className="blob blob-2" />
-        <div className="blob blob-3" />
+      <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center justify-center">
+        {/* Parallax Background */}
+        <div 
+          ref={parallaxRef}
+          className="parallax-bg"
+          style={{ transform: `translateY(${parallaxOffset}px)` }}
+        >
+          <div className="blob blob-1" />
+          <div className="blob blob-2" />
+          <div className="blob blob-3" />
+        </div>
 
         <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
+          <div className="hero-center max-w-3xl mx-auto">
             <div className="hero-badge">
               <Sparkles className="w-4 h-4 text-[var(--purple)] icon-spin" />
               <span className="text-[var(--plum)]">For Nursing Students</span>
@@ -95,8 +104,8 @@ export default function HomePage() {
             </div>
 
             <h1 className="hero-title">
-  <span className="gradient-text">Revision Foundations</span>
-</h1>
+              <span className="gradient-text">Revision Foundations</span>
+            </h1>
 
 
             <p className="hero-subtitle">Your Nursing Bestie for OSCEs & Exams</p>

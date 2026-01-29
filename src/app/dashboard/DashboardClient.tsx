@@ -24,7 +24,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="animate-on-scroll text-2xl md:text-3xl font-display text-[var(--plum-dark)]">
+              <h1 className="animate-on-scroll brand-title brand-title-md">
                 Hey, {firstName}! 👋
               </h1>
               <p className="animate-on-scroll text-[var(--plum)] mt-1">

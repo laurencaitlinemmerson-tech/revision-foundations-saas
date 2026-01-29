@@ -105,19 +105,21 @@ export default function PricingPage() {
 
       {/* Hero */}
       <section className="pt-28 pb-10 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="animate-on-scroll inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm mb-6">
-            <Zap className="w-4 h-4 text-[var(--purple)]" />
-            <span className="text-sm font-medium text-[var(--plum)]">One-time payment • Lifetime access</span>
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="hero-center">
+            <div className="animate-on-scroll inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm mb-6">
+              <Zap className="w-4 h-4 text-[var(--purple)]" />
+              <span className="text-sm font-medium text-[var(--plum)]">One-time payment • Lifetime access</span>
+            </div>
+            
+            <h1 className="animate-on-scroll brand-title brand-title-xl mb-4">
+              Simple, Fair Pricing
+            </h1>
+            
+            <p className="animate-on-scroll text-[var(--plum)] text-lg max-w-xl">
+              No subscriptions, no hidden fees. Pay once and get lifetime access to your study tools.
+            </p>
           </div>
-          
-          <h1 className="animate-on-scroll text-4xl md:text-5xl font-display text-[var(--plum-dark)] mb-4">
-            Simple, Fair Pricing
-          </h1>
-          
-          <p className="animate-on-scroll text-[var(--plum)] text-lg max-w-xl mx-auto">
-            No subscriptions, no hidden fees. Pay once and get lifetime access to your study tools.
-          </p>
         </div>
       </section>
 
