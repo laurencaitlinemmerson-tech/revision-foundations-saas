@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/react";
 import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 import "./premium-animations-vanilla.css";
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="en">
         <body className="antialiased">
           <SmoothScroll>{children}</SmoothScroll>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
