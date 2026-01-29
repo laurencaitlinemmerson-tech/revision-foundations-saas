@@ -506,11 +506,50 @@ const resources: Record<string, {
     },
     'y1-play-distraction': {
       title: 'Y1 Play & Distraction Techniques',
-      description: 'Age-appropriate play and distraction techniques for procedures and hospital stays.',
+      description: 'Age-appropriate play and distraction techniques for procedures and hospital stays, based on UK NHS and RCPCH guidance.',
       isLocked: false,
-      readTime: '3 min read',
+      readTime: '5 min read',
       sections: [
-        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+        {
+          title: 'Why Play & Distraction Matter',
+          type: 'normal',
+          content: [
+            'Play is essential for children’s development and wellbeing, especially in hospital settings.',
+            'Distraction techniques reduce anxiety, pain, and distress during procedures.',
+            'Play specialists are trained professionals who support children and families during hospital stays.',
+          ],
+        },
+        {
+          title: 'Techniques by Age Group',
+          type: 'checklist',
+          content: [
+            'Babies: Soothing music, mobiles, bubbles, comfort from parent/carer.',
+            'Toddlers: Picture books, toys, blowing bubbles, singing, simple games.',
+            'Pre-school: Storytelling, puppets, drawing, interactive games, tablet apps.',
+            'School age: Video games, music, guided imagery, breathing exercises, jokes.',
+            'Adolescents: Music, videos, mindfulness, involvement in care decisions, privacy.',
+          ],
+        },
+        {
+          title: 'Tips for Practice',
+          type: 'tip',
+          content: [
+            'Prepare the child by explaining what will happen in age-appropriate language.',
+            'Offer choices where possible (e.g. which arm for a blood test).',
+            'Involve parents/carers—they know what works best for their child.',
+            'Use play specialists for complex or highly anxious cases.',
+            'Praise and reward the child after procedures.',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.gosh.nhs.uk/your-hospital-visit/play-hospital/',
+            'RCPCH: https://www.rcpch.ac.uk/resources/play-hospital',
+            'Starlight UK: https://www.starlight.org.uk/our-work/play-in-hospitals/',
+          ],
+        },
       ],
     },
     'y1-child-communication': {
