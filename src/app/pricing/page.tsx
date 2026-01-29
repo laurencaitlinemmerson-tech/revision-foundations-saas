@@ -99,9 +99,9 @@ export default function PricingPage() {
             <p className="text-[var(--plum)] text-lg mb-8">
               You already own the complete bundle with lifetime access to everything.
             </p>
-            <Link href="/hub" className="btn-primary text-lg px-8 py-4">
+            <Link href="/dashboard" className="btn-primary text-lg px-8 py-4">
               <Sparkles className="w-5 h-5" />
-              Go to Hub
+              Go to Dashboard
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
@@ -314,8 +314,8 @@ export default function PricingPage() {
               </div>
 
               {hasOsce ? (
-                <Link href="/hub" className="btn-secondary w-full justify-center">
-                  <ArrowRight className="w-4 h-4" /> Go to Hub
+                <Link href="/osce" className="btn-secondary w-full justify-center">
+                  <ArrowRight className="w-4 h-4" /> Open OSCE Tool
                 </Link>
               ) : showEmailInput === 'osce' && !isSignedIn ? (
                 <div className="space-y-3">
@@ -382,8 +382,8 @@ export default function PricingPage() {
               </div>
 
               {hasQuiz ? (
-                <Link href="/hub" className="btn-secondary w-full justify-center">
-                  <ArrowRight className="w-4 h-4" /> Go to Hub
+                <Link href="/quiz" className="btn-secondary w-full justify-center">
+                  <ArrowRight className="w-4 h-4" /> Open Quiz Tool
                 </Link>
               ) : showEmailInput === 'quiz' && !isSignedIn ? (
                 <div className="space-y-3">
@@ -487,6 +487,36 @@ export default function PricingPage() {
                 <Link href="/quiz" className="btn-secondary text-sm">
                   Try Quiz Preview
                 </Link>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Sign up options for non-signed in users */}
+          {!isSignedIn && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mt-12"
+            >
+              <div className="card bg-[var(--lilac-soft)] border-0 text-center max-w-lg mx-auto">
+                <h3 className="text-lg text-[var(--plum)] mb-3">Already have an account?</h3>
+                <p className="text-sm text-[var(--plum-dark)]/70 mb-5">
+                  Sign in to access your purchased content, or create an account to track your progress.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link href="/sign-in" className="btn-secondary text-sm px-6 py-2.5">
+                    <Mail className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                  <Link href="/sign-up" className="btn-primary text-sm px-6 py-2.5">
+                    <Sparkles className="w-4 h-4" />
+                    Create Account
+                  </Link>
+                </div>
+                <p className="text-xs text-[var(--plum-dark)]/50 mt-4">
+                  Or checkout as a guest using just your email above
+                </p>
               </div>
             </motion.div>
           )}

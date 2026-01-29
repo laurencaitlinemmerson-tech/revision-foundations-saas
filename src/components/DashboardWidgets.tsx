@@ -748,162 +748,192 @@ export function CommunityStatsCard() {
       });
   }, []);
 
-  if (!mounted || !progress) return null;
+  // Always show the card, just use defaults if no progress yet
+  const safeProgress = progress || { thisWeek: 0, lastWeek: 0, totalAllTime: 0, bestStreak: 0 };
 
-  const weekChange = progress.thisWeek - progress.lastWeek;
+  const weekChange = safeProgress.thisWeek - safeProgress.lastWeek;
   const isImproving = weekChange > 0;
-  const isSame = weekChange === 0;
+
+  // Calculate user's position relative to community
+  const userSessions = safeProgress.totalAllTime;
+  const avgSessions = communityStats?.avgQuestionsPerUser || 0;
+  const totalUsers = communityStats?.totalUsers || 0;
+  const percentAboveAvg = avgSessions > 0 
+    ? Math.round(((userSessions - avgSessions) / avgSessions) * 100)
+    : 0;
+  const isAboveAvg = userSessions > avgSessions;
+  const hasCommunityData = communityStats && totalUsers > 0;
+
+  if (!mounted) return null;
 
   return (
     <motion.div 
       ref={ref}
-      variants={cardVariants}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
       className="card bg-gradient-to-br from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/30 border-[var(--lavender)] hover:shadow-xl transition-all duration-300 overflow-hidden relative"
     >
-      {/* Animated background shimmer */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-        animate={{ x: ['-100%', '100%'] }}
-        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
-      />
-
       <div className="relative z-10">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <TrendingUp className="w-5 h-5 text-[var(--purple)]" />
-            </motion.div>
-            <h3 className="font-semibold text-[var(--plum)]">Your Progress</h3>
+            <Users className="w-5 h-5 text-[var(--purple)]" />
+            <h3 className="font-semibold text-[var(--plum)]">You vs Others</h3>
           </div>
-          <span className="text-xs text-[var(--plum-dark)]/50 bg-white/60 px-2.5 py-1 rounded-full">
-            Personal stats
-          </span>
+          {hasCommunityData && (
+            <span className="text-xs text-[var(--plum-dark)]/50 bg-white/60 px-2.5 py-1 rounded-full">
+              {totalUsers} student{totalUsers !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
 
-        {/* Main Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-5">
-          <motion.div 
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center shadow-sm"
-            whileHover={{ scale: 1.02 }}
-          >
-            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">This week</p>
-            <motion.p 
-              className="text-4xl font-bold text-[var(--purple)]"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+        {/* Hero comparison stat */}
+        {hasCommunityData ? (
+          <>
+            {/* Big comparison callout */}
+            <motion.div 
+              className={`rounded-2xl p-5 mb-4 text-center ${
+                isAboveAvg 
+                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200' 
+                  : userSessions === avgSessions
+                    ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200'
+                    : 'bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200'
+              }`}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
             >
-              {progress.thisWeek}
-            </motion.p>
-            {!isSame && (
               <motion.div 
-                className={`flex items-center justify-center gap-1 mt-1 ${isImproving ? 'text-emerald-600' : 'text-amber-600'}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                className="text-5xl mb-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
               >
-                {isImproving ? <ArrowUp className="w-3 h-3" /> : <span className="text-xs">↓</span>}
-                <span className="text-xs font-medium">{Math.abs(weekChange)} vs last week</span>
+                {isAboveAvg ? '🔥' : userSessions === avgSessions ? '👏' : '💪'}
               </motion.div>
-            )}
-          </motion.div>
-          <motion.div 
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center shadow-sm"
-            whileHover={{ scale: 1.02 }}
-          >
-            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">All time</p>
-            <p className="text-4xl font-bold text-[var(--plum-dark)]/60">{progress.totalAllTime}</p>
-            <p className="text-xs text-[var(--plum-dark)]/50 mt-1">sessions total</p>
-          </motion.div>
-        </div>
+              <p className={`text-lg font-bold mb-1 ${
+                isAboveAvg ? 'text-emerald-700' : userSessions === avgSessions ? 'text-blue-700' : 'text-amber-700'
+              }`}>
+                {isAboveAvg 
+                  ? `You're ahead!`
+                  : userSessions === avgSessions 
+                    ? 'Right on track!' 
+                    : 'Keep going!'}
+              </p>
+              <p className={`text-sm ${
+                isAboveAvg ? 'text-emerald-600' : userSessions === avgSessions ? 'text-blue-600' : 'text-amber-600'
+              }`}>
+                {isAboveAvg 
+                  ? `${Math.abs(percentAboveAvg)}% more practice than average`
+                  : userSessions === avgSessions 
+                    ? 'You match the community average'
+                    : `${avgSessions - userSessions} more sessions to beat the average`}
+              </p>
+            </motion.div>
 
-        {/* Best Streak */}
-        <div className="flex items-center gap-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200 rounded-xl p-3">
-          <motion.div 
-            className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg"
-            animate={progress.bestStreak >= 3 ? { scale: [1, 1.1, 1] } : {}}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Trophy className="w-6 h-6 text-white" />
-          </motion.div>
-          <div>
-            <p className="text-sm font-bold text-amber-800">Best streak: {progress.bestStreak} day{progress.bestStreak !== 1 ? 's' : ''}</p>
-            <p className="text-xs text-amber-700/70">
-              {progress.bestStreak >= 7 
-                ? 'Amazing consistency! 🏆' 
-                : progress.bestStreak >= 3 
-                  ? 'Great habit building! 🔥'
-                  : 'Keep practising to build your streak!'}
-            </p>
+            {/* You vs Average visual bar */}
+            <div className="bg-white/70 rounded-xl p-4 mb-4">
+              <div className="flex justify-between items-end mb-3">
+                <div className="text-center">
+                  <motion.div 
+                    className="w-16 bg-gradient-to-t from-[var(--purple)] to-[var(--lavender)] rounded-t-lg mx-auto mb-1"
+                    initial={{ height: 0 }}
+                    animate={{ height: Math.min(userSessions * 3, 80) }}
+                    transition={{ delay: 0.5, duration: 0.6 }}
+                    style={{ minHeight: 20 }}
+                  />
+                  <p className="text-2xl font-bold text-[var(--purple)]">{userSessions}</p>
+                  <p className="text-xs text-[var(--plum-dark)]/60">You</p>
+                </div>
+                <div className="text-center text-[var(--plum-dark)]/40 text-2xl font-light">vs</div>
+                <div className="text-center">
+                  <motion.div 
+                    className="w-16 bg-gradient-to-t from-gray-300 to-gray-200 rounded-t-lg mx-auto mb-1"
+                    initial={{ height: 0 }}
+                    animate={{ height: Math.min(avgSessions * 3, 80) }}
+                    transition={{ delay: 0.6, duration: 0.6 }}
+                    style={{ minHeight: 20 }}
+                  />
+                  <p className="text-2xl font-bold text-gray-400">{avgSessions}</p>
+                  <p className="text-xs text-[var(--plum-dark)]/60">Average</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Weekly momentum */}
+            <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+              <div className="w-10 h-10 rounded-full bg-[var(--lilac)] flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-[var(--purple)]" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[var(--plum)]">This week: {safeProgress.thisWeek} sessions</p>
+                <p className="text-xs text-[var(--plum-dark)]/60">
+                  {isImproving 
+                    ? `↑ ${weekChange} more than last week` 
+                    : weekChange < 0 
+                      ? `${Math.abs(weekChange)} fewer than last week`
+                      : 'Same as last week'}
+                </p>
+              </div>
+              {safeProgress.bestStreak > 0 && (
+                <div className="text-right">
+                  <p className="text-xs text-amber-600 font-medium flex items-center gap-1">
+                    <Trophy className="w-3 h-3" />
+                    {safeProgress.bestStreak} day streak
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          /* Fallback when no community data - still show personal stats */
+          <div className="space-y-4">
+            {/* Personal stats even without community */}
+            <motion.div 
+              className="rounded-2xl p-5 mb-4 text-center bg-gradient-to-br from-[var(--lilac-soft)] to-white border border-[var(--lavender)]/50"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <motion.div 
+                className="text-5xl mb-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+              >
+                {userSessions > 0 ? '📈' : '🚀'}
+              </motion.div>
+              <p className="text-lg font-bold text-[var(--plum)] mb-1">
+                {userSessions > 0 ? `${userSessions} sessions completed` : 'Ready to start!'}
+              </p>
+              <p className="text-sm text-[var(--plum-dark)]/60">
+                {userSessions > 0 
+                  ? 'Keep up the great work!' 
+                  : 'Complete your first session to start tracking'}
+              </p>
+            </motion.div>
+
+            {/* Weekly stats */}
+            <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+              <div className="w-10 h-10 rounded-full bg-[var(--lilac)] flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-[var(--purple)]" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[var(--plum)]">This week: {safeProgress.thisWeek} sessions</p>
+                <p className="text-xs text-[var(--plum-dark)]/60">
+                  {safeProgress.thisWeek > 0 ? "You're making progress!" : 'Start a session to begin'}
+                </p>
+              </div>
+              {safeProgress.bestStreak > 0 && (
+                <div className="text-right">
+                  <p className="text-xs text-amber-600 font-medium flex items-center gap-1">
+                    <Trophy className="w-3 h-3" />
+                    {safeProgress.bestStreak} day streak
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Community Comparison */}
-        {communityStats && communityStats.totalUsers > 0 && (
-          <motion.div 
-            className="mt-4 p-4 bg-gradient-to-r from-[var(--purple)]/5 to-[var(--lavender)]/10 rounded-xl border border-[var(--lavender)]/30"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-4 h-4 text-[var(--purple)]" />
-              <p className="text-xs font-semibold text-[var(--plum)]">How you compare</p>
-            </div>
-            
-            {/* Your sessions vs average */}
-            <div className="bg-white/60 rounded-lg p-3 mb-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-[var(--plum-dark)]/60">Your sessions</span>
-                <span className="text-xs text-[var(--plum-dark)]/60">Avg: {communityStats.avgQuestionsPerUser}</span>
-              </div>
-              <div className="relative h-2 bg-[var(--lilac-soft)] rounded-full overflow-hidden">
-                <motion.div 
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--purple)] to-[var(--lavender)] rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((progress.totalAllTime / Math.max(communityStats.avgQuestionsPerUser * 2, 1)) * 100, 100)}%` }}
-                  transition={{ delay: 0.8, duration: 0.8 }}
-                />
-                {/* Average marker */}
-                <div 
-                  className="absolute top-0 h-full w-0.5 bg-[var(--plum)]"
-                  style={{ left: '50%' }}
-                />
-              </div>
-              <div className="flex justify-between mt-1">
-                <span className="text-sm font-bold text-[var(--purple)]">{progress.totalAllTime}</span>
-                {progress.totalAllTime > communityStats.avgQuestionsPerUser ? (
-                  <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                    <ArrowUp className="w-3 h-3" />
-                    {progress.totalAllTime - communityStats.avgQuestionsPerUser} above avg
-                  </span>
-                ) : progress.totalAllTime < communityStats.avgQuestionsPerUser ? (
-                  <span className="text-xs text-amber-600 font-medium">
-                    {communityStats.avgQuestionsPerUser - progress.totalAllTime} to catch up
-                  </span>
-                ) : (
-                  <span className="text-xs text-[var(--plum-dark)]/60">Right on average!</span>
-                )}
-              </div>
-            </div>
-
-            {/* Community stats */}
-            <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="bg-white/40 rounded-lg py-2">
-                <p className="text-lg font-bold text-[var(--purple)]">{communityStats.totalUsers}</p>
-                <p className="text-xs text-[var(--plum-dark)]/60">students</p>
-              </div>
-              <div className="bg-white/40 rounded-lg py-2">
-                <p className="text-lg font-bold text-[var(--purple)]">{communityStats.totalQuestionsAttempted.toLocaleString()}</p>
-                <p className="text-xs text-[var(--plum-dark)]/60">total sessions</p>
-              </div>
-            </div>
-          </motion.div>
         )}
       </div>
     </motion.div>

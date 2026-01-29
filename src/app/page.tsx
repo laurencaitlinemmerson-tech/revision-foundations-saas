@@ -125,22 +125,22 @@ export default function HomePage() {
               assessments.
             </p>
 
-            <div className="hero-cta-group">
+            <div className="hero-cta-group flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
               {!accessLoading && isPro ? (
                 <>
-                  <Link href="/hub" className="btn-primary btn-hover text-lg px-8 py-4">
+                  <Link href="/hub" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
                     <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-5 h-5" />
                   </Link>
-                  <Link href="/dashboard" className="btn-secondary btn-hover text-lg px-8 py-4">
+                  <Link href="/dashboard" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
                     Dashboard
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link href="/pricing" className="btn-primary btn-hover text-lg px-8 py-4">
+                  <Link href="/pricing" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
                     <Sparkles className="w-5 h-5" /> Get Started – £4.99
                   </Link>
-                  <a href="#whats-inside" className="btn-secondary btn-hover text-lg px-8 py-4">
+                  <a href="#whats-inside" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
                     See What's Inside <ArrowRight className="w-5 h-5" />
                   </a>
                 </>

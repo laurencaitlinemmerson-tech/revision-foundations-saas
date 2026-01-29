@@ -573,7 +573,68 @@ h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   }
 
   .card {
-    padding: 1.5rem;
+    padding: 1.25rem;
+  }
+  
+  /* Better mobile button sizing */
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Hero CTA group stacking on mobile */
+  .hero-cta-group {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  
+  .hero-cta-group > * {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+  
+  /* Smaller hero badge on mobile */
+  .hero-badge {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Better spacing for hero description */
+  .hero-description {
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+  }
+  
+  /* Stats grid improvement for mobile */
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-number {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+  
+  /* Filter tags scroll horizontally on mobile */
+  .filter-tags-mobile {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+  }
+  
+  .filter-tags-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .filter-tags-mobile button {
+    flex-shrink: 0;
   }
 }
 

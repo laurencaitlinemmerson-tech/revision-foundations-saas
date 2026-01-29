@@ -19,6 +19,8 @@ import {
   ChevronRight,
   Heart,
   MessageCircle,
+  Calculator,
+  FileText,
 } from 'lucide-react';
 
 // Hub content items
@@ -30,6 +32,7 @@ interface HubItem {
   difficulty: 'Quick Win' | 'Moderate' | 'Deep Dive';
   isLocked: boolean;
   href: string;
+  isNew?: boolean;
 }
 
 const hubItems: HubItem[] = [
@@ -224,6 +227,73 @@ const hubItems: HubItem[] = [
     isLocked: true,
     href: '/hub/resources/y1-child-communication',
   },
+  // Glossary of Terms
+  {
+    id: '22',
+    title: 'Glossary of Terms',
+    description: 'Quick definitions for OSCEs, placement & exams. Search nursing terms & abbreviations.',
+    tags: ['Y1 Essentials', 'OSCE', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    isNew: true,
+    href: '/hub/glossary',
+  },
+  // Medications Calculations Section
+  {
+    id: '23',
+    title: 'Drug Calculations Cheat Sheet',
+    description: 'Essential formulas and step-by-step methods for common drug calculations including IV rates, doses and dilutions.',
+    tags: ['Meds & Calculations', 'OSCE', 'Placement'],
+    difficulty: 'Deep Dive',
+    isLocked: true,
+    href: '/hub/resources/drug-calculations-cheat-sheet',
+  },
+  {
+    id: '24',
+    title: 'Paediatric Dose Calculator Guide',
+    description: 'Weight-based dosing formulas, common paediatric medications and safety checks for children.',
+    tags: ['Meds & Calculations', 'Paeds', 'Y1 Essentials'],
+    difficulty: 'Deep Dive',
+    isLocked: true,
+    href: '/hub/resources/paediatric-dose-calculator',
+  },
+  {
+    id: '25',
+    title: 'IV Drip Rate Calculations',
+    description: 'Master IV drip rate calculations with worked examples, formulas and practice questions.',
+    tags: ['Meds & Calculations', 'Adult Nursing', 'Critical Care'],
+    difficulty: 'Moderate',
+    isLocked: true,
+    href: '/hub/resources/iv-drip-rate-calculations',
+  },
+  {
+    id: '26',
+    title: 'Medication Abbreviations Guide',
+    description: 'Common medication abbreviations, units, routes and frequencies you\'ll see on prescriptions.',
+    tags: ['Meds & Calculations', 'Placement', 'Y1 Essentials'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/medication-abbreviations',
+  },
+  {
+    id: '28',
+    title: '9 Rights of Medication Administration',
+    description: 'The essential safety checks before giving any medication. A must-know for OSCEs and placement.',
+    tags: ['Meds & Calculations', 'OSCE', 'Y1 Essentials', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    isNew: true,
+    href: '/hub/resources/9-rights-medication',
+  },
+  {
+    id: '27',
+    title: 'High-Risk Medications Checklist',
+    description: 'Know your high-risk medications: insulin, anticoagulants, opioids and more with safety checks.',
+    tags: ['Meds & Calculations', 'Adult Nursing', 'Critical Care'],
+    difficulty: 'Deep Dive',
+    isLocked: true,
+    href: '/hub/resources/high-risk-medications',
+  },
 ];
 
 // Filter tags
@@ -309,15 +379,22 @@ function HubCard({
 
       {/* Status badge */}
       <div className="flex items-center justify-between mb-3">
-        <span
-          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-            item.isLocked
-              ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
-              : 'bg-emerald-50 text-emerald-700'
-          }`}
-        >
-          {item.isLocked ? 'PREMIUM' : 'FREE'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+              item.isLocked
+                ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
+                : 'bg-emerald-50 text-emerald-700'
+            }`}
+          >
+            {item.isLocked ? 'PREMIUM' : 'FREE'}
+          </span>
+          {item.isNew && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+              NEW
+            </span>
+          )}
+        </div>
 
         <span
           className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${difficultyStyles[item.difficulty]}`}
@@ -528,6 +605,64 @@ export default function HubClient({
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Medications Calculations Section */}
+        <section className="bg-gradient-to-r from-[var(--lilac-soft)] to-[var(--cream-pink)] py-12 border-y border-[var(--lilac-medium)]">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--purple)] to-[var(--lavender)] flex items-center justify-center">
+                  <Calculator className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl font-semibold text-[var(--plum)] mb-2">Medications &amp; Calculations 💊</h3>
+                <p className="text-[var(--plum-dark)]/70">
+                  Cheat sheets, formulas, and step-by-step guides for drug calculations. Never second-guess your maths again!
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedTags(new Set(['Meds & Calculations']));
+                  document.getElementById('resources')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex-shrink-0"
+              >
+                View Cheat Sheets
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Glossary Section */}
+        <section className="bg-white py-12 border-b border-[var(--lilac-medium)]">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+              <div className="flex-shrink-0 relative">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center">
+                  <BookOpen className="w-8 h-8 text-white" />
+                </div>
+                <span className="absolute -top-1 -right-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
+                  NEW
+                </span>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl font-semibold text-[var(--plum)] mb-2">Glossary of Terms 📖</h3>
+                <p className="text-[var(--plum-dark)]/70">
+                  Quick definitions for OSCEs, placement &amp; exams. Search nursing terms, abbreviations &amp; clinical definitions.
+                </p>
+              </div>
+              <Link
+                href="/hub/glossary"
+                className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex-shrink-0"
+              >
+                Open Glossary
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </section>
 

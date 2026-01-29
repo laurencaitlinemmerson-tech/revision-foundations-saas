@@ -210,15 +210,28 @@ export default async function DashboardPage() {
       )}
 
       {/* Main Dashboard Grid - 2 columns on desktop */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      <div className="grid md:grid-cols-2 gap-6 mb-8 items-start">
         <TodaysPlanCard />
-        <CommunityStatsCard />
+        <div className="space-y-6">
+          <QuickAchievement />
+          <CommunityStatsCard />
+        </div>
       </div>
 
-      {/* Streak + Achievement Row */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      {/* Motivation Banner */}
+      <div className="card bg-gradient-to-r from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/50 border-[var(--lavender)]/50 mb-8">
+        <div className="flex items-center gap-4">
+          <div className="text-4xl">💜</div>
+          <div className="flex-1">
+            <p className="text-[var(--plum)] font-medium">Remember: progress over perfection!</p>
+            <p className="text-sm text-[var(--plum-dark)]/60">Even 10 minutes of revision today is better than none. You've got this!</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Streak Calendar - Full Width */}
+      <div className="mb-8">
         <StreakCalendar />
-        <QuickAchievement />
       </div>
 
       {/* Focus Areas - Full Width */}
