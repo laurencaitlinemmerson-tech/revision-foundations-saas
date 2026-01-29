@@ -742,15 +742,6 @@ const resources: Record<string, {
         },
       ],
     },
-  title: string;
-  description: string;
-  isLocked: boolean;
-  readTime: string;
-  sections: {
-    title: string;
-    content: string[];
-    type?: 'checklist' | 'warning' | 'tip' | 'normal';
-  }[];
 }> = {
   'paeds-respiratory-assessment': {
     title: 'Paeds Respiratory Assessment',
