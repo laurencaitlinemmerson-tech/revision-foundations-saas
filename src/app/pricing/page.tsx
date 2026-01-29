@@ -3,14 +3,26 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Mail, ArrowRight, Crown, Gift, Zap } from 'lucide-react';
-import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15 },
+  },
+};
+
 export default function PricingPage() {
-  useScrollAnimation();
   
   const { isSignedIn } = useUser();
   const { hasOsce, hasQuiz, hasBundle, isPro, isLoading: accessLoading } = useEntitlements();
@@ -107,18 +119,38 @@ export default function PricingPage() {
       <section className="pt-28 pb-10 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
         <div className="max-w-4xl mx-auto px-6">
           <div className="hero-center">
-            <div className="animate-on-scroll inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm mb-6">
-              <Zap className="w-4 h-4 text-[var(--purple)]" />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm mb-6"
+            >
+              <motion.div
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Zap className="w-4 h-4 text-[var(--purple)]" />
+              </motion.div>
               <span className="text-sm font-medium text-[var(--plum)]">One-time payment • Lifetime access</span>
-            </div>
+            </motion.div>
             
-            <h1 className="animate-on-scroll hero-title mb-4">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="hero-title mb-4"
+            >
               <span className="gradient-text">Simple, Fair Pricing</span>
-            </h1>
+            </motion.h1>
             
-            <p className="animate-on-scroll text-[var(--plum)] text-lg max-w-xl">
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-[var(--plum)] text-lg max-w-xl"
+            >
               No subscriptions, no hidden fees. Pay once and get lifetime access to your study tools.
-            </p>
+            </motion.p>
           </div>
         </div>
       </section>
@@ -127,14 +159,31 @@ export default function PricingPage() {
         <div className="max-w-5xl mx-auto">
 
           {/* Bundle Card - Featured */}
-          <div className="animate-on-scroll relative mb-10">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[var(--lavender)] via-[var(--pink)] to-[var(--lavender)] rounded-3xl blur-sm opacity-60" />
-            <div className="relative card bg-white border-0 shadow-xl">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="relative mb-10"
+          >
+            <motion.div 
+              className="absolute -inset-1 bg-gradient-to-r from-[var(--lavender)] via-[var(--pink)] to-[var(--lavender)] rounded-3xl blur-sm opacity-60"
+              animate={{ opacity: [0.4, 0.7, 0.4] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <motion.div 
+              className="relative card bg-white border-0 shadow-xl"
+              whileHover={{ y: -4 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <motion.div 
+                className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
                 <span className="bg-gradient-to-r from-[var(--purple)] to-[var(--pink)] text-white text-xs font-bold px-5 py-2 rounded-full shadow-lg">
                   ✨ BEST VALUE — SAVE £5
                 </span>
-              </div>
+              </motion.div>
 
               <div className="pt-8 pb-2">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-8">
@@ -202,20 +251,35 @@ export default function PricingPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Divider */}
-          <div className="flex items-center gap-4 mb-8">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="flex items-center gap-4 mb-8"
+          >
             <div className="flex-1 h-px bg-[var(--lilac-medium)]" />
             <span className="text-sm text-[var(--plum-dark)]/50 font-medium">Or buy individually</span>
             <div className="flex-1 h-px bg-[var(--lilac-medium)]" />
-          </div>
+          </motion.div>
 
           {/* Individual Products */}
-          <div className="grid md:grid-cols-2 gap-6 mb-16">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="grid md:grid-cols-2 gap-6 mb-16"
+          >
             {/* OSCE Card */}
-            <div className={`animate-on-scroll card relative transition-all ${hasOsce ? 'border-emerald-300 bg-emerald-50/30' : ''}`}>
+            <motion.div 
+              variants={cardVariants}
+              whileHover={{ y: -6, boxShadow: "0 20px 40px -15px rgba(0,0,0,0.1)" }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className={`card relative transition-all ${hasOsce ? 'border-emerald-300 bg-emerald-50/30' : ''}`}
+            >
               {hasOsce && (
                 <div className="absolute top-4 right-4">
                   <span className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">
@@ -275,10 +339,15 @@ export default function PricingPage() {
                   {loading === 'osce' ? <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</> : <>Get OSCE Tool — £4.99</>}
                 </button>
               )}
-            </div>
+            </motion.div>
 
             {/* Quiz Card */}
-            <div className={`animate-on-scroll card relative transition-all ${hasQuiz ? 'border-emerald-300 bg-emerald-50/30' : ''}`}>
+            <motion.div 
+              variants={cardVariants}
+              whileHover={{ y: -6, boxShadow: "0 20px 40px -15px rgba(0,0,0,0.1)" }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className={`card relative transition-all ${hasQuiz ? 'border-emerald-300 bg-emerald-50/30' : ''}`}
+            >
               {hasQuiz && (
                 <div className="absolute top-4 right-4">
                   <span className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">
@@ -338,46 +407,78 @@ export default function PricingPage() {
                   {loading === 'quiz' ? <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</> : <>Get Quiz Tool — £4.99</>}
                 </button>
               )}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Trust signals */}
-          <div className="animate-on-scroll grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
+          >
             {[
               { icon: '🔒', label: 'Secure checkout', desc: 'Powered by Stripe' },
               { icon: '⚡', label: 'Instant access', desc: 'Start learning now' },
               { icon: '💜', label: '7-day refund', desc: 'No questions asked' },
               { icon: '♾️', label: 'Lifetime access', desc: 'Includes all updates' },
             ].map((item) => (
-              <div key={item.label} className="text-center p-4 rounded-2xl bg-white/60 backdrop-blur">
+              <motion.div 
+                key={item.label} 
+                variants={cardVariants}
+                whileHover={{ scale: 1.05 }}
+                className="text-center p-4 rounded-2xl bg-white/60 backdrop-blur"
+              >
                 <div className="text-2xl mb-2">{item.icon}</div>
                 <div className="font-semibold text-sm text-[var(--plum-dark)]">{item.label}</div>
                 <div className="text-xs text-[var(--plum-dark)]/60">{item.desc}</div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           {/* FAQ */}
-          <div className="animate-on-scroll card bg-[var(--lilac-soft)] border-0">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="card bg-[var(--lilac-soft)] border-0"
+          >
             <h2 className="text-xl text-center mb-6">Common Questions</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+            <motion.div 
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid md:grid-cols-2 gap-4"
+            >
               {[
                 { q: 'Is this a subscription?', a: 'No! One-time payment, lifetime access. No recurring charges ever.' },
                 { q: 'Do I need an account?', a: 'Nope! Just enter your email at checkout for guest access.' },
                 { q: 'What payment methods?', a: 'All major cards via Stripe — Apple Pay & Google Pay too!' },
                 { q: 'Can I get a refund?', a: 'Yes! Full refund within 7 days, no questions asked.' },
               ].map((faq, i) => (
-                <div key={i} className="p-4 rounded-xl bg-white/80">
+                <motion.div 
+                  key={i} 
+                  variants={cardVariants}
+                  className="p-4 rounded-xl bg-white/80"
+                >
                   <h4 className="font-semibold text-[var(--plum)] text-sm mb-1">{faq.q}</h4>
                   <p className="text-sm text-[var(--plum-dark)]/70">{faq.a}</p>
-                </div>
+                </motion.div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Try free preview - only show for non-owners */}
           {!isPro && (
-            <div className="animate-on-scroll text-center mt-10">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mt-10"
+            >
               <p className="text-[var(--plum-dark)]/60 text-sm mb-4">Want to try before you buy?</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link href="/osce" className="btn-secondary text-sm">
@@ -387,7 +488,7 @@ export default function PricingPage() {
                   Try Quiz Preview
                 </Link>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </main>
