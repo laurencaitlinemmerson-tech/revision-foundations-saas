@@ -179,7 +179,7 @@ const resources: Record<string, {
         title: 'What is Family-Centred Care?',
         type: 'normal',
         content: [
-          'A philosophy of care that recognises the vital role of the family in a child's health and wellbeing.',
+          'A philosophy of care that recognises the vital role of the family in a child\'s health and wellbeing.',
           'Families are partners in care, not just visitors.',
           'Care is planned and delivered around the whole family, not just the patient.',
         ],
@@ -305,7 +305,7 @@ const resources: Record<string, {
           'Physical abuse: hitting, shaking, poisoning, burning, etc.',
           'Emotional abuse: persistent emotional maltreatment, bullying, humiliation.',
           'Sexual abuse: forcing or enticing a child to take part in sexual activities.',
-          'Neglect: persistent failure to meet a child's basic physical and/or psychological needs.',
+          'Neglect: persistent failure to meet a child\'s basic physical and/or psychological needs.',
         ],
       },
       {
@@ -337,7 +337,7 @@ const resources: Record<string, {
         content: [
           'Listen to the child, do not ask leading questions',
           'Reassure the child they have done the right thing by telling you',
-          'Record exactly what was said, using the child's own words',
+          'Record exactly what was said, using the child\'s own words',
           'Report your concerns to the safeguarding lead or supervisor',
           'If a child is in immediate danger, call 999',
         ],
@@ -385,7 +385,7 @@ const resources: Record<string, {
           'Cannot be persuaded to inform parents or allow parental involvement',
           'Likely to begin or continue sexual activity with or without treatment',
           'Physical or mental health likely to suffer without advice or treatment',
-          'Advice or treatment is in the young person's best interests',
+          'Advice or treatment is in the young person\'s best interests',
         ],
       },
       {
@@ -418,7 +418,7 @@ const resources: Record<string, {
         type: 'normal',
         content: [
           'Always use weight-based dosing (mg/kg) unless otherwise specified.',
-          'Check the child's weight and date measured.',
+          'Check the child\'s weight and date measured.',
           'Use the most up-to-date BNFC (British National Formulary for Children).',
           'Double-check calculations and have a second checker for high-risk drugs.',
         ],
@@ -524,7 +524,7 @@ const resources: Record<string, {
         title: 'Why Play & Distraction Matter',
         type: 'normal',
         content: [
-          'Play is essential for children's development and wellbeing, especially in hospital settings.',
+          'Play is essential for children\'s development and wellbeing, especially in hospital settings.',
           'Distraction techniques reduce anxiety, pain, and distress during procedures.',
           'Play specialists are trained professionals who support children and families during hospital stays.',
         ],
@@ -592,8 +592,8 @@ const resources: Record<string, {
         title: 'Tips for Practice',
         type: 'tip',
         content: [
-          'Get down to the child's eye level.',
-          'Use the child's name and preferred pronouns.',
+          'Get down to the child\'s eye level.',
+          'Use the child\'s name and preferred pronouns.',
           'Be patient—allow time for responses.',
           'Check understanding ("Can you tell me what will happen?").',
           'Use play specialists or interpreters if needed.',
@@ -620,7 +620,7 @@ const resources: Record<string, {
         title: 'How to Calculate Paediatric Doses',
         type: 'normal',
         content: [
-          'Always use the child's most recent weight (kg).',
+          'Always use the child\'s most recent weight (kg).',
           'Check the recommended dose in the BNFC.',
           'Formula: Dose required = Dose per kg × Weight (kg)',
           'Check maximum dose limits for age/weight.',
@@ -631,7 +631,7 @@ const resources: Record<string, {
         type: 'checklist',
         content: [
           'Prescription: Amoxicillin 30 mg/kg/day in 3 divided doses',
-          'Child's weight: 18 kg',
+          'Child\'s weight: 18 kg',
           'Total daily dose: 30 × 18 = 540 mg',
           'Each dose: 540 ÷ 3 = 180 mg per dose',
         ],
@@ -1514,4 +1514,5 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
     </div>
   );
 }
+
 
