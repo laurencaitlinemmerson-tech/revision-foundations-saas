@@ -720,8 +720,12 @@ export function CommunityStatsCard() {
   const [progress, setProgress] = useState<PersonalProgress | null>(null);
   const [communityStats, setCommunityStats] = useState<{
     totalUsers: number;
+    activeUsers: number;
     communityAccuracy: number;
     totalQuestionsAttempted: number;
+    avgQuestionsPerUser: number;
+    userPercentile: number | null;
+    userVsAverage: number | null;
   } | null>(null);
   const [mounted, setMounted] = useState(false);
   const ref = useRef(null);
@@ -842,23 +846,61 @@ export function CommunityStatsCard() {
         {/* Community Comparison */}
         {communityStats && communityStats.totalUsers > 0 && (
           <motion.div 
-            className="mt-4 p-3 bg-gradient-to-r from-[var(--purple)]/5 to-[var(--lavender)]/10 rounded-xl border border-[var(--lavender)]/30"
+            className="mt-4 p-4 bg-gradient-to-r from-[var(--purple)]/5 to-[var(--lavender)]/10 rounded-xl border border-[var(--lavender)]/30"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-3">
               <Users className="w-4 h-4 text-[var(--purple)]" />
-              <p className="text-xs font-semibold text-[var(--plum)]">Community</p>
+              <p className="text-xs font-semibold text-[var(--plum)]">How you compare</p>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-center">
-              <div>
-                <p className="text-lg font-bold text-[var(--purple)]">{communityStats.totalUsers}</p>
-                <p className="text-xs text-[var(--plum-dark)]/60">students revising</p>
+            
+            {/* Your sessions vs average */}
+            <div className="bg-white/60 rounded-lg p-3 mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-[var(--plum-dark)]/60">Your sessions</span>
+                <span className="text-xs text-[var(--plum-dark)]/60">Avg: {communityStats.avgQuestionsPerUser}</span>
               </div>
-              <div>
+              <div className="relative h-2 bg-[var(--lilac-soft)] rounded-full overflow-hidden">
+                <motion.div 
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--purple)] to-[var(--lavender)] rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min((progress.totalAllTime / Math.max(communityStats.avgQuestionsPerUser * 2, 1)) * 100, 100)}%` }}
+                  transition={{ delay: 0.8, duration: 0.8 }}
+                />
+                {/* Average marker */}
+                <div 
+                  className="absolute top-0 h-full w-0.5 bg-[var(--plum)]"
+                  style={{ left: '50%' }}
+                />
+              </div>
+              <div className="flex justify-between mt-1">
+                <span className="text-sm font-bold text-[var(--purple)]">{progress.totalAllTime}</span>
+                {progress.totalAllTime > communityStats.avgQuestionsPerUser ? (
+                  <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                    <ArrowUp className="w-3 h-3" />
+                    {progress.totalAllTime - communityStats.avgQuestionsPerUser} above avg
+                  </span>
+                ) : progress.totalAllTime < communityStats.avgQuestionsPerUser ? (
+                  <span className="text-xs text-amber-600 font-medium">
+                    {communityStats.avgQuestionsPerUser - progress.totalAllTime} to catch up
+                  </span>
+                ) : (
+                  <span className="text-xs text-[var(--plum-dark)]/60">Right on average!</span>
+                )}
+              </div>
+            </div>
+
+            {/* Community stats */}
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="bg-white/40 rounded-lg py-2">
+                <p className="text-lg font-bold text-[var(--purple)]">{communityStats.totalUsers}</p>
+                <p className="text-xs text-[var(--plum-dark)]/60">students</p>
+              </div>
+              <div className="bg-white/40 rounded-lg py-2">
                 <p className="text-lg font-bold text-[var(--purple)]">{communityStats.totalQuestionsAttempted.toLocaleString()}</p>
-                <p className="text-xs text-[var(--plum-dark)]/60">questions answered</p>
+                <p className="text-xs text-[var(--plum-dark)]/60">total sessions</p>
               </div>
             </div>
           </motion.div>
