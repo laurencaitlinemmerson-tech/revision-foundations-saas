@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createOrUpdateEntitlement } from "@/lib/entitlements";
 import { createServiceClient } from "@/lib/supabase";
+import { upsertClerkUser } from "@/lib/clerkUsers";
 import Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -72,6 +73,19 @@ export async function POST(request: NextRequest) {
               [user.firstName, user.lastName].filter(Boolean).join(" ") ||
               user.username ||
               null;
+         const email = user.emailAddresses?.[0]?.emailAddress ?? null;
+            const firstName = user.firstName ?? null;
+            const lastName = user.lastName ?? null;
+            const username = user.username ?? null;
+            const fullName = [firstName, lastName].filter(Boolean).join(" ") || null;
+            await upsertClerkUser({
+              clerkUserId,
+              email,
+              firstName,
+              lastName,
+              fullName,
+              username,
+            });
           } catch (e) {
             console.error("Failed to fetch Clerk user for name:", e);
             customerName = null;
