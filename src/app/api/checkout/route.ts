@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       if (user?.emailAddresses?.[0]?.emailAddress) {
         customerEmail = user.emailAddresses[0].emailAddress;
       }
-    if (user) {
+      if (user) {
         const email = user.emailAddresses?.[0]?.emailAddress ?? null;
         const firstName = user.firstName ?? null;
         const lastName = user.lastName ?? null;
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           username,
         });
       }
-
+  }
     // For guest checkout, email is required
     if (!userId && !guestEmail) {
       return NextResponse.json(
