@@ -17,8 +17,8 @@ export default function AboutPage() {
       <section className="pt-28 pb-8 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
         <div className="max-w-4xl mx-auto px-6">
           <div className="hero-center">
-            <h1 className="animate-on-scroll brand-title brand-title-lg mb-2">
-              Hey, I'm Lauren! 👋
+            <h1 className="animate-on-scroll hero-title mb-2">
+              <span className="gradient-text">Hey, I'm Lauren!</span> 👋
             </h1>
             <p className="animate-on-scroll text-[var(--plum)] text-lg">
               The girl behind Revision Foundations

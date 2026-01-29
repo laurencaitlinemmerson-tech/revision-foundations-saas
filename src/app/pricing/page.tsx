@@ -112,8 +112,8 @@ export default function PricingPage() {
               <span className="text-sm font-medium text-[var(--plum)]">One-time payment • Lifetime access</span>
             </div>
             
-            <h1 className="animate-on-scroll brand-title brand-title-xl mb-4">
-              Simple, Fair Pricing
+            <h1 className="animate-on-scroll hero-title mb-4">
+              <span className="gradient-text">Simple, Fair Pricing</span>
             </h1>
             
             <p className="animate-on-scroll text-[var(--plum)] text-lg max-w-xl">

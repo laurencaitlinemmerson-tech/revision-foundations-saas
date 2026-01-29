@@ -39,8 +39,8 @@ export default function ContactPage() {
       <section className="pt-28 pb-8 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
         <div className="max-w-4xl mx-auto px-6">
           <div className="hero-center">
-            <h1 className="animate-on-scroll brand-title brand-title-lg mb-2">
-              Get in Touch 💬
+            <h1 className="animate-on-scroll hero-title mb-2">
+              <span className="gradient-text">Get in Touch</span> 💬
             </h1>
             <p className="animate-on-scroll text-[var(--plum)] text-lg">
               Have a question or feedback? We&apos;d love to hear from you
