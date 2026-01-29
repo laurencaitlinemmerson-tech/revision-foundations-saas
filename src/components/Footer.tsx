@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
 
           <div className="space-y-3 text-sm">
-            <p className="font-semibold text-[var(--plum)]">Account</p>
+            {/* <p className="font-semibold text-[var(--plum)]">Account</p> */}
             <div className="flex flex-col gap-2">
               <Link href="/sign-in" className="footer-link">
                 Sign In

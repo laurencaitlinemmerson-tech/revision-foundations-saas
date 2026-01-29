@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const authLinks = [
     { href: '/dashboard', label: 'Dashboard' },
-    { href: '/account', label: 'Account' },
+    // { href: '/account', label: 'Account' },
   ];
 
   return (
