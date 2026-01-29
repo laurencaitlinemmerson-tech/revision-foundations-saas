@@ -4,10 +4,19 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Testimonials from '@/components/Testimonials';
-import { Sparkles, Heart, Play, ArrowRight } from 'lucide-react';
+import { Sparkles, Heart, Play, ArrowRight, BookOpen, ClipboardCheck, Users, Zap } from 'lucide-react';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 import { useParallax } from '@/lib/hooks/useParallax';
+import { 
+  HorizontalScrollSection, 
+  HorizontalCard, 
+  AnimateOnScroll, 
+  StaggerChildren, 
+  StaggerItem,
+  FloatingElement,
+  ScrollProgress 
+} from '@/components/MotionComponents';
 
 export default function HomePage() {
   useScrollAnimation();
@@ -80,6 +89,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <ScrollProgress />
       <Navbar />
 
       {/* Hero Section */}
@@ -185,56 +195,121 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Tools Section */}
-      <section className="bg-lilac section relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.3 }} />
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-14">
-            <span className="badge badge-purple mb-4 animate-on-scroll badge-shimmer">Our Tools</span>
-            <h2 className="mb-4 text-[var(--plum-dark)] animate-on-scroll">What&apos;s Inside?</h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-left">
-              <h3 className="mb-3 text-[var(--plum-dark)]">Children&apos;s OSCE Tool</h3>
-              <p className="mb-6 text-[var(--plum-dark)]/70">Prepared for placements. 50+ stations.</p>
-              {isPro ? (
-                <Link href="/hub" className="btn-primary btn-hover w-full block text-center">
-                  <ArrowRight className="w-4 h-4 inline mr-2" />Open in Hub
-                </Link>
-              ) : (
-                <Link href="/osce" className="btn-primary btn-hover w-full block text-center">
-                  Try OSCE Tool
-                </Link>
-              )}
-            </div>
-
-            <div className="card card-lift bg-white p-8 rounded-2xl shadow-sm animate-on-scroll slide-in-right">
-              <h3 className="mb-3 text-[var(--plum-dark)]">Core Nursing Quiz</h3>
-              <p className="mb-6 text-[var(--plum-dark)]/70">17 topic areas for exam success.</p>
-              {isPro ? (
-                <Link href="/hub" className="btn-primary btn-hover w-full block text-center">
-                  <ArrowRight className="w-4 h-4 inline mr-2" />Open in Hub
-                </Link>
-              ) : (
-                <Link href="/quiz" className="btn-primary btn-hover w-full block text-center">
-                  Try Quiz Tool
-                </Link>
-              )}
+      {/* Tools Section - Horizontal Scroll */}
+      <HorizontalScrollSection className="bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lilac-soft)]">
+        {/* Intro Card */}
+        <HorizontalCard className="flex items-center">
+          <div className="card bg-white/90 backdrop-blur-sm p-10 h-full flex flex-col justify-center">
+            <span className="badge badge-purple mb-4 inline-flex w-fit">Our Tools</span>
+            <h2 className="text-3xl md:text-4xl text-[var(--plum-dark)] mb-4">What&apos;s Inside?</h2>
+            <p className="text-[var(--plum-dark)]/70 text-lg">
+              Everything you need to ace your nursing exams and feel confident on placement.
+            </p>
+            <div className="mt-6 flex items-center gap-2 text-[var(--purple)]">
+              <span className="text-sm font-medium">Scroll to explore</span>
+              <ArrowRight className="w-4 h-4 animate-pulse" />
             </div>
           </div>
-        </div>
-      </section>
+        </HorizontalCard>
+
+        {/* OSCE Tool Card */}
+        <HorizontalCard>
+          <div className="card bg-white h-full p-8 flex flex-col">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mb-6">
+              <ClipboardCheck className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-2xl text-[var(--plum-dark)] mb-3">Children&apos;s OSCE Tool</h3>
+            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1">
+              Practice with 50+ OSCE stations. Timed scenarios, examiner checklists, and instant feedback to build your confidence.
+            </p>
+            <ul className="space-y-2 mb-6">
+              {['50+ stations', 'Timed practice', 'Examiner checklists', 'Self-assessment'].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-[var(--plum-dark)]/80">
+                  <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            {isPro ? (
+              <Link href="/hub" className="btn-primary w-full text-center">
+                <ArrowRight className="w-4 h-4" /> Open in Hub
+              </Link>
+            ) : (
+              <Link href="/osce" className="btn-primary w-full text-center">
+                Try OSCE Tool
+              </Link>
+            )}
+          </div>
+        </HorizontalCard>
+
+        {/* Quiz Tool Card */}
+        <HorizontalCard>
+          <div className="card bg-white h-full p-8 flex flex-col">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--pink)] to-[var(--lavender)] flex items-center justify-center mb-6">
+              <BookOpen className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-2xl text-[var(--plum-dark)] mb-3">Core Nursing Quiz</h3>
+            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1">
+              17 topic areas covering everything from anatomy to pharmacology. Track your progress and focus on weak spots.
+            </p>
+            <ul className="space-y-2 mb-6">
+              {['17 topic areas', 'Instant feedback', 'Progress tracking', 'Exam-focused'].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-[var(--plum-dark)]/80">
+                  <Sparkles className="w-4 h-4 text-[var(--pink)]" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            {isPro ? (
+              <Link href="/hub" className="btn-primary w-full text-center">
+                <ArrowRight className="w-4 h-4" /> Open in Hub
+              </Link>
+            ) : (
+              <Link href="/quiz" className="btn-primary w-full text-center">
+                Try Quiz Tool
+              </Link>
+            )}
+          </div>
+        </HorizontalCard>
+
+        {/* Hub Card */}
+        <HorizontalCard>
+          <div className="card bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] h-full p-8 flex flex-col text-white">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+              <Users className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-2xl mb-3">Nursing Hub</h3>
+            <p className="text-white/80 mb-6 flex-1">
+              Your central study space. Access all resources, track progress, join discussions, and connect with other students.
+            </p>
+            <ul className="space-y-2 mb-6">
+              {['Y1 Resources', 'Study guides', 'Community Q&A', 'Progress dashboard'].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-white/80">
+                  <Zap className="w-4 h-4 text-[var(--pink)]" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            <Link href="/hub" className="btn-primary w-full text-center bg-white text-[var(--purple)] hover:bg-white/90">
+              Explore Hub
+            </Link>
+          </div>
+        </HorizontalCard>
+      </HorizontalScrollSection>
 
       {/* Why Us Section */}
       <section className="bg-cream section">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <span className="badge badge-purple mb-4 inline-flex animate-on-scroll badge-shimmer">
-            Why Us?
-          </span>
-          <h2 className="mb-12 text-[var(--plum-dark)] animate-on-scroll">Made With Love</h2>
+          <AnimateOnScroll>
+            <span className="badge badge-purple mb-4 inline-flex badge-shimmer">
+              Why Us?
+            </span>
+          </AnimateOnScroll>
+          <AnimateOnScroll delay={0.1}>
+            <h2 className="mb-12 text-[var(--plum-dark)]">Made With Love</h2>
+          </AnimateOnScroll>
 
-          <div className="grid gap-10 md:grid-cols-3">
+          <StaggerChildren className="grid gap-10 md:grid-cols-3">
             {[
               {
                 icon: '👩‍🎓',
@@ -251,20 +326,16 @@ export default function HomePage() {
                 title: 'Pay Once',
                 copy: 'One-time payment. Lifetime access. No subscription.',
               },
-            ].map((item, i) => (
-              <div
-                key={item.title}
-                className="space-y-3 animate-on-scroll fade-in-up"
-                style={{ animationDelay: i * 0.1 + 's' }}
-              >
-                <div className="text-4xl emoji-float" style={{ animationDelay: i * 0.3 + 's' }}>
+            ].map((item) => (
+              <StaggerItem key={item.title} className="space-y-3">
+                <FloatingElement className="text-4xl inline-block">
                   {item.icon}
-                </div>
+                </FloatingElement>
                 <h3 className="text-[var(--plum)]">{item.title}</h3>
                 <p className="text-[var(--plum-dark)]/70">{item.copy}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
         </div>
       </section>
 
