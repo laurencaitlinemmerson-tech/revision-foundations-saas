@@ -1,6 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, PRODUCTS, ProductKey } from '@/lib/stripe';
+import { upsertClerkUser } from '@/lib/clerkUsers';
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,7 +57,21 @@ export async function POST(request: NextRequest) {
       if (user?.emailAddresses?.[0]?.emailAddress) {
         customerEmail = user.emailAddresses[0].emailAddress;
       }
-    }
+    if (user) {
+        const email = user.emailAddresses?.[0]?.emailAddress ?? null;
+        const firstName = user.firstName ?? null;
+        const lastName = user.lastName ?? null;
+        const username = user.username ?? null;
+        const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
+        await upsertClerkUser({
+          clerkUserId: userId,
+          email,
+          firstName,
+          lastName,
+          fullName,
+          username,
+        });
+      }
 
     // For guest checkout, email is required
     if (!userId && !guestEmail) {
