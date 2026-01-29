@@ -742,7 +742,6 @@ const resources: Record<string, {
         },
       ],
     },
-}> = {
   'paeds-respiratory-assessment': {
     title: 'Paeds Respiratory Assessment',
     description: 'Complete guide to assessing respiratory function in children including work of breathing and red flags.',
