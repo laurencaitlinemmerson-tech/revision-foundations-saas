@@ -718,6 +718,11 @@ function getPersonalProgress(): PersonalProgress {
 
 export function CommunityStatsCard() {
   const [progress, setProgress] = useState<PersonalProgress | null>(null);
+  const [communityStats, setCommunityStats] = useState<{
+    totalUsers: number;
+    communityAccuracy: number;
+    totalQuestionsAttempted: number;
+  } | null>(null);
   const [mounted, setMounted] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
@@ -725,6 +730,18 @@ export function CommunityStatsCard() {
   useEffect(() => {
     setMounted(true);
     setProgress(getPersonalProgress());
+    
+    // Fetch community stats
+    fetch('/api/community-stats')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setCommunityStats(data);
+        }
+      })
+      .catch(() => {
+        // Silently fail - community stats are optional
+      });
   }, []);
 
   if (!mounted || !progress) return null;
@@ -821,6 +838,31 @@ export function CommunityStatsCard() {
             </p>
           </div>
         </div>
+
+        {/* Community Comparison */}
+        {communityStats && communityStats.totalUsers > 0 && (
+          <motion.div 
+            className="mt-4 p-3 bg-gradient-to-r from-[var(--purple)]/5 to-[var(--lavender)]/10 rounded-xl border border-[var(--lavender)]/30"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4 text-[var(--purple)]" />
+              <p className="text-xs font-semibold text-[var(--plum)]">Community</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div>
+                <p className="text-lg font-bold text-[var(--purple)]">{communityStats.totalUsers}</p>
+                <p className="text-xs text-[var(--plum-dark)]/60">students revising</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-[var(--purple)]">{communityStats.totalQuestionsAttempted.toLocaleString()}</p>
+                <p className="text-xs text-[var(--plum-dark)]/60">questions answered</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
