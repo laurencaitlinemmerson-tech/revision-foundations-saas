@@ -554,11 +554,50 @@ const resources: Record<string, {
     },
     'y1-child-communication': {
       title: 'Y1 Communicating with Children',
-      description: 'How to adapt your communication for different ages and developmental stages.',
+      description: 'How to adapt your communication for different ages and developmental stages, based on UK NHS and RCPCH guidance.',
       isLocked: true,
-      readTime: '3 min read',
+      readTime: '6 min read',
       sections: [
-        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+        {
+          title: 'Principles of Communicating with Children',
+          type: 'normal',
+          content: [
+            'Children are not small adults—communication must be age-appropriate and tailored to their developmental stage.',
+            'Involve parents/carers as partners in communication, but always address the child directly as appropriate.',
+            'Use simple language, visual aids, and play to support understanding.',
+          ],
+        },
+        {
+          title: 'Communication by Age Group',
+          type: 'checklist',
+          content: [
+            'Infants: Use soothing voice, facial expressions, gentle touch. Respond to cues (crying, smiling).',
+            'Toddlers: Simple words, short sentences, play-based explanations. Allow choices (e.g. which sticker).',
+            'Pre-school: Use stories, drawings, toys. Explain procedures step-by-step. Reassure and praise.',
+            'School age: Give clear, honest information. Encourage questions. Use diagrams, involve in care.',
+            'Adolescents: Respect privacy, use open questions, involve in decision-making. Be honest about risks/benefits.',
+          ],
+        },
+        {
+          title: 'Tips for Practice',
+          type: 'tip',
+          content: [
+            'Get down to the child’s eye level.',
+            'Use the child’s name and preferred pronouns.',
+            'Be patient—allow time for responses.',
+            'Check understanding ("Can you tell me what will happen?").',
+            'Use play specialists or interpreters if needed.',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.nhs.uk/conditions/baby/first-aid-and-safety/communicating-with-children/',
+            'RCPCH: https://www.rcpch.ac.uk/resources/communicating-children-young-people-and-families',
+            'Great Ormond Street Hospital: https://www.gosh.nhs.uk/your-hospital-visit/coming-hospital/communicating-children/',
+          ],
+        },
       ],
     },
     'paediatric-dose-calculator': {
