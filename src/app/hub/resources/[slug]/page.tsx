@@ -8,6 +8,641 @@ import { ArrowLeft, CheckCircle2, AlertTriangle, Lightbulb, FileText, Clock } fr
 
 // Resource content database
 const resources: Record<string, {
+    // --- AUTO-GENERATED PLACEHOLDER ENTRIES FOR MISSING HUB RESOURCES ---
+    'y1-growth-milestones': {
+      title: 'Y1 Growth & Development Milestones',
+      description: 'Key developmental milestones from birth to 5 years with red flags to spot. Based on UK NHS and RCPCH guidance.',
+      isLocked: false,
+      readTime: '6 min read',
+      sections: [
+        {
+          title: 'Gross Motor Milestones',
+          type: 'checklist',
+          content: [
+            '6 weeks: Head control developing',
+            '6 months: Sits with support, rolls over',
+            '9 months: Sits without support, pulls to stand',
+            '12 months: Cruises, may walk with one hand held',
+            '18 months: Walks alone, climbs onto furniture',
+            '2 years: Runs, kicks a ball',
+            '3 years: Rides a tricycle, stands on one foot',
+            '4 years: Hops on one foot, climbs stairs with alternate feet',
+            '5 years: Skips, can catch a ball',
+          ],
+        },
+        {
+          title: 'Fine Motor & Vision Milestones',
+          type: 'checklist',
+          content: [
+            '6 weeks: Follows face',
+            '6 months: Transfers objects hand to hand',
+            '9 months: Pincer grip developing',
+            '12 months: Points, picks up small objects',
+            '18 months: Builds tower of 2-3 blocks',
+            '2 years: Draws lines, builds tower of 6 blocks',
+            '3 years: Copies a circle, uses a spoon well',
+            '4 years: Draws a cross, buttons clothes',
+            '5 years: Draws a square, uses cutlery',
+          ],
+        },
+        {
+          title: 'Speech, Language & Hearing Milestones',
+          type: 'checklist',
+          content: [
+            '6 weeks: Startles to loud noise',
+            '6 months: Babbles, turns to sounds',
+            '9 months: Understands "no"',
+            '12 months: 1-2 words, points to objects',
+            '18 months: 6-20 words, points to body parts',
+            '2 years: 2-3 word sentences, 50+ words',
+            '3 years: Talks in sentences, strangers understand most',
+            '4 years: Tells stories, asks questions',
+            '5 years: Fluent speech, knows colours and shapes',
+          ],
+        },
+        {
+          title: 'Social & Emotional Milestones',
+          type: 'checklist',
+          content: [
+            '6 weeks: Smiles responsively',
+            '6 months: Recognises familiar faces',
+            '9 months: Stranger anxiety',
+            '12 months: Waves bye-bye, plays peekaboo',
+            '18 months: Imitates adults, plays alone',
+            '2 years: Parallel play',
+            '3 years: Shares toys, takes turns',
+            '4 years: Cooperative play, makes friends',
+            '5 years: Understands rules, shows empathy',
+          ],
+        },
+        {
+          title: 'Red Flags – When to Escalate',
+          type: 'warning',
+          content: [
+            'No social smile by 8 weeks',
+            'No head control by 4 months',
+            'Not sitting by 9 months',
+            'Not walking by 18 months',
+            'No single words by 18 months',
+            'No 2-3 word phrases by 2.5 years',
+            'Persistent toe-walking',
+            'Loss of skills at any age',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.nhs.uk/conditions/pregnancy-and-baby/baby-development/',
+            'RCPCH: https://www.rcpch.ac.uk/resources/child-development-milestones',
+            'NICE: https://cks.nice.org.uk/topics/child-development-assessment/',
+          ],
+        },
+      ],
+    },
+    'y1-paeds-vital-signs': {
+      title: 'Y1 Paediatric Vital Signs by Age',
+      description: 'Normal vital sign ranges for children from newborn to adolescent, with a quick reference chart. Based on UK NHS and RCPCH guidance.',
+      isLocked: false,
+      readTime: '4 min read',
+      sections: [
+        {
+          title: 'Normal Vital Signs by Age (RCPCH/NHS)',
+          type: 'checklist',
+          content: [
+            'Newborn (0-1 month): HR 110-160, RR 30-60, Systolic BP 60-90',
+            'Infant (1-12 months): HR 100-160, RR 30-40, Systolic BP 70-95',
+            'Toddler (1-2 years): HR 90-150, RR 25-35, Systolic BP 80-100',
+            'Preschool (3-5 years): HR 80-140, RR 20-30, Systolic BP 80-110',
+            'School age (6-12 years): HR 70-120, RR 15-25, Systolic BP 90-115',
+            'Adolescent (13+ years): HR 60-100, RR 12-20, Systolic BP 100-120',
+          ],
+        },
+        {
+          title: 'Temperature',
+          type: 'normal',
+          content: [
+            'Normal range: 36.5°C – 37.5°C',
+            'Fever: >38°C',
+            'Hypothermia: <36°C',
+          ],
+        },
+        {
+          title: 'Red Flags',
+          type: 'warning',
+          content: [
+            'Tachycardia or bradycardia for age',
+            'Tachypnoea or bradypnoea for age',
+            'Hypotension (late sign in children)',
+            'Persistent fever or hypothermia',
+            'Any sudden change from baseline',
+          ],
+        },
+        {
+          title: 'Clinical Tips',
+          type: 'tip',
+          content: [
+            'Always interpret vital signs in context (e.g. crying, fever, pain)',
+            'Trends are more important than single readings',
+            'Hypotension is a late and pre-terminal sign in children',
+            'Use age-appropriate equipment (cuffs, probes)',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.nhs.uk/conditions/baby/first-aid-and-safety/vital-signs/',
+            'RCPCH: https://www.rcpch.ac.uk/resources/paediatric-early-warning-score-pews',
+            'Resus Council UK: https://www.resus.org.uk/library/additional-guidance/guidance-paediatric-advanced-life-support',
+          ],
+        },
+      ],
+    },
+    'y1-family-centred-care': {
+      title: 'Y1 Family-Centred Care Principles',
+      description: 'Understanding family-centred care in paediatrics and how to apply it on placement. Based on UK NHS and RCPCH guidance.',
+      isLocked: false,
+      readTime: '5 min read',
+      sections: [
+        {
+          title: 'What is Family-Centred Care?',
+          type: 'normal',
+          content: [
+            'A philosophy of care that recognises the vital role of the family in a child’s health and wellbeing.',
+            'Families are partners in care, not just visitors.',
+            'Care is planned and delivered around the whole family, not just the patient.',
+          ],
+        },
+        {
+          title: 'Key Principles (NHS/RCN)',
+          type: 'checklist',
+          content: [
+            'Respect and dignity for all family members',
+            'Information sharing: open, honest, age-appropriate',
+            'Participation: families involved in all decisions',
+            'Collaboration: families and professionals work together',
+            'Support for family strengths, beliefs, and cultural needs',
+          ],
+        },
+        {
+          title: 'Practical Application on Placement',
+          type: 'tip',
+          content: [
+            'Introduce yourself to the child and family, not just the patient',
+            'Ask about routines, preferences, and concerns',
+            'Encourage parents to be present and involved in care',
+            'Support siblings and other family members',
+            'Offer choices where possible (e.g. timing of care, involvement in procedures)',
+            'Use play specialists and interpreters as needed',
+          ],
+        },
+        {
+          title: 'Benefits of Family-Centred Care',
+          type: 'normal',
+          content: [
+            'Improved child and family satisfaction',
+            'Better health outcomes and reduced anxiety',
+            'Faster recovery and shorter hospital stays',
+            'Greater confidence and competence for families',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.england.nhs.uk/ourwork/clinical-policy/children/transition/family-centred-care/',
+            'RCN: https://www.rcn.org.uk/professional-development/publications/pub-009-409',
+          ],
+        },
+      ],
+    },
+    'y1-pain-assessment': {
+      title: 'Y1 Pain Assessment in Children',
+      description: 'Age-appropriate pain assessment tools including FLACC, Wong-Baker, and numeric scales. Based on UK NHS and RCPCH guidance.',
+      isLocked: true,
+      readTime: '5 min read',
+      sections: [
+        {
+          title: 'Principles of Paediatric Pain Assessment',
+          type: 'normal',
+          content: [
+            'Pain is subjective—always believe the child or parent/carer.',
+            'Use age-appropriate, validated pain assessment tools.',
+            'Assess pain at rest and during movement.',
+            'Document pain score, location, quality, and response to interventions.',
+          ],
+        },
+        {
+          title: 'Pain Assessment Tools by Age',
+          type: 'checklist',
+          content: [
+            'FLACC (Face, Legs, Activity, Cry, Consolability): 2 months–7 years, non-verbal or pre-verbal children.',
+            'Wong-Baker FACES: 3 years+, child points to face that best matches their pain.',
+            'Numeric Rating Scale (0–10): 7 years+, child rates pain on a scale.',
+            'Visual Analogue Scale: Older children/adolescents.',
+          ],
+        },
+        {
+          title: 'Behavioural and Physiological Indicators',
+          type: 'normal',
+          content: [
+            'Facial expression: grimacing, frowning',
+            'Crying, irritability, withdrawal',
+            'Changes in activity: less movement, guarding',
+            'Altered vital signs: tachycardia, hypertension',
+          ],
+        },
+        {
+          title: 'Tips for Practice',
+          type: 'tip',
+          content: [
+            'Involve parents/carers—they know their child best.',
+            'Reassess pain after interventions.',
+            'Use play and distraction techniques to reduce anxiety.',
+            'Document both the pain score and the tool used.',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.nhs.uk/conditions/pain-in-children/',
+            'RCPCH: https://www.rcpch.ac.uk/resources/paediatric-pain-assessment-tools',
+            'Great Ormond Street Hospital: https://www.gosh.nhs.uk/conditions-and-treatments/procedures-and-treatments/pain-assessment-children/',
+          ],
+        },
+      ],
+    },
+    'y1-safeguarding': {
+      title: 'Y1 Safeguarding Children Essentials',
+      description: 'Key safeguarding concepts, signs of abuse, and your responsibilities as a student nurse. Based on UK NHS, NSPCC, and RCPCH guidance.',
+      isLocked: true,
+      readTime: '6 min read',
+      sections: [
+        {
+          title: 'What is Safeguarding?',
+          type: 'normal',
+          content: [
+            'Safeguarding is protecting children from maltreatment, preventing impairment of health or development, and ensuring safe and effective care.',
+            'All healthcare professionals have a duty to safeguard children and act on concerns.',
+          ],
+        },
+        {
+          title: 'Types of Abuse',
+          type: 'checklist',
+          content: [
+            'Physical abuse: hitting, shaking, poisoning, burning, etc.',
+            'Emotional abuse: persistent emotional maltreatment, bullying, humiliation.',
+            'Sexual abuse: forcing or enticing a child to take part in sexual activities.',
+            'Neglect: persistent failure to meet a child’s basic physical and/or psychological needs.',
+          ],
+        },
+        {
+          title: 'Key Signs of Abuse or Neglect',
+          type: 'warning',
+          content: [
+            'Unexplained injuries or inconsistent explanations',
+            'Frequent absences or lateness',
+            'Poor hygiene, malnutrition, inappropriate clothing',
+            'Fear of certain adults, withdrawn or anxious behaviour',
+            'Sexualised behaviour inappropriate for age',
+            'Failure to thrive, developmental delay',
+          ],
+        },
+        {
+          title: 'Your Responsibilities as a Student Nurse',
+          type: 'tip',
+          content: [
+            'Know your local safeguarding lead and how to contact them',
+            'Document concerns factually and promptly',
+            'Share concerns with your mentor/supervisor immediately',
+            'Do not promise confidentiality to the child or family',
+            'Follow up to ensure action has been taken',
+          ],
+        },
+        {
+          title: 'What to Do if You Suspect Abuse',
+          type: 'normal',
+          content: [
+            'Listen to the child, do not ask leading questions',
+            'Reassure the child they have done the right thing by telling you',
+            'Record exactly what was said, using the child’s own words',
+            'Report your concerns to the safeguarding lead or supervisor',
+            'If a child is in immediate danger, call 999',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.nhs.uk/conditions/social-care-and-support-guide/safeguarding/',
+            'NSPCC: https://www.nspcc.org.uk/what-is-child-abuse/',
+            'RCPCH: https://www.rcpch.ac.uk/key-topics/safeguarding',
+          ],
+        },
+      ],
+    },
+    'y1-consent-gillick': {
+      title: 'Y1 Consent & Gillick Competence',
+      description: 'Understanding consent in paediatrics, including Gillick competence and Fraser guidelines. Based on UK NHS and GMC guidance.',
+      isLocked: true,
+      readTime: '6 min read',
+      sections: [
+        {
+          title: 'Consent in Children and Young People',
+          type: 'normal',
+          content: [
+            'Consent is required for all examinations, treatments, and procedures.',
+            'Children under 16 can consent if they have sufficient understanding and intelligence (Gillick competence).',
+            'Young people aged 16-17 are presumed to have capacity to consent.',
+          ],
+        },
+        {
+          title: 'Gillick Competence',
+          type: 'checklist',
+          content: [
+            'A child under 16 can consent if they fully understand the proposed treatment, risks, and alternatives.',
+            'Assessment is decision-specific and must be documented.',
+            'Parental consent is not needed if the child is Gillick competent.',
+          ],
+        },
+        {
+          title: 'Fraser Guidelines (Contraceptive Advice)',
+          type: 'checklist',
+          content: [
+            'The young person understands the advice',
+            'Cannot be persuaded to inform parents or allow parental involvement',
+            'Likely to begin or continue sexual activity with or without treatment',
+            'Physical or mental health likely to suffer without advice or treatment',
+            'Advice or treatment is in the young person’s best interests',
+          ],
+        },
+        {
+          title: 'When Can Parents Consent?',
+          type: 'normal',
+          content: [
+            'If a child is not Gillick competent, those with parental responsibility can consent.',
+            'If a competent child refuses treatment, legal advice may be needed in serious cases.',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.nhs.uk/conditions/consent-to-treatment/children/',
+            'GMC: https://www.gmc-uk.org/ethical-guidance/ethical-guidance-for-doctors/0-18-years/assessing-capacity-and-competence',
+            'NSPCC: https://learning.nspcc.org.uk/child-protection-system/gillick-competence-fraser-guidelines',
+          ],
+        },
+      ],
+    },
+    'y1-paeds-medications': {
+      title: 'Y1 Paediatric Medications Guide',
+      description: 'Weight-based dosing, common paediatric medications, and safety considerations. Based on UK BNFC and NHS guidance.',
+      isLocked: true,
+      readTime: '7 min read',
+      sections: [
+        {
+          title: 'Principles of Paediatric Prescribing',
+          type: 'normal',
+          content: [
+            'Always use weight-based dosing (mg/kg) unless otherwise specified.',
+            'Check the child’s weight and date measured.',
+            'Use the most up-to-date BNFC (British National Formulary for Children).',
+            'Double-check calculations and have a second checker for high-risk drugs.',
+          ],
+        },
+        {
+          title: 'Common Paediatric Medications',
+          type: 'checklist',
+          content: [
+            'Paracetamol: 15 mg/kg every 4–6 hours (max 4 doses/24h)',
+            'Ibuprofen: 5–10 mg/kg every 6–8 hours (max 30 mg/kg/24h)',
+            'Amoxicillin: 30–50 mg/kg/day in divided doses',
+            'Salbutamol (inhaled): 2.5–5 mg via nebuliser',
+            'Oral rehydration solution: 50 ml/kg over 4 hours for mild dehydration',
+            'Gentamicin: Dose and interval depend on age/weight/renal function—always check BNFC',
+          ],
+        },
+        {
+          title: 'High-Risk Medications',
+          type: 'warning',
+          content: [
+            'Insulin: risk of hypoglycaemia—double-check dose and route',
+            'Gentamicin: nephrotoxic—dose carefully and monitor levels',
+            'Morphine: risk of respiratory depression—titrate carefully',
+            'IV fluids: risk of fluid overload—calculate maintenance and monitor closely',
+          ],
+        },
+        {
+          title: 'Safety Tips',
+          type: 'tip',
+          content: [
+            'Always check allergies before prescribing or administering',
+            'Use oral syringes for liquid medicines',
+            'Never round doses up or down without checking with a pharmacist',
+            'Document dose, route, time, and any adverse reactions',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'BNFC: https://bnfc.nice.org.uk/',
+            'NHS: https://www.nhs.uk/medicines/children/',
+            'RCN: https://www.rcn.org.uk/clinical-topics/children-and-young-people/medicines-management',
+          ],
+        },
+      ],
+    },
+    'y1-immunisation-schedule': {
+      title: 'Y1 Immunisation Schedule UK',
+      description: 'Complete UK childhood immunisation schedule with catch-up information.',
+      isLocked: false,
+      readTime: '3 min read',
+      sections: [
+        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+      ],
+    },
+    'y1-play-distraction': {
+      title: 'Y1 Play & Distraction Techniques',
+      description: 'Age-appropriate play and distraction techniques for procedures and hospital stays.',
+      isLocked: false,
+      readTime: '3 min read',
+      sections: [
+        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+      ],
+    },
+    'y1-child-communication': {
+      title: 'Y1 Communicating with Children',
+      description: 'How to adapt your communication for different ages and developmental stages.',
+      isLocked: true,
+      readTime: '3 min read',
+      sections: [
+        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+      ],
+    },
+    'paediatric-dose-calculator': {
+      title: 'Paediatric Dose Calculator Guide',
+      description: 'Weight-based dosing formulas, common paediatric medications, and safety checks for children. Based on UK BNFC and NHS guidance.',
+      isLocked: true,
+      readTime: '6 min read',
+      sections: [
+        {
+          title: 'How to Calculate Paediatric Doses',
+          type: 'normal',
+          content: [
+            'Always use the child’s most recent weight (kg).',
+            'Check the recommended dose in the BNFC.',
+            'Formula: Dose required = Dose per kg × Weight (kg)',
+            'Check maximum dose limits for age/weight.',
+          ],
+        },
+        {
+          title: 'Worked Example',
+          type: 'checklist',
+          content: [
+            'Prescription: Amoxicillin 30 mg/kg/day in 3 divided doses',
+            'Child’s weight: 18 kg',
+            'Total daily dose: 30 × 18 = 540 mg',
+            'Each dose: 540 ÷ 3 = 180 mg per dose',
+          ],
+        },
+        {
+          title: 'Safety Checks',
+          type: 'warning',
+          content: [
+            'Double-check calculations with a colleague',
+            'Never round doses up or down without checking with a pharmacist',
+            'Check for allergies and contraindications',
+            'Document dose, route, and time clearly',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'BNFC: https://bnfc.nice.org.uk/',
+            'NHS: https://www.nhs.uk/medicines/children/',
+          ],
+        },
+      ],
+    },
+    'iv-drip-rate-calculations': {
+      title: 'IV Drip Rate Calculations',
+      description: 'Master IV drip rate calculations with worked examples, formulas, and practice questions. Based on UK NHS and RCN guidance.',
+      isLocked: true,
+      readTime: '6 min read',
+      sections: [
+        {
+          title: 'Drip Rate Formula (Gravity Sets)',
+          type: 'normal',
+          content: [
+            'Drip rate (drops/min) = (Volume to be infused (ml) × Drop factor) ÷ Time (minutes)',
+            'Drop factor is usually 20 drops/ml (check your giving set)',
+          ],
+        },
+        {
+          title: 'Worked Example',
+          type: 'checklist',
+          content: [
+            'Order: 1 litre (1000 ml) over 8 hours',
+            'Time: 8 × 60 = 480 minutes',
+            'Drip rate = (1000 × 20) ÷ 480 = 41.6 ≈ 42 drops/min',
+          ],
+        },
+        {
+          title: 'Pump Rate Formula',
+          type: 'normal',
+          content: [
+            'Pump rate (ml/hr) = Total volume (ml) ÷ Time (hours)',
+            'E.g. 1000 ml over 8 hours: 1000 ÷ 8 = 125 ml/hr',
+          ],
+        },
+        {
+          title: 'Safety Tips',
+          type: 'tip',
+          content: [
+            'Always use a pump for paediatric infusions if possible',
+            'Double-check calculations and settings with a colleague',
+            'Monitor the child for signs of fluid overload',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.nhs.uk/conditions/iv-infusion/',
+            'RCN: https://www.rcn.org.uk/clinical-topics/medicines-management/calculations',
+          ],
+        },
+      ],
+    },
+    'high-risk-medications': {
+      title: 'High-Risk Medications Checklist',
+      description: 'Know your high-risk medications: insulin, anticoagulants, opioids, and more with safety checks. Based on UK NHS and NPSA guidance.',
+      isLocked: true,
+      readTime: '5 min read',
+      sections: [
+        {
+          title: 'What are High-Risk Medications?',
+          type: 'normal',
+          content: [
+            'Medications with a high risk of causing significant harm if used incorrectly.',
+            'Require extra care, double-checking, and clear documentation.',
+          ],
+        },
+        {
+          title: 'Examples of High-Risk Medications',
+          type: 'checklist',
+          content: [
+            'Insulin',
+            'Anticoagulants (e.g. warfarin, heparin)',
+            'Opioids (e.g. morphine, fentanyl)',
+            'IV potassium',
+            'Gentamicin and other aminoglycosides',
+            'Chemotherapy agents',
+          ],
+        },
+        {
+          title: 'Safety Checks',
+          type: 'warning',
+          content: [
+            'Always double-check dose, route, and patient identity',
+            'Use pre-mixed solutions where possible',
+            'Document administration clearly',
+            'Monitor for adverse effects and escalate concerns promptly',
+          ],
+        },
+        {
+          title: 'References',
+          type: 'tip',
+          content: [
+            'NHS: https://www.england.nhs.uk/patient-safety/medication-safety/',
+            'NPSA: https://www.sps.nhs.uk/articles/high-risk-medicines/',
+          ],
+        },
+      ],
+    },
+    'iv-drip-rate-calculations': {
+      title: 'IV Drip Rate Calculations',
+      description: 'Master IV drip rate calculations with worked examples, formulas and practice questions.',
+      isLocked: true,
+      readTime: '3 min read',
+      sections: [
+        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+      ],
+    },
+    'high-risk-medications': {
+      title: 'High-Risk Medications Checklist',
+      description: 'Know your high-risk medications: insulin, anticoagulants, opioids and more with safety checks.',
+      isLocked: true,
+      readTime: '3 min read',
+      sections: [
+        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+      ],
+    },
   title: string;
   description: string;
   isLocked: boolean;
