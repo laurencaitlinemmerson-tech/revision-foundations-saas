@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence, useInView, Variants } from 'framer-motion';
 import {
   BookOpen,
   ClipboardCheck,
@@ -21,6 +22,10 @@ import {
   Star,
   ArrowUp,
   Sparkles,
+  Calendar,
+  Award,
+  Heart,
+  Rocket,
 } from 'lucide-react';
 
 // ============ localStorage Helpers ============
@@ -105,25 +110,79 @@ function getDailyTip(): string {
   return STUDY_TIPS[seed % STUDY_TIPS.length];
 }
 
+// ============ Animation Variants ============
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.5, ease: "easeOut" } 
+  },
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+  },
+};
+
 // ============ Components ============
 
 export function WeeklyProgress() {
   const [count, setCount] = useState<number | null>(null);
+  const [animatedCount, setAnimatedCount] = useState(0);
 
   useEffect(() => {
-    setCount(getWeeklySessionCount());
+    const actualCount = getWeeklySessionCount();
+    setCount(actualCount);
+    
+    // Animate count up
+    if (actualCount > 0) {
+      let current = 0;
+      const increment = actualCount / 20;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= actualCount) {
+          setAnimatedCount(actualCount);
+          clearInterval(timer);
+        } else {
+          setAnimatedCount(Math.floor(current));
+        }
+      }, 50);
+      return () => clearInterval(timer);
+    }
   }, []);
 
   if (count === null) return null;
 
   return (
-    <p className="text-sm text-[var(--plum-dark)]/70 mt-1">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      className="text-center mb-2"
+    >
       {count > 0 ? (
-        <>You've practised <span className="font-semibold text-[var(--purple)]">{count} time{count !== 1 ? 's' : ''}</span> this week 🎉</>
+        <p className="text-sm text-[var(--plum-dark)]/70">
+          You've practised <motion.span 
+            className="inline-flex items-center gap-1 font-semibold text-[var(--purple)] bg-[var(--lilac-soft)] px-2 py-0.5 rounded-full"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+          >
+            <Flame className="w-3.5 h-3.5 text-orange-500" />
+            {animatedCount} time{count !== 1 ? 's' : ''}
+          </motion.span> this week 🎉
+        </p>
       ) : (
-        <>Ready when you are — try a quick 5-minute session.</>
+        <p className="text-sm text-[var(--plum-dark)]/70">
+          Ready when you are — try a quick 5-minute session.
+        </p>
       )}
-    </p>
+    </motion.div>
   );
 }
 
@@ -160,21 +219,39 @@ export function ContinueCard() {
   const Icon = toolInfo.icon;
 
   return (
-    <div className="card mb-6 border border-[var(--lilac-medium)] hover:border-[var(--lavender)] hover:shadow-md transition-all duration-200">
-      <div className="flex items-center gap-2 mb-3">
-        <Clock className="w-4 h-4 text-[var(--purple)]" />
+    <motion.div 
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ scale: 1.01, y: -2 }}
+      className="card mb-6 border border-[var(--lilac-medium)] hover:border-[var(--lavender)] hover:shadow-lg transition-all duration-300 overflow-hidden relative"
+    >
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--lavender)]/5 to-transparent pointer-events-none" />
+      
+      <div className="flex items-center gap-2 mb-3 relative z-10">
+        <motion.div
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+        >
+          <Clock className="w-4 h-4 text-[var(--purple)]" />
+        </motion.div>
         <h3 className="text-sm font-semibold text-[var(--plum)]">Continue where you left off</h3>
       </div>
 
       {activity ? (
         <Link
           href={activity.path}
-          className="flex items-center justify-between group"
+          className="flex items-center justify-between group relative z-10"
         >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl ${toolInfo.bg} flex items-center justify-center group-hover:scale-105 transition-transform`}>
-              <Icon className={`w-5 h-5 ${toolInfo.color}`} />
-            </div>
+            <motion.div 
+              className={`w-12 h-12 rounded-xl ${toolInfo.bg} flex items-center justify-center`}
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Icon className={`w-6 h-6 ${toolInfo.color}`} />
+            </motion.div>
             <div>
               <p className="font-medium text-[var(--plum)]">{activity.label}</p>
               <p className="text-xs text-[var(--plum-dark)]/60">
@@ -182,13 +259,17 @@ export function ContinueCard() {
               </p>
             </div>
           </div>
-          <div className="bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm group-hover:bg-[var(--plum)] transition-all flex items-center gap-1.5 group-hover:gap-2">
+          <motion.div 
+            className="bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2"
+            whileHover={{ scale: 1.05, gap: '12px' }}
+            whileTap={{ scale: 0.95 }}
+          >
             Continue
             <ArrowRight className="w-4 h-4" />
-          </div>
+          </motion.div>
         </Link>
       ) : (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between relative z-10">
           <p className="text-sm text-[var(--plum-dark)]/70">
             Start a session and pick up right where you left off.
           </p>
@@ -200,12 +281,13 @@ export function ContinueCard() {
           </Link>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
 export function StudyTipCard() {
   const [tip, setTip] = useState<string>('');
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     setTip(getDailyTip());
@@ -214,24 +296,38 @@ export function StudyTipCard() {
   if (!tip) return null;
 
   return (
-    <div className="card bg-[var(--lilac-soft)]/50 hover:shadow-md transition-all duration-200">
+    <motion.div 
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ scale: 1.01 }}
+      className="card bg-gradient-to-br from-amber-50/80 via-white to-[var(--lilac-soft)]/50 hover:shadow-lg transition-all duration-300 overflow-hidden"
+    >
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-          <Lightbulb className="w-5 h-5 text-amber-600" />
-        </div>
+        <motion.div 
+          className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center flex-shrink-0 shadow-sm"
+          animate={{ rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, repeatDelay: 2 }}
+        >
+          <Lightbulb className="w-6 h-6 text-amber-600" />
+        </motion.div>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-2">
             <h3 className="font-semibold text-[var(--plum)]">Study Tip</h3>
-            <span className="text-[10px] uppercase tracking-wide text-[var(--purple)] bg-[var(--lilac)] px-2 py-0.5 rounded-full font-medium">
-              New tip daily
-            </span>
+            <motion.span 
+              className="text-[10px] uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-medium"
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              ✨ Daily wisdom
+            </motion.span>
           </div>
-          <p className="text-sm text-[var(--plum-dark)]/70 leading-relaxed">
+          <p className="text-sm text-[var(--plum-dark)]/80 leading-relaxed">
             {tip}
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -261,6 +357,8 @@ export function WavingHand() {
 export function ProgressStatsRow() {
   const [weeklyCount, setWeeklyCount] = useState<number>(0);
   const [mounted, setMounted] = useState(false);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
 
   useEffect(() => {
     setMounted(true);
@@ -269,48 +367,74 @@ export function ProgressStatsRow() {
 
   if (!mounted) return null;
 
-  // TODO: Wire these to real analytics when available
   const stats = [
     {
       icon: Flame,
       label: 'Current streak',
       value: weeklyCount > 0 ? `${Math.min(weeklyCount, 7)} days` : 'Start today!',
       color: 'text-orange-500',
-      bg: 'bg-orange-50',
+      bg: 'bg-gradient-to-br from-orange-100 to-amber-100',
+      iconBg: 'bg-gradient-to-br from-orange-400 to-amber-500',
     },
     {
       icon: Timer,
       label: 'This week',
       value: weeklyCount > 0 ? `${weeklyCount} sessions` : 'No sessions yet',
       color: 'text-[var(--purple)]',
-      bg: 'bg-[var(--lilac-soft)]',
+      bg: 'bg-gradient-to-br from-[var(--lilac-soft)] to-[var(--lavender)]/30',
+      iconBg: 'bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)]',
     },
     {
       icon: TrendingUp,
-      label: 'Keep going',
-      value: weeklyCount >= 5 ? 'On fire!' : `${5 - weeklyCount} more to goal`,
+      label: 'Goal progress',
+      value: weeklyCount >= 5 ? 'Smashed it! 🎉' : `${5 - weeklyCount} more to goal`,
       color: 'text-emerald-500',
-      bg: 'bg-emerald-50',
+      bg: 'bg-gradient-to-br from-emerald-50 to-teal-50',
+      iconBg: 'bg-gradient-to-br from-emerald-400 to-teal-500',
+      progress: Math.min((weeklyCount / 5) * 100, 100),
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <motion.div 
+      ref={ref}
+      className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+      variants={staggerContainer}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
       {stats.map((stat, i) => (
-        <div
+        <motion.div
           key={i}
-          className="card flex items-center gap-4 hover:border-[var(--lavender)] hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
+          variants={cardVariants}
+          whileHover={{ scale: 1.03, y: -4 }}
+          className={`card ${stat.bg} border-none shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden relative`}
         >
-          <div className={`w-11 h-11 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
-            <stat.icon className={`w-5 h-5 ${stat.color}`} />
+          {/* Progress bar for goal */}
+          {stat.progress !== undefined && (
+            <motion.div 
+              className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${stat.progress}%` }}
+              transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            />
+          )}
+          
+          <div className="flex items-center gap-4">
+            <motion.div 
+              className={`w-12 h-12 rounded-xl ${stat.iconBg} flex items-center justify-center flex-shrink-0 shadow-md`}
+              whileHover={{ rotate: 10 }}
+            >
+              <stat.icon className="w-6 h-6 text-white" />
+            </motion.div>
+            <div>
+              <p className="text-xs text-[var(--plum-dark)]/60 uppercase tracking-wide font-medium">{stat.label}</p>
+              <p className="font-bold text-lg text-[var(--plum)]">{stat.value}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-[var(--plum-dark)]/60 uppercase tracking-wide">{stat.label}</p>
-            <p className="font-semibold text-[var(--plum)]">{stat.value}</p>
-          </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -375,54 +499,98 @@ export function TodaysPlanCard() {
 
   const completedCount = checked.size;
   const totalCount = DAILY_CHECKLIST.length;
+  const allComplete = completedCount === totalCount;
 
   return (
-    <div className="card hover:border-[var(--lavender)] hover:shadow-md transition-all duration-200">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-[var(--purple)]" />
-          <h3 className="font-semibold text-[var(--plum)]">Today's Plan</h3>
-        </div>
-        <span className="text-xs text-[var(--plum-dark)]/60 bg-[var(--lilac-soft)] px-2.5 py-1 rounded-full">
-          {completedCount}/{totalCount} done
-        </span>
-      </div>
+    <motion.div 
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      className="card hover:shadow-lg transition-all duration-300 overflow-hidden relative"
+    >
+      {/* Celebration overlay when all complete */}
+      <AnimatePresence>
+        {allComplete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-gradient-to-br from-emerald-50/90 via-[var(--mint)]/80 to-teal-50/90 z-0 pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
 
-      <div className="space-y-3 mb-4">
-        {DAILY_CHECKLIST.map((item) => {
-          const isChecked = checked.has(item.id);
-          return (
-            <button
-              key={item.id}
-              onClick={() => toggleItem(item.id)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-left ${
-                isChecked
-                  ? 'bg-[var(--mint)]/20 border border-[var(--mint)]'
-                  : 'bg-[var(--lilac-soft)]/50 hover:bg-[var(--lilac-soft)] border border-transparent'
-              }`}
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <motion.div
+              animate={allComplete ? { rotate: [0, -10, 10, -10, 0], scale: [1, 1.2, 1] } : {}}
+              transition={{ duration: 0.5 }}
             >
-              {isChecked ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-              ) : (
-                <Circle className="w-5 h-5 text-[var(--plum-dark)]/30 flex-shrink-0" />
-              )}
-              <span className={`flex-1 text-sm ${isChecked ? 'text-[var(--plum-dark)]/50 line-through' : 'text-[var(--plum)]'}`}>
-                {item.label}
-              </span>
-              <span className="text-xs text-[var(--plum-dark)]/50">{item.duration}</span>
-            </button>
-          );
-        })}
-      </div>
+              <Target className={`w-5 h-5 ${allComplete ? 'text-emerald-500' : 'text-[var(--purple)]'}`} />
+            </motion.div>
+            <h3 className="font-semibold text-[var(--plum)]">Today's Plan</h3>
+          </div>
+          <motion.span 
+            className={`text-xs px-3 py-1.5 rounded-full font-medium ${
+              allComplete 
+                ? 'bg-emerald-100 text-emerald-700' 
+                : 'bg-[var(--lilac-soft)] text-[var(--plum-dark)]/70'
+            }`}
+            animate={allComplete ? { scale: [1, 1.1, 1] } : {}}
+          >
+            {allComplete ? '🎉 All done!' : `${completedCount}/${totalCount} done`}
+          </motion.span>
+        </div>
 
-      <Link
-        href="/osce"
-        className="flex items-center justify-center gap-2 w-full bg-[var(--purple)] text-white py-2.5 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all"
-      >
-        <Play className="w-4 h-4" />
-        Start Session
-      </Link>
-    </div>
+        <div className="space-y-2 mb-4">
+          {DAILY_CHECKLIST.map((item, index) => {
+            const isChecked = checked.has(item.id);
+            return (
+              <motion.button
+                key={item.id}
+                onClick={() => toggleItem(item.id)}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-left ${
+                  isChecked
+                    ? 'bg-[var(--mint)]/30 border border-[var(--mint)]'
+                    : 'bg-[var(--lilac-soft)]/50 hover:bg-[var(--lilac-soft)] border border-transparent'
+                }`}
+              >
+                <motion.div
+                  animate={isChecked ? { scale: [0, 1.2, 1] } : {}}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  {isChecked ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-[var(--plum-dark)]/30 flex-shrink-0" />
+                  )}
+                </motion.div>
+                <span className={`flex-1 text-sm ${isChecked ? 'text-[var(--plum-dark)]/50 line-through' : 'text-[var(--plum)]'}`}>
+                  {item.label}
+                </span>
+                <span className="text-xs text-[var(--plum-dark)]/50">{item.duration}</span>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Link
+            href="/osce"
+            className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-[var(--purple)] to-[var(--plum)] text-white py-3 rounded-full font-semibold text-sm hover:shadow-lg transition-all"
+          >
+            <Play className="w-4 h-4" />
+            Start Session
+          </Link>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -442,37 +610,56 @@ const FOCUS_AREAS: FocusArea[] = [
 ];
 
 const STATUS_STYLES = {
-  'needs-work': 'bg-amber-50 text-amber-700 border-amber-200',
-  'improving': 'bg-blue-50 text-blue-700 border-blue-200',
-  'strong': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'needs-work': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: '🎯' },
+  'improving': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: '📈' },
+  'strong': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: '💪' },
 };
 
 export function FocusAreasCard() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+
   return (
-    <div className="card hover:border-[var(--lavender)] hover:shadow-md transition-all duration-200">
+    <motion.div 
+      ref={ref}
+      variants={cardVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="card hover:shadow-lg transition-all duration-300"
+    >
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-5 h-5 text-[var(--purple)]" />
         <h3 className="font-semibold text-[var(--plum)]">Focus areas this week</h3>
       </div>
 
       <div className="space-y-3">
-        {FOCUS_AREAS.map((area, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between p-3 rounded-xl bg-[var(--lilac-soft)]/30"
-          >
-            <span className="text-sm text-[var(--plum)]">{area.topic}</span>
-            <span className={`text-xs px-2.5 py-1 rounded-full border ${STATUS_STYLES[area.status]}`}>
-              {area.label}
-            </span>
-          </div>
-        ))}
+        {FOCUS_AREAS.map((area, i) => {
+          const style = STATUS_STYLES[area.status];
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ delay: i * 0.15 }}
+              whileHover={{ scale: 1.02, x: 4 }}
+              className={`flex items-center justify-between p-3 rounded-xl ${style.bg}/50 border ${style.border} cursor-default`}
+            >
+              <div className="flex items-center gap-2">
+                <span>{style.icon}</span>
+                <span className="text-sm font-medium text-[var(--plum)]">{area.topic}</span>
+              </div>
+              <span className={`text-xs px-2.5 py-1 rounded-full border ${style.bg} ${style.text} ${style.border} font-medium`}>
+                {area.label}
+              </span>
+            </motion.div>
+          );
+        })}
       </div>
 
       <p className="text-xs text-[var(--plum-dark)]/50 mt-4 text-center">
         Based on your recent quiz performance
       </p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -514,6 +701,9 @@ function getCommunityStats(userSessions: number): CommunityStats {
 export function CommunityStatsCard() {
   const [stats, setStats] = useState<CommunityStats | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [animatedPercentile, setAnimatedPercentile] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
 
   useEffect(() => {
     setMounted(true);
@@ -521,83 +711,174 @@ export function CommunityStatsCard() {
     setStats(getCommunityStats(weeklyCount));
   }, []);
 
+  useEffect(() => {
+    if (stats && isInView) {
+      // Animate percentile bar
+      let current = 0;
+      const target = stats.percentile;
+      const timer = setInterval(() => {
+        current += 2;
+        if (current >= target) {
+          setAnimatedPercentile(target);
+          clearInterval(timer);
+        } else {
+          setAnimatedPercentile(current);
+        }
+      }, 20);
+      return () => clearInterval(timer);
+    }
+  }, [stats, isInView]);
+
   if (!mounted || !stats) return null;
 
   const isAboveAverage = stats.yourSessions > stats.avgSessions;
   const isTopPerformer = stats.percentile >= 80;
 
   return (
-    <div className="card bg-gradient-to-br from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/30 border-[var(--lavender)] hover:shadow-lg transition-all duration-300">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <Users className="w-5 h-5 text-[var(--purple)]" />
-          <h3 className="font-semibold text-[var(--plum)]">How you compare</h3>
-        </div>
-        <span className="text-xs text-[var(--plum-dark)]/50 bg-white/60 px-2.5 py-1 rounded-full">
-          This week
-        </span>
-      </div>
+    <motion.div 
+      ref={ref}
+      variants={cardVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="card bg-gradient-to-br from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/30 border-[var(--lavender)] hover:shadow-xl transition-all duration-300 overflow-hidden relative"
+    >
+      {/* Animated background shimmer */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+        animate={{ x: ['-100%', '100%'] }}
+        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+      />
 
-      {/* Main Comparison */}
-      <div className="grid grid-cols-2 gap-4 mb-5">
-        <div className="bg-white/70 rounded-2xl p-4 text-center">
-          <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Your sessions</p>
-          <p className="text-3xl font-bold text-[var(--purple)]">{stats.yourSessions}</p>
-          {isAboveAverage && (
-            <div className="flex items-center justify-center gap-1 mt-1 text-emerald-600">
-              <ArrowUp className="w-3 h-3" />
-              <span className="text-xs font-medium">Above avg</span>
-            </div>
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Users className="w-5 h-5 text-[var(--purple)]" />
+            </motion.div>
+            <h3 className="font-semibold text-[var(--plum)]">How you compare</h3>
+          </div>
+          <span className="text-xs text-[var(--plum-dark)]/50 bg-white/60 px-2.5 py-1 rounded-full">
+            This week
+          </span>
+        </div>
+
+        {/* Main Comparison */}
+        <div className="grid grid-cols-2 gap-4 mb-5">
+          <motion.div 
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center shadow-sm"
+            whileHover={{ scale: 1.02 }}
+          >
+            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Your sessions</p>
+            <motion.p 
+              className="text-4xl font-bold text-[var(--purple)]"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+            >
+              {stats.yourSessions}
+            </motion.p>
+            {isAboveAverage && (
+              <motion.div 
+                className="flex items-center justify-center gap-1 mt-1 text-emerald-600"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <ArrowUp className="w-3 h-3" />
+                <span className="text-xs font-medium">Above avg</span>
+              </motion.div>
+            )}
+          </motion.div>
+          <motion.div 
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center shadow-sm"
+            whileHover={{ scale: 1.02 }}
+          >
+            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Community avg</p>
+            <p className="text-4xl font-bold text-[var(--plum-dark)]/60">{stats.avgSessions}</p>
+            <p className="text-xs text-[var(--plum-dark)]/50 mt-1">{stats.totalUsers} students</p>
+          </motion.div>
+        </div>
+
+        {/* Percentile Bar */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-[var(--plum-dark)]/70">Your ranking</span>
+            <motion.span 
+              className="text-xs font-bold text-[var(--purple)]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
+              Top {100 - stats.percentile}%
+            </motion.span>
+          </div>
+          <div className="h-4 bg-white/60 rounded-full overflow-hidden shadow-inner">
+            <motion.div 
+              className="h-full bg-gradient-to-r from-[var(--lavender)] via-[var(--purple)] to-[var(--pink)] rounded-full relative"
+              style={{ width: `${animatedPercentile}%` }}
+            >
+              {/* Shimmer effect on bar */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Achievement Badge */}
+        <AnimatePresence mode="wait">
+          {isTopPerformer ? (
+            <motion.div 
+              key="top"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-3"
+            >
+              <motion.div 
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-lg"
+                animate={{ rotate: [0, -5, 5, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Trophy className="w-6 h-6 text-white" />
+              </motion.div>
+              <div>
+                <p className="text-sm font-bold text-amber-800">Top Performer! 🏆</p>
+                <p className="text-xs text-amber-700/70">You're crushing it - top {100 - stats.percentile}% of all students!</p>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="regular"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="flex items-center gap-3 bg-[var(--lilac-soft)] rounded-xl p-3"
+            >
+              <motion.div 
+                className="w-12 h-12 rounded-full bg-[var(--lavender)]/30 flex items-center justify-center"
+                whileHover={{ scale: 1.1, rotate: 10 }}
+              >
+                <Zap className="w-6 h-6 text-[var(--purple)]" />
+              </motion.div>
+              <div>
+                <p className="text-sm font-medium text-[var(--plum)]">
+                  {5 - stats.yourSessions > 0 
+                    ? `${5 - stats.yourSessions} more to beat the average!`
+                    : 'Keep up the great work!'}
+                </p>
+                <p className="text-xs text-[var(--plum-dark)]/60">Top students do {stats.topUserSessions}+ sessions/week</p>
+              </div>
+            </motion.div>
           )}
-        </div>
-        <div className="bg-white/70 rounded-2xl p-4 text-center">
-          <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Community avg</p>
-          <p className="text-3xl font-bold text-[var(--plum-dark)]/70">{stats.avgSessions}</p>
-          <p className="text-xs text-[var(--plum-dark)]/50 mt-1">{stats.totalUsers} students</p>
-        </div>
+        </AnimatePresence>
       </div>
-
-      {/* Percentile Bar */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[var(--plum-dark)]/70">Your ranking</span>
-          <span className="text-xs font-semibold text-[var(--purple)]">Top {100 - stats.percentile}%</span>
-        </div>
-        <div className="h-3 bg-white/60 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-[var(--lavender)] to-[var(--purple)] rounded-full transition-all duration-1000 ease-out"
-            style={{ width: `${stats.percentile}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Achievement Badge */}
-      {isTopPerformer ? (
-        <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-amber-800">Top Performer! 🏆</p>
-            <p className="text-xs text-amber-700/70">You're in the top {100 - stats.percentile}% of all students</p>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center gap-3 bg-[var(--lilac-soft)] rounded-xl p-3">
-          <div className="w-10 h-10 rounded-full bg-[var(--lavender)]/30 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-[var(--purple)]" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-[var(--plum)]">
-              {5 - stats.yourSessions > 0 
-                ? `${5 - stats.yourSessions} more to beat the average!`
-                : 'Keep up the great work!'}
-            </p>
-            <p className="text-xs text-[var(--plum-dark)]/60">Top students do {stats.topUserSessions}+ sessions/week</p>
-          </div>
-        </div>
-      )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -606,6 +887,8 @@ export function CommunityStatsCard() {
 export function StreakCalendar() {
   const [activityDays, setActivityDays] = useState<Set<string>>(new Set());
   const [mounted, setMounted] = useState(false);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
 
   useEffect(() => {
     setMounted(true);
@@ -631,82 +914,179 @@ export function StreakCalendar() {
   });
 
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const streakCount = activityDays.size;
 
   return (
-    <div className="card hover:border-[var(--lavender)] hover:shadow-md transition-all duration-200">
-      <div className="flex items-center gap-2 mb-4">
-        <Flame className="w-5 h-5 text-orange-500" />
-        <h3 className="font-semibold text-[var(--plum)]">Your streak</h3>
-      </div>
+    <motion.div 
+      ref={ref}
+      variants={cardVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="card hover:shadow-lg transition-all duration-300 overflow-hidden relative"
+    >
+      {/* Fire background for good streaks */}
+      {streakCount >= 5 && (
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-orange-50/50 to-amber-50/50 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        />
+      )}
 
-      <div className="flex justify-between gap-2">
-        {days.map((date, i) => {
-          const isActive = activityDays.has(date.toDateString());
-          const isToday = date.toDateString() === new Date().toDateString();
-          
-          return (
-            <div key={i} className="flex flex-col items-center gap-1.5">
-              <span className="text-xs text-[var(--plum-dark)]/50">{dayNames[date.getDay()]}</span>
-              <div 
-                className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-medium transition-all ${
-                  isActive 
-                    ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md' 
-                    : isToday 
-                      ? 'bg-[var(--lilac)] text-[var(--purple)] border-2 border-dashed border-[var(--lavender)]'
-                      : 'bg-[var(--lilac-soft)] text-[var(--plum-dark)]/50'
-                }`}
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <motion.div
+              animate={streakCount > 0 ? { 
+                scale: [1, 1.2, 1],
+                rotate: [0, -10, 10, 0]
+              } : {}}
+              transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+            >
+              <Flame className={`w-5 h-5 ${streakCount >= 5 ? 'text-orange-500' : 'text-[var(--purple)]'}`} />
+            </motion.div>
+            <h3 className="font-semibold text-[var(--plum)]">Your streak</h3>
+          </div>
+          {streakCount > 0 && (
+            <motion.span 
+              className="text-xs font-bold bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 px-3 py-1 rounded-full"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              🔥 {streakCount} day{streakCount !== 1 ? 's' : ''}
+            </motion.span>
+          )}
+        </div>
+
+        <div className="flex justify-between gap-2">
+          {days.map((date, i) => {
+            const isActive = activityDays.has(date.toDateString());
+            const isToday = date.toDateString() === new Date().toDateString();
+            
+            return (
+              <motion.div 
+                key={i} 
+                className="flex flex-col items-center gap-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: i * 0.08 }}
               >
-                {isActive ? <Star className="w-4 h-4" /> : date.getDate()}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                <span className="text-xs font-medium text-[var(--plum-dark)]/50">{dayNames[date.getDay()]}</span>
+                <motion.div 
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-medium transition-all ${
+                    isActive 
+                      ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-lg shadow-orange-200' 
+                      : isToday 
+                        ? 'bg-[var(--lilac)] text-[var(--purple)] border-2 border-dashed border-[var(--lavender)]'
+                        : 'bg-[var(--lilac-soft)] text-[var(--plum-dark)]/50'
+                  }`}
+                  whileHover={{ scale: 1.1 }}
+                  animate={isActive ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ delay: i * 0.1 + 0.5 }}
+                >
+                  {isActive ? <Star className="w-5 h-5" /> : date.getDate()}
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
 
-      <p className="text-xs text-[var(--plum-dark)]/50 mt-4 text-center">
-        {activityDays.size > 0 
-          ? `🔥 ${activityDays.size} day${activityDays.size !== 1 ? 's' : ''} this week!`
-          : 'Start a session to build your streak!'}
-      </p>
-    </div>
+        <motion.p 
+          className="text-xs text-[var(--plum-dark)]/60 mt-5 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          {streakCount >= 7 
+            ? '🏆 Perfect week! You&apos;re unstoppable!'
+            : streakCount >= 5 
+              ? '🔥 Amazing streak! Keep it going!'
+              : streakCount > 0 
+                ? `⚡ ${7 - streakCount} more days for a perfect week!`
+                : '✨ Start a session to build your streak!'}
+        </motion.p>
+      </div>
+    </motion.div>
   );
 }
 
 // ============ Quick Achievement ============
 
+const ACHIEVEMENTS = [
+  { threshold: 10, title: 'Revision Legend', emoji: '👑', desc: '10+ sessions this week!', color: 'from-amber-400 to-yellow-500' },
+  { threshold: 7, title: 'Week Warrior', emoji: '⚔️', desc: 'Practised every day!', color: 'from-purple-400 to-pink-500' },
+  { threshold: 5, title: 'Consistent', emoji: '💪', desc: '5+ sessions - nice streak!', color: 'from-emerald-400 to-teal-500' },
+  { threshold: 3, title: 'Getting Started', emoji: '🌱', desc: 'Building good habits!', color: 'from-green-400 to-emerald-500' },
+  { threshold: 1, title: 'First Step', emoji: '👣', desc: 'You showed up - that matters!', color: 'from-blue-400 to-indigo-500' },
+];
+
 export function QuickAchievement() {
-  const [achievement, setAchievement] = useState<{ title: string; emoji: string; desc: string } | null>(null);
+  const [achievement, setAchievement] = useState<typeof ACHIEVEMENTS[0] | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const sessions = getWeeklySessionCount();
     
-    if (sessions >= 10) {
-      setAchievement({ title: 'Revision Legend', emoji: '👑', desc: '10+ sessions this week!' });
-    } else if (sessions >= 7) {
-      setAchievement({ title: 'Week Warrior', emoji: '⚔️', desc: 'Practised every day!' });
-    } else if (sessions >= 5) {
-      setAchievement({ title: 'Consistent', emoji: '💪', desc: '5+ sessions - nice streak!' });
-    } else if (sessions >= 3) {
-      setAchievement({ title: 'Getting Started', emoji: '🌱', desc: 'Building good habits!' });
-    } else if (sessions >= 1) {
-      setAchievement({ title: 'First Step', emoji: '👣', desc: 'You showed up - that matters!' });
+    for (const ach of ACHIEVEMENTS) {
+      if (sessions >= ach.threshold) {
+        setAchievement(ach);
+        break;
+      }
     }
   }, []);
 
   if (!mounted || !achievement) return null;
 
   return (
-    <div className="flex items-center gap-3 bg-gradient-to-r from-[var(--lilac-soft)] to-[var(--pink-soft)]/50 rounded-2xl p-4 border border-[var(--lavender)]/50">
-      <div className="text-3xl">{achievement.emoji}</div>
-      <div>
-        <div className="flex items-center gap-2">
-          <p className="font-semibold text-[var(--plum)]">{achievement.title}</p>
-          <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+    <motion.div 
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.02 }}
+      className="relative overflow-hidden rounded-2xl"
+    >
+      {/* Animated gradient background */}
+      <motion.div 
+        className={`absolute inset-0 bg-gradient-to-r ${achievement.color} opacity-10`}
+        animate={{ 
+          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+        }}
+        transition={{ duration: 5, repeat: Infinity }}
+      />
+      
+      <div className="relative flex items-center gap-4 bg-gradient-to-r from-[var(--lilac-soft)]/80 to-[var(--pink-soft)]/50 backdrop-blur-sm rounded-2xl p-5 border border-[var(--lavender)]/50">
+        <motion.div 
+          className="text-4xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, -10, 10, 0]
+          }}
+          transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+        >
+          {achievement.emoji}
+        </motion.div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="font-bold text-lg text-[var(--plum)]">{achievement.title}</p>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="w-5 h-5 text-[var(--purple)]" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-[var(--plum-dark)]/70">{achievement.desc}</p>
         </div>
-        <p className="text-xs text-[var(--plum-dark)]/70">{achievement.desc}</p>
+        <motion.div
+          className={`w-12 h-12 rounded-full bg-gradient-to-br ${achievement.color} flex items-center justify-center shadow-lg`}
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Award className="w-6 h-6 text-white" />
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
