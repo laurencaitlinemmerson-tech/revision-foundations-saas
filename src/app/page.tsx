@@ -275,20 +275,59 @@ export default function HomePage() {
             <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
               <Users className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-2xl mb-3">Nursing Hub</h3>
-            <p className="text-white/80 mb-6 flex-1">
-              Your all-in-one study headquarters. Access curated Y1 child nursing resources, downloadable guides, and community discussions. Plus a personalised dashboard to track your progress, streaks, and see how you compare to other students.
+            <h3 className="text-2xl font-bold mb-3">Nursing Hub</h3>
+            <p className="text-white/90 mb-6 flex-1 leading-relaxed">
+              Your all-in-one study headquarters with curated resources, guides, and community Q&amp;A.
             </p>
-            <ul className="space-y-2 mb-6">
-              {['Y1 Child Nursing Resources', 'Personalised Dashboard', 'Community Q&A', 'Progress & Streaks'].map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm text-white/80">
-                  <Zap className="w-4 h-4 text-[var(--pink)]" />
-                  {feature}
+            <div className="space-y-2.5 mb-6">
+              <div className="flex items-center gap-3 text-sm text-white/90">
+                <span>📚</span>
+                <span>Y1 Child Nursing Resources</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-white/90">
+                <span>📄</span>
+                <span>Downloadable Study Guides</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-white/90">
+                <span>💬</span>
+                <span>Community Q&amp;A Forum</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-white/90">
+                <span>📊</span>
+                <span>Progress Tracking</span>
+              </div>
+            </div>
+            <Link href="/hub" className="btn-primary w-full text-center bg-white text-[var(--purple)] hover:bg-white/90 font-semibold">
+              Explore Hub
+            </Link>
+          </div>
+        </HorizontalCard>
+
+        {/* Dashboard Preview Card */}
+        <HorizontalCard>
+          <div className="card bg-gradient-to-br from-[var(--pink-soft)] via-white to-[var(--lilac-soft)] h-full p-8 flex flex-col border-2 border-[var(--lavender)]/30">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mb-6 shadow-lg">
+              <Zap className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-[var(--plum-dark)] mb-3">Personal Dashboard</h3>
+            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1 leading-relaxed">
+              Track your learning journey with streaks, progress stats, and daily goals. Stay motivated and see how far you&apos;ve come!
+            </p>
+            <ul className="space-y-2.5 mb-6">
+              {[
+                { text: 'Daily study streak tracker', icon: '🔥' },
+                { text: 'Weekly progress stats', icon: '📈' },
+                { text: 'Personal best records', icon: '🏆' },
+                { text: 'Daily revision checklist', icon: '✅' },
+              ].map((feature) => (
+                <li key={feature.text} className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
+                  <span className="text-base">{feature.icon}</span>
+                  {feature.text}
                 </li>
               ))}
             </ul>
-            <Link href="/hub" className="btn-primary w-full text-center bg-white text-[var(--purple)] hover:bg-white/90">
-              Explore Hub
+            <Link href="/dashboard" className="btn-primary w-full text-center font-semibold">
+              View Dashboard
             </Link>
           </div>
         </HorizontalCard>

@@ -32,7 +32,7 @@ export default function DeleteDataPage() {
       `Please delete all my data from Revision Foundations.`
     );
 
-    window.location.href = `mailto:hello@revisionfoundations.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:lauren@revisionfoundations.com?subject=${subject}&body=${body}`;
 
     setSubmitted(true);
     setLoading(false);
@@ -51,7 +51,7 @@ export default function DeleteDataPage() {
                 Your email app should have opened with the deletion request. Send that email and I'll process your request within 7 days.
               </p>
               <p className="text-sm text-[var(--plum-dark)]/50 mb-6">
-                If your email didn't open, please email hello@revisionfoundations.com directly.
+                If your email didn't open, please email lauren@revisionfoundations.com directly.
               </p>
               <Link href="/" className="btn-secondary">
                 <ArrowLeft className="w-4 h-4" />

@@ -188,7 +188,7 @@ export default function ContactPage() {
               Prefer email? Reach us directly at:
             </p>
             <a
-              href="mailto:hello@revisionfoundations.com"
+              href="mailto:lauren@revisionfoundations.com"
               className="inline-flex items-center gap-2 text-[var(--lavender-primary)] font-medium hover:underline"
             >
               <Mail className="w-4 h-4" />
