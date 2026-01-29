@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-
+import { upsertClerkUser } from '@/lib/clerkUsers';
 // GET comments for a resource
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -37,6 +37,21 @@ export async function POST(request: NextRequest) {
   const user = await currentUser();
   const userName = user?.firstName || 'Anonymous';
 
+  if (user) {
+    const email = user.emailAddresses?.[0]?.emailAddress ?? null;
+    const firstName = user.firstName ?? null;
+    const lastName = user.lastName ?? null;
+    const username = user.username ?? null;
+    const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
+    await upsertClerkUser({
+      clerkUserId: userId,
+      email,
+      firstName,
+      lastName,
+      fullName,
+      username,
+    });
+  }
   const body = await request.json();
   const { slug, body: commentBody, parentId } = body;
 
