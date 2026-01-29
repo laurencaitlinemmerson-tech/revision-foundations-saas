@@ -1,5 +1,4 @@
-import { clerkClient } from '@clerk/nextjs/server';
-import { createServiceClient } from './supabase';
+import { createServiceClient } from '@/lib/supabase';
 
 interface UpsertUserParams {
   clerkUserId: string;
@@ -73,3 +72,5 @@ export async function getUserFromSupabase(clerkUserId: string) {
     return null;
   }
 }
+
+
