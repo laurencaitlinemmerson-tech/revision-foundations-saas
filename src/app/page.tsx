@@ -271,33 +271,33 @@ export default function HomePage() {
 
         {/* Hub Card */}
         <HorizontalCard>
-          <div className="card bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] h-full p-8 flex flex-col text-white">
-            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+          <div className="card bg-white h-full p-8 flex flex-col">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] flex items-center justify-center mb-6">
               <Users className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-2xl font-bold mb-3">Nursing Hub</h3>
-            <p className="text-white/90 mb-6 flex-1 leading-relaxed">
+            <h3 className="text-2xl font-bold text-[var(--plum-dark)] mb-3">Nursing Hub</h3>
+            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1 leading-relaxed">
               Your all-in-one study headquarters with curated resources, guides, and community Q&amp;A.
             </p>
             <div className="space-y-2.5 mb-6">
-              <div className="flex items-center gap-3 text-sm text-white/90">
+              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
                 <span>📚</span>
                 <span>Y1 Child Nursing Resources</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-white/90">
+              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
                 <span>📄</span>
                 <span>Downloadable Study Guides</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-white/90">
+              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
                 <span>💬</span>
                 <span>Community Q&amp;A Forum</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-white/90">
+              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
                 <span>📊</span>
                 <span>Progress Tracking</span>
               </div>
             </div>
-            <Link href="/hub" className="btn-primary w-full text-center bg-white text-[var(--purple)] hover:bg-white/90 font-semibold">
+            <Link href="/hub" className="btn-primary w-full text-center">
               Explore Hub
             </Link>
           </div>
