@@ -663,76 +663,75 @@ export function FocusAreasCard() {
   );
 }
 
-// ============ Community Stats - Compare vs Other Users ============
+// ============ Personal Progress Card (replaces fake community stats) ============
 
-interface CommunityStats {
-  yourSessions: number;
-  avgSessions: number;
-  percentile: number;
-  totalUsers: number;
-  topUserSessions: number;
+interface PersonalProgress {
+  thisWeek: number;
+  lastWeek: number;
+  totalAllTime: number;
+  bestStreak: number;
 }
 
-// Simulated community stats - in production, this would come from an API
-function getCommunityStats(userSessions: number): CommunityStats {
-  // These would be fetched from the backend in production
-  const avgSessions = 4.2;
-  const totalUsers = 847;
-  const topUserSessions = 14;
+function getPersonalProgress(): PersonalProgress {
+  if (typeof window === 'undefined') {
+    return { thisWeek: 0, lastWeek: 0, totalAllTime: 0, bestStreak: 0 };
+  }
   
-  // Calculate percentile based on user's sessions
-  let percentile = 50;
-  if (userSessions >= 10) percentile = 95;
-  else if (userSessions >= 7) percentile = 85;
-  else if (userSessions >= 5) percentile = 70;
-  else if (userSessions >= 3) percentile = 50;
-  else if (userSessions >= 1) percentile = 30;
-  else percentile = 10;
-  
-  return {
-    yourSessions: userSessions,
-    avgSessions,
-    percentile,
-    totalUsers,
-    topUserSessions,
-  };
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.sessionEvents);
+    if (!stored) return { thisWeek: 0, lastWeek: 0, totalAllTime: 0, bestStreak: 0 };
+    
+    const events: SessionEvent[] = JSON.parse(stored);
+    const now = Date.now();
+    const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const twoWeeksAgo = now - 14 * 24 * 60 * 60 * 1000;
+    
+    const thisWeek = events.filter(e => e.timestamp > oneWeekAgo).length;
+    const lastWeek = events.filter(e => e.timestamp > twoWeeksAgo && e.timestamp <= oneWeekAgo).length;
+    const totalAllTime = events.length;
+    
+    // Calculate best streak (consecutive days)
+    const uniqueDays = [...new Set(events.map(e => new Date(e.timestamp).toDateString()))];
+    let bestStreak = 0;
+    let currentStreak = 1;
+    
+    const sortedDays = uniqueDays.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    for (let i = 1; i < sortedDays.length; i++) {
+      const prev = new Date(sortedDays[i - 1]);
+      const curr = new Date(sortedDays[i]);
+      const diffDays = (curr.getTime() - prev.getTime()) / (24 * 60 * 60 * 1000);
+      
+      if (diffDays === 1) {
+        currentStreak++;
+      } else {
+        bestStreak = Math.max(bestStreak, currentStreak);
+        currentStreak = 1;
+      }
+    }
+    bestStreak = Math.max(bestStreak, currentStreak);
+    
+    return { thisWeek, lastWeek, totalAllTime, bestStreak };
+  } catch {
+    return { thisWeek: 0, lastWeek: 0, totalAllTime: 0, bestStreak: 0 };
+  }
 }
 
 export function CommunityStatsCard() {
-  const [stats, setStats] = useState<CommunityStats | null>(null);
+  const [progress, setProgress] = useState<PersonalProgress | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [animatedPercentile, setAnimatedPercentile] = useState(0);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
   useEffect(() => {
     setMounted(true);
-    const weeklyCount = getWeeklySessionCount();
-    setStats(getCommunityStats(weeklyCount));
+    setProgress(getPersonalProgress());
   }, []);
 
-  useEffect(() => {
-    if (stats && isInView) {
-      // Animate percentile bar
-      let current = 0;
-      const target = stats.percentile;
-      const timer = setInterval(() => {
-        current += 2;
-        if (current >= target) {
-          setAnimatedPercentile(target);
-          clearInterval(timer);
-        } else {
-          setAnimatedPercentile(current);
-        }
-      }, 20);
-      return () => clearInterval(timer);
-    }
-  }, [stats, isInView]);
+  if (!mounted || !progress) return null;
 
-  if (!mounted || !stats) return null;
-
-  const isAboveAverage = stats.yourSessions > stats.avgSessions;
-  const isTopPerformer = stats.percentile >= 80;
+  const weekChange = progress.thisWeek - progress.lastWeek;
+  const isImproving = weekChange > 0;
+  const isSame = weekChange === 0;
 
   return (
     <motion.div 
@@ -756,39 +755,39 @@ export function CommunityStatsCard() {
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             >
-              <Users className="w-5 h-5 text-[var(--purple)]" />
+              <TrendingUp className="w-5 h-5 text-[var(--purple)]" />
             </motion.div>
-            <h3 className="font-semibold text-[var(--plum)]">How you compare</h3>
+            <h3 className="font-semibold text-[var(--plum)]">Your Progress</h3>
           </div>
           <span className="text-xs text-[var(--plum-dark)]/50 bg-white/60 px-2.5 py-1 rounded-full">
-            This week
+            Personal stats
           </span>
         </div>
 
-        {/* Main Comparison */}
+        {/* Main Stats */}
         <div className="grid grid-cols-2 gap-4 mb-5">
           <motion.div 
             className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center shadow-sm"
             whileHover={{ scale: 1.02 }}
           >
-            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Your sessions</p>
+            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">This week</p>
             <motion.p 
               className="text-4xl font-bold text-[var(--purple)]"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             >
-              {stats.yourSessions}
+              {progress.thisWeek}
             </motion.p>
-            {isAboveAverage && (
+            {!isSame && (
               <motion.div 
-                className="flex items-center justify-center gap-1 mt-1 text-emerald-600"
+                className={`flex items-center justify-center gap-1 mt-1 ${isImproving ? 'text-emerald-600' : 'text-amber-600'}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <ArrowUp className="w-3 h-3" />
-                <span className="text-xs font-medium">Above avg</span>
+                {isImproving ? <ArrowUp className="w-3 h-3" /> : <span className="text-xs">↓</span>}
+                <span className="text-xs font-medium">{Math.abs(weekChange)} vs last week</span>
               </motion.div>
             )}
           </motion.div>
@@ -796,87 +795,32 @@ export function CommunityStatsCard() {
             className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center shadow-sm"
             whileHover={{ scale: 1.02 }}
           >
-            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">Community avg</p>
-            <p className="text-4xl font-bold text-[var(--plum-dark)]/60">{stats.avgSessions}</p>
-            <p className="text-xs text-[var(--plum-dark)]/50 mt-1">{stats.totalUsers} students</p>
+            <p className="text-xs text-[var(--plum-dark)]/60 mb-1">All time</p>
+            <p className="text-4xl font-bold text-[var(--plum-dark)]/60">{progress.totalAllTime}</p>
+            <p className="text-xs text-[var(--plum-dark)]/50 mt-1">sessions total</p>
           </motion.div>
         </div>
 
-        {/* Percentile Bar */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-[var(--plum-dark)]/70">Your ranking</span>
-            <motion.span 
-              className="text-xs font-bold text-[var(--purple)]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-            >
-              Top {100 - stats.percentile}%
-            </motion.span>
-          </div>
-          <div className="h-4 bg-white/60 rounded-full overflow-hidden shadow-inner">
-            <motion.div 
-              className="h-full bg-gradient-to-r from-[var(--lavender)] via-[var(--purple)] to-[var(--pink)] rounded-full relative"
-              style={{ width: `${animatedPercentile}%` }}
-            >
-              {/* Shimmer effect on bar */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                animate={{ x: ['-100%', '100%'] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </motion.div>
+        {/* Best Streak */}
+        <div className="flex items-center gap-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200 rounded-xl p-3">
+          <motion.div 
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg"
+            animate={progress.bestStreak >= 3 ? { scale: [1, 1.1, 1] } : {}}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Trophy className="w-6 h-6 text-white" />
+          </motion.div>
+          <div>
+            <p className="text-sm font-bold text-amber-800">Best streak: {progress.bestStreak} day{progress.bestStreak !== 1 ? 's' : ''}</p>
+            <p className="text-xs text-amber-700/70">
+              {progress.bestStreak >= 7 
+                ? 'Amazing consistency! 🏆' 
+                : progress.bestStreak >= 3 
+                  ? 'Great habit building! 🔥'
+                  : 'Keep practising to build your streak!'}
+            </p>
           </div>
         </div>
-
-        {/* Achievement Badge */}
-        <AnimatePresence mode="wait">
-          {isTopPerformer ? (
-            <motion.div 
-              key="top"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-3"
-            >
-              <motion.div 
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-lg"
-                animate={{ rotate: [0, -5, 5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Trophy className="w-6 h-6 text-white" />
-              </motion.div>
-              <div>
-                <p className="text-sm font-bold text-amber-800">Top Performer! 🏆</p>
-                <p className="text-xs text-amber-700/70">You're crushing it - top {100 - stats.percentile}% of all students!</p>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="regular"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-3 bg-[var(--lilac-soft)] rounded-xl p-3"
-            >
-              <motion.div 
-                className="w-12 h-12 rounded-full bg-[var(--lavender)]/30 flex items-center justify-center"
-                whileHover={{ scale: 1.1, rotate: 10 }}
-              >
-                <Zap className="w-6 h-6 text-[var(--purple)]" />
-              </motion.div>
-              <div>
-                <p className="text-sm font-medium text-[var(--plum)]">
-                  {5 - stats.yourSessions > 0 
-                    ? `${5 - stats.yourSessions} more to beat the average!`
-                    : 'Keep up the great work!'}
-                </p>
-                <p className="text-xs text-[var(--plum-dark)]/60">Top students do {stats.topUserSessions}+ sessions/week</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </motion.div>
   );
