@@ -457,12 +457,51 @@ const resources: Record<string, {
       ],
     },
     'y1-immunisation-schedule': {
-      title: 'Y1 Immunisation Schedule UK',
-      description: 'Complete UK childhood immunisation schedule with catch-up information.',
+      title: 'Year 1 Immunisation Schedule (UK)',
+      description: 'A clear overview of the UK childhood immunisation schedule for Year 1 medical students, including timing, vaccines, and rationale.',
       isLocked: false,
-      readTime: '3 min read',
+      readTime: '5 min read',
       sections: [
-        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
+        {
+          title: 'UK Childhood Immunisation Schedule (as of 2026)',
+          type: 'checklist',
+          content: [
+            'At birth: BCG (if indicated, e.g. high-risk TB areas), Hepatitis B (if indicated)',
+            '8 weeks: 6-in-1 (DTaP/IPV/Hib/HepB), Rotavirus (oral), MenB, PCV (Pneumococcal)',
+            '12 weeks: 6-in-1 (2nd dose), Rotavirus (2nd dose), MenC/HiB',
+            '16 weeks: 6-in-1 (3rd dose), MenB (2nd dose), PCV (2nd dose)',
+            '1 year: Hib/MenC booster, MMR (1st dose), PCV booster, MenB booster',
+            '2-10 years (annually): Nasal flu vaccine',
+            '3 years 4 months: 4-in-1 pre-school booster (DTaP/IPV), MMR (2nd dose)',
+          ],
+        },
+        {
+          title: 'Key Points',
+          type: 'tip',
+          content: [
+            'All vaccines are free on the NHS and given according to the national schedule.',
+            'Live vaccines (e.g. MMR, Rotavirus, nasal flu) are not given to immunocompromised children.',
+            'Catch-up schedules are available for children who miss doses.',
+            'Parental consent is required for all childhood immunisations.',
+          ],
+        },
+        {
+          title: 'Why Immunise?',
+          type: 'normal',
+          content: [
+            'Protects children from serious infectious diseases.',
+            'Reduces spread in the community (herd immunity).',
+            'Some vaccines (e.g. MMR) are required for school entry.',
+          ],
+        },
+        {
+          title: 'Resources',
+          type: 'tip',
+          content: [
+            'UK Government Immunisation Resources: https://www.gov.uk/government/collections/immunisation',
+            'NHS: Vaccinations and When to Have Them: https://www.nhs.uk/conditions/vaccinations/nhs-vaccinations-and-when-to-have-them/',
+          ],
+        },
       ],
     },
     'y1-play-distraction': {
