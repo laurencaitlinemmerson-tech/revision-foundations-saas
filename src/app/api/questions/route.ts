@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-
+import { upsertClerkUser } from '@/lib/clerkUsers';
 // GET all questions
 export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
@@ -45,8 +45,24 @@ export async function POST(request: NextRequest) {
   const user = await currentUser();
   const userName = user?.firstName || 'Anonymous';
 
-  const body = await request.json();
-  const { title, body: questionBody, tags } = body;
+
+    if (user) {
+    const email = user.emailAddresses?.[0]?.emailAddress ?? null;
+    const firstName = user.firstName ?? null;
+    const lastName = user.lastName ?? null;
+    const username = user.username ?? null;
+    const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
+    await upsertClerkUser({
+      clerkUserId: userId,
+      email,
+      firstName,
+      lastName,
+      fullName,
+      username,
+    });
+  }
+ const body = await request.json();
+ const { title, body: questionBody, tags } = body;
 
   if (!title || !questionBody) {
     return NextResponse.json({ error: 'Title and body are required' }, { status: 400 });
