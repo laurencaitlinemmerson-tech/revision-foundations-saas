@@ -742,24 +742,6 @@ const resources: Record<string, {
         },
       ],
     },
-    'iv-drip-rate-calculations': {
-      title: 'IV Drip Rate Calculations',
-      description: 'Master IV drip rate calculations with worked examples, formulas and practice questions.',
-      isLocked: true,
-      readTime: '3 min read',
-      sections: [
-        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
-      ],
-    },
-    'high-risk-medications': {
-      title: 'High-Risk Medications Checklist',
-      description: 'Know your high-risk medications: insulin, anticoagulants, opioids and more with safety checks.',
-      isLocked: true,
-      readTime: '3 min read',
-      sections: [
-        { title: 'Coming soon', type: 'normal', content: ['Content for this resource will be added soon.'] },
-      ],
-    },
   title: string;
   description: string;
   isLocked: boolean;
