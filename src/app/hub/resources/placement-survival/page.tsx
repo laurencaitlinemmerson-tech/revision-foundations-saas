@@ -1,9 +1,10 @@
 import React from 'react';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
+import { useUser } from '@clerk/nextjs';
 
 export default function PlacementSurvivalPage() {
-  const { user } = useEntitlements();
-  const isLauren = user?.email === 'laurencaitlinemmerson@gmail.com';
+  const { user } = useUser();
+  const isLauren = user?.primaryEmailAddress?.emailAddress === 'laurencaitlinemmerson@gmail.com';
 
   if (!isLauren) {
     return (
