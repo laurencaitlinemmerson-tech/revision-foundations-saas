@@ -44,6 +44,15 @@ const hubItems: HubItem[] = [
     href: '/hub/resources/paeds-respiratory-assessment',
   },
   {
+    id: '0',
+    title: 'Drug Calculations Cheat Sheet',
+    description: 'Essential formulas, worked examples, and practice questions for medication calculations.',
+    tags: ['Meds & Calculations', 'OSCE', 'Placement'],
+    difficulty: 'Deep Dive',
+    isLocked: true,
+    href: '/hub/resources/drug-calculations-cheat-sheet',
+  },
+  {
     id: '2',
     title: 'Sepsis 6 & Escalation',
     description: 'Step-by-step sepsis recognition and the Sepsis 6 bundle with escalation pathways.',
