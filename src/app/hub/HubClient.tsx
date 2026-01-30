@@ -586,6 +586,24 @@ function HubCard({
     handleClick();
   };
 
+  // Progress tracking state
+  const [completed, setCompleted] = React.useState(false);
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const done = localStorage.getItem('resource-completed-' + item.id) === 'true';
+      setCompleted(done);
+    }
+  }, [item.id]);
+
+  const toggleCompleted = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newVal = !completed;
+    setCompleted(newVal);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('resource-completed-' + item.id, newVal ? 'true' : 'false');
+    }
+  };
+
   return (
     <div
       onClick={handleCardClick}
@@ -594,6 +612,7 @@ function HubCard({
         hover:-translate-y-1 hover:shadow-lg
         focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2
         ${!canAccess ? 'overflow-hidden' : ''}
+        ${completed ? 'opacity-70 grayscale' : ''}
       `}
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
@@ -679,6 +698,18 @@ function HubCard({
           </span>
         ))}
       </div>
+
+      {/* Progress tracking button */}
+      {canAccess && (
+        <button
+          onClick={toggleCompleted}
+          className={`absolute top-3 right-3 z-20 px-3 py-1 rounded-full text-xs font-semibold border transition-all
+            ${completed ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : 'bg-white text-[var(--plum-dark)] border-[var(--lilac-medium)] hover:bg-[var(--lilac-soft)]'}`}
+          title={completed ? 'Mark as not completed' : 'Mark as completed'}
+        >
+          {completed ? '✓ Completed' : 'Mark as Done'}
+        </button>
+      )}
 
       {/* CTA */}
       <div
