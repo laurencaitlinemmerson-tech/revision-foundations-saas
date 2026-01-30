@@ -359,29 +359,8 @@ function HubCard({
 // Main Client Component
 export default function HubClient({
   isPro = false,
-  isSignedIn = false,
-  return (
-    <ToastProvider>
-      <div className="min-h-screen bg-cream">
-        <Navbar />
-        {/* ...existing code for all sections, cards, overlays, etc... */}
-        <footer className="bg-[var(--lilac)] px-6 py-8 text-center text-[var(--plum-dark)]/70 text-sm">
-          <p>Made with love by Lauren</p>
-          <div className="flex justify-center gap-4 mt-3">
-            <Link href="/privacy" className="hover:text-[var(--plum)]">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-[var(--plum)]">
-              Terms
-            </Link>
-            <Link href="/about" className="hover:text-[var(--plum)]">
-              About
-            </Link>
-          </div>
-        </footer>
-      </div>
-    </ToastProvider>
-  );
+  isSignedIn = false
+
 
     return hubItems.filter((item) => {
       const matchesSearch =
