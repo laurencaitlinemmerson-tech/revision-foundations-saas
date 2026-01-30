@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import { motion, Variants } from 'framer-motion';
+
 interface DashboardClientProps {
   children: ReactNode;
   firstName: string;
 }
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -20,6 +22,7 @@ const containerVariants: Variants = {
     },
   },
 };
+
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -28,16 +31,20 @@ const itemVariants: Variants = {
     transition: { duration: 0.5, ease: "easeOut" },
   },
 };
+
 export default function DashboardClient({ children, firstName }: DashboardClientProps) {
   useScrollAnimation();
+
   // Get time-based greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
+      
       {/* Premium Hero with Gradient Orbs */}
-      <section className="pt-12 pb-4 relative overflow-hidden">
+      <section className="pt-8 pb-6 relative overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--cream)] to-[var(--pink-soft)]/30" />
         
@@ -60,22 +67,23 @@ export default function DashboardClient({ children, firstName }: DashboardClient
           }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
+        
         <div className="max-w-5xl mx-auto px-6 relative z-10">
           <motion.div 
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             initial="hidden"
             animate="visible"
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
               <motion.div 
-                className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[var(--lavender)]/30 rounded-full px-4 py-1.5 mb-3"
+                className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[var(--lavender)]/30 rounded-full px-4 py-1.5 mb-2"
                 whileHover={{ scale: 1.02 }}
               >
                 <Sparkles className="w-4 h-4 text-[var(--purple)]" />
                 <span className="text-sm text-[var(--plum)]">{greeting}</span>
               </motion.div>
-              <h1 className="hero-title mb-2">
+              <h1 className="hero-title mb-1">
                 <span className="gradient-text">Hey, {firstName}!</span>
               </h1>
               <p className="text-[var(--plum-dark)]/70 text-lg">
@@ -95,16 +103,18 @@ export default function DashboardClient({ children, firstName }: DashboardClient
           </motion.div>
         </div>
       </section>
+
       <motion.main 
-        className="pb-8 px-6"
+        className="px-6"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto space-y-4">
           {children}
         </div>
       </motion.main>
+      
       <Footer />
     </div>
   );
