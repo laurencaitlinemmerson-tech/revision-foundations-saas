@@ -52,20 +52,20 @@ export default async function DashboardPage() {
   return (
     <DashboardClient firstName={firstName}>
       {/* Progress Stats - Always visible */}
-      <div className="mb-8">
+      <div className="mb-4">
         <ProgressStatsRow />
       </div>
 
       {/* Continue Where You Left Off */}
       {hasAnyTool && (
-        <div className="mb-8">
+        <div className="mb-4">
           <ContinueCard />
         </div>
       )}
 
       {/* Quick Launch Tools */}
       {hasAnyTool && (
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
           {hasOsce && (
             <Link
               href="/osce"
@@ -110,7 +110,7 @@ export default async function DashboardPage() {
 
       {/* Status Banner */}
       {hasOsce && hasQuiz ? (
-        <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)] mb-8">
+        <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)] mb-4">
           <div className="flex items-center gap-4">
             <div className="text-4xl">🎉</div>
             <div className="flex-1">
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : hasAnyTool ? (
-        <div className="card bg-[var(--lilac-soft)] border border-[var(--lavender)] mb-8">
+        <div className="card bg-[var(--lilac-soft)] border border-[var(--lavender)] mb-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
               <div className="text-3xl">🎁</div>
@@ -139,7 +139,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="card text-center py-12 mb-8 bg-gradient-to-br from-[var(--lilac-soft)] to-white">
+        <div className="card text-center py-12 mb-4 bg-gradient-to-br from-[var(--lilac-soft)] to-white">
           <div className="text-6xl mb-4">✨</div>
           <h2 className="text-xl font-semibold text-[var(--plum)] mb-2">Ready to start revising?</h2>
           <p className="text-[var(--plum-dark)]/70 mb-6 max-w-md mx-auto">
@@ -160,8 +160,8 @@ export default async function DashboardPage() {
 
       {/* Unlock more tools - Only show if has one but not both */}
       {hasAnyTool && (!hasOsce || !hasQuiz) && (
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Unlock more tools</h2>
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-3">Unlock more tools</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {!hasOsce && (
               <div className="card border-2 border-dashed border-[var(--lilac-medium)] hover:border-[var(--lavender)] hover:shadow-md transition-all">
@@ -210,16 +210,16 @@ export default async function DashboardPage() {
       )}
 
       {/* Main Dashboard Grid - 2 columns on desktop */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8 items-start">
+      <div className="grid md:grid-cols-2 gap-4 mb-4 items-start">
         <TodaysPlanCard />
-        <div className="space-y-6">
+        <div className="space-y-4">
           <QuickAchievement />
           <CommunityStatsCard />
         </div>
       </div>
 
       {/* Motivation Banner */}
-      <div className="card bg-gradient-to-r from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/50 border-[var(--lavender)]/50 mb-8">
+      <div className="card bg-gradient-to-r from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/50 border-[var(--lavender)]/50 mb-4">
         <div className="flex items-center gap-4">
           <div className="text-4xl">💜</div>
           <div className="flex-1">
@@ -230,18 +230,18 @@ export default async function DashboardPage() {
       </div>
 
       {/* Streak Calendar - Full Width */}
-      <div className="mb-8">
+      <div className="mb-4">
         <StreakCalendar />
       </div>
 
       {/* Focus Areas - Full Width */}
-      <div className="mb-8">
+      <div className="mb-4">
         <FocusAreasCard />
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Quick actions</h2>
+      <div className="mb-4">
+        <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-3">Quick actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link
             href="/hub"
