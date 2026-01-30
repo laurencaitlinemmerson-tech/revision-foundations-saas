@@ -51,20 +51,20 @@ export default async function DashboardPage() {
   return (
     <DashboardClient firstName={firstName}>
       {/* Progress row */}
-      <div className="mb-8">
+      <div className="mb-10 md:mb-12">
         <ProgressStatsRow />
       </div>
 
       {/* Continue where you left off */}
       {hasAnyTool && (
-        <div className="mb-8">
+        <div className="mb-10 md:mb-12">
           <ContinueCard />
         </div>
       )}
 
       {/* Quick launch tools */}
       {hasAnyTool && (
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-10 md:mb-12">
           {hasOsce && (
             <Link href="/osce" className="group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]">
               <div className="flex items-center gap-4">
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
 
       {/* Status banner */}
       {hasOsce && hasQuiz ? (
-        <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)] mb-8">
+        <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)] mb-10 md:mb-12">
           <div className="flex items-center gap-4">
             <div className="text-4xl">🎉</div>
             <div className="flex-1">
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : hasAnyTool ? (
-        <div className="card bg-[var(--lilac-soft)] border border-[var(--lavender)] mb-8">
+        <div className="card bg-[var(--lilac-soft)] border border-[var(--lavender)] mb-10 md:mb-12">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
               <div className="text-3xl">🎁</div>
@@ -202,16 +202,16 @@ export default async function DashboardPage() {
       )}
 
       {/* Main dashboard grid */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8 items-start">
+      <div className="grid md:grid-cols-2 gap-8 mb-10 md:mb-12 items-start">
         <TodaysPlanCard />
-        <div className="space-y-6">
+        <div className="space-y-8">
           <QuickAchievement />
           <CommunityStatsCard />
         </div>
       </div>
 
       {/* Motivation banner */}
-      <div className="card bg-gradient-to-r from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/50 border-[var(--lavender)]/50 mb-8">
+      <div className="card bg-gradient-to-r from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/50 border-[var(--lavender)]/50 mb-10 md:mb-12">
         <div className="flex items-center gap-4">
           <div className="text-4xl">💜</div>
           <div className="flex-1">
@@ -222,19 +222,19 @@ export default async function DashboardPage() {
       </div>
 
       {/* Streak calendar */}
-      <div className="mb-8">
+      <div className="mb-10 md:mb-12">
         <StreakCalendar />
       </div>
 
       {/* Focus areas */}
-      <div className="mb-8">
+      <div className="mb-10 md:mb-12">
         <FocusAreasCard />
       </div>
 
       {/* Quick actions */}
-      <div className="mb-8">
+      <div className="mb-10 md:mb-12">
         <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Quick actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <Link href="/hub" className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group">
             <Sparkles className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-medium text-[var(--plum)]">Nursing Hub</p>
@@ -259,7 +259,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Study tip */}
-      <StudyTipCard />
+      <div className="mb-10 md:mb-16">
+        <StudyTipCard />
+      </div>
     </DashboardClient>
   );
 }
