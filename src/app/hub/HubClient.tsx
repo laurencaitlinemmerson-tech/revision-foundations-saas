@@ -624,7 +624,7 @@ function HubCard({
       {/* Title row with bookmark */}
       <div className="flex items-center mb-2">
         <ResourceBookmark resourceId={item.id} />
-        <h3 className="text-[var(--plum)] text-base font-semibold line-clamp-2 pl-8">{item.title}</h3>
+        <h3 className="text-[var(--plum)] text-base font-semibold line-clamp-2 ml-3" style={{display: 'flex', alignItems: 'center', minHeight: '2.25rem'}}>{item.title}</h3>
       </div>
       {/* Locked overlay */}
       {!canAccess && (
