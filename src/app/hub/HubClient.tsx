@@ -37,6 +37,16 @@ interface HubItem {
 
 const hubItems: HubItem[] = [
   {
+    id: 'theories-dev',
+    title: 'Theories of Development',
+    description: 'Key developmental theories (Piaget, Erikson, Bowlby, Vygotsky, and more) explained for nursing and exams.',
+    tags: ['Y1 Essentials', 'Paeds', 'Theory', 'Assessment'],
+    difficulty: 'Moderate',
+    isLocked: false,
+    href: '/hub/resources/theories-of-development',
+    isNew: true,
+  },
+  {
     id: '1',
     title: 'Paeds Respiratory Assessment',
     description:
