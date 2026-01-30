@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { Menu, X, Sparkles } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -27,15 +27,14 @@ export default function Navbar() {
     { href: '/contact', label: 'Contact' },
   ];
 
-  const authLinks = [
-    { href: '/dashboard', label: 'Dashboard' },
-    // { href: '/account', label: 'Account' },
-  ];
+  const authLinks = [{ href: '/dashboard', label: 'Dashboard' }];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/95 backdrop-blur-lg shadow-sm' : 'bg-transparent'
-    }`}>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-white/95 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+      }`}
+    >
       <div className="container">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -43,9 +42,17 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
+
+            {/* ✅ allow full title on desktop; clamp to 1 line on mobile without truncating too aggressively */}
             <span
-              className="font-display text-lg text-[var(--plum)] whitespace-nowrap overflow-hidden text-ellipsis block"
-              style={{ fontFamily: 'Shrikhand', maxWidth: '180px' }}
+              className="
+                font-display text-lg text-[var(--plum)]
+                leading-none
+                block
+                max-w-[220px] sm:max-w-[320px] md:max-w-none
+                whitespace-nowrap
+              "
+              style={{ fontFamily: 'Shrikhand' }}
             >
               Revision Foundations
             </span>
@@ -107,10 +114,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
+          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? (
               <X className="w-6 h-6 text-[var(--plum)]" />
             ) : (
