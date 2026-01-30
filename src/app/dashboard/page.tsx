@@ -48,7 +48,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient firstName={firstName}>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Continue Where You Left Off */}
         {hasAnyTool && <ContinueCard />}
 
