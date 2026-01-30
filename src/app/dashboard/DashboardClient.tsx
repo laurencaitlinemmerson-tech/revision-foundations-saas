@@ -44,7 +44,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
       <Navbar />
       
       {/* Premium Hero with Gradient Orbs */}
-      <section className="pt-6 pb-6 relative overflow-hidden">
+      <section className="pt-8 pb-8 relative overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--cream)] to-[var(--pink-soft)]/30" />
         
@@ -76,20 +76,20 @@ export default function DashboardClient({ children, firstName }: DashboardClient
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
-  <motion.div 
-    className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[var(--lavender)]/30 rounded-full px-4 py-1.5 mb-3"
-    whileHover={{ scale: 1.02 }}
-  >
-    <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-    <span className="text-sm text-[var(--plum)]">{greeting}</span>
-  </motion.div>
-  <h1 className="hero-title mb-2">
-    <span className="gradient-text">Hey, {firstName}!</span>
-  </h1>
-  <p className="text-[var(--plum-dark)]/70 text-lg">
-    Ready to smash your revision today?
-  </p>
-</motion.div>
+              <h1 className="hero-title mb-2">
+                <span className="gradient-text">Hey, {firstName}!</span>
+              </h1>
+              <p className="text-[var(--plum-dark)]/70 text-lg mb-3">
+                Ready to smash your revision today?
+              </p>
+              <motion.div 
+                className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[var(--lavender)]/30 rounded-full px-4 py-1.5"
+                whileHover={{ scale: 1.02 }}
+              >
+                <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+                <span className="text-sm text-[var(--plum)]">{greeting}</span>
+              </motion.div>
+            </motion.div>
             
             <motion.div variants={itemVariants}>
               <Link 
@@ -110,7 +110,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
         animate="visible"
         variants={containerVariants}
       >
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-5xl mx-auto space-y-8">
           {children}
         </div>
       </motion.main>
