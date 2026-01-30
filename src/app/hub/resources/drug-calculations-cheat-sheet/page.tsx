@@ -79,6 +79,31 @@ export default function DrugCalculationsCheatSheetPage() {
               </h2>
               
               <div className="space-y-6">
+                                {/* Holiday-Segar Method */}
+                                <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-xl p-5 border-2 border-green-300">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <span className="text-xl">🧮</span>
+                                    <h3 className="font-semibold text-green-800">Holiday-Segar Method (Paediatric Maintenance Fluids)</h3>
+                                  </div>
+                                  <div className="bg-white rounded-xl p-6 text-center mb-4 shadow-sm">
+                                    <p className="text-lg font-bold text-green-900 mb-2">Maintenance fluids (ml/day):</p>
+                                    <div className="text-base text-green-800 mb-2">• <strong>First 10 kg:</strong> 100 ml/kg</div>
+                                    <div className="text-base text-green-800 mb-2">• <strong>Next 10 kg:</strong> 50 ml/kg</div>
+                                    <div className="text-base text-green-800 mb-2">• <strong>Each kg above 20 kg:</strong> 20 ml/kg</div>
+                                  </div>
+                                  <div className="bg-green-100/50 rounded-lg p-4 mb-4">
+                                    <p className="text-sm text-green-800 mb-2"><strong>How to calculate:</strong></p>
+                                    <ul className="text-sm text-green-700 space-y-1">
+                                      <li>• For a child weighing <strong>8 kg</strong>: 8 × 100 = <strong>800 ml/day</strong></li>
+                                      <li>• For a child weighing <strong>18 kg</strong>: (10 × 100) + (8 × 50) = <strong>1,400 ml/day</strong></li>
+                                      <li>• For a child weighing <strong>25 kg</strong>: (10 × 100) + (10 × 50) + (5 × 20) = <strong>1,700 ml/day</strong></li>
+                                    </ul>
+                                  </div>
+                                  <div className="bg-white/70 rounded-lg p-3">
+                                    <p className="text-sm text-[var(--plum-dark)]/70 mb-2"><strong>Tip:</strong> Divide total by 24 for hourly rate (ml/hr).</p>
+                                    <p className="text-sm text-[var(--plum-dark)]/70">E.g. 1,400 ml/day ÷ 24 = <strong>58 ml/hr</strong></p>
+                                  </div>
+                                </div>
                 {/* NHS Formula */}
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-300">
                   <div className="flex items-center gap-2 mb-3">
