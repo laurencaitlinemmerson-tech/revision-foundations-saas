@@ -76,20 +76,20 @@ export default function DashboardClient({ children, firstName }: DashboardClient
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
-              <motion.div 
-                className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[var(--lavender)]/30 rounded-full px-4 py-1.5 mb-2"
-                whileHover={{ scale: 1.02 }}
-              >
-                <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-                <span className="text-sm text-[var(--plum)]">{greeting}</span>
-              </motion.div>
-              <h1 className="hero-title mb-1">
-                <span className="gradient-text">Hey, {firstName}!</span>
-              </h1>
-              <p className="text-[var(--plum-dark)]/70 text-lg">
-                Ready to smash your revision today?
-              </p>
-            </motion.div>
+  <motion.div 
+    className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[var(--lavender)]/30 rounded-full px-4 py-1.5 mb-3"
+    whileHover={{ scale: 1.02 }}
+  >
+    <Sparkles className="w-4 h-4 text-[var(--purple)]" />
+    <span className="text-sm text-[var(--plum)]">{greeting}</span>
+  </motion.div>
+  <h1 className="hero-title mb-2">
+    <span className="gradient-text">Hey, {firstName}!</span>
+  </h1>
+  <p className="text-[var(--plum-dark)]/70 text-lg">
+    Ready to smash your revision today?
+  </p>
+</motion.div>
             
             <motion.div variants={itemVariants}>
               <Link 
