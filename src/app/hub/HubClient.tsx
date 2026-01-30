@@ -641,7 +641,31 @@ function HubCard({
       {/* Content */}
 
       <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">{item.title}</h3>
+
       <p className="text-sm text-[var(--plum-dark)]/70 mb-2 line-clamp-2">{item.description}</p>
+
+      {/* Expanded details for Y1 Professionalism & Ethics */}
+      {item.id === 'y1-professionalism-ethics' && (
+        <div className="text-left text-[var(--plum-dark)]/90 mb-3">
+          <h4 className="font-bold text-[var(--plum)] mb-1">Introduction</h4>
+          <p className="mb-2">An introduction to professional behaviour, values, and ethical principles for Year 1 nursing students.</p>
+          <h4 className="font-bold text-[var(--plum)] mb-1 mt-3">Professionalism</h4>
+          <ul className="list-disc pl-5 mb-2">
+            <li><strong>Accountability:</strong> Take responsibility for your actions and learning.</li>
+            <li><strong>Respect:</strong> Treat all patients and colleagues with dignity and courtesy.</li>
+            <li><strong>Teamwork:</strong> Work collaboratively and communicate effectively.</li>
+            <li><strong>Appearance:</strong> Maintain a professional appearance and follow dress codes.</li>
+          </ul>
+          <h4 className="font-bold text-[var(--plum)] mb-1 mt-3">Ethics</h4>
+          <ul className="list-disc pl-5">
+            <li><strong>Confidentiality:</strong> Protect patient information at all times.</li>
+            <li><strong>Consent:</strong> Always seek informed consent before care or procedures.</li>
+            <li><strong>Non-maleficence:</strong> Do no harm.</li>
+            <li><strong>Beneficence:</strong> Act in the best interest of the patient.</li>
+            <li><strong>Justice:</strong> Treat patients fairly and without discrimination.</li>
+          </ul>
+        </div>
+      )}
 
 
       {/* Tags */}
