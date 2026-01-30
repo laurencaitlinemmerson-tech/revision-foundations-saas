@@ -643,25 +643,6 @@ function HubCard({
       <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">{item.title}</h3>
       <p className="text-sm text-[var(--plum-dark)]/70 mb-2 line-clamp-2">{item.description}</p>
 
-      {/* Special detailed card for Y1 Documentation & Record Keeping */}
-      {item.id === 'y1-documentation' && (
-        <div className="text-left text-[var(--plum-dark)]/90 mb-3">
-          <h4 className="font-bold text-[var(--plum)] mb-1">Key Principles</h4>
-          <ul className="list-disc pl-5 mb-2">
-            <li><strong>Accuracy:</strong> Record facts, not opinions. <em>Example:</em> "Patient reports pain 7/10" not "Patient seems fine".</li>
-            <li><strong>Timeliness:</strong> Document care as soon as possible after it is given.</li>
-            <li><strong>Legibility:</strong> Write clearly and use approved abbreviations only.</li>
-            <li><strong>Confidentiality:</strong> Keep patient information secure and private.</li>
-            <li><strong>Sign & Date:</strong> Every entry must be signed and dated.</li>
-          </ul>
-          <h4 className="font-bold text-[var(--plum)] mb-1 mt-3">Common Pitfalls</h4>
-          <ul className="list-disc pl-5">
-            <li>Never document care before it is given.</li>
-            <li>Do not use correction fluid or erase errors; strike through with a single line and sign.</li>
-            <li>Do not share login details or leave records unattended.</li>
-          </ul>
-        </div>
-      )}
 
       {/* Tags */}
       <div className="flex flex-wrap gap-1.5 mb-4">
