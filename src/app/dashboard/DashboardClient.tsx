@@ -70,7 +70,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
         
         <div className="max-w-5xl mx-auto px-6 relative z-10">
           <motion.div 
-            className="flex flex-col gap-4 items-start"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             initial="hidden"
             animate="visible"
             variants={containerVariants}
@@ -86,18 +86,19 @@ export default function DashboardClient({ children, firstName }: DashboardClient
               <h1 className="hero-title mb-1">
                 <span className="gradient-text">Hey, {firstName}!</span>
               </h1>
-              <p className="text-[var(--plum-dark)]/70 text-lg mb-6">
+              <p className="text-[var(--plum-dark)]/70 text-lg">
                 Ready to smash your revision today?
               </p>
-              <motion.div variants={itemVariants} className="w-full">
-                <Link 
-                  href="/hub" 
-                  className="btn-primary inline-flex items-center gap-2 group w-full justify-center py-4 text-lg mt-2 mb-2"
-                >
-                  <span>Go to Hub</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </motion.div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants}>
+              <Link 
+                href="/hub" 
+                className="btn-primary inline-flex items-center gap-2 group"
+              >
+                <span>Go to Hub</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </motion.div>
           </motion.div>
         </div>
