@@ -358,8 +358,43 @@ function HubCard({
 
 // Main Client Component
 export default function HubClient({
+  isPro = false,
+  isSignedIn = false,
+}: {
+  isPro?: boolean;
+  isSignedIn?: boolean;
+}) {
+  useScrollAnimation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) => {
+      const newTags = new Set(prev);
+      if (newTags.has(tag)) {
+        newTags.delete(tag);
+      } else {
+        newTags.add(tag);
+      }
+      return newTags;
+    });
+  };
 
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return hubItems.filter((item) => {
+      const matchesSearch =
+        q === '' ||
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(q));
+      const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag));
+      return matchesSearch && matchesTags;
+    });
+  }, [searchQuery, selectedTags]);
+
+  const freeCount = filteredItems.filter((item) => !item.isLocked).length;
+  const premiumCount = filteredItems.filter((item) => item.isLocked).length;
   return (
     <ToastProvider>
       <div className="min-h-screen bg-cream">
