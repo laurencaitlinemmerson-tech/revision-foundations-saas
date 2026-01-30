@@ -246,6 +246,7 @@ const filterTags = [
   'Placement',
   'Revision Plans',
   'Emergency/ABCDE',
+  'Deep Dive', // Added filter for Deep Dive difficulty
 ] as const;
 
 const difficultyStyles: Record<HubItem['difficulty'], string> = {
@@ -397,8 +398,10 @@ export default function HubClient({
         item.title.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
         item.tags.some((tag) => tag.toLowerCase().includes(q));
-      const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag));
-      return matchesSearch && matchesTags;
+      // Add support for Deep Dive filter
+      const matchesDeepDive = selectedTags.has('Deep Dive') ? item.difficulty === 'Deep Dive' : true;
+      const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag)) || (selectedTags.has('Deep Dive') && item.difficulty === 'Deep Dive');
+      return matchesSearch && matchesTags && matchesDeepDive;
     });
   }, [searchQuery, selectedTags]);
 
