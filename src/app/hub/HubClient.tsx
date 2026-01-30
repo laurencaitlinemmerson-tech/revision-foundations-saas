@@ -621,8 +621,11 @@ function HubCard({
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
       role="button"
     >
-      {/* Bookmark button (top left) */}
-      <ResourceBookmark resourceId={item.id} />
+      {/* Title row with bookmark */}
+      <div className="flex items-center mb-2">
+        <ResourceBookmark resourceId={item.id} />
+        <h3 className="text-[var(--plum)] text-base font-semibold line-clamp-2 pl-2">{item.title}</h3>
+      </div>
       {/* Locked overlay */}
       {!canAccess && (
         <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center rounded-2xl">
@@ -662,9 +665,7 @@ function HubCard({
         </span>
       </div>
 
-      {/* Content */}
-
-      <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">{item.title}</h3>
+  {/* Content */}
 
       <p className="text-sm text-[var(--plum-dark)]/70 mb-2 line-clamp-2">{item.description}</p>
 
