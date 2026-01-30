@@ -1,4 +1,5 @@
 'use client';
+
 import { ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -28,7 +29,7 @@ const itemVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -42,34 +43,41 @@ export default function DashboardClient({ children, firstName }: DashboardClient
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-      
+
       {/* Premium Hero with Gradient Orbs */}
-      <section className="pt-16 pb-12 relative overflow-hidden">
+      <section
+        className="
+          relative overflow-hidden
+          pt-16
+          pb-20 md:pb-28
+          min-h-[520px] md:min-h-[600px]
+        "
+      >
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--cream)] to-[var(--pink-soft)]/30" />
-        
+
         {/* Floating orbs */}
-        <motion.div 
+        <motion.div
           className="absolute top-10 right-[10%] w-64 h-64 bg-gradient-to-br from-[var(--lavender)]/30 to-[var(--pink)]/20 rounded-full blur-3xl"
-          animate={{ 
+          animate={{
             scale: [1, 1.2, 1],
             x: [0, 30, 0],
             y: [0, -20, 0],
           }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-0 left-[5%] w-48 h-48 bg-gradient-to-br from-[var(--purple)]/20 to-[var(--lavender)]/30 rounded-full blur-3xl"
-          animate={{ 
+          animate={{
             scale: [1, 1.1, 1],
             x: [0, -20, 0],
             y: [0, 20, 0],
           }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
-        
+
         <div className="max-w-5xl mx-auto px-6 relative z-10">
-          <motion.div 
+          <motion.div
             className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6"
             initial="hidden"
             animate="visible"
@@ -79,10 +87,12 @@ export default function DashboardClient({ children, firstName }: DashboardClient
               <h1 className="hero-title mb-3">
                 <span className="gradient-text">Hey, {firstName}!</span>
               </h1>
+
               <p className="text-[var(--plum-dark)]/70 text-lg mb-4">
                 Ready to smash your revision today?
               </p>
-              <motion.div 
+
+              <motion.div
                 className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[var(--lavender)]/30 rounded-full px-4 py-1.5"
                 whileHover={{ scale: 1.02 }}
               >
@@ -90,12 +100,9 @@ export default function DashboardClient({ children, firstName }: DashboardClient
                 <span className="text-sm text-[var(--plum)]">{greeting}</span>
               </motion.div>
             </motion.div>
-            
+
             <motion.div variants={itemVariants} className="sm:pt-8">
-              <Link 
-                href="/hub" 
-                className="btn-primary inline-flex items-center gap-2 group"
-              >
+              <Link href="/hub" className="btn-primary inline-flex items-center gap-2 group">
                 <span>Go to Hub</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -104,17 +111,19 @@ export default function DashboardClient({ children, firstName }: DashboardClient
         </div>
       </section>
 
-      <motion.main 
-        className="px-6 pb-12 -mt-4"
+      {/* ✅ Remove negative overlap so there's a real gap between hero and first card */}
+      <motion.main
+        className="px-6 pb-12 mt-0"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <div className="max-w-5xl mx-auto space-y-8">
+        {/* ✅ Add top padding to create space before “Continue where you left off” */}
+        <div className="max-w-5xl mx-auto space-y-8 pt-6 md:pt-10">
           {children}
         </div>
       </motion.main>
-      
+
       <Footer />
     </div>
   );
