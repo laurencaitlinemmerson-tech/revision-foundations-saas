@@ -588,23 +588,7 @@ function HubCard({
     handleClick();
   };
 
-  // Progress tracking state
-  const [completed, setCompleted] = React.useState(false);
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const done = localStorage.getItem('resource-completed-' + item.id) === 'true';
-      setCompleted(done);
-    }
-  }, [item.id]);
 
-  const toggleCompleted = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newVal = !completed;
-    setCompleted(newVal);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('resource-completed-' + item.id, newVal ? 'true' : 'false');
-    }
-  };
 
   return (
     <div
@@ -614,17 +598,16 @@ function HubCard({
         hover:-translate-y-1 hover:shadow-lg
         focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2
         ${!canAccess ? 'overflow-hidden' : ''}
-        ${completed ? 'opacity-70 grayscale' : ''}
         min-h-[370px] min-w-[340px] p-7
       `}
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
       role="button"
     >
-      {/* Title row with bookmark */}
-      <div className="flex items-center mb-2">
-        <ResourceBookmark resourceId={item.id} />
-        <h3 className="text-[var(--plum)] text-base font-semibold line-clamp-2 ml-3" style={{display: 'flex', alignItems: 'center', minHeight: '2.25rem'}}>{item.title}</h3>
+      {/* Title row */}
+            <div className="flex items-center mb-2">
+        <h3 className="text-[var(--plum)] text-base font-semibold line-clamp-2">{item.title}</h3>
+            </div>
       </div>
       {/* Locked overlay */}
       {!canAccess && (
@@ -684,21 +667,13 @@ function HubCard({
         ))}
       </div>
 
-      {/* Resource Rating */}
-      <ResourceRating resourceId={item.id} />
+      {/* Resource Rating (hearts, improved spacing) */}
+      <div className="flex justify-center">
+        <ResourceRating resourceId={item.id} />
+      </div>
 
 
-      {/* Progress tracking button (moved below tags) */}
-      {canAccess && (
-        <button
-          onClick={toggleCompleted}
-          className={`w-full mb-3 py-2 rounded-full text-sm font-semibold border transition-all
-            ${completed ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : 'bg-white text-[var(--plum-dark)] border-[var(--lilac-medium)] hover:bg-[var(--lilac-soft)]'}`}
-          title={completed ? 'Mark as not completed' : 'Mark as completed'}
-        >
-          {completed ? '✓ Completed' : 'Mark as Done'}
-        </button>
-      )}
+
 
       {/* CTA */}
       <div
@@ -725,7 +700,6 @@ export default function HubClient({
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [showBookmarked, setShowBookmarked] = useState(false);
   const [showRated, setShowRated] = useState(false);
 
   const freeCount = hubItems.filter((i) => !i.isLocked).length;
@@ -752,10 +726,6 @@ export default function HubClient({
 
       const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag));
 
-      // Bookmarked filter
-      if (showBookmarked && typeof window !== 'undefined') {
-        if (localStorage.getItem('resource-bookmark-' + item.id) !== 'true') return false;
-      }
       // Rated filter
       if (showRated && typeof window !== 'undefined') {
         const rating = localStorage.getItem('resource-rating-' + item.id);
@@ -764,7 +734,7 @@ export default function HubClient({
 
       return matchesSearch && matchesTags;
     });
-  }, [searchQuery, selectedTags, showBookmarked, showRated]);
+  }, [searchQuery, selectedTags, showRated]);
 
   return (
     <ToastProvider>
@@ -843,18 +813,7 @@ export default function HubClient({
                 </button>
               ))}
 
-              {/* Bookmarked and Rated filter toggles */}
-              <button
-                onClick={() => setShowBookmarked((v) => !v)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-                  showBookmarked
-                    ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
-                    : 'bg-white text-[var(--plum-dark)] border-[var(--lilac-medium)] hover:bg-[var(--lilac-soft)]'
-                }`}
-                type="button"
-              >
-                {showBookmarked ? '★ Bookmarked' : 'Show Bookmarked'}
-              </button>
+              {/* Rated filter toggle only */}
               <button
                 onClick={() => setShowRated((v) => !v)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
