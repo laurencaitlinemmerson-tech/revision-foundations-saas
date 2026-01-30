@@ -45,7 +45,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
       <Navbar />
 
       {/* Premium Hero with Gradient Orbs */}
-      <section className="pt-24 pb-8 relative overflow-hidden">
+      <section className="pt-12 pb-4 relative overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--cream)] to-[var(--pink-soft)]/30" />
         
@@ -106,7 +106,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
       </section>
 
       <motion.main 
-        className="pb-20 px-6"
+        className="pb-8 px-6"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
