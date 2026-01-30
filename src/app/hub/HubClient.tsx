@@ -723,6 +723,8 @@ export default function HubClient({
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [showBookmarked, setShowBookmarked] = useState(false);
+  const [showRated, setShowRated] = useState(false);
 
   const freeCount = hubItems.filter((i) => !i.isLocked).length;
   const premiumCount = hubItems.filter((i) => i.isLocked).length;
@@ -748,9 +750,19 @@ export default function HubClient({
 
       const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag));
 
+      // Bookmarked filter
+      if (showBookmarked && typeof window !== 'undefined') {
+        if (localStorage.getItem('resource-bookmark-' + item.id) !== 'true') return false;
+      }
+      // Rated filter
+      if (showRated && typeof window !== 'undefined') {
+        const rating = localStorage.getItem('resource-rating-' + item.id);
+        if (!rating || rating === '0') return false;
+      }
+
       return matchesSearch && matchesTags;
     });
-  }, [searchQuery, selectedTags]);
+  }, [searchQuery, selectedTags, showBookmarked, showRated]);
 
   return (
     <ToastProvider>
@@ -828,6 +840,30 @@ export default function HubClient({
                   {tag}
                 </button>
               ))}
+
+              {/* Bookmarked and Rated filter toggles */}
+              <button
+                onClick={() => setShowBookmarked((v) => !v)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                  showBookmarked
+                    ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                    : 'bg-white text-[var(--plum-dark)] border-[var(--lilac-medium)] hover:bg-[var(--lilac-soft)]'
+                }`}
+                type="button"
+              >
+                {showBookmarked ? '★ Bookmarked' : 'Show Bookmarked'}
+              </button>
+              <button
+                onClick={() => setShowRated((v) => !v)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                  showRated
+                    ? 'bg-yellow-100 text-yellow-700 border-yellow-300'
+                    : 'bg-white text-[var(--plum-dark)] border-[var(--lilac-medium)] hover:bg-[var(--lilac-soft)]'
+                }`}
+                type="button"
+              >
+                {showRated ? '★ Rated' : 'Show Rated'}
+              </button>
 
               {selectedTags.size > 0 && (
                 <button
