@@ -261,8 +261,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* Study Tip */}
+      <div className="pb-16">
         <StudyTipCard />
       </div>
+   
     </DashboardClient>
   );
 }
