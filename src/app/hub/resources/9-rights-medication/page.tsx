@@ -61,9 +61,18 @@ const rights = [
   {
     number: 4,
     title: 'Right Dose',
-    description: 'Ensure the dose is correct for the patient. Double-check calculations, especially for paediatrics.',
+    description: 'Ensure the dose is correct for the patient. Double-check calculations, especially for paediatrics. Use the NHS formula and always check units and maximum doses.',
     tip: 'If in doubt, always get a second checker. Never guess doses.',
     emoji: '⚖️',
+    formula: 'Dose = (What you need ÷ What you have) × Volume/Stock',
+    formulaExample: 'Example: Patient needs 250mg, tablets are 125mg each. 250 ÷ 125 × 1 = 2 tablets.',
+    workedExample: 'Paediatric: Child weighs 20kg, needs paracetamol 15mg/kg. 15 × 20 = 300mg. If you have 120mg/5ml suspension: 300 ÷ 120 × 5 = 12.5ml.',
+    safetyReminders: [
+      'Always check the maximum single and daily dose for the patient’s age/weight.',
+      'Double-check calculations with a colleague for paediatric and high-risk drugs.',
+      'Be careful with unit conversions (mg, mcg, g, ml).',
+      'Never round doses unless guidelines say it is safe.',
+    ],
     adultScenario: {
       situation: 'An elderly patient weighing 45kg is prescribed gentamicin. The standard adult dose is calculated, but this patient is frail with reduced kidney function.',
       whatWentWrong: 'Standard adult doses don\'t account for weight, age, or renal function. Gentamicin is nephrotoxic and needs careful dosing.',
@@ -251,6 +260,28 @@ export default function NineRightsMedicationPage() {
                       <h3 className="text-lg font-semibold text-[var(--plum)]">{right.title}</h3>
                     </div>
                     <p className="text-[var(--plum-dark)]/70 mb-3">{right.description}</p>
+                    {right.formula && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                        <p className="text-sm font-semibold text-blue-800 mb-1">💡 Formula</p>
+                        <div className="font-mono text-blue-900 text-base">{right.formula}</div>
+                        {right.formulaExample && (
+                          <div className="mt-2 text-xs text-blue-700">{right.formulaExample}</div>
+                        )}
+                        {right.workedExample && (
+                          <div className="mt-2 text-xs text-blue-700">{right.workedExample}</div>
+                        )}
+                      </div>
+                    )}
+                    {right.safetyReminders && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-2">
+                        <p className="text-sm font-semibold text-amber-800 mb-1">⚠️ Safety Reminders</p>
+                        <ul className="list-disc pl-5 text-xs text-amber-700 space-y-1">
+                          {right.safetyReminders.map((reminder, i) => (
+                            <li key={i}>{reminder}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <div className="bg-[var(--lilac-soft)] rounded-lg p-3 mb-4">
                       <p className="text-sm text-[var(--purple)] flex items-start gap-2">
                         <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />

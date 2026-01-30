@@ -37,12 +37,13 @@ function GlossaryCard({
   const hasPremiumContent = term.whyItMatters || term.exampleInPractice || term.osceWording || term.redFlags || term.commonMistakes || term.quizQuestion;
 
   const categoryColors: Record<GlossaryCategory, string> = {
+    "Basic Terms": "bg-gray-100 text-gray-700",
+    "Placement Essentials": "bg-amber-100 text-amber-700",
     "Abbreviations": "bg-blue-100 text-blue-700",
     "OSCE": "bg-purple-100 text-purple-700",
     "Medications": "bg-pink-100 text-pink-700",
     "Clinical Conditions": "bg-red-100 text-red-700",
     "Observations & Vitals": "bg-emerald-100 text-emerald-700",
-    "Placement Basics": "bg-amber-100 text-amber-700",
   };
 
   const populationColors: Record<GlossaryPopulation, { bg: string; icon: React.ReactNode }> = {
