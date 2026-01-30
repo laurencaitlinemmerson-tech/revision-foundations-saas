@@ -35,64 +35,106 @@ interface HubItem {
   isNew?: boolean;
 }
 
+interface HubItem {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  difficulty: 'Quick Win' | 'Moderate' | 'Deep Dive';
+  isLocked: boolean;
+  href: string;
+  isNew?: boolean;
+  keyPoints?: string[];
+}
+
 const hubItems: HubItem[] = [
 // Placement Survival Guide removed from hubItems
           {
             id: 'y1-professionalism-ethics',
             title: 'Y1 Professionalism & Ethics',
-            description: 'Introduction to professional behaviour, values, and ethical principles for Year 1 nursing students.',
+            description: 'Comprehensive introduction to professional behaviour, NMC Code, values, and ethical principles for Year 1 nursing students. Includes real-world scenarios, common dilemmas, and tips for upholding professionalism on placement.',
             tags: ['Y1 Essentials', 'Ethics', 'Professionalism'],
             difficulty: 'Quick Win',
             isLocked: false,
             href: '/hub/resources/y1-professionalism-ethics',
             isNew: true,
+            keyPoints: [
+              'Understand the NMC Code and its real-life application',
+              'Recognise common ethical dilemmas on placement',
+              'Tips for maintaining professionalism as a student',
+            ],
           },
         {
           id: 'y1-documentation',
           title: 'Y1 Documentation & Record Keeping',
-          description: 'The basics of accurate, legal, and professional documentation for Year 1 nursing students.',
+          description: 'Step-by-step guide to accurate, legal, and professional documentation. Covers SOAP notes, common abbreviations, legal pitfalls, and practical tips for clear record keeping on placement.',
           tags: ['Y1 Essentials', 'Documentation', 'Placement'],
           difficulty: 'Quick Win',
           isLocked: false,
           href: '/hub/resources/y1-documentation',
           isNew: true,
+          keyPoints: [
+            'How to write clear, legal, and professional notes',
+            'Common documentation pitfalls and how to avoid them',
+            'SOAP note structure explained',
+          ],
         },
       {
         id: 'y1-infection-control',
         title: 'Y1 Infection Control',
-        description: 'Core principles of infection prevention and control for Year 1 nursing students, including hand hygiene, PPE, and aseptic technique.',
+        description: 'Core principles of infection prevention and control: hand hygiene, PPE, aseptic technique, and real-life placement scenarios. Includes common mistakes, red flags, and how to protect yourself and patients.',
         tags: ['Y1 Essentials', 'Infection Control', 'Placement'],
         difficulty: 'Quick Win',
         isLocked: false,
         href: '/hub/resources/y1-infection-control',
         isNew: true,
+        keyPoints: [
+          'Hand hygiene and PPE best practices',
+          'Red flags for infection on placement',
+          'Aseptic technique step-by-step',
+        ],
       },
     {
       id: 'y1-anatomy-physiology',
       title: 'Y1 Anatomy & Physiology',
-      description: 'Overview of major body systems, functions, and key facts for Year 1 nursing.',
+      description: 'Overview of major body systems, functions, and key facts for Year 1 nursing. Includes diagrams, clinical relevance, and memory aids for exams and placement.',
       tags: ['Y1 Essentials', 'Anatomy', 'Physiology'],
       difficulty: 'Quick Win',
       isLocked: false,
       href: '/hub/resources/y1-anatomy-physiology',
       isNew: true,
+      keyPoints: [
+        'Major body systems and their functions',
+        'Clinical relevance for each system',
+        'Memory aids for anatomy exams',
+      ],
     },
   {
     id: 'theories-dev',
     title: 'Theories of Development',
-    description: 'Key developmental theories (Piaget, Erikson, Bowlby, Vygotsky, and more) explained for nursing and exams.',
+    description: 'Key developmental theories (Piaget, Erikson, Bowlby, Vygotsky, and more) explained for nursing and exams. Includes practical examples, comparison tables, and how to apply theory to patient care.',
     tags: ['Y1 Essentials', 'Paeds', 'Theory', 'Assessment'],
     difficulty: 'Moderate',
     isLocked: false,
     href: '/hub/resources/theories-of-development',
     isNew: true,
+    keyPoints: [
+      'Compare Piaget, Erikson, Bowlby, Vygotsky',
+      'Apply theory to real patient scenarios',
+      'Quick reference comparison tables',
+    ],
   },
   {
     id: '1',
     title: 'Paeds Respiratory Assessment',
     description:
-      'Complete guide to assessing respiratory function in children including work of breathing and red flags.',
+      'Complete guide to assessing respiratory function in children: inspection, auscultation, work of breathing, and red flags. Includes normal vs abnormal findings, escalation triggers, and OSCE tips.',
     tags: ['OSCE', 'Paeds', 'Assessment'],
+    keyPoints: [
+      'Normal vs abnormal respiratory findings',
+      'Escalation triggers for paediatric patients',
+      'OSCE tips for respiratory assessment',
+    ],
     difficulty: 'Moderate',
     isLocked: false,
     href: '/hub/resources/paeds-respiratory-assessment',
@@ -100,8 +142,13 @@ const hubItems: HubItem[] = [
   {
     id: '2',
     title: 'Sepsis 6 & Escalation',
-    description: 'Step-by-step sepsis recognition and the Sepsis 6 bundle with escalation pathways.',
+    description: 'Step-by-step sepsis recognition, the Sepsis 6 bundle, escalation pathways, and case studies. Includes early warning signs, documentation tips, and what to do if you suspect sepsis.',
     tags: ['Emergency/ABCDE', 'Adult Nursing', 'Critical Care'],
+    keyPoints: [
+      'Recognise early signs of sepsis',
+      'Understand the Sepsis 6 bundle',
+      'Escalation and documentation tips',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/sepsis-6-escalation',
@@ -109,8 +156,13 @@ const hubItems: HubItem[] = [
   {
     id: '3',
     title: 'Wound Care & Infection Control',
-    description: 'Wound assessment, dressing selection, and infection prevention best practices.',
+    description: 'Wound assessment, dressing selection, infection prevention, and practical wound care tips. Includes wound types, red flags, and documentation essentials.',
     tags: ['Adult Nursing', 'Placement', 'Practical'],
+    keyPoints: [
+      'Wound types and dressing selection',
+      'Infection prevention strategies',
+      'Documentation essentials for wounds',
+    ],
     difficulty: 'Moderate',
     isLocked: false,
     href: '/hub/resources/wound-care-infection-control',
@@ -118,8 +170,13 @@ const hubItems: HubItem[] = [
   {
     id: '4',
     title: 'Medicines Management OSCE',
-    description: 'Drug calculations, administration routes, and common medication errors to avoid.',
+    description: 'Drug calculations, administration routes, common medication errors, and worked examples. Includes formulas, safety checks, and how to avoid the most frequent mistakes on placement.',
     tags: ['OSCE', 'Meds & Calculations'],
+    keyPoints: [
+      'Drug calculation formulas and worked examples',
+      'Common medication errors to avoid',
+      'Safety checks before administration',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/medicines-management-osce',
@@ -127,8 +184,13 @@ const hubItems: HubItem[] = [
   {
     id: '5',
     title: 'SBAR Handover Template',
-    description: 'Printable SBAR template with examples for confident clinical handovers.',
+    description: 'Printable SBAR template with worked examples for confident clinical handovers. Includes tips for clear communication, common pitfalls, and how to escalate concerns effectively.',
     tags: ['Placement', 'Communication'],
+    keyPoints: [
+      'SBAR structure and printable template',
+      'Example handover scripts',
+      'Escalation tips for handover',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/sbar-handover',
@@ -136,8 +198,13 @@ const hubItems: HubItem[] = [
   {
     id: '6',
     title: 'IV Fluids & Vitals Red Flags',
-    description: 'Fluid balance essentials and vital signs that need immediate escalation.',
+    description: 'Fluid balance essentials, vital signs that need immediate escalation, and practical fluid management tips. Includes worked examples, red flags, and documentation advice.',
     tags: ['Adult Nursing', 'Emergency/ABCDE', 'Critical Care'],
+    keyPoints: [
+      'Vital signs that require escalation',
+      'Fluid balance worked examples',
+      'Documentation advice for fluids',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/iv-fluids-vitals',
@@ -145,8 +212,13 @@ const hubItems: HubItem[] = [
   {
     id: '7',
     title: 'NEWS2 Quick Guide',
-    description: 'National Early Warning Score explained with scoring chart and response triggers.',
+    description: 'National Early Warning Score (NEWS2) explained with scoring chart, response triggers, and case examples. Includes how to interpret scores and when to escalate.',
     tags: ['Adult Nursing', 'Assessment', 'Emergency/ABCDE'],
+    keyPoints: [
+      'How to use the NEWS2 chart',
+      'Response triggers and escalation',
+      'Case examples for practice',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/news2-guide',
@@ -154,8 +226,13 @@ const hubItems: HubItem[] = [
   {
     id: '11',
     title: 'PEWS - Paediatric Early Warning Score',
-    description: 'Age-appropriate early warning scoring for children with escalation triggers.',
+    description: 'PEWS: Age-appropriate early warning scoring for children, escalation triggers, and normal ranges. Includes charts, red flags, and how to use PEWS in practice.',
     tags: ['Paeds', 'Assessment', 'Emergency/ABCDE'],
+    keyPoints: [
+      'PEWS scoring and normal ranges',
+      'Red flags for paediatric deterioration',
+      'How to escalate using PEWS',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/pews-guide',
@@ -163,8 +240,13 @@ const hubItems: HubItem[] = [
   {
     id: '8',
     title: 'Pressure Area Care Plan',
-    description: 'Waterlow scoring, prevention strategies, and SSKIN bundle implementation.',
+    description: 'Waterlow scoring, prevention strategies, SSKIN bundle implementation, and pressure ulcer case studies. Includes risk factors, prevention tips, and documentation essentials.',
     tags: ['Adult Nursing', 'Placement', 'Care Planning'],
+    keyPoints: [
+      'Waterlow scoring explained',
+      'SSKIN bundle for prevention',
+      'Case studies for pressure ulcers',
+    ],
     difficulty: 'Moderate',
     isLocked: true,
     href: '/hub/resources/pressure-area-care',
@@ -172,8 +254,13 @@ const hubItems: HubItem[] = [
   {
     id: '9',
     title: 'A-E Assessment Checklist',
-    description: 'Systematic ABCDE assessment approach with printable pocket checklist.',
+    description: 'Systematic ABCDE assessment approach with printable pocket checklist, OSCE tips, and real-life scenarios. Includes what to do at each step and when to escalate.',
     tags: ['OSCE', 'Emergency/ABCDE', 'Assessment'],
+    keyPoints: [
+      'ABCDE assessment steps',
+      'Printable pocket checklist',
+      'When and how to escalate',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/ae-assessment',
@@ -181,8 +268,13 @@ const hubItems: HubItem[] = [
   {
     id: '10',
     title: 'End of Life Communication Phrases',
-    description: 'Compassionate phrases and frameworks for difficult conversations with families.',
+    description: 'Compassionate phrases, frameworks, and practical scripts for difficult conversations with families. Includes communication tips, cultural considerations, and self-care advice.',
     tags: ['Mental Health', 'Palliative', 'Communication'],
+    keyPoints: [
+      'Compassionate phrases for families',
+      'Frameworks for difficult conversations',
+      'Self-care tips for staff',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/end-of-life-communication',
@@ -191,8 +283,13 @@ const hubItems: HubItem[] = [
   {
     id: '12',
     title: 'Y1 Growth & Development Milestones',
-    description: 'Key developmental milestones from birth to 5 years with red flags to spot.',
+    description: 'Key developmental milestones from birth to 5 years, red flags to spot, and practical assessment tips. Includes charts, case examples, and how to document concerns.',
     tags: ['Paeds', 'Y1 Essentials', 'Assessment'],
+    keyPoints: [
+      'Milestones from birth to 5 years',
+      'Red flags and when to escalate',
+      'How to document concerns',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/y1-growth-milestones',
@@ -200,8 +297,13 @@ const hubItems: HubItem[] = [
   {
     id: '13',
     title: 'Y1 Paediatric Vital Signs by Age',
-    description: 'Normal vital sign ranges for children from newborn to adolescent with quick reference chart.',
+    description: 'Normal vital sign ranges for children from newborn to adolescent, quick reference chart, and clinical relevance. Includes how to interpret abnormal values and when to escalate.',
     tags: ['Paeds', 'Y1 Essentials', 'Assessment'],
+    keyPoints: [
+      'Normal paediatric vital sign ranges',
+      'Quick reference chart included',
+      'How to interpret abnormal values',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/y1-paeds-vital-signs',
@@ -209,8 +311,13 @@ const hubItems: HubItem[] = [
   {
     id: '14',
     title: 'Y1 Family-Centred Care Principles',
-    description: 'Understanding family-centred care in paediatrics and how to apply it on placement.',
+    description: 'Understanding family-centred care in paediatrics, how to apply it on placement, and real-life examples. Includes communication tips, cultural sensitivity, and involving families in care.',
     tags: ['Paeds', 'Y1 Essentials', 'Placement'],
+    keyPoints: [
+      'Principles of family-centred care',
+      'Cultural sensitivity in paediatrics',
+      'Involving families in care',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/y1-family-centred-care',
@@ -218,8 +325,13 @@ const hubItems: HubItem[] = [
   {
     id: '15',
     title: 'Y1 Pain Assessment in Children',
-    description: 'Age-appropriate pain assessment tools including FLACC, Wong-Baker, and numeric scales.',
+    description: 'Age-appropriate pain assessment tools (FLACC, Wong-Baker, numeric scales), how to use them, and practical examples. Includes red flags, documentation tips, and when to escalate.',
     tags: ['Paeds', 'Y1 Essentials', 'Assessment', 'OSCE'],
+    keyPoints: [
+      'Pain assessment tools for children',
+      'When to escalate pain concerns',
+      'Documentation tips for pain',
+    ],
     difficulty: 'Moderate',
     isLocked: true,
     href: '/hub/resources/y1-pain-assessment',
@@ -227,8 +339,13 @@ const hubItems: HubItem[] = [
   {
     id: '16',
     title: 'Y1 Safeguarding Children Essentials',
-    description: 'Key safeguarding concepts, signs of abuse, and your responsibilities as a student nurse.',
+    description: 'Key safeguarding concepts, signs of abuse, responsibilities as a student nurse, and escalation pathways. Includes case studies, documentation advice, and support resources.',
     tags: ['Paeds', 'Y1 Essentials', 'Placement'],
+    keyPoints: [
+      'Recognising signs of abuse',
+      'Escalation pathways for safeguarding',
+      'Support resources for students',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/y1-safeguarding',
@@ -236,8 +353,13 @@ const hubItems: HubItem[] = [
   {
     id: '17',
     title: 'Y1 Consent & Gillick Competence',
-    description: 'Understanding consent in paediatrics including Gillick competence and Fraser guidelines.',
+    description: 'Understanding consent in paediatrics, Gillick competence, Fraser guidelines, and practical scenarios. Includes communication tips, legal considerations, and documentation advice.',
     tags: ['Paeds', 'Y1 Essentials', 'Ethics'],
+    keyPoints: [
+      'Gillick competence explained',
+      'Fraser guidelines in practice',
+      'Legal considerations for consent',
+    ],
     difficulty: 'Moderate',
     isLocked: true,
     href: '/hub/resources/y1-consent-gillick',
@@ -245,8 +367,13 @@ const hubItems: HubItem[] = [
   {
     id: '18',
     title: 'Y1 Paediatric Medications Guide',
-    description: 'Weight-based dosing, common paediatric medications, and safety considerations.',
+    description: 'Weight-based dosing, common paediatric medications, safety considerations, and worked examples. Includes formulas, double-checking tips, and how to avoid common errors.',
     tags: ['Paeds', 'Y1 Essentials', 'Meds & Calculations'],
+    keyPoints: [
+      'Weight-based dosing formulas',
+      'Common paediatric medications',
+      'Safety checks and double-checking',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/y1-paeds-medications',
@@ -254,8 +381,13 @@ const hubItems: HubItem[] = [
   {
     id: '19',
     title: 'Y1 Immunisation Schedule UK',
-    description: 'Complete UK childhood immunisation schedule with catch-up information.',
+    description: 'Complete UK childhood immunisation schedule, catch-up information, and practical tips for discussing vaccines with families. Includes charts and red flags.',
     tags: ['Paeds', 'Y1 Essentials', 'Health Promotion'],
+    keyPoints: [
+      'UK immunisation schedule overview',
+      'Catch-up vaccine information',
+      'Tips for discussing vaccines',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/y1-immunisation-schedule',
@@ -263,8 +395,13 @@ const hubItems: HubItem[] = [
   {
     id: '20',
     title: 'Y1 Play & Distraction Techniques',
-    description: 'Age-appropriate play and distraction techniques for procedures and hospital stays.',
+    description: 'Age-appropriate play and distraction techniques for procedures and hospital stays, with practical examples. Includes tips for reducing anxiety and involving families.',
     tags: ['Paeds', 'Y1 Essentials', 'Placement'],
+    keyPoints: [
+      'Play techniques for different ages',
+      'Reducing anxiety during procedures',
+      'Involving families in distraction',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/y1-play-distraction',
@@ -272,8 +409,13 @@ const hubItems: HubItem[] = [
   {
     id: '21',
     title: 'Y1 Communicating with Children',
-    description: 'How to adapt your communication for different ages and developmental stages.',
+    description: 'How to adapt your communication for different ages and developmental stages, with practical scripts and examples. Includes tips for building rapport and overcoming barriers.',
     tags: ['Paeds', 'Y1 Essentials', 'Communication'],
+    keyPoints: [
+      'Adapting communication by age',
+      'Building rapport with children',
+      'Overcoming communication barriers',
+    ],
     difficulty: 'Moderate',
     isLocked: true,
     href: '/hub/resources/y1-child-communication',
@@ -282,8 +424,13 @@ const hubItems: HubItem[] = [
   {
     id: '22',
     title: 'Glossary of Terms',
-    description: 'Quick definitions for OSCEs, placement & exams. Search nursing terms & abbreviations.',
+    description: 'Quick definitions for OSCEs, placement & exams. Search nursing terms & abbreviations. Includes common pitfalls, memory aids, and links to further resources.',
     tags: ['Y1 Essentials', 'OSCE', 'Placement'],
+    keyPoints: [
+      'Quick definitions for OSCEs and exams',
+      'Common abbreviations and pitfalls',
+      'Memory aids for revision',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     isNew: true,
@@ -293,8 +440,13 @@ const hubItems: HubItem[] = [
   {
     id: '23',
     title: 'Drug Calculations Cheat Sheet',
-    description: 'Essential formulas and step-by-step methods for common drug calculations including IV rates, doses and dilutions.',
+    description: 'Essential formulas and step-by-step methods for common drug calculations: IV rates, doses, dilutions, and worked examples. Includes safety reminders, common errors, and practice questions.',
     tags: ['Meds & Calculations', 'OSCE', 'Placement'],
+    keyPoints: [
+      'IV rate and dose calculation formulas',
+      'Worked examples and practice questions',
+      'Safety reminders for calculations',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/drug-calculations-cheat-sheet',
@@ -302,8 +454,13 @@ const hubItems: HubItem[] = [
   {
     id: '24',
     title: 'Paediatric Dose Calculator Guide',
-    description: 'Weight-based dosing formulas, common paediatric medications and safety checks for children.',
+    description: 'Weight-based dosing formulas, common paediatric medications, safety checks for children, and worked examples. Includes double-checking tips and escalation advice.',
     tags: ['Meds & Calculations', 'Paeds', 'Y1 Essentials'],
+    keyPoints: [
+      'Paediatric dosing formulas',
+      'Common paediatric medication safety',
+      'Escalation advice for errors',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/paediatric-dose-calculator',
@@ -311,8 +468,13 @@ const hubItems: HubItem[] = [
   {
     id: '25',
     title: 'IV Drip Rate Calculations',
-    description: 'Master IV drip rate calculations with worked examples, formulas and practice questions.',
+    description: 'Master IV drip rate calculations with worked examples, formulas, practice questions, and safety reminders. Includes common pitfalls and how to check your answer.',
     tags: ['Meds & Calculations', 'Adult Nursing', 'Critical Care'],
+    keyPoints: [
+      'IV drip rate calculation steps',
+      'Practice questions included',
+      'How to check your answer',
+    ],
     difficulty: 'Moderate',
     isLocked: true,
     href: '/hub/resources/iv-drip-rate-calculations',
@@ -320,8 +482,13 @@ const hubItems: HubItem[] = [
   {
     id: '26',
     title: 'Medication Abbreviations Guide',
-    description: 'Common medication abbreviations, units, routes and frequencies you\'ll see on prescriptions.',
+    description: 'Common medication abbreviations, units, routes, and frequencies you\'ll see on prescriptions. Includes worked examples, red flags, and tips for safe prescribing.',
     tags: ['Meds & Calculations', 'Placement', 'Y1 Essentials'],
+    keyPoints: [
+      'Common medication abbreviations',
+      'Units, routes, and frequencies',
+      'Red flags for safe prescribing',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/medication-abbreviations',
@@ -329,8 +496,13 @@ const hubItems: HubItem[] = [
   {
     id: '28',
     title: '9 Rights of Medication Administration',
-    description: 'The essential safety checks before giving any medication. A must-know for OSCEs and placement.',
+    description: 'The essential safety checks before giving any medication: 9 Rights explained, worked examples, and safety reminders. A must-know for OSCEs and placement.',
     tags: ['Meds & Calculations', 'OSCE', 'Y1 Essentials', 'Placement'],
+    keyPoints: [
+      '9 Rights of Medication explained',
+      'Worked examples for each right',
+      'Safety reminders for OSCEs',
+    ],
     difficulty: 'Quick Win',
     isLocked: false,
     isNew: true,
@@ -339,8 +511,13 @@ const hubItems: HubItem[] = [
   {
     id: '27',
     title: 'High-Risk Medications Checklist',
-    description: 'Know your high-risk medications: insulin, anticoagulants, opioids and more with safety checks.',
+    description: 'Know your high-risk medications: insulin, anticoagulants, opioids, and more with safety checks, case examples, and escalation advice. Includes double-checking tips and red flags.',
     tags: ['Meds & Calculations', 'Adult Nursing', 'Critical Care'],
+    keyPoints: [
+      'High-risk medication safety checks',
+      'Case examples for insulin, anticoagulants, opioids',
+      'Red flags and escalation advice',
+    ],
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/high-risk-medications',
@@ -403,9 +580,15 @@ function HubCard({
     router.push('/pricing');
   };
 
+  const [expanded, setExpanded] = React.useState(false);
+  const handleCardClick = () => {
+    if (canAccess) setExpanded((prev) => !prev);
+    handleClick();
+  };
+
   return (
     <div
-      onClick={handleClick}
+      onClick={handleCardClick}
       className={`
         relative card card-lift cursor-pointer transition-all duration-300
         hover:-translate-y-1 hover:shadow-lg
@@ -413,7 +596,7 @@ function HubCard({
         ${!canAccess ? 'overflow-hidden' : ''}
       `}
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
       role="button"
     >
       {/* Locked overlay */}
@@ -470,6 +653,26 @@ function HubCard({
           </span>
         ))}
       </div>
+
+      {/* Expandable Key Points */}
+      {canAccess && item.keyPoints && (
+        <div className="mb-2">
+          <button
+            className="text-xs text-[var(--purple)] underline mb-1 focus:outline-none"
+            onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
+            tabIndex={-1}
+          >
+            {expanded ? 'Hide key points' : 'Show key points'}
+          </button>
+          {expanded && (
+            <ul className="list-disc pl-5 text-xs text-[var(--plum-dark)]/80 mb-2 animate-fade-in">
+              {item.keyPoints.map((point, idx) => (
+                <li key={idx}>{point}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* CTA */}
       <div
