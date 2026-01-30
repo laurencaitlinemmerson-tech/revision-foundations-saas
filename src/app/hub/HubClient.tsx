@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import ResourceRating from '@/components/ResourceRating';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { ToastProvider, useToast } from '@/components/Toast';
@@ -665,8 +666,9 @@ function HubCard({
 
 
 
+
       {/* Tags */}
-      <div className="flex flex-wrap gap-1.5 mb-4">
+      <div className="flex flex-wrap gap-1.5 mb-2">
         {item.tags.slice(0, 3).map((tag) => (
           <span
             key={tag}
@@ -676,6 +678,9 @@ function HubCard({
           </span>
         ))}
       </div>
+
+      {/* Resource Rating */}
+      <ResourceRating resourceId={item.id} />
 
 
       {/* Progress tracking button (moved below tags) */}
