@@ -615,6 +615,7 @@ function HubCard({
         focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:ring-offset-2
         ${!canAccess ? 'overflow-hidden' : ''}
         ${completed ? 'opacity-70 grayscale' : ''}
+        min-h-[370px] min-w-[340px] p-7
       `}
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
