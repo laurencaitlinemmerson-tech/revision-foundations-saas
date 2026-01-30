@@ -4,6 +4,8 @@ import React from 'react';
 
 
 
+
+export default function PlacementSurvivalPage() {
   return (
     <main className="max-w-3xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-[var(--plum)] mb-4">Placement Survival Guide</h1>
