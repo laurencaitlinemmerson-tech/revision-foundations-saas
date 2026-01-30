@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BrandTitle from './BrandTitle';
 import { usePathname } from 'next/navigation';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { Menu, X, Sparkles } from 'lucide-react';
@@ -43,12 +44,9 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span
-              className="font-display text-lg text-[var(--plum)] whitespace-nowrap overflow-hidden text-ellipsis block"
-              style={{ fontFamily: 'Shrikhand', maxWidth: '180px' }}
-            >
+            <BrandTitle as="span" className="text-lg !mb-0 !mt-0 !leading-none" style={{ maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Revision Foundations
-            </span>
+            </BrandTitle>
           </Link>
 
           {/* Desktop Nav */}
