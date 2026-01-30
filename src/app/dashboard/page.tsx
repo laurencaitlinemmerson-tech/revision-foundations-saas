@@ -5,11 +5,6 @@ import Link from 'next/link';
 import DashboardClient from './DashboardClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 
-export const metadata: Metadata = {
-  title: 'Dashboard',
-  description: 'Your personal dashboard - track your progress and access your purchased content.',
-};
-
 import {
   BookOpen,
   ClipboardCheck,
@@ -22,6 +17,7 @@ import {
   Gift,
   HelpCircle,
 } from 'lucide-react';
+
 import {
   ContinueCard,
   StudyTipCard,
@@ -30,6 +26,11 @@ import {
   CommunityStatsCard,
   QuickAchievement,
 } from '@/components/DashboardWidgets';
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Your personal dashboard - track your progress and access your purchased content.',
+};
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -48,7 +49,8 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient firstName={firstName}>
-      <div className="space-y-8">
+      {/* ✅ Adds a little breathing room below the hero before the first card */}
+      <div className="space-y-8 pt-6 md:pt-10">
         {/* Continue Where You Left Off */}
         {hasAnyTool && <ContinueCard />}
 
@@ -121,7 +123,10 @@ export default async function DashboardPage() {
                   <p className="text-sm text-[var(--plum-dark)]/70">Get the bundle and save!</p>
                 </div>
               </div>
-              <Link href="/pricing" className="bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center gap-2">
+              <Link
+                href="/pricing"
+                className="bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center gap-2"
+              >
                 <Gift className="w-4 h-4" />
                 View Bundle
               </Link>
@@ -135,11 +140,17 @@ export default async function DashboardPage() {
               Unlock your study tools and feel confident walking into your exams and placements!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/pricing" className="bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2">
+              <Link
+                href="/pricing"
+                className="bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2"
+              >
                 <Sparkles className="w-5 h-5" />
                 Get Started - £4.99
               </Link>
-              <Link href="/osce" className="bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-6 py-3 rounded-full font-semibold hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2">
+              <Link
+                href="/osce"
+                className="bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-6 py-3 rounded-full font-semibold hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2"
+              >
                 <Play className="w-4 h-4" />
                 Try Free Preview
               </Link>
@@ -150,7 +161,9 @@ export default async function DashboardPage() {
         {/* Unlock more tools - Only show if has one but not both */}
         {hasAnyTool && (!hasOsce || !hasQuiz) && (
           <div>
-            <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-3">Unlock more tools</h2>
+            <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-3">
+              Unlock more tools
+            </h2>
             <div className="grid md:grid-cols-2 gap-4">
               {!hasOsce && (
                 <div className="card border-2 border-dashed border-[var(--lilac-medium)] hover:border-[var(--lavender)] hover:shadow-md transition-all">
@@ -164,15 +177,22 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link href="/osce" className="flex-1 bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-4 py-2 rounded-full font-semibold text-sm hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2">
+                    <Link
+                      href="/osce"
+                      className="flex-1 bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-4 py-2 rounded-full font-semibold text-sm hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2"
+                    >
                       <Play className="w-4 h-4" /> Preview
                     </Link>
-                    <Link href="/pricing?product=osce" className="flex-1 bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2">
+                    <Link
+                      href="/pricing?product=osce"
+                      className="flex-1 bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2"
+                    >
                       <Sparkles className="w-4 h-4" /> Unlock
                     </Link>
                   </div>
                 </div>
               )}
+
               {!hasQuiz && (
                 <div className="card border-2 border-dashed border-[var(--lilac-medium)] hover:border-[var(--lavender)] hover:shadow-md transition-all">
                   <div className="flex items-center gap-4 mb-4">
@@ -185,10 +205,16 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link href="/quiz" className="flex-1 bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-4 py-2 rounded-full font-semibold text-sm hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2">
+                    <Link
+                      href="/quiz"
+                      className="flex-1 bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-4 py-2 rounded-full font-semibold text-sm hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2"
+                    >
                       <Play className="w-4 h-4" /> Preview
                     </Link>
-                    <Link href="/pricing?product=quiz" className="flex-1 bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2">
+                    <Link
+                      href="/pricing?product=quiz"
+                      className="flex-1 bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2"
+                    >
                       <Sparkles className="w-4 h-4" /> Unlock
                     </Link>
                   </div>
@@ -213,7 +239,9 @@ export default async function DashboardPage() {
             <div className="text-4xl">💜</div>
             <div className="flex-1">
               <p className="text-[var(--plum)] font-medium">Remember: progress over perfection!</p>
-              <p className="text-sm text-[var(--plum-dark)]/60">Even 10 minutes of revision today is better than none. You've got this!</p>
+              <p className="text-sm text-[var(--plum-dark)]/60">
+                Even 10 minutes of revision today is better than none. You've got this!
+              </p>
             </div>
           </div>
         </div>
@@ -223,7 +251,9 @@ export default async function DashboardPage() {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Quick actions</h2>
+          <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">
+            Quick actions
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
               href="/hub"
@@ -233,6 +263,7 @@ export default async function DashboardPage() {
               <p className="text-sm font-medium text-[var(--plum)]">Nursing Hub</p>
               <p className="text-xs text-[var(--plum-dark)]/50 mt-1">Resources & Q&A</p>
             </Link>
+
             <Link
               href="/how-to-use"
               className="card text-center py-6 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
@@ -241,6 +272,7 @@ export default async function DashboardPage() {
               <p className="text-sm font-medium text-[var(--plum)]">How to use</p>
               <p className="text-xs text-[var(--plum-dark)]/50 mt-1">2-min tour</p>
             </Link>
+
             <Link
               href="/contact"
               className="card text-center py-6 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
@@ -249,6 +281,7 @@ export default async function DashboardPage() {
               <p className="text-sm font-medium text-[var(--plum)]">Get Help</p>
               <p className="text-xs text-[var(--plum-dark)]/50 mt-1">WhatsApp</p>
             </Link>
+
             <Link
               href="/review"
               className="card text-center py-6 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
@@ -268,4 +301,3 @@ export default async function DashboardPage() {
     </DashboardClient>
   );
 }
-
