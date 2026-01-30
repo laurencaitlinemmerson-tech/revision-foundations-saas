@@ -639,8 +639,18 @@ function HubCard({
       </div>
 
       {/* Content */}
+
       <h3 className="text-[var(--plum)] text-base font-semibold mb-2 line-clamp-2">{item.title}</h3>
-      <p className="text-sm text-[var(--plum-dark)]/70 mb-4 line-clamp-2">{item.description}</p>
+      <p className="text-sm text-[var(--plum-dark)]/70 mb-2 line-clamp-2">{item.description}</p>
+
+      {/* Key Points - always visible */}
+      {canAccess && item.keyPoints && (
+        <ul className="list-disc pl-5 text-xs text-[var(--plum-dark)]/80 mb-3">
+          {item.keyPoints.map((point, idx) => (
+            <li key={idx}>{point}</li>
+          ))}
+        </ul>
+      )}
 
       {/* Tags */}
       <div className="flex flex-wrap gap-1.5 mb-4">
@@ -653,26 +663,6 @@ function HubCard({
           </span>
         ))}
       </div>
-
-      {/* Expandable Key Points */}
-      {canAccess && item.keyPoints && (
-        <div className="mb-2">
-          <button
-            className="text-xs text-[var(--purple)] underline mb-1 focus:outline-none"
-            onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
-            tabIndex={-1}
-          >
-            {expanded ? 'Hide key points' : 'Show key points'}
-          </button>
-          {expanded && (
-            <ul className="list-disc pl-5 text-xs text-[var(--plum-dark)]/80 mb-2 animate-fade-in">
-              {item.keyPoints.map((point, idx) => (
-                <li key={idx}>{point}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
 
       {/* CTA */}
       <div
