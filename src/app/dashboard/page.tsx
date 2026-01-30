@@ -1,3 +1,8 @@
+There's a syntax error in your `page.tsx` file - likely a missing closing brace or tag. Can you share your current `src/app/dashboard/page.tsx` file so I can see what's wrong?
+
+Or try this - replace the entire file with this corrected version:
+
+```tsx
 import { Metadata } from 'next';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -261,10 +266,13 @@ export default async function DashboardPage() {
         </div>
 
         {/* Study Tip */}
-      <div className="pb-16">
-        <StudyTipCard />
+        <div className="pb-16">
+          <StudyTipCard />
+        </div>
       </div>
-   
     </DashboardClient>
   );
 }
+```
+
+This is a complete, clean version that should build without errors!
