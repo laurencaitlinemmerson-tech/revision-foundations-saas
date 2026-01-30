@@ -44,7 +44,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
       <Navbar />
       
       {/* Premium Hero with Gradient Orbs */}
-      <section className="pt-8 pb-8 relative overflow-hidden">
+      <section className="pt-12 pb-10 relative overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--cream)] to-[var(--pink-soft)]/30" />
         
@@ -70,16 +70,16 @@ export default function DashboardClient({ children, firstName }: DashboardClient
         
         <div className="max-w-5xl mx-auto px-6 relative z-10">
           <motion.div 
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6"
             initial="hidden"
             animate="visible"
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
-              <h1 className="hero-title mb-2">
+              <h1 className="hero-title mb-3">
                 <span className="gradient-text">Hey, {firstName}!</span>
               </h1>
-              <p className="text-[var(--plum-dark)]/70 text-lg mb-3">
+              <p className="text-[var(--plum-dark)]/70 text-lg mb-4">
                 Ready to smash your revision today?
               </p>
               <motion.div 
@@ -91,7 +91,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
               </motion.div>
             </motion.div>
             
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants} className="sm:pt-2">
               <Link 
                 href="/hub" 
                 className="btn-primary inline-flex items-center gap-2 group"
@@ -105,7 +105,7 @@ export default function DashboardClient({ children, firstName }: DashboardClient
       </section>
 
       <motion.main 
-        className="px-6"
+        className="px-6 pb-12"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
