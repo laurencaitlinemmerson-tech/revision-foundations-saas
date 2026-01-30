@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 import { useUser } from '@clerk/nextjs';
