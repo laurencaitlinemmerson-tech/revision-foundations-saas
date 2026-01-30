@@ -1427,7 +1427,13 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
     }
   }
 
-  const getSectionIcon = (type?: string) => {
+  // Color and icon for A-E sections
+  const getSectionIcon = (type?: string, title?: string) => {
+    if (title?.startsWith('A -')) return <CheckCircle2 className="w-6 h-6 text-red-500" />;
+    if (title?.startsWith('B -')) return <CheckCircle2 className="w-6 h-6 text-blue-500" />;
+    if (title?.startsWith('C -')) return <CheckCircle2 className="w-6 h-6 text-yellow-500" />;
+    if (title?.startsWith('D -')) return <CheckCircle2 className="w-6 h-6 text-purple-500" />;
+    if (title?.startsWith('E -')) return <CheckCircle2 className="w-6 h-6 text-green-600" />;
     switch (type) {
       case 'checklist': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
       case 'warning': return <AlertTriangle className="w-5 h-5 text-amber-500" />;
@@ -1436,8 +1442,14 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
     }
   };
 
-  const getSectionStyle = (type?: string) => {
+  // Color backgrounds for A-E
+  const getSectionStyle = (type?: string, title?: string) => {
     const hoverStyle = 'transition-all duration-200 hover:border-[var(--purple)] hover:shadow-md hover:-translate-y-0.5 cursor-default';
+    if (title?.startsWith('A -')) return `bg-red-50 border-red-200 ${hoverStyle}`;
+    if (title?.startsWith('B -')) return `bg-blue-50 border-blue-200 ${hoverStyle}`;
+    if (title?.startsWith('C -')) return `bg-yellow-50 border-yellow-200 ${hoverStyle}`;
+    if (title?.startsWith('D -')) return `bg-purple-50 border-purple-200 ${hoverStyle}`;
+    if (title?.startsWith('E -')) return `bg-green-50 border-green-200 ${hoverStyle}`;
     switch (type) {
       case 'checklist': return `bg-emerald-50/50 border-emerald-200 ${hoverStyle}`;
       case 'warning': return `bg-amber-50/50 border-amber-200 ${hoverStyle}`;
@@ -1481,21 +1493,37 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
           </div>
 
           {/* Content sections */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {resource.sections.map((section, index) => (
               <div
                 key={index}
-                className={`rounded-2xl border p-6 ${getSectionStyle(section.type)}`}
+                className={`rounded-2xl border p-6 shadow-sm ${getSectionStyle(section.type, section.title)}`}
               >
                 <div className="flex items-center gap-3 mb-4">
-                  {getSectionIcon(section.type)}
-                  <h2 className="text-lg font-semibold text-[var(--plum)]">{section.title}</h2>
+                  {getSectionIcon(section.type, section.title)}
+                  <h2 className="text-xl font-bold tracking-tight" style={{letterSpacing: '0.01em'}}>{section.title}</h2>
                 </div>
+                {/* Quick summary/tip for each section */}
+                {section.title.startsWith('A -') && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-100/60 text-red-800 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Airway is always first—look, listen, feel. Call for help early if in doubt!</div>
+                )}
+                {section.title.startsWith('B -') && (
+                  <div className="mb-4 p-3 rounded-lg bg-blue-100/60 text-blue-800 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Breathing: rate, effort, and oxygenation. Watch for silent chest!</div>
+                )}
+                {section.title.startsWith('C -') && (
+                  <div className="mb-4 p-3 rounded-lg bg-yellow-100/60 text-yellow-900 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Circulation: pulse, BP, perfusion. Shock can be subtle—check cap refill!</div>
+                )}
+                {section.title.startsWith('D -') && (
+                  <div className="mb-4 p-3 rounded-lg bg-purple-100/60 text-purple-900 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Disability: AVPU/GCS, glucose, pupils. Think reversible causes!</div>
+                )}
+                {section.title.startsWith('E -') && (
+                  <div className="mb-4 p-3 rounded-lg bg-green-100/60 text-green-900 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Exposure: look everywhere, keep warm, preserve dignity.</div>
+                )}
                 <ul className="space-y-2">
                   {section.content.map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 p-2 -mx-2 rounded-lg transition-colors hover:bg-[var(--purple)]/5">
+                    <li key={i} className={`flex items-start gap-3 p-2 -mx-2 rounded-lg transition-colors ${item.toLowerCase().includes('red flag') ? 'bg-amber-100/60 text-amber-900 font-semibold' : 'hover:bg-[var(--purple)]/5'}`}>
                       {section.type === 'checklist' ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-1 flex-shrink-0" />
+                        <CheckCircle2 className={`w-4 h-4 mt-1 flex-shrink-0 ${section.title.startsWith('A -') ? 'text-red-400' : section.title.startsWith('B -') ? 'text-blue-400' : section.title.startsWith('C -') ? 'text-yellow-400' : section.title.startsWith('D -') ? 'text-purple-400' : section.title.startsWith('E -') ? 'text-green-500' : 'text-emerald-500'}`} />
                       ) : (
                         <span className="w-1.5 h-1.5 rounded-full bg-[var(--purple)] mt-2 flex-shrink-0" />
                       )}
