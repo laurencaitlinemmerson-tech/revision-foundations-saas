@@ -35,42 +35,38 @@ import {
 } from '@/components/DashboardWidgets';
 
 export default async function DashboardPage() {
+  // Auth and user info
   const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
+  if (!userId) redirect('/sign-in');
   const user = await currentUser();
   const firstName = user?.firstName || 'lovely';
 
+  // Entitlements
   const entitlements = await getUserEntitlements(userId);
   const hasOsce = hasAccessToContent(entitlements, 'osce');
   const hasQuiz = hasAccessToContent(entitlements, 'quiz');
   const hasAnyTool = hasOsce || hasQuiz;
 
+  // Main dashboard layout
   return (
     <DashboardClient firstName={firstName}>
-      {/* Progress Stats - Always visible */}
+      {/* Progress row */}
       <div className="mb-8">
         <ProgressStatsRow />
       </div>
 
-      {/* Continue Where You Left Off */}
+      {/* Continue where you left off */}
       {hasAnyTool && (
         <div className="mb-8">
           <ContinueCard />
         </div>
       )}
 
-      {/* Quick Launch Tools */}
+      {/* Quick launch tools */}
       {hasAnyTool && (
         <div className="grid md:grid-cols-2 gap-4 mb-8">
           {hasOsce && (
-            <Link
-              href="/osce"
-              className="group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]"
-            >
+            <Link href="/osce" className="group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-[var(--purple)]/15 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <ClipboardCheck className="w-7 h-7 text-[var(--purple)]" />
@@ -85,12 +81,8 @@ export default async function DashboardPage() {
               </div>
             </Link>
           )}
-
           {hasQuiz && (
-            <Link
-              href="/quiz"
-              className="group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]"
-            >
+            <Link href="/quiz" className="group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-[var(--purple)]/15 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <BookOpen className="w-7 h-7 text-[var(--purple)]" />
@@ -108,7 +100,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Status Banner */}
+      {/* Status banner */}
       {hasOsce && hasQuiz ? (
         <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)] mb-8">
           <div className="flex items-center gap-4">
@@ -158,7 +150,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Unlock more tools - Only show if has one but not both */}
+      {/* Unlock more tools */}
       {hasAnyTool && (!hasOsce || !hasQuiz) && (
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Unlock more tools</h2>
@@ -209,7 +201,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Main Dashboard Grid - 2 columns on desktop */}
+      {/* Main dashboard grid */}
       <div className="grid md:grid-cols-2 gap-6 mb-8 items-start">
         <TodaysPlanCard />
         <div className="space-y-6">
@@ -218,7 +210,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Motivation Banner */}
+      {/* Motivation banner */}
       <div className="card bg-gradient-to-r from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/50 border-[var(--lavender)]/50 mb-8">
         <div className="flex items-center gap-4">
           <div className="text-4xl">💜</div>
@@ -229,48 +221,36 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Streak Calendar - Full Width */}
+      {/* Streak calendar */}
       <div className="mb-8">
         <StreakCalendar />
       </div>
 
-      {/* Focus Areas - Full Width */}
+      {/* Focus areas */}
       <div className="mb-8">
         <FocusAreasCard />
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick actions */}
       <div className="mb-8">
         <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">Quick actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link
-            href="/hub"
-            className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
-          >
+          <Link href="/hub" className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group">
             <Sparkles className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-medium text-[var(--plum)]">Nursing Hub</p>
             <p className="text-xs text-[var(--plum-dark)]/50 mt-1">Resources & Q&A</p>
           </Link>
-          <Link
-            href="/how-to-use"
-            className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
-          >
+          <Link href="/how-to-use" className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group">
             <HelpCircle className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-medium text-[var(--plum)]">How to use</p>
             <p className="text-xs text-[var(--plum-dark)]/50 mt-1">2-min tour</p>
           </Link>
-          <Link
-            href="/contact"
-            className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
-          >
+          <Link href="/contact" className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group">
             <MessageCircle className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-medium text-[var(--plum)]">Get Help</p>
             <p className="text-xs text-[var(--plum-dark)]/50 mt-1">WhatsApp</p>
           </Link>
-          <Link
-            href="/review"
-            className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
-          >
+          <Link href="/review" className="card text-center py-5 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group">
             <Heart className="w-6 h-6 text-[var(--pink)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-medium text-[var(--plum)]">Leave Review</p>
             <p className="text-xs text-[var(--plum-dark)]/50 mt-1">30 seconds</p>
@@ -278,7 +258,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Study Tip */}
+      {/* Study tip */}
       <StudyTipCard />
     </DashboardClient>
   );
