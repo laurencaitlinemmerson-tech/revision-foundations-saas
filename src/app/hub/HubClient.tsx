@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import ResourceBookmark from '@/components/ResourceBookmark';
 import ResourceRating from '@/components/ResourceRating';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
@@ -619,6 +620,8 @@ function HubCard({
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
       role="button"
     >
+      {/* Bookmark button (top left) */}
+      <ResourceBookmark resourceId={item.id} />
       {/* Locked overlay */}
       {!canAccess && (
         <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center rounded-2xl">
