@@ -1,5 +1,3 @@
-
-```tsx
 import { Metadata } from 'next';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
