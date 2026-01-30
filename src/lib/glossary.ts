@@ -116,7 +116,7 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     id: "sbar",
     term: "SBAR",
-    category: "Placement Basics",
+    category: "Placement Essentials",
     population: "general",
     shortDefinition: "Situation, Background, Assessment, Recommendation – the gold standard framework for clinical handovers.",
     premium: false,
@@ -429,7 +429,7 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     id: "escalation",
     term: "Escalation",
-    category: "Placement Basics",
+    category: "Placement Essentials",
     population: "general",
     shortDefinition: "Communicating concerns about a deteriorating patient to senior staff using a structured approach.",
     premium: true,
@@ -584,7 +584,7 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     id: "safeguarding-paeds",
     term: "Safeguarding Children",
-    category: "Placement Basics",
+    category: "Placement Essentials",
     population: "paediatric",
     shortDefinition: "Protecting children from abuse and neglect. Everyone's responsibility! Report concerns even if uncertain.",
     premium: true,
@@ -653,7 +653,7 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     id: "dnar",
     term: "DNACPR",
-    category: "Placement Basics",
+    category: "Placement Essentials",
     population: "adult",
     shortDefinition: "Do Not Attempt Cardiopulmonary Resuscitation – a decision that CPR should not be attempted if the heart stops.",
     premium: true,
