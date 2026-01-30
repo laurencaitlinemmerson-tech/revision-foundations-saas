@@ -36,16 +36,7 @@ interface HubItem {
 }
 
 const hubItems: HubItem[] = [
-            {
-              id: 'placement-survival',
-              title: 'Placement Survival Guide',
-              description: 'Tips, tricks, and real talk for surviving and thriving on your first nursing placement. (Lauren only)',
-              tags: ['Y1 Essentials', 'Placement', 'Personal'],
-              difficulty: 'Quick Win',
-              isLocked: true,
-              href: '/hub/resources/placement-survival',
-              isNew: true,
-            },
+// Placement Survival Guide removed from hubItems
           {
             id: 'y1-professionalism-ethics',
             title: 'Y1 Professionalism & Ethics',
