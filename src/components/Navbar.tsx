@@ -39,11 +39,14 @@ export default function Navbar() {
       <div className="container">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center">
+          <Link href="/" className="flex items-center gap-2 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-display text-lg text-[var(--plum)]" style={{ fontFamily: 'Shrikhand' }}>
+            <span
+              className="font-display text-lg text-[var(--plum)] whitespace-nowrap overflow-hidden text-ellipsis block"
+              style={{ fontFamily: 'Shrikhand', maxWidth: '180px' }}
+            >
               Revision Foundations
             </span>
           </Link>
