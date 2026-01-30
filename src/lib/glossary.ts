@@ -1,10 +1,11 @@
 export type GlossaryCategory =
+  | "Basic Terms"
+  | "Placement Essentials"
   | "Abbreviations"
   | "OSCE"
   | "Medications"
   | "Clinical Conditions"
-  | "Observations & Vitals"
-  | "Placement Basics";
+  | "Observations & Vitals";
 
 export type GlossaryPopulation = "general" | "adult" | "paediatric";
 
@@ -36,16 +37,82 @@ export const glossaryPopulations: { value: GlossaryPopulation; label: string }[]
 ];
 
 export const glossaryCategories: GlossaryCategory[] = [
+  "Basic Terms",
+  "Placement Essentials",
   "Abbreviations",
   "OSCE",
   "Medications",
   "Clinical Conditions",
   "Observations & Vitals",
-  "Placement Basics",
 ];
 
 export const glossaryTerms: GlossaryTerm[] = [
-  // FREE TERMS
+  // BASIC TERMS (for first placement)
+  {
+    id: "nurse",
+    term: "Nurse",
+    category: "Basic Terms",
+    population: "general",
+    shortDefinition: "A registered healthcare professional who provides care, support, and education to patients.",
+    premium: false,
+  },
+  {
+    id: "patient",
+    term: "Patient",
+    category: "Basic Terms",
+    population: "general",
+    shortDefinition: "A person receiving medical care or treatment.",
+    premium: false,
+  },
+  {
+    id: "ward",
+    term: "Ward",
+    category: "Basic Terms",
+    population: "general",
+    shortDefinition: "A hospital area where patients stay for treatment and care.",
+    premium: false,
+  },
+  {
+    id: "handover",
+    term: "Handover",
+    category: "Placement Essentials",
+    population: "general",
+    shortDefinition: "The process of passing patient information and responsibility to another healthcare professional or team.",
+    premium: false,
+  },
+  {
+    id: "multidisciplinary-team",
+    term: "Multidisciplinary Team (MDT)",
+    category: "Placement Essentials",
+    population: "general",
+    shortDefinition: "A group of healthcare professionals from different backgrounds working together for patient care.",
+    premium: false,
+  },
+  {
+    id: "aseptic-technique",
+    term: "Aseptic Technique",
+    category: "Placement Essentials",
+    population: "general",
+    shortDefinition: "Practices that prevent contamination by pathogens during procedures.",
+    premium: false,
+  },
+  {
+    id: "personal-protective-equipment",
+    term: "Personal Protective Equipment (PPE)",
+    category: "Placement Essentials",
+    population: "general",
+    shortDefinition: "Equipment such as gloves, aprons, and masks used to protect staff and patients from infection.",
+    premium: false,
+  },
+  {
+    id: "vital-signs",
+    term: "Vital Signs",
+    category: "Basic Terms",
+    population: "general",
+    shortDefinition: "Clinical measurements that indicate the state of a patient’s essential body functions (e.g., temperature, pulse, respiration, blood pressure).",
+    premium: false,
+  },
+  // ...existing code...
   {
     id: "sbar",
     term: "SBAR",
