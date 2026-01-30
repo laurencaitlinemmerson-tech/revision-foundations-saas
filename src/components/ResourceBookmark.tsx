@@ -27,7 +27,7 @@ export default function ResourceBookmark({ resourceId }: ResourceBookmarkProps) 
     <button
       onClick={toggleBookmark}
       title={bookmarked ? 'Remove bookmark' : 'Bookmark this resource'}
-      className={`absolute top-16 left-8 z-20 p-2 rounded-full border-none bg-white shadow hover:bg-[var(--lilac-soft)] transition-colors`}
+      className={`absolute top-20 left-4 z-20 p-2 rounded-full border-none bg-white shadow hover:bg-[var(--lilac-soft)] transition-colors`}
       aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this resource'}
       type="button"
     >
