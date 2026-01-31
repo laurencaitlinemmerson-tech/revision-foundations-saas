@@ -4,7 +4,7 @@ import { createOrUpdateEntitlement } from '@/lib/entitlements';
 import { createServiceClient } from '@/lib/supabase';
 
 export async function POST(_req: NextRequest) {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   const email = sessionClaims?.email;
   if (!email) return NextResponse.json({ error: 'No email found' }, { status: 400 });
