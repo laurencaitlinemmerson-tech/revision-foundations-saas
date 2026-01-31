@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createOrUpdateEntitlement } from '@/lib/entitlements';
 import { createServiceClient } from '@/lib/supabase';
 
-
+export async function POST(_req: NextRequest) {
   const { userId, sessionClaims } = auth();
   if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   const email = sessionClaims?.email;
