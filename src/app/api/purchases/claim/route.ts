@@ -1,14 +1,12 @@
-import { auth, currentUser } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createOrUpdateEntitlement } from '@/lib/entitlements';
 import { createServiceClient } from '@/lib/supabase';
 
-export async function POST(req: NextRequest) {
-  const { userId } = auth();
-  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-  const user = await currentUser();
-  const email = user?.emailAddresses?.[0]?.emailAddress;
+  const { userId, sessionClaims } = auth();
+  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const email = sessionClaims?.email;
   if (!email) return NextResponse.json({ error: 'No email found' }, { status: 400 });
 
   const supabase = createServiceClient();
