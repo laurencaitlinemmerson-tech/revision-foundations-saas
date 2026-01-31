@@ -302,22 +302,6 @@ const resources: Record<string, {
         ],
       },
     ],
-          'Involve parents/carers—they know their child best.',
-          'Reassess pain after interventions.',
-          'Use play and distraction techniques to reduce anxiety.',
-          'Document both the pain score and the tool used.',
-        ],
-      },
-      {
-        title: 'References',
-        type: 'tip',
-        content: [
-          'NHS: https://www.nhs.uk/conditions/pain-in-children/',
-          'RCPCH: https://www.rcpch.ac.uk/resources/paediatric-pain-assessment-tools',
-          'Great Ormond Street Hospital: https://www.gosh.nhs.uk/conditions-and-treatments/procedures-and-treatments/pain-assessment-children/',
-        ],
-      },
-    ],
   },
   'y1-safeguarding': {
     title: 'Y1 Safeguarding Children Essentials',
