@@ -1,5 +1,4 @@
 'use client';
-
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUser, SignInButton } from '@clerk/nextjs';
@@ -13,6 +12,7 @@ function SuccessContent() {
   const [claiming, setClaiming] = useState(false);
   const [claimed, setClaimed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const product = searchParams.get('product');
   const sessionId = searchParams.get('session_id');
 
@@ -52,7 +52,7 @@ function SuccessContent() {
           <p className="text-[var(--plum-dark)]/70 mb-6">
             Create an account or sign in to unlock your access.
           </p>
-          <SignInButton afterSignInUrl="/success">
+          <SignInButton redirectUrl="/success">
             <button className="btn-primary w-full">Sign in to unlock access</button>
           </SignInButton>
         </div>
