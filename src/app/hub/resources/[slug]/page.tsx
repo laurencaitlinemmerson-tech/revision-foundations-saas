@@ -301,9 +301,6 @@ const resources: Record<string, {
           'Ask for feedback from parents/carers after procedures.',
         ],
       },
-    ],
-          'If a child is in immediate danger, call 999',
-        ],
       },
       {
         title: 'References',
