@@ -303,46 +303,6 @@ const resources: Record<string, {
       },
     ],
   },
-  'y1-safeguarding': {
-    title: 'Y1 Safeguarding Children Essentials',
-    description: 'Key safeguarding concepts, signs of abuse, and your responsibilities as a student nurse. Based on UK NHS, NSPCC, and RCPCH guidance.',
-    isLocked: true,
-    readTime: '6 min read',
-    sections: [
-      {
-        title: 'What is Safeguarding?',
-        type: 'normal',
-        content: [
-          'Safeguarding is protecting children from maltreatment, preventing impairment of health or development, and ensuring safe and effective care.',
-          'All healthcare professionals have a duty to safeguard children and act on concerns.',
-        ],
-      },
-      {
-        title: 'Types of Abuse',
-        type: 'checklist',
-        content: [
-          'Physical abuse: hitting, shaking, poisoning, burning, etc.',
-          'Emotional abuse: persistent emotional maltreatment, bullying, humiliation.',
-          'Sexual abuse: forcing or enticing a child to take part in sexual activities.',
-          'Neglect: persistent failure to meet a child\'s basic physical and/or psychological needs.',
-        ],
-      },
-      {
-        title: 'Key Signs of Abuse or Neglect',
-        type: 'warning',
-        content: [
-          'Unexplained injuries or inconsistent explanations',
-          'Frequent absences or lateness',
-          'Poor hygiene, malnutrition, inappropriate clothing',
-          'Fear of certain adults, withdrawn or anxious behaviour',
-          'Sexualised behaviour inappropriate for age',
-          'Failure to thrive, developmental delay',
-        ],
-      },
-      {
-        title: 'Your Responsibilities as a Student Nurse',
-        type: 'tip',
-        content: [
           'Know your local safeguarding lead and how to contact them',
           'Document concerns factually and promptly',
           'Share concerns with your mentor/supervisor immediately',
