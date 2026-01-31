@@ -242,7 +242,6 @@ const resources: Record<string, {
           'Empowers children and gives them a sense of control.',
           'Improves cooperation and outcomes for staff and families.',
         ],
-      },
       {
         title: 'Play Techniques by Age Group',
         type: 'checklist',
