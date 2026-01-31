@@ -242,6 +242,7 @@ const resources: Record<string, {
           'Empowers children and gives them a sense of control.',
           'Improves cooperation and outcomes for staff and families.',
         ],
+      },
       {
         title: 'Play Techniques by Age Group',
         type: 'checklist',
@@ -299,7 +300,6 @@ const resources: Record<string, {
           'Document what distraction/play was used and the child’s response.',
           'Ask for feedback from parents/carers after procedures.',
         ],
-      },
       },
       {
         title: 'References',
@@ -1521,5 +1521,3 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
     </div>
   );
 }
-
-
