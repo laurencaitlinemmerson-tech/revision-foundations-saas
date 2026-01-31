@@ -1253,7 +1253,6 @@ const resources: Record<string, {
     description: 'Expanded systematic ABCDE assessment approach with clinical pearls, red flags, and printable pocket checklist. Ideal for OSCE revision.',
     isLocked: false,
     readTime: '8 min read',
-    tags: ['OSCE', 'Emergency/ABCDE', 'Assessment'],
     sections: [
       {
         title: 'A - Airway',
