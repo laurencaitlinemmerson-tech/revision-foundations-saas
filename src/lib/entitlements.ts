@@ -53,7 +53,7 @@ export async function getUserEntitlements(
 export async function createOrUpdateEntitlement(
   clerkUserId: string,
   product: Product,
-  stripeCustomerId: string,
+  stripeCustomerId: string | null,
   stripeSubscriptionId: string | null,
   expiresAt: string | null = null
 ): Promise<void> {
