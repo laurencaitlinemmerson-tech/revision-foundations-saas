@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ClerkClientProvider from "@/components/ClerkClientProvider";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkClientProvider>
+    <ClerkProvider>
       <html lang="en">
         <body className="antialiased">
           <SmoothScroll>{children}</SmoothScroll>
@@ -43,6 +43,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SpeedInsights />
         </body>
       </html>
-    </ClerkClientProvider>
+    </ClerkProvider>
   );
 }
