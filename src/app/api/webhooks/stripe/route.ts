@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
         // ---- create/update entitlements ----
         for (const p of productsToCreate) {
           if (clerkUserId) {
-            // Create/ensure entitlement
+            // Create/ensure entitlement (idempotent)
             await createOrUpdateEntitlement(
               clerkUserId,
               p,
@@ -114,33 +114,37 @@ export async function POST(request: NextRequest) {
               null,
               null
             );
-
             // Write customer_name into this entitlement row
             const { error } = await supabase
               .from("entitlements")
               .update({ customer_name: customerName })
               .eq("clerk_user_id", clerkUserId)
               .eq("product", p);
-
             if (error) {
               console.error("Error updating customer_name (signed-in):", error);
             }
-          } else if (guestEmail) {
-            // Guest entitlement (store name directly in upsert)
-            const { error } = await supabase.from("entitlements").upsert(
-              {
-                clerk_user_id: "guest_" + guestEmail,
-                product: p,
-                status: "active",
-                stripe_customer_id: (session.customer as string) ?? null,
-                stripe_payment_intent_id: (session.payment_intent as string) ?? null,
-                customer_name: customerName,
-              },
-              { onConflict: "clerk_user_id,product" }
+          } else {
+            // Guest checkout: store as unclaimed purchase
+            const stripe_session_id = session.id;
+            const stripe_payment_intent_id = (session.payment_intent as string) ?? null;
+            const amount_total = session.amount_total || null;
+            const currency = session.currency || null;
+            const customer_email = guestEmail;
+            const status = 'unclaimed';
+            await supabase.from('purchases').upsert(
+              [{
+                stripe_session_id,
+                stripe_payment_intent_id,
+                customer_email,
+                product_key: p,
+                amount_total,
+                currency,
+                status,
+              }],
+              { onConflict: 'stripe_session_id' }
             );
-
-            if (error) {
-              console.error("Error creating guest entitlement:", error);
+            if (!customer_email) {
+              console.warn(`Stripe webhook: guest checkout missing email for session ${stripe_session_id}`);
             }
           }
         }

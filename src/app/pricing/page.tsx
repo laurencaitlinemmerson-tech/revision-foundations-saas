@@ -115,6 +115,14 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
+      {/* Access Recommendation Notice */}
+      <div className="w-full flex justify-center bg-[var(--lilac-soft)] border-b border-[var(--lilac-medium)] py-3 px-2">
+        <div className="max-w-2xl text-center text-[var(--plum-dark)] text-sm flex flex-col gap-1">
+          <span className="font-semibold">For instant access:</span> Sign in or create an account before purchasing.<br />
+          Or, purchase as a guest and claim access later by signing in with your email.
+        </div>
+      </div>
+
       {/* Hero */}
       <section className="pt-28 pb-10 bg-gradient-to-b from-[var(--lilac-soft)] to-cream">
         <div className="max-w-4xl mx-auto px-6">

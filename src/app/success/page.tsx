@@ -1,15 +1,20 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useUser, SignInButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, Mail, UserPlus } from 'lucide-react';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { isSignedIn } = useUser();
+  const [claiming, setClaiming] = useState(false);
+  const [claimed, setClaimed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const product = searchParams.get('product');
+  const sessionId = searchParams.get('session_id');
 
   const productName =
     product === 'osce'
@@ -22,57 +27,47 @@ function SuccessContent() {
 
   const productLink = product === 'osce' ? '/osce' : product === 'quiz' ? '/quiz' : '/dashboard';
 
+  useEffect(() => {
+    if (isSignedIn) {
+      setClaiming(true);
+      fetch('/api/purchases/claim', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          setClaimed(true);
+          setClaiming(false);
+        })
+        .catch(err => {
+          setError('Failed to claim your purchase. Please contact support.');
+          setClaiming(false);
+        });
+    }
+  }, [isSignedIn]);
+
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen gradient-hero flex items-center justify-center p-6">
+        <div className="card max-w-md text-center">
+          <div className="text-6xl mb-6 float">🎉</div>
+          <h1 className="text-2xl mb-3">Payment Successful!</h1>
+          <p className="text-[var(--plum-dark)]/70 mb-6">
+            Create an account or sign in to unlock your access.
+          </p>
+          <SignInButton afterSignInUrl="/success">
+            <button className="btn-primary w-full">Sign in to unlock access</button>
+          </SignInButton>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center p-6">
       <div className="card max-w-md text-center">
         <div className="text-6xl mb-6 float">🎉</div>
         <h1 className="text-2xl mb-3">Payment Successful!</h1>
-        <p className="text-[var(--plum-dark)]/70 mb-6">
-          Thank you! You now have full access to {productName}.
-        </p>
-
-        {isSignedIn ? (
-          <div className="space-y-3">
-            <Link href={productLink} className="btn-primary w-full">
-              <Sparkles className="w-5 h-5" />
-              Start Using {product === 'bundle' ? 'Your Tools' : productName}
-            </Link>
-            <Link href="/dashboard" className="btn-secondary w-full">
-              <ArrowRight className="w-4 h-4" />
-              Go to Dashboard
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-[var(--lilac-soft)] border border-[var(--lilac-medium)]">
-              <Mail className="w-6 h-6 text-[var(--purple)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--plum)] font-medium mb-1">
-                Check your email!
-              </p>
-              <p className="text-xs text-[var(--plum-dark)]/70">
-                We've sent your access details to your email address.
-              </p>
-            </div>
-
-            <div className="border-t border-[var(--lilac-medium)] pt-4">
-              <p className="text-sm text-[var(--plum-dark)]/70 mb-3">
-                Create a free account to access your tools anytime:
-              </p>
-              <Link href="/sign-up" className="btn-primary w-full">
-                <UserPlus className="w-5 h-5" />
-                Create Account
-              </Link>
-            </div>
-
-            <Link
-              href={productLink}
-              className="text-sm text-[var(--purple)] hover:underline inline-flex items-center gap-1"
-            >
-              Or continue without account
-              <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        )}
+        {claiming && <p>Claiming your purchase...</p>}
+        {claimed && <p>Your access has been unlocked! <a href="/dashboard" className="underline">Go to dashboard</a></p>}
+        {error && <p className="text-red-500">{error}</p>}
       </div>
     </div>
   );

@@ -1,3 +1,29 @@
+// Minimal upsert for claim endpoint and webhook
+export async function createOrUpdateEntitlement(
+  clerkUserId: string,
+  product: Product,
+  stripeCustomerId: string | null = null,
+  stripeSubscriptionId: string | null = null,
+  expiresAt: string | null = null
+): Promise<void> {
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from('entitlements')
+    .upsert({
+      clerk_user_id: clerkUserId,
+      product,
+      status: 'active',
+      stripe_customer_id: stripeCustomerId,
+      stripe_subscription_id: stripeSubscriptionId,
+      expires_at: expiresAt,
+    }, {
+      onConflict: 'clerk_user_id,product'
+    });
+  if (error) {
+    console.error('Error creating entitlement:', error);
+    throw error;
+  }
+}
 import { createServiceClient, Entitlement } from './supabase';
 
 export type Product = 'osce' | 'quiz' | 'bundle';
