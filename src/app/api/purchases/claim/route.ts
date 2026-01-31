@@ -4,8 +4,9 @@ import { createOrUpdateEntitlement } from '@/lib/entitlements';
 import { createServiceClient } from '@/lib/supabase';
 
 export async function POST(_req: NextRequest) {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+
   const email = sessionClaims?.email;
   if (!email) return NextResponse.json({ error: 'No email found' }, { status: 400 });
 
@@ -24,12 +25,14 @@ export async function POST(_req: NextRequest) {
   for (const purchase of purchases) {
     // Upsert entitlement (idempotent)
     await createOrUpdateEntitlement(userId, purchase.product_key, null, null, null);
+
     // Mark purchase as claimed
     await supabase.from('purchases').update({
       status: 'claimed',
       claimed_by_clerk_user_id: userId,
       claimed_at: new Date().toISOString(),
     }).eq('id', purchase.id);
+
     results.push({ product_key: purchase.product_key, status: 'claimed' });
   }
 
