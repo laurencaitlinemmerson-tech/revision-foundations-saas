@@ -188,42 +188,78 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Simple 2-column grid */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Stacked cards with detail */}
+          <div className="flex flex-col gap-4">
             {/* OSCE Tool */}
-            <Link href={isPro ? "/hub" : "/osce"} className="card bg-white dark:bg-[var(--bg-card)] p-5 text-center hover:scale-[1.02] transition-transform">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mx-auto mb-3">
-                <ClipboardCheck className="w-6 h-6 text-white" />
+            <Link href={isPro ? "/hub" : "/osce"} className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center flex-shrink-0">
+                  <ClipboardCheck className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Children&apos;s OSCE Tool</h3>
+                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">Practice with 50+ OSCE stations. Timed scenarios, examiner checklists, and instant feedback.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">50+ stations</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Timed practice</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Self-assessment</span>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-base font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">OSCE Tool</h3>
-              <p className="text-xs text-[var(--plum-dark)]/60 dark:text-[var(--text-muted)]">50+ stations</p>
             </Link>
 
             {/* Quiz Tool */}
-            <Link href={isPro ? "/hub" : "/quiz"} className="card bg-white dark:bg-[var(--bg-card)] p-5 text-center hover:scale-[1.02] transition-transform">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--pink)] to-[var(--lavender)] flex items-center justify-center mx-auto mb-3">
-                <BookOpen className="w-6 h-6 text-white" />
+            <Link href={isPro ? "/hub" : "/quiz"} className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--pink)] to-[var(--lavender)] flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Core Nursing Quiz</h3>
+                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">17 topic areas covering anatomy to pharmacology. Track your progress and focus on weak spots.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">17 topics</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Instant feedback</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Progress tracking</span>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-base font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Core Quiz</h3>
-              <p className="text-xs text-[var(--plum-dark)]/60 dark:text-[var(--text-muted)]">17 topics</p>
             </Link>
 
             {/* Hub */}
-            <Link href="/hub" className="card bg-white dark:bg-[var(--bg-card)] p-5 text-center hover:scale-[1.02] transition-transform">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] flex items-center justify-center mx-auto mb-3">
-                <Users className="w-6 h-6 text-white" />
+            <Link href="/hub" className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] flex items-center justify-center flex-shrink-0">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Nursing Hub</h3>
+                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">Access revision resources, ask questions, and connect with fellow nursing students.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Resources</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Q&A forum</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Community</span>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-base font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Nursing Hub</h3>
-              <p className="text-xs text-[var(--plum-dark)]/60 dark:text-[var(--text-muted)]">Resources & Q&A</p>
             </Link>
 
             {/* Dashboard */}
-            <Link href="/dashboard" className="card bg-white dark:bg-[var(--bg-card)] p-5 text-center hover:scale-[1.02] transition-transform">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mx-auto mb-3">
-                <Zap className="w-6 h-6 text-white" />
+            <Link href="/dashboard" className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Your Dashboard</h3>
+                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">Track your study progress, view stats, and stay motivated with achievement badges.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Progress stats</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Achievements</span>
+                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Study goals</span>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-base font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Dashboard</h3>
-              <p className="text-xs text-[var(--plum-dark)]/60 dark:text-[var(--text-muted)]">Track progress</p>
             </Link>
           </div>
         </div>
