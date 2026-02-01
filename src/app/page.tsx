@@ -9,8 +9,6 @@ import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 import { useParallax } from '@/lib/hooks/useParallax';
 import { 
-  HorizontalScrollSection, 
-  HorizontalCard, 
   AnimateOnScroll, 
   StaggerChildren, 
   StaggerItem,
@@ -197,146 +195,120 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Tools Section - Horizontal Scroll */}
-      <HorizontalScrollSection id="whats-inside" className="bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lilac-soft)]">
-        {/* Intro Card */}
-        <HorizontalCard className="flex items-center">
-          <div className="card bg-white/90 backdrop-blur-sm p-10 h-full flex flex-col justify-center">
-            <span className="badge badge-purple mb-4 inline-flex w-fit">Our Tools</span>
+      {/* Tools Section - What's Inside */}
+      <section id="whats-inside" className="py-16 md:py-24 bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lilac-soft)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <span className="badge badge-purple mb-4 inline-flex">Our Tools</span>
             <h2 className="text-3xl md:text-4xl text-[var(--plum-dark)] mb-4">What&apos;s Inside?</h2>
-            <p className="text-[var(--plum-dark)]/70 text-lg">
+            <p className="text-[var(--plum-dark)]/70 text-lg max-w-2xl mx-auto">
               Everything you need to ace your nursing exams and feel confident on placement.
             </p>
-            <div className="mt-6 flex items-center gap-2 text-[var(--purple)]">
-              <span className="text-sm font-medium">Scroll to explore</span>
-              <ArrowRight className="w-4 h-4 animate-pulse" />
-            </div>
           </div>
-        </HorizontalCard>
 
-        {/* OSCE Tool Card */}
-        <HorizontalCard>
-          <div className="card bg-white h-full p-8 flex flex-col">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mb-6">
-              <ClipboardCheck className="w-8 h-8 text-white" />
+          {/* Tools Grid - Responsive */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* OSCE Tool Card */}
+            <div className="card bg-white dark:bg-[var(--bg-card)] p-6 flex flex-col h-full">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mb-4">
+                <ClipboardCheck className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-2">Children&apos;s OSCE Tool</h3>
+              <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] text-sm mb-4 flex-1">
+                Practice with 50+ OSCE stations. Timed scenarios and examiner checklists.
+              </p>
+              <ul className="space-y-1.5 mb-4 text-xs">
+                {['50+ stations', 'Timed practice', 'Self-assessment'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-[var(--plum-dark)]/80 dark:text-[var(--text-secondary)]">
+                    <Sparkles className="w-3 h-3 text-[var(--purple)]" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              {isPro ? (
+                <Link href="/hub" className="btn-primary w-full text-center text-sm py-2.5">
+                  Open in Hub
+                </Link>
+              ) : (
+                <Link href="/osce" className="btn-primary w-full text-center text-sm py-2.5">
+                  Try OSCE Tool
+                </Link>
+              )}
             </div>
-            <h3 className="text-2xl text-[var(--plum-dark)] mb-3">Children&apos;s OSCE Tool</h3>
-            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1">
-              Practice with 50+ OSCE stations. Timed scenarios, examiner checklists, and instant feedback to build your confidence.
-            </p>
-            <ul className="space-y-2 mb-6">
-              {['50+ stations', 'Timed practice', 'Examiner checklists', 'Self-assessment'].map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm text-[var(--plum-dark)]/80">
-                  <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            {isPro ? (
-              <Link href="/hub" className="btn-primary w-full text-center">
-                <ArrowRight className="w-4 h-4" /> Open in Hub
-              </Link>
-            ) : (
-              <Link href="/osce" className="btn-primary w-full text-center">
-                Try OSCE Tool
-              </Link>
-            )}
-          </div>
-        </HorizontalCard>
 
-        {/* Quiz Tool Card */}
-        <HorizontalCard>
-          <div className="card bg-white h-full p-8 flex flex-col">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--pink)] to-[var(--lavender)] flex items-center justify-center mb-6">
-              <BookOpen className="w-8 h-8 text-white" />
+            {/* Quiz Tool Card */}
+            <div className="card bg-white dark:bg-[var(--bg-card)] p-6 flex flex-col h-full">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--pink)] to-[var(--lavender)] flex items-center justify-center mb-4">
+                <BookOpen className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-2">Core Nursing Quiz</h3>
+              <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] text-sm mb-4 flex-1">
+                17 topic areas from anatomy to pharmacology. Track your progress.
+              </p>
+              <ul className="space-y-1.5 mb-4 text-xs">
+                {['17 topics', 'Instant feedback', 'Progress tracking'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-[var(--plum-dark)]/80 dark:text-[var(--text-secondary)]">
+                    <Sparkles className="w-3 h-3 text-[var(--pink)]" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              {isPro ? (
+                <Link href="/hub" className="btn-primary w-full text-center text-sm py-2.5">
+                  Open in Hub
+                </Link>
+              ) : (
+                <Link href="/quiz" className="btn-primary w-full text-center text-sm py-2.5">
+                  Try Quiz Tool
+                </Link>
+              )}
             </div>
-            <h3 className="text-2xl text-[var(--plum-dark)] mb-3">Core Nursing Quiz</h3>
-            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1">
-              17 topic areas covering everything from anatomy to pharmacology. Track your progress and focus on weak spots.
-            </p>
-            <ul className="space-y-2 mb-6">
-              {['17 topic areas', 'Instant feedback', 'Progress tracking', 'Exam-focused'].map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm text-[var(--plum-dark)]/80">
-                  <Sparkles className="w-4 h-4 text-[var(--pink)]" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            {isPro ? (
-              <Link href="/hub" className="btn-primary w-full text-center">
-                <ArrowRight className="w-4 h-4" /> Open in Hub
-              </Link>
-            ) : (
-              <Link href="/quiz" className="btn-primary w-full text-center">
-                Try Quiz Tool
-              </Link>
-            )}
-          </div>
-        </HorizontalCard>
 
-        {/* Hub Card */}
-        <HorizontalCard>
-          <div className="card bg-white h-full p-8 flex flex-col">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] flex items-center justify-center mb-6">
-              <Users className="w-8 h-8 text-white" />
+            {/* Hub Card */}
+            <div className="card bg-white dark:bg-[var(--bg-card)] p-6 flex flex-col h-full">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] flex items-center justify-center mb-4">
+                <Users className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-2">Nursing Hub</h3>
+              <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] text-sm mb-4 flex-1">
+                Your study HQ with curated resources, guides, and community Q&amp;A.
+              </p>
+              <ul className="space-y-1.5 mb-4 text-xs">
+                {['📚 Study guides', '💬 Community Q&A', '📊 Progress tracking'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-[var(--plum-dark)]/80 dark:text-[var(--text-secondary)]">
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/hub" className="btn-primary w-full text-center text-sm py-2.5">
+                Explore Hub
+              </Link>
             </div>
-            <h3 className="text-2xl font-bold text-[var(--plum-dark)] mb-3">Nursing Hub</h3>
-            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1 leading-relaxed">
-              Your all-in-one study headquarters with curated resources, guides, and community Q&amp;A.
-            </p>
-            <div className="space-y-2.5 mb-6">
-              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
-                <span>📚</span>
-                <span>Y1 Child Nursing Resources</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
-                <span>📄</span>
-                <span>Downloadable Study Guides</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
-                <span>💬</span>
-                <span>Community Q&amp;A Forum</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
-                <span>📊</span>
-                <span>Progress Tracking</span>
-              </div>
-            </div>
-            <Link href="/hub" className="btn-primary w-full text-center">
-              Explore Hub
-            </Link>
-          </div>
-        </HorizontalCard>
 
-        {/* Dashboard Preview Card */}
-        <HorizontalCard>
-          <div className="card bg-gradient-to-br from-[var(--pink-soft)] via-white to-[var(--lilac-soft)] h-full p-8 flex flex-col border-2 border-[var(--lavender)]/30">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mb-6 shadow-lg">
-              <Zap className="w-8 h-8 text-white" />
+            {/* Dashboard Card */}
+            <div className="card bg-gradient-to-br from-[var(--pink-soft)] via-white to-[var(--lilac-soft)] dark:from-[var(--bg-card)] dark:via-[var(--bg-secondary)] dark:to-[var(--bg-card)] p-6 flex flex-col h-full border-2 border-[var(--lavender)]/30">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center mb-4 shadow-lg">
+                <Zap className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-2">Dashboard</h3>
+              <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] text-sm mb-4 flex-1">
+                Track your learning with streaks, stats, and daily goals.
+              </p>
+              <ul className="space-y-1.5 mb-4 text-xs">
+                {['🔥 Study streaks', '📈 Progress stats', '✅ Daily checklist'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-[var(--plum-dark)]/80 dark:text-[var(--text-secondary)]">
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/dashboard" className="btn-primary w-full text-center text-sm py-2.5">
+                View Dashboard
+              </Link>
             </div>
-            <h3 className="text-2xl font-bold text-[var(--plum-dark)] mb-3">Personal Dashboard</h3>
-            <p className="text-[var(--plum-dark)]/70 mb-6 flex-1 leading-relaxed">
-              Track your learning journey with streaks, progress stats, and daily goals. Stay motivated and see how far you&apos;ve come!
-            </p>
-            <ul className="space-y-2.5 mb-6">
-              {[
-                { text: 'Daily study streak tracker', icon: '🔥' },
-                { text: 'Weekly progress stats', icon: '📈' },
-                { text: 'Personal best records', icon: '🏆' },
-                { text: 'Daily revision checklist', icon: '✅' },
-              ].map((feature) => (
-                <li key={feature.text} className="flex items-center gap-3 text-sm text-[var(--plum-dark)]/80">
-                  <span className="text-base">{feature.icon}</span>
-                  {feature.text}
-                </li>
-              ))}
-            </ul>
-            <Link href="/dashboard" className="btn-primary w-full text-center font-semibold">
-              View Dashboard
-            </Link>
           </div>
-        </HorizontalCard>
-      </HorizontalScrollSection>
+        </div>
+      </section>
 
       {/* Why Us Section */}
       <section className="bg-cream section">
