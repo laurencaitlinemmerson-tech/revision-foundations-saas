@@ -67,7 +67,7 @@ export default function Testimonials() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 whileHover={{ scale: 1.02 }}
-                className="testimonial-card"
+                className="testimonial-card dark:!bg-[var(--bg-card)]"
               >
                 <div className="flex gap-1 mb-3">
                   {[...Array(5)].map((_, j) => (
@@ -81,15 +81,15 @@ export default function Testimonials() {
                     />
                   ))}
                 </div>
-                <p className="text-gray-700 dark:text-white text-sm mb-4 leading-relaxed">"{review.text}"</p>
+                <p className="text-gray-700 dark:!text-white text-sm mb-4 leading-relaxed">"{review.text}"</p>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center text-white text-sm font-semibold shadow-md">
                     {review.name[0]}
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-medium text-sm text-[var(--purple)] dark:text-white">{review.name}</span>
+                    <span className="font-medium text-sm text-[var(--purple)] dark:!text-white">{review.name}</span>
                     {review.course && (
-                      <span className="text-xs text-gray-500 dark:text-gray-300">{review.course}</span>
+                      <span className="text-xs text-gray-500 dark:!text-gray-300">{review.course}</span>
                     )}
                   </div>
                 </div>
