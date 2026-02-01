@@ -60,7 +60,7 @@ export async function POST(
     });
   }
   const body = await request.json();
-  const { body: answerBody } = body;
+  const { body: answerBody, image_url } = body;
 
   if (!answerBody) {
     return NextResponse.json({ error: 'Answer body is required' }, { status: 400 });
@@ -76,6 +76,7 @@ export async function POST(
       user_name: userName,
       body: answerBody.slice(0, 2000),
       is_from_lauren: isFromLauren,
+      image_url: image_url || null,
     })
     .select()
     .single();

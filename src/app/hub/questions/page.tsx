@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import Navbar from '@/components/Navbar';
 import {
@@ -15,6 +16,8 @@ import {
   Send,
   User,
   Sparkles,
+  ImagePlus,
+  Loader2,
 } from 'lucide-react';
 
 interface Question {
@@ -26,6 +29,7 @@ interface Question {
   tags: string[];
   is_answered: boolean;
   created_at: string;
+  image_url?: string;
 }
 
 const TAGS = [
@@ -69,6 +73,37 @@ export default function QuestionsPage() {
   const [body, setBody] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setImageUrl(data.url);
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Failed to upload image');
+    }
+    setUploading(false);
+  };
 
   useEffect(() => {
     fetchQuestions();
@@ -103,6 +138,7 @@ export default function QuestionsPage() {
           title: title.trim(),
           body: body.trim(),
           tags: selectedTags,
+          image_url: imageUrl,
         }),
       });
 
@@ -110,6 +146,7 @@ export default function QuestionsPage() {
         setTitle('');
         setBody('');
         setSelectedTags([]);
+        setImageUrl(null);
         setShowAskForm(false);
         fetchQuestions();
       }
@@ -236,6 +273,58 @@ export default function QuestionsPage() {
                     />
                   </div>
 
+                  {/* Image Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--plum)] mb-2">
+                      Attach Image (optional)
+                    </label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    {imageUrl ? (
+                      <div className="relative">
+                        <Image
+                          src={imageUrl}
+                          alt="Uploaded image"
+                          width={200}
+                          height={200}
+                          className="rounded-xl object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setImageUrl(null)}
+                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-[var(--lilac-medium)] rounded-xl text-[var(--plum-dark)]/60 hover:border-[var(--purple)] hover:text-[var(--purple)] transition-all"
+                      >
+                        {uploading ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <ImagePlus className="w-5 h-5" />
+                            Add image or GIF
+                          </>
+                        )}
+                      </button>
+                    )}
+                    <p className="text-xs text-[var(--plum-dark)]/50 mt-1">Max 5MB. JPG, PNG, GIF, WebP</p>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-[var(--plum)] mb-2">
                       Topics (optional)
@@ -323,6 +412,17 @@ export default function QuestionsPage() {
                       <p className="text-sm text-[var(--plum-dark)]/60 line-clamp-2 mt-1">
                         {question.body}
                       </p>
+                      {question.image_url && (
+                        <div className="mt-2">
+                          <Image
+                            src={question.image_url}
+                            alt="Question attachment"
+                            width={120}
+                            height={80}
+                            className="rounded-lg object-cover"
+                          />
+                        </div>
+                      )}
                       <div className="flex items-center gap-3 mt-3 flex-wrap">
                         <span className="flex items-center gap-1 text-xs text-[var(--plum-dark)]/50">
                           <User className="w-3 h-3" />

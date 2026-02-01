@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     });
   }
  const body = await request.json();
- const { title, body: questionBody, tags } = body;
+ const { title, body: questionBody, tags, image_url } = body;
 
   if (!title || !questionBody) {
     return NextResponse.json({ error: 'Title and body are required' }, { status: 400 });
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       title: title.slice(0, 200),
       body: questionBody.slice(0, 2000),
       tags: tags || [],
+      image_url: image_url || null,
     })
     .select()
     .single();

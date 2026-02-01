@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import Navbar from '@/components/Navbar';
 import {
@@ -13,6 +14,9 @@ import {
   MessageCircle,
   Sparkles,
   Crown,
+  ImagePlus,
+  Loader2,
+  X,
 } from 'lucide-react';
 
 interface Question {
@@ -24,6 +28,7 @@ interface Question {
   tags: string[];
   is_answered: boolean;
   created_at: string;
+  image_url?: string;
 }
 
 interface Answer {
@@ -34,6 +39,7 @@ interface Answer {
   is_accepted: boolean;
   is_from_lauren: boolean;
   created_at: string;
+  image_url?: string;
 }
 
 function timeAgo(dateString: string): string {
@@ -60,6 +66,37 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(true);
   const [answerBody, setAnswerBody] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [answerImageUrl, setAnswerImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAnswerImageUrl(data.url);
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Failed to upload image');
+    }
+    setUploading(false);
+  };
 
   useEffect(() => {
     fetchQuestion();
@@ -97,11 +134,12 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
       const res = await fetch(`/api/questions/${id}/answers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ body: answerBody.trim() }),
+        body: JSON.stringify({ body: answerBody.trim(), image_url: answerImageUrl }),
       });
 
       if (res.ok) {
         setAnswerBody('');
+        setAnswerImageUrl(null);
         fetchAnswers();
         fetchQuestion(); // Refresh to get updated is_answered status
       }
@@ -184,6 +222,18 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
 
             <p className="text-[var(--plum-dark)]/80 whitespace-pre-wrap mb-4">{question.body}</p>
 
+            {question.image_url && (
+              <div className="mb-4">
+                <Image
+                  src={question.image_url}
+                  alt="Question attachment"
+                  width={400}
+                  height={300}
+                  className="rounded-xl object-contain max-w-full"
+                />
+              </div>
+            )}
+
             {question.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {question.tags.map((tag) => (
@@ -251,6 +301,17 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                         <p className="text-[var(--plum-dark)]/80 whitespace-pre-wrap">
                           {answer.body}
                         </p>
+                        {answer.image_url && (
+                          <div className="mt-3">
+                            <Image
+                              src={answer.image_url}
+                              alt="Answer attachment"
+                              width={300}
+                              height={200}
+                              className="rounded-lg object-contain max-w-full"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -273,6 +334,55 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                   maxLength={2000}
                   required
                 />
+                
+                {/* Image Upload for Answer */}
+                <div className="mb-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  {answerImageUrl ? (
+                    <div className="relative inline-block">
+                      <Image
+                        src={answerImageUrl}
+                        alt="Uploaded image"
+                        width={150}
+                        height={100}
+                        className="rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setAnswerImageUrl(null)}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="flex items-center gap-2 px-3 py-2 text-sm border border-dashed border-[var(--lilac-medium)] rounded-lg text-[var(--plum-dark)]/60 hover:border-[var(--purple)] hover:text-[var(--purple)] transition-all"
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <ImagePlus className="w-4 h-4" />
+                          Add image
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   disabled={submitting || !answerBody.trim()}
