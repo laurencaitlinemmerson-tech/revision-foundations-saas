@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { Menu, X, Sparkles } from 'lucide-react';
 import { useEffect, useState, useCallback, useId } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -70,7 +71,7 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+        scrolled ? 'bg-white/95 dark:bg-[#1a1625]/95 backdrop-blur-lg shadow-sm' : 'bg-transparent'
       }`}
       role="navigation"
       aria-label="Main navigation"
@@ -155,6 +156,9 @@ export default function Navbar() {
                 Get Started
               </Link>
             </SignedOut>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
@@ -178,7 +182,7 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div 
           id={mobileMenuId}
-          className="md:hidden bg-white border-t border-[var(--lilac)] max-h-[calc(100vh-5rem)] overflow-y-auto"
+          className="md:hidden bg-white dark:bg-[#1a1625] border-t border-[var(--lilac)] max-h-[calc(100vh-5rem)] overflow-y-auto"
           role="menu"
           aria-label="Mobile navigation"
         >
@@ -235,6 +239,13 @@ export default function Navbar() {
                 Get Started
               </Link>
             </SignedOut>
+
+            {/* Mobile Theme Toggle */}
+            <div className="border-t border-[var(--lilac)] my-2" aria-hidden="true" />
+            <div className="flex items-center justify-between py-3">
+              <span className="text-sm font-medium text-[var(--plum-dark)]">Theme</span>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       )}

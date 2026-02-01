@@ -6,6 +6,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import SkipToContent from "@/components/SkipToContent";
 import JsonLd from "@/components/JsonLd";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { getOrganizationSchema, getWebsiteSchema } from "@/lib/seo";
 import "./globals.css";
 import "./premium-animations-vanilla.css";
@@ -95,8 +96,23 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en-GB" dir="ltr">
+      <html lang="en-GB" dir="ltr" suppressHydrationWarning>
         <head>
+          {/* Prevent flash of wrong theme */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  try {
+                    var theme = localStorage.getItem('theme');
+                    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                      document.documentElement.classList.add('dark');
+                    }
+                  } catch (e) {}
+                })();
+              `,
+            }}
+          />
           {/* PWA manifest */}
           <link rel="manifest" href="/manifest.json" />
           <link rel="apple-touch-icon" href="/icon-192.png" />
@@ -114,9 +130,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <JsonLd data={getWebsiteSchema()} />
         </head>
         <body className="antialiased">
-          <SkipToContent />
-          <SmoothScroll>{children}</SmoothScroll>
-          <PWAInstallPrompt />
+          <ThemeProvider>
+            <SkipToContent />
+            <SmoothScroll>{children}</SmoothScroll>
+            <PWAInstallPrompt />
+          </ThemeProvider>
           <Analytics />
           <SpeedInsights />
         </body>

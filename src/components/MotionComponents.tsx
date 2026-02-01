@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useScroll, useTransform, useInView, Variants } from 'framer-motion';
-import { useRef, ReactNode } from 'react';
+import { useRef, ReactNode, useState, useEffect } from 'react';
 
 // ============ Animation Variants ============
 
@@ -135,11 +135,32 @@ interface HorizontalScrollProps {
 
 export function HorizontalScrollSection({ children, className = '', id }: HorizontalScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end']
   });
 
+  // Mobile: Simple vertical stacked layout
+  if (isMobile) {
+    return (
+      <section id={id} className={`py-16 px-4 ${className}`}>
+        <div className="flex flex-col gap-6 max-w-lg mx-auto">
+          {children}
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop: Horizontal scroll animation
   return (
     <section ref={containerRef} id={id} className={`relative ${className}`} style={{ height: '300vh' }}>
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
@@ -157,7 +178,7 @@ export function HorizontalScrollSection({ children, className = '', id }: Horizo
 export function HorizontalCard({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <motion.div 
-      className={`flex-shrink-0 w-[80vw] md:w-[45vw] lg:w-[35vw] ${className}`}
+      className={`flex-shrink-0 w-full md:w-[45vw] lg:w-[35vw] ${className}`}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
     >
