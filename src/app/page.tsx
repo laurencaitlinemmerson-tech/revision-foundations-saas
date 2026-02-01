@@ -228,8 +228,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-        </div>
-      </section>
 
       {/* Why Us Section */}
       <section className="bg-cream py-16 md:py-24">
