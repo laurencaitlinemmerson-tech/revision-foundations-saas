@@ -71,7 +71,7 @@ export default function AEAssessmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream overflow-x-hidden">
+    <div className="min-h-screen bg-cream overflow-x-hidden" style={{ touchAction: 'pan-y' }}>
       <Navbar />
 
       {/* Hero */}
@@ -238,7 +238,7 @@ export default function AEAssessmentPage() {
           </div>
           
           {/* Key Paediatric Differences */}
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-white rounded-xl p-3">
               <h4 className="font-semibold text-sky-700 text-sm mb-2">🫁 Airway & Breathing</h4>
               <ul className="text-xs text-sky-800 space-y-1">
@@ -307,7 +307,7 @@ export default function AEAssessmentPage() {
           </button>
 
           {expandedSections.has('A') && (
-            <div className="px-4 pb-4 space-y-4">
+            <div className="px-4 pb-4 space-y-4" style={{ touchAction: 'pan-y' }}>
               <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                 <p className="text-blue-800">
                   <strong>Quick check:</strong> Is the patient talking? If yes, their airway is patent. If no or struggling, assess using <strong>Look, Listen, Feel</strong>.
@@ -315,7 +315,7 @@ export default function AEAssessmentPage() {
               </div>
 
               {/* Look Listen Feel - Only for Airway */}
-              <div className="grid sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-[var(--lilac-soft)] rounded-xl p-4">
                   <h4 className="font-semibold text-[var(--plum)] mb-3">👀 Look</h4>
                   <ul className="space-y-2 text-sm text-[var(--plum-dark)]">
@@ -394,6 +394,7 @@ export default function AEAssessmentPage() {
           </button>
 
           {expandedSections.has('B') && (
+            <div className="px-4 pb-4 space-y-4" style={{ touchAction: 'pan-y' }}>
             <div className="px-4 pb-4 space-y-4">
               <div className="bg-[var(--lilac-soft)] rounded-xl p-4">
                 <h4 className="font-semibold text-[var(--plum)] mb-3">📋 Assess</h4>
@@ -549,10 +550,10 @@ export default function AEAssessmentPage() {
           </button>
 
           {expandedSections.has('C') && (
-            <div className="px-4 pb-4 space-y-4">
+            <div className="px-4 pb-4 space-y-4" style={{ touchAction: 'pan-y' }}>
               <div className="bg-[var(--lilac-soft)] rounded-xl p-4">
                 <h4 className="font-semibold text-[var(--plum)] mb-3">📋 Assess</h4>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <p className="text-sm font-medium text-[var(--plum)] mb-2">Observations:</p>
                     <ul className="space-y-1 text-sm text-[var(--plum-dark)]">
@@ -623,10 +624,10 @@ export default function AEAssessmentPage() {
           </button>
 
           {expandedSections.has('D') && (
-            <div className="px-4 pb-4 space-y-4">
+            <div className="px-4 pb-4 space-y-4" style={{ touchAction: 'pan-y' }}>
               <div className="bg-[var(--lilac-soft)] rounded-xl p-4">
                 <h4 className="font-semibold text-[var(--plum)] mb-3">📋 Assess</h4>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <p className="text-sm font-medium text-[var(--plum)] mb-2">AVPU / GCS:</p>
                     <ul className="space-y-1 text-sm text-[var(--plum-dark)]">
@@ -697,7 +698,7 @@ export default function AEAssessmentPage() {
           </button>
 
           {expandedSections.has('E') && (
-            <div className="px-4 pb-4 space-y-4">
+            <div className="px-4 pb-4 space-y-4" style={{ touchAction: 'pan-y' }}>
               <div className="bg-[var(--lilac-soft)] rounded-xl p-4">
                 <h4 className="font-semibold text-[var(--plum)] mb-3">📋 Full Examination</h4>
                 <ul className="space-y-2 text-sm text-[var(--plum-dark)]">
