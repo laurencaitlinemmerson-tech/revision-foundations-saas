@@ -508,6 +508,167 @@ const resources: Record<string, {
       },
     ],
   },
+  'y1-pain-assessment': {
+    title: 'Y1 Pain Assessment in Children',
+    description: 'Age-appropriate pain assessment tools including FLACC, Wong-Baker, and numeric scales. Essential for OSCEs and placement.',
+    isLocked: true,
+    readTime: '7 min read',
+    sections: [
+      {
+        title: 'Why Pain Assessment Matters',
+        type: 'normal',
+        content: [
+          'Children often cannot verbalise pain—observation is key.',
+          'Undertreated pain affects recovery, wellbeing, and trust.',
+          'Regular assessment allows effective pain management.',
+          'Pain assessment is a core nursing skill tested in OSCEs.',
+        ],
+      },
+      {
+        title: 'FLACC Scale (0-7 years or non-verbal)',
+        type: 'checklist',
+        content: [
+          'Face: 0 = no expression, 1 = occasional grimace, 2 = frequent grimace',
+          'Legs: 0 = relaxed, 1 = restless, 2 = kicking/drawn up',
+          'Activity: 0 = lying quietly, 1 = squirming, 2 = arched/rigid',
+          'Cry: 0 = no cry, 1 = moans/whimpers, 2 = crying steadily/screaming',
+          'Consolability: 0 = content, 1 = reassured by touch, 2 = difficult to comfort',
+          'Total score: 0 = no pain, 1-3 = mild, 4-6 = moderate, 7-10 = severe',
+        ],
+      },
+      {
+        title: 'Wong-Baker FACES Scale (3+ years)',
+        type: 'checklist',
+        content: [
+          'Show child 6 faces from happy to crying',
+          '0 = no hurt, 2 = hurts a little, 4 = hurts more, 6 = hurts even more, 8 = hurts a lot, 10 = worst pain',
+          'Ask "Point to the face that shows how much you hurt right now"',
+          'Document score and action taken',
+        ],
+      },
+      {
+        title: 'Numeric Rating Scale (7+ years)',
+        type: 'checklist',
+        content: [
+          'Ask child to rate pain 0-10',
+          '0 = no pain, 1-3 = mild, 4-6 = moderate, 7-10 = severe',
+          'Good for older children and adolescents',
+          'Use consistently and document changes',
+        ],
+      },
+      {
+        title: 'Clinical Tips',
+        type: 'tip',
+        content: [
+          'Use the same tool consistently for each child',
+          'Assess pain before, during, and after interventions',
+          'Involve parents—they know their child\'s baseline',
+          'Non-verbal cues: guarding, withdrawal, unusual stillness',
+          'Consider distraction, positioning, and non-pharmacological methods',
+        ],
+      },
+      {
+        title: 'Red Flags',
+        type: 'warning',
+        content: [
+          'Sudden increase in pain—reassess cause',
+          'Unrelieved pain despite treatment—escalate',
+          'Changes in behaviour (withdrawn, irritable)—investigate',
+        ],
+      },
+      {
+        title: 'References',
+        type: 'tip',
+        content: [
+          'RCN: Managing Pain in Children: https://www.rcn.org.uk/clinical-topics/pain-management/pain-in-children',
+          'NICE: https://cks.nice.org.uk/topics/pain-in-children/',
+        ],
+      },
+    ],
+  },
+  'y1-safeguarding': {
+    title: 'Y1 Safeguarding Children Essentials',
+    description: 'Key safeguarding concepts, signs of abuse, and your responsibilities as a student nurse.',
+    isLocked: true,
+    readTime: '8 min read',
+    sections: [
+      {
+        title: 'What is Safeguarding?',
+        type: 'normal',
+        content: [
+          'Safeguarding = protecting children from harm, abuse, and neglect.',
+          'Every healthcare professional has a duty to safeguard.',
+          'Children Act 1989/2004 and Working Together to Safeguard Children guide practice.',
+          'As a student nurse, you must report concerns—never assume someone else will.',
+        ],
+      },
+      {
+        title: 'Types of Abuse',
+        type: 'checklist',
+        content: [
+          'Physical: unexplained injuries, bruises in unusual patterns, burns, fractures',
+          'Emotional: withdrawal, low self-esteem, anxiety, fearfulness',
+          'Sexual: age-inappropriate sexual behaviour, reluctance to undress, UTIs',
+          'Neglect: poor hygiene, underweight, untreated medical needs, inappropriate clothing',
+        ],
+      },
+      {
+        title: 'Signs to Watch For',
+        type: 'warning',
+        content: [
+          'Injuries inconsistent with explanation or developmental stage',
+          'Delay in seeking medical help',
+          'Frequent A&E attendances',
+          'Fearfulness around certain adults',
+          'Parent/carer behaviour: hostile, avoidant, over-controlling',
+          'Child disclosures—always take seriously',
+        ],
+      },
+      {
+        title: 'Your Responsibilities',
+        type: 'checklist',
+        content: [
+          'Listen to children and take concerns seriously',
+          'Do NOT promise to keep secrets',
+          'Report concerns to your mentor/supervisor immediately',
+          'Document factually (what you saw/heard, not opinions)',
+          'Know your trust\'s safeguarding lead and procedures',
+          'Complete safeguarding training (mandatory)',
+        ],
+      },
+      {
+        title: 'How to Respond to a Disclosure',
+        type: 'tip',
+        content: [
+          'Stay calm and listen',
+          'Don\'t ask leading questions',
+          'Reassure: "You did the right thing telling me"',
+          'Explain you may need to tell someone who can help',
+          'Document using child\'s own words',
+          'Report immediately—do not investigate yourself',
+        ],
+      },
+      {
+        title: 'Key Contacts',
+        type: 'normal',
+        content: [
+          'Trust Safeguarding Lead/Named Nurse',
+          'Local Authority Children\'s Services',
+          'NSPCC Helpline: 0808 800 5000',
+          'Police (if immediate danger)',
+        ],
+      },
+      {
+        title: 'References',
+        type: 'tip',
+        content: [
+          'NSPCC: https://www.nspcc.org.uk/keeping-children-safe/',
+          'GOV.UK: Working Together to Safeguard Children: https://www.gov.uk/government/publications/working-together-to-safeguard-children--2',
+          'RCN: Safeguarding Children and Young People: https://www.rcn.org.uk/clinical-topics/safeguarding',
+        ],
+      },
+    ],
+  },
   'y1-child-communication': {
     title: 'Y1 Communicating with Children',
     description: 'How to adapt your communication for different ages and developmental stages, based on UK NHS and RCPCH guidance.',

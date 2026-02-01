@@ -25,6 +25,7 @@ import {
   FocusAreasCard,
   CommunityStatsCard,
   QuickAchievement,
+  StudyStreakCard,
 } from '@/components/DashboardWidgets';
 import PlacementSurvivalDashboardCardClient from '@/components/PlacementSurvivalDashboardCardClient';
 
@@ -52,8 +53,16 @@ export default async function DashboardPage() {
     <DashboardClient firstName={firstName}>
       {/* ✅ Adds a little breathing room below the hero before the first card */}
       <div className="space-y-8 pt-6 md:pt-10">
-        {/* Continue Where You Left Off */}
-        {hasAnyTool && <ContinueCard />}
+        {/* Study Streak Card - show for users with tools */}
+        {hasAnyTool && (
+          <div className="grid md:grid-cols-2 gap-4">
+            <StudyStreakCard />
+            <ContinueCard />
+          </div>
+        )}
+
+        {/* Continue Where You Left Off - only show if no tools yet */}
+        {!hasAnyTool && <ContinueCard />}
 
         {/* Quick Launch Tools Grid */}
         {hasAnyTool && (

@@ -3,8 +3,60 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, AlertTriangle, Sparkles, Shield, AlertCircle, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, AlertTriangle, Sparkles, Shield, AlertCircle, ThumbsUp, Printer } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+const quizQuestions = [
+  {
+    question: 'How many identifiers should you use to confirm patient identity?',
+    options: ['One (name only)', 'At least two (e.g., name and DOB)', 'Three or more', 'Just check the bed number'],
+    answer: 1,
+    explanation: 'Always use at least TWO identifiers. Bed numbers can change, and patients may answer "yes" to any name if confused.',
+  },
+  {
+    question: 'When should you read the medication label?',
+    options: ['Just before giving it', 'When picking up and before giving', 'Three times: picking up, preparing, and administering', 'Once is enough if you\'re experienced'],
+    answer: 2,
+    explanation: 'Read the label THREE times to catch errors - when picking up, when preparing, and before administering.',
+  },
+  {
+    question: 'A prescription says "PO" but the drug is only available as an injection. What should you do?',
+    options: ['Give it as an injection - same drug, doesn\'t matter', 'Stop and contact the prescriber', 'Ask a colleague to decide', 'Skip the dose'],
+    answer: 1,
+    explanation: 'NEVER change the route yourself. Contact the prescriber - they need to write a new prescription for the correct route.',
+  },
+  {
+    question: 'For paediatric doses, who should you get to double-check your calculation?',
+    options: ['No one - if you\'re confident it\'s correct', 'A student nurse', 'Another registered nurse or pharmacist', 'The parent'],
+    answer: 2,
+    explanation: 'Paediatric doses must ALWAYS be double-checked by another registered professional due to the risk of calculation errors.',
+  },
+  {
+    question: 'A diabetic patient\'s meal-time insulin is prescribed for 12:00. Their lunch arrives late at 13:30. What should you do?',
+    options: ['Give insulin at 12:00 as prescribed', 'Wait and give insulin with the meal', 'Skip the insulin dose', 'Give double dose later'],
+    answer: 1,
+    explanation: 'Meal-time insulin should be given WITH the meal, not at a fixed time. Giving it without food can cause dangerous hypoglycaemia.',
+  },
+  {
+    question: 'What is the purpose of documenting the REASON for giving a medication?',
+    options: ['It\'s not necessary for routine medications', 'To show you know why the patient needs it', 'To check the prescription is appropriate', 'Both B and C'],
+    answer: 3,
+    explanation: 'Understanding WHY helps you spot inappropriate prescriptions and ensures the medication is still needed.',
+  },
+  {
+    question: 'A child needs paracetamol but refuses to swallow liquid. Can you use a suppository instead?',
+    options: ['Yes, it\'s the same drug so it\'s fine', 'No - you need a new prescription for the different form', 'Only if the parent agrees', 'Only in emergencies'],
+    answer: 1,
+    explanation: 'Different forms may have different absorption rates and doses. You MUST get a new prescription for a different formulation.',
+  },
+  {
+    question: 'What should you monitor after giving a medication?',
+    options: ['Nothing - your job is done once it\'s given', 'Whether the patient takes it', 'The patient\'s response - both expected effects and side effects', 'Just check for allergic reactions'],
+    answer: 2,
+    explanation: 'Monitor for BOTH therapeutic effects (is it working?) and adverse effects (side effects, allergic reactions).',
+  },
+];
 
 const rights = [
   {
@@ -391,8 +443,25 @@ export default function NineRightsMedicationPage() {
             </p>
           </motion.div>
 
+          {/* Self-Test Quiz */}
+          <SelfTestQuiz 
+            title="Test Your Knowledge: 9 Rights" 
+            questions={quizQuestions}
+          />
+
+          {/* Print button */}
+          <div className="mt-6 text-center print:hidden">
+            <button 
+              onClick={() => window.print()}
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              Print This Guide
+            </button>
+          </div>
+
           {/* Back to Hub */}
-          <div className="mt-10 text-center">
+          <div className="mt-6 text-center">
             <Link
               href="/hub"
               className="btn-secondary inline-flex items-center gap-2"

@@ -42,10 +42,100 @@ interface SessionEvent {
   tool: string;
 }
 
+interface StudyStreak {
+  currentStreak: number;
+  longestStreak: number;
+  lastStudyDate: string; // YYYY-MM-DD format
+  studyDates: string[]; // Array of YYYY-MM-DD dates
+}
+
 const STORAGE_KEYS = {
   lastActivity: 'rf_last_activity',
   sessionEvents: 'rf_session_events',
+  studyStreak: 'rf_study_streak',
 };
+
+function getTodayDateString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getYesterdayDateString(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.toISOString().split('T')[0];
+}
+
+export function recordStudySession() {
+  if (typeof window === 'undefined') return;
+  try {
+    const today = getTodayDateString();
+    const stored = localStorage.getItem(STORAGE_KEYS.studyStreak);
+    let streak: StudyStreak = stored ? JSON.parse(stored) : {
+      currentStreak: 0,
+      longestStreak: 0,
+      lastStudyDate: '',
+      studyDates: [],
+    };
+
+    // If already studied today, don't update
+    if (streak.lastStudyDate === today) return streak;
+
+    const yesterday = getYesterdayDateString();
+    
+    // Calculate new streak
+    if (streak.lastStudyDate === yesterday) {
+      // Continuing streak
+      streak.currentStreak += 1;
+    } else if (streak.lastStudyDate !== today) {
+      // Streak broken - start fresh
+      streak.currentStreak = 1;
+    }
+
+    // Update longest streak
+    if (streak.currentStreak > streak.longestStreak) {
+      streak.longestStreak = streak.currentStreak;
+    }
+
+    // Update last study date
+    streak.lastStudyDate = today;
+
+    // Add to study dates (keep last 30 days)
+    if (!streak.studyDates.includes(today)) {
+      streak.studyDates.push(today);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const cutoff = thirtyDaysAgo.toISOString().split('T')[0];
+      streak.studyDates = streak.studyDates.filter(d => d >= cutoff);
+    }
+
+    localStorage.setItem(STORAGE_KEYS.studyStreak, JSON.stringify(streak));
+    return streak;
+  } catch {
+    return null;
+  }
+}
+
+export function getStudyStreak(): StudyStreak | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.studyStreak);
+    if (!stored) return null;
+    
+    const streak: StudyStreak = JSON.parse(stored);
+    const today = getTodayDateString();
+    const yesterday = getYesterdayDateString();
+    
+    // Check if streak is still valid
+    if (streak.lastStudyDate !== today && streak.lastStudyDate !== yesterday) {
+      // Streak is broken
+      streak.currentStreak = 0;
+    }
+    
+    return streak;
+  } catch {
+    return null;
+  }
+}
 
 export function saveLastActivity(activity: Omit<LastActivity, 'timestamp'>) {
   if (typeof window === 'undefined') return;
@@ -73,6 +163,9 @@ export function recordSessionStart(tool: string) {
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const filtered = events.filter((e) => e.timestamp > thirtyDaysAgo);
     localStorage.setItem(STORAGE_KEYS.sessionEvents, JSON.stringify(filtered));
+    
+    // Also record study streak
+    recordStudySession();
   } catch {
     // Ignore errors
   }
@@ -88,6 +181,29 @@ function getWeeklySessionCount(): number {
     return events.filter((e) => e.timestamp > oneWeekAgo).length;
   } catch {
     return 0;
+  }
+}
+
+// Get study activity for the last 7 days
+function getLast7DaysActivity(): boolean[] {
+  if (typeof window === 'undefined') return Array(7).fill(false);
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.studyStreak);
+    if (!stored) return Array(7).fill(false);
+    
+    const streak: StudyStreak = JSON.parse(stored);
+    const result: boolean[] = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      result.push(streak.studyDates?.includes(dateStr) || false);
+    }
+    
+    return result;
+  } catch {
+    return Array(7).fill(false);
   }
 }
 
@@ -181,6 +297,125 @@ export function WeeklyProgress() {
         <p className="text-sm text-[var(--plum-dark)]/70">
           Ready when you are — try a quick 5-minute session.
         </p>
+      )}
+    </motion.div>
+  );
+}
+
+// Study Streak Card with visual activity graph
+export function StudyStreakCard() {
+  const [streak, setStreak] = useState<StudyStreak | null>(null);
+  const [weekActivity, setWeekActivity] = useState<boolean[]>(Array(7).fill(false));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setStreak(getStudyStreak());
+    setWeekActivity(getLast7DaysActivity());
+  }, []);
+
+  if (!mounted) return null;
+
+  const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const today = new Date().getDay();
+  // Adjust so Monday is index 0
+  const orderedDays = [];
+  for (let i = 6; i >= 0; i--) {
+    const dayIndex = (today - i + 7) % 7;
+    // Convert Sunday=0 to Monday-based (Mon=0, Sun=6)
+    const mondayBasedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+    orderedDays.push({ label: dayLabels[mondayBasedIndex], active: weekActivity[6 - i] });
+  }
+
+  const currentStreak = streak?.currentStreak || 0;
+  const longestStreak = streak?.longestStreak || 0;
+  const studiedToday = streak?.lastStudyDate === getTodayDateString();
+
+  return (
+    <motion.div
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      className="card bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200/50"
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Flame className="w-5 h-5 text-orange-500" />
+            <h3 className="font-semibold text-[var(--plum)]">Study Streak</h3>
+          </div>
+          <p className="text-xs text-[var(--plum-dark)]/60">Keep the momentum going!</p>
+        </div>
+        <div className="text-right">
+          <motion.div 
+            className="text-3xl font-bold text-orange-500"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          >
+            {currentStreak}
+          </motion.div>
+          <p className="text-xs text-[var(--plum-dark)]/60">
+            {currentStreak === 1 ? 'day' : 'days'}
+          </p>
+        </div>
+      </div>
+
+      {/* Week activity visualization */}
+      <div className="flex justify-between mb-4">
+        {orderedDays.map((day, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1 * i }}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                day.active 
+                  ? 'bg-orange-400 text-white' 
+                  : 'bg-white/60 text-[var(--plum-dark)]/30'
+              }`}
+            >
+              {day.active ? (
+                <Flame className="w-4 h-4" />
+              ) : (
+                <Circle className="w-4 h-4" />
+              )}
+            </motion.div>
+            <span className={`text-xs ${day.active ? 'text-orange-600 font-medium' : 'text-[var(--plum-dark)]/40'}`}>
+              {day.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Status message */}
+      <div className={`text-center p-3 rounded-xl ${
+        studiedToday 
+          ? 'bg-emerald-100 text-emerald-700' 
+          : 'bg-white/60 text-[var(--plum-dark)]/70'
+      }`}>
+        {studiedToday ? (
+          <p className="text-sm font-medium flex items-center justify-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            You've studied today! Keep it up! 🎉
+          </p>
+        ) : currentStreak > 0 ? (
+          <p className="text-sm">
+            Study today to keep your <span className="font-semibold text-orange-500">{currentStreak}-day streak</span> going!
+          </p>
+        ) : (
+          <p className="text-sm">
+            Start a study session to begin your streak! 🔥
+          </p>
+        )}
+      </div>
+
+      {/* Best streak */}
+      {longestStreak > 0 && (
+        <div className="mt-3 text-center text-xs text-[var(--plum-dark)]/50">
+          <Trophy className="w-3 h-3 inline mr-1 text-amber-500" />
+          Personal best: {longestStreak} {longestStreak === 1 ? 'day' : 'days'}
+        </div>
       )}
     </motion.div>
   );

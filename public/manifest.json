@@ -3,8 +3,9 @@
   "short_name": "RevFoundations",
   "description": "Your nursing bestie for OSCEs & exams. Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FFFBF5",
+  "background_color": "#1a1a2e",
   "theme_color": "#805AD5",
   "orientation": "portrait-primary",
   "icons": [
@@ -22,5 +23,29 @@
     }
   ],
   "categories": ["education", "medical"],
-  "lang": "en-GB"
+  "lang": "en-GB",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Study Hub",
+      "short_name": "Hub",
+      "description": "Access study resources",
+      "url": "/hub",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Quiz Practice",
+      "short_name": "Quiz",
+      "description": "Practice with quizzes",
+      "url": "/quiz",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "OSCE Practice",
+      "short_name": "OSCE",
+      "description": "Practice OSCEs",
+      "url": "/osce",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }

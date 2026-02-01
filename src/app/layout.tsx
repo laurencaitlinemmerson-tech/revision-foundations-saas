@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import SmoothScroll from "@/components/SmoothScroll";
 import SkipToContent from "@/components/SkipToContent";
 import JsonLd from "@/components/JsonLd";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import { getOrganizationSchema, getWebsiteSchema } from "@/lib/seo";
 import "./globals.css";
 import "./premium-animations-vanilla.css";
@@ -96,6 +97,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en-GB" dir="ltr">
         <head>
+          {/* PWA manifest */}
+          <link rel="manifest" href="/manifest.json" />
+          <link rel="apple-touch-icon" href="/icon-192.png" />
+          
           {/* Preconnect to external resources */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -111,6 +116,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <body className="antialiased">
           <SkipToContent />
           <SmoothScroll>{children}</SmoothScroll>
+          <PWAInstallPrompt />
           <Analytics />
           <SpeedInsights />
         </body>

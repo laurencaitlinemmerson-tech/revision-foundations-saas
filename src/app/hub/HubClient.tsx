@@ -30,9 +30,42 @@ interface HubItem {
   difficulty: 'Quick Win' | 'Moderate' | 'Deep Dive';
   isLocked: boolean;
   href: string;
+  isRecommended?: boolean;
 }
 
 const hubItems: HubItem[] = [
+  // ===== RECOMMENDED / POPULAR =====
+  {
+    id: 'rec-1',
+    title: '9 Rights of Medication Administration',
+    description: 'Essential medication safety checklist every nursing student needs to know. Interactive quiz included!',
+    tags: ['Meds & Calculations', 'OSCE', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/9-rights-medication',
+    isRecommended: true,
+  },
+  {
+    id: 'rec-2',
+    title: 'Medication Abbreviations Guide',
+    description: 'Common prescription abbreviations with safety warnings. Quiz mode to test yourself!',
+    tags: ['Meds & Calculations', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/medication-abbreviations',
+    isRecommended: true,
+  },
+  {
+    id: 'rec-3',
+    title: 'Placement Survival Guide',
+    description: 'Everything you need to survive and thrive on your nursing placements. Tips from real students!',
+    tags: ['Placement', 'Y1 Essentials'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/placement-survival',
+    isRecommended: true,
+  },
+  // ===== CORE RESOURCES =====
   {
     id: '1',
     title: 'Paeds Respiratory Assessment',
@@ -233,6 +266,61 @@ const hubItems: HubItem[] = [
     isLocked: true,
     href: '/hub/resources/y1-child-communication',
   },
+  // ===== MORE Y1 ESSENTIALS =====
+  {
+    id: '22',
+    title: 'Y1 Anatomy & Physiology Basics',
+    description: 'Key anatomy and physiology concepts for first-year nursing students with visual aids.',
+    tags: ['Y1 Essentials', 'Revision Plans'],
+    difficulty: 'Moderate',
+    isLocked: false,
+    href: '/hub/resources/y1-anatomy-physiology',
+  },
+  {
+    id: '23',
+    title: 'Y1 Documentation & Record Keeping',
+    description: 'How to write clear, accurate nursing documentation. NMC standards explained.',
+    tags: ['Y1 Essentials', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/y1-documentation',
+  },
+  {
+    id: '24',
+    title: 'Y1 Infection Control Essentials',
+    description: 'Hand hygiene, PPE, aseptic technique and infection prevention basics. Quiz included!',
+    tags: ['Y1 Essentials', 'Placement', 'OSCE'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/y1-infection-control',
+  },
+  {
+    id: '25',
+    title: 'Y1 Professionalism & Ethics',
+    description: 'NMC Code, professional boundaries, and ethical principles for nursing students.',
+    tags: ['Y1 Essentials', 'Ethics'],
+    difficulty: 'Moderate',
+    isLocked: false,
+    href: '/hub/resources/y1-professionalism-ethics',
+  },
+  {
+    id: '26',
+    title: 'Theories of Development',
+    description: 'Piaget, Erikson, Bowlby and other key developmental theories for child nursing.',
+    tags: ['Paeds', 'Y1 Essentials'],
+    difficulty: 'Moderate',
+    isLocked: false,
+    href: '/hub/resources/theories-of-development',
+  },
+  {
+    id: '27',
+    title: 'Nursing Glossary',
+    description: 'Searchable glossary of 100+ nursing terms, abbreviations and definitions.',
+    tags: ['Y1 Essentials', 'Revision Plans'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/glossary',
+  },
 ];
 
 // Filter tags
@@ -392,7 +480,13 @@ export default function HubClient({
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
+    // Filter out recommended items for the main grid (they show separately)
     return hubItems.filter((item) => {
+      // Exclude recommended items when showing all
+      if (searchQuery === '' && selectedTags.size === 0 && item.isRecommended) {
+        return false;
+      }
+      
       // Search filter
       const matchesSearch =
         q === '' ||
@@ -412,6 +506,14 @@ export default function HubClient({
       return matchesSearch && (matchesTags || matchesDeepDive);
     });
   }, [searchQuery, selectedTags]);
+
+  // Get recommended items for the featured section
+  const recommendedItems = useMemo(() => {
+    return hubItems.filter((item) => item.isRecommended);
+  }, []);
+
+  // Only show recommended section when no filters active
+  const showRecommended = searchQuery === '' && selectedTags.size === 0;
 
   const freeCount = filteredItems.filter((item) => !item.isLocked).length;
   const premiumCount = filteredItems.filter((item) => item.isLocked).length;
@@ -519,6 +621,45 @@ export default function HubClient({
         {/* Content Grid */}
         <section className="bg-cream pb-16">
           <div className="max-w-6xl mx-auto px-6">
+            {/* Lauren Recommends Section */}
+            {showRecommended && (
+              <div className="mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--pink)] to-[var(--purple)] flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-[var(--plum)]">Lauren Recommends</h2>
+                    <p className="text-sm text-[var(--plum-dark)]/60">Start here if you&apos;re new!</p>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recommendedItems.map((item, i) => (
+                    <div
+                      key={item.id}
+                      className="animate-on-scroll fade-in-up relative"
+                      style={{ animationDelay: i * 0.06 + 's' }}
+                    >
+                      {/* Recommended badge */}
+                      <div className="absolute -top-2 -right-2 z-20 bg-gradient-to-r from-[var(--pink)] to-[var(--purple)] text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg">
+                        ⭐ Recommended
+                      </div>
+                      <HubCard item={item} isPro={isPro} isSignedIn={isSignedIn} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Section divider */}
+            {showRecommended && filteredItems.length > 0 && (
+              <div className="flex items-center gap-4 mb-8">
+                <div className="flex-1 h-px bg-[var(--lilac-medium)]" />
+                <span className="text-sm font-medium text-[var(--plum-dark)]/50">All Resources</span>
+                <div className="flex-1 h-px bg-[var(--lilac-medium)]" />
+              </div>
+            )}
+
             {filteredItems.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-[var(--plum-dark)]/60">No resources match your search.</p>

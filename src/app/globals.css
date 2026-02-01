@@ -1128,3 +1128,115 @@ img[loading="lazy"]:not([src=""]) {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* =============================================
+   PRINT STYLES
+   ============================================= */
+@media print {
+  /* Hide navigation and interactive elements */
+  nav,
+  footer,
+  .print\\:hidden,
+  button:not(.print\\:show),
+  .btn-primary,
+  .btn-secondary,
+  [role="navigation"],
+  .blob,
+  .fixed {
+    display: none !important;
+  }
+
+  /* Reset backgrounds for printing */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Make cards print-friendly */
+  .card {
+    background: white !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem !important;
+    padding: 1rem !important;
+  }
+
+  /* Ensure text is readable */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  h1 { font-size: 18pt !important; }
+  h2 { font-size: 14pt !important; }
+  h3 { font-size: 12pt !important; }
+
+  p, li, td, th {
+    color: #333 !important;
+  }
+
+  /* Links - show URL */
+  a[href]:after {
+    content: none; /* Don't show URLs - too cluttered */
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 0.5rem !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  .no-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Gradient text fallback */
+  .gradient-text {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    color: #553C9A !important;
+  }
+
+  /* Warning boxes */
+  .bg-red-50, .bg-amber-50 {
+    background: #fff5f5 !important;
+    border: 2px solid #c53030 !important;
+  }
+
+  .bg-emerald-50, .bg-green-50 {
+    background: #f0fff4 !important;
+    border: 2px solid #38a169 !important;
+  }
+
+  /* Remove animations */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1.5cm;
+  }
+
+  /* Show all print:block elements */
+  .print\\:block {
+    display: block !important;
+  }
+}

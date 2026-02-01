@@ -2,7 +2,59 @@
 
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { ArrowLeft, Shield, Droplets, Hand, AlertTriangle, CheckCircle2, Lightbulb, Syringe, Bug, Sparkles, Clock, XCircle } from 'lucide-react';
+import { ArrowLeft, Shield, Droplets, Hand, AlertTriangle, CheckCircle2, Lightbulb, Syringe, Bug, Sparkles, Clock, XCircle, Printer } from 'lucide-react';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+const quizQuestions = [
+  {
+    question: 'How long should alcohol hand rub be applied for?',
+    options: ['10 seconds', '20-30 seconds', '40-60 seconds', '2 minutes'],
+    answer: 1,
+    explanation: 'Alcohol hand rub should be applied for 20-30 seconds, ensuring all areas of the hands are covered.',
+  },
+  {
+    question: 'When should you wash with soap and water instead of using alcohol gel?',
+    options: ['When your hands look clean', 'When caring for C. diff patients or visibly soiled hands', 'Never - gel is always better', 'Only before eating'],
+    answer: 1,
+    explanation: 'Alcohol gel does NOT kill C. diff spores. Use soap and water when hands are visibly soiled or after caring for patients with diarrhoea/vomiting.',
+  },
+  {
+    question: 'What does MRSA stand for?',
+    options: ['Multiple Resistant Skin Allergy', 'Methicillin-Resistant Staphylococcus Aureus', 'Micro-Resistant Staph Infection', 'Medication-Related Skin Abscess'],
+    answer: 1,
+    explanation: 'MRSA is Methicillin-Resistant Staphylococcus Aureus - a bacteria resistant to many common antibiotics.',
+  },
+  {
+    question: 'Which type of isolation requires a negative pressure room?',
+    options: ['Contact isolation', 'Droplet isolation', 'Airborne isolation', 'Protective isolation'],
+    answer: 2,
+    explanation: 'Airborne isolation (e.g., TB, measles, chickenpox) requires negative pressure rooms to prevent spread through air currents.',
+  },
+  {
+    question: 'What is the chain of infection?',
+    options: ['A type of bacterial infection', 'The sequence of events required for infection to spread', 'A list of antibiotic treatments', 'The order of PPE application'],
+    answer: 1,
+    explanation: 'The chain of infection describes the 6 links needed for infection: organism, reservoir, exit, transmission, entry, susceptible host.',
+  },
+  {
+    question: 'After a needlestick injury, when should you attend occupational health?',
+    options: ['Within the next week', 'Within 24 hours', 'Within 1 hour', 'Only if you feel unwell'],
+    answer: 2,
+    explanation: 'Needlestick injuries need URGENT assessment - ideally within 1 hour - as HIV post-exposure prophylaxis must start within 72 hours to be effective.',
+  },
+  {
+    question: 'What colour bag are clinical waste items disposed in?',
+    options: ['Black', 'Yellow/Orange', 'Clear', 'Blue'],
+    answer: 1,
+    explanation: 'Clinical waste goes in yellow or orange bags (varies by trust). Black is domestic waste, clear is recycling.',
+  },
+  {
+    question: 'Which of the following does NOT require contact precautions?',
+    options: ['MRSA', 'C. difficile', 'Common cold', 'Scabies'],
+    answer: 2,
+    explanation: 'Common cold is spread by droplets, not contact. MRSA, C. diff, and scabies all require contact precautions.',
+  },
+];
 
 export default function Y1InfectionControlPage() {
   return (
@@ -497,8 +549,25 @@ export default function Y1InfectionControlPage() {
           </ul>
         </div>
 
+        {/* Self-Test Quiz */}
+        <SelfTestQuiz 
+          title="Test Yourself: Infection Control" 
+          questions={quizQuestions}
+        />
+
+        {/* Print button */}
+        <div className="text-center print:hidden">
+          <button 
+            onClick={() => window.print()}
+            className="btn-secondary inline-flex items-center gap-2"
+          >
+            <Printer className="w-4 h-4" />
+            Print This Guide
+          </button>
+        </div>
+
         {/* Back to Hub */}
-        <div className="text-center pt-8">
+        <div className="text-center pt-4">
           <Link
             href="/hub"
             className="inline-flex items-center gap-2 text-[var(--purple)] hover:text-[var(--plum)] font-medium"
