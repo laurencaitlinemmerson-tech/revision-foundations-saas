@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Easing } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Mail, ArrowRight, Crown, Gift, Zap, Shield, Star, Users, X, Info } from 'lucide-react';
@@ -25,7 +25,7 @@ const staggerContainer = {
 const floatingVariants = {
   animate: {
     y: [-5, 5, -5],
-    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" as Easing }
   }
 };
 
