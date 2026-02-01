@@ -1,5 +1,3 @@
-"use client";
-=======
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
@@ -110,7 +108,7 @@ function SuccessContent() {
             To unlock access to <span className="font-semibold">{productName}</span>, please create an account or sign in.
           </p>
 
-          <SignInButton redirectUrl={redirectTo}>
+          <SignInButton forceRedirectUrl={redirectTo}>
             <button className="btn-primary w-full">Sign in to unlock access</button>
           </SignInButton>
 

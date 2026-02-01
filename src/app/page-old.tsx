@@ -17,6 +17,7 @@ import {
   FloatingElement,
   ScrollProgress 
 } from '@/components/MotionComponents';
+import FAQ from '@/components/FAQ';
 
 export default function HomePage() {
   useScrollAnimation();
@@ -88,22 +89,17 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-cream" id="main-content">
       <ScrollProgress />
       <Navbar />
 
       {/* Hero Section */}
-      <main id="main-content">
-        <section 
-          className="gradient-hero min-h-screen relative overflow-hidden flex items-center justify-center"
-          aria-labelledby="hero-heading"
-        >
+      <section className="gradient-hero min-h-screen relative overflow-hidden flex items-center justify-center">
         {/* Parallax Background */}
         <div 
           ref={parallaxRef}
           className="parallax-bg"
           style={{ transform: `translateY(${parallaxOffset}px)` }}
-          aria-hidden="true"
         >
           <div className="blob blob-1" />
           <div className="blob blob-2" />
@@ -112,13 +108,13 @@ export default function HomePage() {
 
         <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
           <div className="hero-center max-w-3xl mx-auto">
-            <div className="hero-badge" aria-hidden="true">
+            <div className="hero-badge">
               <Sparkles className="w-4 h-4 text-[var(--purple)] icon-spin" />
               <span className="text-[var(--plum)]">For Nursing Students</span>
               <Heart className="w-4 h-4 text-[var(--pink)] icon-pulse" />
             </div>
 
-            <h1 id="hero-heading" className="hero-title">
+            <h1 className="hero-title">
               <span className="gradient-text">Revision Foundations</span>
             </h1>
 
@@ -134,7 +130,7 @@ export default function HomePage() {
               {!accessLoading && isPro ? (
                 <>
                   <Link href="/hub" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                    <Sparkles className="w-5 h-5" aria-hidden="true" /> Go to Hub <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                    <Sparkles className="w-5 h-5" /> Go to Hub <ArrowRight className="w-5 h-5" />
                   </Link>
                   <Link href="/dashboard" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
                     Dashboard
@@ -143,13 +139,20 @@ export default function HomePage() {
               ) : (
                 <>
                   <Link href="/pricing" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                    <Sparkles className="w-5 h-5" aria-hidden="true" /> Get Started – £4.99
+                    <Sparkles className="w-5 h-5" /> Get Started – £4.99
                   </Link>
                   <a href="#whats-inside" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                    See What's Inside <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                    See What's Inside <ArrowRight className="w-5 h-5" />
                   </a>
                 </>
               )}
+            </div>
+            {/* Money-back guarantee badge */}
+            <div className="flex justify-center mt-4">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-[var(--lavender)]/40 text-[var(--plum-dark)] text-sm font-medium shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="lucide lucide-shield w-4 h-4 text-[var(--purple)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 3l7 4v5c0 5.25-3.5 9.74-7 10-3.5-.26-7-4.75-7-10V7l7-4z"/></svg>
+                30-day money-back guarantee
+              </span>
             </div>
           </div>
         </div>
@@ -383,6 +386,9 @@ export default function HomePage() {
       {/* Testimonials */}
       <Testimonials />
 
+      {/* FAQ Section */}
+      <FAQ />
+
       {/* Leave Review Section */}
       <section className="bg-cream py-12">
         <div className="flex justify-center">
@@ -453,10 +459,9 @@ export default function HomePage() {
           </a>
         </div>
       </section>
-      </main>
 
       {/* Footer */}
-      <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70" role="contentinfo">
+      <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70">
         <div className="mx-auto flex max-w-6xl flex-col gap-10">
           <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
             <div className="space-y-4">
