@@ -91,6 +91,10 @@
   animation: fadeInUp 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) 0.2s backwards;
 }
 
+.dark .hero-subtitle {
+  color: white;
+}
+
 @media (min-width: 768px) {
   .hero-subtitle {
     font-size: 1.5rem;
@@ -105,6 +109,10 @@
   margin-left: auto;
   margin-right: auto;
   animation: fadeInUp 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) 0.3s backwards;
+}
+
+.dark .hero-description {
+  color: white;
 }
 
 @media (min-width: 768px) {
