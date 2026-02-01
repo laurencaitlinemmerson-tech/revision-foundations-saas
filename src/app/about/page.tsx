@@ -48,12 +48,13 @@ export default function AboutPage() {
             className="mb-12"
           >
             <div className="card">
-              <div className="space-y-4 text-[var(--plum-dark)]/80">
+              <div className="space-y-6 text-[var(--plum-dark)]/80">
                 <p>
                   I used to be a medical photographer – spent years in hospitals behind a camera. 
                   It was cool, but it never quite felt like <em>my thing</em>. So at 25, I decided 
                   to make a change and start nursing. Best decision ever.
                 </p>
+                
                 <p>
                   Now I'm a children's nursing student and honestly loving it. But one thing that 
                   drove me mad? Trying to find decent revision resources. Everything was either 

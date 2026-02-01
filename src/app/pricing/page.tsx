@@ -601,10 +601,10 @@ export default function PricingPage() {
                 <motion.div 
                   key={i} 
                   variants={cardVariants}
-                  className="p-5 rounded-2xl bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-sm border border-white dark:border-[var(--border-color)]"
+                  className="p-5 rounded-2xl bg-white/80 dark:bg-[#2a2438] backdrop-blur-sm border border-white dark:border-[var(--purple)]/30"
                 >
-                  <h4 className="font-semibold text-[var(--plum)] dark:text-white mb-2">{faq.q}</h4>
-                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-white leading-relaxed">{faq.a}</p>
+                  <h4 className="font-semibold text-[var(--plum)] dark:text-[var(--lavender)] mb-2">{faq.q}</h4>
+                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-white/90 leading-relaxed">{faq.a}</p>
                 </motion.div>
               ))}
             </motion.div>
