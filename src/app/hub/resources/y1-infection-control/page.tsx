@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { ArrowLeft, Shield, Droplets, Hand, AlertTriangle, CheckCircle2, Lightbulb, Syringe, Bug, Sparkles, Clock, XCircle, Printer } from 'lucide-react';
+import { ArrowLeft, Shield, Droplets, Hand, AlertTriangle, CheckCircle2, Lightbulb, Syringe, Bug, Sparkles, Clock, XCircle } from 'lucide-react';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 
 const quizQuestions = [
@@ -554,17 +554,6 @@ export default function Y1InfectionControlPage() {
           title="Test Yourself: Infection Control" 
           questions={quizQuestions}
         />
-
-        {/* Print button */}
-        <div className="text-center print:hidden">
-          <button 
-            onClick={() => window.print()}
-            className="btn-secondary inline-flex items-center gap-2"
-          >
-            <Printer className="w-4 h-4" />
-            Print This Guide
-          </button>
-        </div>
 
         {/* Back to Hub */}
         <div className="text-center pt-4">

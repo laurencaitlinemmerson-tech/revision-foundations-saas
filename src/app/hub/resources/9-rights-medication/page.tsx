@@ -3,7 +3,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, AlertTriangle, Sparkles, Shield, AlertCircle, ThumbsUp, Printer } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, AlertTriangle, Sparkles, Shield, AlertCircle, ThumbsUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 
