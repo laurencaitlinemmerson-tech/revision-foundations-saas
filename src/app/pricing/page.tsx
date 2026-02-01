@@ -162,7 +162,7 @@ export default function PricingPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-[var(--plum)] text-lg md:text-xl max-w-2xl mx-auto mb-8"
             >
-              Join 500+ student nurses who&apos;ve boosted their confidence with our study tools. 
+              Built by nursing students, for nursing students. Your all-in-one revision companion. 
               Pay once, access forever.
             </motion.p>
 
@@ -580,9 +580,9 @@ export default function PricingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="bg-gradient-to-br from-[var(--lilac-soft)] to-[var(--pink-soft)]/30 rounded-3xl p-8 md:p-10 border border-[var(--lilac-medium)]/20"
+            className="bg-gradient-to-br from-[var(--lilac-soft)] to-[var(--pink-soft)]/30 dark:from-[var(--bg-card)] dark:to-[var(--bg-secondary)] rounded-3xl p-8 md:p-10 border border-[var(--lilac-medium)]/20 dark:border-[var(--border-color)]"
           >
-            <h2 className="text-2xl font-display text-[var(--plum-dark)] text-center mb-8">Frequently Asked Questions</h2>
+            <h2 className="text-2xl font-display text-[var(--plum-dark)] dark:text-white text-center mb-8">Frequently Asked Questions</h2>
             <motion.div 
               variants={staggerContainer}
               initial="hidden"
@@ -601,10 +601,10 @@ export default function PricingPage() {
                 <motion.div 
                   key={i} 
                   variants={cardVariants}
-                  className="p-5 rounded-2xl bg-white/80 backdrop-blur-sm border border-white"
+                  className="p-5 rounded-2xl bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-sm border border-white dark:border-[var(--border-color)]"
                 >
-                  <h4 className="font-semibold text-[var(--plum)] mb-2">{faq.q}</h4>
-                  <p className="text-sm text-[var(--plum-dark)]/70 leading-relaxed">{faq.a}</p>
+                  <h4 className="font-semibold text-[var(--plum)] dark:text-white mb-2">{faq.q}</h4>
+                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-white leading-relaxed">{faq.a}</p>
                 </motion.div>
               ))}
             </motion.div>
