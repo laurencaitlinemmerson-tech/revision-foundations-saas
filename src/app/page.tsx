@@ -383,17 +383,6 @@ export default function HomePage() {
       {/* Testimonials */}
       <Testimonials />
 
-      {/* Leave Review Section */}
-      <section className="bg-cream py-12">
-        <div className="flex justify-center">
-          <a href="/review" className="review-link">
-            <Sparkles className="w-4 h-4 text-[var(--purple)]" />
-            <span className="text-[var(--plum)]">Leave your own review</span>
-            <Heart className="w-4 h-4 text-[var(--pink)]" />
-          </a>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="gradient-hero section relative overflow-hidden">
         <div className="blob blob-1" />
