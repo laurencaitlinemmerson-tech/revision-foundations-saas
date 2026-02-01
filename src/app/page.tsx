@@ -5,19 +5,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Testimonials from '@/components/Testimonials';
 import { Sparkles, Heart, Play, ArrowRight, BookOpen, ClipboardCheck, Users, Zap } from 'lucide-react';
-import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 import { useParallax } from '@/lib/hooks/useParallax';
-import { 
-  AnimateOnScroll, 
-  StaggerChildren, 
-  StaggerItem,
-  FloatingElement,
-  ScrollProgress 
-} from '@/components/MotionComponents';
+import { ScrollProgress } from '@/components/MotionComponents';
 
 export default function HomePage() {
-  useScrollAnimation();
   const { isPro, isLoading: accessLoading } = useEntitlements();
   const { ref: parallaxRef, offset: parallaxOffset } = useParallax({ speed: 0.3 });
   
@@ -165,30 +157,19 @@ export default function HomePage() {
       {/* Stats */}
       <section className="bg-cream py-16" ref={statsRef}>
         <div className="max-w-5xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
               { num: '17', label: 'Quiz Topics', icon: '📚', id: 'quiz' },
               { num: '50+', label: 'OSCE Stations', icon: '✨', id: 'osce' },
               { num: '£4.99', label: 'One-time access', icon: '💜', id: 'price' },
               { num: '∞', label: 'Lifetime updates', icon: '⭐', id: 'lifetime' },
-            ].map((s, i) => (
-              <div
-                key={s.id}
-                className="animate-on-scroll stat-card"
-                style={{ animationDelay: i * 0.1 + 's' }}
-              >
-                <span
-                  className="text-2xl mb-2 block emoji-float"
-                  style={{ animationDelay: i * 0.2 + 's' }}
-                >
-                  {s.icon}
-                </span>
-
-                <div className="stat-number">
+            ].map((s) => (
+              <div key={s.id} className="card bg-white dark:bg-[var(--bg-card)] p-4 md:p-6">
+                <span className="text-2xl mb-2 block">{s.icon}</span>
+                <div className="text-2xl md:text-3xl font-bold text-[var(--purple)] dark:text-[var(--lavender)]">
                   {s.id === 'quiz' && counters[s.id] !== undefined ? counters[s.id] : s.num}
                 </div>
-
-                <p className="text-[var(--plum-dark)]/60 text-sm mt-1">{s.label}</p>
+                <p className="text-[var(--plum-dark)]/60 dark:text-[var(--text-muted)] text-sm mt-1">{s.label}</p>
               </div>
             ))}
           </div>
@@ -311,18 +292,14 @@ export default function HomePage() {
       </section>
 
       {/* Why Us Section */}
-      <section className="bg-cream section">
+      <section className="bg-cream py-16 md:py-24">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <AnimateOnScroll>
-            <span className="badge badge-purple mb-4 inline-flex badge-shimmer">
-              Why Us?
-            </span>
-          </AnimateOnScroll>
-          <AnimateOnScroll delay={0.1}>
-            <h2 className="mb-12 text-[var(--plum-dark)]">Made With Love</h2>
-          </AnimateOnScroll>
+          <span className="badge badge-purple mb-4 inline-flex">
+            Why Us?
+          </span>
+          <h2 className="mb-12 text-[var(--plum-dark)]">Made With Love</h2>
 
-          <StaggerChildren className="grid gap-10 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3">
             {[
               {
                 icon: '👩‍🎓',
@@ -340,15 +317,13 @@ export default function HomePage() {
                 copy: 'One-time payment. Lifetime access. No subscription.',
               },
             ].map((item) => (
-              <StaggerItem key={item.title} className="space-y-3">
-                <FloatingElement className="text-4xl inline-block">
-                  {item.icon}
-                </FloatingElement>
-                <h3 className="text-[var(--plum)]">{item.title}</h3>
-                <p className="text-[var(--plum-dark)]/70">{item.copy}</p>
-              </StaggerItem>
+              <div key={item.title} className="card bg-white dark:bg-[var(--bg-card)] p-6 text-center">
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="text-[var(--plum)] dark:text-[var(--lavender)] mb-2">{item.title}</h3>
+                <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] text-sm">{item.copy}</p>
+              </div>
             ))}
-          </StaggerChildren>
+          </div>
         </div>
       </section>
 
@@ -356,21 +331,21 @@ export default function HomePage() {
       <Testimonials />
 
       {/* CTA Section */}
-      <section className="gradient-hero section relative overflow-hidden">
+      <section className="gradient-hero py-16 md:py-24 relative overflow-hidden">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
         <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
-          <div className="text-4xl mb-6 animate-on-scroll emoji-float">✨</div>
-          <h2 className="mb-4 text-white animate-on-scroll">Ready to Start?</h2>
-          <p className="text-white text-lg mb-8 animate-on-scroll">
+          <div className="text-4xl mb-6">✨</div>
+          <h2 className="mb-4 text-white">Ready to Start?</h2>
+          <p className="text-white/90 text-lg mb-8">
             Your nursing exams don&apos;t stand a chance.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-on-scroll">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isPro ? (
               <Link
                 href="/hub"
-                className="btn-primary btn-hover px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
+                className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
               >
                 <Sparkles className="w-5 h-5" />
                 Go to Hub
@@ -380,14 +355,14 @@ export default function HomePage() {
               <>
                 <Link
                   href="/pricing"
-                  className="btn-primary btn-hover px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
+                  className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
                 >
                   <Sparkles className="w-5 h-5" />
                   Get Started – £4.99
                 </Link>
                 <Link
                   href="/quiz"
-                  className="btn-secondary btn-hover px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30"
+                  className="btn-secondary px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30"
                 >
                   <Play className="w-5 h-5" />
                   Free Preview
@@ -401,7 +376,7 @@ export default function HomePage() {
       {/* WhatsApp CTA */}
       <section className="bg-cream py-12">
         <div className="max-w-2xl mx-auto px-6 text-center">
-          <p className="text-[var(--plum-dark)]/70 mb-4 animate-on-scroll">
+          <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-4">
             Got questions? I&apos;m always happy to chat!
           </p>
           <a
