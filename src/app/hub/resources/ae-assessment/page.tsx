@@ -181,6 +181,113 @@ export default function AEAssessmentPage() {
           </div>
         </div>
 
+        {/* Paediatric Considerations */}
+        <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-2xl p-6 border border-sky-200 mb-8">
+          <h2 className="text-lg font-semibold text-sky-800 mb-4 flex items-center gap-2">
+            👶 Paediatric Considerations
+          </h2>
+          <p className="text-sky-800 mb-4 text-sm">
+            Children are <strong>NOT small adults</strong>. They have different anatomy, physiology, and normal values. Key differences:
+          </p>
+          
+          {/* Normal Values Table */}
+          <div className="bg-white rounded-xl p-4 mb-4 overflow-x-auto">
+            <h3 className="font-semibold text-sky-700 mb-3 text-sm">📊 Normal Vital Signs by Age</h3>
+            <table className="w-full text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-sky-200">
+                  <th className="text-left py-2 pr-2 text-sky-700">Age</th>
+                  <th className="text-center py-2 px-2 text-sky-700">RR</th>
+                  <th className="text-center py-2 px-2 text-sky-700">HR</th>
+                  <th className="text-center py-2 pl-2 text-sky-700">Systolic BP</th>
+                </tr>
+              </thead>
+              <tbody className="text-sky-800">
+                <tr className="border-b border-sky-100">
+                  <td className="py-2 pr-2 font-medium">&lt;1 year</td>
+                  <td className="text-center py-2 px-2">30-40</td>
+                  <td className="text-center py-2 px-2">110-160</td>
+                  <td className="text-center py-2 pl-2">70-90</td>
+                </tr>
+                <tr className="border-b border-sky-100">
+                  <td className="py-2 pr-2 font-medium">1-2 years</td>
+                  <td className="text-center py-2 px-2">25-35</td>
+                  <td className="text-center py-2 px-2">100-150</td>
+                  <td className="text-center py-2 pl-2">80-95</td>
+                </tr>
+                <tr className="border-b border-sky-100">
+                  <td className="py-2 pr-2 font-medium">2-5 years</td>
+                  <td className="text-center py-2 px-2">25-30</td>
+                  <td className="text-center py-2 px-2">95-140</td>
+                  <td className="text-center py-2 pl-2">80-100</td>
+                </tr>
+                <tr className="border-b border-sky-100">
+                  <td className="py-2 pr-2 font-medium">5-12 years</td>
+                  <td className="text-center py-2 px-2">20-25</td>
+                  <td className="text-center py-2 px-2">80-120</td>
+                  <td className="text-center py-2 pl-2">90-110</td>
+                </tr>
+                <tr>
+                  <td className="py-2 pr-2 font-medium">&gt;12 years</td>
+                  <td className="text-center py-2 px-2">15-20</td>
+                  <td className="text-center py-2 px-2">60-100</td>
+                  <td className="text-center py-2 pl-2">100-120</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Key Paediatric Differences */}
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="bg-white rounded-xl p-3">
+              <h4 className="font-semibold text-sky-700 text-sm mb-2">🫁 Airway & Breathing</h4>
+              <ul className="text-xs text-sky-800 space-y-1">
+                <li>• Larger head, shorter neck</li>
+                <li>• Tongue relatively larger</li>
+                <li>• Narrowest point = cricoid (not cords)</li>
+                <li>• Obligate nose breathers (&lt;6 months)</li>
+                <li>• Higher metabolic rate = faster desaturation</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-xl p-3">
+              <h4 className="font-semibold text-sky-700 text-sm mb-2">❤️ Circulation</h4>
+              <ul className="text-xs text-sky-800 space-y-1">
+                <li>• Cardiac output = HR dependent</li>
+                <li>• Compensate well then crash suddenly</li>
+                <li>• Hypotension = LATE sign of shock</li>
+                <li>• CRT, colour, behaviour = early signs</li>
+                <li>• Fluid bolus = 10ml/kg (not 250ml)</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-xl p-3">
+              <h4 className="font-semibold text-sky-700 text-sm mb-2">🧠 Disability</h4>
+              <ul className="text-xs text-sky-800 space-y-1">
+                <li>• Use AVPU (GCS harder in young children)</li>
+                <li>• Fontanelle: bulging (↑ICP) or sunken (dehydration)</li>
+                <li>• Hypoglycaemia more common</li>
+                <li>• Seizures more common with fever</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-xl p-3">
+              <h4 className="font-semibold text-sky-700 text-sm mb-2">⚠️ Red Flags in Children</h4>
+              <ul className="text-xs text-sky-800 space-y-1">
+                <li>• Floppy, not responding to parents</li>
+                <li>• Weak/absent cry</li>
+                <li>• Mottled/grey skin colour</li>
+                <li>• Grunting (sign of respiratory distress)</li>
+                <li>• Non-blanching rash</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mt-4 bg-amber-50 rounded-xl p-3 border border-amber-200">
+            <p className="text-amber-800 text-sm flex items-start gap-2">
+              <Lightbulb className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span><strong>Remember:</strong> A quiet, still child who doesn&apos;t react to their parent is very concerning. Trust your gut - if a child &quot;doesn&apos;t look right&quot;, escalate early.</span>
+            </p>
+          </div>
+        </div>
+
         {/* A - Airway */}
         <div className="bg-white rounded-2xl border border-[var(--lilac-medium)] overflow-hidden shadow-sm mb-4">
           <button
@@ -640,7 +747,7 @@ export default function AEAssessmentPage() {
           <div className="space-y-3">
             {[
               'Reassess from A after any intervention',
-              'Calculate NEWS2 score',
+              'Calculate NEWS2 score (adults) or PEWS (paediatrics)',
               'Escalate concerns using SBAR',
               'Document findings and actions',
               'Increase monitoring frequency if unwell',
