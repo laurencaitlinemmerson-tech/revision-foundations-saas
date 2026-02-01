@@ -393,15 +393,23 @@ export default function HubClient({
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return hubItems.filter((item) => {
+      // Search filter
       const matchesSearch =
         q === '' ||
         item.title.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
         item.tags.some((tag) => tag.toLowerCase().includes(q));
-      // Add support for Deep Dive filter
-      const matchesDeepDive = selectedTags.has('Deep Dive') ? item.difficulty === 'Deep Dive' : true;
-      const matchesTags = selectedTags.size === 0 || item.tags.some((tag) => selectedTags.has(tag)) || (selectedTags.has('Deep Dive') && item.difficulty === 'Deep Dive');
-      return matchesSearch && matchesTags && matchesDeepDive;
+      
+      // Tag filter - if no tags selected, show all
+      if (selectedTags.size === 0) {
+        return matchesSearch;
+      }
+      
+      // Check if item matches any selected tag OR matches Deep Dive difficulty
+      const matchesTags = item.tags.some((tag) => selectedTags.has(tag));
+      const matchesDeepDive = selectedTags.has('Deep Dive') && item.difficulty === 'Deep Dive';
+      
+      return matchesSearch && (matchesTags || matchesDeepDive);
     });
   }, [searchQuery, selectedTags]);
 
