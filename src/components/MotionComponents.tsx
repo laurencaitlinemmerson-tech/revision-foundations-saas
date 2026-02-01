@@ -149,6 +149,9 @@ export function HorizontalScrollSection({ children, className = '', id }: Horizo
     offset: ['start start', 'end end']
   });
 
+  // Must call useTransform unconditionally (React hooks rules)
+  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-66%']);
+
   // Mobile: Simple vertical stacked layout
   if (isMobile) {
     return (
@@ -166,7 +169,7 @@ export function HorizontalScrollSection({ children, className = '', id }: Horizo
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         <motion.div 
           className="flex gap-8 pl-[10vw]"
-          style={{ x: useTransform(scrollYProgress, [0, 1], ['0%', '-66%']) }}
+          style={{ x }}
         >
           {children}
         </motion.div>
