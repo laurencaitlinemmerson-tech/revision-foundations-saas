@@ -449,17 +449,6 @@ export default function NineRightsMedicationPage() {
             questions={quizQuestions}
           />
 
-          {/* Print button */}
-          <div className="mt-6 text-center print:hidden">
-            <button 
-              onClick={() => window.print()}
-              className="btn-secondary inline-flex items-center gap-2"
-            >
-              <Printer className="w-4 h-4" />
-              Print This Guide
-            </button>
-          </div>
-
           {/* Back to Hub */}
           <div className="mt-6 text-center">
             <Link
