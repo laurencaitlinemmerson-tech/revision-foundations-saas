@@ -3,7 +3,6 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ResourceDiscussion from '@/components/ResourceDiscussion';
-import ResourceDownload from '@/components/ResourceDownload';
 import { getUserEntitlements } from '@/lib/entitlements';
 import { ArrowLeft, CheckCircle2, AlertTriangle, Lightbulb, FileText, Clock } from 'lucide-react';
 
@@ -1606,12 +1605,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl mb-3">{resource.title}</h1>
-            <p className="text-lg text-[var(--plum-dark)]/70 mb-4">{resource.description}</p>
-            <ResourceDownload 
-              title={resource.title} 
-              description={resource.description} 
-              sections={resource.sections} 
-            />
+            <p className="text-lg text-[var(--plum-dark)]/70">{resource.description}</p>
           </div>
 
           {/* Content sections */}
