@@ -1136,8 +1136,9 @@ img[loading="lazy"]:not([src=""]) {
   /* Hide navigation and interactive elements */
   nav,
   footer,
-  .print\\:hidden,
-  button:not(.print\\:show),
+  .no-print,
+  .print-hidden,
+  button:not(.print-show),
   .btn-primary,
   .btn-secondary,
   [role="navigation"],
@@ -1235,8 +1236,8 @@ img[loading="lazy"]:not([src=""]) {
     margin: 1.5cm;
   }
 
-  /* Show all print:block elements */
-  .print\\:block {
+  /* Show print-visible elements */
+  .print-block {
     display: block !important;
   }
 }
