@@ -81,15 +81,15 @@ export default function Testimonials() {
                     />
                   ))}
                 </div>
-                <p className="text-gray-700 dark:text-gray-200 text-sm mb-4 leading-relaxed">"{review.text}"</p>
+                <p className="text-gray-700 dark:text-white text-sm mb-4 leading-relaxed">"{review.text}"</p>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center text-white text-sm font-semibold shadow-md">
                     {review.name[0]}
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-medium text-sm text-[var(--purple)] dark:text-[var(--lavender)]">{review.name}</span>
+                    <span className="font-medium text-sm text-[var(--purple)] dark:text-white">{review.name}</span>
                     {review.course && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{review.course}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-300">{review.course}</span>
                     )}
                   </div>
                 </div>
