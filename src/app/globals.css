@@ -577,6 +577,11 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.35rem); }
   transition: transform var(--transition-smooth), border-color var(--transition-base);
 }
 
+.dark .testimonial-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
 @media (hover: hover) {
   .testimonial-card:hover {
     transform: translateY(-2px);
