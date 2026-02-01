@@ -71,7 +71,7 @@ export default function AEAssessmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-cream overflow-x-hidden">
       <Navbar />
 
       {/* Hero */}
@@ -191,9 +191,9 @@ export default function AEAssessmentPage() {
           </p>
           
           {/* Normal Values Table */}
-          <div className="bg-white rounded-xl p-4 mb-4 overflow-x-auto">
+          <div className="bg-white rounded-xl p-4 mb-4 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-4">
             <h3 className="font-semibold text-sky-700 mb-3 text-sm">📊 Normal Vital Signs by Age</h3>
-            <table className="w-full text-xs sm:text-sm">
+            <table className="w-full text-xs sm:text-sm min-w-[300px]">
               <thead>
                 <tr className="border-b border-sky-200">
                   <th className="text-left py-2 pr-2 text-sky-700">Age</th>
