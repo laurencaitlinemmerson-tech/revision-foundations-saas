@@ -165,6 +165,7 @@ const hubItems: HubItem[] = [
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/ae-assessment',
+    isRecommended: true,
   },
   {
     id: '10',
