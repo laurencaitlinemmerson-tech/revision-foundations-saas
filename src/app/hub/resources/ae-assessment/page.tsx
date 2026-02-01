@@ -395,10 +395,9 @@ export default function AEAssessmentPage() {
 
           {expandedSections.has('B') && (
             <div className="px-4 pb-4 space-y-4" style={{ touchAction: 'pan-y' }}>
-            <div className="px-4 pb-4 space-y-4">
               <div className="bg-[var(--lilac-soft)] rounded-xl p-4">
                 <h4 className="font-semibold text-[var(--plum)] mb-3">📋 Assess</h4>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <p className="text-sm font-medium text-[var(--plum)] mb-2">Observations:</p>
                     <ul className="space-y-1 text-sm text-[var(--plum-dark)]">
