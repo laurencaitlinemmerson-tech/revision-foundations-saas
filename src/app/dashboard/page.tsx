@@ -27,7 +27,6 @@ import {
   QuickAchievement,
   StudyStreakCard,
 } from '@/components/DashboardWidgets';
-import PlacementSurvivalDashboardCardClient from '@/components/PlacementSurvivalDashboardCardClient';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -254,12 +253,6 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Placement Survival Guide - Lauren only */}
-        <div className="card mt-8">
-          <h2 className="text-xl font-bold text-[var(--plum)] mb-4">Placement Survival Guide</h2>
-          <PlacementSurvivalDashboardCardClient />
         </div>
 
         {/* Focus Areas - Full Width */}
