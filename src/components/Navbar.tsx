@@ -107,8 +107,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
                   isActive(link.href)
-                    ? 'text-[var(--purple)]'
-                    : 'text-[var(--plum-dark)]/70 hover:text-[var(--purple)]'
+                    ? 'text-[var(--purple)] dark:text-[var(--lavender)]'
+                    : 'text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] hover:text-[var(--purple)] dark:hover:text-[var(--lavender)]'
                 }`}
                 role="menuitem"
                 aria-current={isActive(link.href) ? 'page' : undefined}
@@ -125,8 +125,8 @@ export default function Navbar() {
                   href={link.href}
                   className={`text-sm font-medium transition-colors ${
                     isActive(link.href)
-                      ? 'text-[var(--purple)]'
-                      : 'text-[var(--plum-dark)]/70 hover:text-[var(--purple)]'
+                      ? 'text-[var(--purple)] dark:text-[var(--lavender)]'
+                      : 'text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] hover:text-[var(--purple)] dark:hover:text-[var(--lavender)]'
                   }`}
                   role="menuitem"
                   aria-current={isActive(link.href) ? 'page' : undefined}
@@ -147,7 +147,7 @@ export default function Navbar() {
             <SignedOut>
               <Link
                 href="/sign-in"
-                className="text-sm font-medium text-[var(--plum-dark)]/70 hover:text-[var(--purple)]"
+                className="text-sm font-medium text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] hover:text-[var(--purple)] dark:hover:text-[var(--lavender)]"
               >
                 Sign In
               </Link>
@@ -163,16 +163,16 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden p-2 rounded-lg hover:bg-[var(--lilac-soft)] transition-colors" 
+            className="md:hidden p-2 rounded-lg hover:bg-[var(--lilac-soft)] dark:hover:bg-[var(--lilac)] transition-colors" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-controls={mobileMenuId}
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-[var(--plum)]" aria-hidden="true" />
+              <X className="w-6 h-6 text-[var(--plum)] dark:text-[var(--lavender)]" aria-hidden="true" />
             ) : (
-              <Menu className="w-6 h-6 text-[var(--plum)]" aria-hidden="true" />
+              <Menu className="w-6 h-6 text-[var(--plum)] dark:text-[var(--lavender)]" aria-hidden="true" />
             )}
           </button>
         </div>
@@ -192,7 +192,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`block py-3 text-sm font-medium ${
-                  isActive(link.href) ? 'text-[var(--purple)]' : 'text-[var(--plum-dark)]'
+                  isActive(link.href) ? 'text-[var(--purple)] dark:text-[var(--lavender)]' : 'text-[var(--plum-dark)] dark:text-[var(--text-primary)]'
                 }`}
                 onClick={closeMobileMenu}
                 role="menuitem"
@@ -209,7 +209,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={`block py-3 text-sm font-medium ${
-                    isActive(link.href) ? 'text-[var(--purple)]' : 'text-[var(--plum-dark)]'
+                    isActive(link.href) ? 'text-[var(--purple)] dark:text-[var(--lavender)]' : 'text-[var(--plum-dark)] dark:text-[var(--text-primary)]'
                   }`}
                   onClick={closeMobileMenu}
                   role="menuitem"
@@ -224,7 +224,7 @@ export default function Navbar() {
               <div className="border-t border-[var(--lilac)] my-2" aria-hidden="true" />
               <Link
                 href="/sign-in"
-                className="block py-3 text-sm font-medium text-[var(--plum-dark)]"
+                className="block py-3 text-sm font-medium text-[var(--plum-dark)] dark:text-[var(--text-primary)]"
                 onClick={closeMobileMenu}
                 role="menuitem"
               >
@@ -243,7 +243,7 @@ export default function Navbar() {
             {/* Mobile Theme Toggle */}
             <div className="border-t border-[var(--lilac)] my-2" aria-hidden="true" />
             <div className="flex items-center justify-between py-3">
-              <span className="text-sm font-medium text-[var(--plum-dark)]">Theme</span>
+              <span className="text-sm font-medium text-[var(--plum-dark)] dark:text-[var(--text-primary)]">Theme</span>
               <ThemeToggle />
             </div>
           </div>

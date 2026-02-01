@@ -311,6 +311,54 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.35rem); }
   border-color: rgba(183, 148, 246, 0.3);
 }
 
+/* Dark mode utility overrides for common Tailwind patterns */
+.dark .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .bg-white\/90,
+.dark .bg-white\/95 {
+  background-color: rgba(45, 38, 64, 0.9) !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--bg-secondary);
+  border-color: var(--lilac-medium);
+  color: var(--text-primary);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Dark mode text color overrides - ensure readability */
+.dark [class*="text-[var(--plum-dark)]"] {
+  color: var(--text-primary) !important;
+}
+
+/* Override opacity variants to be more visible in dark mode */
+.dark .text-\[var\(--plum-dark\)\]\/80,
+.dark .text-\[var\(--plum-dark\)\]\/70 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-\[var\(--plum-dark\)\]\/60,
+.dark .text-\[var\(--plum-dark\)\]\/50,
+.dark .text-\[var\(--plum-dark\)\]\/40 {
+  color: var(--text-muted) !important;
+}
+
+/* Gray text colors for dark mode */
+.dark .text-gray-300,
+.dark .text-gray-400,
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: var(--text-muted) !important;
+}
+
 .card-dark {
   background: linear-gradient(135deg, var(--plum-dark) 0%, var(--plum) 100%);
   border-radius: var(--radius-xl);
