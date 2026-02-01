@@ -582,6 +582,15 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.35rem); }
   border-color: var(--border-color);
 }
 
+.dark .testimonial-card p,
+.dark .testimonial-card span {
+  color: white !important;
+}
+
+.dark .testimonial-card .text-gray-500 {
+  color: #d1d5db !important;
+}
+
 @media (hover: hover) {
   .testimonial-card:hover {
     transform: translateY(-2px);
