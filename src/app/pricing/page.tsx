@@ -162,7 +162,7 @@ export default function PricingPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-[var(--plum)] text-lg md:text-xl max-w-2xl mx-auto mb-8"
             >
-              Built by nursing students, for nursing students. Your all-in-one revision companion. 
+              Built by a nursing student, for nursing students. Your all-in-one revision companion. 
               Pay once, access forever.
             </motion.p>
 
