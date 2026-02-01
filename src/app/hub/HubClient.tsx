@@ -37,12 +37,12 @@ const hubItems: HubItem[] = [
   // ===== RECOMMENDED / POPULAR =====
   {
     id: 'rec-1',
-    title: 'Medication Abbreviations Guide',
-    description: 'Common prescription abbreviations with safety warnings. Quiz mode to test yourself!',
-    tags: ['Meds & Calculations', 'Placement'],
+    title: 'Drug Calculations Cheat Sheet',
+    description: 'Essential formulas, worked examples, and practice questions for medication calculations.',
+    tags: ['Meds & Calculations', 'OSCE', 'Placement'],
     difficulty: 'Quick Win',
     isLocked: false,
-    href: '/hub/resources/medication-abbreviations',
+    href: '/hub/resources/drug-calculations-cheat-sheet',
     isRecommended: true,
   },
   {
@@ -78,12 +78,12 @@ const hubItems: HubItem[] = [
   },
   {
     id: '0',
-    title: 'Drug Calculations Cheat Sheet',
-    description: 'Essential formulas, worked examples, and practice questions for medication calculations.',
-    tags: ['Meds & Calculations', 'OSCE', 'Placement'],
-    difficulty: 'Deep Dive',
-    isLocked: true,
-    href: '/hub/resources/drug-calculations-cheat-sheet',
+    title: 'Medication Abbreviations Guide',
+    description: 'Common prescription abbreviations with safety warnings. Quiz mode to test yourself!',
+    tags: ['Meds & Calculations', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/medication-abbreviations',
   },
   {
     id: '2',
