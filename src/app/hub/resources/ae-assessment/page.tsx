@@ -315,62 +315,67 @@ export default function AEAssessmentPage() {
               {/* Work of Breathing Diagram */}
               <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
                 <h4 className="font-semibold text-orange-700 mb-4 text-center">🫁 Signs of Increased Work of Breathing</h4>
-                <div className="relative max-w-xs mx-auto">
-                  {/* Visual body diagram */}
-                  <div className="flex flex-col items-center">
-                    {/* Head */}
-                    <div className="w-16 h-16 rounded-full bg-orange-200 border-2 border-orange-400 mb-1 flex items-center justify-center">
-                      <span className="text-2xl">😮</span>
-                    </div>
-                    {/* Neck */}
-                    <div className="w-6 h-4 bg-orange-200 border-x-2 border-orange-400"></div>
-                    {/* Chest */}
-                    <div className="w-32 h-24 bg-orange-100 border-2 border-orange-400 rounded-lg relative">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-8 h-12 border-2 border-dashed border-orange-400 rounded-lg"></div>
+                
+                {/* Cleaner list-based diagram */}
+                <div className="max-w-md mx-auto">
+                  <div className="flex items-start gap-4">
+                    {/* Body illustration */}
+                    <div className="flex flex-col items-center flex-shrink-0">
+                      {/* Head */}
+                      <div className="w-14 h-14 rounded-full bg-orange-200 border-2 border-orange-400 flex items-center justify-center">
+                        <span className="text-xl">😮</span>
                       </div>
+                      {/* Neck */}
+                      <div className="w-5 h-6 bg-orange-200 border-x-2 border-orange-400"></div>
+                      {/* Chest */}
+                      <div className="w-24 h-20 bg-orange-100 border-2 border-orange-400 rounded-t-lg relative">
+                        <div className="absolute inset-2 border-2 border-dashed border-orange-300 rounded"></div>
+                      </div>
+                      {/* Abdomen */}
+                      <div className="w-20 h-10 bg-orange-100 border-2 border-t-0 border-orange-400 rounded-b-lg"></div>
                     </div>
-                    {/* Abdomen */}
-                    <div className="w-28 h-12 bg-orange-100 border-2 border-t-0 border-orange-400 rounded-b-lg"></div>
-                  </div>
-                  
-                  {/* Labels */}
-                  <div className="absolute top-0 -left-2 sm:left-0 text-xs sm:text-sm space-y-1 text-right w-24 sm:w-28">
-                    <div className="bg-white px-2 py-1 rounded shadow-sm border border-orange-200">
-                      <strong className="text-orange-700">Head bobbing</strong>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute top-12 -right-2 sm:right-0 text-xs sm:text-sm space-y-1 w-24 sm:w-28">
-                    <div className="bg-white px-2 py-1 rounded shadow-sm border border-orange-200">
-                      <strong className="text-orange-700">Nasal flaring</strong>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute top-20 -left-2 sm:left-0 text-xs sm:text-sm w-24 sm:w-28 text-right">
-                    <div className="bg-white px-2 py-1 rounded shadow-sm border border-orange-200">
-                      <strong className="text-orange-700">Tracheal tug</strong>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute top-28 -right-2 sm:right-0 text-xs sm:text-sm w-24 sm:w-32 space-y-1">
-                    <div className="bg-white px-2 py-1 rounded shadow-sm border border-orange-200">
-                      <strong className="text-orange-700">Accessory muscles</strong>
-                      <p className="text-orange-600 text-xs">(SCM, scalenes)</p>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute top-40 -left-2 sm:left-0 text-xs sm:text-sm w-28 sm:w-32 text-right">
-                    <div className="bg-white px-2 py-1 rounded shadow-sm border border-orange-200">
-                      <strong className="text-orange-700">Intercostal recession</strong>
-                      <p className="text-orange-600 text-xs">(between ribs)</p>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute bottom-4 -right-2 sm:right-0 text-xs sm:text-sm w-28 sm:w-32">
-                    <div className="bg-white px-2 py-1 rounded shadow-sm border border-orange-200">
-                      <strong className="text-orange-700">Subcostal recession</strong>
-                      <p className="text-orange-600 text-xs">(below ribs)</p>
+                    
+                    {/* Labels list */}
+                    <div className="flex-1 space-y-2 pt-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <div className="bg-white px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 flex-1">
+                          <strong className="text-orange-700 text-sm">Head bobbing</strong>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <div className="bg-white px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 flex-1">
+                          <strong className="text-orange-700 text-sm">Nasal flaring</strong>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <div className="bg-white px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 flex-1">
+                          <strong className="text-orange-700 text-sm">Tracheal tug</strong>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <div className="bg-white px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 flex-1">
+                          <strong className="text-orange-700 text-sm">Accessory muscle use</strong>
+                          <span className="text-orange-600 text-xs ml-1">(SCM, scalenes)</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <div className="bg-white px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 flex-1">
+                          <strong className="text-orange-700 text-sm">Intercostal recession</strong>
+                          <span className="text-orange-600 text-xs ml-1">(between ribs)</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                        <div className="bg-white px-3 py-1.5 rounded-lg shadow-sm border border-orange-200 flex-1">
+                          <strong className="text-orange-700 text-sm">Subcostal recession</strong>
+                          <span className="text-orange-600 text-xs ml-1">(below ribs)</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
