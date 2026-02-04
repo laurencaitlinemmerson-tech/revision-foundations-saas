@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
-import { ArrowLeft, AlertTriangle, Lightbulb, Heart, Wind, Brain, Thermometer, Activity, Droplets, ChevronDown, ChevronUp, Printer, Download, BookOpen, Info } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Lightbulb, Heart, Wind, Brain, Thermometer, Activity, Droplets, ChevronDown, ChevronUp, Printer, Download, BookOpen, Info, Stethoscope, CircleDot, HandMetal, Ruler, Baby, User } from 'lucide-react';
 
 // Vital signs data by age group
 const vitalSignsData = [
@@ -446,6 +446,300 @@ export default function PaedsVitalSignsCheatSheet() {
             </div>
           </div>
         )}
+
+        {/* How to Take Observations Section */}
+        <div className="bg-white rounded-2xl border border-[var(--lilac-medium)] overflow-hidden shadow-sm mb-8">
+          <div className="bg-gradient-to-r from-[var(--purple)] to-[var(--pink)] p-4">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Stethoscope className="w-5 h-5" /> How to Take Observations by Age
+            </h2>
+            <p className="text-white/80 text-sm mt-1">Equipment, technique & positioning guidance</p>
+          </div>
+
+          <div className="p-4 space-y-6">
+            {/* Blood Pressure Section */}
+            <div>
+              <h3 className="font-semibold text-[var(--plum-dark)] mb-3 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-[var(--purple)]" /> Blood Pressure
+              </h3>
+
+              {/* Cuff Size Table */}
+              <div className="bg-[var(--lilac-soft)] rounded-xl p-4 mb-4">
+                <h4 className="font-medium text-[var(--plum)] mb-3 flex items-center gap-2">
+                  <Ruler className="w-4 h-4" /> Cuff Size Selection (CRITICAL!)
+                </h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[var(--lavender)]">
+                        <th className="px-3 py-2 text-left font-semibold text-[var(--plum)]">Age</th>
+                        <th className="px-3 py-2 text-left font-semibold text-[var(--plum)]">Cuff Width</th>
+                        <th className="px-3 py-2 text-left font-semibold text-[var(--plum)]">Bladder Length</th>
+                        <th className="px-3 py-2 text-left font-semibold text-[var(--plum)]">Cuff Name</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-[var(--plum-dark)]">
+                      <tr className="border-b border-[var(--lilac-soft)]">
+                        <td className="px-3 py-2">Newborn</td>
+                        <td className="px-3 py-2 font-mono">2.5-4 cm</td>
+                        <td className="px-3 py-2 font-mono">5-9 cm</td>
+                        <td className="px-3 py-2">Neonatal / Size 1</td>
+                      </tr>
+                      <tr className="border-b border-[var(--lilac-soft)]">
+                        <td className="px-3 py-2">Infant (1-12m)</td>
+                        <td className="px-3 py-2 font-mono">4-6 cm</td>
+                        <td className="px-3 py-2 font-mono">9-14 cm</td>
+                        <td className="px-3 py-2">Infant / Size 2</td>
+                      </tr>
+                      <tr className="border-b border-[var(--lilac-soft)]">
+                        <td className="px-3 py-2">Toddler (1-3y)</td>
+                        <td className="px-3 py-2 font-mono">6-8 cm</td>
+                        <td className="px-3 py-2 font-mono">12-18 cm</td>
+                        <td className="px-3 py-2">Child / Size 3</td>
+                      </tr>
+                      <tr className="border-b border-[var(--lilac-soft)]">
+                        <td className="px-3 py-2">Child (3-6y)</td>
+                        <td className="px-3 py-2 font-mono">8-10 cm</td>
+                        <td className="px-3 py-2 font-mono">17-22 cm</td>
+                        <td className="px-3 py-2">Small Adult / Size 4</td>
+                      </tr>
+                      <tr className="border-b border-[var(--lilac-soft)]">
+                        <td className="px-3 py-2">School-age (6-12y)</td>
+                        <td className="px-3 py-2 font-mono">10-12 cm</td>
+                        <td className="px-3 py-2 font-mono">22-26 cm</td>
+                        <td className="px-3 py-2">Adult / Size 5</td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-2">Adolescent</td>
+                        <td className="px-3 py-2 font-mono">12-14 cm</td>
+                        <td className="px-3 py-2 font-mono">26-33 cm</td>
+                        <td className="px-3 py-2">Adult / Large Adult</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                  <p className="text-sm text-amber-800">
+                    <strong>Golden Rule:</strong> Cuff bladder width should cover <strong>2/3 of upper arm</strong> (or 40% of arm circumference).
+                    Too small = falsely HIGH reading. Too large = falsely LOW reading.
+                  </p>
+                </div>
+              </div>
+
+              {/* BP Technique by Age */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-pink-50 rounded-xl p-4 border border-pink-200">
+                  <h4 className="font-medium text-pink-800 mb-2 flex items-center gap-2">
+                    <Baby className="w-4 h-4" /> Newborns & Infants
+                  </h4>
+                  <ul className="space-y-1 text-sm text-pink-900">
+                    <li>• Use <strong>oscillometric device</strong> (Dinamap)</li>
+                    <li>• Upper arm OR lower leg/calf acceptable</li>
+                    <li>• Measure when <strong>calm or asleep</strong></li>
+                    <li>• Support limb at heart level</li>
+                    <li>• May need to repeat if moving/crying</li>
+                  </ul>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                  <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                    <User className="w-4 h-4" /> Toddlers & Older
+                  </h4>
+                  <ul className="space-y-1 text-sm text-blue-900">
+                    <li>• <strong>Right arm preferred</strong> (standardised)</li>
+                    <li>• Seated with arm supported at heart level</li>
+                    <li>• Allow 5 mins rest before measuring</li>
+                    <li>• Explain procedure - use distraction</li>
+                    <li>• Manual auscultation reliable from ~3 years</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Heart Rate Section */}
+            <div>
+              <h3 className="font-semibold text-[var(--plum-dark)] mb-3 flex items-center gap-2">
+                <Heart className="w-5 h-5 text-[var(--purple)]" /> Heart Rate
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-pink-50 rounded-xl p-4 border border-pink-200">
+                  <h4 className="font-medium text-pink-800 mb-2">Newborn & Infant</h4>
+                  <ul className="space-y-1 text-sm text-pink-900">
+                    <li>• <strong>Apex beat</strong> (auscultate) most accurate</li>
+                    <li>• Brachial pulse for quick check</li>
+                    <li>• Femoral pulse if concern about coarctation</li>
+                    <li>• Count for <strong>full 60 seconds</strong></li>
+                  </ul>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                  <h4 className="font-medium text-purple-800 mb-2">Toddler & Pre-school</h4>
+                  <ul className="space-y-1 text-sm text-purple-900">
+                    <li>• Apex or radial pulse</li>
+                    <li>• Pulse oximeter gives continuous HR</li>
+                    <li>• Carotid palpable but can frighten</li>
+                    <li>• Distraction helps cooperation</li>
+                  </ul>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+                  <h4 className="font-medium text-emerald-800 mb-2">School-age & Adolescent</h4>
+                  <ul className="space-y-1 text-sm text-emerald-900">
+                    <li>• <strong>Radial pulse</strong> (standard)</li>
+                    <li>• Can use apex if irregular</li>
+                    <li>• Automated monitors reliable</li>
+                    <li>• Note rhythm as well as rate</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-3 p-3 bg-[var(--lilac-soft)] rounded-lg">
+                <p className="text-sm text-[var(--plum-dark)]">
+                  <strong>Pulse locations:</strong> Brachial (inside elbow) • Radial (wrist) • Femoral (groin crease) • Carotid (neck) • Apex (left side of chest, 4th-5th intercostal space)
+                </p>
+              </div>
+            </div>
+
+            {/* Respiratory Rate Section */}
+            <div>
+              <h3 className="font-semibold text-[var(--plum-dark)] mb-3 flex items-center gap-2">
+                <Wind className="w-5 h-5 text-[var(--purple)]" /> Respiratory Rate
+              </h3>
+              <div className="bg-teal-50 rounded-xl p-4 border border-teal-200 mb-3">
+                <h4 className="font-medium text-teal-800 mb-2">Technique for All Ages</h4>
+                <ul className="space-y-1 text-sm text-teal-900">
+                  <li>• <strong>Observe chest/abdomen</strong> - don&apos;t touch (changes RR)</li>
+                  <li>• Count for <strong>full 60 seconds</strong> (irregularities in young children)</li>
+                  <li>• Count when child is <strong>calm/asleep</strong> if possible</li>
+                  <li>• One rise AND fall = one breath</li>
+                  <li>• Note: effort, symmetry, accessory muscle use, sounds</li>
+                </ul>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-white rounded-lg p-3 border border-teal-100">
+                  <p className="text-sm text-teal-800"><strong>Infants:</strong> Watch abdomen (diaphragmatic breathers)</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border border-teal-100">
+                  <p className="text-sm text-teal-800"><strong>Older children:</strong> Watch chest wall movement</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Temperature Section */}
+            <div>
+              <h3 className="font-semibold text-[var(--plum-dark)] mb-3 flex items-center gap-2">
+                <Thermometer className="w-5 h-5 text-[var(--purple)]" /> Temperature
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-[var(--lilac-soft)]">
+                      <th className="px-3 py-2 text-left font-semibold text-[var(--plum)]">Age</th>
+                      <th className="px-3 py-2 text-left font-semibold text-[var(--plum)]">Recommended Site</th>
+                      <th className="px-3 py-2 text-left font-semibold text-[var(--plum)]">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-[var(--plum-dark)]">
+                    <tr className="border-b border-[var(--lilac-soft)]">
+                      <td className="px-3 py-2 font-medium">0-4 weeks</td>
+                      <td className="px-3 py-2"><strong>Axilla</strong> (electronic)</td>
+                      <td className="px-3 py-2">Add 0.5°C for core estimate. Rectal if needed for accuracy.</td>
+                    </tr>
+                    <tr className="border-b border-[var(--lilac-soft)]">
+                      <td className="px-3 py-2 font-medium">4 weeks - 5 years</td>
+                      <td className="px-3 py-2"><strong>Axilla</strong> or <strong>Tympanic</strong></td>
+                      <td className="px-3 py-2">Tympanic unreliable &lt;3 months. Pull pinna back and down.</td>
+                    </tr>
+                    <tr>
+                      <td className="px-3 py-2 font-medium">5+ years</td>
+                      <td className="px-3 py-2"><strong>Tympanic</strong> or <strong>Oral</strong></td>
+                      <td className="px-3 py-2">Pull pinna back and up. Oral: under tongue, lips closed.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                  <p className="text-sm text-red-800"><strong>Fever:</strong> ≥38°C (any method) requires assessment. &lt;3 months with fever = urgent review.</p>
+                </div>
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800"><strong>Tympanic tip:</strong> Gently pull ear - back/down (&lt;1yr) or back/up (&gt;1yr) to straighten canal.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Oxygen Saturation Section */}
+            <div>
+              <h3 className="font-semibold text-[var(--plum-dark)] mb-3 flex items-center gap-2">
+                <Droplets className="w-5 h-5 text-[var(--purple)]" /> Oxygen Saturation (SpO2)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-[var(--lilac-soft)] rounded-xl p-4">
+                  <h4 className="font-medium text-[var(--plum)] mb-2">Probe Placement by Age</h4>
+                  <ul className="space-y-2 text-sm text-[var(--plum-dark)]">
+                    <li><strong>Newborn/Infant:</strong> Foot (wrap-around) or hand</li>
+                    <li><strong>Toddler:</strong> Finger or toe (paediatric probe)</li>
+                    <li><strong>Older child:</strong> Finger (adult probe often fits)</li>
+                  </ul>
+                </div>
+                <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                  <h4 className="font-medium text-amber-800 mb-2">Tips for Accurate Reading</h4>
+                  <ul className="space-y-1 text-sm text-amber-900">
+                    <li>• Warm cold peripheries first</li>
+                    <li>• Remove nail polish</li>
+                    <li>• Ensure good waveform on monitor</li>
+                    <li>• Wait for stable reading (30+ seconds)</li>
+                    <li>• Poor perfusion = unreliable reading</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Capillary Refill Section */}
+            <div>
+              <h3 className="font-semibold text-[var(--plum-dark)] mb-3 flex items-center gap-2">
+                <CircleDot className="w-5 h-5 text-[var(--purple)]" /> Capillary Refill Time (CRT)
+              </h3>
+              <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium text-emerald-800 mb-2">Technique</h4>
+                    <ol className="space-y-1 text-sm text-emerald-900 list-decimal list-inside">
+                      <li>Press on <strong>sternum</strong> (central) or <strong>fingertip</strong> (peripheral)</li>
+                      <li>Apply pressure for <strong>5 seconds</strong></li>
+                      <li>Release and count seconds to return to pink</li>
+                      <li>Normal: <strong>&lt;2 seconds</strong> (or &lt;3s in newborns)</li>
+                    </ol>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-emerald-800 mb-2">Sites by Age</h4>
+                    <ul className="space-y-1 text-sm text-emerald-900">
+                      <li><strong>All ages:</strong> Sternum (most reliable, central)</li>
+                      <li><strong>Infant:</strong> Sole of foot or palm</li>
+                      <li><strong>Older child:</strong> Fingertip or nail bed</li>
+                      <li><strong>Tip:</strong> Peripheral CRT affected by cold - use central if in doubt</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* General Tips */}
+            <div className="bg-gradient-to-r from-[var(--purple)]/10 to-[var(--pink)]/10 rounded-xl p-4 border border-[var(--lavender)]">
+              <h4 className="font-semibold text-[var(--plum)] mb-3">General Tips for Paediatric Observations</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-[var(--plum-dark)]">
+                <ul className="space-y-1">
+                  <li>• <strong>LOOK before touching</strong> - observe from end of bed first</li>
+                  <li>• Work from <strong>least to most invasive</strong> (RR → HR → Temp → BP)</li>
+                  <li>• Involve <strong>parents</strong> - child on lap, parent holds probe</li>
+                  <li>• <strong>Explain</strong> in age-appropriate language</li>
+                </ul>
+                <ul className="space-y-1">
+                  <li>• Use <strong>distraction</strong> - bubbles, videos, toys</li>
+                  <li>• <strong>Praise cooperation</strong> - stickers, certificates</li>
+                  <li>• <strong>Document position</strong> (asleep/awake/crying)</li>
+                  <li>• <strong>Trending</strong> is more important than single values</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Quick Reference Formula */}
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 mb-8">
