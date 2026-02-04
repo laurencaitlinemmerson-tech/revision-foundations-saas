@@ -187,12 +187,12 @@ const hubItems: HubItem[] = [
   },
   {
     id: '13',
-    title: 'Y1 Paediatric Vital Signs by Age',
-    description: 'Normal vital sign ranges for children from newborn to adolescent with quick reference chart.',
-    tags: ['Paeds', 'Y1 Essentials', 'Assessment'],
+    title: 'Paediatric Vital Signs Cheat Sheet',
+    description: 'Massive reference for normal vital signs by age (newborn to adolescent). Tables, cards, red flags, formulas & quiz!',
+    tags: ['Paeds', 'Y1 Essentials', 'Assessment', 'OSCE'],
     difficulty: 'Quick Win',
     isLocked: false,
-    href: '/hub/resources/y1-paeds-vital-signs',
+    href: '/hub/resources/paeds-vital-signs-cheat-sheet',
   },
   {
     id: '14',
