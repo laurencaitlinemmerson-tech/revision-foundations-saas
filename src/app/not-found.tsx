@@ -16,7 +16,6 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-cream flex flex-col">
-      <Navbar />
 
       <main 
         id="main-content"
@@ -54,24 +53,14 @@ export default function NotFound() {
             <p className="text-sm text-[var(--plum-dark)]/60 mb-4">
               Looking for something specific?
             </p>
+
             <div className="flex flex-wrap gap-2 justify-center text-sm">
-          return (
-            <EditorialLayout
-              kicker="404"
-              title="Page Not Found"
-              standfirst="Sorry, the page you’re looking for doesn’t exist."
-              byline="Revision Foundations"
-              backHref="/"
-              backLabel="Back Home"
-            >
-              <div className="w-full text-center py-16">
-                <h1 className="text-5xl font-bold mb-4">404</h1>
-                <h2 className="text-2xl font-semibold mb-2">Page Not Found</h2>
-                <p className="text-[var(--plum-dark)]/70 mb-6">Sorry, the page you’re looking for doesn’t exist.</p>
-                <a href="/" className="btn-gradient inline-flex items-center gap-2">
-                  Back Home
-                </a>
-              </div>
-            </EditorialLayout>
-          );
-              </Link>
+              {/* ...existing helpful links here... */}
+            </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

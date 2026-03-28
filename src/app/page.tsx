@@ -44,102 +44,35 @@ export default function HomePage() {
         </Link>
       </div>
       {/* ...existing content... */}
-    </EditorialLayout>
-              </div>
-
-              <div className="hero-cta-group flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-                {!accessLoading && isPro ? (
-                  <>
-                    <Link href="/hub" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                      Go to Hub <ArrowRight className="w-5 h-5" aria-hidden="true" />
-                    </Link>
-                    <Link href="/dashboard" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                      Dashboard
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/pricing" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                      Get Access — £9.99
-                    </Link>
-                    <a href="#whats-inside" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                      See what&apos;s inside <ArrowRight className="w-5 h-5" aria-hidden="true" />
-                    </a>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Content Preview Section */}
-        <section className="bg-[var(--linen-light)] border-y border-[var(--linen-deep)] py-16">
-          <div className="max-w-6xl mx-auto px-6">
-            <h2 className="text-xl text-[var(--espresso)] mb-8">A sample of what&apos;s inside</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-
-              {/* Panel 1 — Quiz question */}
-              <div className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
-                <p className="text-[10px] uppercase tracking-widest text-[var(--charcoal-light)] mb-3 font-medium">Quiz — Paediatric Observations</p>
-                <p className="text-sm font-semibold text-[var(--espresso)] mb-4">What&apos;s the normal HR for a 2-year-old at rest?</p>
-                <ul className="space-y-2 mb-4">
-                  {[
-                    { label: '60–100 bpm', correct: false },
-                    { label: '80–120 bpm', correct: false },
-                    { label: '100–140 bpm', correct: true },
-                    { label: '120–160 bpm', correct: false },
-                  ].map((opt) => (
-                    <li
-                      key={opt.label}
-                      className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${
-                        opt.correct
-                          ? 'bg-green-50 border border-green-200 text-green-800 font-medium'
-                          : 'text-[var(--charcoal)] border border-[var(--linen-deep)]'
-                      }`}
-                    >
-                      {opt.correct ? (
-                        <span className="text-green-600 text-xs font-bold">✓</span>
-                      ) : (
-                        <span className="w-3 h-3 rounded-full border border-gray-300 flex-shrink-0" />
-                      )}
-                      {opt.label}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-[var(--charcoal-light)] leading-relaxed">
-                  Students often confuse paed and adult ranges — a common mistake in OSCE obs stations.
-                </p>
-              </div>
-
-              {/* Panel 2 — OSCE checklist */}
-              <div className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
-                <p className="text-[10px] uppercase tracking-widest text-[var(--charcoal-light)] mb-3 font-medium">OSCE Station</p>
-                <p className="text-sm font-semibold text-[var(--espresso)] mb-1">Paediatric Vital Signs</p>
-                <p className="text-xs text-[var(--charcoal-light)] mb-4 leading-relaxed">4-year-old admitted to the ward. Take a full set of obs and document correctly.</p>
-                <ul className="space-y-2 mb-4">
-                  {[
-                    { text: 'Introduces self, checks patient ID', done: true },
-                    { text: 'Explains to child & carer appropriately', done: true },
-                    { text: 'Washes hands / correct PPE', done: true },
-                    { text: 'Records HR, RR, SpO₂, temp, BP', done: false, bold: true },
-                    { text: 'Documents using SBAR, escalates if abnormal', done: false },
-                  ].map((item) => (
-                    <li key={item.text} className="flex items-start gap-2 text-xs text-[var(--charcoal)]">
-                      {item.done ? (
-                        <span className="text-green-600 flex-shrink-0 mt-px">✓</span>
-                      ) : (
-                        <span className="w-3 h-3 mt-0.5 rounded-sm border border-gray-400 flex-shrink-0" />
-                      )}
-                      <span className={`${item.done ? 'line-through text-[var(--charcoal-light)]' : ''} ${item.bold ? 'font-semibold' : ''}`}>
-                        {item.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-[var(--charcoal-light)] leading-relaxed">
-                  Each station has a full marking sheet with pass/fail criteria.
-                </p>
-              </div>
+      {/* Panel 2 — OSCE checklist */}
+      <div className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
+        <p className="text-[10px] uppercase tracking-widest text-[var(--charcoal-light)] mb-3 font-medium">OSCE Station</p>
+        <p className="text-sm font-semibold text-[var(--espresso)] mb-1">Paediatric Vital Signs</p>
+        <p className="text-xs text-[var(--charcoal-light)] mb-4 leading-relaxed">4-year-old admitted to the ward. Take a full set of obs and document correctly.</p>
+        <ul className="space-y-2 mb-4">
+          {[
+            { text: 'Introduces self, checks patient ID', done: true },
+            { text: 'Explains to child & carer appropriately', done: true },
+            { text: 'Washes hands / correct PPE', done: true },
+            { text: 'Records HR, RR, SpO₂, temp, BP', done: false, bold: true },
+            { text: 'Documents using SBAR, escalates if abnormal', done: false },
+          ].map((item) => (
+            <li key={item.text} className="flex items-start gap-2 text-xs text-[var(--charcoal)]">
+              {item.done ? (
+                <span className="text-green-600 flex-shrink-0 mt-px">✓</span>
+              ) : (
+                <span className="w-3 h-3 mt-0.5 rounded-sm border border-gray-400 flex-shrink-0" />
+              )}
+              <span className={`${item.done ? 'line-through text-[var(--charcoal-light)]' : ''} ${item.bold ? 'font-semibold' : ''}`}>
+                {item.text}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-[var(--charcoal-light)] leading-relaxed">
+          Each station has a full marking sheet with pass/fail criteria.
+        </p>
+      </div>
 
               {/* Panel 3 — Reference table */}
               <div className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
@@ -171,13 +104,10 @@ export default function HomePage() {
                   </tbody>
                 </table>
                 <p className="text-xs text-[var(--charcoal-light)] leading-relaxed">
-                  Part of the Paediatric Vital Signs cheat sheet in the Hub.
+    			Part of the Paediatric Vital Signs cheat sheet in the Hub.
                 </p>
               </div>
-
-            </div>
-          </div>
-        </section>
+            </section>
 
         {/* Tools Section — What's Inside */}
         <section id="whats-inside" className="py-16 md:py-24 bg-cream">

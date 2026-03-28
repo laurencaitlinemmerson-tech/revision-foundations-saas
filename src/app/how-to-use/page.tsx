@@ -2,6 +2,7 @@ import Link from 'next/link';
 import EditorialLayout from '@/components/EditorialLayout';
 import { ClipboardCheck, BookOpen, Play, CheckCircle2, ArrowRight, Trophy } from 'lucide-react';
 
+export default function HowToUsePage() {
   return (
     <EditorialLayout
       kicker="Quick Guide"

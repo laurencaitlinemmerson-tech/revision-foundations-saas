@@ -10,6 +10,8 @@ import { motion } from 'framer-motion';
 export default function AboutPage() {
   useScrollAnimation();
 
+  useScrollAnimation();
+
   return (
     <EditorialLayout
       kicker="About"
@@ -19,37 +21,10 @@ export default function AboutPage() {
       backHref="/dashboard"
       backLabel="Back to Dashboard"
     >
-      <div className="ed-card p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-2">Who We Are</h2>
-        <p className="mb-4 text-[var(--plum-dark)]/70">
-          Revision Foundations was created by Lauren, a children’s nurse and educator, to help students build confidence and succeed in their exams.
-        </p>
-        <p className="mb-4 text-[var(--plum-dark)]/70">
-          We believe in making learning accessible, enjoyable, and focused on what matters most.
-        </p>
-      </div>
-      <div className="ed-card p-6">
-        <h2 className="text-lg font-semibold mb-2">Our Values</h2>
-        <ul className="list-disc pl-6 text-[var(--plum-dark)]/70">
-          <li className="mb-2"><strong className="text-[var(--plum)]">Simplicity</strong> — Clear, easy-to-use tools</li>
-          <li className="mb-2"><strong className="text-[var(--plum)]">Evidence-based</strong> — Up-to-date, accurate content</li>
-          <li className="mb-2"><strong className="text-[var(--plum)]">Supportive</strong> — Here for you every step of the way</li>
-        </ul>
-      </div>
-    </EditorialLayout>
-  );
-}
-  
-// Additional context lines to maintain structure
-<Footer />
-    </div>
-  );
-
       {/* Hero Section */}
       <section className="pt-28 pb-12 bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--pink-soft)]/30 to-cream relative overflow-hidden">
         <div className="blob blob-1" style={{ opacity: 0.2 }} />
         <div className="blob blob-2" style={{ opacity: 0.2 }} />
-        
         <div className="max-w-3xl mx-auto px-6 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -60,7 +35,6 @@ export default function AboutPage() {
             <h1 className="hero-title mb-4">
               <span className="gradient-text">Hey, I'm Lauren</span> 👋
             </h1>
-            
             <p className="text-[var(--plum-dark)]/70 text-lg">
               Children's nursing student & creator of Revision Foundations
             </p>
@@ -70,7 +44,6 @@ export default function AboutPage() {
 
       <main className="pb-20 px-6">
         <div className="max-w-2xl mx-auto">
-
           {/* Main Story */}
           <motion.section 
             initial={{ opacity: 0, y: 20 }}
@@ -85,7 +58,6 @@ export default function AboutPage() {
                   It was cool, but it never quite felt like <em>my thing</em>. So at 25, I decided 
                   to make a change and start nursing. Best decision ever.
                 </p>
-                
                 <p>
                   Now I'm a children's nursing student and honestly loving it. But one thing that 
                   drove me mad? Trying to find decent revision resources. Everything was either 
@@ -103,7 +75,6 @@ export default function AboutPage() {
               </div>
             </div>
           </motion.section>
-
           {/* Quick Facts */}
           <motion.section 
             initial={{ opacity: 0, y: 20 }}
@@ -132,7 +103,6 @@ export default function AboutPage() {
               ))}
             </div>
           </motion.section>
-
           {/* Promise */}
           <motion.section 
             initial={{ opacity: 0, y: 20 }}
@@ -150,7 +120,6 @@ export default function AboutPage() {
               </div>
             </div>
           </motion.section>
-
           {/* CTA */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -174,9 +143,8 @@ export default function AboutPage() {
             </div>
           </motion.div>
         </div>
-      </main>
 
-      <Footer />
-    </div>
+      </main>
+    </EditorialLayout>
   );
 }

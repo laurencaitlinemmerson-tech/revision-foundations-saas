@@ -60,7 +60,6 @@ const resources: Record<string, {
         type: 'checklist',
         content: [
           // ...existing code...
-        content: [
           'Tachycardia or bradycardia for age',
           'Tachypnoea or bradypnoea for age',
           'Hypotension (late sign in children)',

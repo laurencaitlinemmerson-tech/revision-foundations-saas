@@ -27,17 +27,23 @@ export default function DeleteDataPage() {
     const body = encodeURIComponent(
       `Data Deletion Request\n\n` +
       `Email: ${userEmail}\n` +
-      `User ID: ${isSignedIn ? user?.id : 'Guest'}\n` +
-      return (
-        <EditorialLayout
-          kicker="Delete Data"
-          title="Request Data Deletion"
-          standfirst="You can request deletion of your account and all associated data here."
-          byline="Revision Foundations"
-          backHref="/dashboard"
-          backLabel="Back to Dashboard"
-        >
-          <div className="ed-card p-6">
+      `User ID: ${isSignedIn ? user?.id : 'Guest'}\n`
+    );
+    // ...rest of logic...
+  };
+
+  return (
+    <EditorialLayout
+      kicker="Delete Data"
+      title="Request Data Deletion"
+      standfirst="You can request deletion of your account and all associated data here."
+      byline="Revision Foundations"
+      backHref="/dashboard"
+      backLabel="Back to Dashboard"
+    >
+      <main className="pb-20 px-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="ed-card p-6 mb-8">
             <h2 className="text-lg font-semibold mb-2">How to Request Deletion</h2>
             <ul className="list-disc pl-6 text-[var(--plum-dark)]/70">
               <li className="mb-2">Email us at <a href="mailto:hello@revisionfoundations.com" className="text-[var(--purple)] hover:underline">hello@revisionfoundations.com</a></li>
@@ -45,50 +51,65 @@ export default function DeleteDataPage() {
               <li className="mb-2">We’ll confirm deletion within 7 days</li>
             </ul>
           </div>
-        </EditorialLayout>
-      );
-              </div>
-
-              {/* Confirmation checkbox */}
-              <div className="flex items-start gap-3">
+          <form onSubmit={handleSubmit} className="ed-card p-6 space-y-6">
+            {!isSignedIn && (
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-[var(--plum-dark)] mb-1">Your Email</label>
                 <input
-                  type="checkbox"
-                  id="confirm"
-                  checked={confirmed}
-                  onChange={(e) => setConfirmed(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-[var(--lilac-medium)] text-[var(--purple)] focus:ring-[var(--lavender)]"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  className="w-full px-4 py-2 rounded border border-[var(--lilac-medium)] focus:ring-[var(--lavender)]"
                 />
-                <label htmlFor="confirm" className="text-sm text-[var(--plum-dark)]/80">
-                  I understand that this will permanently delete all my data and I will lose access to any purchased tools. This cannot be undone.
-                </label>
               </div>
-
-              <button
-                type="submit"
-                disabled={loading || !confirmed || (!isSignedIn && !email)}
-                className="w-full py-3 px-6 rounded-full font-semibold transition-all flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="w-5 h-5" />
-                    Request Data Deletion
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Help text */}
+            )}
+            <div>
+              <label htmlFor="reason" className="block text-sm font-medium text-[var(--plum-dark)] mb-1">Reason (optional)</label>
+              <textarea
+                id="reason"
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2 rounded border border-[var(--lilac-medium)] focus:ring-[var(--lavender)]"
+              />
+            </div>
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="confirm"
+                checked={confirmed}
+                onChange={e => setConfirmed(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-[var(--lilac-medium)] text-[var(--purple)] focus:ring-[var(--lavender)]"
+              />
+              <label htmlFor="confirm" className="text-sm text-[var(--plum-dark)]/80">
+                I understand that this will permanently delete all my data and I will lose access to any purchased tools. This cannot be undone.
+              </label>
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !confirmed || (!isSignedIn && !email)}
+              className="w-full py-3 px-6 rounded-full font-semibold transition-all flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-5 h-5" />
+                  Request Data Deletion
+                </>
+              )}
+            </button>
+          </form>
           <p className="text-center text-sm text-[var(--plum-dark)]/50 mt-6">
             Questions? <Link href="/contact" className="text-[var(--purple)] hover:underline">Contact me</Link> instead.
           </p>
         </div>
       </main>
-    </div>
+    </EditorialLayout>
   );
 }
