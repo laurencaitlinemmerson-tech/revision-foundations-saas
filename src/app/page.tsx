@@ -129,7 +129,7 @@ export default function HomePage() {
                   <p style={{ fontFamily: serif, fontSize: '13px', color: charcoal, lineHeight: 1.75, fontWeight: 300, marginBottom: '12px' }}>{tool.desc}</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
                     {tool.tags.map(tag => (
-                      <span key={tag} style={{ fontFamily: serif, fontSize: '11px', background: linen, color: charcoal, padding: '2px 10px', border: `0.5px solid ${linenDeep}`, borderRadius: '99px', fontWeight: 400 }}>{tag}</span>
+                      <span key={tag} style={{ fontFamily: serif, fontSize: '11px', background: linen, color: charcoal, padding: '2px 10px', border: `0.5px solid ${linenDeep}`, borderRadius: '2px', fontWeight: 400 }}>{tag}</span>
                     ))}
                   </div>
                 </div>

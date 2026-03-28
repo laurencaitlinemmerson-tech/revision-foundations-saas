@@ -8,7 +8,6 @@ import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 import {
   BookOpen,
   ClipboardCheck,
-  Sparkles,
   ArrowRight,
   Play,
   Crown,
@@ -50,7 +49,6 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient firstName={firstName}>
-      {/* ✅ Adds a little breathing room below the hero before the first card */}
       <div className="space-y-8 pt-6 md:pt-10">
         {/* Study Streak Card - show for users with tools */}
         {hasAnyTool && (
@@ -69,17 +67,17 @@ export default async function DashboardPage() {
             {hasOsce && (
               <Link
                 href="/osce"
-                className="group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]"
+                className="group card transition-colors duration-200 bg-white border border-[var(--linen-deep)] hover:border-[var(--linen-medium)]"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-[var(--purple)]/15 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <ClipboardCheck className="w-7 h-7 text-[var(--purple)]" />
+                  <div className="w-14 h-14 bg-[var(--linen-light)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
+                    <ClipboardCheck className="w-7 h-7 text-[var(--espresso)]" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-[var(--plum)] text-lg font-semibold">OSCE Tool</h3>
-                    <p className="text-[var(--plum-dark)]/70 text-sm">50+ stations • timed practice</p>
+                    <h3 className="text-[var(--espresso)] text-lg font-display">OSCE Tool</h3>
+                    <p className="text-[var(--charcoal)] text-sm font-light">50+ stations &middot; timed practice</p>
                   </div>
-                  <div className="bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm group-hover:bg-[var(--plum)] transition-all flex items-center gap-2">
+                  <div className="bg-[var(--espresso)] text-white px-4 py-2 text-sm transition-colors flex items-center gap-2 hover:bg-[#3a2010]" style={{ borderRadius: '8px' }}>
                     Launch <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
@@ -89,17 +87,17 @@ export default async function DashboardPage() {
             {hasQuiz && (
               <Link
                 href="/quiz"
-                className="group card hover:-translate-y-1 hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lavender)]/60 border-[var(--lavender)]"
+                className="group card transition-colors duration-200 bg-white border border-[var(--linen-deep)] hover:border-[var(--linen-medium)]"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-[var(--purple)]/15 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <BookOpen className="w-7 h-7 text-[var(--purple)]" />
+                  <div className="w-14 h-14 bg-[var(--linen-light)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
+                    <BookOpen className="w-7 h-7 text-[var(--espresso)]" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-[var(--plum)] text-lg font-semibold">Core Quiz</h3>
-                    <p className="text-[var(--plum-dark)]/70 text-sm">17 topics • instant feedback</p>
+                    <h3 className="text-[var(--espresso)] text-lg font-display">Core Quiz</h3>
+                    <p className="text-[var(--charcoal)] text-sm font-light">17 topics &middot; instant feedback</p>
                   </div>
-                  <div className="bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm group-hover:bg-[var(--plum)] transition-all flex items-center gap-2">
+                  <div className="bg-[var(--espresso)] text-white px-4 py-2 text-sm transition-colors flex items-center gap-2 hover:bg-[#3a2010]" style={{ borderRadius: '8px' }}>
                     Launch <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
@@ -110,31 +108,32 @@ export default async function DashboardPage() {
 
         {/* Status Banner */}
         {hasOsce && hasQuiz ? (
-          <div className="card bg-[var(--mint)]/20 border-2 border-[var(--mint)]">
+          <div className="card bg-[var(--linen-light)] border border-[var(--linen-deep)]">
             <div className="flex items-center gap-4">
               <div className="text-4xl">🎉</div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Crown className="w-5 h-5 text-yellow-600" />
-                  <h3 className="font-semibold text-green-800">Full Access Unlocked!</h3>
+                  <Crown className="w-5 h-5 text-[var(--espresso)]" />
+                  <h3 className="font-display text-[var(--espresso)]">Full Access Unlocked</h3>
                 </div>
-                <p className="text-sm text-green-700">You have lifetime access to all tools. Happy revising!</p>
+                <p className="text-sm text-[var(--charcoal)] font-light">You have lifetime access to all tools. Happy revising!</p>
               </div>
             </div>
           </div>
         ) : hasAnyTool ? (
-          <div className="card bg-[var(--lilac-soft)] border border-[var(--lavender)]">
+          <div className="card bg-white border border-[var(--linen-deep)]">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
                 <div className="text-3xl">🎁</div>
                 <div>
-                  <h3 className="font-semibold text-[var(--plum)]">Want both tools?</h3>
-                  <p className="text-sm text-[var(--plum-dark)]/70">Get the bundle and save!</p>
+                  <h3 className="font-display text-[var(--espresso)]">Want both tools?</h3>
+                  <p className="text-sm text-[var(--charcoal)] font-light">Get the bundle and save!</p>
                 </div>
               </div>
               <Link
                 href="/pricing"
-                className="bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center gap-2"
+                className="bg-[var(--espresso)] text-white px-5 py-2.5 text-sm hover:bg-[#3a2010] transition-colors flex items-center gap-2"
+                style={{ borderRadius: '8px' }}
               >
                 <Gift className="w-4 h-4" />
                 View Bundle
@@ -142,23 +141,23 @@ export default async function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="card text-center py-12 bg-gradient-to-br from-[var(--lilac-soft)] to-white">
-            <div className="text-6xl mb-4">✨</div>
-            <h2 className="text-xl font-semibold text-[var(--plum)] mb-2">Ready to start revising?</h2>
-            <p className="text-[var(--plum-dark)]/70 mb-6 max-w-md mx-auto">
-              Unlock your study tools and feel confident walking into your exams and placements!
+          <div className="card text-center py-12 bg-white border border-[var(--linen-deep)]">
+            <h2 className="text-xl font-display text-[var(--espresso)] mb-2">No tools unlocked yet</h2>
+            <p className="text-[var(--charcoal)] font-light mb-6 max-w-md mx-auto">
+              There&rsquo;s a free preview if you want to try before you buy.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/pricing"
-                className="bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2"
+                className="bg-[var(--espresso)] text-white px-6 py-3 hover:bg-[#3a2010] transition-colors flex items-center justify-center gap-2"
+                style={{ borderRadius: '8px' }}
               >
-                <Sparkles className="w-5 h-5" />
-                Get Started - £4.99
+                See pricing
               </Link>
               <Link
                 href="/osce"
-                className="bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-6 py-3 rounded-full font-semibold hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2"
+                className="bg-white border border-[var(--linen-deep)] text-[var(--espresso)] px-6 py-3 hover:border-[var(--linen-medium)] transition-colors flex items-center justify-center gap-2"
+                style={{ borderRadius: '8px' }}
               >
                 <Play className="w-4 h-4" />
                 Try Free Preview
@@ -170,61 +169,65 @@ export default async function DashboardPage() {
         {/* Unlock more tools - Only show if has one but not both */}
         {hasAnyTool && (!hasOsce || !hasQuiz) && (
           <div>
-            <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-3">
+            <h2 className="text-[11px] text-[var(--charcoal)] uppercase tracking-[0.14em] mb-3" style={{ fontFamily: 'var(--font-source-serif, serif)' }}>
               Unlock more tools
             </h2>
             <div className="grid md:grid-cols-2 gap-4">
               {!hasOsce && (
-                <div className="card border-2 border-dashed border-[var(--lilac-medium)] hover:border-[var(--lavender)] hover:shadow-md transition-all">
+                <div className="card border border-[var(--linen-deep)] hover:border-[var(--linen-medium)] transition-colors">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
-                      <ClipboardCheck className="w-6 h-6 text-[var(--purple)]" />
+                    <div className="w-12 h-12 bg-[var(--linen-light)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
+                      <ClipboardCheck className="w-6 h-6 text-[var(--espresso)]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[var(--plum)]">OSCE Tool</h3>
-                      <p className="text-sm text-[var(--plum-dark)]/60">50+ timed stations</p>
+                      <h3 className="font-display text-[var(--espresso)]">OSCE Tool</h3>
+                      <p className="text-sm text-[var(--charcoal)] font-light">50+ timed stations</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <Link
                       href="/osce"
-                      className="flex-1 bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-4 py-2 rounded-full font-semibold text-sm hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2"
+                      className="flex-1 bg-white border border-[var(--linen-deep)] text-[var(--espresso)] px-4 py-2 text-sm hover:border-[var(--linen-medium)] transition-colors flex items-center justify-center gap-2"
+                      style={{ borderRadius: '8px' }}
                     >
                       <Play className="w-4 h-4" /> Preview
                     </Link>
                     <Link
                       href="/pricing?product=osce"
-                      className="flex-1 bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2"
+                      className="flex-1 bg-[var(--espresso)] text-white px-4 py-2 text-sm hover:bg-[#3a2010] transition-colors flex items-center justify-center gap-2"
+                      style={{ borderRadius: '8px' }}
                     >
-                      <Sparkles className="w-4 h-4" /> Unlock
+                      <ArrowRight className="w-4 h-4" /> Unlock
                     </Link>
                   </div>
                 </div>
               )}
 
               {!hasQuiz && (
-                <div className="card border-2 border-dashed border-[var(--lilac-medium)] hover:border-[var(--lavender)] hover:shadow-md transition-all">
+                <div className="card border border-[var(--linen-deep)] hover:border-[var(--linen-medium)] transition-colors">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-[var(--lilac-soft)] flex items-center justify-center">
-                      <BookOpen className="w-6 h-6 text-[var(--purple)]" />
+                    <div className="w-12 h-12 bg-[var(--linen-light)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
+                      <BookOpen className="w-6 h-6 text-[var(--espresso)]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[var(--plum)]">Core Quiz</h3>
-                      <p className="text-sm text-[var(--plum-dark)]/60">17 topic areas</p>
+                      <h3 className="font-display text-[var(--espresso)]">Core Quiz</h3>
+                      <p className="text-sm text-[var(--charcoal)] font-light">17 topic areas</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <Link
                       href="/quiz"
-                      className="flex-1 bg-white border-2 border-[var(--lilac-medium)] text-[var(--plum)] px-4 py-2 rounded-full font-semibold text-sm hover:border-[var(--lavender)] transition-all flex items-center justify-center gap-2"
+                      className="flex-1 bg-white border border-[var(--linen-deep)] text-[var(--espresso)] px-4 py-2 text-sm hover:border-[var(--linen-medium)] transition-colors flex items-center justify-center gap-2"
+                      style={{ borderRadius: '8px' }}
                     >
                       <Play className="w-4 h-4" /> Preview
                     </Link>
                     <Link
                       href="/pricing?product=quiz"
-                      className="flex-1 bg-[var(--purple)] text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all flex items-center justify-center gap-2"
+                      className="flex-1 bg-[var(--espresso)] text-white px-4 py-2 text-sm hover:bg-[#3a2010] transition-colors flex items-center justify-center gap-2"
+                      style={{ borderRadius: '8px' }}
                     >
-                      <Sparkles className="w-4 h-4" /> Unlock
+                      <ArrowRight className="w-4 h-4" /> Unlock
                     </Link>
                   </div>
                 </div>
@@ -243,12 +246,12 @@ export default async function DashboardPage() {
         </div>
 
         {/* Motivation Banner */}
-        <div className="card bg-gradient-to-r from-[var(--lilac-soft)] via-white to-[var(--pink-soft)]/50 border-[var(--lavender)]/50">
+        <div className="card bg-white border border-[var(--linen-deep)]">
           <div className="flex items-center gap-4">
             <div className="text-4xl">💜</div>
             <div className="flex-1">
-              <p className="text-[var(--plum)] font-medium">Remember: progress over perfection!</p>
-              <p className="text-sm text-[var(--plum-dark)]/60">
+              <p className="text-[var(--espresso)] font-display">Remember: progress over perfection!</p>
+              <p className="text-sm text-[var(--charcoal)] font-light">
                 Even 10 minutes of revision today is better than none. You've got this!
               </p>
             </div>
@@ -260,44 +263,44 @@ export default async function DashboardPage() {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-sm font-semibold text-[var(--plum-dark)]/60 uppercase tracking-wide mb-4">
+          <h2 className="text-[11px] text-[var(--charcoal)] uppercase tracking-[0.14em] mb-4" style={{ fontFamily: 'var(--font-source-serif, serif)' }}>
             Quick actions
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
               href="/hub"
-              className="card text-center py-6 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
+              className="card text-center py-6 hover:border-[var(--linen-medium)] transition-colors group"
             >
-              <Sparkles className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-medium text-[var(--plum)]">Nursing Hub</p>
-              <p className="text-xs text-[var(--plum-dark)]/50 mt-1">Resources & Q&A</p>
+              <BookOpen className="w-6 h-6 text-[var(--espresso)] mx-auto mb-2" />
+              <p className="text-sm font-display text-[var(--espresso)]">Nursing Hub</p>
+              <p className="text-xs text-[var(--charcoal)] font-light mt-1">Resources &amp; Q&amp;A</p>
             </Link>
 
             <Link
               href="/how-to-use"
-              className="card text-center py-6 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
+              className="card text-center py-6 hover:border-[var(--linen-medium)] transition-colors group"
             >
-              <HelpCircle className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-medium text-[var(--plum)]">How to use</p>
-              <p className="text-xs text-[var(--plum-dark)]/50 mt-1">2-min tour</p>
+              <HelpCircle className="w-6 h-6 text-[var(--espresso)] mx-auto mb-2" />
+              <p className="text-sm font-display text-[var(--espresso)]">How to use</p>
+              <p className="text-xs text-[var(--charcoal)] font-light mt-1">2-min tour</p>
             </Link>
 
             <Link
               href="/contact"
-              className="card text-center py-6 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
+              className="card text-center py-6 hover:border-[var(--linen-medium)] transition-colors group"
             >
-              <MessageCircle className="w-6 h-6 text-[var(--purple)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-medium text-[var(--plum)]">Get Help</p>
-              <p className="text-xs text-[var(--plum-dark)]/50 mt-1">WhatsApp</p>
+              <MessageCircle className="w-6 h-6 text-[var(--espresso)] mx-auto mb-2" />
+              <p className="text-sm font-display text-[var(--espresso)]">Get Help</p>
+              <p className="text-xs text-[var(--charcoal)] font-light mt-1">WhatsApp</p>
             </Link>
 
             <Link
               href="/review"
-              className="card text-center py-6 hover:border-[var(--lavender)] hover:-translate-y-1 hover:shadow-md transition-all group"
+              className="card text-center py-6 hover:border-[var(--linen-medium)] transition-colors group"
             >
-              <Heart className="w-6 h-6 text-[var(--pink)] mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-medium text-[var(--plum)]">Leave Review</p>
-              <p className="text-xs text-[var(--plum-dark)]/50 mt-1">30 seconds</p>
+              <Heart className="w-6 h-6 text-[var(--espresso)] mx-auto mb-2" />
+              <p className="text-sm font-display text-[var(--espresso)]">Leave Review</p>
+              <p className="text-xs text-[var(--charcoal)] font-light mt-1">30 seconds</p>
             </Link>
           </div>
         </div>

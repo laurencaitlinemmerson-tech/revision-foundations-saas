@@ -6,13 +6,12 @@ import Navbar from '@/components/Navbar';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 import { glossaryTerms, glossaryCategories, glossaryPopulations, GlossaryCategory, GlossaryTerm, GlossaryPopulation } from '@/lib/glossary';
 import { 
-  Search, 
-  ArrowLeft, 
-  BookOpen, 
-  ChevronDown, 
-  ChevronUp, 
-  Lock, 
-  Sparkles,
+  Search,
+  ArrowLeft,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Lock,
   AlertTriangle,
   Lightbulb,
   MessageCircle,
@@ -53,7 +52,7 @@ function GlossaryCard({
   };
 
   return (
-    <div className="card bg-white border border-[var(--lilac)] rounded-xl overflow-hidden transition-all hover:shadow-md">
+    <div className="card bg-white border border-[var(--lilac)] overflow-hidden transition-all" style={{ borderRadius: '8px' }}>
       {/* Header - always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -61,16 +60,16 @@ function GlossaryCard({
       >
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <h3 className="text-lg font-semibold text-[var(--plum)]">{term.term}</h3>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${categoryColors[term.category]}`}>
+            <h3 className="text-lg font-display text-[var(--plum)]">{term.term}</h3>
+            <span className={`text-xs font-medium px-2 py-0.5 ${categoryColors[term.category]}`} style={{ borderRadius: '2px' }}>
               {term.category}
             </span>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${populationColors[term.population].bg}`}>
+            <span className={`text-xs font-medium px-2 py-0.5 flex items-center gap-1 ${populationColors[term.population].bg}`} style={{ borderRadius: '2px' }}>
               {populationColors[term.population].icon}
               {term.population === 'paediatric' ? 'Paeds' : term.population === 'adult' ? 'Adult' : 'All'}
             </span>
             {term.premium && !isUnlocked && (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--purple)]/10 text-[var(--purple)]">
+              <span className="text-xs font-medium px-2 py-0.5 bg-[var(--espresso)]/10 text-[var(--espresso)]" style={{ borderRadius: '2px' }}>
                 <Lock className="w-3 h-3 inline mr-1" />
                 Premium
               </span>
@@ -83,7 +82,7 @@ function GlossaryCard({
         </div>
         <div className="flex-shrink-0 mt-1">
           {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-[var(--purple)]" />
+            <ChevronUp className="w-5 h-5 text-[var(--espresso)]" />
           ) : (
             <ChevronDown className="w-5 h-5 text-[var(--plum-dark)]/40" />
           )}
@@ -107,7 +106,7 @@ function GlossaryCard({
 
               {term.exampleInPractice && (
                 <div className="flex gap-3">
-                  <MessageCircle className="w-5 h-5 text-[var(--purple)] flex-shrink-0 mt-0.5" />
+                  <MessageCircle className="w-5 h-5 text-[var(--espresso)] flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-xs font-semibold text-[var(--plum)] uppercase tracking-wide mb-1">Example in practice</p>
                     <p className="text-sm text-[var(--plum-dark)]/80">{term.exampleInPractice}</p>
@@ -166,9 +165,9 @@ function GlossaryCard({
           ) : (
             /* Locked premium content */
             <div className="p-4 sm:p-5 relative">
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-[3px] z-10 flex flex-col items-center justify-center p-6">
-                <div className="w-12 h-12 rounded-full bg-[var(--lilac)] flex items-center justify-center mb-3">
-                  <Lock className="w-5 h-5 text-[var(--purple)]" />
+              <div className="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center p-6">
+                <div className="w-12 h-12 bg-[var(--linen-deep)] flex items-center justify-center mb-3" style={{ borderRadius: '8px' }}>
+                  <Lock className="w-5 h-5 text-[var(--espresso)]" />
                 </div>
                 <p className="text-sm text-[var(--plum)] font-medium text-center mb-3">
                   Unlock detailed explanations, OSCE wording & quiz questions
@@ -177,7 +176,6 @@ function GlossaryCard({
                   href="/pricing"
                   className="btn-primary text-sm px-5 py-2 inline-flex items-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4" />
                   Unlock full explanation
                 </Link>
               </div>
@@ -191,7 +189,7 @@ function GlossaryCard({
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <MessageCircle className="w-5 h-5 text-[var(--purple)]" />
+                  <MessageCircle className="w-5 h-5 text-[var(--espresso)]" />
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-[var(--plum)]">Example in practice</p>
                     <p className="text-sm text-[var(--plum-dark)]">Real-world scenario showing how to apply...</p>
@@ -219,9 +217,9 @@ function QuizSection({ quiz }: { quiz: NonNullable<GlossaryTerm['quizQuestion']>
   const isCorrect = selectedAnswer === quiz.answerIndex;
 
   return (
-    <div className="bg-white rounded-xl p-4 border border-[var(--lilac)]">
+    <div className="bg-white p-4 border border-[var(--linen-deep)]" style={{ borderRadius: '8px' }}>
       <div className="flex items-start gap-3 mb-3">
-        <HelpCircle className="w-5 h-5 text-[var(--purple)] flex-shrink-0 mt-0.5" />
+        <HelpCircle className="w-5 h-5 text-[var(--espresso)] flex-shrink-0 mt-0.5" />
         <p className="text-sm font-medium text-[var(--plum)]">{quiz.question}</p>
       </div>
       
@@ -290,7 +288,7 @@ export default function GlossaryPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="animate-pulse text-[var(--purple)]">Loading...</div>
+        <div className="animate-pulse text-[var(--espresso)]">Loading...</div>
       </div>
     );
   }
@@ -300,26 +298,23 @@ export default function GlossaryPage() {
       <Navbar />
 
       {/* Header */}
-      <section className="gradient-hero pt-28 pb-6 relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.25 }} />
-        <div className="blob blob-2" style={{ opacity: 0.25 }} />
-
-        <div className="max-w-4xl mx-auto px-6 relative z-10">
+      <section className="pt-28 pb-6">
+        <div className="max-w-4xl mx-auto px-6">
           <Link
             href="/hub"
-            className="inline-flex items-center gap-2 text-[var(--plum)] hover:text-[var(--purple)] mb-6 transition-colors"
+            className="inline-flex items-center gap-2 text-[var(--plum)] hover:text-[var(--espresso)] mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Hub
           </Link>
 
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center">
-              <BookOpen className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 bg-[var(--linen-deep)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
+              <BookOpen className="w-7 h-7 text-[var(--espresso)]" />
             </div>
             <div>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">
-                NEW
+              <span className="text-xs px-2.5 py-1 bg-[var(--teal-50)] text-[var(--teal-800)]" style={{ borderRadius: '2px', letterSpacing: '0.1em', textTransform: 'uppercase' as any }}>
+                New
               </span>
             </div>
           </div>
@@ -338,7 +333,7 @@ export default function GlossaryPage() {
               {freeCount} free
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[var(--purple)]" />
+              <span className="w-2 h-2 rounded-full bg-[var(--espresso)]" />
               {premiumCount} premium
             </span>
             <span className="flex items-center gap-1.5">
@@ -358,7 +353,7 @@ export default function GlossaryPage() {
       </section>
 
       {/* Sticky search & filters */}
-      <div className="sticky top-20 z-30 bg-cream/95 backdrop-blur-sm border-b border-[var(--lilac)] py-4">
+      <div className="sticky top-20 z-30 bg-cream border-b border-[var(--linen-deep)] py-4">
         <div className="max-w-4xl mx-auto px-6">
           {/* Search */}
           <div className="relative mb-4">
@@ -368,7 +363,8 @@ export default function GlossaryPage() {
               placeholder="Search terms..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-full border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:border-transparent text-[var(--plum-dark)]"
+              className="w-full pl-12 pr-4 py-3 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-[var(--espresso)]"
+              style={{ borderRadius: '8px' }}
             />
           </div>
 
@@ -377,7 +373,7 @@ export default function GlossaryPage() {
             <span className="text-xs text-[var(--plum-dark)]/50 uppercase tracking-wide font-medium self-center mr-1">Patient:</span>
             <button
               onClick={() => setSelectedPopulation('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${
                 selectedPopulation === 'all'
                   ? 'bg-[var(--plum)] text-white'
                   : 'bg-white text-[var(--plum-dark)]/70 hover:bg-[var(--lilac)] border border-[var(--lilac-medium)]'
@@ -388,7 +384,7 @@ export default function GlossaryPage() {
             </button>
             <button
               onClick={() => setSelectedPopulation('adult')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${
                 selectedPopulation === 'adult'
                   ? 'bg-indigo-600 text-white'
                   : 'bg-white text-[var(--plum-dark)]/70 hover:bg-indigo-50 border border-[var(--lilac-medium)]'
@@ -399,7 +395,7 @@ export default function GlossaryPage() {
             </button>
             <button
               onClick={() => setSelectedPopulation('paediatric')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${
                 selectedPopulation === 'paediatric'
                   ? 'bg-cyan-600 text-white'
                   : 'bg-white text-[var(--plum-dark)]/70 hover:bg-cyan-50 border border-[var(--lilac-medium)]'
@@ -415,9 +411,9 @@ export default function GlossaryPage() {
             <span className="text-xs text-[var(--plum-dark)]/50 uppercase tracking-wide font-medium self-center mr-1">Category:</span>
             <button
               onClick={() => setSelectedCategory('All')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all ${
                 selectedCategory === 'All'
-                  ? 'bg-[var(--purple)] text-white'
+                  ? 'bg-[var(--espresso)] text-white'
                   : 'bg-white text-[var(--plum-dark)]/70 hover:bg-[var(--lilac)] border border-[var(--lilac-medium)]'
               }`}
             >
@@ -427,9 +423,9 @@ export default function GlossaryPage() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                className={`px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
                   selectedCategory === cat
-                    ? 'bg-[var(--purple)] text-white'
+                    ? 'bg-[var(--espresso)] text-white'
                     : 'bg-white text-[var(--plum-dark)]/70 hover:bg-[var(--lilac)] border border-[var(--lilac-medium)]'
                 }`}
               >
@@ -444,10 +440,10 @@ export default function GlossaryPage() {
       <main className="max-w-4xl mx-auto px-6 py-8">
         {filteredTerms.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-full bg-[var(--lilac)] flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-[var(--purple)]" />
+            <div className="w-16 h-16 bg-[var(--linen-deep)] flex items-center justify-center mx-auto mb-4" style={{ borderRadius: '8px' }}>
+              <Search className="w-8 h-8 text-[var(--espresso)]" />
             </div>
-            <h3 className="text-lg font-semibold text-[var(--plum)] mb-2">No results found</h3>
+            <h3 className="text-lg font-display text-[var(--espresso)] mb-2">No results found</h3>
             <p className="text-[var(--plum-dark)]/60 mb-4">
               Try adjusting your search or filters
             </p>
@@ -457,7 +453,7 @@ export default function GlossaryPage() {
                 setSelectedCategory('All');
                 setSelectedPopulation('all');
               }}
-              className="text-[var(--purple)] font-medium hover:underline"
+              className="text-[var(--espresso)] font-medium hover:underline"
             >
               Clear all filters
             </button>
@@ -476,21 +472,20 @@ export default function GlossaryPage() {
 
         {/* Upgrade CTA for non-pro users */}
         {!isPro && (
-          <div className="mt-12 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[var(--lilac)] to-[var(--pink-soft)] text-center">
-            <div className="w-14 h-14 rounded-full bg-white/80 flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-7 h-7 text-[var(--purple)]" />
+          <div className="mt-12 p-6 sm:p-8 bg-[var(--linen-light)] border border-[var(--linen-deep)] text-center" style={{ borderRadius: '8px' }}>
+            <div className="w-14 h-14 bg-[var(--linen-deep)] flex items-center justify-center mx-auto mb-4" style={{ borderRadius: '8px' }}>
+              <BookOpen className="w-7 h-7 text-[var(--espresso)]" />
             </div>
-            <h3 className="text-xl font-semibold text-[var(--plum)] mb-2">
+            <h3 className="text-xl font-display text-[var(--espresso)] mb-2">
               Unlock all {premiumCount} premium terms
             </h3>
-            <p className="text-[var(--plum-dark)]/70 mb-6 max-w-md mx-auto">
+            <p className="text-[var(--charcoal)] mb-6 max-w-md mx-auto text-sm" style={{ fontWeight: 300 }}>
               Get detailed explanations, OSCE wording, red flags, and quiz questions for every term.
             </p>
             <Link
               href="/pricing"
               className="btn-primary inline-flex items-center gap-2"
             >
-              <Sparkles className="w-4 h-4" />
               Upgrade to Pro
             </Link>
           </div>

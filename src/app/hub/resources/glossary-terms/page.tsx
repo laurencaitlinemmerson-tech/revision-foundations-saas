@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 import EditorialLayout from '@/components/EditorialLayout';
-import LockedContent from '@/components/LockedContent';
-import { useEntitlements } from '@/lib/hooks/useEntitlements';
-import { EDITORIAL_CSS } from '@/lib/editorialStyles';
 
 const glossaryTerms = {
   A: [
@@ -140,7 +137,6 @@ const glossaryTerms = {
 };
 
 export default function GlossaryPage() {
-  const { isPro, isLoading } = useEntitlements();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedLetter, setExpandedLetter] = useState<string | null>(null);
 
@@ -158,38 +154,14 @@ export default function GlossaryPage() {
       }, {} as FilteredTerms)
     : (glossaryTerms as FilteredTerms);
 
-  if (isLoading) {
-    return (
-      <div className="ed">
-        <style dangerouslySetInnerHTML={{ __html: EDITORIAL_CSS }} />
-        <div className="ed-wrap" style={{ paddingTop: '112px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <p style={{ fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#aaa', fontFamily: 'Source Serif 4, serif' }}>Loading…</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <EditorialLayout
-      kicker="Nursing Terminology · Premium Resource"
+      kicker="Nursing Terminology · Free Resource"
       title="Nursing Glossary A–Z"
       standfirst="Your complete reference to nursing terminology, abbreviations, and medical jargon — searchable and organised alphabetically."
       byline="Revision Foundations · Children's Hub"
     >
-      {!isPro ? (
-        <LockedContent
-          title="Unlock the Full Glossary"
-          description="Get instant access to our comprehensive A–Z nursing glossary with 100+ terms and definitions."
-          features={[
-            'Complete A–Z terminology',
-            'Medical abbreviations explained',
-            'Searchable across all terms',
-            'Definitions with clinical context',
-          ]}
-        />
-      ) : (
-        <>
-          {/* Search */}
+      {/* Search */}
           <div style={{ position: 'relative', marginBottom: '24px' }}>
             <input
               type="text"
@@ -200,7 +172,7 @@ export default function GlossaryPage() {
                 width: '100%',
                 padding: '10px 16px',
                 border: '0.5px solid #ccc8c0',
-                borderRadius: '3px',
+                borderRadius: '8px',
                 fontFamily: 'Source Serif 4, serif',
                 fontSize: '14px',
                 color: '#1A1815',
@@ -292,8 +264,6 @@ export default function GlossaryPage() {
                 Clear search
               </button>
             </div>
-          )}
-        </>
       )}
     </EditorialLayout>
   );
