@@ -3,27 +3,42 @@
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import EditorialLayout from '@/components/EditorialLayout';
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <Link href="/" className="text-sm text-[var(--purple)] hover:underline inline-flex items-center gap-1 mb-4">
-              <ArrowLeft className="w-3 h-3" />
-              Back home
-            </Link>
-            <h1 className="mb-2">Terms of Service</h1>
-            <p className="text-[var(--plum-dark)]/60 text-sm">Last updated: January 2025</p>
-          </div>
 
-          {/* Content */}
-          <div className="card">
-            <div className="prose prose-sm max-w-none space-y-6 text-[var(--plum-dark)]/80">
+    <EditorialLayout
+      kicker="Terms"
+      title="Terms & Conditions"
+      standfirst="Please read these terms carefully before using Revision Foundations."
+      byline="Revision Foundations"
+      backHref="/dashboard"
+      backLabel="Back to Dashboard"
+    >
+      <div className="ed-card p-6 mb-8">
+        <h2 className="text-lg font-semibold mb-2">Use of Service</h2>
+        <ul className="list-disc pl-6 text-[var(--plum-dark)]/70">
+          <li className="mb-2">You must be a registered user to access premium content</li>
+          <li className="mb-2">Do not share your login details with others</li>
+          <li className="mb-2">Content is for personal use only</li>
+        </ul>
+      </div>
+      <div className="ed-card p-6 mb-8">
+        <h2 className="text-lg font-semibold mb-2">Refunds</h2>
+        <ul className="list-disc pl-6 text-[var(--plum-dark)]/70">
+          <li className="mb-2">Refunds are available within 14 days of purchase if you have not accessed premium content</li>
+          <li className="mb-2">Contact us for refund requests</li>
+        </ul>
+      </div>
+      <div className="ed-card p-6">
+        <h2 className="text-lg font-semibold mb-2">Contact</h2>
+        <p className="text-[var(--plum-dark)]/70">For any questions about these terms, please <a href="/contact" className="text-[var(--purple)] hover:underline">contact us</a>.</p>
+      </div>
+    </EditorialLayout>
+  );
               <section>
                 <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Welcome!</h2>
                 <p>

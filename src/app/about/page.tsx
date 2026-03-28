@@ -11,8 +11,39 @@ export default function AboutPage() {
   useScrollAnimation();
 
   return (
-    <div className="min-h-screen bg-cream">
-      <Navbar />
+    <EditorialLayout
+      kicker="About"
+      title="About Revision Foundations"
+      standfirst="Our mission is to make revision simple, effective, and stress-free for children’s nursing students."
+      byline="Revision Foundations"
+      backHref="/dashboard"
+      backLabel="Back to Dashboard"
+    >
+      <div className="ed-card p-6 mb-8">
+        <h2 className="text-lg font-semibold mb-2">Who We Are</h2>
+        <p className="mb-4 text-[var(--plum-dark)]/70">
+          Revision Foundations was created by Lauren, a children’s nurse and educator, to help students build confidence and succeed in their exams.
+        </p>
+        <p className="mb-4 text-[var(--plum-dark)]/70">
+          We believe in making learning accessible, enjoyable, and focused on what matters most.
+        </p>
+      </div>
+      <div className="ed-card p-6">
+        <h2 className="text-lg font-semibold mb-2">Our Values</h2>
+        <ul className="list-disc pl-6 text-[var(--plum-dark)]/70">
+          <li className="mb-2"><strong className="text-[var(--plum)]">Simplicity</strong> — Clear, easy-to-use tools</li>
+          <li className="mb-2"><strong className="text-[var(--plum)]">Evidence-based</strong> — Up-to-date, accurate content</li>
+          <li className="mb-2"><strong className="text-[var(--plum)]">Supportive</strong> — Here for you every step of the way</li>
+        </ul>
+      </div>
+    </EditorialLayout>
+  );
+}
+  
+// Additional context lines to maintain structure
+<Footer />
+    </div>
+  );
 
       {/* Hero Section */}
       <section className="pt-28 pb-12 bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--pink-soft)]/30 to-cream relative overflow-hidden">

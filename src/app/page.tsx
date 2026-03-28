@@ -1,83 +1,50 @@
 'use client';
 
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import EditorialLayout from '@/components/EditorialLayout';
 import Testimonials from '@/components/Testimonials';
 import { ArrowRight } from 'lucide-react';
-import { useEntitlements } from '@/lib/hooks/useEntitlements';
-import { useParallax } from '@/lib/hooks/useParallax';
-import { ScrollProgress } from '@/components/MotionComponents';
 
 export default function HomePage() {
-  const { isPro, isLoading: accessLoading } = useEntitlements();
-  const { ref: parallaxRef, offset: parallaxOffset } = useParallax({ speed: 0.3 });
-
   return (
-    <div className="min-h-screen bg-cream">
-      <ScrollProgress />
-      <Navbar />
-
-      {/* Hero Section */}
-      <main id="main-content">
-        <section
-          className="gradient-hero min-h-screen relative overflow-hidden flex items-center justify-center"
-          aria-labelledby="hero-heading"
+    <EditorialLayout
+      kicker="OSCE prep · Theory revision · Placement survival"
+      title="Pass your nursing assessments."
+      standfirst="Revision tools built by a nursing student, for nursing students. OSCE practice, theory quizzes, cheat sheets, and a full reference hub — no generic content."
+      byline="Revision Foundations"
+      backHref="/hub"
+      backLabel="Nursing Hub"
+    >
+      <div className="grid sm:grid-cols-2 gap-4 max-w-xl mb-8">
+        <Link
+          href="/hub/childrens"
+          className="group bg-white/80 backdrop-blur-sm border border-[var(--linen-deep)] rounded-xl p-5 text-left hover:border-[var(--espresso)]/30 hover:shadow-md transition-all"
         >
-          {/* Parallax Background */}
-          <div
-            ref={parallaxRef}
-            className="parallax-bg"
-            style={{ transform: `translateY(${parallaxOffset}px)` }}
-            aria-hidden="true"
-          >
-            <div className="blob blob-1" style={{ opacity: 0.2 }} />
-            <div className="blob blob-2" style={{ opacity: 0.15 }} />
-            <div className="blob blob-3" style={{ opacity: 0.2 }} />
-          </div>
-
-          <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
-            <div className="max-w-3xl mx-auto">
-              <p className="text-sm text-[var(--charcoal-light)] mb-4 tracking-wide">
-                OSCE prep · Theory revision · Placement survival
-              </p>
-
-              <h1 id="hero-heading" className="hero-title">
-                Pass your nursing assessments.
-              </h1>
-
-              <p className="hero-description mb-8">
-                Revision tools built by a nursing student, for nursing students. OSCE practice, theory quizzes, cheat sheets, and a full reference hub — no generic content.
-              </p>
-
-              {/* Branch pathway cards */}
-              <div className="grid sm:grid-cols-2 gap-4 max-w-xl mb-8">
-                <Link
-                  href="/hub/childrens"
-                  className="group bg-white/80 backdrop-blur-sm border border-[var(--linen-deep)] rounded-xl p-5 text-left hover:border-[var(--espresso)]/30 hover:shadow-md transition-all"
-                >
-                  <div className="text-2xl mb-3">🧒</div>
-                  <h2 className="text-base font-semibold text-[var(--espresso)] mb-1">Children&apos;s Nursing</h2>
-                  <p className="text-xs text-[var(--charcoal)] mb-3 leading-relaxed">
-                    Paed obs, PEWS, paediatric OSCEs, family-centred care
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--espresso)] bg-[var(--linen-light)] px-2.5 py-1 rounded-full">
-                    Available now <ArrowRight className="w-3 h-3" />
-                  </span>
-                </Link>
-
-                <Link
-                  href="/hub/adult"
-                  className="group bg-white/50 backdrop-blur-sm border border-[var(--linen-deep)] rounded-xl p-5 text-left hover:border-[var(--charcoal-light)]/30 transition-all opacity-70"
-                >
-                  <div className="text-2xl mb-3">🏥</div>
-                  <h2 className="text-base font-semibold text-[var(--espresso)] mb-1">Adult Nursing</h2>
-                  <p className="text-xs text-[var(--charcoal)] mb-3 leading-relaxed">
-                    NEWS2, sepsis, wound care, adult OSCE stations
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-xs text-[var(--charcoal-light)] bg-[var(--linen-light)]/80 px-2.5 py-1 rounded-full">
-                    Coming soon
-                  </span>
-                </Link>
+          <div className="text-2xl mb-3">🧒</div>
+          <h2 className="text-base font-semibold text-[var(--espresso)] mb-1">Children&apos;s Nursing</h2>
+          <p className="text-xs text-[var(--charcoal)] mb-3 leading-relaxed">
+            Paed obs, PEWS, paediatric OSCEs, family-centred care
+          </p>
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--espresso)] bg-[var(--linen-light)] px-2.5 py-1 rounded-full">
+            Available now <ArrowRight className="w-3 h-3" />
+          </span>
+        </Link>
+        <Link
+          href="/hub/adult"
+          className="group bg-white/50 backdrop-blur-sm border border-[var(--linen-deep)] rounded-xl p-5 text-left hover:border-[var(--charcoal-light)]/30 transition-all opacity-70"
+        >
+          <div className="text-2xl mb-3">🏥</div>
+          <h2 className="text-base font-semibold text-[var(--espresso)] mb-1">Adult Nursing</h2>
+          <p className="text-xs text-[var(--charcoal)] mb-3 leading-relaxed">
+            NEWS2, sepsis, wound care, adult OSCE stations
+          </p>
+          <span className="inline-flex items-center gap-1 text-xs text-[var(--charcoal-light)] bg-[var(--linen-light)]/80 px-2.5 py-1 rounded-full">
+            Coming soon
+          </span>
+        </Link>
+      </div>
+      {/* ...existing content... */}
+    </EditorialLayout>
               </div>
 
               <div className="hero-cta-group flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">

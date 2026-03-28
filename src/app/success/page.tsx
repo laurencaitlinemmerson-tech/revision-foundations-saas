@@ -57,21 +57,24 @@ function SuccessContent() {
     const controller = new AbortController();
 
     (async () => {
-      try {
-        setError(null);
-        setMessage(null);
-        setClaiming(true);
-
-        const res = await fetch('/api/purchases/claim', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          // Send session_id if you have it (API can still fall back to email matching)
-          body: JSON.stringify({ sessionId, product }),
-          signal: controller.signal,
-        });
-
-        const data = (await res.json().catch(() => null)) as ClaimResponse | null;
-
+      return (
+        <EditorialLayout
+          kicker="Success!"
+          title="Payment Successful"
+          standfirst="Your payment was successful. You now have access to all your premium content."
+          byline="Revision Foundations"
+          backHref="/dashboard"
+          backLabel="Go to Dashboard"
+        >
+          <div className="w-full text-center py-16">
+            <h1 className="text-3xl font-bold mb-4">Success!</h1>
+            <p className="text-[var(--plum-dark)]/70 mb-6">Your payment was successful. You now have access to all your premium content.</p>
+            <a href="/dashboard" className="btn-gradient inline-flex items-center gap-2">
+              Go to Dashboard
+            </a>
+          </div>
+        </EditorialLayout>
+      );
         if (!res.ok) {
           const errMsg =
             (data && 'error' in data && data.error) ||
