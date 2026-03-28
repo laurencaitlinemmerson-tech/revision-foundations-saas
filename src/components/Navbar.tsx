@@ -93,7 +93,7 @@ export default function Navbar() {
                 max-w-[220px] sm:max-w-[320px] md:max-w-none
                 whitespace-nowrap
               "
-              style={{ fontFamily: 'Shrikhand' }}
+              style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '0.06em' }}
             >
               Revision Foundations
             </span>

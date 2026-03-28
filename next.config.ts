@@ -1,10 +1,25 @@
 import type { NextConfig } from "next";
+import { execSync } from "child_process";
+import path from "path";
+
+// When running in a git worktree, node_modules live in the main repo.
+// Resolve the git common dir so Turbopack's root includes node_modules.
+let turbopackRoot = __dirname;
+try {
+  const gitCommonDir = execSync("git rev-parse --git-common-dir", { cwd: __dirname })
+    .toString()
+    .trim();
+  const resolved = path.resolve(__dirname, gitCommonDir, "..");
+  if (resolved !== __dirname) turbopackRoot = resolved;
+} catch {
+  // not a git repo or git not available — keep __dirname
+}
 
 const nextConfig: NextConfig = {
-  // Ensure Turbopack uses this workspace as the root to avoid
-  // incorrect root inference when multiple lockfiles exist.
+  // Ensure Turbopack uses the repo root (handles git worktrees where
+  // node_modules live in the main checkout, not the worktree).
   turbopack: {
-    root: __dirname,
+    root: turbopackRoot,
   },
 
   // Performance optimizations
