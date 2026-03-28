@@ -189,8 +189,8 @@ export const EDITORIAL_CSS = `
   font-size: 11px;
   background: #FCEBEB;
   color: #A32D2D;
-  padding: 3px 11px;
-  border-radius: 99px;
+  padding: 3px 9px;
+  border-radius: 2px;
   font-weight: 300;
   font-family: 'Source Serif 4', serif;
 }
@@ -198,9 +198,8 @@ export const EDITORIAL_CSS = `
 /* Pearl callouts */
 .ed-pearl {
   background: #FAEEDA;
-  border-left: 2px solid rgba(99,56,6,0.28);
   padding: 14px 18px;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0;
   margin-bottom: 14px;
 }
 
@@ -224,9 +223,8 @@ export const EDITORIAL_CSS = `
 /* Info callout (blue tinted) */
 .ed-info {
   background: #EEF3FA;
-  border-left: 2px solid rgba(24,95,165,0.3);
   padding: 14px 18px;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0;
   margin-bottom: 14px;
 }
 
@@ -371,7 +369,7 @@ export const EDITORIAL_CSS = `
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding: 3px 10px;
-  border-radius: 3px;
+  border-radius: 2px;
   font-family: 'Source Serif 4', serif;
   font-weight: 400;
 }
@@ -393,7 +391,7 @@ export const EDITORIAL_CSS = `
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 6px 14px;
-  border-radius: 3px;
+  border-radius: 2px;
   border: 0.5px solid transparent;
   cursor: pointer;
   font-family: 'Source Serif 4', serif;
@@ -418,7 +416,7 @@ export const EDITORIAL_CSS = `
   text-align: left;
   padding: 12px 16px;
   border: 0.5px solid rgba(0,0,0,0.15);
-  border-radius: 4px;
+  border-radius: 2px;
   font-size: 13px;
   font-family: 'Source Serif 4', serif;
   font-weight: 300;
@@ -442,4 +440,23 @@ export const EDITORIAL_CSS = `
   .ed-step-row { grid-template-columns: 60px 1fr; }
   .ed-step-numeral { font-size: 44px; }
 }
+
+/* Semantic badges for editorial pages */
+.ed-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-family: 'Source Serif 4', serif;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+.ed-badge-blue   { background: #E6F1FB; color: #0C447C; }
+.ed-badge-teal   { background: #E1F5EE; color: #085041; }
+.ed-badge-coral  { background: #FAECE7; color: #712B13; }
+.ed-badge-purple { background: #EEEDFE; color: #3C3489; }
+.ed-badge-amber  { background: #FAEEDA; color: #633806; }
+.ed-badge-red    { background: #FCEBEB; color: #A32D2D; }
+.ed-badge-gray   { background: #F1EFE8; color: #444441; }
 `;

@@ -10,64 +10,126 @@ export const metadata: Metadata = {
     'Choose your nursing branch to find OSCE guides, cheat sheets, and revision materials tailored to your pathway.',
 };
 
+const serif = "'Source Serif 4', Georgia, serif";
+const display = "'Playfair Display', Georgia, serif";
+const espresso = '#301906';
+const charcoal = '#5A5750';
+const linenDeep = '#E8E0D8';
+const linenLight = '#F7F3EF';
+
 export default function HubPage() {
   return (
-    <div className="min-h-screen bg-cream">
+    <div style={{ background: 'var(--cream)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-sm text-[var(--charcoal-light)] mb-3 tracking-wide uppercase text-[10px]">
+
+      <main style={{ flex: 1, paddingTop: '112px', paddingBottom: '80px', padding: '112px 24px 80px' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+
+          {/* Header */}
+          <p style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#aaa', fontWeight: 400, marginBottom: '12px' }}>
             Revision Hub
           </p>
-          <h1 className="text-3xl md:text-4xl font-display text-[var(--espresso)] mb-4">
+          <h1 style={{ fontFamily: display, fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 600, color: espresso, marginBottom: '16px', lineHeight: 1.1 }}>
             Which branch are you studying?
           </h1>
-          <p className="text-[var(--charcoal)] mb-12 max-w-xl">
+          <p style={{ fontFamily: serif, fontSize: '15px', color: charcoal, fontWeight: 300, lineHeight: 1.75, maxWidth: '480px', marginBottom: '48px' }}>
             Pick your pathway to find resources, cheat sheets, and OSCE prep tailored to your branch.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* Branch cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '64px' }}>
+
             {/* Children's Nursing */}
             <Link
               href="/hub/childrens"
-              className="group bg-white border border-[var(--linen-deep)] rounded-2xl p-8 hover:border-[var(--espresso)]/30 hover:shadow-md transition-all"
+              style={{
+                display: 'block',
+                background: '#fff',
+                border: `0.5px solid ${linenDeep}`,
+                borderRadius: '12px',
+                padding: '32px',
+                textDecoration: 'none',
+                transition: 'border-color 0.15s',
+              }}
             >
-              <div className="text-3xl mb-5">🧒</div>
-              <h2 className="text-xl font-semibold text-[var(--espresso)] mb-3">
+              <div style={{ fontSize: '28px', marginBottom: '20px' }}>🧒</div>
+              <h2 style={{ fontFamily: display, fontSize: '22px', fontWeight: 500, color: espresso, marginBottom: '12px' }}>
                 Children&apos;s Nursing
               </h2>
-              <p className="text-sm text-[var(--charcoal)] mb-6 leading-relaxed">
-                Paediatric OSCEs, PEWS, normal ranges by age, Gillick competence, family-centred care,
-                developmental milestones, and more.
+              <p style={{ fontFamily: serif, fontSize: '13px', color: charcoal, lineHeight: 1.8, fontWeight: 300, marginBottom: '24px' }}>
+                Paediatric OSCEs, PEWS, normal ranges by age, Gillick competence, family-centred care, developmental milestones, and more.
               </p>
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--espresso)] group-hover:underline underline-offset-2">
-                Browse resources <ArrowRight className="w-4 h-4" />
+              <span style={{ fontFamily: serif, fontSize: '13px', color: espresso, display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 400 }}>
+                Browse resources <ArrowRight style={{ width: '13px', height: '13px' }} />
               </span>
             </Link>
 
             {/* Adult Nursing — Coming Soon */}
-            <Link
-              href="/hub/adult"
-              className="relative bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-2xl p-8 transition-all hover:border-[var(--charcoal-light)]/30"
+            <div
+              style={{
+                background: linenLight,
+                border: `0.5px solid ${linenDeep}`,
+                borderRadius: '12px',
+                padding: '32px',
+                opacity: 0.6,
+              }}
             >
-              <span className="absolute top-5 right-5 text-xs bg-[var(--charcoal-light)]/10 text-[var(--charcoal)] px-3 py-1 rounded-full font-medium">
-                Coming soon
-              </span>
-              <div className="text-3xl mb-5">🏥</div>
-              <h2 className="text-xl font-semibold text-[var(--espresso)] mb-3">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                <span style={{ fontSize: '28px' }}>🏥</span>
+                <span style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#aaa', background: linenDeep, padding: '3px 10px', borderRadius: '99px' }}>
+                  Coming soon
+                </span>
+              </div>
+              <h2 style={{ fontFamily: display, fontSize: '22px', fontWeight: 500, color: espresso, marginBottom: '12px' }}>
                 Adult Nursing
               </h2>
-              <p className="text-sm text-[var(--charcoal)] mb-6 leading-relaxed">
-                NEWS2, sepsis recognition, wound care, medication management, and adult-specific OSCE
-                stations. In development.
+              <p style={{ fontFamily: serif, fontSize: '13px', color: charcoal, lineHeight: 1.8, fontWeight: 300, marginBottom: '24px' }}>
+                NEWS2, sepsis recognition, wound care, medication management, and adult-specific OSCE stations. In development.
               </p>
-              <span className="inline-flex items-center gap-1.5 text-sm text-[var(--charcoal-light)]">
-                Join the waitlist <ArrowRight className="w-4 h-4" />
+              <span style={{ fontFamily: serif, fontSize: '13px', color: charcoal, display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 300 }}>
+                Join the waitlist <ArrowRight style={{ width: '13px', height: '13px' }} />
               </span>
-            </Link>
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div style={{ borderTop: `0.5px solid ${linenDeep}`, paddingTop: '40px' }}>
+            <p style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#aaa', marginBottom: '20px' }}>
+              Also in the hub
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+              {[
+                { href: '/hub/questions', label: 'Q&A Board' },
+                { href: '/hub/glossary', label: 'Nursing Glossary' },
+                { href: '/pricing', label: 'Unlock Premium' },
+              ].map(link => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    color: espresso,
+                    background: '#fff',
+                    border: `0.5px solid ${linenDeep}`,
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    textDecoration: 'none',
+                    transition: 'background 0.15s',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  {link.label} <ArrowRight style={{ width: '12px', height: '12px', color: '#ccc' }} />
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );

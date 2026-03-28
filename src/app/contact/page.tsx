@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import EditorialLayout from '@/components/EditorialLayout';
+// import Navbar from '@/components/Navbar';
+// import Footer from '@/components/Footer';
 import { Mail, Send, Loader2, CheckCircle } from 'lucide-react';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 

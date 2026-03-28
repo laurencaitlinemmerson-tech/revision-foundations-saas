@@ -57,34 +57,22 @@ function SuccessContent() {
     const controller = new AbortController();
 
     (async () => {
-      return (
-        <EditorialLayout
-          kicker="Success!"
-          title="Payment Successful"
-          standfirst="Your payment was successful. You now have access to all your premium content."
-          byline="Revision Foundations"
-          backHref="/dashboard"
-          backLabel="Go to Dashboard"
-        >
-          <div className="w-full text-center py-16">
-            <h1 className="text-3xl font-bold mb-4">Success!</h1>
-            <p className="text-[var(--plum-dark)]/70 mb-6">Your payment was successful. You now have access to all your premium content.</p>
-            <a href="/dashboard" className="btn-gradient inline-flex items-center gap-2">
-              Go to Dashboard
-            </a>
-          </div>
-        </EditorialLayout>
-      );
+      setClaiming(true);
+      setError(null);
+      setMessage(null);
+      try {
+        const res = await fetch(`/api/purchases/claim?session_id=${sessionId || ''}&product=${product || ''}`, {
+          method: 'POST',
+          signal: controller.signal,
+        });
+        const data: ClaimResponse = await res.json();
         if (!res.ok) {
           const errMsg =
             (data && 'error' in data && data.error) ||
             'Failed to claim your purchase. Please contact support.';
           throw new Error(errMsg);
         }
-
-        // Mark claimed even if API says "nothing to claim" — avoids infinite retries
         setClaimed(true);
-
         const friendly =
           (data && 'ok' in data && data.ok && (data.message || null)) ||
           'Your access has been unlocked!';

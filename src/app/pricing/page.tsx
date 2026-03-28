@@ -7,7 +7,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {
   Check,
-  Sparkles,
   BookOpen,
   ClipboardCheck,
   Loader2,
@@ -107,7 +106,6 @@ export default function PricingPage() {
               Lifetime access to everything — OSCE tool, quiz, and revision hub.
             </p>
             <Link href="/dashboard" className="btn-primary text-lg px-8 py-4">
-              <Sparkles className="w-5 h-5" />
               Go to Dashboard
               <ArrowRight className="w-5 h-5" />
             </Link>
@@ -140,7 +138,7 @@ export default function PricingPage() {
 
           {/* Guest tip */}
           {!isSignedIn && showGuestTip && (
-            <div className="mb-10 bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-2xl p-4 flex items-start gap-3">
+            <div className="mb-10 bg-[var(--linen-light)] border border-[var(--linen-deep)] p-4 flex items-start gap-3" style={{ borderRadius: '8px' }}>
               <Info className="w-4 h-4 text-[var(--charcoal-light)] mt-0.5 flex-shrink-0" />
               <p className="text-sm text-[var(--charcoal)]">
                 <span className="font-medium">No account needed.</span> You can checkout as a guest with
@@ -157,7 +155,7 @@ export default function PricingPage() {
           )}
 
           {/* === CHILDREN'S BUNDLE === */}
-          <div className="bg-white border border-[var(--linen-deep)] rounded-2xl overflow-hidden mb-6">
+          <div className="bg-white border border-[var(--linen-deep)] overflow-hidden mb-6" style={{ borderRadius: '8px' }}>
             <div className="p-7 md:p-8">
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
@@ -198,7 +196,7 @@ export default function PricingPage() {
                       placeholder="Your email address"
                       value={guestEmail}
                       onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-11 pr-4 py-3 rounded-full border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 focus:border-[var(--espresso)]/40 text-sm"
+                      className="w-full pl-11 pr-4 py-3 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 focus:border-[var(--espresso)]/40 text-sm" style={{ borderRadius: '8px' }}
                     />
                   </div>
                   {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
@@ -227,7 +225,7 @@ export default function PricingPage() {
           </div>
 
           {/* === ADULT BUNDLE (coming soon) === */}
-          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-2xl overflow-hidden mb-6 opacity-75">
+          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] overflow-hidden mb-6 opacity-75" style={{ borderRadius: '8px' }}>
             <div className="p-7 md:p-8">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
@@ -261,7 +259,7 @@ export default function PricingPage() {
                       value={adultEmail}
                       onChange={(e) => setAdultEmail(e.target.value)}
                       required
-                      className="w-full pl-10 pr-4 py-2.5 rounded-full border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm" style={{ borderRadius: '8px' }}
                     />
                   </div>
                   <button type="submit" className="btn-secondary py-2.5 px-5 text-sm flex-shrink-0">
@@ -282,14 +280,14 @@ export default function PricingPage() {
           {/* Individual tools */}
           <div className="grid md:grid-cols-2 gap-5 mb-16">
             {/* OSCE */}
-            <div className={`bg-white border rounded-2xl p-6 ${hasOsce ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'}`}>
+            <div className={`bg-white border p-6 ${hasOsce ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'}`} style={{ borderRadius: '8px' }}>
               {hasOsce && (
                 <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-3">
                   <Check className="w-3 h-3" /> Owned
                 </span>
               )}
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-[var(--linen-deep)] flex items-center justify-center">
+                <div className="w-10 h-10 bg-[var(--linen-deep)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
                   <ClipboardCheck className="w-5 h-5 text-[var(--espresso)]" />
                 </div>
                 <div>
@@ -313,7 +311,7 @@ export default function PricingPage() {
                       placeholder="Your email"
                       value={guestEmail}
                       onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-full border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm" style={{ borderRadius: '8px' }}
                     />
                   </div>
                   {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
@@ -330,14 +328,14 @@ export default function PricingPage() {
             </div>
 
             {/* Quiz */}
-            <div className={`bg-white border rounded-2xl p-6 ${hasQuiz ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'}`}>
+            <div className={`bg-white border p-6 ${hasQuiz ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'}`} style={{ borderRadius: '8px' }}>
               {hasQuiz && (
                 <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-3">
                   <Check className="w-3 h-3" /> Owned
                 </span>
               )}
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-[var(--linen-deep)] flex items-center justify-center">
+                <div className="w-10 h-10 bg-[var(--linen-deep)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
                   <BookOpen className="w-5 h-5 text-[var(--espresso)]" />
                 </div>
                 <div>
@@ -361,7 +359,7 @@ export default function PricingPage() {
                       placeholder="Your email"
                       value={guestEmail}
                       onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-full border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm" style={{ borderRadius: '8px' }}
                     />
                   </div>
                   {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
@@ -386,7 +384,7 @@ export default function PricingPage() {
               { icon: '↩️', label: '7-day refund', desc: 'No questions asked' },
               { icon: '♾️', label: 'Lifetime access', desc: 'All updates included' },
             ].map((item) => (
-              <div key={item.label} className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
+              <div key={item.label} className="bg-white border border-[var(--linen-deep)] p-4" style={{ borderRadius: '8px' }}>
                 <div className="text-2xl mb-2">{item.icon}</div>
                 <div className="text-xs font-semibold text-[var(--espresso)] mb-0.5">{item.label}</div>
                 <div className="text-xs text-[var(--charcoal-light)]">{item.desc}</div>
@@ -395,7 +393,7 @@ export default function PricingPage() {
           </div>
 
           {/* FAQ */}
-          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-2xl p-7 md:p-8 mb-12">
+          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] p-7 md:p-8 mb-12" style={{ borderRadius: '8px' }}>
             <h2 className="text-xl font-display text-[var(--espresso)] mb-6">Questions</h2>
             <div className="space-y-5">
               {[

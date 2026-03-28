@@ -1,47 +1,17 @@
 'use client';
 
 import EditorialLayout from '@/components/EditorialLayout';
-import LockedContent from '@/components/LockedContent';
-import { useEntitlements } from '@/lib/hooks/useEntitlements';
 import { EDITORIAL_CSS } from '@/lib/editorialStyles';
 
 export default function DrugCalculationsCheatSheetPage() {
-  const { isPro, isLoading } = useEntitlements();
-
-  if (isLoading) {
-    return (
-      <div className="ed">
-        <style dangerouslySetInnerHTML={{ __html: EDITORIAL_CSS }} />
-        <div className="ed-wrap" style={{ paddingTop: '112px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <p style={{ fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#aaa', fontFamily: 'Source Serif 4, serif' }}>Loading…</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <EditorialLayout
-      kicker="Medication Safety · Premium Resource"
+      kicker="Medication Safety · Free Resource"
       title="Drug Calculations Cheat Sheet"
       standfirst="Essential formulas and step-by-step methods for common drug calculations — from oral liquids to IV rates and weight-based paediatric dosing."
       byline="Revision Foundations · Children's Hub"
     >
-      {!isPro ? (
-        <LockedContent
-          title="Unlock Drug Calculations Cheat Sheet"
-          description="Master medication calculations with our comprehensive cheat sheet including formulas, worked examples, and practice questions."
-          features={[
-            'Essential formulas explained step by step',
-            'Worked examples for tablets, liquids, and injections',
-            'IV drip rate and pump rate calculations',
-            'Holliday-Segar paediatric maintenance fluids',
-            'Weight-based dosing for paediatrics',
-            'Safe dose range checking',
-            'Unit conversion quick reference',
-          ]}
-        />
-      ) : (
-        <>
+      <>
           {/* NHS Formula */}
           <h2 className="ed-section-title">The NHS Formula</h2>
           <div className="ed-mono" style={{ fontSize: '18px', textAlign: 'center', padding: '20px' }}>
@@ -232,7 +202,6 @@ export default function DrugCalculationsCheatSheetPage() {
             ].map(flag => <span key={flag} className="ed-red-pill">{flag}</span>)}
           </div>
         </>
-      )}
     </EditorialLayout>
   );
 }

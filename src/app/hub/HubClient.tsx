@@ -8,7 +8,6 @@ import { ToastProvider, useToast } from '@/components/Toast';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import {
   Search,
-  Sparkles,
   ArrowDown,
   Lock,
   Zap,
@@ -48,19 +47,9 @@ const hubItems: HubItem[] = [
     title: 'Drug Calculations Cheat Sheet',
     description: 'Essential formulas, worked examples, and practice questions for medication calculations.',
     tags: ['Meds & Calculations', 'OSCE', 'Placement'],
-    difficulty: 'Quick Win',
+    difficulty: 'Quick Win' as const,
     isLocked: false,
     href: '/hub/resources/drug-calculations-cheat-sheet',
-    isRecommended: true,
-  },
-  {
-    id: 'rec-2',
-    title: 'A-E Assessment Framework',
-    description: 'Interactive ABCDE assessment with paediatric values, work of breathing diagram, and quiz!',
-    tags: ['OSCE', 'Emergency/ABCDE', 'Assessment'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/ae-assessment',
     isRecommended: true,
   },
   {
@@ -74,16 +63,6 @@ const hubItems: HubItem[] = [
     isRecommended: true,
   },
   // ===== CORE RESOURCES =====
-  {
-    id: '1',
-    title: 'Paeds Respiratory Assessment',
-    description:
-      'Complete guide to assessing respiratory function in children including work of breathing and red flags.',
-    tags: ['OSCE', 'Paeds', 'Assessment'],
-    difficulty: 'Moderate',
-    isLocked: false,
-    href: '/hub/resources/paeds-respiratory-assessment',
-  },
   {
     id: '0',
     title: 'Medication Abbreviations Guide',
@@ -103,15 +82,6 @@ const hubItems: HubItem[] = [
     href: '/hub/resources/sepsis-6-escalation',
   },
   {
-    id: '3',
-    title: 'Wound Care & Infection Control',
-    description: 'Wound assessment, dressing selection, and infection prevention best practices.',
-    tags: ['Adult Nursing', 'Placement', 'Practical'],
-    difficulty: 'Moderate',
-    isLocked: false,
-    href: '/hub/resources/wound-care-infection-control',
-  },
-  {
     id: '4',
     title: 'Medicines Management OSCE',
     description: 'Drug calculations, administration routes, and common medication errors to avoid.',
@@ -121,15 +91,6 @@ const hubItems: HubItem[] = [
     href: '/hub/resources/medicines-management-osce',
   },
   {
-    id: '5',
-    title: 'SBAR Handover Template',
-    description: 'Printable SBAR template with examples for confident clinical handovers.',
-    tags: ['Placement', 'Communication'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/sbar-handover',
-  },
-  {
     id: '6',
     title: 'IV Fluids & Vitals Red Flags',
     description: 'Fluid balance essentials and vital signs that need immediate escalation.',
@@ -137,24 +98,6 @@ const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/iv-fluids-vitals',
-  },
-  {
-    id: '7',
-    title: 'NEWS2 Quick Guide',
-    description: 'National Early Warning Score explained with scoring chart and response triggers.',
-    tags: ['Adult Nursing', 'Assessment', 'Emergency/ABCDE'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/news2-guide',
-  },
-  {
-    id: '11',
-    title: 'PEWS - Paediatric Early Warning Score',
-    description: 'Age-appropriate early warning scoring for children with escalation triggers.',
-    tags: ['Paeds', 'Assessment', 'Emergency/ABCDE'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/pews-guide',
   },
   {
     id: '8',
@@ -185,15 +128,6 @@ const hubItems: HubItem[] = [
   },
   // Y1 Child Nursing Resources
   {
-    id: '12',
-    title: 'Y1 Growth & Development Milestones',
-    description: 'Key developmental milestones from birth to 5 years with red flags to spot.',
-    tags: ['Paeds', 'Y1 Essentials', 'Assessment'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/y1-growth-milestones',
-  },
-  {
     id: '13',
     title: 'Paediatric Vital Signs Cheat Sheet',
     description: 'Massive reference for normal vital signs by age (newborn to adolescent). Tables, cards, red flags, formulas & quiz!',
@@ -201,15 +135,6 @@ const hubItems: HubItem[] = [
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/paeds-vital-signs-cheat-sheet',
-  },
-  {
-    id: '14',
-    title: 'Y1 Family-Centred Care Principles',
-    description: 'Understanding family-centred care in paediatrics and how to apply it on placement.',
-    tags: ['Paeds', 'Y1 Essentials', 'Placement'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/y1-family-centred-care',
   },
   {
     id: '15',
@@ -246,24 +171,6 @@ const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/y1-paeds-medications',
-  },
-  {
-    id: '19',
-    title: 'Y1 Immunisation Schedule UK',
-    description: 'Complete UK childhood immunisation schedule with catch-up information.',
-    tags: ['Paeds', 'Y1 Essentials', 'Health Promotion'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/y1-immunisation-schedule',
-  },
-  {
-    id: '20',
-    title: 'Y1 Play & Distraction Techniques',
-    description: 'Age-appropriate play and distraction techniques for procedures and hospital stays.',
-    tags: ['Paeds', 'Y1 Essentials', 'Placement'],
-    difficulty: 'Quick Win',
-    isLocked: false,
-    href: '/hub/resources/y1-play-distraction',
   },
   {
     id: '21',
@@ -346,15 +253,15 @@ const filterTags = [
 ] as const;
 
 const difficultyStyles: Record<HubItem['difficulty'], string> = {
-  'Quick Win': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Moderate: 'bg-amber-50 text-amber-700 border-amber-200',
-  'Deep Dive': 'bg-purple-50 text-purple-700 border-purple-200',
+  'Quick Win': 'bg-[var(--linen-light)] text-[var(--espresso)] border-[var(--linen-deep)]',
+  Moderate: 'bg-[var(--linen-light)] text-[var(--charcoal)] border-[var(--linen-deep)]',
+  'Deep Dive': 'bg-[var(--linen-deep)] text-[var(--espresso)] border-[var(--linen-medium)]',
 };
 
 const difficultyIcons: Record<HubItem['difficulty'], React.ComponentType<{ className?: string }>> = {
   'Quick Win': Zap,
   Moderate: BookOpen,
-  'Deep Dive': Sparkles,
+  'Deep Dive': Heart,
 };
 
 // Hub Card Component
@@ -403,8 +310,8 @@ function HubCard({
     >
       {/* Locked overlay */}
       {!canAccess && (
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center rounded-2xl">
-          <div className="w-12 h-12 rounded-full bg-[var(--linen-deep)] flex items-center justify-center mb-2">
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center">
+          <div className="w-12 h-12 bg-[var(--linen-deep)] flex items-center justify-center mb-2">
             <Lock className="w-5 h-5 text-[var(--espresso)]" />
           </div>
           <span className="text-xs font-semibold text-[var(--espresso)] bg-[var(--linen-light)] px-3 py-1 rounded-full">
@@ -451,9 +358,10 @@ function HubCard({
 
       {/* CTA */}
       <div
+        style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '13px', fontWeight: 400, borderRadius: '8px', letterSpacing: '0.01em' }}
         className={`
-          w-full py-2 rounded-full text-sm font-semibold text-center transition-all
-          ${canAccess ? 'bg-[var(--espresso)] text-white hover:bg-[var(--charcoal)]' : 'bg-[var(--linen-deep)] text-[var(--espresso)]'}
+          w-full py-2 text-center transition-all
+          ${canAccess ? 'bg-[var(--espresso)] text-[var(--cream)] hover:bg-[var(--charcoal)]' : 'bg-[var(--linen-deep)] text-[var(--espresso)] border border-[var(--linen-medium)]'}
         `}
       >
         {canAccess ? 'Open Resource' : 'Unlock'}
@@ -558,7 +466,6 @@ export default function HubClient({
                 href="/pricing"
                 className="btn-primary btn-hover text-sm px-6 py-2.5 inline-flex items-center justify-center gap-2"
               >
-                <Sparkles className="w-4 h-4" />
                 Unlock everything
               </Link>
             </div>
@@ -569,13 +476,14 @@ export default function HubClient({
         <section id="resources" className="bg-cream py-10">
           <div className="max-w-6xl mx-auto px-6">
             <div className="animate-on-scroll relative max-w-md mx-auto mb-6">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--plum-dark)]/40" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
               <input
                 type="text"
-                placeholder="Search resources..."
+                placeholder="Search resources…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-full border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] focus:border-transparent text-[var(--plum-dark)]"
+                style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '14px', borderRadius: '8px' }}
+                className="w-full pl-11 pr-4 py-2.5 border border-[var(--linen-deep)] bg-white focus:outline-none focus:border-[var(--espresso)]/40 text-[var(--espresso)]"
               />
             </div>
 
@@ -584,10 +492,11 @@ export default function HubClient({
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '12px', letterSpacing: '0.01em', borderRadius: '99px', fontWeight: 400 }}
+                  className={`px-3 py-1.5 border transition-all ${
                     selectedTags.has(tag)
-                      ? 'bg-[var(--espresso)] text-white'
-                      : 'bg-[var(--linen-light)] text-[var(--plum-dark)]/70 hover:bg-[var(--linen-deep)]'
+                      ? 'bg-[var(--espresso)] text-[var(--cream)] border-[var(--espresso)]'
+                      : 'bg-white text-[var(--charcoal)] border-[var(--linen-deep)] hover:border-[var(--charcoal-light)]'
                   }`}
                   type="button"
                 >
@@ -598,7 +507,8 @@ export default function HubClient({
               {selectedTags.size > 0 && (
                 <button
                   onClick={() => setSelectedTags(new Set())}
-                  className="px-4 py-2 rounded-full text-sm font-medium text-[var(--espresso)] hover:underline"
+                  style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '12px', background: 'transparent', border: 'none' }}
+                  className="px-3 py-1.5 text-[var(--espresso)] hover:underline underline-offset-2"
                   type="button"
                 >
                   Clear all
@@ -625,13 +535,10 @@ export default function HubClient({
             {/* Lauren Recommends Section */}
             {showRecommended && (
               <div className="mb-12">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--linen-deep)] flex items-center justify-center">
-                    <Heart className="w-5 h-5 text-[var(--espresso)]" />
-                  </div>
+                <div className="flex items-center gap-4 mb-6">
                   <div>
-                    <h2 className="text-xl font-semibold text-[var(--plum)]">Lauren Recommends</h2>
-                    <p className="text-sm text-[var(--plum-dark)]/60">Start here if you&apos;re new!</p>
+                    <p style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#aaa', marginBottom: '4px', fontWeight: 400 }}>Start here</p>
+                    <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px', fontWeight: 500, color: 'var(--espresso)' }}>Lauren Recommends</h2>
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -642,8 +549,8 @@ export default function HubClient({
                       style={{ animationDelay: i * 0.06 + 's' }}
                     >
                       {/* Recommended badge */}
-                      <div className="absolute -top-2 -right-2 z-20 bg-[var(--espresso)] text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                        ⭐ Recommended
+                      <div style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, fontWeight: 500, borderRadius: '99px' }} className="absolute -top-2 -right-2 z-20 bg-[var(--espresso)] text-[var(--cream)] px-2.5 py-1">
+                        Recommended
                       </div>
                       <HubCard item={item} isPro={isPro} isSignedIn={isSignedIn} />
                     </div>
@@ -708,7 +615,8 @@ export default function HubClient({
               </div>
               <Link
                 href="/hub/questions"
-                className="inline-flex items-center gap-2 bg-[var(--espresso)] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--charcoal)] transition-all flex-shrink-0"
+                style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 400, fontSize: '13px', borderRadius: '8px' }}
+                className="inline-flex items-center gap-2 bg-[var(--espresso)] text-[var(--cream)] px-5 py-2.5 hover:bg-[var(--charcoal)] transition-all flex-shrink-0"
               >
                 Browse Q&amp;A
                 <ChevronRight className="w-4 h-4" />
@@ -729,9 +637,9 @@ export default function HubClient({
                 </p>
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center gap-2 bg-white text-[var(--espresso)] px-7 py-3 rounded-full font-semibold text-sm hover:bg-[var(--linen-light)] transition-all"
+                  style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 400, fontSize: '14px', borderRadius: '8px' }}
+                  className="inline-flex items-center gap-2 bg-white text-[var(--espresso)] px-7 py-3 hover:bg-[var(--linen-light)] transition-all"
                 >
-                  <Sparkles className="w-4 h-4" />
                   See pricing — from £9.99
                 </Link>
                 <p className="text-white/50 text-xs mt-4">

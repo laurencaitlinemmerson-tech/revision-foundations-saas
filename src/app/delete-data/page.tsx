@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import Navbar from '@/components/Navbar';
+import EditorialLayout from '@/components/EditorialLayout';
+// import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { Trash2, ArrowLeft, Send, Loader2, AlertTriangle } from 'lucide-react';
 

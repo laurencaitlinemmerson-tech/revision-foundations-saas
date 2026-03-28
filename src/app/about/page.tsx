@@ -1,150 +1,90 @@
 'use client';
 
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import EditorialLayout from '@/components/EditorialLayout';
 import Link from 'next/link';
-import { Heart, Sparkles, ArrowRight } from 'lucide-react';
-import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
-import { motion } from 'framer-motion';
+import { Heart, ArrowRight } from 'lucide-react';
 
 export default function AboutPage() {
-  useScrollAnimation();
-
-  useScrollAnimation();
-
   return (
     <EditorialLayout
-      kicker="About"
-      title="About Revision Foundations"
-      standfirst="Our mission is to make revision simple, effective, and stress-free for children’s nursing students."
+      kicker="About Lauren"
+      title="Hi, I'm Lauren."
+      standfirst="Children's nursing student, former medical photographer, and the person who built this because I couldn't find revision tools I actually liked."
       byline="Revision Foundations"
       backHref="/dashboard"
       backLabel="Back to Dashboard"
     >
-      {/* Hero Section */}
-      <section className="pt-28 pb-12 bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--pink-soft)]/30 to-cream relative overflow-hidden">
-        <div className="blob blob-1" style={{ opacity: 0.2 }} />
-        <div className="blob blob-2" style={{ opacity: 0.2 }} />
-        <div className="max-w-3xl mx-auto px-6 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <h1 className="hero-title mb-4">
-              <span className="gradient-text">Hey, I'm Lauren</span> 👋
-            </h1>
-            <p className="text-[var(--plum-dark)]/70 text-lg">
-              Children's nursing student & creator of Revision Foundations
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <main className="pb-20 px-6">
-        <div className="max-w-2xl mx-auto">
-          {/* Main Story */}
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <div className="card">
-              <div className="space-y-6 text-[var(--plum-dark)]/80">
-                <p>
-                  I used to be a medical photographer – spent years in hospitals behind a camera. 
-                  It was cool, but it never quite felt like <em>my thing</em>. So at 25, I decided 
-                  to make a change and start nursing. Best decision ever.
-                </p>
-                <p>
-                  Now I'm a children's nursing student and honestly loving it. But one thing that 
-                  drove me mad? Trying to find decent revision resources. Everything was either 
-                  boring, outdated, or ridiculously expensive.
-                </p>
-                <p>
-                  So I started making my own. I shared them with my coursemates and they actually 
-                  found them useful – that's when I thought... maybe other nursing students need 
-                  this too? 💡
-                </p>
-                <p>
-                  That's how Revision Foundations was born – study tools that are actually nice 
-                  to look at, made by a student who gets it.
-                </p>
-              </div>
-            </div>
-          </motion.section>
-          {/* Quick Facts */}
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { emoji: '👶', label: 'Paeds Student' },
-                { emoji: '🍒', label: 'Pepsi Max Cherry' },
-                { emoji: '💜', label: 'Purple Everything' },
-                { emoji: '✨', label: 'Design Nerd' },
-              ].map((fact, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="bg-white/60 rounded-2xl p-4 text-center"
-                >
-                  <span className="text-2xl block mb-1">{fact.emoji}</span>
-                  <span className="text-xs font-medium text-[var(--plum-dark)]/70">{fact.label}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
-          {/* Promise */}
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <div className="card-glass text-center">
-              <Sparkles className="w-8 h-8 text-[var(--lavender)] mx-auto mb-3" />
-              <h2 className="text-lg text-[var(--plum)] mb-4">What you can expect</h2>
-              <div className="space-y-2 text-sm text-[var(--plum-dark)]/70">
-                <p><strong className="text-[var(--plum)]">No subscriptions</strong> – pay once, yours forever</p>
-                <p><strong className="text-[var(--plum)]">Made by a student</strong> – I know the struggle</p>
-                <p><strong className="text-[var(--plum)]">Always improving</strong> – I use these tools too!</p>
-              </div>
-            </div>
-          </motion.section>
-          {/* CTA */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <p className="text-[var(--plum-dark)]/60 text-sm mb-4">
-              Questions? Just want to chat? I'd love to hear from you 💜
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/contact" className="btn-primary">
-                <Heart className="w-4 h-4" />
-                Get in Touch
-              </Link>
-              <Link href="/hub" className="btn-secondary">
-                <Sparkles className="w-4 h-4" />
-                Explore the Hub
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </motion.div>
+      <>
+        <h2 className="ed-section-title">How this started</h2>
+        <div className="ed-card">
+          <p style={{ fontSize: '15px', color: '#5A5750', lineHeight: '1.75', fontWeight: 300, marginBottom: '18px' }}>
+            Before nursing, I spent years as a medical photographer in hospitals. Interesting work — genuinely — but it never felt like <em>my</em> thing. At 25 I decided to change that. Applied to nursing, got in, and haven't looked back.
+          </p>
+          <p style={{ fontSize: '15px', color: '#5A5750', lineHeight: '1.75', fontWeight: 300, marginBottom: '18px' }}>
+            Children's was an easy choice. I knew it was the branch for me from the first placement.
+          </p>
+          <p style={{ fontSize: '15px', color: '#5A5750', lineHeight: '1.75', fontWeight: 300 }}>
+            What wasn't so easy? Finding revision resources that weren't boring, badly designed, or weirdly expensive. So I started making my own — mostly for myself, then for coursemates who asked. That's when the idea clicked.
+          </p>
         </div>
 
-      </main>
+        <div className="ed-grid-4" style={{ marginTop: '32px', marginBottom: '8px' }}>
+          {[
+            { emoji: '👶', label: 'Paeds Student' },
+            { emoji: '🍒', label: 'Pepsi Max Cherry' },
+            { emoji: '💜', label: 'Purple Everything' },
+            { emoji: '✏️', label: 'Design Nerd' },
+          ].map((fact) => (
+            <div key={fact.label} className="ed-grid-4-cell" style={{ textAlign: 'center', padding: '20px 16px' }}>
+              <span style={{ fontSize: '22px', display: 'block', marginBottom: '8px' }}>{fact.emoji}</span>
+              <span className="ed-grid-4-title" style={{ display: 'block', borderBottom: 'none', marginBottom: 0, paddingBottom: 0 }}>{fact.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="ed-section-title">What Revision Foundations is</h2>
+        <p style={{ fontSize: '15px', color: '#5A5750', lineHeight: '1.75', fontWeight: 300, marginBottom: '24px' }}>
+          Study tools designed to actually look good and feel good to use — not walls of text recycled from a 2009 PDF. I use these myself, which means if something's wrong or unclear, I notice it too.
+        </p>
+
+        <div className="ed-grid-3" style={{ marginBottom: '32px' }}>
+          {[
+            {
+              title: 'Made by a student',
+              body: "I know the curriculum, the pressure, and what 'study-friendly' actually means at 11pm before a placement shift.",
+            },
+            {
+              title: 'One payment',
+              body: 'No subscription. No drip-feed. You pay once and everything — including future updates — is yours.',
+            },
+            {
+              title: 'Always improving',
+              body: 'New resources get added, things get fixed, content gets updated when guidelines change. Because I use it too.',
+            },
+          ].map((item) => (
+            <div key={item.title} className="ed-cell">
+              <p className="ed-cell-title">{item.title}</p>
+              <p>{item.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="ed-pearl" style={{ marginBottom: '40px' }}>
+          <p className="ed-pearl-label">A note</p>
+          <p>Questions, feedback, or just want to say hi — I genuinely read every message. Email is the best way to reach me.</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <Link href="/contact" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Heart style={{ width: '16px', height: '16px' }} />
+            Get in Touch
+          </Link>
+          <Link href="/hub" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            Explore the Hub
+            <ArrowRight style={{ width: '16px', height: '16px' }} />
+          </Link>
+        </div>
+      </>
     </EditorialLayout>
   );
 }

@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
-import { Menu, X, Sparkles } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useEffect, useState, useCallback, useId } from 'react';
-import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -13,7 +12,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const mobileMenuId = useId();
 
-  // Throttled scroll handler for better performance
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -29,224 +27,264 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && mobileMenuOpen) {
-        setMobileMenuOpen(false);
-      }
+      if (e.key === 'Escape' && mobileMenuOpen) setMobileMenuOpen(false);
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [mobileMenuOpen]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  const closeMobileMenu = useCallback(() => {
-    setMobileMenuOpen(false);
-  }, []);
-
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
   const isActive = (path: string) => pathname === path;
 
   const navLinks = [
-    { href: '/', label: 'Home' },
     { href: '/hub', label: 'Hub' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
   ];
 
-  const authLinks = [{ href: '/dashboard', label: 'Dashboard' }];
+  const navStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    transition: 'background-color 0.25s ease, border-color 0.25s ease',
+    backgroundColor: scrolled ? 'rgba(241,237,233,0.97)' : 'transparent',
+    borderBottom: scrolled ? '0.5px solid var(--linen-deep)' : '0.5px solid transparent',
+    backdropFilter: 'none',
+  };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 dark:bg-[#1a1625]/95 backdrop-blur-lg shadow-sm' : 'bg-transparent'
-      }`}
-      role="navigation"
-      aria-label="Main navigation"
-    >
-      <div className="container">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 min-w-0" aria-label="Revision Foundations - Home">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-white" aria-hidden="true" />
-            </div>
+    <nav style={navStyle} role="navigation" aria-label="Main navigation">
+      <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '68px' }}>
 
-            {/* ✅ allow full title on desktop; clamp to 1 line on mobile without truncating too aggressively */}
-            <span
-              className="
-                font-display text-lg text-[var(--plum)]
-                leading-none
-                block
-                max-w-[220px] sm:max-w-[320px] md:max-w-none
-                whitespace-nowrap
-              "
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '0.06em' }}
-            >
-              Revision Foundations
-            </span>
+          {/* Wordmark */}
+          <Link
+            href="/"
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: '18px',
+              fontWeight: 600,
+              letterSpacing: '0.04em',
+              color: 'var(--espresso)',
+              textDecoration: 'none',
+              lineHeight: 1,
+            }}
+            aria-label="Revision Foundations — Home"
+          >
+            Revision Foundations
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6" role="menubar">
-            {navLinks.map((link) => (
+          {/* Desktop nav */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="hidden md:flex" role="menubar">
+            {navLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors ${
-                  isActive(link.href)
-                    ? 'text-[var(--purple)] dark:text-[var(--lavender)]'
-                    : 'text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] hover:text-[var(--purple)] dark:hover:text-[var(--lavender)]'
-                }`}
+                style={{
+                  fontFamily: "'Source Serif 4', Georgia, serif",
+                  fontSize: '14px',
+                  fontWeight: isActive(link.href) ? 500 : 400,
+                  color: isActive(link.href) ? 'var(--espresso)' : 'var(--charcoal-light)',
+                  textDecoration: 'none',
+                  borderBottom: isActive(link.href) ? '1px solid var(--espresso)' : '1px solid transparent',
+                  paddingBottom: '1px',
+                  transition: 'color 0.15s',
+                }}
                 role="menuitem"
                 aria-current={isActive(link.href) ? 'page' : undefined}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--espresso)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = isActive(link.href) ? 'var(--espresso)' : 'var(--charcoal-light)'; }}
               >
                 {link.label}
               </Link>
             ))}
 
             <SignedIn>
-              <div className="w-px h-4 bg-[var(--lilac-medium)]" aria-hidden="true" />
-              {authLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-sm font-medium transition-colors ${
-                    isActive(link.href)
-                      ? 'text-[var(--purple)] dark:text-[var(--lavender)]'
-                      : 'text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] hover:text-[var(--purple)] dark:hover:text-[var(--lavender)]'
-                  }`}
-                  role="menuitem"
-                  aria-current={isActive(link.href) ? 'page' : undefined}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <UserButton
-                afterSwitchSessionUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: 'w-8 h-8 ring-2 ring-[var(--lilac)]',
-                  },
+              <div style={{ width: '0.5px', height: '16px', background: 'var(--linen-deep)' }} aria-hidden="true" />
+              <Link
+                href="/dashboard"
+                style={{
+                  fontFamily: "'Source Serif 4', Georgia, serif",
+                  fontSize: '14px',
+                  fontWeight: isActive('/dashboard') ? 500 : 400,
+                  color: isActive('/dashboard') ? 'var(--espresso)' : 'var(--charcoal-light)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s',
                 }}
-              />
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--espresso)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = isActive('/dashboard') ? 'var(--espresso)' : 'var(--charcoal-light)'; }}
+              >
+                Dashboard
+              </Link>
+              <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: 'w-7 h-7' } }} />
             </SignedIn>
 
             <SignedOut>
-              <Link
-                href="/sign-in"
-                className="text-sm font-medium text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] hover:text-[var(--purple)] dark:hover:text-[var(--lavender)]"
-              >
-                Sign In
-              </Link>
-              <Link href="/sign-up" className="btn-primary text-sm px-5 py-2">
-                <Sparkles className="w-4 h-4" aria-hidden="true" />
-                Get Started
-              </Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Link
+                  href="/sign-in"
+                  style={{
+                    fontFamily: "'Source Serif 4', Georgia, serif",
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    color: 'var(--charcoal-light)',
+                    textDecoration: 'none',
+                    transition: 'color 0.15s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--espresso)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--charcoal-light)'; }}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/pricing"
+                  style={{
+                    fontFamily: "'Source Serif 4', Georgia, serif",
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    color: 'var(--cream)',
+                    background: 'var(--espresso)',
+                    padding: '7px 18px',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    transition: 'background 0.15s',
+                    letterSpacing: '0.01em',
+                  }}
+                >
+                  Get Access
+                </Link>
+              </div>
             </SignedOut>
-
-            {/* Theme Toggle */}
-            <ThemeToggle />
           </div>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden p-2 rounded-lg hover:bg-[var(--lilac-soft)] dark:hover:bg-[var(--lilac)] transition-colors" 
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              color: 'var(--espresso)',
+            }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-controls={mobileMenuId}
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-[var(--plum)] dark:text-[var(--lavender)]" aria-hidden="true" />
-            ) : (
-              <Menu className="w-6 h-6 text-[var(--plum)] dark:text-[var(--lavender)]" aria-hidden="true" />
-            )}
+            {mobileMenuOpen
+              ? <X style={{ width: '22px', height: '22px' }} aria-hidden="true" />
+              : <Menu style={{ width: '22px', height: '22px' }} aria-hidden="true" />
+            }
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div 
+        <div
           id={mobileMenuId}
-          className="md:hidden bg-white dark:bg-[#1a1625] border-t border-[var(--lilac)] max-h-[calc(100vh-5rem)] overflow-y-auto"
+          style={{
+            background: 'var(--cream)',
+            borderTop: '0.5px solid var(--linen-deep)',
+            padding: '20px 24px 28px',
+          }}
           role="menu"
           aria-label="Mobile navigation"
         >
-          <div className="px-6 py-4 space-y-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`block py-3 text-sm font-medium ${
-                  isActive(link.href) ? 'text-[var(--purple)] dark:text-[var(--lavender)]' : 'text-[var(--plum-dark)] dark:text-[var(--text-primary)]'
-                }`}
-                onClick={closeMobileMenu}
-                role="menuitem"
-                aria-current={isActive(link.href) ? 'page' : undefined}
-              >
-                {link.label}
-              </Link>
-            ))}
+          {navLinks.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{
+                display: 'block',
+                padding: '12px 0',
+                fontFamily: "'Source Serif 4', Georgia, serif",
+                fontSize: '16px',
+                fontWeight: isActive(link.href) ? 500 : 400,
+                color: isActive(link.href) ? 'var(--espresso)' : 'var(--charcoal)',
+                textDecoration: 'none',
+                borderBottom: '0.5px solid var(--linen-deep)',
+              }}
+              onClick={closeMobileMenu}
+              role="menuitem"
+              aria-current={isActive(link.href) ? 'page' : undefined}
+            >
+              {link.label}
+            </Link>
+          ))}
 
-            <SignedIn>
-              <div className="border-t border-[var(--lilac)] my-2" aria-hidden="true" />
-              {authLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`block py-3 text-sm font-medium ${
-                    isActive(link.href) ? 'text-[var(--purple)] dark:text-[var(--lavender)]' : 'text-[var(--plum-dark)] dark:text-[var(--text-primary)]'
-                  }`}
-                  onClick={closeMobileMenu}
-                  role="menuitem"
-                  aria-current={isActive(link.href) ? 'page' : undefined}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </SignedIn>
+          <SignedIn>
+            <Link
+              href="/dashboard"
+              style={{
+                display: 'block',
+                padding: '12px 0',
+                fontFamily: "'Source Serif 4', Georgia, serif",
+                fontSize: '16px',
+                color: 'var(--charcoal)',
+                textDecoration: 'none',
+                borderBottom: '0.5px solid var(--linen-deep)',
+              }}
+              onClick={closeMobileMenu}
+              role="menuitem"
+            >
+              Dashboard
+            </Link>
+            <div style={{ paddingTop: '20px' }}>
+              <UserButton afterSwitchSessionUrl="/" />
+            </div>
+          </SignedIn>
 
-            <SignedOut>
-              <div className="border-t border-[var(--lilac)] my-2" aria-hidden="true" />
+          <SignedOut>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '20px' }}>
               <Link
                 href="/sign-in"
-                className="block py-3 text-sm font-medium text-[var(--plum-dark)] dark:text-[var(--text-primary)]"
+                style={{
+                  display: 'block',
+                  textAlign: 'center',
+                  padding: '10px',
+                  fontFamily: "'Source Serif 4', Georgia, serif",
+                  fontSize: '15px',
+                  color: 'var(--charcoal)',
+                  border: '0.5px solid var(--linen-deep)',
+                  borderRadius: '3px',
+                  textDecoration: 'none',
+                }}
                 onClick={closeMobileMenu}
                 role="menuitem"
               >
-                Sign In
+                Sign in
               </Link>
               <Link
-                href="/sign-up"
-                className="btn-primary w-full text-center mt-2"
+                href="/pricing"
+                style={{
+                  display: 'block',
+                  textAlign: 'center',
+                  padding: '10px',
+                  fontFamily: "'Source Serif 4', Georgia, serif",
+                  fontSize: '15px',
+                  color: 'var(--cream)',
+                  background: 'var(--espresso)',
+                  borderRadius: '3px',
+                  textDecoration: 'none',
+                }}
                 onClick={closeMobileMenu}
                 role="menuitem"
               >
-                Get Started
+                Get Access
               </Link>
-            </SignedOut>
-
-            {/* Mobile Theme Toggle */}
-            <div className="border-t border-[var(--lilac)] my-2" aria-hidden="true" />
-            <div className="flex items-center justify-between py-3">
-              <span className="text-sm font-medium text-[var(--plum-dark)] dark:text-[var(--text-primary)]">Theme</span>
-              <ThemeToggle />
             </div>
-          </div>
+          </SignedOut>
         </div>
       )}
     </nav>
