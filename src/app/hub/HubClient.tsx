@@ -34,6 +34,16 @@ interface HubItem {
 const hubItems: HubItem[] = [
   // ===== RECOMMENDED / POPULAR =====
   {
+    id: 'ae-guide',
+    title: 'A–E Assessment Framework — Full Guide',
+    description: 'Editorial-style reference covering all five steps with paediatric values, red flags, vital signs table, and an interactive after-A–E checklist.',
+    tags: ['OSCE', 'Emergency/ABCDE', 'Paeds', 'Assessment'],
+    difficulty: 'Quick Win' as const,
+    isLocked: false,
+    href: '/hub/resources/ae-assessment-guide',
+    isRecommended: true,
+  },
+  {
     id: 'rec-1',
     title: 'Drug Calculations Cheat Sheet',
     description: 'Essential formulas, worked examples, and practice questions for medication calculations.',
