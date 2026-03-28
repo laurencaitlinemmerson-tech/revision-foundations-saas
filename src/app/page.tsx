@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Testimonials from '@/components/Testimonials';
-import { Sparkles, Heart, Play, ArrowRight, BookOpen, ClipboardCheck, Users, Zap } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 import { useParallax } from '@/lib/hooks/useParallax';
 import { ScrollProgress } from '@/components/MotionComponents';
@@ -12,70 +11,6 @@ import { ScrollProgress } from '@/components/MotionComponents';
 export default function HomePage() {
   const { isPro, isLoading: accessLoading } = useEntitlements();
   const { ref: parallaxRef, offset: parallaxOffset } = useParallax({ speed: 0.3 });
-  
-  const [counters, setCounters] = useState<Record<string, number>>({});
-  const statsRef = useRef<HTMLDivElement>(null);
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  const intervalRef = useRef<number | null>(null);
-
-  const animateCounter = useCallback((id: string, target: number, duration: number) => {
-    // clear any existing interval
-    if (intervalRef.current !== null) {
-      window.clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    const steps = 60;
-    const increment = target / steps;
-    const stepDuration = duration / steps;
-    let current = 0;
-
-    intervalRef.current = window.setInterval(() => {
-      current += increment;
-
-      if (current >= target) {
-        setCounters((prev) => ({ ...prev, [id]: target }));
-
-        if (intervalRef.current !== null) {
-          window.clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      } else {
-        setCounters((prev) => ({ ...prev, [id]: Math.floor(current) }));
-      }
-    }, stepDuration);
-  }, []);
-
-  // Counter animation trigger
-  useEffect(() => {
-    if (!statsRef.current || hasAnimated) return;
-
-    const observer = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
-        if (entries[0]?.isIntersecting) {
-          setHasAnimated(true);
-          animateCounter('quiz', 17, 2000);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(statsRef.current);
-
-    return () => observer.disconnect();
-  }, [hasAnimated, animateCounter]);
-
-  // Cleanup any running interval on unmount
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current !== null) {
-        window.clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -84,306 +19,354 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <main id="main-content">
-        <section 
+        <section
           className="gradient-hero min-h-screen relative overflow-hidden flex items-center justify-center"
           aria-labelledby="hero-heading"
         >
-        {/* Parallax Background */}
-        <div 
-          ref={parallaxRef}
-          className="parallax-bg"
-          style={{ transform: `translateY(${parallaxOffset}px)` }}
-          aria-hidden="true"
-        >
-          <div className="blob blob-1" />
-          <div className="blob blob-2" />
-          <div className="blob blob-3" />
-        </div>
+          {/* Parallax Background */}
+          <div
+            ref={parallaxRef}
+            className="parallax-bg"
+            style={{ transform: `translateY(${parallaxOffset}px)` }}
+            aria-hidden="true"
+          >
+            <div className="blob blob-1" style={{ opacity: 0.2 }} />
+            <div className="blob blob-2" style={{ opacity: 0.15 }} />
+            <div className="blob blob-3" style={{ opacity: 0.2 }} />
+          </div>
 
-        <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
-          <div className="hero-center max-w-3xl mx-auto">
-            <div className="hero-badge" aria-hidden="true">
-              <Sparkles className="w-4 h-4 text-[var(--purple)] icon-spin" />
-              <span className="text-[var(--plum)]">For Nursing Students</span>
-              <Heart className="w-4 h-4 text-[var(--pink)] icon-pulse" />
+          <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
+            <div className="max-w-3xl mx-auto">
+              <p className="text-sm text-[var(--charcoal-light)] mb-4 tracking-wide">
+                Children&apos;s nursing · OSCE prep · Theory revision
+              </p>
+
+              <h1 id="hero-heading" className="hero-title">
+                Pass your nursing assessments.
+              </h1>
+
+              <p className="hero-description mb-3">
+                Revision tools built specifically for children&apos;s nursing students — not a generic study app.
+              </p>
+
+              <p className="hero-description mb-8">
+                50+ OSCE stations, 17 quiz topics, cheat sheets, and a Q&amp;A hub. Made by a paeds student who noticed that most revision tools don&apos;t cover what actually comes up.
+              </p>
+
+              <div className="hero-cta-group flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+                {!accessLoading && isPro ? (
+                  <>
+                    <Link href="/hub" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
+                      Go to Hub <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                    </Link>
+                    <Link href="/dashboard" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
+                      Dashboard
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/pricing" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
+                      Get Access — £4.99
+                    </Link>
+                    <a href="#whats-inside" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
+                      See what&apos;s inside <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                    </a>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Content Preview Section */}
+        <section className="bg-[var(--linen-light)] border-y border-[var(--linen-deep)] py-16">
+          <div className="max-w-6xl mx-auto px-6">
+            <h2 className="text-xl text-[var(--espresso)] mb-8">A sample of what&apos;s inside</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+
+              {/* Panel 1 — Quiz question */}
+              <div className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
+                <p className="text-[10px] uppercase tracking-widest text-[var(--charcoal-light)] mb-3 font-medium">Quiz — Paediatric Observations</p>
+                <p className="text-sm font-semibold text-[var(--espresso)] mb-4">What&apos;s the normal HR for a 2-year-old at rest?</p>
+                <ul className="space-y-2 mb-4">
+                  {[
+                    { label: '60–100 bpm', correct: false },
+                    { label: '80–120 bpm', correct: false },
+                    { label: '100–140 bpm', correct: true },
+                    { label: '120–160 bpm', correct: false },
+                  ].map((opt) => (
+                    <li
+                      key={opt.label}
+                      className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${
+                        opt.correct
+                          ? 'bg-green-50 border border-green-200 text-green-800 font-medium'
+                          : 'text-[var(--charcoal)] border border-[var(--linen-deep)]'
+                      }`}
+                    >
+                      {opt.correct ? (
+                        <span className="text-green-600 text-xs font-bold">✓</span>
+                      ) : (
+                        <span className="w-3 h-3 rounded-full border border-gray-300 flex-shrink-0" />
+                      )}
+                      {opt.label}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-[var(--charcoal-light)] leading-relaxed">
+                  Students often confuse paed and adult ranges — a common mistake in OSCE obs stations.
+                </p>
+              </div>
+
+              {/* Panel 2 — OSCE checklist */}
+              <div className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
+                <p className="text-[10px] uppercase tracking-widest text-[var(--charcoal-light)] mb-3 font-medium">OSCE Station</p>
+                <p className="text-sm font-semibold text-[var(--espresso)] mb-1">Paediatric Vital Signs</p>
+                <p className="text-xs text-[var(--charcoal-light)] mb-4 leading-relaxed">4-year-old admitted to the ward. Take a full set of obs and document correctly.</p>
+                <ul className="space-y-2 mb-4">
+                  {[
+                    { text: 'Introduces self, checks patient ID', done: true },
+                    { text: 'Explains to child & carer appropriately', done: true },
+                    { text: 'Washes hands / correct PPE', done: true },
+                    { text: 'Records HR, RR, SpO₂, temp, BP', done: false, bold: true },
+                    { text: 'Documents using SBAR, escalates if abnormal', done: false },
+                  ].map((item) => (
+                    <li key={item.text} className="flex items-start gap-2 text-xs text-[var(--charcoal)]">
+                      {item.done ? (
+                        <span className="text-green-600 flex-shrink-0 mt-px">✓</span>
+                      ) : (
+                        <span className="w-3 h-3 mt-0.5 rounded-sm border border-gray-400 flex-shrink-0" />
+                      )}
+                      <span className={`${item.done ? 'line-through text-[var(--charcoal-light)]' : ''} ${item.bold ? 'font-semibold' : ''}`}>
+                        {item.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-[var(--charcoal-light)] leading-relaxed">
+                  Each station has a full marking sheet with pass/fail criteria.
+                </p>
+              </div>
+
+              {/* Panel 3 — Reference table */}
+              <div className="bg-white border border-[var(--linen-deep)] rounded-xl p-4">
+                <p className="text-[10px] uppercase tracking-widest text-[var(--charcoal-light)] mb-3 font-medium">Hub Resource</p>
+                <p className="text-sm font-semibold text-[var(--espresso)] mb-4">Paed Normal Obs Ranges</p>
+                <table className="w-full text-xs mb-4">
+                  <thead>
+                    <tr className="text-left text-[var(--charcoal-light)] border-b border-[var(--linen-deep)]">
+                      <th className="pb-2 font-medium">Age</th>
+                      <th className="pb-2 font-medium">HR</th>
+                      <th className="pb-2 font-medium">RR</th>
+                      <th className="pb-2 font-medium">SBP</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { age: 'Newborn', hr: '100–160', rr: '30–60', sbp: '50–70' },
+                      { age: '1–12mo', hr: '100–150', rr: '25–50', sbp: '70–90' },
+                      { age: '1–5yr', hr: '90–140', rr: '20–40', sbp: '80–100' },
+                      { age: '5–12yr', hr: '70–120', rr: '15–25', sbp: '90–110' },
+                    ].map((row, i) => (
+                      <tr key={row.age} className={`${i % 2 === 0 ? 'bg-[var(--linen-light)]' : ''}`}>
+                        <td className="py-1.5 pr-2 text-[var(--charcoal)] font-medium">{row.age}</td>
+                        <td className="py-1.5 pr-2 text-[var(--charcoal)]">{row.hr}</td>
+                        <td className="py-1.5 pr-2 text-[var(--charcoal)]">{row.rr}</td>
+                        <td className="py-1.5 text-[var(--charcoal)]">{row.sbp}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="text-xs text-[var(--charcoal-light)] leading-relaxed">
+                  Part of the Paediatric Vital Signs cheat sheet in the Hub.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* Tools Section — What's Inside */}
+        <section id="whats-inside" className="py-16 md:py-24 bg-cream">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+            <h2 className="text-2xl text-[var(--espresso)] mb-8">What&apos;s included</h2>
+
+            <div className="flex flex-col gap-4">
+              {/* OSCE Tool */}
+              <Link href={isPro ? "/hub" : "/osce"} className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--linen-deep)] flex items-center justify-center flex-shrink-0 text-xl">
+                    🩺
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Children&apos;s OSCE Tool</h3>
+                    <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">
+                      50+ practice stations covering paediatric obs, A-E assessment, medication administration, safeguarding, and SBAR handover. Each station has an examiner marking checklist and timed mode for realistic practice.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Paed obs', 'ABCDE approach', 'Medication admin', 'Safeguarding', 'SBAR handover'].map((tag) => (
+                        <span key={tag} className="text-xs bg-[var(--linen-light)] dark:bg-[var(--bg-tertiary)] text-[var(--charcoal)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full border border-[var(--linen-deep)]">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Quiz Tool */}
+              <Link href={isPro ? "/hub" : "/quiz"} className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--linen-deep)] flex items-center justify-center flex-shrink-0 text-xl">
+                    📋
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Core Nursing Quiz</h3>
+                    <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">
+                      17 topic areas: vital signs, drug calculations, anatomy &amp; physiology, pharmacology, infection control, fluid balance. Every answer includes an explanation — not just right or wrong.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Drug calculations', 'Vital signs', 'Anatomy', 'Pharmacology', 'Infection control'].map((tag) => (
+                        <span key={tag} className="text-xs bg-[var(--linen-light)] dark:bg-[var(--bg-tertiary)] text-[var(--charcoal)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full border border-[var(--linen-deep)]">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Hub */}
+              <Link href="/hub" className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--linen-deep)] flex items-center justify-center flex-shrink-0 text-xl">
+                    📚
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Revision Hub</h3>
+                    <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">
+                      Cheat sheets, clinical guides, and practice questions. Includes paediatric obs reference ranges, A-E assessment guide, SBAR template, and a placement survival guide. Plus a Q&amp;A section for anything you&apos;re stuck on.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Cheat sheets', 'Clinical guides', 'Placement tips', 'Q&A'].map((tag) => (
+                        <span key={tag} className="text-xs bg-[var(--linen-light)] dark:bg-[var(--bg-tertiary)] text-[var(--charcoal)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full border border-[var(--linen-deep)]">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </div>
 
-            <h1 id="hero-heading" className="hero-title">
-              <span className="gradient-text">Revision Foundations</span>
-            </h1>
-
-
-            <p className="hero-subtitle">Your Nursing Bestie for OSCEs & Exams</p>
-
-            <p className="hero-description">
-              Know what to revise, how to revise, and feel confident walking into placements and
-              assessments.
+            <p className="text-sm text-[var(--charcoal-light)] mt-6">
+              £4.99 one-time — includes everything above plus new content as it&apos;s added.{' '}
+              <Link href="/pricing" className="underline underline-offset-2 hover:opacity-75 transition-opacity">See pricing →</Link>
             </p>
+          </div>
+        </section>
 
-            <div className="hero-cta-group flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+        {/* Why I built this */}
+        <section className="bg-[var(--linen-light)] border-y border-[var(--linen-deep)] py-16 md:py-20">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-2xl text-[var(--espresso)] mb-10">Why I built this</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <h3 className="text-base font-semibold text-[var(--espresso)] mb-2">Paediatric-specific</h3>
+                <p className="text-sm text-[var(--charcoal-light)] leading-relaxed">
+                  Most revision tools are written for adult nursing. This is built around paeds — age-appropriate normal ranges, child-focused communication, safeguarding scenarios, and development milestones.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-[var(--espresso)] mb-2">What actually gets tested</h3>
+                <p className="text-sm text-[var(--charcoal-light)] leading-relaxed">
+                  I made these tools while preparing for my own OSCEs and theory exams. The topics and scenarios reflect what nursing students actually face — not what a textbook assumes they face.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-[var(--espresso)] mb-2">No recurring cost</h3>
+                <p className="text-sm text-[var(--charcoal-light)] leading-relaxed">
+                  Students don&apos;t have spare cash. £4.99 once, and it&apos;s yours. I use these tools myself so new content is added regularly — and you get all future updates at no extra cost.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <Testimonials />
+
+        {/* Bottom CTA */}
+        <section className="bg-cream py-16">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-2xl text-[var(--espresso)] mb-3">Start revising today</h2>
+            <p className="text-sm text-[var(--charcoal-light)] mb-8">One-time access. Works on mobile. Built for children&apos;s nursing.</p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
               {!accessLoading && isPro ? (
-                <>
-                  <Link href="/hub" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                    <Sparkles className="w-5 h-5" aria-hidden="true" /> Go to Hub <ArrowRight className="w-5 h-5" aria-hidden="true" />
-                  </Link>
-                  <Link href="/dashboard" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                    Dashboard
-                  </Link>
-                </>
+                <Link href="/hub" className="btn-primary px-8 py-4">
+                  Go to Hub <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                </Link>
               ) : (
                 <>
-                  <Link href="/pricing" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                    <Sparkles className="w-5 h-5" aria-hidden="true" /> Get Started – £4.99
+                  <Link href="/pricing" className="btn-primary px-8 py-4">
+                    Get Access — £4.99
                   </Link>
-                  <a href="#whats-inside" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                    See What's Inside <ArrowRight className="w-5 h-5" aria-hidden="true" />
-                  </a>
+                  <Link href="/quiz" className="btn-secondary px-8 py-4">
+                    Try a free preview →
+                  </Link>
                 </>
               )}
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="wave-divider">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path
-              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,150.63,69.29,321.39,56.44Z"
-              fill="var(--cream)"
-            ></path>
-          </svg>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="bg-cream py-16" ref={statsRef}>
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {[
-              { num: '17', label: 'Quiz Topics', icon: '📚', id: 'quiz' },
-              { num: '50+', label: 'OSCE Stations', icon: '✨', id: 'osce' },
-              { num: '£4.99', label: 'One-time access', icon: '💜', id: 'price' },
-              { num: '∞', label: 'Lifetime updates', icon: '⭐', id: 'lifetime' },
-            ].map((s) => (
-              <div key={s.id} className="card bg-white dark:bg-[var(--bg-card)] p-4 md:p-6">
-                <span className="text-2xl mb-2 block">{s.icon}</span>
-                <div className="text-2xl md:text-3xl font-bold text-[var(--purple)] dark:text-[var(--lavender)]">
-                  {s.id === 'quiz' && counters[s.id] !== undefined ? counters[s.id] : s.num}
-                </div>
-                <p className="text-[var(--plum-dark)]/60 dark:text-[var(--text-muted)] text-sm mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Tools Section - What's Inside */}
-      <section id="whats-inside" className="py-16 md:py-24 bg-gradient-to-b from-[var(--lilac-soft)] via-[var(--lilac)] to-[var(--lilac-soft)]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          {/* Section Header */}
-          <div className="text-center mb-10">
-            <span className="badge badge-purple mb-4 inline-flex">Our Tools</span>
-            <h2 className="text-3xl md:text-4xl text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-4">What&apos;s Inside?</h2>
-            <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] text-lg">
-              Everything you need to ace your exams.
+        {/* Contact strip */}
+        <section className="bg-[var(--linen-light)] border-t border-[var(--linen-deep)] py-10">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <p className="text-sm text-[var(--charcoal-light)] mb-1">
+              Got a question? Spotted something that needs updating?
+            </p>
+            <p className="text-sm text-[var(--charcoal-light)]">
+              <a
+                href="https://wa.me/447572650980"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:opacity-75 transition-opacity text-[var(--espresso)]"
+              >
+                WhatsApp me
+              </a>
+              {' '}or{' '}
+              <Link href="/contact" className="underline underline-offset-2 hover:opacity-75 transition-opacity text-[var(--espresso)]">
+                use the contact form
+              </Link>
             </p>
           </div>
-
-          {/* Stacked cards with detail */}
-          <div className="flex flex-col gap-4">
-            {/* OSCE Tool */}
-            <Link href={isPro ? "/hub" : "/osce"} className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center flex-shrink-0">
-                  <ClipboardCheck className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Children&apos;s OSCE Tool</h3>
-                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">Practice with 50+ OSCE stations. Timed scenarios, examiner checklists, and instant feedback.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">50+ stations</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Timed practice</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Self-assessment</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Quiz Tool */}
-            <Link href={isPro ? "/hub" : "/quiz"} className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--pink)] to-[var(--lavender)] flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Core Nursing Quiz</h3>
-                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">17 topic areas covering anatomy to pharmacology. Track your progress and focus on weak spots.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">17 topics</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Instant feedback</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Progress tracking</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Hub */}
-            <Link href="/hub" className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--purple)] to-[var(--plum)] flex items-center justify-center flex-shrink-0">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Nursing Hub</h3>
-                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">Access revision resources, ask questions, and connect with fellow nursing students.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Resources</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Q&A forum</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Community</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Dashboard */}
-            <Link href="/dashboard" className="card bg-white dark:bg-[var(--bg-card)] p-5 hover:scale-[1.01] transition-transform">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--lavender)] to-[var(--purple)] flex items-center justify-center flex-shrink-0">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[var(--plum-dark)] dark:text-[var(--text-primary)] mb-1">Your Dashboard</h3>
-                  <p className="text-sm text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-3">Track your study progress, view stats, and stay motivated with achievement badges.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Progress stats</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Achievements</span>
-                    <span className="text-xs bg-[var(--lilac-soft)] dark:bg-[var(--bg-tertiary)] text-[var(--plum-dark)] dark:text-[var(--text-muted)] px-2 py-1 rounded-full">Study goals</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Us Section */}
-      <section className="bg-cream py-16 md:py-24">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <span className="badge badge-purple mb-4 inline-flex">
-            Why Us?
-          </span>
-          <h2 className="mb-12 text-[var(--plum-dark)]">Made With Love</h2>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                icon: '👩‍🎓',
-                title: 'By a Student',
-                copy: 'Created by a nursing student who knows exactly what you need.',
-              },
-              {
-                icon: '⚡',
-                title: 'Easy to Use',
-                copy: 'Simple, pretty interface that makes revision actually fun.',
-              },
-              {
-                icon: '🎁',
-                title: 'Pay Once',
-                copy: 'One-time payment. Lifetime access. No subscription.',
-              },
-            ].map((item) => (
-              <div key={item.title} className="card bg-white dark:bg-[var(--bg-card)] p-6 text-center">
-                <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 className="text-[var(--plum)] dark:text-[var(--lavender)] mb-2">{item.title}</h3>
-                <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] text-sm">{item.copy}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <Testimonials />
-
-      {/* CTA Section */}
-      <section className="gradient-hero py-16 md:py-24 relative overflow-hidden">
-        <div className="blob blob-1" />
-        <div className="blob blob-2" />
-        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
-          <div className="text-4xl mb-6">✨</div>
-          <h2 className="mb-4 text-white">Ready to Start?</h2>
-          <p className="text-white/90 text-lg mb-8">
-            Your nursing exams don&apos;t stand a chance.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {isPro ? (
-              <Link
-                href="/hub"
-                className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
-              >
-                <Sparkles className="w-5 h-5" />
-                Go to Hub
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            ) : (
-              <>
-                <Link
-                  href="/pricing"
-                  className="btn-primary px-8 py-4 bg-white text-[var(--purple)] hover:bg-white/90"
-                >
-                  <Sparkles className="w-5 h-5" />
-                  Get Started – £4.99
-                </Link>
-                <Link
-                  href="/quiz"
-                  className="btn-secondary px-8 py-4 bg-white/20 text-white border-white/30 hover:bg-white/30"
-                >
-                  <Play className="w-5 h-5" />
-                  Free Preview
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* WhatsApp CTA */}
-      <section className="bg-cream py-12">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <p className="text-[var(--plum-dark)]/70 dark:text-[var(--text-secondary)] mb-4">
-            Got questions? I&apos;m always happy to chat!
-          </p>
-          <a
-            href="https://wa.me/447572650980"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="whatsapp-btn"
-          >
-            💬 WhatsApp Me
-          </a>
-        </div>
-      </section>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-[var(--lilac)] px-6 pb-10 pt-16 text-[var(--plum-dark)]/70" role="contentinfo">
+      <footer className="bg-[var(--linen-light)] border-t border-[var(--linen-deep)] px-6 pb-10 pt-16 text-[var(--charcoal-light)]" role="contentinfo">
         <div className="mx-auto flex max-w-6xl flex-col gap-10">
           <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-            <div className="space-y-4">
-              <div className="font-serif text-2xl font-semibold text-[var(--plum)]">
+            <div className="space-y-2">
+              <div className="font-serif text-2xl font-semibold text-[var(--espresso)]">
                 Revision Foundations
               </div>
-              <p className="text-sm">Made with 💜 by Lauren</p>
+              <p className="text-sm">Made by Lauren — children&apos;s nursing student</p>
+              <p className="text-sm text-[var(--charcoal-light)]">Built because good paeds revision tools didn&apos;t exist.</p>
             </div>
 
             <div className="space-y-3 text-sm">
-              <p className="font-semibold text-[var(--plum)]">Products</p>
+              <p className="font-semibold text-[var(--espresso)]">Tools</p>
               <div className="flex flex-col gap-2">
                 <Link href="/osce" className="footer-link">
                   OSCE Tool
                 </Link>
                 <Link href="/quiz" className="footer-link">
                   Core Quiz
+                </Link>
+                <Link href="/hub" className="footer-link">
+                  Revision Hub
                 </Link>
                 <Link href="/pricing" className="footer-link">
                   Pricing
@@ -392,7 +375,7 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-3 text-sm">
-              <p className="font-semibold text-[var(--plum)]">Company</p>
+              <p className="font-semibold text-[var(--espresso)]">Info</p>
               <div className="flex flex-col gap-2">
                 <Link href="/about" className="footer-link">
                   About
@@ -413,7 +396,7 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-3 text-sm">
-              <p className="font-semibold text-[var(--plum)]">Account</p>
+              <p className="font-semibold text-[var(--espresso)]">Account</p>
               <div className="flex flex-col gap-2">
                 <Link href="/sign-in" className="footer-link">
                   Sign In
@@ -428,7 +411,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-[var(--lavender)]/40 pt-6 text-center text-sm">
+          <div className="border-t border-[var(--linen-deep)] pt-6 text-center text-sm">
             © 2026 Revision Foundations
           </div>
         </div>

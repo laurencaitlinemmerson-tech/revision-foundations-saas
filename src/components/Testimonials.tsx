@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Star, MessageCircle, Heart, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
 import Link from 'next/link';
 
 interface Review {
@@ -45,83 +44,56 @@ export default function Testimonials() {
     fetchReviews();
   }, []);
 
-  const hasMultipleReviews = reviews.length > 1;
-
   return (
-    <section className="gradient-hero py-16 md:py-20 relative overflow-hidden">
-      <div className="blob blob-2" />
+    <section className="bg-[var(--linen-light)] border-y border-[var(--linen-deep)] py-16">
+      <div className="max-w-4xl mx-auto px-6">
+        <h2 className="text-2xl text-[var(--espresso)] mb-2">What students say</h2>
+        <p className="text-sm text-[var(--charcoal-light)] mb-8">
+          These tools are new — here&apos;s what early users have said.
+        </p>
 
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
-        <div className="text-center mb-10">
-          <span className="badge mb-4">Reviews</span>
-          <h2>What Students Say</h2>
-        </div>
-
-        <div className="flex flex-col items-center gap-8">
-          {/* Reviews Grid */}
-          <div className={`grid gap-6 w-full ${hasMultipleReviews ? 'md:grid-cols-2 lg:grid-cols-3' : 'max-w-lg mx-auto'}`}>
-            {reviews.map((review, idx) => (
-              <motion.div 
-                key={review.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className="testimonial-card dark:!bg-[var(--bg-card)]"
-              >
-                <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, j) => (
-                    <Star
-                      key={j}
-                      className={`w-4 h-4 ${
-                        j < review.rating
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="text-gray-700 dark:!text-white text-sm mb-4 leading-relaxed">"{review.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center text-white text-sm font-semibold shadow-md">
-                    {review.name[0]}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-sm text-[var(--purple)] dark:!text-white">{review.name}</span>
-                    {review.course && (
-                      <span className="text-xs text-gray-500 dark:!text-gray-300">{review.course}</span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Call to action for more reviews */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-center mt-4"
-          >
-            <div className="inline-flex flex-col sm:flex-row items-center gap-4 bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-[var(--lavender)]/30">
-              <div className="flex items-center gap-2">
-                <Heart className="w-5 h-5 text-[var(--pink)]" />
-                <p className="text-sm text-[var(--plum-dark)]/70">
-                  {hasMultipleReviews 
-                    ? 'Loving the tools? Share your experience!' 
-                    : 'Be one of the first to share your experience!'}
-                </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          {reviews.map((review) => (
+            <div key={review.id} className="bg-white rounded-xl p-5 border border-[var(--linen-deep)]">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, j) => (
+                  <Star
+                    key={j}
+                    className={`w-4 h-4 ${
+                      j < review.rating
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
               </div>
-              <Link
-                href="/review"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--lavender)] to-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg transition-all"
-              >
-                <Sparkles className="w-4 h-4" />
-                Leave a Review
-              </Link>
+              <p className="text-sm text-[var(--charcoal)] mb-4 leading-relaxed">&quot;{review.text}&quot;</p>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-[var(--linen-deep)] flex items-center justify-center text-[var(--espresso)] text-xs font-semibold">
+                  {review.name[0]}
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-[var(--espresso)]">{review.name}</span>
+                  {review.course && (
+                    <span className="text-xs text-[var(--charcoal-light)] ml-2">{review.course}</span>
+                  )}
+                </div>
+              </div>
             </div>
-          </motion.div>
+          ))}
+
+          {/* Honest invite — dashed border */}
+          <div className="bg-white rounded-xl p-5 border border-dashed border-[var(--linen-deep)] flex flex-col justify-center items-center text-center gap-2">
+            <p className="text-sm text-[var(--charcoal-light)]">
+              Used the tools? I&apos;d love to hear what you think — good or bad.
+            </p>
+            <Link
+              href="/review"
+              className="text-sm text-[var(--espresso)] underline underline-offset-2 hover:opacity-75 transition-opacity"
+            >
+              Leave a review →
+            </Link>
+          </div>
         </div>
       </div>
     </section>
