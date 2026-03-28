@@ -38,20 +38,47 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto px-6 py-32 relative z-10">
             <div className="max-w-3xl mx-auto">
               <p className="text-sm text-[var(--charcoal-light)] mb-4 tracking-wide">
-                Children&apos;s nursing · OSCE prep · Theory revision
+                OSCE prep · Theory revision · Placement survival
               </p>
 
               <h1 id="hero-heading" className="hero-title">
                 Pass your nursing assessments.
               </h1>
 
-              <p className="hero-description mb-3">
-                Revision tools built specifically for children&apos;s nursing students — not a generic study app.
+              <p className="hero-description mb-8">
+                Revision tools built by a nursing student, for nursing students. OSCE practice, theory quizzes, cheat sheets, and a full reference hub — no generic content.
               </p>
 
-              <p className="hero-description mb-8">
-                50+ OSCE stations, 17 quiz topics, cheat sheets, and a Q&amp;A hub. Made by a paeds student who noticed that most revision tools don&apos;t cover what actually comes up.
-              </p>
+              {/* Branch pathway cards */}
+              <div className="grid sm:grid-cols-2 gap-4 max-w-xl mb-8">
+                <Link
+                  href="/hub/childrens"
+                  className="group bg-white/80 backdrop-blur-sm border border-[var(--linen-deep)] rounded-xl p-5 text-left hover:border-[var(--espresso)]/30 hover:shadow-md transition-all"
+                >
+                  <div className="text-2xl mb-3">🧒</div>
+                  <h2 className="text-base font-semibold text-[var(--espresso)] mb-1">Children&apos;s Nursing</h2>
+                  <p className="text-xs text-[var(--charcoal)] mb-3 leading-relaxed">
+                    Paed obs, PEWS, paediatric OSCEs, family-centred care
+                  </p>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--espresso)] bg-[var(--linen-light)] px-2.5 py-1 rounded-full">
+                    Available now <ArrowRight className="w-3 h-3" />
+                  </span>
+                </Link>
+
+                <Link
+                  href="/hub/adult"
+                  className="group bg-white/50 backdrop-blur-sm border border-[var(--linen-deep)] rounded-xl p-5 text-left hover:border-[var(--charcoal-light)]/30 transition-all opacity-70"
+                >
+                  <div className="text-2xl mb-3">🏥</div>
+                  <h2 className="text-base font-semibold text-[var(--espresso)] mb-1">Adult Nursing</h2>
+                  <p className="text-xs text-[var(--charcoal)] mb-3 leading-relaxed">
+                    NEWS2, sepsis, wound care, adult OSCE stations
+                  </p>
+                  <span className="inline-flex items-center gap-1 text-xs text-[var(--charcoal-light)] bg-[var(--linen-light)]/80 px-2.5 py-1 rounded-full">
+                    Coming soon
+                  </span>
+                </Link>
+              </div>
 
               <div className="hero-cta-group flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                 {!accessLoading && isPro ? (
@@ -66,7 +93,7 @@ export default function HomePage() {
                 ) : (
                   <>
                     <Link href="/pricing" className="btn-primary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
-                      Get Access — £4.99
+                      Get Access — £9.99
                     </Link>
                     <a href="#whats-inside" className="btn-secondary btn-hover text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center">
                       See what&apos;s inside <ArrowRight className="w-5 h-5" aria-hidden="true" />
@@ -271,9 +298,9 @@ export default function HomePage() {
             <h2 className="text-2xl text-[var(--espresso)] mb-10">Why I built this</h2>
             <div className="grid md:grid-cols-3 gap-8">
               <div>
-                <h3 className="text-base font-semibold text-[var(--espresso)] mb-2">Paediatric-specific</h3>
+                <h3 className="text-base font-semibold text-[var(--espresso)] mb-2">Branch-specific content</h3>
                 <p className="text-sm text-[var(--charcoal-light)] leading-relaxed">
-                  Most revision tools are written for adult nursing. This is built around paeds — age-appropriate normal ranges, child-focused communication, safeguarding scenarios, and development milestones.
+                  Generic revision tools miss what matters for your branch. Children&apos;s nursing is live now — paed obs ranges, family-centred care, PEWS, safeguarding. Adult nursing is coming next.
                 </p>
               </div>
               <div>
@@ -285,7 +312,7 @@ export default function HomePage() {
               <div>
                 <h3 className="text-base font-semibold text-[var(--espresso)] mb-2">No recurring cost</h3>
                 <p className="text-sm text-[var(--charcoal-light)] leading-relaxed">
-                  Students don&apos;t have spare cash. £4.99 once, and it&apos;s yours. I use these tools myself so new content is added regularly — and you get all future updates at no extra cost.
+                  Students don&apos;t have spare cash. One payment, and it&apos;s yours. I use these tools myself so new content is added regularly — and you get all future updates at no extra cost.
                 </p>
               </div>
             </div>
@@ -299,7 +326,7 @@ export default function HomePage() {
         <section className="bg-cream py-16">
           <div className="max-w-4xl mx-auto px-6">
             <h2 className="text-2xl text-[var(--espresso)] mb-3">Start revising today</h2>
-            <p className="text-sm text-[var(--charcoal-light)] mb-8">One-time access. Works on mobile. Built for children&apos;s nursing.</p>
+            <p className="text-sm text-[var(--charcoal-light)] mb-8">One-time access. Works on mobile. Built for nursing students.</p>
 
             <div className="flex flex-col sm:flex-row gap-3">
               {!accessLoading && isPro ? (
@@ -309,7 +336,7 @@ export default function HomePage() {
               ) : (
                 <>
                   <Link href="/pricing" className="btn-primary px-8 py-4">
-                    Get Access — £4.99
+                    Get Access — £9.99
                   </Link>
                   <Link href="/quiz" className="btn-secondary px-8 py-4">
                     Try a free preview →
