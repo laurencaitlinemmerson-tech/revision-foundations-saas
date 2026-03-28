@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
-import { motion, AnimatePresence, type Easing } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Check, Sparkles, BookOpen, ClipboardCheck, Loader2, Mail, ArrowRight, Crown, Gift, Zap, Shield, Star, Users, X, Info } from 'lucide-react';
@@ -22,12 +22,6 @@ const staggerContainer = {
   },
 };
 
-const floatingVariants = {
-  animate: {
-    y: [-5, 5, -5],
-    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" as Easing }
-  }
-};
 
 export default function PricingPage() {
   
@@ -146,50 +140,23 @@ export default function PricingPage() {
               <span className="text-sm font-medium text-[var(--plum)]">One-time payment • Lifetime access • No subscriptions</span>
             </motion.div>
             
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-4xl md:text-5xl lg:text-6xl font-display text-[var(--plum-dark)] mb-5"
             >
-              Invest in Your{' '}
-              <span className="gradient-text">Future Career</span>
+              One payment, everything included.
             </motion.h1>
             
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-[var(--plum)] text-lg md:text-xl max-w-2xl mx-auto mb-8"
             >
-              Built by a nursing student, for nursing students. Your all-in-one revision companion. 
-              Pay once, access forever.
+              50+ OSCE stations, 17 quiz topics, and a full revision hub. Covers children&apos;s nursing specifically.
             </motion.p>
-
-            {/* Social proof */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-wrap items-center justify-center gap-6 text-sm text-[var(--plum-dark)]/70"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {['👩‍⚕️', '👨‍⚕️', '👩‍⚕️', '👨‍⚕️'].map((emoji, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-[var(--lilac)] flex items-center justify-center border-2 border-white text-sm">
-                      {emoji}
-                    </div>
-                  ))}
-                </div>
-                <span>Trusted by nursing students</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                ))}
-                <span className="ml-1">Made with 💜</span>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
@@ -235,17 +202,7 @@ export default function PricingPage() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="relative mb-12"
           >
-            {/* Animated glow background */}
-            <motion.div 
-              className="absolute -inset-1 bg-gradient-to-r from-[var(--lavender)] via-[var(--pink)] to-[var(--lavender)] rounded-3xl blur-md"
-              animate={{ 
-                opacity: [0.4, 0.6, 0.4],
-                scale: [1, 1.01, 1]
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
-            
-            <motion.div 
+            <motion.div
               className="relative bg-white rounded-3xl shadow-xl overflow-hidden"
               whileHover={{ y: -4 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -270,16 +227,12 @@ export default function PricingPage() {
                   {/* Left - Info */}
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-6">
-                      <motion.div 
-                        variants={floatingVariants}
-                        animate="animate"
-                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center shadow-lg"
-                      >
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)] flex items-center justify-center shadow-lg">
                         <Gift className="w-8 h-8 text-white" />
-                      </motion.div>
+                      </div>
                       <div>
                         <h2 className="text-2xl md:text-3xl font-display text-[var(--plum-dark)]">Complete Bundle</h2>
-                        <p className="text-[var(--plum-dark)]/60">Everything you need to succeed</p>
+                        <p className="text-[var(--plum-dark)]/60">OSCE tool + quiz + revision hub</p>
                       </div>
                     </div>
 
