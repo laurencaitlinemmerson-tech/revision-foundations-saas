@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {
@@ -16,105 +17,141 @@ import {
   Shield,
   X,
   Info,
-  Sparkles,
-  Smartphone,
-  RefreshCw,
-  Lock,
 } from 'lucide-react';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 
 type Product = 'osce' | 'quiz' | 'bundle';
 
+const serif = "'Source Serif 4', Georgia, serif";
+const display = "'Playfair Display', Georgia, serif";
+
+const ink = '#1C1510';
+const inkMid = '#5C4A38';
+const inkLight = '#9C8878';
+const cream = '#F9F6F0';
+const parchment = '#F3EEE4';
+const panel = '#F6F0E5';
+const border = '#D9D0C1';
+const softLine = 'rgba(217, 208, 193, 0.7)';
+const tagBg = '#EFE5D4';
+
+const sectionLabel: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '11px',
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: inkLight,
+  marginBottom: '14px',
+};
+
+const body: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '16px',
+  lineHeight: 1.9,
+  fontWeight: 300,
+  color: inkMid,
+};
+
+const editorialCard: CSSProperties = {
+  border: `1px solid ${border}`,
+  borderRadius: '28px',
+  overflow: 'hidden',
+};
+
+const tagStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  fontFamily: serif,
+  fontSize: '13px',
+  color: inkMid,
+  background: tagBg,
+  padding: '8px 14px',
+  borderRadius: '999px',
+  lineHeight: 1,
+};
+
+const primaryButton: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  fontFamily: serif,
+  fontSize: '14px',
+  fontWeight: 400,
+  background: ink,
+  color: cream,
+  padding: '14px 28px',
+  borderRadius: '9999px',
+  textDecoration: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  width: '100%',
+};
+
+const secondaryButton: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  fontFamily: serif,
+  fontSize: '14px',
+  fontWeight: 400,
+  background: 'transparent',
+  color: ink,
+  padding: '13px 24px',
+  borderRadius: '9999px',
+  border: `1px solid ${border}`,
+  textDecoration: 'none',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  width: '100%',
+};
+
+const inputStyle: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '14px',
+  width: '100%',
+  padding: '12px 16px 12px 40px',
+  border: `1px solid ${border}`,
+  borderRadius: '14px',
+  background: '#fff',
+  color: ink,
+  outline: 'none',
+};
+
 const BUNDLE_FEATURES = [
   '50+ paediatric OSCE stations',
-  'Core nursing quiz across 17 topics',
-  'Revision hub for nursing knowledge',
+  'Core nursing quiz — 17 topics',
+  'Revision hub with clinical guides',
   'Timed exam mode + marking checklists',
   'Progress tracking dashboard',
   'All future updates included',
 ];
 
 const FAQS = [
-  {
-    q: 'Is this a subscription?',
-    a: 'No. It is a one-time payment with lifetime access. No recurring charges.',
-  },
-  {
-    q: 'Do I need an account?',
-    a: 'No. You can checkout as a guest with just your email, then create an account later to sync progress across devices.',
-  },
-  {
-    q: "What if it's not for me?",
-    a: 'You can get a full refund within 7 days. No questions asked.',
-  },
-  {
-    q: 'Will more content be added?',
-    a: 'Yes. New resources are added regularly, and all future updates are included in your purchase.',
-  },
-  {
-    q: 'Does it work on my phone?',
-    a: 'Yes. Everything is mobile-friendly and designed to work on placement, on the bus, or wherever you revise.',
-  },
-  {
-    q: 'What is included in the bundle?',
-    a: 'The Children’s Bundle includes the OSCE tool, the core quiz, and the revision hub in one purchase.',
-  },
-];
-
-const TRUST_ITEMS = [
-  {
-    icon: Lock,
-    title: 'Secure checkout',
-    desc: 'Powered by Stripe',
-  },
-  {
-    icon: Sparkles,
-    title: 'Instant access',
-    desc: 'Start right away',
-  },
-  {
-    icon: RefreshCw,
-    title: '7-day refund',
-    desc: 'No questions asked',
-  },
-  {
-    icon: Smartphone,
-    title: 'Works anywhere',
-    desc: 'Mobile, tablet, laptop',
-  },
+  { q: 'Is this a subscription?', a: 'Nope. One payment, yours forever. No recurring charges.' },
+  { q: 'Do I need an account?', a: "Not to buy — you can checkout as a guest with just your email. Create an account later to sync progress across devices." },
+  { q: "What if it's not for me?", a: 'Full refund within 7 days, no questions asked. Just email and we\'ll sort it.' },
+  { q: 'Will more content be added?', a: 'Yes — new resources are added regularly. All future updates are included with your purchase.' },
+  { q: 'Does it work on my phone?', a: 'Yes. Everything is mobile-friendly and designed for revising on placement, on the bus, wherever.' },
 ];
 
 export default function PricingPage() {
   const { isSignedIn } = useUser();
-  const {
-    hasOsce,
-    hasQuiz,
-    hasBundle,
-    isPro,
-    isLoading: accessLoading,
-  } = useEntitlements();
+  const { hasOsce, hasQuiz, hasBundle, isPro, isLoading: accessLoading } = useEntitlements();
 
   const [loading, setLoading] = useState<Product | null>(null);
   const [guestEmail, setGuestEmail] = useState('');
   const [showEmailInput, setShowEmailInput] = useState<Product | null>(null);
   const [emailError, setEmailError] = useState('');
-  const [showGuestTip, setShowGuestTip] = useState(true);
-
   const [adultEmail, setAdultEmail] = useState('');
   const [adultSubmitted, setAdultSubmitted] = useState(false);
 
-  const validateEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
-  const bundleValueText = useMemo(() => {
-    // Individual items shown are £4.99 + £4.99, and the bundle also includes the revision hub.
-    // Avoid over-claiming a specific hub price if it is not sold separately.
-    return 'Better value than buying separately';
-  }, []);
-
-  const resetEmailState = () => {
-    setEmailError('');
-  };
+  const resetEmailState = () => setEmailError('');
 
   const handlePurchase = async (product: Product) => {
     if (!isSignedIn && !guestEmail.trim()) {
@@ -122,448 +159,210 @@ export default function PricingPage() {
       setEmailError('');
       return;
     }
-
     if (!isSignedIn && !validateEmail(guestEmail)) {
       setShowEmailInput(product);
       setEmailError('Please enter a valid email address');
       return;
     }
-
     setLoading(product);
     setEmailError('');
-
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product,
-          guestEmail: !isSignedIn ? guestEmail.trim() : undefined,
-        }),
+        body: JSON.stringify({ product, guestEmail: !isSignedIn ? guestEmail.trim() : undefined }),
       });
-
       const data = await response.json();
-
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-
+      if (data?.url) { window.location.href = data.url; return; }
       throw new Error(data?.error || 'No checkout URL returned');
     } catch (error: unknown) {
-      console.error('Checkout error:', error);
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Something went wrong. Please try again.';
+      const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.';
       alert(`Oops! ${message}`);
-    } finally {
-      setLoading(null);
-    }
+    } finally { setLoading(null); }
   };
 
   const handleGuestCheckout = (product: Product) => {
-    if (!validateEmail(guestEmail)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-
+    if (!validateEmail(guestEmail)) { setEmailError('Please enter a valid email address'); return; }
     void handlePurchase(product);
   };
 
   const handleAdultWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!validateEmail(adultEmail)) return;
-
     await new Promise((resolve) => setTimeout(resolve, 400));
     setAdultSubmitted(true);
   };
 
+  // ── Full access state ──
   if (!accessLoading && hasBundle) {
     return (
-      <div
-        className="bg-cream"
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <div style={{ background: cream, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Navbar />
-
-        <main
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '120px 24px 80px',
-          }}
-        >
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '120px 24px 80px' }}>
           <div style={{ maxWidth: '480px', width: '100%', textAlign: 'center' }}>
-            {/* Account status label */}
-            <p
-              style={{
-                fontSize: '10px',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'var(--charcoal)',
-                marginBottom: '20px',
-              }}
-            >
-              Account status
-            </p>
-
-            {/* Icon */}
-            <div
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                background: 'var(--linen-deep)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 24px',
-              }}
-            >
-              <Crown className="w-7 h-7" style={{ color: 'var(--espresso)' }} />
+            <p style={sectionLabel}>Account status</p>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: parchment, border: `1px solid ${softLine}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <Crown style={{ width: '28px', height: '28px', color: inkMid }} />
             </div>
-
-            {/* Heading */}
-            <h1
-              className="font-display"
-              style={{
-                fontSize: 'clamp(1.6rem, 4vw, 2.2rem)',
-                fontWeight: 400,
-                color: 'var(--espresso)',
-                marginBottom: '10px',
-                lineHeight: 1.15,
-              }}
-            >
+            <h1 style={{ fontFamily: display, fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', fontWeight: 400, color: ink, marginBottom: '10px', lineHeight: 1.15 }}>
               You have full access
             </h1>
-
-            <p
-              style={{
-                fontSize: '15px',
-                color: 'var(--charcoal)',
-                lineHeight: 1.6,
-                marginBottom: '28px',
-              }}
-            >
+            <p style={{ ...body, fontSize: '15px', marginBottom: '28px' }}>
               Lifetime access to everything — no subscription, no renewal.
             </p>
-
-            {/* Access chips */}
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '8px',
-                marginBottom: '32px',
-              }}
-            >
-              {['OSCE Tool', 'Core Quiz', 'Revision Hub', 'Lifetime access'].map(
-                (label) => (
-                  <span
-                    key={label}
-                    style={{
-                      fontSize: '12px',
-                      fontWeight: 400,
-                      color: 'var(--espresso)',
-                      background: 'var(--linen-light)',
-                      border: '0.5px solid var(--linen-deep)',
-                      padding: '5px 14px',
-                      borderRadius: '2px',
-                      letterSpacing: '0.02em',
-                    }}
-                  >
-                    {label}
-                  </span>
-                ),
-              )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginBottom: '32px' }}>
+              {['OSCE Tool', 'Core Quiz', 'Revision Hub', 'Lifetime access'].map((label) => (
+                <span key={label} style={tagStyle}>{label}</span>
+              ))}
             </div>
-
-            {/* Primary CTA */}
-            <Link
-              href="/dashboard"
-              className="btn-primary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '15px',
-                padding: '12px 28px',
-              }}
-            >
-              Go to Dashboard
-              <ArrowRight className="w-4 h-4" />
+            <Link href="/dashboard" style={{ ...primaryButton, display: 'inline-flex', width: 'auto' }}>
+              Go to Dashboard <ArrowRight style={{ width: '16px', height: '16px' }} />
             </Link>
-
-            {/* Secondary action */}
             <div style={{ marginTop: '16px' }}>
-              <Link
-                href="/hub"
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--charcoal)',
-                  textDecoration: 'none',
-                  borderBottom: '0.5px solid var(--linen-deep)',
-                  paddingBottom: '1px',
-                  transition: 'color 0.15s',
-                }}
-              >
+              <Link href="/hub" style={{ fontFamily: serif, fontSize: '14px', color: ink, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
                 Browse the Hub
               </Link>
             </div>
           </div>
         </main>
-
-        {/* Compact footer */}
-        <footer
-          style={{
-            borderTop: '0.5px solid rgba(0,0,0,0.08)',
-            padding: '20px 24px',
-            textAlign: 'center',
-            fontSize: '11px',
-            color: 'var(--charcoal)',
-            letterSpacing: '0.02em',
-          }}
-        >
-          Revision Foundations &middot; {new Date().getFullYear()}
+        <footer style={{ borderTop: `1px solid ${softLine}`, padding: '20px 24px', textAlign: 'center' }}>
+          <p style={{ fontFamily: serif, fontSize: '12px', color: inkLight }}>Revision Foundations &middot; {new Date().getFullYear()}</p>
         </footer>
       </div>
     );
   }
 
+  // ── Main pricing page ──
   return (
-    <div className="min-h-screen bg-cream">
+    <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      <section className="pt-28 pb-12 px-6">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--charcoal-light)] mb-4">
-            Pricing
+      {/* Hero */}
+      <section style={{ padding: '128px 24px 64px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <p style={sectionLabel}>Pricing</p>
+
+          <h1 style={{
+            fontFamily: display,
+            fontSize: 'clamp(2.4rem, 6vw, 4rem)',
+            fontWeight: 400,
+            lineHeight: 1.06,
+            letterSpacing: '-0.02em',
+            color: ink,
+            marginBottom: '20px',
+            maxWidth: '700px',
+          }}>
+            One payment.{' '}
+            <em>Lifetime access.</em>
+          </h1>
+
+          <p style={{ ...body, fontSize: '18px', maxWidth: '560px', marginBottom: '28px' }}>
+            Everything you need for OSCE practice, theory revision, and placement support — built by a nursing student who actually uses it.
           </p>
 
-          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 items-start">
-            <div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl leading-tight font-display text-[var(--espresso)] mb-5">
-                Revise for exams, practise OSCEs, and build nursing knowledge in
-                one place.
-              </h1>
-
-              <p className="text-lg md:text-xl text-[var(--charcoal)] max-w-2xl mb-5">
-                One payment for the tools and revision support that help you feel
-                more prepared on placement, in exams, and in OSCEs.
-              </p>
-
-              <div className="flex flex-wrap gap-3 text-sm text-[var(--charcoal)] mb-8">
-                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
-                  <Check className="w-4 h-4 text-[var(--espresso)]" />
-                  Lifetime access
-                </span>
-                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
-                  <Check className="w-4 h-4 text-[var(--espresso)]" />
-                  No subscription
-                </span>
-                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
-                  <Check className="w-4 h-4 text-[var(--espresso)]" />
-                  New content included
-                </span>
-                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
-                  <Check className="w-4 h-4 text-[var(--espresso)]" />
-                  Mobile-friendly
-                </span>
-              </div>
-
-              {!isPro && (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Link href="/osce" className="btn-secondary text-sm px-6 py-3">
-                    Try OSCE preview
-                  </Link>
-                  <Link href="/quiz" className="btn-secondary text-sm px-6 py-3">
-                    Try quiz preview
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {!isSignedIn && showGuestTip && (
-              <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] p-5 rounded-xl relative">
-                <button
-                  onClick={() => setShowGuestTip(false)}
-                  className="absolute right-3 top-3 text-[var(--charcoal-light)] hover:text-[var(--espresso)] transition-colors"
-                  aria-label="Dismiss guest checkout note"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-
-                <div className="flex items-start gap-3">
-                  <Info className="w-4 h-4 text-[var(--charcoal-light)] mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-[var(--espresso)] mb-1">
-                      No account needed
-                    </p>
-                    <p className="text-sm text-[var(--charcoal)] leading-relaxed">
-                      You can checkout as a guest with just your email, then create
-                      an account later to sync progress across devices.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '0' }}>
+            {['No subscription', 'Future updates included', '7-day guarantee', 'Works on mobile'].map((item) => (
+              <span key={item} style={tagStyle}>
+                <Check style={{ width: '13px', height: '13px', color: inkMid }} />
+                {item}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
-      <main className="pb-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Main bundle */}
-          <div className="bg-white border-2 border-[var(--espresso)]/15 shadow-sm overflow-hidden mb-8 rounded-2xl">
-            <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-0">
-              <div className="p-7 md:p-9 border-b lg:border-b-0 lg:border-r border-[var(--linen-deep)]">
-                <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <span className="text-xs uppercase tracking-[0.2em] text-[var(--charcoal-light)]">
-                    Most popular
-                  </span>
-                  <span className="inline-flex items-center rounded-full bg-[var(--linen-light)] text-[var(--espresso)] text-xs font-medium px-3 py-1">
+      {/* Main bundle card */}
+      <section style={{ padding: '0 24px 56px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div style={{ ...editorialCard, background: panel, border: `2px solid ${border}` }}>
+            <div className="pricing-bundle-grid">
+              {/* Left: details */}
+              <div className="pricing-bundle-left" style={{ padding: '40px 36px 44px', borderRight: `1px solid ${softLine}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                  <p style={{ ...sectionLabel, marginBottom: 0 }}>Recommended</p>
+                  <span style={{ fontFamily: serif, fontSize: '11px', color: inkMid, background: tagBg, padding: '5px 12px', borderRadius: '999px' }}>
                     Best value
                   </span>
                 </div>
 
-                <h2 className="text-2xl md:text-3xl font-display text-[var(--espresso)] mb-2">
+                <h2 style={{ fontFamily: display, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 400, color: ink, marginBottom: '10px' }}>
                   Children&apos;s Bundle
                 </h2>
 
-                <p className="text-[var(--charcoal)] text-base md:text-lg mb-6 max-w-2xl">
-                  Everything you need for OSCE practice, nursing revision, and core
-                  knowledge building in one bundle.
+                <p style={{ ...body, fontSize: '15px', marginBottom: '28px', maxWidth: '480px' }}>
+                  OSCE practice, nursing quizzes, and the revision hub — all in one.
                 </p>
 
-                <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '28px' }}>
                   {BUNDLE_FEATURES.map((feature) => (
-                    <div
-                      key={feature}
-                      className="flex items-start gap-2 text-sm text-[var(--charcoal)]"
-                    >
-                      <Check className="w-4 h-4 text-[var(--espresso)] mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
+                    <div key={feature} style={{ display: 'flex', alignItems: 'start', gap: '8px' }}>
+                      <Check style={{ width: '14px', height: '14px', color: inkMid, marginTop: '3px', flexShrink: 0 }} />
+                      <span style={{ fontFamily: serif, fontSize: '13px', color: inkMid, lineHeight: 1.5, fontWeight: 300 }}>{feature}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-xl p-4">
-                  <p className="text-sm font-medium text-[var(--espresso)] mb-1">
-                    What this helps with
-                  </p>
-                  <p className="text-sm text-[var(--charcoal)] leading-relaxed">
-                    Practise stations before OSCEs, revise high-yield nursing topics,
-                    and strengthen the knowledge you need for exams and placement.
+                <div style={{ background: cream, border: `1px solid ${softLine}`, borderRadius: '18px', padding: '18px 20px' }}>
+                  <p style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: ink, marginBottom: '4px' }}>What this helps with</p>
+                  <p style={{ fontFamily: serif, fontSize: '13px', lineHeight: 1.7, fontWeight: 300, color: inkMid }}>
+                    Practise stations before OSCEs, revise high-yield topics, and build the knowledge you need for exams and placement.
                   </p>
                 </div>
               </div>
 
-              <div className="p-7 md:p-9 bg-[var(--linen-light)]">
-                <div className="mb-5">
-                  <p className="text-sm text-[var(--charcoal-light)] mb-2">
-                    One-time payment
-                  </p>
-                  <div className="flex items-end gap-3 mb-2">
-                    <span className="text-4xl md:text-5xl font-display text-[var(--espresso)]">
-                      £9.99
-                    </span>
-                  </div>
-                  <p className="text-sm text-[var(--charcoal)]">{bundleValueText}</p>
-                </div>
+              {/* Right: price + CTA */}
+              <div className="pricing-bundle-right" style={{ padding: '40px 36px 44px', background: parchment }}>
+                <p style={{ ...sectionLabel, marginBottom: '8px' }}>One-time payment</p>
+
+                <p style={{ fontFamily: display, fontSize: 'clamp(3rem, 6vw, 4.2rem)', lineHeight: 1, color: ink, marginBottom: '8px' }}>
+                  £9.99
+                </p>
+
+                <p style={{ fontFamily: serif, fontSize: '13px', color: inkLight, marginBottom: '32px' }}>
+                  Better value than buying separately
+                </p>
 
                 {showEmailInput === 'bundle' && !isSignedIn ? (
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-[var(--espresso)]">
-                      Checkout as guest
-                    </label>
-
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <p style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: ink }}>Checkout as guest</p>
+                    <div style={{ position: 'relative' }}>
+                      <Mail style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: inkLight }} />
                       <input
                         type="email"
                         placeholder="Your email address"
                         value={guestEmail}
-                        onChange={(e) => {
-                          setGuestEmail(e.target.value);
-                          resetEmailState();
-                        }}
-                        className="w-full pl-11 pr-4 py-3 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 focus:border-[var(--espresso)]/40 text-sm rounded-xl"
+                        onChange={(e) => { setGuestEmail(e.target.value); resetEmailState(); }}
+                        style={inputStyle}
                         aria-label="Guest email address"
                       />
                     </div>
-
-                    {emailError && (
-                      <p className="text-red-500 text-xs" role="alert">
-                        {emailError}
-                      </p>
-                    )}
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleGuestCheckout('bundle')}
-                        disabled={loading !== null}
-                        className="btn-primary flex-1 py-3"
-                      >
-                        {loading === 'bundle' ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>Get instant access — £9.99</>
-                        )}
+                    {emailError && <p style={{ fontFamily: serif, fontSize: '12px', color: '#c44' }}>{emailError}</p>}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => handleGuestCheckout('bundle')} disabled={loading !== null} style={{ ...primaryButton, flex: 1 }}>
+                        {loading === 'bundle' ? <><Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} /> Processing...</> : <>Get instant access — £9.99</>}
                       </button>
-
-                      <button
-                        onClick={() => {
-                          setShowEmailInput(null);
-                          setEmailError('');
-                        }}
-                        className="btn-secondary py-3 px-4 text-sm"
-                      >
+                      <button onClick={() => { setShowEmailInput(null); setEmailError(''); }} style={{ ...secondaryButton, width: 'auto', padding: '13px 16px' }}>
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <button
-                      onClick={() => handlePurchase('bundle')}
-                      disabled={loading !== null}
-                      className="btn-primary w-full justify-center py-3.5 px-8 mb-4"
-                    >
-                      {loading === 'bundle' ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        <>Get Children&apos;s Bundle — £9.99</>
-                      )}
+                    <button onClick={() => handlePurchase('bundle')} disabled={loading !== null} style={primaryButton}>
+                      {loading === 'bundle' ? <><Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} /> Processing...</> : <>Get Children&apos;s Bundle — £9.99</>}
                     </button>
 
-                    <div className="space-y-2 text-sm text-[var(--charcoal)]">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4 text-[var(--espresso)]" />
-                        7-day money-back guarantee
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-[var(--espresso)]" />
-                        No subscription or recurring charges
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-[var(--espresso)]" />
-                        Guest checkout available
-                      </div>
+                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {[
+                        { icon: Shield, text: '7-day money-back guarantee' },
+                        { icon: Check, text: 'No subscription or recurring charges' },
+                        { icon: Check, text: 'Guest checkout available' },
+                      ].map((item) => (
+                        <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <item.icon style={{ width: '14px', height: '14px', color: inkMid, flexShrink: 0 }} />
+                          <span style={{ fontFamily: serif, fontSize: '13px', color: inkMid, fontWeight: 300 }}>{item.text}</span>
+                        </div>
+                      ))}
                     </div>
                   </>
                 )}
@@ -571,330 +370,273 @@ export default function PricingPage() {
             </div>
           </div>
 
-          {/* Individual options */}
-          <div className="flex items-center gap-4 my-10">
-            <div className="flex-1 h-px bg-[var(--linen-deep)]" />
-            <span className="text-xs uppercase tracking-[0.18em] text-[var(--charcoal-light)]">
-              Or buy individually
-            </span>
-            <div className="flex-1 h-px bg-[var(--linen-deep)]" />
+          {/* Guest tip */}
+          {!isSignedIn && (
+            <div style={{ marginTop: '16px', padding: '16px 20px', background: parchment, border: `1px solid ${softLine}`, borderRadius: '16px', display: 'flex', alignItems: 'start', gap: '12px' }}>
+              <Info style={{ width: '16px', height: '16px', color: inkLight, marginTop: '2px', flexShrink: 0 }} />
+              <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, lineHeight: 1.6, fontWeight: 300 }}>
+                <strong style={{ fontWeight: 400, color: ink }}>No account needed.</strong> You can checkout as a guest with just your email, then create an account later to sync progress.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Or buy individually */}
+      <section style={{ padding: '0 24px 56px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
+            <div style={{ flex: 1, height: '1px', background: border }} />
+            <span style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: inkLight }}>Or buy individually</span>
+            <div style={{ flex: 1, height: '1px', background: border }} />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-14">
-            <div
-              className={`bg-white border p-6 rounded-2xl ${
-                hasOsce ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'
-              }`}
-            >
+          <div className="pricing-individual-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+            {/* OSCE Tool */}
+            <div style={{ ...editorialCard, background: '#fff', padding: '32px 28px 34px' }}>
               {hasOsce && (
-                <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-4">
-                  <Check className="w-3 h-3" />
-                  Owned
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontFamily: serif, fontSize: '11px', color: cream, background: ink, padding: '4px 12px', borderRadius: '999px', marginBottom: '16px' }}>
+                  <Check style={{ width: '12px', height: '12px' }} /> Owned
                 </span>
               )}
 
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 bg-[var(--linen-deep)] flex items-center justify-center rounded-xl">
-                  <ClipboardCheck className="w-5 h-5 text-[var(--espresso)]" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: parchment, border: `1px solid ${softLine}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ClipboardCheck style={{ width: '20px', height: '20px', color: inkMid }} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[var(--espresso)]">
-                    Children&apos;s OSCE Tool
-                  </h3>
-                  {!hasOsce && (
-                    <span className="text-sm text-[var(--charcoal)]">£4.99</span>
-                  )}
+                  <h3 style={{ fontFamily: display, fontSize: '20px', fontWeight: 400, color: ink }}>Children&apos;s OSCE Tool</h3>
+                  {!hasOsce && <p style={{ fontFamily: serif, fontSize: '13px', color: inkLight }}>£4.99</p>}
                 </div>
               </div>
 
-              <p className="text-sm text-[var(--charcoal)] leading-relaxed mb-5">
-                Practise 50+ paediatric OSCE stations with marking checklists and
-                timed exam mode so you can feel more prepared on the day.
+              <p style={{ ...body, fontSize: '14px', marginBottom: '24px' }}>
+                50+ paediatric OSCE stations with marking checklists and timed exam mode.
               </p>
 
               {hasOsce ? (
-                <Link
-                  href="/osce"
-                  className="btn-secondary w-full justify-center py-2.5 text-sm"
-                >
-                  Open OSCE Tool
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                <Link href="/osce" style={secondaryButton}>Open OSCE Tool <ArrowRight style={{ width: '14px', height: '14px' }} /></Link>
               ) : showEmailInput === 'osce' && !isSignedIn ? (
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
-                    <input
-                      type="email"
-                      placeholder="Your email"
-                      value={guestEmail}
-                      onChange={(e) => {
-                        setGuestEmail(e.target.value);
-                        resetEmailState();
-                      }}
-                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm rounded-xl"
-                      aria-label="Guest email for OSCE checkout"
-                    />
-                  </div>
-
-                  {emailError && (
-                    <p className="text-red-500 text-xs" role="alert">
-                      {emailError}
-                    </p>
-                  )}
-
-                  <button
-                    onClick={() => handleGuestCheckout('osce')}
-                    disabled={loading !== null}
-                    className="btn-secondary w-full py-2.5 text-sm"
-                  >
-                    {loading === 'osce' ? 'Processing...' : 'Continue to checkout'}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setShowEmailInput(null);
-                      setEmailError('');
-                    }}
-                    className="text-xs text-[var(--charcoal-light)] w-full"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                <EmailInput product="osce" guestEmail={guestEmail} setGuestEmail={setGuestEmail} emailError={emailError} resetEmailState={resetEmailState} loading={loading} handleGuestCheckout={handleGuestCheckout} setShowEmailInput={setShowEmailInput} setEmailError={setEmailError} />
               ) : (
-                <button
-                  onClick={() => handlePurchase('osce')}
-                  disabled={loading !== null}
-                  className="btn-secondary w-full py-2.5 text-sm"
-                >
+                <button onClick={() => handlePurchase('osce')} disabled={loading !== null} style={secondaryButton}>
                   {loading === 'osce' ? 'Processing...' : 'Get OSCE Tool — £4.99'}
                 </button>
               )}
             </div>
 
-            <div
-              className={`bg-white border p-6 rounded-2xl ${
-                hasQuiz ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'
-              }`}
-            >
+            {/* Quiz Tool */}
+            <div style={{ ...editorialCard, background: '#fff', padding: '32px 28px 34px' }}>
               {hasQuiz && (
-                <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-4">
-                  <Check className="w-3 h-3" />
-                  Owned
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontFamily: serif, fontSize: '11px', color: cream, background: ink, padding: '4px 12px', borderRadius: '999px', marginBottom: '16px' }}>
+                  <Check style={{ width: '12px', height: '12px' }} /> Owned
                 </span>
               )}
 
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 bg-[var(--linen-deep)] flex items-center justify-center rounded-xl">
-                  <BookOpen className="w-5 h-5 text-[var(--espresso)]" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: parchment, border: `1px solid ${softLine}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen style={{ width: '20px', height: '20px', color: inkMid }} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[var(--espresso)]">
-                    Core Nursing Quiz
-                  </h3>
-                  {!hasQuiz && (
-                    <span className="text-sm text-[var(--charcoal)]">£4.99</span>
-                  )}
+                  <h3 style={{ fontFamily: display, fontSize: '20px', fontWeight: 400, color: ink }}>Core Nursing Quiz</h3>
+                  {!hasQuiz && <p style={{ fontFamily: serif, fontSize: '13px', color: inkLight }}>£4.99</p>}
                 </div>
               </div>
 
-              <p className="text-sm text-[var(--charcoal)] leading-relaxed mb-5">
-                Build exam-ready nursing knowledge across 17 topic areas with
-                instant feedback and explanations, not just right or wrong answers.
+              <p style={{ ...body, fontSize: '14px', marginBottom: '24px' }}>
+                17 topic areas with instant feedback and explanations — not just right or wrong.
               </p>
 
               {hasQuiz ? (
-                <Link
-                  href="/quiz"
-                  className="btn-secondary w-full justify-center py-2.5 text-sm"
-                >
-                  Open Quiz Tool
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                <Link href="/quiz" style={secondaryButton}>Open Quiz Tool <ArrowRight style={{ width: '14px', height: '14px' }} /></Link>
               ) : showEmailInput === 'quiz' && !isSignedIn ? (
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
-                    <input
-                      type="email"
-                      placeholder="Your email"
-                      value={guestEmail}
-                      onChange={(e) => {
-                        setGuestEmail(e.target.value);
-                        resetEmailState();
-                      }}
-                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm rounded-xl"
-                      aria-label="Guest email for quiz checkout"
-                    />
-                  </div>
-
-                  {emailError && (
-                    <p className="text-red-500 text-xs" role="alert">
-                      {emailError}
-                    </p>
-                  )}
-
-                  <button
-                    onClick={() => handleGuestCheckout('quiz')}
-                    disabled={loading !== null}
-                    className="btn-secondary w-full py-2.5 text-sm"
-                  >
-                    {loading === 'quiz' ? 'Processing...' : 'Continue to checkout'}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setShowEmailInput(null);
-                      setEmailError('');
-                    }}
-                    className="text-xs text-[var(--charcoal-light)] w-full"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                <EmailInput product="quiz" guestEmail={guestEmail} setGuestEmail={setGuestEmail} emailError={emailError} resetEmailState={resetEmailState} loading={loading} handleGuestCheckout={handleGuestCheckout} setShowEmailInput={setShowEmailInput} setEmailError={setEmailError} />
               ) : (
-                <button
-                  onClick={() => handlePurchase('quiz')}
-                  disabled={loading !== null}
-                  className="btn-secondary w-full py-2.5 text-sm"
-                >
+                <button onClick={() => handlePurchase('quiz')} disabled={loading !== null} style={secondaryButton}>
                   {loading === 'quiz' ? 'Processing...' : 'Get Quiz Tool — £4.99'}
                 </button>
               )}
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Trust signals */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
-            {TRUST_ITEMS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="bg-white border border-[var(--linen-deep)] p-5 rounded-2xl text-center"
-                >
-                  <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-[var(--linen-light)] flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-[var(--espresso)]" />
-                  </div>
-                  <div className="text-sm font-semibold text-[var(--espresso)] mb-1">
-                    {item.title}
-                  </div>
-                  <div className="text-xs text-[var(--charcoal-light)]">
-                    {item.desc}
-                  </div>
-                </div>
-              );
-            })}
+      {/* Try previews */}
+      {!isPro && (
+        <section style={{ padding: '0 24px 64px' }}>
+          <div style={{ maxWidth: '920px', margin: '0 auto', textAlign: 'center' }}>
+            <p style={{ fontFamily: serif, fontSize: '14px', color: inkMid, marginBottom: '16px' }}>
+              Not sure yet? Try the free previews first.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Link href="/osce" style={{ ...secondaryButton, width: 'auto', padding: '11px 24px' }}>
+                Try OSCE preview
+              </Link>
+              <Link href="/quiz" style={{ ...secondaryButton, width: 'auto', padding: '11px 24px' }}>
+                Try quiz preview
+              </Link>
+            </div>
           </div>
+        </section>
+      )}
 
-          {/* Adult bundle */}
-          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-2xl p-7 md:p-8 mb-12">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-              <div className="max-w-2xl">
-                <span className="inline-flex text-xs bg-[var(--charcoal-light)]/10 text-[var(--charcoal)] px-3 py-1 rounded-full font-medium mb-3">
-                  Coming soon
-                </span>
-
-                <h2 className="text-2xl font-display text-[var(--espresso)] mb-2">
+      {/* Adult bundle — coming soon */}
+      <section style={{ padding: '0 24px 64px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div style={{ ...editorialCard, background: parchment, padding: '36px 32px 38px' }}>
+            <div className="pricing-adult-grid" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '24px', flexWrap: 'wrap' }}>
+              <div style={{ maxWidth: '520px' }}>
+                <span style={{ ...tagStyle, marginBottom: '14px', display: 'inline-flex' }}>Coming soon</span>
+                <h2 style={{ fontFamily: display, fontSize: '24px', fontWeight: 400, color: ink, marginBottom: '10px' }}>
                   Adult Nursing Bundle
                 </h2>
-
-                <p className="text-sm text-[var(--charcoal)] leading-relaxed">
-                  Adult nursing content is in development, including topics like
-                  NEWS2, sepsis, wound care, adult OSCE stations, and more.
+                <p style={{ ...body, fontSize: '14px' }}>
+                  Adult nursing content is in development — NEWS2, sepsis, wound care, adult OSCE stations, and more.
                 </p>
               </div>
-
-              <div className="md:text-right">
-                <div className="text-3xl font-display text-[var(--espresso)]">
-                  £9.99
-                </div>
-                <p className="text-xs text-[var(--charcoal-light)]">planned one-time price</p>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontFamily: display, fontSize: '32px', color: ink, lineHeight: 1, marginBottom: '4px' }}>£9.99</p>
+                <p style={{ fontFamily: serif, fontSize: '12px', color: inkLight }}>planned one-time price</p>
               </div>
             </div>
 
-            <div className="mt-5">
+            <div style={{ marginTop: '24px' }}>
               {adultSubmitted ? (
-                <p className="text-sm text-[var(--espresso)] font-medium">
+                <p style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, color: ink }}>
                   Got it — we&apos;ll email you when it&apos;s ready.
                 </p>
               ) : (
-                <form onSubmit={handleAdultWaitlist} className="flex flex-col sm:flex-row gap-2 max-w-md">
-                  <div className="relative flex-1">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
+                <form onSubmit={handleAdultWaitlist} style={{ display: 'flex', gap: '10px', maxWidth: '400px', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+                    <Mail style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: inkLight }} />
                     <input
                       type="email"
                       placeholder="your@email.com"
                       value={adultEmail}
                       onChange={(e) => setAdultEmail(e.target.value)}
                       required
-                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm rounded-xl"
+                      style={inputStyle}
                     />
                   </div>
-
-                  <button
-                    type="submit"
-                    className="btn-secondary py-2.5 px-5 text-sm flex-shrink-0"
-                  >
+                  <button type="submit" style={{ ...secondaryButton, width: 'auto', padding: '12px 20px', flexShrink: 0 }}>
                     Notify me
                   </button>
                 </form>
               )}
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* FAQ */}
-          <div className="bg-white border border-[var(--linen-deep)] rounded-2xl p-7 md:p-8 mb-12">
-            <h2 className="text-xl md:text-2xl font-display text-[var(--espresso)] mb-6">
+      {/* FAQ */}
+      <section style={{ padding: '0 24px 64px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div style={{ ...editorialCard, background: '#fff', padding: '36px 32px 38px' }}>
+            <h2 style={{ fontFamily: display, fontSize: 'clamp(1.6rem, 3vw, 2rem)', fontWeight: 400, color: ink, marginBottom: '28px' }}>
               Questions
             </h2>
 
-            <div className="space-y-5">
-              {FAQS.map((faq) => (
-                <div
-                  key={faq.q}
-                  className="border-b border-[var(--linen-deep)] last:border-0 pb-5 last:pb-0"
-                >
-                  <h3 className="font-medium text-[var(--espresso)] mb-1.5">
-                    {faq.q}
-                  </h3>
-                  <p className="text-sm text-[var(--charcoal)] leading-relaxed">
-                    {faq.a}
-                  </p>
-                </div>
-              ))}
-            </div>
+            {FAQS.map((faq, i) => (
+              <div key={faq.q} style={{ borderBottom: i !== FAQS.length - 1 ? `1px solid ${softLine}` : 'none', paddingBottom: i !== FAQS.length - 1 ? '20px' : '0', marginBottom: i !== FAQS.length - 1 ? '20px' : '0' }}>
+                <h3 style={{ fontFamily: serif, fontSize: '15px', fontWeight: 400, color: ink, marginBottom: '6px' }}>{faq.q}</h3>
+                <p style={{ fontFamily: serif, fontSize: '14px', lineHeight: 1.7, fontWeight: 300, color: inkMid }}>{faq.a}</p>
+              </div>
+            ))}
           </div>
-
-          {!isPro && (
-            <div className="text-center">
-              <h2 className="text-2xl md:text-3xl font-display text-[var(--espresso)] mb-3">
-                Ready to get started?
-              </h2>
-              <p className="text-[var(--charcoal)] mb-5">
-                Get instant access to your OSCE practice, nursing quiz, and revision
-                support.
-              </p>
-              <button
-                onClick={() => handlePurchase('bundle')}
-                disabled={loading !== null}
-                className="btn-primary px-8 py-3.5"
-              >
-                {loading === 'bundle' ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>Get Children&apos;s Bundle — £9.99</>
-                )}
-              </button>
-            </div>
-          )}
         </div>
-      </main>
+      </section>
+
+      {/* Final CTA */}
+      {!isPro && (
+        <section style={{ padding: '0 24px 96px' }}>
+          <div style={{ maxWidth: '920px', margin: '0 auto', textAlign: 'center' }}>
+            <p style={sectionLabel}>Ready</p>
+            <h2 style={{ fontFamily: display, fontSize: 'clamp(2rem, 4vw, 2.6rem)', fontWeight: 400, lineHeight: 1.15, color: ink, marginBottom: '14px' }}>
+              Start with the tools you&apos;ll actually use.
+            </h2>
+            <p style={{ ...body, maxWidth: '480px', margin: '0 auto 28px' }}>
+              One payment. Lifetime access. Built for nursing students preparing for real assessments.
+            </p>
+            <button onClick={() => handlePurchase('bundle')} disabled={loading !== null} style={{ ...primaryButton, width: 'auto', display: 'inline-flex' }}>
+              {loading === 'bundle' ? <><Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} /> Processing...</> : <>Get Children&apos;s Bundle — £9.99</>}
+            </button>
+          </div>
+        </section>
+      )}
 
       <Footer />
+
+      <style>{`
+        .pricing-bundle-grid {
+          display: grid;
+          grid-template-columns: 1.15fr 0.85fr;
+        }
+        .pricing-individual-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 18px;
+        }
+        @media (max-width: 768px) {
+          .pricing-bundle-grid {
+            grid-template-columns: 1fr;
+          }
+          .pricing-bundle-left {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(217, 208, 193, 0.7);
+            padding: 28px 24px 32px !important;
+          }
+          .pricing-bundle-right {
+            padding: 28px 24px 32px !important;
+          }
+          .pricing-individual-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function EmailInput({ product, guestEmail, setGuestEmail, emailError, resetEmailState, loading, handleGuestCheckout, setShowEmailInput, setEmailError }: {
+  product: Product;
+  guestEmail: string;
+  setGuestEmail: (v: string) => void;
+  emailError: string;
+  resetEmailState: () => void;
+  loading: Product | null;
+  handleGuestCheckout: (p: Product) => void;
+  setShowEmailInput: (p: Product | null) => void;
+  setEmailError: (v: string) => void;
+}) {
+  const serif = "'Source Serif 4', Georgia, serif";
+  const ink = '#1C1510';
+  const inkLight = '#9C8878';
+  const border = '#D9D0C1';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ position: 'relative' }}>
+        <Mail style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: inkLight }} />
+        <input
+          type="email"
+          placeholder="Your email"
+          value={guestEmail}
+          onChange={(e) => { setGuestEmail(e.target.value); resetEmailState(); }}
+          style={{ fontFamily: serif, fontSize: '14px', width: '100%', padding: '12px 16px 12px 40px', border: `1px solid ${border}`, borderRadius: '14px', background: '#fff', color: ink, outline: 'none' }}
+          aria-label={`Guest email for ${product} checkout`}
+        />
+      </div>
+      {emailError && <p style={{ fontFamily: serif, fontSize: '12px', color: '#c44' }}>{emailError}</p>}
+      <button onClick={() => handleGuestCheckout(product)} disabled={loading !== null} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: serif, fontSize: '14px', background: 'transparent', color: ink, padding: '13px 24px', borderRadius: '9999px', border: `1px solid ${border}`, cursor: 'pointer', width: '100%' }}>
+        {loading === product ? 'Processing...' : 'Continue to checkout'}
+      </button>
+      <button onClick={() => { setShowEmailInput(null); setEmailError(''); }} style={{ fontFamily: serif, fontSize: '12px', color: inkLight, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+        Cancel
+      </button>
     </div>
   );
 }

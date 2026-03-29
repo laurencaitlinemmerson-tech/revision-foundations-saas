@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import type { CSSProperties } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -78,7 +79,7 @@ const smallCaps: CSSProperties = {
 };
 
 const laurenFacts = [
-  'Children’s nursing student',
+  "Children's nursing student",
   'Former medical photographer',
   'Pepsi Max Cherry',
   'Purple everything',
@@ -96,20 +97,16 @@ export default function AboutPage() {
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      <section style={{ padding: '132px 24px 88px' }}>
+      {/* Hero section with photo */}
+      <section className="about-hero" style={{ padding: '132px 24px 88px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1.15fr) minmax(220px, 0.85fr)',
-              gap: '36px',
-              alignItems: 'end',
-            }}
-          >
+          <div className="about-hero-grid">
+            {/* Text column */}
             <div>
               <p style={sectionLabel}>About me</p>
 
               <h1
+                className="about-headline"
                 style={{
                   fontFamily: display,
                   fontSize: 'clamp(3.2rem, 7.5vw, 5.4rem)',
@@ -120,7 +117,7 @@ export default function AboutPage() {
                   marginBottom: '24px',
                 }}
               >
-                Hi, I’m Lauren.
+                Hi, I'm Lauren.
               </h1>
 
               <p
@@ -131,21 +128,60 @@ export default function AboutPage() {
                   marginBottom: '0',
                 }}
               >
-                I’m a children’s nursing student and the person behind Revision
+                I'm a children's nursing student and the person behind Revision
                 Foundations. I made it because I wanted revision tools that felt
                 thoughtful, calm, and actually lovely to use.
               </p>
             </div>
 
-            <div
-              style={{
-                paddingBottom: '10px',
-              }}
-            >
+            {/* Photo + facts column */}
+            <div className="about-right-col">
+              {/* Photo */}
               <div
+                className="about-photo-frame"
+                style={{
+                  borderRadius: '28px',
+                  overflow: 'hidden',
+                  border: `1px solid ${softLine}`,
+                  background: parchment,
+                  aspectRatio: '4 / 5',
+                  position: 'relative',
+                }}
+              >
+                {/* Replace src with your actual photo path */}
+                <Image
+                  src="/lauren.jpg"
+                  alt="Lauren, founder of Revision Foundations"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 768px) 200px, 280px"
+                  priority
+                />
+                {/* Fallback if image doesn't load — shows initials */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: display,
+                    fontSize: '64px',
+                    color: softLine,
+                    zIndex: 0,
+                  }}
+                >
+                  L
+                </div>
+              </div>
+
+              {/* Facts chips */}
+              <div
+                className="about-facts-section"
                 style={{
                   borderLeft: `1px solid ${softLine}`,
                   paddingLeft: '24px',
+                  marginTop: '24px',
                 }}
               >
                 <p style={{ ...smallCaps, marginBottom: '14px' }}>A few Lauren things</p>
@@ -169,17 +205,14 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Founder note — editorial card */}
       <section style={{ padding: '0 24px 76px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
-          <div style={editorialCard}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '150px minmax(0, 1fr)',
-                gap: '0',
-              }}
-            >
+          <div className="founder-card" style={editorialCard}>
+            <div className="founder-card-inner">
+              {/* Sidebar */}
               <div
+                className="founder-sidebar"
                 style={{
                   borderRight: `1px solid ${softLine}`,
                   padding: '42px 24px 42px 32px',
@@ -205,7 +238,8 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div style={{ padding: '42px 40px 46px' }}>
+              {/* Content */}
+              <div className="founder-content" style={{ padding: '42px 40px 46px' }}>
                 <p style={sectionLabel}>How this started</p>
 
                 <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
@@ -216,7 +250,7 @@ export default function AboutPage() {
 
                 <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
                   At 25, I decided to change direction, applied to nursing, and got
-                  in. Children’s nursing felt right almost immediately. From my
+                  in. Children's nursing felt right almost immediately. From my
                   first placement, I knew it was where I wanted to be.
                 </p>
 
@@ -239,13 +273,13 @@ export default function AboutPage() {
 
                 <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
                   At first they were just for me. Then people on my course started
-                  asking for them too, and that’s when Revision Foundations slowly
+                  asking for them too, and that's when Revision Foundations slowly
                   became a real thing.
                 </p>
 
                 <p style={{ ...body, maxWidth: '700px' }}>
                   I still make everything in the same way — based on what actually
-                  feels helpful when you’re revising, not what sounds good on paper.
+                  feels helpful when you're revising, not what sounds good on paper.
                 </p>
               </div>
             </div>
@@ -253,15 +287,10 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* What this is */}
       <section style={{ padding: '0 24px 76px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 320px)',
-              gap: '18px',
-            }}
-          >
+          <div className="what-grid">
             <div style={noteCard}>
               <div style={{ padding: '34px 34px 36px' }}>
                 <p style={sectionLabel}>What this is</p>
@@ -326,6 +355,7 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Small note */}
       <section style={{ padding: '0 24px 96px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div
@@ -360,7 +390,7 @@ export default function AboutPage() {
               </p>
 
               <p style={{ ...body, marginBottom: '24px', maxWidth: '660px' }}>
-                If you ever have a question, spot something that doesn’t make
+                If you ever have a question, spot something that doesn't make
                 sense, or just want to say hi, I really do read every message.
               </p>
 
@@ -386,6 +416,93 @@ export default function AboutPage() {
       </section>
 
       <Footer />
+
+      {/* Responsive styles */}
+      <style>{`
+        .about-hero-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
+          gap: 40px;
+          align-items: start;
+        }
+        .about-right-col {
+          padding-top: 8px;
+        }
+        .about-photo-frame {
+          max-width: 280px;
+        }
+        .founder-card-inner {
+          display: grid;
+          grid-template-columns: 150px minmax(0, 1fr);
+          gap: 0;
+        }
+        .what-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+          gap: 18px;
+        }
+
+        @media (max-width: 768px) {
+          .about-hero {
+            padding-top: 108px !important;
+            padding-bottom: 56px !important;
+          }
+          .about-hero-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+          }
+          .about-right-col {
+            display: flex;
+            flex-direction: row;
+            align-items: start;
+            gap: 24px;
+            padding-top: 0;
+          }
+          .about-photo-frame {
+            max-width: 140px;
+            min-width: 120px;
+            flex-shrink: 0;
+          }
+          .about-facts-section {
+            margin-top: 0 !important;
+            border-left: none !important;
+            padding-left: 0 !important;
+          }
+          .about-headline {
+            font-size: clamp(2.4rem, 9vw, 3.6rem) !important;
+          }
+          .founder-card-inner {
+            grid-template-columns: 1fr;
+          }
+          .founder-sidebar {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(217, 208, 193, 0.7);
+            padding: 28px 28px 24px !important;
+            flex-direction: row !important;
+            align-items: center;
+            gap: 16px;
+          }
+          .founder-sidebar > div > p:first-child {
+            font-size: 48px !important;
+            margin-bottom: 0 !important;
+          }
+          .founder-content {
+            padding: 28px !important;
+          }
+          .what-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .about-right-col {
+            flex-direction: column;
+          }
+          .about-photo-frame {
+            max-width: 160px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
