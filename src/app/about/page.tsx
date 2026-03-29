@@ -5,8 +5,6 @@ import Image from 'next/image';
 import type { CSSProperties } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper-bundle.min.css';
 
 const serif = "'Source Serif 4', Georgia, serif";
 const display = "'Playfair Display', Georgia, serif";
@@ -16,7 +14,6 @@ const inkMid = '#5C4A38';
 const inkLight = '#9C8878';
 const cream = '#F9F6F0';
 const parchment = '#F3EEE4';
-const paper = '#F7F2E8';
 const border = '#D9D0C1';
 const softLine = 'rgba(217, 208, 193, 0.7)';
 const blush = '#EEE4DE';
@@ -247,53 +244,42 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Blog Carousel Section */}
+      {/* Blog Post List Section */}
       <section style={{ padding: '40px 24px 60px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <p style={{ ...smallCaps, marginBottom: '18px' }}>Featured Blog Posts</p>
 
-          <Swiper
-            spaceBetween={24}
-            slidesPerView={'auto'}
-            grabCursor={true}
-            className="blog-carousel"
-          >
+          <div className="blog-posts">
             {blogPosts.map((post, index) => (
-              <SwiperSlide key={index}>
-                <div
+              <div key={index} style={{ padding: '20px', background: parchment, borderRadius: '14px', marginBottom: '16px' }}>
+                <h3
                   style={{
-                    padding: '20px',
-                    background: parchment,
-                    borderRadius: '14px',
+                    fontFamily: display,
+                    fontSize: '1.5rem',
+                    color: ink,
+                    marginBottom: '12px',
                   }}
                 >
-                  <h3
-                    style={{
-                      fontFamily: display,
-                      fontSize: '1.5rem',
-                      color: ink,
-                      marginBottom: '12px',
-                    }}
-                  >
-                    {post.title}
-                  </h3>
-                  <p
-                    style={{
-                      ...body,
-                      fontSize: '14px',
-                      lineHeight: 1.8,
-                      marginBottom: '16px',
-                    }}
-                  >
-                    {post.excerpt}
-                  </p>
                   <Link href={post.link} style={textLink}>
-                    Read more →
+                    {post.title}
                   </Link>
-                </div>
-              </SwiperSlide>
+                </h3>
+                <p
+                  style={{
+                    ...body,
+                    fontSize: '14px',
+                    lineHeight: 1.8,
+                    marginBottom: '16px',
+                  }}
+                >
+                  {post.excerpt}
+                </p>
+                <Link href={post.link} style={textLink}>
+                  Read more →
+                </Link>
+              </div>
             ))}
-          </Swiper>
+          </div>
         </div>
       </section>
 
@@ -362,18 +348,10 @@ export default function AboutPage() {
           border-left: 1px solid rgba(217, 208, 193, 0.7);
         }
 
-        .blog-carousel {
+        .blog-posts {
           display: flex;
-          gap: 24px;
-          overflow-x: auto;
-        }
-
-        .blog-carousel .swiper-slide {
-          flex: 0 0 auto;
-          width: 300px;
-          border-radius: 14px;
-          background: ${parchment};
-          padding: 20px;
+          flex-direction: column;
+          gap: 16px;
         }
 
         @media (max-width: 768px) {
