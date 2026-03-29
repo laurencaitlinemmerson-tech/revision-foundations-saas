@@ -25,22 +25,18 @@ export default function Navbar() {
       }
     };
 
-    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMobileMenuOpen(false);
-      }
+      if (e.key === 'Escape' && mobileMenuOpen) setMobileMenuOpen(false);
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, []);
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
@@ -49,14 +45,7 @@ export default function Navbar() {
     };
   }, [mobileMenuOpen]);
 
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
-  const closeMobileMenu = useCallback(() => {
-    setMobileMenuOpen(false);
-  }, []);
-
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
   const isActive = (path: string) => pathname === path;
 
   const navLinks = [
@@ -65,19 +54,15 @@ export default function Navbar() {
     { href: '/about', label: 'About' },
   ];
 
-  const display = "'Playfair Display', Georgia, serif";
   const serif = "'Source Serif 4', Georgia, serif";
-
+  const display = "'Playfair Display', Georgia, serif";
   const ink = '#1C1510';
   const inkMid = '#5C4A38';
   const cream = '#F9F6F0';
   const border = '#DDD5C8';
-  const inkHover = '#3a2010';
 
   return (
     <nav
-      role="navigation"
-      aria-label="Main navigation"
       style={{
         position: 'fixed',
         top: 0,
@@ -87,29 +72,21 @@ export default function Navbar() {
         transition: 'background-color 0.25s ease, border-color 0.25s ease',
         backgroundColor: scrolled ? 'rgba(249,246,240,0.97)' : 'transparent',
         borderBottom: scrolled ? `1px solid ${border}` : '1px solid transparent',
-        backdropFilter: scrolled ? 'blur(8px)' : 'none',
       }}
+      role="navigation"
+      aria-label="Main navigation"
     >
-      <div
-        style={{
-          maxWidth: '1120px',
-          margin: '0 auto',
-          padding: '0 16px',
-        }}
-        className="sm:px-6"
-      >
+      <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 24px' }}>
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
+            alignItems: 'center',
             height: '68px',
-            gap: '12px',
           }}
         >
           <Link
             href="/"
-            aria-label="Revision Foundations — Home"
             style={{
               fontFamily: display,
               fontSize: '17px',
@@ -118,20 +95,20 @@ export default function Navbar() {
               color: ink,
               textDecoration: 'none',
               lineHeight: 1,
-              whiteSpace: 'nowrap',
-              flexShrink: 1,
-              minWidth: 0,
             }}
+            aria-label="Revision Foundations — Home"
           >
             Revision Foundations
           </Link>
 
-          <div className="hidden md:flex items-center gap-7">
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '28px' }}
+            className="hidden md:flex"
+          >
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                aria-current={isActive(link.href) ? 'page' : undefined}
                 style={{
                   fontFamily: serif,
                   fontSize: '14px',
@@ -142,14 +119,17 @@ export default function Navbar() {
                     ? `1px solid ${ink}`
                     : '1px solid transparent',
                   paddingBottom: '1px',
-                  transition: 'color 0.15s ease',
+                  transition: 'color 0.15s',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = ink;
+                  (e.currentTarget as HTMLAnchorElement).style.color = ink;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = isActive(link.href) ? ink : inkMid;
+                  (e.currentTarget as HTMLAnchorElement).style.color = isActive(link.href)
+                    ? ink
+                    : inkMid;
                 }}
+                aria-current={isActive(link.href) ? 'page' : undefined}
               >
                 {link.label}
               </Link>
@@ -157,11 +137,7 @@ export default function Navbar() {
 
             <SignedIn>
               <div
-                style={{
-                  width: '1px',
-                  height: '16px',
-                  background: border,
-                }}
+                style={{ width: '1px', height: '16px', background: border }}
                 aria-hidden="true"
               />
               <Link
@@ -172,13 +148,15 @@ export default function Navbar() {
                   fontWeight: isActive('/dashboard') ? 500 : 400,
                   color: isActive('/dashboard') ? ink : inkMid,
                   textDecoration: 'none',
-                  transition: 'color 0.15s ease',
+                  transition: 'color 0.15s',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = ink;
+                  (e.currentTarget as HTMLAnchorElement).style.color = ink;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = isActive('/dashboard') ? ink : inkMid;
+                  (e.currentTarget as HTMLAnchorElement).style.color = isActive('/dashboard')
+                    ? ink
+                    : inkMid;
                 }}
               >
                 Dashboard
@@ -190,7 +168,7 @@ export default function Navbar() {
             </SignedIn>
 
             <SignedOut>
-              <div className="flex items-center gap-3">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Link
                   href="/sign-in"
                   style={{
@@ -199,13 +177,13 @@ export default function Navbar() {
                     fontWeight: 400,
                     color: inkMid,
                     textDecoration: 'none',
-                    transition: 'color 0.15s ease',
+                    transition: 'color 0.15s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = ink;
+                    (e.currentTarget as HTMLAnchorElement).style.color = ink;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.color = inkMid;
+                    (e.currentTarget as HTMLAnchorElement).style.color = inkMid;
                   }}
                 >
                   Sign in
@@ -221,14 +199,12 @@ export default function Navbar() {
                     padding: '8px 20px',
                     borderRadius: '9999px',
                     textDecoration: 'none',
-                    whiteSpace: 'nowrap',
-                    transition: 'background-color 0.15s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = inkHover;
+                    (e.currentTarget as HTMLAnchorElement).style.background = '#3a2010';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = ink;
+                    (e.currentTarget as HTMLAnchorElement).style.background = ink;
                   }}
                 >
                   Get Access
@@ -238,23 +214,18 @@ export default function Navbar() {
           </div>
 
           <button
-            type="button"
             className="md:hidden"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            aria-expanded={mobileMenuOpen}
-            aria-controls={mobileMenuId}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             style={{
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
               padding: '8px',
               color: ink,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
             }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-controls={mobileMenuId}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? (
               <X style={{ width: '22px', height: '22px' }} />
@@ -268,119 +239,100 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div
           id={mobileMenuId}
-          role="menu"
           style={{
             background: cream,
             borderTop: `1px solid ${border}`,
-            padding: '20px 16px 28px',
+            padding: '20px 24px 28px',
           }}
-          className="md:hidden sm:px-6"
+          role="menu"
         >
-          <div
-            style={{
-              maxWidth: '1120px',
-              margin: '0 auto',
-            }}
-          >
-            {navLinks.map((link) => (
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{
+                display: 'block',
+                padding: '12px 0',
+                fontFamily: serif,
+                fontSize: '16px',
+                fontWeight: isActive(link.href) ? 500 : 400,
+                color: isActive(link.href) ? ink : inkMid,
+                textDecoration: 'none',
+                borderBottom: `1px solid ${border}`,
+              }}
+              onClick={closeMobileMenu}
+              aria-current={isActive(link.href) ? 'page' : undefined}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          <SignedIn>
+            <Link
+              href="/dashboard"
+              style={{
+                display: 'block',
+                padding: '12px 0',
+                fontFamily: serif,
+                fontSize: '16px',
+                color: inkMid,
+                textDecoration: 'none',
+                borderBottom: `1px solid ${border}`,
+              }}
+              onClick={closeMobileMenu}
+            >
+              Dashboard
+            </Link>
+            <div style={{ paddingTop: '20px' }}>
+              <UserButton afterSwitchSessionUrl="/" />
+            </div>
+          </SignedIn>
+
+          <SignedOut>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                paddingTop: '20px',
+              }}
+            >
               <Link
-                key={link.href}
-                href={link.href}
-                role="menuitem"
-                aria-current={isActive(link.href) ? 'page' : undefined}
-                onClick={closeMobileMenu}
+                href="/sign-in"
                 style={{
                   display: 'block',
-                  padding: '12px 0',
+                  textAlign: 'center' as const,
+                  padding: '11px',
                   fontFamily: serif,
-                  fontSize: '16px',
-                  fontWeight: isActive(link.href) ? 500 : 400,
-                  color: isActive(link.href) ? ink : inkMid,
+                  fontSize: '15px',
+                  color: inkMid,
+                  border: `1px solid ${border}`,
+                  borderRadius: '9999px',
                   textDecoration: 'none',
-                  borderBottom: `1px solid ${border}`,
                 }}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <SignedIn>
-              <Link
-                href="/dashboard"
-                role="menuitem"
                 onClick={closeMobileMenu}
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/pricing"
                 style={{
                   display: 'block',
-                  padding: '12px 0',
+                  textAlign: 'center' as const,
+                  padding: '11px',
                   fontFamily: serif,
-                  fontSize: '16px',
-                  fontWeight: isActive('/dashboard') ? 500 : 400,
-                  color: isActive('/dashboard') ? ink : inkMid,
+                  fontSize: '15px',
+                  color: cream,
+                  background: ink,
+                  borderRadius: '9999px',
                   textDecoration: 'none',
-                  borderBottom: `1px solid ${border}`,
                 }}
+                onClick={closeMobileMenu}
               >
-                Dashboard
+                Get Access
               </Link>
-
-              <div
-                style={{
-                  paddingTop: '20px',
-                  display: 'flex',
-                  justifyContent: 'flex-start',
-                }}
-              >
-                <UserButton afterSwitchSessionUrl="/" />
-              </div>
-            </SignedIn>
-
-            <SignedOut>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                  paddingTop: '20px',
-                }}
-              >
-                <Link
-                  href="/sign-in"
-                  onClick={closeMobileMenu}
-                  style={{
-                    display: 'block',
-                    textAlign: 'center',
-                    padding: '11px',
-                    fontFamily: serif,
-                    fontSize: '15px',
-                    color: inkMid,
-                    border: `1px solid ${border}`,
-                    borderRadius: '9999px',
-                    textDecoration: 'none',
-                  }}
-                >
-                  Sign in
-                </Link>
-
-                <Link
-                  href="/pricing"
-                  onClick={closeMobileMenu}
-                  style={{
-                    display: 'block',
-                    textAlign: 'center',
-                    padding: '11px',
-                    fontFamily: serif,
-                    fontSize: '15px',
-                    color: cream,
-                    background: ink,
-                    borderRadius: '9999px',
-                    textDecoration: 'none',
-                  }}
-                >
-                  Get Access
-                </Link>
-              </div>
-            </SignedOut>
-          </div>
+            </div>
+          </SignedOut>
         </div>
       )}
     </nav>
