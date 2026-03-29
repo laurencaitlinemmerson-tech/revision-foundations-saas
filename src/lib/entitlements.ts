@@ -6,56 +6,91 @@ function normalizeEmail(email?: string | null) {
   return email?.toLowerCase().trim() ?? null;
 }
 
+function applyIdentityFilter<T extends { or: Function; eq: Function }>(
+  query: T,
+  clerkUserId?: string | null,
+  email?: string | null
+): T {
+  const normalizedEmail = normalizeEmail(email);
+
+  if (clerkUserId && normalizedEmail) {
+    return query.or(
+      `clerk_user_id.eq.${clerkUserId},email.eq.${normalizedEmail}`
+    ) as T;
+  }
+
+  if (clerkUserId) {
+    return query.eq('clerk_user_id', clerkUserId) as T;
+  }
+
+  if (normalizedEmail) {
+    return query.eq('email', normalizedEmail) as T;
+  }
+
+  return query;
+}
+
 export async function checkEntitlement(
-  clerkUserId: string,
-  product: Product,
+  clerkUserId?: string | null,
+  product?: Product,
   email?: string | null
 ): Promise<boolean> {
   const supabase = createServiceClient();
   const normalizedEmail = normalizeEmail(email);
 
+  if (!clerkUserId && !normalizedEmail) {
+    return false;
+  }
+
+  if (!product) {
+    return false;
+  }
+
+  const now = new Date().toISOString();
+
   let bundleQuery = supabase
     .from('entitlements')
     .select('*')
     .eq('product', 'bundle')
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .limit(1);
 
-  if (clerkUserId && normalizedEmail) {
-    bundleQuery = bundleQuery.or(
-      `clerk_user_id.eq.${clerkUserId},email.eq.${normalizedEmail}`
-    );
-  } else if (clerkUserId) {
-    bundleQuery = bundleQuery.eq('clerk_user_id', clerkUserId);
-  } else if (normalizedEmail) {
-    bundleQuery = bundleQuery.eq('email', normalizedEmail);
+  bundleQuery = applyIdentityFilter(bundleQuery, clerkUserId, normalizedEmail);
+
+  const { data: bundleEntitlements, error: bundleError } = await bundleQuery;
+
+  if (bundleError) {
+    console.error('Error checking bundle entitlement:', bundleError);
+    return false;
   }
 
-  const { data: bundleEntitlement } = await bundleQuery.single();
-  if (bundleEntitlement) return true;
+  if (bundleEntitlements && bundleEntitlements.length > 0) {
+    return true;
+  }
 
   let productQuery = supabase
     .from('entitlements')
     .select('*')
     .eq('product', product)
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .limit(1);
 
-  if (clerkUserId && normalizedEmail) {
-    productQuery = productQuery.or(
-      `clerk_user_id.eq.${clerkUserId},email.eq.${normalizedEmail}`
-    );
-  } else if (clerkUserId) {
-    productQuery = productQuery.eq('clerk_user_id', clerkUserId);
-  } else if (normalizedEmail) {
-    productQuery = productQuery.eq('email', normalizedEmail);
+  productQuery = applyIdentityFilter(productQuery, clerkUserId, normalizedEmail);
+
+  const { data: productEntitlements, error: productError } = await productQuery;
+
+  if (productError) {
+    console.error('Error checking product entitlement:', productError);
+    return false;
   }
 
-  const { data: productEntitlement } = await productQuery.single();
-
-  return !!productEntitlement;
+  return !!(productEntitlements && productEntitlements.length > 0);
 }
 
 export async function getUserEntitlements(
-  clerkUserId?: string,
+  clerkUserId?: string | null,
   email?: string | null
 ): Promise<Entitlement[]> {
   const supabase = createServiceClient();
@@ -65,20 +100,15 @@ export async function getUserEntitlements(
     return [];
   }
 
+  const now = new Date().toISOString();
+
   let query = supabase
     .from('entitlements')
     .select('*')
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`expires_at.is.null,expires_at.gt.${now}`);
 
-  if (clerkUserId && normalizedEmail) {
-    query = query.or(
-      `clerk_user_id.eq.${clerkUserId},email.eq.${normalizedEmail}`
-    );
-  } else if (clerkUserId) {
-    query = query.eq('clerk_user_id', clerkUserId);
-  } else if (normalizedEmail) {
-    query = query.eq('email', normalizedEmail);
-  }
+  query = applyIdentityFilter(query, clerkUserId, normalizedEmail);
 
   const { data, error } = await query;
 
@@ -87,7 +117,7 @@ export async function getUserEntitlements(
     return [];
   }
 
-  return data || [];
+  return data ?? [];
 }
 
 export async function createOrUpdateEntitlement(
@@ -143,11 +173,10 @@ export function hasAccessToContent(
   entitlements: Entitlement[],
   product: Product
 ): boolean {
-  if (entitlements.some((e) => e.product === 'bundle' && e.status === 'active')) {
-    return true;
-  }
-
   return entitlements.some(
-    (e) => e.product === product && e.status === 'active'
+    (e) =>
+      e.status === 'active' &&
+      (e.expires_at == null || new Date(e.expires_at) > new Date()) &&
+      (e.product === 'bundle' || e.product === product)
   );
 }
