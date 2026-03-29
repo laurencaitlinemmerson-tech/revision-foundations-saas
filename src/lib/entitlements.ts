@@ -2,127 +2,56 @@ import { createServiceClient, Entitlement } from './supabase';
 
 export type Product = 'osce' | 'quiz' | 'bundle';
 
-function normalizeEmail(email?: string | null) {
-  return email?.toLowerCase().trim() ?? null;
-}
-
-function applyIdentityFilter<T extends { or: Function; eq: Function }>(
-  query: T,
-  clerkUserId?: string | null,
-  email?: string | null
-): T {
-  const normalizedEmail = normalizeEmail(email);
-
-  if (clerkUserId && normalizedEmail) {
-    return query.or(
-      `clerk_user_id.eq.${clerkUserId},email.eq.${normalizedEmail}`
-    ) as T;
-  }
-
-  if (clerkUserId) {
-    return query.eq('clerk_user_id', clerkUserId) as T;
-  }
-
-  if (normalizedEmail) {
-    return query.eq('email', normalizedEmail) as T;
-  }
-
-  return query;
-}
-
 export async function checkEntitlement(
-  clerkUserId?: string | null,
-  product?: Product,
-  email?: string | null
+  clerkUserId: string,
+  product: Product
 ): Promise<boolean> {
   const supabase = createServiceClient();
-  const normalizedEmail = normalizeEmail(email);
 
-  if (!clerkUserId && !normalizedEmail) {
-    return false;
-  }
-
-  if (!product) {
-    return false;
-  }
-
-  const now = new Date().toISOString();
-
-  let bundleQuery = supabase
+  // Check for bundle first (gives access to everything)
+  const { data: bundleEntitlement } = await supabase
     .from('entitlements')
     .select('*')
+    .eq('clerk_user_id', clerkUserId)
     .eq('product', 'bundle')
     .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`)
-    .limit(1);
+    .single();
 
-  bundleQuery = applyIdentityFilter(bundleQuery, clerkUserId, normalizedEmail);
+  if (bundleEntitlement) return true;
 
-  const { data: bundleEntitlements, error: bundleError } = await bundleQuery;
-
-  if (bundleError) {
-    console.error('Error checking bundle entitlement:', bundleError);
-    return false;
-  }
-
-  if (bundleEntitlements && bundleEntitlements.length > 0) {
-    return true;
-  }
-
-  let productQuery = supabase
+  // Check for specific product
+  const { data: productEntitlement } = await supabase
     .from('entitlements')
     .select('*')
+    .eq('clerk_user_id', clerkUserId)
     .eq('product', product)
     .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`)
-    .limit(1);
+    .single();
 
-  productQuery = applyIdentityFilter(productQuery, clerkUserId, normalizedEmail);
-
-  const { data: productEntitlements, error: productError } = await productQuery;
-
-  if (productError) {
-    console.error('Error checking product entitlement:', productError);
-    return false;
-  }
-
-  return !!(productEntitlements && productEntitlements.length > 0);
+  return !!productEntitlement;
 }
 
 export async function getUserEntitlements(
-  clerkUserId?: string | null,
-  email?: string | null
+  clerkUserId: string
 ): Promise<Entitlement[]> {
   const supabase = createServiceClient();
-  const normalizedEmail = normalizeEmail(email);
 
-  if (!clerkUserId && !normalizedEmail) {
-    return [];
-  }
-
-  const now = new Date().toISOString();
-
-  let query = supabase
+  const { data, error } = await supabase
     .from('entitlements')
     .select('*')
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`);
-
-  query = applyIdentityFilter(query, clerkUserId, normalizedEmail);
-
-  const { data, error } = await query;
+    .eq('clerk_user_id', clerkUserId)
+    .eq('status', 'active');
 
   if (error) {
     console.error('Error fetching entitlements:', error);
     return [];
   }
 
-  return data ?? [];
+  return data || [];
 }
 
 export async function createOrUpdateEntitlement(
   clerkUserId: string,
-  email: string,
   product: Product,
   stripeCustomerId: string | null,
   stripeSubscriptionId: string | null,
@@ -132,20 +61,16 @@ export async function createOrUpdateEntitlement(
 
   const { error } = await supabase
     .from('entitlements')
-    .upsert(
-      {
-        clerk_user_id: clerkUserId,
-        email: normalizeEmail(email),
-        product,
-        status: 'active',
-        stripe_customer_id: stripeCustomerId,
-        stripe_subscription_id: stripeSubscriptionId,
-        expires_at: expiresAt,
-      },
-      {
-        onConflict: 'clerk_user_id,product',
-      }
-    );
+    .upsert({
+      clerk_user_id: clerkUserId,
+      product,
+      status: 'active',
+      stripe_customer_id: stripeCustomerId,
+      stripe_subscription_id: stripeSubscriptionId,
+      expires_at: expiresAt,
+    }, {
+      onConflict: 'clerk_user_id,product'
+    });
 
   if (error) {
     console.error('Error creating entitlement:', error);
@@ -173,10 +98,10 @@ export function hasAccessToContent(
   entitlements: Entitlement[],
   product: Product
 ): boolean {
-  return entitlements.some(
-    (e) =>
-      e.status === 'active' &&
-      (e.expires_at == null || new Date(e.expires_at) > new Date()) &&
-      (e.product === 'bundle' || e.product === product)
-  );
+  // Bundle gives access to everything
+  if (entitlements.some(e => e.product === 'bundle' && e.status === 'active')) {
+    return true;
+  }
+  // Check specific product
+  return entitlements.some(e => e.product === product && e.status === 'active');
 }
