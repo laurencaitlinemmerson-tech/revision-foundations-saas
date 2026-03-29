@@ -7,178 +7,620 @@ import Testimonials from '@/components/Testimonials';
 
 const serif = "'Source Serif 4', Georgia, serif";
 const display = "'Playfair Display', Georgia, serif";
+
 const ink = '#1C1510';
 const inkMid = '#5C4A38';
 const inkLight = '#9C8878';
+
 const cream = '#F9F6F0';
-const parchment = '#F0EBE0';
+const parchment = '#F3EEE4';
+const panel = '#F7F2E8';
+const panelSoft = 'rgba(255,255,255,0.32)';
 const border = '#DDD5C8';
-const amber = '#C8700A';
-const amberBg = '#FDF3E3';
-const amberText = '#7A3F04';
-const white = '#ffffff';
-
-const tools = [
-  {
-    num: '01',
-    title: "Children's OSCE Tool",
-    desc: '50+ practice stations covering paediatric obs, A-E assessment, medication administration, safeguarding, and SBAR handover. Each station has a marking checklist and timed mode.',
-    tags: ['Paed obs', 'ABCDE', 'Medication admin', 'Safeguarding'],
-    href: '/osce',
-  },
-  {
-    num: '02',
-    title: 'Core Nursing Quiz',
-    desc: '17 topic areas: vital signs, drug calculations, anatomy & physiology, pharmacology, infection control, fluid balance. Every answer includes clear explanations.',
-    tags: ['Drug calculations', 'Vital signs', 'Pharmacology', 'Infection control'],
-    href: '/quiz',
-  },
-  {
-    num: '03',
-    title: 'Revision Hub',
-    desc: 'Cheat sheets, clinical guides, and reference articles. A-E assessment guide, SBAR template, paediatric vital signs, placement survival guide, and much more.',
-    tags: ['Cheat sheets', 'Clinical guides', 'Placement tips', 'Q&A'],
-    href: '/hub',
-  },
-];
-
-const whyItems = [
-  { title: 'Branch-specific content', text: "Generic revision tools miss what matters for your branch. Children's nursing is live now — paed obs, PEWS, safeguarding. Adult nursing is next." },
-  { title: 'What actually gets tested', text: "Made while preparing for my own OSCEs and theory exams. The topics reflect what nursing students actually face — not what a textbook assumes." },
-  { title: 'No recurring cost', text: "Students don't have spare cash. One payment, and it's yours. New content is added regularly — all future updates at no extra cost." },
-];
 
 export default function HomePage() {
+  const tools = [
+    {
+      num: '01',
+      title: "Children's OSCE Tool",
+      desc: '50+ practice stations covering paediatric observations, A–E assessment, medication administration, safeguarding, and SBAR handover.',
+      tags: ['Paed obs', 'A–E assessment', 'Medication admin', 'Safeguarding'],
+      href: '/osce',
+    },
+    {
+      num: '02',
+      title: 'Core Nursing Quiz',
+      desc: 'Topic-based revision across vital signs, drug calculations, anatomy and physiology, pharmacology, infection control, and fluid balance.',
+      tags: ['Drug calculations', 'Vital signs', 'Pharmacology', 'Infection control'],
+      href: '/quiz',
+    },
+    {
+      num: '03',
+      title: 'Revision Hub',
+      desc: 'Clinical guides, cheat sheets, and reference articles for the topics nursing students actually need during placement and revision.',
+      tags: ['Cheat sheets', 'Clinical guides', 'Placement tips', 'Q&A'],
+      href: '/hub',
+    },
+  ];
+
+  const whyItems = [
+    {
+      title: 'Branch-specific content',
+      text: "Children's nursing is live now, with paediatric observations, PEWS, safeguarding, and family-centred care built in from the start.",
+    },
+    {
+      title: 'Built around real assessments',
+      text: 'The structure reflects the way nursing students are actually assessed in OSCEs, written exams, and placement settings.',
+    },
+    {
+      title: 'One payment, no subscription',
+      text: 'Pay once and keep access. New material is added over time, with future updates included.',
+    },
+  ];
+
+  const sectionLabelStyle: React.CSSProperties = {
+    fontFamily: serif,
+    fontSize: '11px',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    color: inkLight,
+    marginBottom: '14px',
+  };
+
+  const primaryButton: React.CSSProperties = {
+    display: 'inline-block',
+    fontFamily: serif,
+    fontSize: '14px',
+    fontWeight: 400,
+    background: ink,
+    color: cream,
+    padding: '12px 24px',
+    borderRadius: '9999px',
+    textDecoration: 'none',
+    whiteSpace: 'nowrap',
+  };
+
+  const secondaryButton: React.CSSProperties = {
+    display: 'inline-block',
+    fontFamily: serif,
+    fontSize: '14px',
+    fontWeight: 400,
+    background: 'transparent',
+    color: ink,
+    padding: '11px 24px',
+    borderRadius: '9999px',
+    border: `1px solid ${border}`,
+    textDecoration: 'none',
+    whiteSpace: 'nowrap',
+  };
+
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      {/* ── Hero ── */}
-      <section style={{ paddingTop: '120px', paddingBottom: '80px', borderBottom: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 24px' }}>
-          <h1 style={{ fontFamily: display, fontSize: 'clamp(2.4rem, 6vw, 3.8rem)', fontWeight: 400, lineHeight: 1.08, color: ink, marginBottom: '24px', letterSpacing: '-0.01em' }}>
-            Pass your nursing<br /><em>assessments.</em>
+      <section style={{ padding: '128px 24px 110px', borderBottom: `1px solid ${border}` }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>OSCE prep · theory revision · placement support</p>
+
+          <h1
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2.8rem, 7vw, 4.4rem)',
+              fontWeight: 400,
+              lineHeight: 1.04,
+              letterSpacing: '-0.02em',
+              color: ink,
+              marginBottom: '24px',
+            }}
+          >
+            Pass your nursing
+            <br />
+            <em>assessments.</em>
           </h1>
-          <p style={{ fontFamily: serif, fontSize: '17px', color: inkMid, fontWeight: 300, lineHeight: 1.8, maxWidth: '480px', marginBottom: '40px' }}>
-            Revision tools built by a nursing student, for nursing students. OSCE practice, theory quizzes, cheat sheets — no generic content.
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '18px',
+              lineHeight: 1.9,
+              fontWeight: 300,
+              color: inkMid,
+              maxWidth: '560px',
+              marginBottom: '34px',
+            }}
+          >
+            Revision tools built by a nursing student, for nursing students — with OSCE practice,
+            focused quizzes, and practical revision guides designed around what actually gets tested.
           </p>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '18px' }}>
-            <Link href="/pricing" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: ink, color: cream, padding: '12px 28px', borderRadius: '9999px', textDecoration: 'none' }}>
-              Get access — £9.99
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              marginBottom: '16px',
+            }}
+          >
+            <Link href="/pricing" style={primaryButton}>
+              Start revising →
             </Link>
-            <Link href="/quiz" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: 'transparent', color: ink, padding: '11px 26px', borderRadius: '9999px', border: `1px solid ${border}`, textDecoration: 'none' }}>
+            <Link href="/quiz" style={secondaryButton}>
               Try free preview →
             </Link>
           </div>
-          {/* Inline badge strip */}
-          <div style={{ fontFamily: serif, fontSize: '12px', color: inkLight, fontWeight: 300 }}>
-            One-time payment · Lifetime access · 7-day refund
-          </div>
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '13px',
+              lineHeight: 1.8,
+              color: inkLight,
+              fontWeight: 300,
+            }}
+          >
+            £9.99 one-time payment · Lifetime access · 7-day guarantee
+          </p>
         </div>
       </section>
 
-      {/* ── Choose your branch ── */}
-      <section style={{ padding: '64px 24px', borderBottom: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: display, fontSize: '28px', fontWeight: 400, color: ink, marginBottom: '28px' }}>
+      <section style={{ padding: '84px 24px 72px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>Choose your branch</p>
+
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2rem, 4vw, 2.4rem)',
+              fontWeight: 400,
+              lineHeight: 1.15,
+              color: ink,
+              marginBottom: '32px',
+            }}
+          >
             Which branch are you studying?
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-            <Link href="/hub/childrens" style={{ display: 'block', padding: '28px', textDecoration: 'none', color: ink }}>
-              <h3 style={{ fontFamily: display, fontSize: '20px', fontWeight: 400, color: ink, marginBottom: '10px' }}>Children&apos;s Nursing</h3>
-              <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, lineHeight: 1.75, fontWeight: 300, marginBottom: '20px' }}>
-                Paed obs, PEWS, paediatric OSCEs, family-centred care, developmental milestones, and more.
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '16px',
+            }}
+          >
+            <Link
+              href="/hub/childrens"
+              style={{
+                display: 'block',
+                padding: '30px',
+                border: `1px solid ${border}`,
+                borderRadius: '22px',
+                background: panelSoft,
+                textDecoration: 'none',
+                color: ink,
+              }}
+            >
+              <p
+                style={{
+                  ...sectionLabelStyle,
+                  marginBottom: '12px',
+                }}
+              >
+                Available now
               </p>
-              <span style={{ fontFamily: serif, fontSize: '13px', color: amber }}>Browse resources →</span>
+
+              <h3
+                style={{
+                  fontFamily: display,
+                  fontSize: '24px',
+                  fontWeight: 400,
+                  color: ink,
+                  marginBottom: '12px',
+                }}
+              >
+                Children&apos;s Nursing
+              </h3>
+
+              <p
+                style={{
+                  fontFamily: serif,
+                  fontSize: '14px',
+                  lineHeight: 1.85,
+                  fontWeight: 300,
+                  color: inkMid,
+                  marginBottom: '20px',
+                }}
+              >
+                Paediatric observations, PEWS, paediatric OSCEs, family-centred care,
+                developmental milestones, and more.
+              </p>
+
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: '14px',
+                  color: ink,
+                }}
+              >
+                Browse resources →
+              </span>
             </Link>
-            <div style={{ padding: '28px', opacity: 0.75 }}>
-              <h3 style={{ fontFamily: display, fontSize: '20px', fontWeight: 400, color: inkMid, marginBottom: '10px' }}>Adult Nursing</h3>
-              <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, lineHeight: 1.75, fontWeight: 300, marginBottom: '20px' }}>
-                NEWS2, sepsis, wound care, medication management, adult-specific OSCE stations. In development.
+
+            <div
+              style={{
+                padding: '30px',
+                border: `1px solid ${border}`,
+                borderRadius: '22px',
+                background: 'transparent',
+                opacity: 0.72,
+              }}
+            >
+              <p
+                style={{
+                  ...sectionLabelStyle,
+                  marginBottom: '12px',
+                }}
+              >
+                Coming soon
               </p>
-              <span style={{ fontFamily: serif, fontSize: '13px', color: inkLight }}>Join waitlist →</span>
+
+              <h3
+                style={{
+                  fontFamily: display,
+                  fontSize: '24px',
+                  fontWeight: 400,
+                  color: inkMid,
+                  marginBottom: '12px',
+                }}
+              >
+                Adult Nursing
+              </h3>
+
+              <p
+                style={{
+                  fontFamily: serif,
+                  fontSize: '14px',
+                  lineHeight: 1.85,
+                  fontWeight: 300,
+                  color: inkMid,
+                  marginBottom: '20px',
+                }}
+              >
+                NEWS2, sepsis, wound care, medication management, and adult-specific OSCE
+                stations.
+              </p>
+
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: '14px',
+                  color: inkMid,
+                }}
+              >
+                Join waitlist →
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── What's included ── */}
-      <section style={{ padding: '64px 24px', borderBottom: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: display, fontSize: '28px', fontWeight: 400, color: ink, marginBottom: '32px' }}>
-            Three tools, one payment.
-          </h2>
-          {tools.map(tool => (
-            <Link key={tool.href} href={tool.href} style={{ display: 'block', marginBottom: '32px', textDecoration: 'none', color: ink }}>
-              <p style={{ fontFamily: display, fontSize: '16px', marginBottom: '6px' }}>{tool.title}</p>
-              <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, marginBottom: '6px' }}>{tool.desc}</p>
-              <p style={{ fontFamily: serif, fontSize: '12px', color: inkLight }}>
-                {tool.tags.join(' · ')}
-              </p>
-            </Link>
-          ))}
+      <section style={{ padding: '36px 24px 84px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>What&apos;s included</p>
 
-          {/* Simple pricing block */}
-          <div style={{ marginTop: '32px', padding: '36px', borderRadius: '16px', background: cream }}>
-            <p style={{ fontFamily: serif, fontSize: '11px', color: inkMid }}>Children's Bundle</p>
-            <p style={{ fontFamily: display, fontSize: '48px', color: ink }}>£9.99</p>
-            <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid }}>
-              One-time · Full Revision Hub · OSCE Tool · Core Quiz · All future updates
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2rem, 4vw, 2.4rem)',
+              fontWeight: 400,
+              lineHeight: 1.15,
+              color: ink,
+              marginBottom: '16px',
+            }}
+          >
+            Everything you need, in one place.
+          </h2>
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '16px',
+              lineHeight: 1.9,
+              fontWeight: 300,
+              color: inkMid,
+              maxWidth: '560px',
+              marginBottom: '40px',
+            }}
+          >
+            A calmer way to revise for OSCEs, theory exams, and placement — without generic
+            resources or scattered notes.
+          </p>
+
+          <div>
+            {tools.map((tool, index) => (
+              <Link
+                key={tool.href}
+                href={tool.href}
+                style={{
+                  display: 'block',
+                  textDecoration: 'none',
+                  color: ink,
+                  padding: '0 0 30px',
+                  marginBottom: '30px',
+                  borderBottom: index !== tools.length - 1 ? `1px solid ${border}` : 'none',
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '12px',
+                    letterSpacing: '0.08em',
+                    color: inkLight,
+                    marginBottom: '10px',
+                  }}
+                >
+                  {tool.num}
+                </p>
+
+                <h3
+                  style={{
+                    fontFamily: display,
+                    fontSize: '24px',
+                    fontWeight: 400,
+                    lineHeight: 1.2,
+                    color: ink,
+                    marginBottom: '10px',
+                  }}
+                >
+                  {tool.title}
+                </h3>
+
+                <p
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '14px',
+                    lineHeight: 1.9,
+                    fontWeight: 300,
+                    color: inkMid,
+                    maxWidth: '640px',
+                    marginBottom: '10px',
+                  }}
+                >
+                  {tool.desc}
+                </p>
+
+                <p
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '12px',
+                    lineHeight: 1.8,
+                    color: inkLight,
+                  }}
+                >
+                  {tool.tags.join(' · ')}
+                </p>
+              </Link>
+            ))}
+          </div>
+
+          <div
+            style={{
+              marginTop: '42px',
+              padding: '44px 40px',
+              borderRadius: '24px',
+              background: panel,
+              border: `1px solid ${border}`,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: '11px',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: inkLight,
+                marginBottom: '14px',
+              }}
+            >
+              Children&apos;s Nursing Bundle
             </p>
-            <Link href="/pricing" style={{ display: 'inline-block', marginTop: '24px', background: amber, color: white, fontFamily: serif, fontSize: '14px', padding: '12px 28px', borderRadius: '9999px', textDecoration: 'none' }}>
-              Get Access — £9.99
+
+            <p
+              style={{
+                fontFamily: display,
+                fontSize: '56px',
+                lineHeight: 1,
+                color: ink,
+                marginBottom: '14px',
+              }}
+            >
+              £9.99
+            </p>
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: '15px',
+                lineHeight: 1.85,
+                color: inkMid,
+                maxWidth: '480px',
+                marginBottom: '24px',
+              }}
+            >
+              One-time access to the OSCE Tool, Core Quiz, Revision Hub, and all future updates.
+            </p>
+
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '420px',
+                height: '1px',
+                background: border,
+                marginBottom: '24px',
+              }}
+            />
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: '14px',
+                lineHeight: 2,
+                color: inkMid,
+                marginBottom: '28px',
+              }}
+            >
+              50+ OSCE stations
+              <br />
+              Topic-based quizzes with explanations
+              <br />
+              Clinical guides, cheat sheets, and references
+            </p>
+
+            <Link href="/pricing" style={primaryButton}>
+              Start revising →
             </Link>
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: '12px',
+                color: inkLight,
+                marginTop: '14px',
+              }}
+            >
+              7-day guarantee
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── Why I built this ── */}
-      <section style={{ padding: '64px 24px', background: parchment, borderBottom: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: display, fontSize: '28px', fontWeight: 400, color: ink, marginBottom: '40px' }}>
-            Made by a student, for students.
+      <section style={{ padding: '84px 24px', background: parchment }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>Why it exists</p>
+
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2rem, 4vw, 2.4rem)',
+              fontWeight: 400,
+              lineHeight: 1.15,
+              color: ink,
+              marginBottom: '40px',
+            }}
+          >
+            Designed around real nursing assessments.
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '36px' }}>
-            {whyItems.map(item => (
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '36px',
+            }}
+          >
+            {whyItems.map((item) => (
               <div key={item.title}>
-                <h3 style={{ fontFamily: display, fontSize: '17px', fontWeight: 400, color: ink, marginBottom: '10px' }}>{item.title}</h3>
-                <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, lineHeight: 1.8, fontWeight: 300 }}>{item.text}</p>
+                <h3
+                  style={{
+                    fontFamily: display,
+                    fontSize: '20px',
+                    fontWeight: 400,
+                    lineHeight: 1.25,
+                    color: ink,
+                    marginBottom: '12px',
+                  }}
+                >
+                  {item.title}
+                </h3>
+
+                <p
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '14px',
+                    lineHeight: 1.9,
+                    fontWeight: 300,
+                    color: inkMid,
+                  }}
+                >
+                  {item.text}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
       <Testimonials />
 
-      {/* ── Bottom CTA ── */}
-      <section style={{ padding: '80px 24px', borderTop: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: display, fontSize: '32px', fontWeight: 400, color: ink, marginBottom: '12px' }}>
-            Start revising today
+      <section style={{ padding: '88px 24px 96px', borderTop: `1px solid ${border}` }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>Ready</p>
+
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2rem, 4vw, 2.6rem)',
+              fontWeight: 400,
+              lineHeight: 1.15,
+              color: ink,
+              marginBottom: '14px',
+            }}
+          >
+            Start with the tools you&apos;ll actually use.
           </h2>
-          <p style={{ fontFamily: serif, fontSize: '14px', color: inkMid, fontWeight: 300, marginBottom: '36px', lineHeight: 1.7 }}>
-            One-time access. Works on mobile. Built for nursing students.
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '16px',
+              lineHeight: 1.9,
+              fontWeight: 300,
+              color: inkMid,
+              maxWidth: '520px',
+              marginBottom: '28px',
+            }}
+          >
+            One payment. Lifetime access. Built for nursing students preparing for real
+            assessments.
           </p>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '24px' }}>
-            <Link href="/pricing" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: ink, color: cream, padding: '12px 28px', borderRadius: '9999px', textDecoration: 'none' }}>
-              Get Access — £9.99
-            </Link>
-            <Link href="/quiz" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: 'transparent', color: ink, padding: '11px 26px', borderRadius: '9999px', border: `1px solid ${border}`, textDecoration: 'none' }}>
-              Try for free →
-            </Link>
-          </div>
+
+          <Link href="/pricing" style={primaryButton}>
+            Explore the bundle →
+          </Link>
         </div>
       </section>
 
-      {/* ── Contact strip ── */}
-      <section style={{ padding: '28px 24px', background: parchment, borderTop: `1px solid ${border}`, textAlign: 'center' }}>
-        <p style={{ fontFamily: serif, fontSize: '13px', color: inkLight, fontWeight: 300 }}>
+      <section
+        style={{
+          padding: '26px 24px',
+          background: parchment,
+          borderTop: `1px solid ${border}`,
+          textAlign: 'center',
+        }}
+      >
+        <p
+          style={{
+            fontFamily: serif,
+            fontSize: '13px',
+            lineHeight: 1.8,
+            color: inkLight,
+            fontWeight: 300,
+          }}
+        >
           Got a question or spotted something that needs updating?{' '}
-          <a href="https://wa.me/447572650980" target="_blank" rel="noopener noreferrer" style={{ color: ink, textDecoration: 'underline' }}>WhatsApp me</a>
-          {' '}or{' '}
-          <Link href="/contact" style={{ color: ink, textDecoration: 'underline' }}>use the contact form</Link>
+          <a
+            href="https://wa.me/447572650980"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: ink, textDecoration: 'underline' }}
+          >
+            WhatsApp me
+          </a>{' '}
+          or{' '}
+          <Link href="/contact" style={{ color: ink, textDecoration: 'underline' }}>
+            use the contact form
+          </Link>
+          .
         </p>
       </section>
 
