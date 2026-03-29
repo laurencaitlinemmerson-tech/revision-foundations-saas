@@ -1,9 +1,13 @@
+'use client';  // Add this line to mark the component as a client component
+
 import Link from 'next/link';
 import { useState } from 'react';
 import { Mail, Send, Loader2, CheckCircle, Phone } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import styles from './contact.module.css';
+
+// If you don't need the CSS module, remove this import and apply styles inline
+// import styles from './contact.module.css';
 
 const ink = '#1C1510';
 const inkMid = '#5C4A38';
@@ -100,10 +104,10 @@ export default function ContactPage() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className="contactPage"> {/* Replace with your own layout if not using CSS module */}
       <Navbar />
-      <section className={styles.contactSection}>
-        <div className={styles.wrap}>
+      <section className="contactSection"> {/* Replace with your own layout if not using CSS module */}
+        <div className="wrap"> {/* Replace with your own layout if not using CSS module */}
           <p style={sectionLabelStyle}>Get in touch</p>
           <h2
             style={{
@@ -118,7 +122,7 @@ export default function ContactPage() {
             We’d love to hear from you.
           </h2>
 
-          <div className={styles.contactFormContainer}>
+          <div className="contactFormContainer"> {/* Replace with your own layout if not using CSS module */}
             {submitted ? (
               <div className="flex flex-col items-start gap-4">
                 <div className="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700">
@@ -233,7 +237,7 @@ export default function ContactPage() {
             )}
           </div>
 
-          <div className={styles.contactInfo}>
+          <div className="contactInfo">
             <p style={sectionLabelStyle}>Get in Touch</p>
             <h3
               style={{
@@ -246,7 +250,7 @@ export default function ContactPage() {
             >
               We are here to help.
             </h3>
-            <div className={styles.contactButtons}>
+            <div className="contactButtons">
               <Link href="mailto:hello@revisionfoundations.com" style={primaryButton}>
                 Email Us
               </Link>
