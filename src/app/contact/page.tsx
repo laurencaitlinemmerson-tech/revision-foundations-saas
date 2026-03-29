@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Mail, MessageCircle, ArrowRight } from 'lucide-react';
+import { Mail, MessageCircle, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 
 const serif = "'Source Serif 4', Georgia, serif";
 const display = "'Playfair Display', Georgia, serif";
@@ -42,7 +43,80 @@ const textLink: CSSProperties = {
   textUnderlineOffset: '3px',
 };
 
+const editorialCard: CSSProperties = {
+  border: `1px solid ${border}`,
+  borderRadius: '34px',
+  overflow: 'hidden',
+};
+
+const inputBase: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '15px',
+  color: ink,
+  background: cream,
+  border: `1px solid ${border}`,
+  borderRadius: '12px',
+  padding: '13px 16px',
+  width: '100%',
+  outline: 'none',
+  lineHeight: 1.6,
+  boxSizing: 'border-box',
+};
+
+const labelStyle: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '12px',
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  color: inkLight,
+  display: 'block',
+  marginBottom: '8px',
+};
+
 export default function ContactPage() {
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [focused, setFocused] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    setErrorMsg('');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMsg(data.error || 'Something went wrong. Please try again.');
+        setStatus('error');
+        return;
+      }
+
+      setStatus('success');
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch {
+      setErrorMsg('Something went wrong. Please try again.');
+      setStatus('error');
+    }
+  };
+
+  const inputStyle = (field: string): CSSProperties => ({
+    ...inputBase,
+    borderColor: focused === field ? '#B8AD9E' : border,
+    transition: 'border-color 0.15s ease',
+  });
+
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
@@ -85,7 +159,8 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section style={{ padding: '0 24px 88px' }}>
+      {/* Contact method cards */}
+      <section style={{ padding: '0 24px 52px' }}>
         <div className="contact-layout" style={{ maxWidth: '920px', margin: '0 auto' }}>
           <a
             href="mailto:lauren@revisionfoundations.com"
@@ -158,6 +233,198 @@ export default function ContactPage() {
         </div>
       </section>
 
+      {/* Contact form */}
+      <section style={{ padding: '0 24px 76px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div style={{ ...editorialCard, background: cream }}>
+            <div style={{ padding: '48px 44px 52px' }} className="contact-form-padding">
+              <p style={sectionLabel}>Send a message</p>
+
+              <p
+                style={{
+                  fontFamily: display,
+                  fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)',
+                  lineHeight: 1.12,
+                  color: ink,
+                  marginBottom: '8px',
+                  maxWidth: '560px',
+                }}
+              >
+                Prefer to write it here?
+              </p>
+
+              <p style={{ ...body, fontSize: '15px', maxWidth: '540px', marginBottom: '36px' }}>
+                Fill in the form below and I&apos;ll get back to you by email.
+              </p>
+
+              {status === 'success' ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  padding: '48px 24px',
+                  gap: '16px',
+                }}>
+                  <CheckCircle style={{ width: '40px', height: '40px', color: '#7A9E7E' }} />
+                  <p style={{
+                    fontFamily: display,
+                    fontSize: 'clamp(1.4rem, 3vw, 1.8rem)',
+                    color: ink,
+                    lineHeight: 1.2,
+                  }}>
+                    Message sent!
+                  </p>
+                  <p style={{ ...body, fontSize: '15px', maxWidth: '400px' }}>
+                    Thanks for getting in touch. I&apos;ll reply to your email as soon as I can.
+                  </p>
+                  <button
+                    onClick={() => setStatus('idle')}
+                    style={{
+                      fontFamily: serif,
+                      fontSize: '14px',
+                      color: inkMid,
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      marginTop: '8px',
+                      textDecoration: 'underline',
+                      textUnderlineOffset: '3px',
+                    }}
+                  >
+                    Send another message
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} noValidate>
+                  <div className="contact-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div>
+                      <label htmlFor="name" style={labelStyle}>Name</label>
+                      <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        value={form.name}
+                        onChange={handleChange}
+                        onFocus={() => setFocused('name')}
+                        onBlur={() => setFocused(null)}
+                        placeholder="Your name"
+                        required
+                        style={inputStyle('name')}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="email" style={labelStyle}>Email</label>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        onFocus={() => setFocused('email')}
+                        onBlur={() => setFocused(null)}
+                        placeholder="your@email.com"
+                        required
+                        style={inputStyle('email')}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label htmlFor="subject" style={labelStyle}>
+                      Subject <span style={{ textTransform: 'none', letterSpacing: 0, fontSize: '11px', color: inkLight }}>(optional)</span>
+                    </label>
+                    <input
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      value={form.subject}
+                      onChange={handleChange}
+                      onFocus={() => setFocused('subject')}
+                      onBlur={() => setFocused(null)}
+                      placeholder="What's it about?"
+                      style={inputStyle('subject')}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <label htmlFor="message" style={labelStyle}>Message</label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={form.message}
+                      onChange={handleChange}
+                      onFocus={() => setFocused('message')}
+                      onBlur={() => setFocused(null)}
+                      placeholder="What's on your mind?"
+                      required
+                      rows={6}
+                      style={{
+                        ...inputStyle('message'),
+                        resize: 'vertical',
+                        minHeight: '140px',
+                      }}
+                    />
+                    <p style={{
+                      fontFamily: serif,
+                      fontSize: '12px',
+                      color: inkLight,
+                      marginTop: '6px',
+                      textAlign: 'right',
+                    }}>
+                      {form.message.length}/2000
+                    </p>
+                  </div>
+
+                  {status === 'error' && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '12px 16px',
+                      background: '#FDF0EF',
+                      border: '1px solid #EAC4C1',
+                      borderRadius: '10px',
+                      marginBottom: '20px',
+                    }}>
+                      <AlertCircle style={{ width: '16px', height: '16px', color: '#C0534F', flexShrink: 0 }} />
+                      <p style={{ fontFamily: serif, fontSize: '14px', color: '#C0534F', margin: 0 }}>
+                        {errorMsg}
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    style={{
+                      fontFamily: serif,
+                      fontSize: '15px',
+                      color: cream,
+                      background: status === 'loading' ? inkLight : ink,
+                      border: 'none',
+                      borderRadius: '12px',
+                      padding: '14px 28px',
+                      cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'background 0.2s ease',
+                      letterSpacing: '0.01em',
+                    }}
+                  >
+                    {status === 'loading' ? 'Sending…' : (
+                      <>Send message <ArrowRight style={{ width: '14px', height: '14px' }} /></>
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* A note */}
       <section style={{ padding: '0 24px 96px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div className="contact-note">
@@ -250,6 +517,21 @@ export default function ContactPage() {
           padding-top: 34px;
         }
 
+        .contact-form-row {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+          color: #B8AD9E;
+          font-family: 'Source Serif 4', Georgia, serif;
+        }
+
+        input:focus,
+        textarea:focus {
+          outline: none;
+        }
+
         @media (max-width: 768px) {
           .contact-hero {
             padding-top: 108px !important;
@@ -264,6 +546,14 @@ export default function ContactPage() {
           .contact-panel-side {
             padding: 30px 24px 32px;
             border-radius: 26px;
+          }
+
+          .contact-form-row {
+            grid-template-columns: 1fr !important;
+          }
+
+          .contact-form-padding {
+            padding: 32px 24px 36px !important;
           }
         }
       `}</style>
