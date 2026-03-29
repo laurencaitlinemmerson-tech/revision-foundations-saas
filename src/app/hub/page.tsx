@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import BranchCard from '@/components/hub/BranchCard';
 import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -17,13 +16,14 @@ const espresso = '#301906';
 const charcoal = '#5A5750';
 const mist = '#8A8178';
 const linenDeep = '#E8E0D8';
+const linenLight = '#F7F3EF';
 const white = '#FFFFFF';
 
-const quickLinks = [
-  { href: '/hub/questions', label: 'Q&A Board' },
-  { href: '/hub/glossary', label: 'Nursing Glossary' },
-  { href: '/pricing', label: 'Unlock Premium' },
-];
+const cardBase: React.CSSProperties = {
+  borderRadius: '16px',
+  padding: '28px',
+  minHeight: '100%',
+};
 
 export default function HubPage() {
   return (
@@ -40,15 +40,11 @@ export default function HubPage() {
       <main
         style={{
           flex: 1,
-          padding: '96px 16px 64px',
+          padding: '96px 20px 72px',
         }}
       >
-        <div
-          style={{
-            maxWidth: '880px',
-            margin: '0 auto',
-          }}
-        >
+        <div style={{ maxWidth: '880px', margin: '0 auto' }}>
+          {/* Hero */}
           <section
             style={{
               marginBottom: '40px',
@@ -63,7 +59,7 @@ export default function HubPage() {
                 textTransform: 'uppercase',
                 color: mist,
                 fontWeight: 500,
-                margin: '0 0 10px',
+                marginBottom: '10px',
               }}
             >
               Revision Hub
@@ -75,7 +71,7 @@ export default function HubPage() {
                 fontSize: 'clamp(2.2rem, 5vw, 3.4rem)',
                 fontWeight: 600,
                 color: espresso,
-                margin: '0 0 14px',
+                marginBottom: '14px',
                 lineHeight: 1.05,
                 maxWidth: '12ch',
               }}
@@ -99,6 +95,7 @@ export default function HubPage() {
             </p>
           </section>
 
+          {/* Branch cards */}
           <section
             style={{
               display: 'grid',
@@ -107,23 +104,203 @@ export default function HubPage() {
               marginBottom: '48px',
             }}
           >
-            <BranchCard
-              title="Children's Nursing"
-              description="Paediatric OSCEs, PEWS, age-based normal ranges, Gillick competence, family-centred care, developmental milestones, and more."
-              icon="🧒"
+            <Link
               href="/hub/childrens"
-              tags={['OSCE prep', 'Cheat sheets', 'Paediatrics']}
-            />
+              style={{
+                ...cardBase,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                background: white,
+                border: `1px solid ${linenDeep}`,
+                textDecoration: 'none',
+                boxShadow: '0 1px 2px rgba(48, 25, 6, 0.04)',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '12px',
+                    display: 'grid',
+                    placeItems: 'center',
+                    background: linenLight,
+                    fontSize: '24px',
+                    marginBottom: '18px',
+                  }}
+                >
+                  🧒
+                </div>
 
-            <BranchCard
-              title="Adult Nursing"
-              description="NEWS2, sepsis recognition, wound care, medication management, and adult-focused OSCE stations are in development."
-              icon="🏥"
-              comingSoon
-              tags={['Adult care', 'OSCEs', 'Clinical skills']}
-            />
+                <h2
+                  style={{
+                    fontFamily: display,
+                    fontSize: '24px',
+                    fontWeight: 500,
+                    color: espresso,
+                    marginBottom: '10px',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Children&apos;s Nursing
+                </h2>
+
+                <p
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '14px',
+                    color: charcoal,
+                    lineHeight: 1.75,
+                    fontWeight: 300,
+                    marginBottom: '18px',
+                  }}
+                >
+                  Paediatric OSCEs, PEWS, age-based normal ranges, Gillick
+                  competence, family-centred care, developmental milestones, and
+                  more.
+                </p>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    marginBottom: '22px',
+                  }}
+                >
+                  {['OSCE prep', 'Cheat sheets', 'Paediatrics'].map(tag => (
+                    <span
+                      key={tag}
+                      style={{
+                        fontFamily: serif,
+                        fontSize: '12px',
+                        color: espresso,
+                        background: linenLight,
+                        border: `1px solid ${linenDeep}`,
+                        borderRadius: '999px',
+                        padding: '6px 10px',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: '14px',
+                  color: espresso,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 500,
+                }}
+              >
+                Explore children&apos;s resources
+                <ArrowRight style={{ width: '15px', height: '15px' }} />
+              </span>
+            </Link>
+
+            <div
+              style={{
+                ...cardBase,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                background: linenLight,
+                border: `1px solid ${linenDeep}`,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    marginBottom: '18px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '12px',
+                      display: 'grid',
+                      placeItems: 'center',
+                      background: white,
+                      fontSize: '24px',
+                    }}
+                  >
+                    🏥
+                  </div>
+
+                  <span
+                    style={{
+                      fontFamily: serif,
+                      fontSize: '11px',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      color: mist,
+                      background: '#EFE7DE',
+                      padding: '5px 10px',
+                      borderRadius: '999px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Coming soon
+                  </span>
+                </div>
+
+                <h2
+                  style={{
+                    fontFamily: display,
+                    fontSize: '24px',
+                    fontWeight: 500,
+                    color: espresso,
+                    marginBottom: '10px',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Adult Nursing
+                </h2>
+
+                <p
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '14px',
+                    color: charcoal,
+                    lineHeight: 1.75,
+                    fontWeight: 300,
+                    marginBottom: '18px',
+                  }}
+                >
+                  NEWS2, sepsis recognition, wound care, medication management,
+                  and adult-focused OSCE stations are in development.
+                </p>
+              </div>
+
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: '14px',
+                  color: mist,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 400,
+                }}
+              >
+                Available soon
+              </span>
+            </div>
           </section>
 
+          {/* Secondary navigation */}
           <section
             style={{
               borderTop: `1px solid ${linenDeep}`,
@@ -137,7 +314,7 @@ export default function HubPage() {
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
                 color: mist,
-                margin: '0 0 16px',
+                marginBottom: '16px',
               }}
             >
               More ways to revise
@@ -150,7 +327,11 @@ export default function HubPage() {
                 gap: '10px',
               }}
             >
-              {quickLinks.map(link => (
+              {[
+                { href: '/hub/questions', label: 'Q&A Board' },
+                { href: '/hub/glossary', label: 'Nursing Glossary' },
+                { href: '/pricing', label: 'Unlock Premium' },
+              ].map(link => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -167,15 +348,6 @@ export default function HubPage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    transition: 'background 0.18s ease, border-color 0.18s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#F7F3EF';
-                    e.currentTarget.style.borderColor = '#D9CDC2';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = white;
-                    e.currentTarget.style.borderColor = linenDeep;
                   }}
                 >
                   {link.label}
