@@ -43,10 +43,10 @@ const editorialCard: CSSProperties = {
   overflow: 'hidden',
 };
 
-const noteCard: CSSProperties = {
-  border: `1px solid ${border}`,
+const softCard: CSSProperties = {
   borderRadius: '30px',
   background: paper,
+  boxShadow: '0 1px 0 rgba(28, 21, 16, 0.03)',
 };
 
 const chip: CSSProperties = {
@@ -97,11 +97,33 @@ export default function AboutPage() {
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      {/* Hero section with photo */}
-      <section className="about-hero" style={{ padding: '132px 24px 88px' }}>
-        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
-          <div className="about-hero-grid">
-            {/* Text column */}
+      <section className="about-hero" style={{ padding: '132px 24px 80px' }}>
+        <div
+          style={{
+            maxWidth: '920px',
+            margin: '0 auto',
+            position: 'relative',
+          }}
+        >
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: '-34px',
+              left: '-26px',
+              width: '220px',
+              height: '220px',
+              borderRadius: '999px',
+              background: 'rgba(238, 228, 222, 0.55)',
+              filter: 'blur(10px)',
+              zIndex: 0,
+            }}
+          />
+
+          <div
+            className="about-hero-grid"
+            style={{ position: 'relative', zIndex: 1 }}
+          >
             <div>
               <p style={sectionLabel}>About me</p>
 
@@ -117,26 +139,24 @@ export default function AboutPage() {
                   marginBottom: '24px',
                 }}
               >
-                Hi, I'm Lauren.
+                Hi, I&apos;m Lauren.
               </h1>
 
               <p
                 style={{
                   ...body,
                   fontSize: '18px',
-                  maxWidth: '640px',
+                  maxWidth: '580px',
                   marginBottom: '0',
                 }}
               >
-                I'm a children's nursing student and the person behind Revision
-                Foundations. I made it because I wanted revision tools that felt
-                thoughtful, calm, and actually lovely to use.
+                I&apos;m a children&apos;s nursing student and the person behind
+                Revision Foundations. I made it because I wanted revision tools
+                that felt thoughtful, calm, and actually lovely to use.
               </p>
             </div>
 
-            {/* Photo + facts column */}
             <div className="about-right-col">
-              {/* Photo */}
               <div
                 className="about-photo-frame"
                 style={{
@@ -148,7 +168,6 @@ export default function AboutPage() {
                   position: 'relative',
                 }}
               >
-                {/* Replace src with your actual photo path */}
                 <Image
                   src="/lauren.jpg"
                   alt="Lauren, founder of Revision Foundations"
@@ -157,7 +176,6 @@ export default function AboutPage() {
                   sizes="(max-width: 768px) 200px, 280px"
                   priority
                 />
-                {/* Fallback if image doesn't load — shows initials */}
                 <div
                   style={{
                     position: 'absolute',
@@ -175,16 +193,10 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Facts chips */}
-              <div
-                className="about-facts-section"
-                style={{
-                  borderLeft: `1px solid ${softLine}`,
-                  paddingLeft: '24px',
-                  marginTop: '24px',
-                }}
-              >
-                <p style={{ ...smallCaps, marginBottom: '14px' }}>A few Lauren things</p>
+              <div className="about-facts-section">
+                <p style={{ ...smallCaps, marginBottom: '14px' }}>
+                  A few Lauren things
+                </p>
 
                 <div
                   style={{
@@ -205,12 +217,10 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Founder note — editorial card */}
-      <section style={{ padding: '0 24px 76px' }}>
+      <section style={{ padding: '0 24px 68px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div className="founder-card" style={editorialCard}>
             <div className="founder-card-inner">
-              {/* Sidebar */}
               <div
                 className="founder-sidebar"
                 style={{
@@ -238,48 +248,48 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Content */}
               <div className="founder-content" style={{ padding: '42px 40px 46px' }}>
                 <p style={sectionLabel}>How this started</p>
 
-                <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
-                  Before nursing, I worked as a medical photographer in hospitals.
-                  I loved being in clinical environments, but it never quite felt
-                  like the right fit for me.
+                <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
+                  Before nursing, I worked as a medical photographer in
+                  hospitals. I loved being in clinical environments, but it
+                  never quite felt like the right fit for me.
                 </p>
 
-                <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
-                  At 25, I decided to change direction, applied to nursing, and got
-                  in. Children's nursing felt right almost immediately. From my
-                  first placement, I knew it was where I wanted to be.
+                <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
+                  At 25, I decided to change direction, applied to nursing, and
+                  got in. Children&apos;s nursing felt right almost immediately.
+                  From my first placement, I knew it was where I wanted to be.
                 </p>
 
-                <p style={{ ...body, marginBottom: '28px', maxWidth: '700px' }}>
+                <p style={{ ...body, marginBottom: '28px', maxWidth: '620px' }}>
                   What I struggled with was revision. Most resources felt either
                   overwhelming, badly designed, or just not that useful when you
-                  were already tired and trying to take everything in. So I started
-                  making my own.
+                  were already tired and trying to take everything in. So I
+                  started making my own.
                 </p>
 
                 <div
                   style={{
                     width: '100%',
-                    maxWidth: '640px',
+                    maxWidth: '560px',
                     height: '1px',
                     background: softLine,
                     marginBottom: '28px',
                   }}
                 />
 
-                <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
-                  At first they were just for me. Then people on my course started
-                  asking for them too, and that's when Revision Foundations slowly
-                  became a real thing.
+                <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
+                  At first they were just for me. Then people on my course
+                  started asking for them too, and that&apos;s when Revision
+                  Foundations slowly became a real thing.
                 </p>
 
-                <p style={{ ...body, maxWidth: '700px' }}>
-                  I still make everything in the same way — based on what actually
-                  feels helpful when you're revising, not what sounds good on paper.
+                <p style={{ ...body, maxWidth: '620px' }}>
+                  I still make everything in the same way — based on what
+                  actually feels helpful when you&apos;re revising, not what
+                  sounds good on paper.
                 </p>
               </div>
             </div>
@@ -287,65 +297,73 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* What this is */}
-      <section style={{ padding: '0 24px 76px' }}>
+      <section style={{ padding: '0 24px 82px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div className="what-grid">
-            <div style={noteCard}>
-              <div style={{ padding: '34px 34px 36px' }}>
-                <p style={sectionLabel}>What this is</p>
+            <div
+              style={{
+                padding: '26px 10px 18px 0',
+                alignSelf: 'center',
+              }}
+            >
+              <p style={sectionLabel}>What this is</p>
 
-                <p
-                  style={{
-                    fontFamily: display,
-                    fontSize: 'clamp(2rem, 4vw, 2.8rem)',
-                    lineHeight: 1.08,
-                    color: ink,
-                    marginBottom: '16px',
-                    maxWidth: '520px',
-                  }}
-                >
-                  Revision tools made the way I wanted them to feel.
-                </p>
+              <p
+                style={{
+                  fontFamily: display,
+                  fontSize: 'clamp(2.1rem, 4vw, 3rem)',
+                  lineHeight: 1.06,
+                  color: ink,
+                  marginBottom: '18px',
+                  maxWidth: '520px',
+                }}
+              >
+                Revision tools made the way I wanted them to feel.
+              </p>
 
-                <p style={{ ...body, maxWidth: '620px' }}>
-                  Clear, practical, and actually nice to come back to. Built for
-                  OSCE prep, theory revision, placement support, and those quick
-                  refreshers you always seem to need at exactly the wrong moment.
-                </p>
-              </div>
+              <p style={{ ...body, maxWidth: '560px' }}>
+                Clear, practical, and actually nice to come back to. Built for
+                OSCE prep, theory revision, placement support, and those quick
+                refreshers you always seem to need at exactly the wrong moment.
+              </p>
             </div>
 
             <div
               style={{
-                ...noteCard,
-                background: cream,
+                ...softCard,
+                background: 'rgba(243, 238, 228, 0.75)',
+                border: `1px solid ${softLine}`,
+                marginTop: '20px',
               }}
             >
-              <div style={{ padding: '34px 28px 36px' }}>
+              <div style={{ padding: '30px 28px 32px' }}>
                 <p style={sectionLabel}>What it helps with</p>
 
-                <div
-                  style={{
-                    display: 'grid',
-                    gap: '10px',
-                  }}
-                >
-                  {supportItems.map((item) => (
+                <div style={{ display: 'grid', gap: '0' }}>
+                  {supportItems.map((item, index) => (
                     <div
                       key={item}
                       style={{
-                        padding: '14px 16px',
-                        borderRadius: '999px',
-                        border: `1px solid ${softLine}`,
-                        fontFamily: serif,
-                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '14px',
+                        padding: '14px 0',
+                        borderTop: index === 0 ? 'none' : `1px solid ${softLine}`,
                         color: inkMid,
-                        textAlign: 'center',
-                        background: parchment,
                       }}
                     >
-                      {item}
+                      <span style={{ ...smallCaps, minWidth: '26px' }}>
+                        0{index + 1}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: serif,
+                          fontSize: '15px',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {item}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -355,61 +373,54 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Small note */}
       <section style={{ padding: '0 24px 96px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div
             style={{
-              ...editorialCard,
-              background: cream,
+              borderTop: `1px solid ${softLine}`,
+              paddingTop: '34px',
             }}
           >
-            <div
+            <p style={sectionLabel}>A small note</p>
+
+            <p
               style={{
-                padding: '38px 36px 40px',
+                fontFamily: display,
+                fontSize: 'clamp(2rem, 4vw, 2.6rem)',
+                lineHeight: 1.1,
+                color: ink,
+                marginBottom: '16px',
+                maxWidth: '560px',
               }}
             >
-              <p style={sectionLabel}>A small note</p>
+              I still use these resources myself.
+            </p>
 
-              <p
-                style={{
-                  fontFamily: display,
-                  fontSize: 'clamp(2rem, 4vw, 2.6rem)',
-                  lineHeight: 1.1,
-                  color: ink,
-                  marginBottom: '16px',
-                  maxWidth: '620px',
-                }}
-              >
-                I still use these resources myself.
-              </p>
+            <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
+              Which means I notice pretty quickly when something feels unclear,
+              clunky, or like it needs improving.
+            </p>
 
-              <p style={{ ...body, marginBottom: '18px', maxWidth: '660px' }}>
-                Which means I notice pretty quickly when something feels unclear,
-                clunky, or like it needs improving.
-              </p>
+            <p style={{ ...body, marginBottom: '24px', maxWidth: '620px' }}>
+              If you ever have a question, spot something that doesn&apos;t make
+              sense, or just want to say hi, I really do read every message.
+            </p>
 
-              <p style={{ ...body, marginBottom: '24px', maxWidth: '660px' }}>
-                If you ever have a question, spot something that doesn't make
-                sense, or just want to say hi, I really do read every message.
-              </p>
+            <div
+              style={{
+                display: 'flex',
+                gap: '20px',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+              }}
+            >
+              <Link href="/contact" style={textLink}>
+                Contact me →
+              </Link>
 
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '20px',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                }}
-              >
-                <Link href="/contact" style={textLink}>
-                  Contact me →
-                </Link>
-
-                <Link href="/hub" style={textLink}>
-                  Browse the hub →
-                </Link>
-              </div>
+              <Link href="/hub" style={textLink}>
+                Browse the hub →
+              </Link>
             </div>
           </div>
         </div>
@@ -417,29 +428,39 @@ export default function AboutPage() {
 
       <Footer />
 
-      {/* Responsive styles */}
       <style>{`
         .about-hero-grid {
           display: grid;
           grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
-          gap: 40px;
+          gap: 48px;
           align-items: start;
         }
+
         .about-right-col {
-          padding-top: 8px;
+          padding-top: 24px;
         }
+
         .about-photo-frame {
           max-width: 280px;
         }
+
+        .about-facts-section {
+          margin-top: 24px;
+          padding-left: 24px;
+          border-left: 1px solid rgba(217, 208, 193, 0.7);
+        }
+
         .founder-card-inner {
           display: grid;
           grid-template-columns: 150px minmax(0, 1fr);
           gap: 0;
         }
+
         .what-grid {
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
-          gap: 18px;
+          gap: 28px;
+          align-items: start;
         }
 
         @media (max-width: 768px) {
@@ -447,10 +468,12 @@ export default function AboutPage() {
             padding-top: 108px !important;
             padding-bottom: 56px !important;
           }
+
           .about-hero-grid {
             grid-template-columns: 1fr;
             gap: 32px;
           }
+
           .about-right-col {
             display: flex;
             flex-direction: row;
@@ -458,22 +481,27 @@ export default function AboutPage() {
             gap: 24px;
             padding-top: 0;
           }
+
           .about-photo-frame {
             max-width: 140px;
             min-width: 120px;
             flex-shrink: 0;
           }
+
           .about-facts-section {
             margin-top: 0 !important;
             border-left: none !important;
             padding-left: 0 !important;
           }
+
           .about-headline {
             font-size: clamp(2.4rem, 9vw, 3.6rem) !important;
           }
+
           .founder-card-inner {
             grid-template-columns: 1fr;
           }
+
           .founder-sidebar {
             border-right: none !important;
             border-bottom: 1px solid rgba(217, 208, 193, 0.7);
@@ -482,15 +510,19 @@ export default function AboutPage() {
             align-items: center;
             gap: 16px;
           }
+
           .founder-sidebar > div > p:first-child {
             font-size: 48px !important;
             margin-bottom: 0 !important;
           }
+
           .founder-content {
             padding: 28px !important;
           }
+
           .what-grid {
             grid-template-columns: 1fr;
+            gap: 18px;
           }
         }
 
@@ -498,6 +530,7 @@ export default function AboutPage() {
           .about-right-col {
             flex-direction: column;
           }
+
           .about-photo-frame {
             max-width: 160px;
           }
