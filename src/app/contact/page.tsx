@@ -30,9 +30,27 @@ export default function ContactPage() {
               <div className="mt-10 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">Email</p>
-                  <p className="mt-3 font-serif text-2xl">lauren@revisionfoundations.com</p>
+                  <a href="mailto:lauren@revisionfoundations.com" className="mt-3 block font-serif text-2xl hover:underline">
+                    lauren@revisionfoundations.com
+                  </a>
                   <p className="mt-2 text-sm leading-6 text-[#6c5f53]">Best for support, feedback, and general questions.</p>
                 </div>
+
+                <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">WhatsApp</p>
+                  <a
+                    href="https://wa.me/447572650980"
+                    target="_blank"
+                    className="mt-4 inline-block rounded-full bg-[#1f140d] px-5 py-2 text-sm text-[#f7efe4]"
+                  >
+                    Message on WhatsApp →
+                  </a>
+                  <a href="tel:07572650980" className="mt-4 block font-serif text-2xl hover:underline">
+                    07572 650 980
+                  </a>
+                  <p className="mt-2 text-sm leading-6 text-[#6c5f53]">Quick replies for access or resource questions.</p>
+                </div>
+              </div>
                 <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">WhatsApp</p>
                   <p className="mt-3 font-serif text-2xl">Quick replies</p>
@@ -43,12 +61,33 @@ export default function ContactPage() {
 
             <div className="rounded-[32px] border border-[#d9cfbf] bg-[#f8f4ed] p-6 shadow-sm md:p-8">
               <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">Send a message</p>
-              <form className="mt-6 space-y-5">
+              <form
+                className="mt-6 space-y-5"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const data = new FormData(form);
+
+                  const firstName = data.get('firstName') || '';
+                  const lastName = data.get('lastName') || '';
+                  const email = data.get('email') || '';
+                  const enquiryType = data.get('enquiryType') || 'General question';
+                  const message = data.get('message') || '';
+
+                  const subject = encodeURIComponent(`New contact form enquiry: ${enquiryType}`);
+                  const body = encodeURIComponent(
+                    `Name: ${firstName} ${lastName}\nEmail: ${email}\nEnquiry: ${enquiryType}\n\nMessage:\n${message}`
+                  );
+
+                  window.location.href = `mailto:lauren@revisionfoundations.com?subject=${subject}&body=${body}`;
+                }}
+              >
                 <div className="grid gap-5 md:grid-cols-2">
                   <label className="block">
                     <span className="mb-2 block text-sm text-[#5f5348]">First name</span>
                     <input
                       type="text"
+                      name="firstName"
                       placeholder="Lauren"
                       className="w-full rounded-2xl border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]"
                     />
@@ -57,6 +96,7 @@ export default function ContactPage() {
                     <span className="mb-2 block text-sm text-[#5f5348]">Last name</span>
                     <input
                       type="text"
+                      name="lastName"
                       placeholder="Smith"
                       className="w-full rounded-2xl border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]"
                     />
@@ -67,6 +107,7 @@ export default function ContactPage() {
                   <span className="mb-2 block text-sm text-[#5f5348]">Email address</span>
                   <input
                     type="email"
+                    name="email"
                     placeholder="you@example.com"
                     className="w-full rounded-2xl border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]"
                   />
@@ -74,7 +115,7 @@ export default function ContactPage() {
 
                 <label className="block">
                   <span className="mb-2 block text-sm text-[#5f5348]">What can I help with?</span>
-                  <select className="w-full rounded-2xl border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]">
+                  <select name="enquiryType" className="w-full rounded-2xl border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]">
                     <option>General question</option>
                     <option>Support</option>
                     <option>Partnership or collaboration</option>
@@ -85,6 +126,7 @@ export default function ContactPage() {
                 <label className="block">
                   <span className="mb-2 block text-sm text-[#5f5348]">Message</span>
                   <textarea
+                    name="message"
                     rows={7}
                     placeholder="Tell me a little about what you need..."
                     className="w-full rounded-[24px] border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]"
