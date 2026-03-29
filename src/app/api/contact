@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState("idle");
+
   return (
     <div className="min-h-screen bg-[#f4efe6] text-[#2b2118]">
       <header className="border-b border-[#d9cfbf]">
@@ -34,10 +34,15 @@ export default function ContactPage() {
               <div className="mt-10 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">Email</p>
-                  <a href="mailto:lauren@revisionfoundations.com" className="mt-3 block font-serif text-2xl hover:underline">
+                  <a
+                    href="mailto:lauren@revisionfoundations.com"
+                    className="mt-3 block break-all font-serif text-2xl hover:underline"
+                  >
                     lauren@revisionfoundations.com
                   </a>
-                  <p className="mt-2 text-sm leading-6 text-[#6c5f53]">Best for support, feedback, and general questions.</p>
+                  <p className="mt-2 text-sm leading-6 text-[#6c5f53]">
+                    Best for support, feedback, and general questions.
+                  </p>
                 </div>
 
                 <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
@@ -45,20 +50,17 @@ export default function ContactPage() {
                   <a
                     href="https://wa.me/447572650980"
                     target="_blank"
+                    rel="noreferrer"
                     className="mt-4 inline-block rounded-full bg-[#1f140d] px-5 py-2 text-sm text-[#f7efe4]"
                   >
                     Message on WhatsApp →
                   </a>
-                  <a href="tel:07572650980" className="mt-4 block font-serif text-2xl hover:underline">
+                  <a href="tel:07572650980" className="mt-4 block font-serif text-3xl hover:underline">
                     07572 650 980
                   </a>
-                  <p className="mt-2 text-sm leading-6 text-[#6c5f53]">Quick replies for access or resource questions.</p>
-                </div>
-              </div>
-                <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">WhatsApp</p>
-                  <p className="mt-3 font-serif text-2xl">Quick replies</p>
-                  <p className="mt-2 text-sm leading-6 text-[#6c5f53]">Useful for fast questions about access, updates, or resources.</p>
+                  <p className="mt-2 text-sm leading-6 text-[#6c5f53]">
+                    Quick replies for access or resource questions.
+                  </p>
                 </div>
               </div>
             </div>
@@ -69,6 +71,8 @@ export default function ContactPage() {
                 className="mt-6 space-y-5"
                 onSubmit={(e) => {
                   e.preventDefault();
+                  setIsSubmitting(true);
+
                   const form = e.currentTarget;
                   const data = new FormData(form);
 
@@ -80,16 +84,13 @@ export default function ContactPage() {
 
                   const subject = encodeURIComponent(`New enquiry: ${enquiryType}`);
                   const body = encodeURIComponent(
-                    `Name: ${firstName} ${lastName}
-Email: ${email}
-Type: ${enquiryType}
-
-Message:
-${message}`
+                    `Name: ${firstName} ${lastName}\nEmail: ${email}\nType: ${enquiryType}\n\nMessage:\n${message}`
                   );
 
                   window.location.href = `mailto:lauren@revisionfoundations.com?subject=${subject}&body=${body}`;
-                }
+
+                  setTimeout(() => setIsSubmitting(false), 300);
+                }}
               >
                 <div className="grid gap-5 md:grid-cols-2">
                   <label className="block">
@@ -145,31 +146,17 @@ ${message}`
                   />
                 </label>
 
-                <div className="flex flex-col gap-4 border-t border-[#e2d8cb] pt-5">
-                  {status === "success" && (
-                    <p className="text-sm leading-6 text-[#5f5348]">
-                      Thank you. Your message has been sent successfully.
-                    </p>
-                  )}
-
-                  {status === "error" && (
-                    <p className="text-sm leading-6 text-[#8a4b3d]">
-                      Sorry, there was a problem sending your message. Please try again.
-                    </p>
-                  )}
-
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="max-w-xs text-xs leading-5 text-[#7a6c60]">
-                      Usually replies within 1–2 working days. For account issues, include the email you signed up with.
-                    </p>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="rounded-full bg-[#1f140d] px-6 py-3 text-sm text-[#f7efe4] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      {isSubmitting ? "Sending..." : "Send message →"}
-                    </button>
-                  </div>
+                <div className="flex flex-col gap-4 border-t border-[#e2d8cb] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="max-w-xs text-xs leading-5 text-[#7a6c60]">
+                    Usually replies within 1–2 working days. For account issues, include the email you signed up with.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="rounded-full bg-[#1f140d] px-6 py-3 text-sm text-[#f7efe4] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isSubmitting ? "Opening email..." : "Send message →"}
+                  </button>
                 </div>
               </form>
             </div>
@@ -180,19 +167,19 @@ ${message}`
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                eyebrow: 'Email',
-                title: 'Detailed support',
-                body: 'For account help, bundle questions, feedback, or anything that needs a fuller reply.',
+                eyebrow: "Email",
+                title: "Detailed support",
+                body: "For account help, bundle questions, feedback, or anything that needs a fuller reply.",
               },
               {
-                eyebrow: 'WhatsApp',
-                title: 'Quick questions',
-                body: 'Best for shorter messages about access, links, or anything you need help with quickly.',
+                eyebrow: "WhatsApp",
+                title: "Quick questions",
+                body: "Best for shorter messages about access, links, or anything you need help with quickly.",
               },
               {
-                eyebrow: 'Phone',
-                title: 'Direct contact',
-                body: 'Available for urgent queries during working hours when you would prefer to speak directly.',
+                eyebrow: "Phone",
+                title: "Direct contact",
+                body: "Available for urgent queries during working hours when you would prefer to speak directly.",
               },
             ].map((item) => (
               <div key={item.title} className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-6">
@@ -204,7 +191,35 @@ ${message}`
           </div>
         </section>
 
-        <section className="border-t border-[#d9cfbf] border-b border-[#d9cfbf] bg-[#f7f2ea]">
+        <section className="mx-auto max-w-6xl px-6 py-16 lg:px-10 lg:py-20">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
+            <div className="rounded-[32px] border border-[#d9cfbf] bg-[#f8f4ed] p-8 md:p-10">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">A note from Lauren</p>
+              <h2 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">
+                Built to support you properly.
+              </h2>
+              <p className="mt-5 text-base leading-7 text-[#5f5348]">
+                I created Revision Foundations to make OSCE preparation clearer, more structured, and less overwhelming. If something isn’t working for you, or you need help navigating the resources, I genuinely want to know.
+              </p>
+              <p className="mt-4 text-base leading-7 text-[#5f5348]">
+                Every message is read personally, and your feedback directly shapes updates and improvements.
+              </p>
+              <p className="mt-6 font-serif text-lg">— Lauren</p>
+            </div>
+
+            <div className="flex items-center justify-center rounded-[32px] border border-[#d9cfbf] bg-[#f7f2ea] p-6 md:p-8">
+              <div className="text-center">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[#9a8874]">Students supported</p>
+                <p className="mt-4 font-serif text-6xl">1,000+</p>
+                <p className="mt-3 text-sm text-[#6c5f53]">
+                  Nursing students using Revision Foundations for OSCEs and exams.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-[#d9cfbf] bg-[#f7f2ea]">
           <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-20">
             <div>
               <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">Before you get in touch</p>
@@ -219,16 +234,16 @@ ${message}`
             <div className="space-y-4">
               {[
                 {
-                  question: 'How quickly will I get a reply?',
-                  answer: 'Most messages are answered within 1–2 working days. During busy periods, replies may take a little longer.',
+                  question: "How quickly will I get a reply?",
+                  answer: "Most messages are answered within 1–2 working days. During busy periods, replies may take a little longer.",
                 },
                 {
-                  question: 'What should I include in my message?',
-                  answer: 'Please include the email you used at checkout and a short summary of the issue so I can help as quickly as possible.',
+                  question: "What should I include in my message?",
+                  answer: "Please include the email you used at checkout and a short summary of the issue so I can help as quickly as possible.",
                 },
                 {
-                  question: 'Can I use WhatsApp instead of email?',
-                  answer: 'Yes — WhatsApp is ideal for quick questions. Email is usually best for anything detailed or account-related.',
+                  question: "Can I use WhatsApp instead of email?",
+                  answer: "Yes — WhatsApp is ideal for quick questions. Email is usually best for anything detailed or account-related.",
                 },
               ].map((item) => (
                 <div key={item.question} className="rounded-[28px] border border-[#d9cfbf] bg-[#fbf8f2] p-6">
@@ -241,7 +256,7 @@ ${message}`
         </section>
 
         <section className="mx-auto max-w-6xl px-6 py-16 lg:px-10 lg:py-20">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center rounded-[32px] border border-[#d9cfbf] bg-[#f8f4ed] p-8 md:p-10">
+          <div className="grid items-center gap-6 rounded-[32px] border border-[#d9cfbf] bg-[#f8f4ed] p-8 md:p-10 lg:grid-cols-[1fr_auto]">
             <div>
               <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">Need a quicker route?</p>
               <h2 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">
@@ -256,6 +271,7 @@ ${message}`
               <a
                 href="https://wa.me/447572650980"
                 target="_blank"
+                rel="noreferrer"
                 className="rounded-full bg-[#1f140d] px-6 py-3 text-center text-sm text-[#f7efe4] transition hover:translate-y-[-1px]"
               >
                 WhatsApp Lauren
