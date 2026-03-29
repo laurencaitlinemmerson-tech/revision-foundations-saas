@@ -182,30 +182,159 @@ export default function PricingPage() {
 
   if (!accessLoading && hasBundle) {
     return (
-      <div className="min-h-screen bg-cream">
+      <div
+        className="bg-cream"
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <Navbar />
-        <section className="pt-28 pb-16 px-6">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="w-20 h-20 rounded-full bg-[var(--linen-deep)] flex items-center justify-center mx-auto mb-6">
-              <Crown className="w-10 h-10 text-[var(--espresso)]" />
-            </div>
 
-            <h1 className="text-3xl md:text-4xl font-display text-[var(--espresso)] mb-4">
-              You already have full access
-            </h1>
-
-            <p className="text-[var(--charcoal)] text-lg mb-8">
-              You have lifetime access to your OSCE practice, quiz content, and
-              revision hub.
+        <main
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '120px 24px 80px',
+          }}
+        >
+          <div style={{ maxWidth: '480px', width: '100%', textAlign: 'center' }}>
+            {/* Account status label */}
+            <p
+              style={{
+                fontSize: '10px',
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: 'var(--charcoal)',
+                marginBottom: '20px',
+              }}
+            >
+              Account status
             </p>
 
-            <Link href="/dashboard" className="btn-primary text-lg px-8 py-4">
+            {/* Icon */}
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'var(--linen-deep)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+              }}
+            >
+              <Crown className="w-7 h-7" style={{ color: 'var(--espresso)' }} />
+            </div>
+
+            {/* Heading */}
+            <h1
+              className="font-display"
+              style={{
+                fontSize: 'clamp(1.6rem, 4vw, 2.2rem)',
+                fontWeight: 400,
+                color: 'var(--espresso)',
+                marginBottom: '10px',
+                lineHeight: 1.15,
+              }}
+            >
+              You have full access
+            </h1>
+
+            <p
+              style={{
+                fontSize: '15px',
+                color: 'var(--charcoal)',
+                lineHeight: 1.6,
+                marginBottom: '28px',
+              }}
+            >
+              Lifetime access to everything — no subscription, no renewal.
+            </p>
+
+            {/* Access chips */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: '8px',
+                marginBottom: '32px',
+              }}
+            >
+              {['OSCE Tool', 'Core Quiz', 'Revision Hub', 'Lifetime access'].map(
+                (label) => (
+                  <span
+                    key={label}
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 400,
+                      color: 'var(--espresso)',
+                      background: 'var(--linen-light)',
+                      border: '0.5px solid var(--linen-deep)',
+                      padding: '5px 14px',
+                      borderRadius: '2px',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    {label}
+                  </span>
+                ),
+              )}
+            </div>
+
+            {/* Primary CTA */}
+            <Link
+              href="/dashboard"
+              className="btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '15px',
+                padding: '12px 28px',
+              }}
+            >
               Go to Dashboard
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4" />
             </Link>
+
+            {/* Secondary action */}
+            <div style={{ marginTop: '16px' }}>
+              <Link
+                href="/hub"
+                style={{
+                  fontSize: '13px',
+                  color: 'var(--charcoal)',
+                  textDecoration: 'none',
+                  borderBottom: '0.5px solid var(--linen-deep)',
+                  paddingBottom: '1px',
+                  transition: 'color 0.15s',
+                }}
+              >
+                Browse the Hub
+              </Link>
+            </div>
           </div>
-        </section>
-        <Footer />
+        </main>
+
+        {/* Compact footer */}
+        <footer
+          style={{
+            borderTop: '0.5px solid rgba(0,0,0,0.08)',
+            padding: '20px 24px',
+            textAlign: 'center',
+            fontSize: '11px',
+            color: 'var(--charcoal)',
+            letterSpacing: '0.02em',
+          }}
+        >
+          Revision Foundations &middot; {new Date().getFullYear()}
+        </footer>
       </div>
     );
   }
