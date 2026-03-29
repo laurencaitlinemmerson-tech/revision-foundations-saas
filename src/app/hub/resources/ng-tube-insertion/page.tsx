@@ -173,7 +173,7 @@ export default function NGTubeInsertionPage() {
           {[
             'Attach a 20–60ml syringe to the end of the NG tube.',
             'Gently pull back to aspirate gastric contents. You need a small amount — even 0.5ml is enough.',
-            'If no aspirate is obtained: try repositioning the child (left lateral), advance or withdraw the tube by 1–2cm, wait 15–30 minutes and try again, or inject 1–5ml of air then re-aspirate.',
+            'If no aspirate is obtained: try repositioning the child (left lateral), advance or withdraw the tube by 1–2cm, wait 15–30 minutes and try again.',
             'Apply the aspirate to CE-marked pH indicator paper (not litmus paper).',
             'Read the pH against the colour chart immediately.',
             'Gastric placement is confirmed if pH is ≤5.5.',
