@@ -176,11 +176,13 @@ export default function ContactPage() {
             <p
               style={{
                 fontFamily: display,
-                fontSize: 'clamp(1.45rem, 3vw, 2.1rem)',
-                lineHeight: 1.12,
+                fontSize: 'clamp(1.1rem, 2.2vw, 1.55rem)',
+                lineHeight: 1.2,
                 color: ink,
                 marginBottom: '14px',
-                wordBreak: 'break-word',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
               lauren@revisionfoundations.com
