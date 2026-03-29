@@ -6063,210 +6063,132 @@
 
   // ---------- UI ----------
   container.innerHTML = `
-    <div class="fade-in max-w-6xl mx-auto">
+    <div class="fade-in" style="max-width:820px; margin:0 auto; padding:0 16px;">
 
-      <!-- HERO -->
-      <div class="glass-card rounded-3xl p-8 md:p-12 text-center mb-8 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-          <div class="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-amber-400 to-amber-300 rounded-full blur-3xl"></div>
-          <div class="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-amber-300 to-amber-400 rounded-full blur-3xl"></div>
-        </div>
-
-        <div class="relative z-10">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 ${grade === 'Review Needed' ? 'pulse-red-badge' : ''}" style="background:${gradeColor}22; border:2px solid ${gradeColor};">
-            <i data-lucide="${gradeIcon}" class="w-5 h-5" style="color:${gradeColor};"></i>
-            <span class="font-bold text-sm" style="color:${gradeColor};">${grade}</span>
-          </div>
-
-          <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">Quiz Complete!</h1>
-          <p class="text-xl text-slate-300 max-w-2xl mx-auto">${gradeMessage}</p>
-        </div>
+      <!-- MASTHEAD -->
+      <div style="text-align:center; padding:48px 0 32px;">
+        <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:12px;">Quiz Complete</div>
+        <h1 style="font-family:'Playfair Display',Georgia,serif; font-size:40px; font-weight:700; color:#1A1815; margin:0 0 12px;">${grade}</h1>
+        <p style="font-family:'Source Serif 4',Georgia,serif; font-size:17px; color:#5A5750; max-width:480px; margin:0 auto; line-height:1.6;">${gradeMessage}</p>
       </div>
 
-      <!-- KPI ROW -->
-      <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
-        <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
-          <i data-lucide="percent" class="w-5 h-5 text-amber-400 mb-2"></i>
-          <div class="text-3xl font-extrabold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent mb-1">${percentage}%</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Accuracy</div>
+      <!-- STATS GRID -->
+      <div style="display:flex; flex-wrap:wrap; border-top:1px solid rgba(0,0,0,0.1); border-left:1px solid rgba(0,0,0,0.1); margin-bottom:40px;">
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Accuracy</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${percentage}%</div>
         </div>
-
-        <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
-          <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mb-2"></i>
-          <div class="text-3xl font-extrabold text-green-400 mb-1">${correctCount}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Correct</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Correct</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#2E7D32;">${correctCount}</div>
         </div>
-
-        <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
-          <i data-lucide="x-circle" class="w-5 h-5 text-red-400 mb-2"></i>
-          <div class="text-3xl font-extrabold text-red-400 mb-1">${incorrectCount}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Incorrect</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Incorrect</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#A32D2D;">${incorrectCount}</div>
         </div>
-
-        <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
-          <i data-lucide="clock" class="w-5 h-5 text-cyan-400 mb-2"></i>
-          <div class="text-3xl font-extrabold text-cyan-400 mb-1">${timeLabel}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Time</div>
+        ${totalSeconds > 0 ? `
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Time</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${timeLabel}</div>
         </div>
-
-        <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
-          <i data-lucide="zap" class="w-5 h-5 text-yellow-400 mb-2"></i>
-          <div class="text-3xl font-extrabold text-yellow-400 mb-1">${avgPace ? `${avgPace}s` : '—'}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Avg Pace</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Avg Pace</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${avgPace ? `${avgPace}s` : '—'}</div>
         </div>
-
-        <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
-          <i data-lucide="flag" class="w-5 h-5 text-pink-400 mb-2"></i>
-          <div class="text-3xl font-extrabold text-pink-400 mb-1">${flaggedQuestions.length}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Flagged</div>
+        ` : ''}
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Flagged</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#633806;">${flaggedQuestions.length}</div>
         </div>
       </div>
-
-      <!-- SMART INSIGHTS -->
-      ${insights.length ? `
-        <div class="glass-card rounded-2xl p-8 mb-8">
-          <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-            <i data-lucide="brain" class="w-7 h-7 text-pink-400"></i>
-            Smart Insights
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            ${insights.map(ins => `
-              <div class="p-4 rounded-xl border-2 transition-all hover:scale-105" style="background:${ins.color}11; border-color:${ins.color}33;">
-                <div class="flex items-start gap-3">
-                  <div class="p-2 rounded-lg" style="background:${ins.color}22;">
-                    <i data-lucide="${ins.icon}" class="w-5 h-5" style="color:${ins.color};"></i>
-                  </div>
-                  <div class="flex-1">
-                    <h4 class="text-white font-bold mb-1">${ins.title}</h4>
-                    <p class="text-slate-300 text-sm leading-relaxed">${ins.text}</p>
-                  </div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
 
       <!-- PERFORMANCE BY TOPIC -->
-      <div class="glass-card rounded-2xl p-8 mb-8">
-        <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="bar-chart-3" class="w-7 h-7 text-amber-400"></i>
-          Performance by Topic
-        </h2>
-
-        <div class="space-y-4">
-          ${topicPerformance.map(tp => {
-            const isPriority = tp.percentage < 75 && tp.total > 0;
-            const color = tp.topic.color || '#B8976A';
-            return `
-              <div class="p-4 rounded-xl ${isPriority ? 'bg-orange-500 bg-opacity-10 border-2 border-orange-500 border-opacity-30' : 'bg-white bg-opacity-5'}">
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-3">
-                    <div class="p-2 rounded-lg" style="background:${color}22;">
-                      <i data-lucide="${tp.topic.icon || 'tag'}" class="w-5 h-5" style="color:${color};"></i>
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="text-white font-semibold">${safe(tp.topic.name)}</span>
-                        ${isPriority ? '<span class="px-2 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full">PRIORITY</span>' : ''}
-                      </div>
-                      <span class="text-slate-400 text-sm">${tp.correct}/${tp.total} correct</span>
-                    </div>
-                  </div>
-                  <div class="text-2xl font-bold ${tp.percentage >= 75 ? 'text-green-400' : tp.percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}">${tp.percentage}%</div>
+      <div style="margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:20px;">Performance by Topic</div>
+        ${topicPerformance.map(tp => {
+          const isPriority = tp.percentage < 75 && tp.total > 0;
+          return `
+            <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <div>
+                  <span style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; color:#1A1815;">${safe(tp.topic.name)}</span>
+                  ${isPriority ? '<span style="display:inline-block; margin-left:8px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; background:#FCEBEB; color:#A32D2D; border-radius:3px; padding:2px 7px; font-weight:600;">Revise</span>' : ''}
+                  <div style="font-size:13px; color:#5A5750; margin-top:2px;">${tp.correct} of ${tp.total} correct</div>
                 </div>
-                <div class="w-full bg-white bg-opacity-5 rounded-full h-3 overflow-hidden">
-                  <div class="h-3 rounded-full transition-all duration-1000 ease-out" style="width:${tp.percentage}%; background:linear-gradient(90deg, ${color}, ${tp.percentage >= 75 ? '#22c55e' : tp.percentage >= 50 ? '#f59e0b' : '#ef4444'});"></div>
-                </div>
+                <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:${tp.percentage >= 75 ? '#2E7D32' : tp.percentage >= 50 ? '#633806' : '#A32D2D'};">${tp.percentage}%</div>
               </div>
-            `;
-          }).join('')}
-        </div>
+              <div style="background:rgba(0,0,0,0.08); border-radius:2px; height:3px; overflow:hidden;">
+                <div style="height:3px; border-radius:2px; background:${tp.percentage >= 75 ? '#2E7D32' : tp.percentage >= 50 ? '#B8830A' : '#A32D2D'}; width:${tp.percentage}%;"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
       </div>
 
-      <!-- WHAT YOU DID WELL + WHAT NEXT -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="glass-card rounded-2xl p-6 border-2 border-green-500 border-opacity-30">
-          <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2">
-            <i data-lucide="thumbs-up" class="w-6 h-6 text-green-400"></i>
-            What You Did Well
-          </h3>
-          <ul class="space-y-3">
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="check" class="w-4 h-4 text-green-400 mt-0.5"></i>
-              <span>You completed the session — this is active retrieval practice strengthening your memory!</span>
-            </li>
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="check" class="w-4 h-4 text-green-400 mt-0.5"></i>
-              <span>You reviewed multiple topics — the best way to build exam stamina.</span>
-            </li>
-          </ul>
+      <!-- WHAT TO WORK ON NEXT -->
+      ${insights.length ? `
+      <div style="background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:4px; padding:20px 24px; margin-bottom:40px;">
+        <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#633806; margin-bottom:10px;">What to Work on Next</div>
+        <ul style="margin:0; padding:0; list-style:none;">
+          ${insights.map(ins => `<li style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;">${ins.text}</li>`).join('')}
+        </ul>
+      </div>
+      ` : ''}
+
+      <!-- QUESTION REVIEW -->
+      <div id="quiz-review" style="margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:16px;">Question Review</div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+          <button onclick="setQuizReviewFilter('all')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'all' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'all' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">All (${totalQ})</button>
+          <button onclick="setQuizReviewFilter('incorrect')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'incorrect' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'incorrect' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">Incorrect (${incorrectCount})</button>
+          <button onclick="setQuizReviewFilter('flagged')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'flagged' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'flagged' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">Flagged (${flaggedQuestions.length})</button>
         </div>
 
-        <div class="glass-card rounded-2xl p-6 border-2 border-orange-500 border-opacity-30">
-          <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2">
-            <i data-lucide="alert-circle" class="w-6 h-6 text-orange-400"></i>
-            What to Work On Next
-          </h3>
-          <ul class="space-y-3">
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="target" class="w-4 h-4 text-pink-400 mt-0.5"></i>
-              <span>${whatToWorkOnNext}</span>
-            </li>
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="book-open" class="w-4 h-4 text-amber-400 mt-0.5"></i>
-              <span>Review all <strong>${incorrectCount}</strong> incorrect answer${incorrectCount !== 1 ? 's' : ''} — focus on understanding <em>why</em>, not memorising.</span>
-            </li>
-          </ul>
-        </div>
+        ${reviewList.map(({ q, idx }) => {
+          const userAns = answers[idx];
+          const isCorrect = (userAns !== null && userAns !== undefined && userAns === q.correct);
+          const topic = topics.find(t => t.id === q.topic) || { name: q.topic || 'Topic', color: '#B8976A' };
+          const isFlagged = flaggedSet.has(idx);
+
+          return `
+            <div style="background:${isCorrect ? '#E8F5E9' : '#FCEBEB'}; border:0.5px solid ${isCorrect ? 'rgba(46,125,50,0.2)' : 'rgba(163,45,45,0.2)'}; border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                    <span style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:${isCorrect ? '#2E7D32' : '#A32D2D'}; font-weight:600;">${isCorrect ? 'Correct' : 'Incorrect'} · Q${idx + 1}</span>
+                    <span style="font-size:11px; color:#999; background:rgba(0,0,0,0.06); border-radius:2px; padding:1px 6px;">${safe(topic.name)}</span>
+                  </div>
+                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#1A1815; line-height:1.5;">${safe(q.question)}</div>
+                </div>
+                <button onclick="toggleFlagQuestion(${idx})" style="flex-shrink:0; font-size:11px; padding:4px 10px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.15); background:${isFlagged ? '#FAEEDA' : '#F5F2EE'}; color:${isFlagged ? '#633806' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">${isFlagged ? 'Flagged' : 'Flag'}</button>
+              </div>
+              <div style="border-top:0.5px solid rgba(0,0,0,0.1); padding-top:12px;">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Correct answer</div>
+                <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#2E7D32; font-weight:600; margin-bottom:${!isCorrect ? '10px' : '0'};">${safe(q.options?.[q.correct])}</div>
+                ${!isCorrect ? `
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Your answer</div>
+                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#A32D2D; font-weight:600; margin-bottom:10px;">${safe(q.options?.[userAns])}</div>
+                ` : ''}
+                ${q.explanation ? `
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Explanation</div>
+                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#5A5750; line-height:1.6;">${safe(q.explanation)}</div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
       </div>
 
-      <!-- PERSONALIZED STUDY PLAN -->
-      <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-amber-600 border-opacity-30">
-        <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="map" class="w-7 h-7 text-amber-400"></i>
-          Your Personalized Study Plan
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="text-amber-300 font-bold mb-4 flex items-center gap-2">
-              <i data-lucide="zap" class="w-5 h-5"></i>
-              Priority Study Topics
-            </h4>
-            <ul class="space-y-3 text-slate-300 text-sm">
-              ${personalPlanTopicBullets}
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="text-pink-300 font-bold mb-4 flex items-center gap-2">
-              <i data-lucide="calendar-check" class="w-5 h-5"></i>
-              Your Revision Strategy
-            </h4>
-            <ul class="space-y-3 text-slate-300 text-sm">
-              <li class="flex items-start gap-2"><span class="text-pink-400 font-bold flex-shrink-0">•</span><span><strong>Daily practice:</strong> Tackle 5–10 questions per day on your weakest topic until comfortable</span></li>
-              <li class="flex items-start gap-2"><span class="text-pink-400 font-bold flex-shrink-0">•</span><span><strong>Review mistakes:</strong> Spend 2× longer reviewing incorrect answers than taking the quiz</span></li>
-              <li class="flex items-start gap-2"><span class="text-pink-400 font-bold flex-shrink-0">•</span><span><strong>Track trends:</strong> Re-take weekly to measure improvement</span></li>
-              <li class="flex items-start gap-2"><span class="text-pink-400 font-bold flex-shrink-0">•</span><span><strong>Teach others:</strong> Explaining concepts to peers solidifies understanding</span></li>
-            </ul>
-          </div>
-        </div>
+      <!-- ACTION BUTTONS -->
+      <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; padding-bottom:48px;">
+        <button onclick="tryAnotherQuiz()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">Try Another Quiz</button>
+        <button onclick="scrollToQuizReview()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;">Review Questions</button>
+        <button onclick="downloadQuizResultsPDF()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;">Download PDF</button>
       </div>
-      <!-- ESSENTIAL MED FORMULAS -->
-      <div class="glass-card rounded-2xl p-8 mb-8">
-        <h2 class="text-white text-2xl font-bold mb-2 flex items-center gap-3">
-          <i data-lucide="calculator" class="w-7 h-7 text-pink-400"></i>
-          Essential Medication Formulas to Revise
-        </h2>
-        <p class="text-slate-300 text-sm mb-6">
-          Master these formulas for safe medication administration. In clinical practice, always double-check calculations and have a second registered nurse verify high-risk drug doses.
-        </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div class="rounded-2xl p-6" style="background: #FAFAF8; /* was linear-gradient(135deg, rgba(236,72,153,.35), rgba(168,85,247,.25)); border: 1px solid rgba(255,255,255,.12);">
-            <div class="text-white font-bold mb-2 flex items-center gap-2"><i data-lucide="scale" class="w-5 h-5"></i>Weight-Based Dosing</div>
-            <div class="bg-black bg-opacity-20 rounded-lg p-3 text-slate-100 mono text-sm mb-3">Dose (mg) = Weight (kg) × mg/kg</div>
+    </div>
+  `;
             <ul class="text-slate-100 text-sm space-y-1">
               <li>• Example: Child weighs 25kg, prescribed 10mg/kg paracetamol → <strong>250mg</strong></li>
               <li>• Critical check: Always verify dose is within safe range in <strong>BNFc</strong></li>
@@ -6869,332 +6791,120 @@ function renderOSCE(container) {
 
   // --------- RENDER ----------
   container.innerHTML = `
-    <div class="fade-in max-w-6xl mx-auto">
-    
-<!-- HERO -->
-<div class="glass-card rounded-3xl p-8 md:p-12 text-center mb-8 relative overflow-hidden">
-  <div class="absolute inset-0 opacity-10">
-    <div class="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-amber-400 to-amber-300 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-amber-300 to-amber-400 rounded-full blur-3xl"></div>
-  </div>
+    <div class="fade-in" style="max-width:820px; margin:0 auto; padding:0 16px;">
 
-  <div class="relative z-10">
-    <div
-      class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 ${grade === 'Needs Work' ? 'pulse-red-badge' : ''}"
-      style="background:${gradeColor}33; border:2px solid ${gradeColor};"
-    >
-      <i data-lucide="${gradeIcon}" class="w-5 h-5" style="color:${gradeColor};"></i>
-      <span class="font-bold text-sm" style="color:${gradeColor};">${grade}</span>
-    </div>
+      <!-- MASTHEAD -->
+      <div style="text-align:center; padding:48px 0 32px;">
+        <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:12px;">OSCE Complete</div>
+        <h1 style="font-family:'Playfair Display',Georgia,serif; font-size:40px; font-weight:700; color:#1A1815; margin:0 0 12px;">${grade}</h1>
+        <p style="font-family:'Source Serif 4',Georgia,serif; font-size:17px; color:#5A5750; max-width:480px; margin:0 auto; line-height:1.6;">${gradeMessage}</p>
+      </div>
 
-    <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
-      OSCE Complete!
-    </h1>
-
-    <p class="text-xl text-slate-300 max-w-2xl mx-auto">
-      ${gradeMessage}
-    </p>
-  </div>
-</div>
-
-      <!-- KPI GRID -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        <div class="glass-card rounded-2xl p-5">
-          <i data-lucide="percent" class="w-5 h-5 text-amber-400"></i>
-          <div class="text-3xl font-extrabold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent mt-2">${overallPercentage}%</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Overall</div>
+      <!-- STATS GRID -->
+      <div style="display:flex; flex-wrap:wrap; border-top:1px solid rgba(0,0,0,0.1); border-left:1px solid rgba(0,0,0,0.1); margin-bottom:40px;">
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Overall</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${overallPercentage}%</div>
         </div>
-        <div class="glass-card rounded-2xl p-5">
-          <i data-lucide="check-square" class="w-5 h-5 text-green-400"></i>
-          <div class="text-3xl font-extrabold text-green-400 mt-2">${totalChecked}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Completed</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Items Checked</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#2E7D32;">${totalChecked}</div>
         </div>
-        <div class="glass-card rounded-2xl p-5">
-          <i data-lucide="square" class="w-5 h-5 text-red-400"></i>
-          <div class="text-3xl font-extrabold text-red-400 mt-2">${Math.max(0, totalItems - totalChecked)}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Missed</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Stations</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${sessionStations.length}</div>
         </div>
-        <div class="glass-card rounded-2xl p-5">
-          <i data-lucide="layers" class="w-5 h-5 text-cyan-400"></i>
-          <div class="text-3xl font-extrabold text-cyan-400 mt-2">${sessionStations.length}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Stations</div>
-        </div>
-        <div class="glass-card rounded-2xl p-5">
-          <i data-lucide="flag" class="w-5 h-5 text-yellow-400"></i>
-          <div class="text-3xl font-extrabold text-yellow-400 mt-2">${flaggedStations.length}</div>
-          <div class="text-slate-400 text-xs uppercase tracking-wider">Flagged</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Flagged</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#633806;">${flaggedStations.length}</div>
         </div>
       </div>
 
-      <!-- INSIGHTS -->
-      <div class="glass-card rounded-2xl p-8 mb-8">
-        <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="brain" class="w-7 h-7 text-pink-400"></i>
-          Smart Insights
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          ${insights.map(insight => `
-            <div class="p-4 rounded-xl border-2" style="background:${insight.color}11; border-color:${insight.color}33;">
-              <div class="flex items-start gap-3">
-                <div class="p-2 rounded-lg" style="background:${insight.color}22;">
-                  <i data-lucide="${insight.icon}" class="w-5 h-5" style="color:${insight.color};"></i>
+      <!-- DOMAIN BREAKDOWN -->
+      <div style="margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:20px;">Domain Breakdown</div>
+        ${domainArray.map(d => {
+          const isPriority = d.total > 0 && d.percentage < 75;
+          return `
+            <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <div>
+                  <span style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; color:#1A1815;">${d.label}</span>
+                  ${isPriority ? '<span style="display:inline-block; margin-left:8px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; background:#FCEBEB; color:#A32D2D; border-radius:3px; padding:2px 7px; font-weight:600;">Revise</span>' : ''}
+                  <div style="font-size:13px; color:#5A5750; margin-top:2px;">${d.checked} of ${d.total} items</div>
                 </div>
-                <div class="flex-1">
-                  <h4 class="text-white font-bold mb-1">${insight.title}</h4>
-                  <p class="text-slate-300 text-sm leading-relaxed">${insight.text}</p>
-                </div>
+                <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:${d.percentage >= 75 ? '#2E7D32' : d.percentage >= 50 ? '#633806' : '#A32D2D'};">${d.percentage}%</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.08); border-radius:2px; height:3px; overflow:hidden;">
+                <div style="height:3px; border-radius:2px; background:${d.percentage >= 75 ? '#2E7D32' : d.percentage >= 50 ? '#B8830A' : '#A32D2D'}; width:${d.percentage}%;"></div>
               </div>
             </div>
-          `).join('')}
-        </div>
+          `;
+        }).join('')}
       </div>
 
-      <!-- PERFORMANCE BY DOMAIN -->
-      <div class="glass-card rounded-2xl p-8 mb-8">
-        <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="bar-chart-3" class="w-7 h-7 text-amber-400"></i>
-          Performance by Domain
-        </h2>
-        <div class="space-y-4">
-          ${domainArray.map(d => {
-            const isPriority = d.total > 0 && d.percentage < 75;
-            return `
-              <div class="p-4 rounded-xl ${isPriority ? 'bg-orange-500 bg-opacity-10 border-2 border-orange-500 border-opacity-30' : 'bg-white bg-opacity-5'}">
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-3">
-                    <div class="p-2 rounded-lg" style="background:${d.color}22;">
-                      <i data-lucide="${d.icon}" class="w-5 h-5" style="color:${d.color};"></i>
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="text-white font-semibold">${d.label}</span>
-                        ${isPriority ? '<span class="px-2 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full">PRIORITY</span>' : ''}
+      <!-- STATION BY STATION -->
+      <div style="margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:20px;">Station by Station</div>
+        ${stationResults.map((sr, idx) => {
+          const topic = topics.find(t => t.id === sr.station.topic);
+          const pctColor = sr.percentage >= 75 ? '#2E7D32' : sr.percentage >= 50 ? '#633806' : '#A32D2D';
+          return `
+            <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;">
+                <div style="flex:1;">
+                  <div style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#999; margin-bottom:4px;">Station ${idx + 1}${sr.isFlagged ? ' · Flagged' : ''}${topic ? ' · ' + topic.name : ''}</div>
+                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:16px; font-weight:600; color:#1A1815;">${sr.station.title}</div>
+                  <div style="font-size:13px; color:#5A5750; margin-top:3px;">${sr.checkedCount} of ${sr.totalCount} items · ${sr.station.estimatedMinutes} min · ${sr.station.difficulty}</div>
+                </div>
+                <div style="font-family:'Playfair Display',Georgia,serif; font-size:28px; font-weight:700; color:${pctColor}; flex-shrink:0;">${sr.percentage}%</div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                ${Object.entries(sr.domainBreakdown)
+                  .filter(([_, d]) => d.total > 0)
+                  .map(([domain, data]) => `
+                    <div style="flex:1; min-width:120px; background:rgba(0,0,0,0.04); border-radius:3px; padding:8px 10px;">
+                      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#999;">${domainLabels[domain]}</span>
+                        <span style="font-size:11px; font-weight:700; color:#1A1815;">${data.percentage}%</span>
                       </div>
-                      <span class="text-slate-400 text-sm">${d.checked}/${d.total} items</span>
-                    </div>
-                  </div>
-                  <div class="text-2xl font-bold ${d.percentage >= 75 ? 'text-green-400' : d.percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}">${d.percentage}%</div>
-                </div>
-                <div class="w-full bg-white bg-opacity-5 rounded-full h-3 overflow-hidden">
-                  <div class="h-3 rounded-full" style="width:${d.percentage}%; background:linear-gradient(90deg, ${d.color}, ${d.percentage >= 75 ? '#22c55e' : d.percentage >= 50 ? '#f59e0b' : '#ef4444'});"></div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- STATION BREAKDOWN -->
-      <div class="glass-card rounded-2xl p-8 mb-8">
-        <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="list-checks" class="w-7 h-7 text-cyan-400"></i>
-          Station Breakdown
-        </h2>
-
-        <div class="space-y-4">
-          ${stationResults.map((sr, idx) => {
-            const topic = topics.find(t => t.id === sr.station.topic);
-            return `
-              <div class="glass-card p-6 rounded-xl border-2 ${sr.percentage >= 75 ? 'border-green-500 border-opacity-30' : sr.percentage >= 50 ? 'border-yellow-500 border-opacity-30' : 'border-red-500 border-opacity-30'}">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="text-white font-bold text-lg">Station ${idx + 1}</span>
-                      ${sr.isFlagged ? '<i data-lucide="flag" class="w-5 h-5 text-yellow-400"></i>' : ''}
-                      ${topic ? `<span class="text-xs px-3 py-1 rounded-full font-semibold" style="background:${topic.color}22; color:${topic.color};">${topic.name}</span>` : ''}
-                    </div>
-                    <h3 class="text-slate-300 font-semibold mb-1">${sr.station.title}</h3>
-                    <p class="text-slate-400 text-sm">
-                      <span class="capitalize ${
-                        sr.station.difficulty === 'easy' ? 'text-green-400' :
-                        sr.station.difficulty === 'medium' ? 'text-yellow-400' : 'text-red-400'
-                      }">${sr.station.difficulty}</span> • ${sr.station.estimatedMinutes} minutes
-                    </p>
-                  </div>
-
-                  <div class="text-right">
-                    <div class="text-4xl font-bold ${sr.percentage >= 75 ? 'text-green-400' : sr.percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}">${sr.percentage}%</div>
-                    <div class="text-slate-400 text-sm">${sr.checkedCount}/${sr.totalCount} items</div>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  ${Object.entries(sr.domainBreakdown)
-                    .filter(([_, d]) => d.total > 0)
-                    .map(([domain, data]) => `
-                      <div class="bg-white bg-opacity-5 rounded-lg p-3">
-                        <div class="flex items-center justify-between mb-2">
-                          <span class="text-xs text-slate-400 font-semibold">${domainLabels[domain]}</span>
-                          <span class="text-xs text-slate-300 mono font-bold">${data.percentage}%</span>
-                        </div>
-                        <div class="w-full bg-white bg-opacity-5 rounded-full h-2">
-                          <div class="h-2 rounded-full" style="width:${data.percentage}%; background:${domainColors[domain]};"></div>
-                        </div>
+                      <div style="background:rgba(0,0,0,0.08); border-radius:2px; height:2px; overflow:hidden;">
+                        <div style="height:2px; border-radius:2px; background:${domainColors[domain]}; width:${data.percentage}%;"></div>
                       </div>
-                    `).join('')}
-                </div>
-
-                ${sr.notes ? `
-                  <div class="mt-4 p-3 bg-amber-600 bg-opacity-10 border border-amber-600 border-opacity-30 rounded-lg">
-                    <div class="text-amber-200 text-xs mb-1 flex items-center gap-1 font-semibold">
-                      <i data-lucide="sticky-note" class="w-3 h-3"></i> Your Notes
                     </div>
-                    <p class="text-slate-300 text-sm leading-relaxed">${sr.notes.substring(0, 180)}${sr.notes.length > 180 ? '...' : ''}</p>
-                  </div>
-                ` : ''}
+                  `).join('')}
               </div>
-            `;
-          }).join('')}
-        </div>
+              ${sr.notes ? `
+                <div style="margin-top:12px; background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:3px; padding:10px 14px;">
+                  <div style="font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#633806; margin-bottom:4px;">Your Notes</div>
+                  <p style="font-family:'Source Serif 4',Georgia,serif; font-size:13px; color:#3D2200; line-height:1.5; margin:0;">${sr.notes.substring(0, 180)}${sr.notes.length > 180 ? '...' : ''}</p>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
       </div>
 
-      ${missedSafetyItems.length ? `
-        <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-red-500 border-opacity-50">
-          <h2 class="text-white text-2xl font-bold mb-4 flex items-center gap-3">
-            <i data-lucide="alert-octagon" class="w-7 h-7 text-red-400"></i>
-            Critical Safety Items Missed
-          </h2>
-          <p class="text-red-200 text-sm mb-6 leading-relaxed">
-            <strong>Important:</strong> These are patient-safety red flags. Missing them in a real OSCE can trigger immediate fail criteria.
-          </p>
-          <div class="space-y-3">
-            ${missedSafetyItems.map(m => `
-              <div class="bg-red-500 bg-opacity-10 border-2 border-red-500 border-opacity-30 rounded-xl p-4">
-                <div class="text-red-300 font-bold mb-1">Station ${m.stationIndex + 1}: ${m.stationTitle}</div>
-                <p class="text-red-100 text-sm leading-relaxed">${m.item}</p>
-              </div>
-            `).join('')}
+      <!-- WHAT TO FOCUS ON -->
+      ${insights.length ? `
+      <div style="background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:4px; padding:20px 24px; margin-bottom:40px;">
+        <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#633806; margin-bottom:10px;">What to Focus On</div>
+        <ul style="margin:0; padding:0; list-style:none;">
+          ${insights.map(ins => `<li style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;"><strong>${ins.title}:</strong> ${ins.text}</li>`).join('')}
+        </ul>
+        ${missedSafetyItems.length ? `
+          <div style="margin-top:14px; border-top:0.5px solid rgba(163,45,45,0.25); padding-top:14px;">
+            <div style="font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#A32D2D; margin-bottom:8px;">Critical Safety Items Missed</div>
+            ${missedSafetyItems.map(m => `<div style="font-family:'Source Serif 4',Georgia,serif; font-size:13px; color:#A32D2D; padding:3px 0;"><strong>Station ${m.stationIndex + 1}:</strong> ${m.item}</div>`).join('')}
           </div>
-        </div>
+        ` : ''}
+      </div>
       ` : ''}
 
-      <!-- Personalized Action Plan -->
-      <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-amber-600 border-opacity-30">
-        <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="map" class="w-7 h-7 text-amber-400"></i>
-          Your Personalized Action Plan
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Immediate Priorities -->
-          <div>
-            <h4 class="text-amber-300 font-bold mb-4 flex items-center gap-2">
-              <i data-lucide="zap" class="w-5 h-5"></i>
-              Immediate Priorities
-            </h4>
-
-            <ul class="space-y-3 text-slate-300 text-sm">
-              ${weakDomains.length > 0 ? weakDomains.slice(0, 3).map(d => `
-                <li class="flex items-start gap-2">
-                  <span class="text-amber-400 font-bold flex-shrink-0">•</span>
-                  <span>
-                    <strong>${d.label}:</strong> Practice ${d.total - d.checked} missed item${(d.total - d.checked) !== 1 ? 's' : ''} until technique is fluent
-                    (${d.percentage}% → aim for 90%+)
-                  </span>
-                </li>
-              `).join('') : `
-                <li class="flex items-start gap-2">
-                  <span class="text-amber-400 font-bold flex-shrink-0">•</span>
-                  <span><strong>Maintain excellence:</strong> Your performance is strong across all domains—keep practicing regularly.</span>
-                </li>
-              `}
-
-              <li class="flex items-start gap-2">
-                <span class="text-amber-400 font-bold flex-shrink-0">•</span>
-                <span><strong>Checklist mastery:</strong> Aim for 100% completion on all domains—every step matters in real clinical practice</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Practice Strategy -->
-          <div>
-            <h4 class="text-pink-300 font-bold mb-4 flex items-center gap-2">
-              <i data-lucide="calendar-check" class="w-5 h-5"></i>
-              Practice Strategy
-            </h4>
-
-            <ul class="space-y-3 text-slate-300 text-sm">
-              <li class="flex items-start gap-2">
-                <span class="text-pink-400 font-bold flex-shrink-0">•</span>
-                <span><strong>Daily focused practice:</strong> Spend 15–20 minutes daily on your weakest domain until comfortable</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-pink-400 font-bold flex-shrink-0">•</span>
-                <span><strong>Break it down:</strong> Practice each station section separately (prep → assessment → interventions) before combining</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-pink-400 font-bold flex-shrink-0">•</span>
-                <span><strong>Real-world application:</strong> Practice on manikins or volunteer for supervised clinical opportunities</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-pink-400 font-bold flex-shrink-0">•</span>
-                <span><strong>Communication drill:</strong> Practice SBAR handovers and patient explanations out loud until natural and confident</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- What You Did Well + Common OSCE Pitfalls -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="glass-card rounded-2xl p-6 border-2 border-green-500 border-opacity-30">
-          <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2">
-            <i data-lucide="thumbs-up" class="w-6 h-6 text-green-400"></i>
-            What You Did Well
-          </h3>
-          <ul class="space-y-3">
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="check" class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0"></i>
-              <span>You completed ${sessionStations.length} station${sessionStations.length !== 1 ? 's' : ''}—this active practice builds clinical confidence and competence</span>
-            </li>
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="check" class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0"></i>
-              <span>Used the checklist system effectively—this mirrors real OSCE mark schemes and builds exam technique</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="glass-card rounded-2xl p-6 border-2 border-orange-500 border-opacity-30">
-          <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2">
-            <i data-lucide="alert-circle" class="w-6 h-6 text-orange-400"></i>
-            Common OSCE Pitfalls
-          </h3>
-          <ul class="space-y-3">
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="x" class="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0"></i>
-              <span><strong>Skipping introduction:</strong> Always introduce yourself, verify patient ID, and gain consent—first impressions matter</span>
-            </li>
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="x" class="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0"></i>
-              <span><strong>Silent procedures:</strong> Talk through what you're doing—examiners need to hear your clinical reasoning</span>
-            </li>
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="x" class="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0"></i>
-              <span><strong>Forgetting hand hygiene:</strong> Wash hands before AND after every patient contact—it's an automatic fail if missed</span>
-            </li>
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="x" class="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0"></i>
-              <span><strong>Poor time management:</strong> Practice timing yourself—running over time loses marks even if technique is perfect</span>
-            </li>
-            <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="x" class="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0"></i>
-              <span><strong>Not documenting:</strong> Real clinical practice requires documentation—practice this step even in mock OSCEs</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-
-      <!-- ACTIONS -->
-      <div class="flex gap-4 justify-center flex-wrap">
-        <button onclick="downloadOSCEResultsPDF()" class="btn-secondary px-10 py-4 rounded-xl text-white font-semibold text-lg">
-          <i data-lucide="download" class="w-6 h-6 inline mr-2"></i>
-          Download PDF
-        </button>
-        <button onclick="exitToSelection()" class="btn-gradient px-10 py-4 rounded-xl text-white font-bold text-lg">
-          <i data-lucide="refresh-cw" class="w-6 h-6 inline mr-2"></i>
-          Practice Again
-        </button>
+      <!-- ACTION BUTTONS -->
+      <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; padding-bottom:48px;">
+        <button onclick="exitToSelection()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">Practice Again</button>
+        <button onclick="downloadOSCEResultsPDF()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;">Download Report</button>
       </div>
     </div>
   `;
