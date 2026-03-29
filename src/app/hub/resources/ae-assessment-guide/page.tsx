@@ -519,7 +519,7 @@ const STEPS = [
       {
         header: 'Act',
         items: [
-          'O₂ if SpO₂ &gt;94%',
+          'O₂ if SpO₂ >94%',
           'Sniffing position',
           'Non-rebreather if needed',
           'Call paediatric team',
@@ -529,7 +529,7 @@ const STEPS = [
     ],
     redFlags: [
       'RR outside age norms',
-      'SpO₂ &lt;94%',
+      'SpO₂ <94%',
       'Tracheal deviation',
       'Silent chest',
       'Grunting',
@@ -551,7 +551,7 @@ const STEPS = [
       },
       {
         header: 'Perfusion',
-        items: ['CRT &lt;2s (central)', 'Skin colour and temp', 'Mottling pattern', 'Behavioural change', 'Nappy output'],
+        items: ['CRT <2s (central)', 'Skin colour and temp', 'Mottling pattern', 'Behavioural change', 'Nappy output'],
       },
       {
         header: 'Monitoring',
@@ -562,7 +562,7 @@ const STEPS = [
         items: ['IV or IO access', 'Fluid bolus 10 ml/kg', 'Reassess after bolus', 'Repeat bolus if needed', 'Escalate early'],
       },
     ],
-    redFlags: ['HR outside age norms', 'Hypotension (late sign)', 'CRT &gt;2s', 'Mottled/pale/grey skin', 'No urine output'],
+    redFlags: ['HR outside age norms', 'Hypotension (late sign)', 'CRT >2s', 'Mottled/pale/grey skin', 'No urine output'],
     pearl:
       'Children compensate remarkably well — then crash suddenly. Do not wait for hypotension before escalating. Fluid bolus in children is 10 ml/kg (not the adult 250 ml). Reassess after every bolus.',
   },
