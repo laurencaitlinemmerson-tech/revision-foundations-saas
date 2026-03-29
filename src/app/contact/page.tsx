@@ -223,7 +223,7 @@ export default function ContactPage() {
                   href="mailto:hello@revisionfoundations.com"
                   className="mt-3 inline-block text-sm font-medium text-[var(--purple)] hover:underline"
                 >
-                  hello@revisionfoundations.com
+                  lauren@revisionfoundations.com
                 </a>
               </div>
             </div>
