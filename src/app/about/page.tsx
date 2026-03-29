@@ -194,8 +194,8 @@ export default function AboutPage() {
                 }}
               >
                 <Image
-                  src="/lauren.jpg"
-                  alt="Lauren, founder of Revision Foundations"
+                  src="//DSC00374.jpg"
+                  alt="Lauren"
                   fill
                   style={{ objectFit: 'cover' }}
                   sizes="(max-width: 768px) 200px, 280px"
