@@ -25,11 +25,11 @@
   .gradient-bg {
     background: linear-gradient(
       135deg,
-      #1a0b2e 0%,
-      #2d1b4e 25%,
-      #4a1f6f 50%,
-      #6b2d8f 75%,
-      #8b3da0 100%
+      #1C1510 0%,
+      #2A2118 25%,
+      #342A20 50%,
+      #3D3228 75%,
+      #463A30 100%
     );
     position: relative;
     overflow: hidden;
@@ -40,8 +40,8 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 20% 20%, rgba(167, 70, 224, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(244, 114, 182, 0.15) 0%, transparent 50%);
+      radial-gradient(circle at 20% 20%, rgba(196, 149, 106, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(232, 201, 160, 0.15) 0%, transparent 50%);
     pointer-events: none;
   }
 
@@ -64,32 +64,32 @@
 
   /* ---------- Glass Cards ---------- */
   .glass-card {
-    background: rgba(30, 15, 50, 0.6);
+    background: rgba(28, 21, 16, 0.6);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(167, 70, 224, 0.2);
+    border: 1px solid rgba(196, 149, 106, 0.2);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .glass-card:hover {
-    border-color: rgba(167, 70, 224, 0.4);
+    border-color: rgba(196, 149, 106, 0.4);
   }
 
   /* ---------- Buttons ---------- */
   .btn-gradient {
-    background: linear-gradient(135deg, #a746e0 0%, #f472b6 100%);
+    background: linear-gradient(135deg, #C4956A 0%, #E8C9A0 100%);
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(167, 70, 224, 0.4);
+    box-shadow: 0 4px 15px rgba(196, 149, 106, 0.4);
   }
 
   .btn-gradient:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(167, 70, 224, 0.6);
+    box-shadow: 0 6px 25px rgba(196, 149, 106, 0.6);
   }
 
   .btn-gradient:focus-visible {
-    outline: 3px solid rgba(167, 70, 224, 0.6);
+    outline: 3px solid rgba(196, 149, 106, 0.6);
     outline-offset: 2px;
   }
 
@@ -111,32 +111,32 @@
 
   /* ---------- Topic Cards ---------- */
   .topic-card {
-    background: rgba(30, 15, 50, 0.4);
-    border: 2px solid rgba(167, 70, 224, 0.2);
+    background: rgba(28, 21, 16, 0.4);
+    border: 2px solid rgba(196, 149, 106, 0.2);
     transition: all 0.3s ease;
     cursor: pointer;
   }
 
   .topic-card:hover {
-    border-color: rgba(167, 70, 224, 0.6);
+    border-color: rgba(196, 149, 106, 0.6);
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(167, 70, 224, 0.3);
+    box-shadow: 0 12px 32px rgba(196, 149, 106, 0.3);
   }
 
   .topic-card:focus-visible {
-    outline: 3px solid rgba(167, 70, 224, 0.6);
+    outline: 3px solid rgba(196, 149, 106, 0.6);
     outline-offset: 2px;
   }
 
   .topic-card.selected {
-    border-color: #a746e0;
-    background: rgba(167, 70, 224, 0.2);
-    box-shadow: 0 0 30px rgba(167, 70, 224, 0.4);
+    border-color: #C4956A;
+    background: rgba(196, 149, 106, 0.2);
+    box-shadow: 0 0 30px rgba(196, 149, 106, 0.4);
   }
 
   /* ---------- Checklist Items ---------- */
   .checklist-item {
-    background: rgba(30, 15, 50, 0.4);
+    background: rgba(28, 21, 16, 0.4);
     border-left: 3px solid rgba(148, 163, 184, 0.3);
     transition: all 0.2s ease;
   }
@@ -158,12 +158,12 @@
   }
 
   .tab-button.active {
-    border-bottom-color: #a746e0;
-    color: #f472b6;
+    border-bottom-color: #C4956A;
+    color: #E8C9A0;
   }
 
   .tab-button:focus-visible {
-    outline: 3px solid rgba(167, 70, 224, 0.6);
+    outline: 3px solid rgba(196, 149, 106, 0.6);
     outline-offset: 2px;
   }
 
@@ -171,7 +171,7 @@
   input[type="checkbox"]:focus-visible,
   textarea:focus-visible,
   input:focus-visible {
-    outline: 3px solid rgba(167, 70, 224, 0.6);
+    outline: 3px solid rgba(196, 149, 106, 0.6);
     outline-offset: 2px;
   }
 
@@ -182,9 +182,9 @@
     right: -400px;
     width: 400px;
     height: 100%;
-    background: rgba(20, 10, 35, 0.95);
+    background: rgba(22, 17, 12, 0.95);
     backdrop-filter: blur(20px);
-    border-left: 1px solid rgba(167, 70, 224, 0.3);
+    border-left: 1px solid rgba(196, 149, 106, 0.3);
     transition: right 0.3s ease;
     z-index: 1000;
     overflow-y: auto;
@@ -225,8 +225,8 @@
   .hint-reveal { animation: highlightPulse 2s ease-out; }
 
   @keyframes highlightPulse {
-    0% { background: rgba(167, 70, 224, 0.4); transform: scale(1.02); }
-    100% { background: rgba(30, 15, 50, 0.4); transform: scale(1); }
+    0% { background: rgba(196, 149, 106, 0.4); transform: scale(1.02); }
+    100% { background: rgba(28, 21, 16, 0.4); transform: scale(1); }
   }
 
   /* ---------- Red Pulsing Badge (Needs Work) ---------- */
@@ -274,9 +274,9 @@
     const defaultConfig = {
       app_title: "BIG Children's Nursing OSCE",
       app_subtitle: "Year 1 Revision Tool",
-      primary_color: "#a746e0",
-      secondary_color: "#f472b6",
-      background_color: "#1a0b2e",
+      primary_color: "#C4956A",
+      secondary_color: "#E8C9A0",
+      background_color: "#1C1510",
       text_color: "#f1f5f9",
       accent_color: "#22c55e",
       font_family: "Outfit",
@@ -292,16 +292,16 @@
       { id: 'personalcare', name: 'Personal Care', icon: 'heart-handshake', color: '#f97316' },
       { id: 'safety', name: 'Patient Safety', icon: 'shield-check', color: '#f59e0b' },
       { id: 'communication', name: 'Communication', icon: 'message-circle', color: '#06b6d4' },
-      { id: 'respiratory', name: 'Airway & Breathing', icon: 'wind', color: '#a746e0' },
+      { id: 'respiratory', name: 'Airway & Breathing', icon: 'wind', color: '#C4956A' },
       { id: 'circulation', name: 'Circulation', icon: 'heart', color: '#ef4444' },
-      { id: 'pain', name: 'Pain Assessment', icon: 'thermometer', color: '#f472b6' },
-      { id: 'medication', name: 'Medication Management', icon: 'pill', color: '#8b5cf6' },
+      { id: 'pain', name: 'Pain Assessment', icon: 'thermometer', color: '#E8C9A0' },
+      { id: 'medication', name: 'Medication Management', icon: 'pill', color: '#7BA3C4' },
       { id: 'injection', name: 'Injection Technique', icon: 'syringe', color: '#ec4899' },
       { id: 'perioperative', name: 'Pre & Post-Op Care', icon: 'clipboard-list', color: '#14b8a6' },
       { id: 'positioning', name: 'Holding & Positioning', icon: 'move', color: '#84cc16' },
       { id: 'deteriorating', name: 'Deteriorating Child', icon: 'activity', color: '#dc2626' },
       { id: 'ngtubes', name: 'NG Tubes', icon: 'cable', color: '#06b6d4' },
-      { id: 'antt', name: 'ANTT', icon: 'sparkles', color: '#a855f7' },
+      { id: 'antt', name: 'ANTT', icon: 'sparkles', color: '#B8976A' },
       { id: 'lines', name: 'Securing Lines/Tapes', icon: 'wrench', color: '#64748b' }
     ];
 
@@ -5878,8 +5878,8 @@
                     class="w-full p-4 rounded-xl text-left transition-all ${
                       showCorrect ? 'bg-green-500 bg-opacity-20 border-2 border-green-500' :
                       showIncorrect ? 'bg-red-500 bg-opacity-20 border-2 border-red-500' :
-                      isSelected ? 'bg-purple-500 bg-opacity-20 border-2 border-purple-500' :
-                      'bg-white bg-opacity-5 border-2 border-transparent hover:border-purple-400'
+                      isSelected ? 'bg-amber-600 bg-opacity-20 border-2 border-amber-600' :
+                      'bg-white bg-opacity-5 border-2 border-transparent hover:border-amber-500'
                     }"
                     ${answered ? '' : 'style="cursor: pointer;"'}
                   >
@@ -5887,7 +5887,7 @@
                       <div class="w-8 h-8 rounded-full flex items-center justify-center ${
                         showCorrect ? 'bg-green-500' :
                         showIncorrect ? 'bg-red-500' :
-                        isSelected ? 'bg-purple-500' :
+                        isSelected ? 'bg-amber-600' :
                         'bg-white bg-opacity-10'
                       }">
                         ${showCorrect ? '<i data-lucide="check" class="w-5 h-5 text-white"></i>' :
@@ -5952,7 +5952,7 @@
             <div class="flex gap-1">
               ${sessionQuestions.map((_, idx) => `
                 <div class="flex-1 h-2 rounded-full ${
-                  sessionAnswers[idx] !== null ? 'bg-purple-500' : 'bg-white bg-opacity-10'
+                  sessionAnswers[idx] !== null ? 'bg-amber-600' : 'bg-white bg-opacity-10'
                 }"></div>
               `).join('')}
             </div>
@@ -6007,7 +6007,7 @@
 
   const topicPerformance = Object.entries(topicAnalysis)
     .map(([topicId, data]) => {
-      const topic = topics.find(t => t.id === topicId) || { id: topicId, name: topicId.toUpperCase(), color: '#a855f7', icon: 'tag' };
+      const topic = topics.find(t => t.id === topicId) || { id: topicId, name: topicId.toUpperCase(), color: '#B8976A', icon: 'tag' };
       const pct = data.total ? Math.round((data.correct / data.total) * 100) : 0;
       return { topicId, topic, ...data, percentage: pct };
     })
@@ -6049,7 +6049,7 @@
   if (incorrectCount > 0) {
     insights.push({
       icon: 'arrow-right',
-      color: '#a855f7',
+      color: '#B8976A',
       title: 'Next Best Action',
       text: `Review the ${incorrectCount} incorrect answer${incorrectCount !== 1 ? 's' : ''} below—small gaps, easy wins!`
     });
@@ -6110,8 +6110,8 @@
     : 'Pick one topic and re-try a short set to build momentum.';
 
   const personalPlanTopicBullets = weakest
-    ? `<li class="flex items-start gap-2"><span class="text-purple-400 font-bold flex-shrink-0">•</span><span><strong>${safe(weakest.topic.name)}:</strong> Focus on ${weakest.total - weakest.correct} missed question${(weakest.total - weakest.correct) !== 1 ? 's' : ''} — review explanations thoroughly</span></li>`
-    : `<li class="flex items-start gap-2"><span class="text-purple-400 font-bold flex-shrink-0">•</span><span><strong>Keep going:</strong> Re-test a small set daily to build retention</span></li>`;
+    ? `<li class="flex items-start gap-2"><span class="text-amber-400 font-bold flex-shrink-0">•</span><span><strong>${safe(weakest.topic.name)}:</strong> Focus on ${weakest.total - weakest.correct} missed question${(weakest.total - weakest.correct) !== 1 ? 's' : ''} — review explanations thoroughly</span></li>`
+    : `<li class="flex items-start gap-2"><span class="text-amber-400 font-bold flex-shrink-0">•</span><span><strong>Keep going:</strong> Re-test a small set daily to build retention</span></li>`;
 
   // ---------- UI ----------
   container.innerHTML = `
@@ -6120,8 +6120,8 @@
       <!-- HERO -->
       <div class="glass-card rounded-3xl p-8 md:p-12 text-center mb-8 relative overflow-hidden">
         <div class="absolute inset-0 opacity-10">
-          <div class="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"></div>
-          <div class="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-cyan-400 to-purple-400 rounded-full blur-3xl"></div>
+          <div class="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-amber-400 to-amber-300 rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-amber-300 to-amber-400 rounded-full blur-3xl"></div>
         </div>
 
         <div class="relative z-10">
@@ -6138,8 +6138,8 @@
       <!-- KPI ROW -->
       <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
         <div class="glass-card rounded-2xl p-5 hover:scale-105 transition-transform">
-          <i data-lucide="percent" class="w-5 h-5 text-purple-400 mb-2"></i>
-          <div class="text-3xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-1">${percentage}%</div>
+          <i data-lucide="percent" class="w-5 h-5 text-amber-400 mb-2"></i>
+          <div class="text-3xl font-extrabold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent mb-1">${percentage}%</div>
           <div class="text-slate-400 text-xs uppercase tracking-wider">Accuracy</div>
         </div>
 
@@ -6202,14 +6202,14 @@
       <!-- PERFORMANCE BY TOPIC -->
       <div class="glass-card rounded-2xl p-8 mb-8">
         <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="bar-chart-3" class="w-7 h-7 text-purple-400"></i>
+          <i data-lucide="bar-chart-3" class="w-7 h-7 text-amber-400"></i>
           Performance by Topic
         </h2>
 
         <div class="space-y-4">
           ${topicPerformance.map(tp => {
             const isPriority = tp.percentage < 75 && tp.total > 0;
-            const color = tp.topic.color || '#a855f7';
+            const color = tp.topic.color || '#B8976A';
             return `
               <div class="p-4 rounded-xl ${isPriority ? 'bg-orange-500 bg-opacity-10 border-2 border-orange-500 border-opacity-30' : 'bg-white bg-opacity-5'}">
                 <div class="flex items-center justify-between mb-3">
@@ -6266,7 +6266,7 @@
               <span>${whatToWorkOnNext}</span>
             </li>
             <li class="flex items-start gap-2 text-slate-300 text-sm">
-              <i data-lucide="book-open" class="w-4 h-4 text-purple-400 mt-0.5"></i>
+              <i data-lucide="book-open" class="w-4 h-4 text-amber-400 mt-0.5"></i>
               <span>Review all <strong>${incorrectCount}</strong> incorrect answer${incorrectCount !== 1 ? 's' : ''} — focus on understanding <em>why</em>, not memorising.</span>
             </li>
           </ul>
@@ -6274,15 +6274,15 @@
       </div>
 
       <!-- PERSONALIZED STUDY PLAN -->
-      <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-purple-500 border-opacity-30">
+      <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-amber-600 border-opacity-30">
         <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="map" class="w-7 h-7 text-purple-400"></i>
+          <i data-lucide="map" class="w-7 h-7 text-amber-400"></i>
           Your Personalized Study Plan
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 class="text-purple-300 font-bold mb-4 flex items-center gap-2">
+            <h4 class="text-amber-300 font-bold mb-4 flex items-center gap-2">
               <i data-lucide="zap" class="w-5 h-5"></i>
               Priority Study Topics
             </h4>
@@ -6377,9 +6377,9 @@
           </h2>
 
           <div class="flex gap-2">
-            <button onclick="setQuizReviewFilter('all')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'all' ? 'border border-purple-400' : ''}">All (${totalQ})</button>
-            <button onclick="setQuizReviewFilter('incorrect')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'incorrect' ? 'border border-purple-400' : ''}">Incorrect (${incorrectCount})</button>
-            <button onclick="setQuizReviewFilter('flagged')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'flagged' ? 'border border-purple-400' : ''}">Flagged (${flaggedQuestions.length})</button>
+            <button onclick="setQuizReviewFilter('all')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'all' ? 'border border-amber-500' : ''}">All (${totalQ})</button>
+            <button onclick="setQuizReviewFilter('incorrect')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'incorrect' ? 'border border-amber-500' : ''}">Incorrect (${incorrectCount})</button>
+            <button onclick="setQuizReviewFilter('flagged')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'flagged' ? 'border border-amber-500' : ''}">Flagged (${flaggedQuestions.length})</button>
           </div>
         </div>
 
@@ -6387,7 +6387,7 @@
           ${reviewList.map(({ q, idx }) => {
             const userAns = answers[idx];
             const isCorrect = (userAns !== null && userAns !== undefined && userAns === q.correct);
-            const topic = topics.find(t => t.id === q.topic) || { name: q.topic || 'Topic', color: '#a855f7' };
+            const topic = topics.find(t => t.id === q.topic) || { name: q.topic || 'Topic', color: '#B8976A' };
             const isFlagged = flaggedSet.has(idx);
 
             return `
@@ -6546,8 +6546,8 @@ function renderOSCE(container) {
             <p class="text-slate-300 leading-relaxed text-lg">${station.candidateInstructions}</p>
           </div>
           ${station.mnemonics ? `
-            <div class="bg-purple-500 bg-opacity-10 p-4 rounded-xl border border-purple-500 border-opacity-30">
-              <h4 class="text-purple-300 font-bold mb-2">Memory Aid</h4>
+            <div class="bg-amber-600 bg-opacity-10 p-4 rounded-xl border border-amber-600 border-opacity-30">
+              <h4 class="text-amber-300 font-bold mb-2">Memory Aid</h4>
               <ul class="list-disc pl-5 text-slate-300 space-y-1">
                 ${station.mnemonics.map(m => `<li>${m}</li>`).join('')}
               </ul>
@@ -6561,7 +6561,7 @@ function renderOSCE(container) {
   const sections = [
     { key: 'safetyRedFlags', label: 'Safety & Red Flags', color: '#ef4444', icon: 'alert-triangle', pinned: true },
     { key: 'preparation', label: 'Preparation', color: '#06b6d4', icon: 'settings' },
-    { key: 'assessment', label: 'Assessment', color: '#8b5cf6', icon: 'stethoscope' },
+    { key: 'assessment', label: 'Assessment', color: '#7BA3C4', icon: 'stethoscope' },
     { key: 'interventions', label: 'Interventions', color: '#22c55e', icon: 'activity' },
     { key: 'communication', label: 'Communication', color: '#f59e0b', icon: 'message-circle' },
     { key: 'documentation', label: 'Documentation', color: '#64748b', icon: 'file-text' }
@@ -6608,7 +6608,7 @@ function renderOSCE(container) {
               Checklist Progress
             </h3>
             <span class="px-3 py-1 rounded-full text-xs font-bold"
-              style="background: rgba(167,70,224,.18); border:1px solid rgba(167,70,224,.35); color:#f472b6;">
+              style="background: rgba(167,70,224,.18); border:1px solid rgba(167,70,224,.35); color:#E8C9A0;">
               ${pct}% complete
             </span>
           </div>
@@ -6626,7 +6626,7 @@ function renderOSCE(container) {
       </div>
 
       <div class="mt-4 w-full bg-white bg-opacity-5 rounded-full h-3 overflow-hidden">
-        <div class="h-3 rounded-full" style="width:${pct}%; background:linear-gradient(90deg, #a746e0, #f472b6);"></div>
+        <div class="h-3 rounded-full" style="width:${pct}%; background:linear-gradient(90deg, #C4956A, #E8C9A0);"></div>
       </div>
     </div>
 
@@ -6709,7 +6709,7 @@ function renderOSCE(container) {
         <div class="glass-card rounded-2xl p-6">
           <h3 class="text-white font-bold text-lg mb-4">Your Notes</h3>
           <textarea 
-            class="w-full h-96 bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-slate-300 resize-none focus:outline-none focus:border-purple-400"
+            class="w-full h-96 bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-slate-300 resize-none focus:outline-none focus:border-amber-500"
             placeholder="Type your reflection here..."
             oninput="updateStationNotes('${stationId}', this.value)"
           >${notes}</textarea>
@@ -6847,7 +6847,7 @@ function renderOSCE(container) {
   };
   const domainColors = {
     preparation: '#06b6d4',
-    assessment: '#8b5cf6',
+    assessment: '#7BA3C4',
     interventions: '#22c55e',
     communication: '#f59e0b',
     safetyRedFlags: '#ef4444',
@@ -6897,7 +6897,7 @@ function renderOSCE(container) {
   }
   if (strongDomains.length) {
     const s = strongDomains[strongDomains.length - 1];
-    insights.push({ icon:'award', color:'#8b5cf6', title:'Key Strength', text:`${s.label}: ${s.percentage}%. Keep this as your confidence anchor.` });
+    insights.push({ icon:'award', color:'#7BA3C4', title:'Key Strength', text:`${s.label}: ${s.percentage}%. Keep this as your confidence anchor.` });
   }
   if (flaggedStations.length) {
     insights.push({ icon:'flag', color:'#ec4899', title:'Flagged Stations', text:`You flagged ${flaggedStations.length} station${flaggedStations.length > 1 ? 's' : ''}. Review these carefully.` });
@@ -6926,8 +6926,8 @@ function renderOSCE(container) {
 <!-- HERO -->
 <div class="glass-card rounded-3xl p-8 md:p-12 text-center mb-8 relative overflow-hidden">
   <div class="absolute inset-0 opacity-10">
-    <div class="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-cyan-400 to-purple-400 rounded-full blur-3xl"></div>
+    <div class="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-amber-400 to-amber-300 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-amber-300 to-amber-400 rounded-full blur-3xl"></div>
   </div>
 
   <div class="relative z-10">
@@ -6952,8 +6952,8 @@ function renderOSCE(container) {
       <!-- KPI GRID -->
       <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         <div class="glass-card rounded-2xl p-5">
-          <i data-lucide="percent" class="w-5 h-5 text-purple-400"></i>
-          <div class="text-3xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mt-2">${overallPercentage}%</div>
+          <i data-lucide="percent" class="w-5 h-5 text-amber-400"></i>
+          <div class="text-3xl font-extrabold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent mt-2">${overallPercentage}%</div>
           <div class="text-slate-400 text-xs uppercase tracking-wider">Overall</div>
         </div>
         <div class="glass-card rounded-2xl p-5">
@@ -7004,7 +7004,7 @@ function renderOSCE(container) {
       <!-- PERFORMANCE BY DOMAIN -->
       <div class="glass-card rounded-2xl p-8 mb-8">
         <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="bar-chart-3" class="w-7 h-7 text-purple-400"></i>
+          <i data-lucide="bar-chart-3" class="w-7 h-7 text-amber-400"></i>
           Performance by Domain
         </h2>
         <div class="space-y-4">
@@ -7087,8 +7087,8 @@ function renderOSCE(container) {
                 </div>
 
                 ${sr.notes ? `
-                  <div class="mt-4 p-3 bg-purple-500 bg-opacity-10 border border-purple-500 border-opacity-30 rounded-lg">
-                    <div class="text-purple-200 text-xs mb-1 flex items-center gap-1 font-semibold">
+                  <div class="mt-4 p-3 bg-amber-600 bg-opacity-10 border border-amber-600 border-opacity-30 rounded-lg">
+                    <div class="text-amber-200 text-xs mb-1 flex items-center gap-1 font-semibold">
                       <i data-lucide="sticky-note" class="w-3 h-3"></i> Your Notes
                     </div>
                     <p class="text-slate-300 text-sm leading-relaxed">${sr.notes.substring(0, 180)}${sr.notes.length > 180 ? '...' : ''}</p>
@@ -7121,16 +7121,16 @@ function renderOSCE(container) {
       ` : ''}
 
       <!-- Personalized Action Plan -->
-      <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-purple-500 border-opacity-30">
+      <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-amber-600 border-opacity-30">
         <h2 class="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-          <i data-lucide="map" class="w-7 h-7 text-purple-400"></i>
+          <i data-lucide="map" class="w-7 h-7 text-amber-400"></i>
           Your Personalized Action Plan
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Immediate Priorities -->
           <div>
-            <h4 class="text-purple-300 font-bold mb-4 flex items-center gap-2">
+            <h4 class="text-amber-300 font-bold mb-4 flex items-center gap-2">
               <i data-lucide="zap" class="w-5 h-5"></i>
               Immediate Priorities
             </h4>
@@ -7138,7 +7138,7 @@ function renderOSCE(container) {
             <ul class="space-y-3 text-slate-300 text-sm">
               ${weakDomains.length > 0 ? weakDomains.slice(0, 3).map(d => `
                 <li class="flex items-start gap-2">
-                  <span class="text-purple-400 font-bold flex-shrink-0">•</span>
+                  <span class="text-amber-400 font-bold flex-shrink-0">•</span>
                   <span>
                     <strong>${d.label}:</strong> Practice ${d.total - d.checked} missed item${(d.total - d.checked) !== 1 ? 's' : ''} until technique is fluent
                     (${d.percentage}% → aim for 90%+)
@@ -7146,13 +7146,13 @@ function renderOSCE(container) {
                 </li>
               `).join('') : `
                 <li class="flex items-start gap-2">
-                  <span class="text-purple-400 font-bold flex-shrink-0">•</span>
+                  <span class="text-amber-400 font-bold flex-shrink-0">•</span>
                   <span><strong>Maintain excellence:</strong> Your performance is strong across all domains—keep practicing regularly.</span>
                 </li>
               `}
 
               <li class="flex items-start gap-2">
-                <span class="text-purple-400 font-bold flex-shrink-0">•</span>
+                <span class="text-amber-400 font-bold flex-shrink-0">•</span>
                 <span><strong>Checklist mastery:</strong> Aim for 100% completion on all domains—every step matters in real clinical practice</span>
               </li>
             </ul>
@@ -7270,7 +7270,7 @@ function renderOSCE(container) {
                 <p class="text-slate-300 text-sm">Multiple-choice questions to test knowledge</p>
               </button>
               <button onclick="selectMode('osce')" class="topic-card p-6 rounded-xl transition-all text-left ${sessionMode === 'osce' ? 'selected' : ''}">
-                <i data-lucide="clipboard-check" class="w-8 h-8 text-purple-400 mb-3"></i>
+                <i data-lucide="clipboard-check" class="w-8 h-8 text-amber-400 mb-3"></i>
                 <h3 class="text-white font-bold text-lg mb-2">OSCE Stations</h3>
                 <p class="text-slate-300 text-sm">Practice clinical scenarios with checklists</p>
               </button>
@@ -7297,7 +7297,7 @@ function renderOSCE(container) {
                   <button 
                     onclick="toggleTopic('${topic.id}')" 
                     class="topic-card p-6 rounded-xl transition-all text-left ${isSelected ? 'selected' : ''}"
-                    style="border-color: ${isSelected ? topic.color : 'rgba(167, 70, 224, 0.2)'};"
+                    style="border-color: ${isSelected ? topic.color : 'rgba(196, 149, 106, 0.2)'};"
                   >
                     <div class="flex items-center justify-between mb-3">
                       <i data-lucide="${topic.icon}" class="w-8 h-8" style="color: ${topic.color};"></i>
@@ -7345,7 +7345,7 @@ function renderOSCE(container) {
             return `
               <button 
                 onclick="jumpToStation(${idx}); closeNavigator();"
-                class="w-full glass-card p-4 rounded-xl text-left transition-all hover:border-purple-400 ${isCurrent ? 'border-2 border-purple-500' : 'border border-white border-opacity-10'}"
+                class="w-full glass-card p-4 rounded-xl text-left transition-all hover:border-amber-500 ${isCurrent ? 'border-2 border-amber-600' : 'border border-white border-opacity-10'}"
               >
                 <div class="flex items-start justify-between mb-2">
                   <div class="flex-1">
@@ -7355,7 +7355,7 @@ function renderOSCE(container) {
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="flex-1 bg-white bg-opacity-5 rounded-full h-2">
-                    <div class="h-2 rounded-full bg-purple-500 transition-all" style="width: ${completionPercent}%"></div>
+                    <div class="h-2 rounded-full bg-amber-600 transition-all" style="width: ${completionPercent}%"></div>
                   </div>
                   <span class="text-xs text-slate-400 mono">${completionPercent}%</span>
                 </div>
