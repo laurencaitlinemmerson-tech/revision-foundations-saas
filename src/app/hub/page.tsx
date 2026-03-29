@@ -44,7 +44,6 @@ export default function HubPage() {
         }}
       >
         <div style={{ maxWidth: '880px', margin: '0 auto' }}>
-          {/* Hero */}
           <section
             style={{
               marginBottom: '40px',
@@ -95,7 +94,6 @@ export default function HubPage() {
             </p>
           </section>
 
-          {/* Branch cards */}
           <section
             style={{
               display: 'grid',
@@ -169,7 +167,7 @@ export default function HubPage() {
                     marginBottom: '22px',
                   }}
                 >
-                  {['OSCE prep', 'Cheat sheets', 'Paediatrics'].map(tag => (
+                  {['OSCE prep', 'Cheat sheets', 'Paediatrics'].map((tag) => (
                     <span
                       key={tag}
                       style={{
@@ -300,7 +298,6 @@ export default function HubPage() {
             </div>
           </section>
 
-          {/* Secondary navigation */}
           <section
             style={{
               borderTop: `1px solid ${linenDeep}`,
@@ -331,7 +328,7 @@ export default function HubPage() {
                 { href: '/hub/questions', label: 'Q&A Board' },
                 { href: '/hub/glossary', label: 'Nursing Glossary' },
                 { href: '/pricing', label: 'Unlock Premium' },
-              ].map(link => (
+              ].map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -351,7 +348,9 @@ export default function HubPage() {
                   }}
                 >
                   {link.label}
-                  <ArrowRight style={{ width: '12px', height: '12px', color: mist }} />
+                  <ArrowRight
+                    style={{ width: '12px', height: '12px', color: mist }}
+                  />
                 </Link>
               ))}
             </div>
