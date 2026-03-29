@@ -1,384 +1,508 @@
 'use client';
 
-import EditorialLayout from '@/components/EditorialLayout';
 import Link from 'next/link';
-import { ArrowRight, Heart, CheckCircle2, Sparkles, NotebookPen, Stethoscope } from 'lucide-react';
+import type { CSSProperties } from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
-const heroPoints = [
-  'Made by a children’s nursing student',
-  'Created for OSCEs, placements, and exams',
-  'One payment, future updates included',
+const serif = "'Source Serif 4', Georgia, serif";
+const display = "'Playfair Display', Georgia, serif";
+
+const ink = '#1C1510';
+const inkMid = '#5C4A38';
+const inkLight = '#9C8878';
+const cream = '#F9F6F0';
+const parchment = '#F3EEE4';
+const panel = '#F6F0E5';
+const panelSoft = 'rgba(255,255,255,0.42)';
+const border = '#D9D0C1';
+const tagBg = '#EFE5D4';
+
+const sectionLabelStyle: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '11px',
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: inkLight,
+  marginBottom: '14px',
+};
+
+const primaryButton: CSSProperties = {
+  display: 'inline-block',
+  fontFamily: serif,
+  fontSize: '14px',
+  fontWeight: 400,
+  background: ink,
+  color: cream,
+  padding: '12px 24px',
+  borderRadius: '9999px',
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+};
+
+const secondaryButton: CSSProperties = {
+  display: 'inline-block',
+  fontFamily: serif,
+  fontSize: '14px',
+  fontWeight: 400,
+  background: 'transparent',
+  color: ink,
+  padding: '11px 24px',
+  borderRadius: '9999px',
+  border: `1px solid ${border}`,
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+};
+
+const bodyText: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '15px',
+  lineHeight: 1.95,
+  fontWeight: 300,
+  color: inkMid,
+};
+
+const cardStyle: CSSProperties = {
+  border: `1px solid ${border}`,
+  borderRadius: '28px',
+  background: panel,
+  overflow: 'hidden',
+};
+
+const tagStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  fontFamily: serif,
+  fontSize: '12px',
+  color: inkMid,
+  background: tagBg,
+  padding: '7px 14px',
+  borderRadius: '999px',
+  lineHeight: 1,
+};
+
+const principles = [
+  {
+    title: 'Built around real assessments',
+    text: 'The tools are designed for OSCEs, theory exams, placement learning, and the kinds of topics nursing students are actually expected to know under pressure.',
+  },
+  {
+    title: 'Made by a nursing student',
+    text: 'I use these resources myself, which means I notice quickly when something feels unclear, clunky, or not useful enough.',
+  },
+  {
+    title: 'One payment, no subscription',
+    text: 'You pay once and keep access. New material is added over time, with future updates included.',
+  },
 ];
 
-const pillars = [
-  {
-    icon: NotebookPen,
-    title: 'Clearer revision',
-    body: 'Resources designed to help you revise quickly and confidently, without digging through cluttered notes or overwhelming blocks of text.',
-  },
-  {
-    icon: Stethoscope,
-    title: 'Built from real student experience',
-    body: 'Created by someone doing the degree, going on placement, and using these tools in real life — not by someone guessing what student nurses need.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Designed to feel good to use',
-    body: 'Useful is not enough. These resources are built to be visually calm, well structured, and genuinely pleasant to come back to.',
-  },
-];
-
-const useCases = [
+const supportAreas = [
   'OSCE preparation',
-  'Exam revision',
+  'Theory revision',
   'Placement support',
-  'Quick pre-shift refreshers',
-  'Less overwhelming study sessions',
-  'Resources you will actually want to open',
+  'Quick refreshers',
 ];
 
 export default function AboutPage() {
   return (
-    <EditorialLayout
-      kicker="About Revision Foundations"
-      title="Nursing revision tools, made the way I wish I’d found them."
-      standfirst="I’m Lauren — a children’s nursing student and former medical photographer. I created Revision Foundations after struggling to find study resources that felt clear, well-designed, and genuinely worth paying for."
-      byline="Revision Foundations"
-      backHref="/dashboard"
-      backLabel="Back to Dashboard"
-    >
-      <>
-        <section
-          className="ed-card"
-          style={{
-            marginBottom: '40px',
-            padding: '32px 24px',
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,244,255,0.92) 100%)',
-            border: '1px solid rgba(126, 92, 255, 0.10)',
-            boxShadow: '0 10px 30px rgba(50, 35, 90, 0.05)',
-          }}
-        >
-          <p
+    <div style={{ background: cream, minHeight: '100vh' }}>
+      <Navbar />
+
+      <section
+        style={{
+          padding: '128px 24px 104px',
+          borderBottom: `1px solid ${border}`,
+        }}
+      >
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>About</p>
+
+          <h1
             style={{
-              fontSize: '18px',
-              lineHeight: '1.75',
-              color: '#3F3B35',
-              marginBottom: '22px',
-              fontWeight: 300,
-              maxWidth: '760px',
+              fontFamily: display,
+              fontSize: 'clamp(3rem, 7vw, 4.8rem)',
+              fontWeight: 400,
+              lineHeight: 1.01,
+              letterSpacing: '-0.02em',
+              color: ink,
+              marginBottom: '26px',
+              maxWidth: '780px',
             }}
           >
-            Revision Foundations is a growing collection of nursing revision tools
-            for <strong>OSCEs, placements, and exams</strong> — built to be clear,
-            practical, and actually nice to use when your brain is full and your
-            energy is low.
+            Why I made
+            <br />
+            <em>Revision Foundations.</em>
+          </h1>
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '18px',
+              lineHeight: 1.95,
+              fontWeight: 300,
+              color: inkMid,
+              maxWidth: '620px',
+              marginBottom: '36px',
+            }}
+          >
+            I’m Lauren — a children’s nursing student and former medical
+            photographer. I started building these tools because I wanted
+            revision resources that felt clearer, calmer, and genuinely useful.
+          </p>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            <Link href="/hub" style={primaryButton}>
+              Explore the hub →
+            </Link>
+            <Link href="/contact" style={secondaryButton}>
+              Get in touch →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: '84px 24px 40px' }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>My story</p>
+
+          <div style={cardStyle}>
+            <div style={{ padding: '36px 32px' }}>
+              <p style={{ ...bodyText, marginBottom: '18px' }}>
+                Before nursing, I worked as a medical photographer in hospitals.
+                I loved being in clinical environments, but it never quite felt
+                like the right fit for me. At 25, I decided to change direction,
+                applied to nursing, and got in.
+              </p>
+
+              <p style={{ ...bodyText, marginBottom: '18px' }}>
+                Children’s nursing felt right very quickly. From my first
+                placement, I knew it was where I wanted to be.
+              </p>
+
+              <p style={bodyText}>
+                What I struggled with was revision. So many resources felt badly
+                designed, hard to use, or too expensive for what they were. I
+                started making my own, first for myself, then for coursemates —
+                and that gradually became Revision Foundations.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: '36px 24px 52px' }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>Why it exists</p>
+
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2.2rem, 4.5vw, 3rem)',
+              fontWeight: 400,
+              lineHeight: 1.12,
+              color: ink,
+              marginBottom: '18px',
+              maxWidth: '640px',
+            }}
+          >
+            Revision support that feels easier to use.
+          </h2>
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '16px',
+              lineHeight: 1.95,
+              fontWeight: 300,
+              color: inkMid,
+              maxWidth: '590px',
+              marginBottom: '40px',
+            }}
+          >
+            The aim is simple: make tools that help nursing students revise for
+            real assessments without the clutter, vagueness, or overwhelm.
+          </p>
+
+          <div style={cardStyle}>
+            {principles.map((item, index) => (
+              <div
+                key={item.title}
+                style={{
+                  padding: '34px 32px',
+                  borderBottom:
+                    index !== principles.length - 1
+                      ? `1px solid ${border}`
+                      : 'none',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 250px) minmax(0, 1fr)',
+                    gap: '22px',
+                    alignItems: 'start',
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontFamily: display,
+                      fontSize: '24px',
+                      fontWeight: 400,
+                      lineHeight: 1.2,
+                      color: ink,
+                    }}
+                  >
+                    {item.title}
+                  </h3>
+
+                  <p style={bodyText}>{item.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        style={{
+          padding: '36px 24px 88px',
+          borderTop: `1px solid ${border}`,
+        }}
+      >
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>What it supports</p>
+
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2.2rem, 4.5vw, 3rem)',
+              fontWeight: 400,
+              lineHeight: 1.12,
+              color: ink,
+              marginBottom: '18px',
+              maxWidth: '680px',
+            }}
+          >
+            Built for the parts of nursing school that matter most.
+          </h2>
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '16px',
+              lineHeight: 1.95,
+              fontWeight: 300,
+              color: inkMid,
+              maxWidth: '590px',
+              marginBottom: '40px',
+            }}
+          >
+            The tools are designed to support the way student nurses actually
+            revise, prepare, and practise.
           </p>
 
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
               gap: '12px',
-              marginBottom: '26px',
+              marginBottom: '46px',
             }}
           >
-            {heroPoints.map((point) => (
+            {supportAreas.map((item) => (
               <div
-                key={point}
+                key={item}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '14px 16px',
-                  borderRadius: '14px',
-                  background: 'rgba(255,255,255,0.82)',
-                  border: '1px solid rgba(90, 87, 80, 0.10)',
+                  padding: '18px 18px',
+                  border: `1px solid ${border}`,
+                  borderRadius: '999px',
+                  background: panelSoft,
+                  textAlign: 'center',
                 }}
               >
-                <CheckCircle2
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    flexShrink: 0,
-                  }}
-                />
                 <span
                   style={{
+                    fontFamily: serif,
                     fontSize: '14px',
-                    lineHeight: '1.6',
-                    color: '#5A5750',
-                    fontWeight: 400,
+                    color: ink,
                   }}
                 >
-                  {point}
+                  {item}
                 </span>
               </div>
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <Link
-              href="/hub"
-              className="btn-primary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              Browse Revision Tools
-              <ArrowRight style={{ width: '16px', height: '16px' }} />
-            </Link>
+          <div
+            style={{
+              padding: '48px 40px',
+              borderRadius: '28px',
+              background: panel,
+              border: `1px solid ${border}`,
+            }}
+          >
+            <p style={sectionLabelStyle}>A simple promise</p>
 
-            <Link
-              href="/contact"
-              className="btn-secondary"
+            <p
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
+                fontFamily: display,
+                fontSize: 'clamp(2rem, 4vw, 2.9rem)',
+                lineHeight: 1.06,
+                color: ink,
+                marginBottom: '16px',
+                maxWidth: '580px',
               }}
             >
-              <Heart style={{ width: '16px', height: '16px' }} />
-              Contact Lauren
+              No subscription.
+              <br />
+              Just one payment.
+            </p>
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: '15px',
+                lineHeight: 1.95,
+                color: inkMid,
+                maxWidth: '540px',
+                marginBottom: '24px',
+                fontWeight: 300,
+              }}
+            >
+              You pay once and keep access to the tools included, with future
+              updates added over time as Revision Foundations grows.
+            </p>
+
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '440px',
+                height: '1px',
+                background: border,
+                marginBottom: '24px',
+              }}
+            />
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '10px',
+                marginBottom: '28px',
+              }}
+            >
+              {[
+                'OSCE practice',
+                'Topic quizzes',
+                'Clinical guides',
+                'Future updates',
+              ].map((item) => (
+                <span key={item} style={tagStyle}>
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            <Link href="/pricing" style={primaryButton}>
+              See the bundle →
             </Link>
           </div>
-        </section>
-
-        <h2 className="ed-section-title">Why I started this</h2>
-
-        <div
-          className="ed-card"
-          style={{
-            marginBottom: '36px',
-            padding: '28px 24px',
-          }}
-        >
-          <p
-            style={{
-              fontSize: '15px',
-              color: '#5A5750',
-              lineHeight: '1.85',
-              fontWeight: 300,
-              marginBottom: '18px',
-            }}
-          >
-            Before nursing, I worked as a medical photographer in hospitals. It
-            was fascinating work, but it never quite felt like the right fit for
-            me. At 25, I decided to change direction, applied to nursing, and got
-            in.
-          </p>
-
-          <p
-            style={{
-              fontSize: '15px',
-              color: '#5A5750',
-              lineHeight: '1.85',
-              fontWeight: 300,
-              marginBottom: '18px',
-            }}
-          >
-            Children’s nursing felt right almost immediately. From my first
-            placement, I knew it was where I wanted to be.
-          </p>
-
-          <p
-            style={{
-              fontSize: '15px',
-              color: '#5A5750',
-              lineHeight: '1.85',
-              fontWeight: 300,
-              marginBottom: 0,
-            }}
-          >
-            What I didn’t love was the revision experience. So many resources felt
-            cluttered, dull, badly designed, or strangely expensive for what they
-            offered. I wanted study tools that felt clearer, calmer, and easier to
-            trust under pressure — so I started making my own. First for myself,
-            then for coursemates, and eventually into what became Revision
-            Foundations.
-          </p>
         </div>
+      </section>
 
-        <h2 className="ed-section-title">What makes it different</h2>
+      <section style={{ padding: '84px 24px', background: parchment }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+          <p style={sectionLabelStyle}>A note</p>
 
-        <div className="ed-grid-3" style={{ marginBottom: '36px' }}>
-          {pillars.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <div
-                key={item.title}
-                className="ed-cell"
-                style={{
-                  paddingTop: '22px',
-                }}
-              >
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '14px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '14px',
-                    background: 'rgba(126, 92, 255, 0.08)',
-                    border: '1px solid rgba(126, 92, 255, 0.10)',
-                  }}
-                >
-                  <Icon style={{ width: '18px', height: '18px' }} />
-                </div>
-
-                <p className="ed-cell-title" style={{ marginBottom: '10px' }}>
-                  {item.title}
-                </p>
-
-                <p>{item.body}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        <h2 className="ed-section-title">Who it’s for</h2>
-
-        <div
-          className="ed-card"
-          style={{
-            marginBottom: '36px',
-            padding: '28px 24px',
-          }}
-        >
-          <p
+          <h2
             style={{
-              fontSize: '15px',
-              color: '#5A5750',
-              lineHeight: '1.8',
-              fontWeight: 300,
+              fontFamily: display,
+              fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+              fontWeight: 400,
+              lineHeight: 1.15,
+              color: ink,
               marginBottom: '18px',
-              maxWidth: '760px',
             }}
           >
-            Revision Foundations is for student nurses who want revision support
-            that feels more thoughtful, less overwhelming, and easier to use when
-            time is short and confidence is wobbling.
+            Still made with care.
+          </h2>
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '16px',
+              lineHeight: 1.95,
+              fontWeight: 300,
+              color: inkMid,
+              maxWidth: '640px',
+              marginBottom: '28px',
+            }}
+          >
+            I still use these resources myself, and I still notice when
+            something needs tightening up. If you have a question, spot
+            something unclear, or think something should be added, I genuinely
+            want to hear it.
           </p>
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              display: 'flex',
               gap: '12px',
+              flexWrap: 'wrap',
             }}
           >
-            {useCases.map((item) => (
-              <div
-                key={item}
-                style={{
-                  padding: '14px 16px',
-                  border: '1px solid rgba(90, 87, 80, 0.12)',
-                  borderRadius: '14px',
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                  color: '#5A5750',
-                  fontWeight: 300,
-                  background: 'rgba(255,255,255,0.7)',
-                }}
-              >
-                {item}
-              </div>
-            ))}
+            <Link href="/contact" style={primaryButton}>
+              Contact me →
+            </Link>
+            <Link href="/hub" style={secondaryButton}>
+              Browse resources →
+            </Link>
           </div>
         </div>
+      </section>
 
-        <section
-          className="ed-card"
+      <section
+        style={{
+          padding: '26px 24px',
+          background: cream,
+          borderTop: `1px solid ${border}`,
+          textAlign: 'center',
+        }}
+      >
+        <p
           style={{
-            marginBottom: '40px',
-            padding: '30px 24px',
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(250,247,255,0.94) 100%)',
-            border: '1px solid rgba(126, 92, 255, 0.10)',
+            fontFamily: serif,
+            fontSize: '13px',
+            lineHeight: 1.8,
+            color: inkLight,
+            fontWeight: 300,
           }}
         >
-          <p
-            style={{
-              fontSize: '12px',
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: '#7A746B',
-              marginBottom: '12px',
-            }}
+          Got a question or spotted something that needs updating?{' '}
+          <a
+            href="https://wa.me/447572650980"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: ink, textDecoration: 'underline' }}
           >
-            A simple promise
-          </p>
-
-          <p
-            style={{
-              fontSize: '20px',
-              lineHeight: '1.75',
-              color: '#3F3B35',
-              fontWeight: 300,
-              marginBottom: '12px',
-              maxWidth: '800px',
-            }}
-          >
-            No subscription. No monthly fee. No drip-fed access.
-          </p>
-
-          <p
-            style={{
-              fontSize: '15px',
-              lineHeight: '1.8',
-              color: '#5A5750',
-              fontWeight: 300,
-              maxWidth: '800px',
-              marginBottom: 0,
-            }}
-          >
-            You pay once and keep access to everything included — with future
-            updates added as Revision Foundations grows and improves.
-          </p>
-        </section>
-
-        <div className="ed-pearl" style={{ marginBottom: '40px' }}>
-          <p className="ed-pearl-label">A note from Lauren</p>
-          <p>
-            If you have a question, spot something unclear, or just want to say
-            hi, I really do read every message. Email is the best place to reach
-            me.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <Link
-            href="/hub"
-            className="btn-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            Explore the Hub
-            <ArrowRight style={{ width: '16px', height: '16px' }} />
+            WhatsApp me
+          </a>{' '}
+          or{' '}
+          <Link href="/contact" style={{ color: ink, textDecoration: 'underline' }}>
+            use the contact form
           </Link>
+          .
+        </p>
+      </section>
 
-          <Link
-            href="/contact"
-            className="btn-secondary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <Heart style={{ width: '16px', height: '16px' }} />
-            Get in Touch
-          </Link>
-        </div>
-      </>
-    </EditorialLayout>
+      <Footer />
+    </div>
   );
 }
