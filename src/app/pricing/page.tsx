@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -16,30 +16,115 @@ import {
   Shield,
   X,
   Info,
+  Sparkles,
+  Smartphone,
+  RefreshCw,
+  Lock,
 } from 'lucide-react';
 import { useEntitlements } from '@/lib/hooks/useEntitlements';
 
+type Product = 'osce' | 'quiz' | 'bundle';
+
+const BUNDLE_FEATURES = [
+  '50+ paediatric OSCE stations',
+  'Core nursing quiz across 17 topics',
+  'Revision hub for nursing knowledge',
+  'Timed exam mode + marking checklists',
+  'Progress tracking dashboard',
+  'All future updates included',
+];
+
+const FAQS = [
+  {
+    q: 'Is this a subscription?',
+    a: 'No. It is a one-time payment with lifetime access. No recurring charges.',
+  },
+  {
+    q: 'Do I need an account?',
+    a: 'No. You can checkout as a guest with just your email, then create an account later to sync progress across devices.',
+  },
+  {
+    q: "What if it's not for me?",
+    a: 'You can get a full refund within 7 days. No questions asked.',
+  },
+  {
+    q: 'Will more content be added?',
+    a: 'Yes. New resources are added regularly, and all future updates are included in your purchase.',
+  },
+  {
+    q: 'Does it work on my phone?',
+    a: 'Yes. Everything is mobile-friendly and designed to work on placement, on the bus, or wherever you revise.',
+  },
+  {
+    q: 'What is included in the bundle?',
+    a: 'The Children’s Bundle includes the OSCE tool, the core quiz, and the revision hub in one purchase.',
+  },
+];
+
+const TRUST_ITEMS = [
+  {
+    icon: Lock,
+    title: 'Secure checkout',
+    desc: 'Powered by Stripe',
+  },
+  {
+    icon: Sparkles,
+    title: 'Instant access',
+    desc: 'Start right away',
+  },
+  {
+    icon: RefreshCw,
+    title: '7-day refund',
+    desc: 'No questions asked',
+  },
+  {
+    icon: Smartphone,
+    title: 'Works anywhere',
+    desc: 'Mobile, tablet, laptop',
+  },
+];
+
 export default function PricingPage() {
   const { isSignedIn } = useUser();
-  const { hasOsce, hasQuiz, hasBundle, isPro, isLoading: accessLoading } = useEntitlements();
+  const {
+    hasOsce,
+    hasQuiz,
+    hasBundle,
+    isPro,
+    isLoading: accessLoading,
+  } = useEntitlements();
 
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading] = useState<Product | null>(null);
   const [guestEmail, setGuestEmail] = useState('');
-  const [showEmailInput, setShowEmailInput] = useState<string | null>(null);
+  const [showEmailInput, setShowEmailInput] = useState<Product | null>(null);
   const [emailError, setEmailError] = useState('');
   const [showGuestTip, setShowGuestTip] = useState(true);
+
   const [adultEmail, setAdultEmail] = useState('');
   const [adultSubmitted, setAdultSubmitted] = useState(false);
 
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
-  const handlePurchase = async (product: 'osce' | 'quiz' | 'bundle') => {
-    if (!isSignedIn && !guestEmail) {
+  const bundleValueText = useMemo(() => {
+    // Individual items shown are £4.99 + £4.99, and the bundle also includes the revision hub.
+    // Avoid over-claiming a specific hub price if it is not sold separately.
+    return 'Better value than buying separately';
+  }, []);
+
+  const resetEmailState = () => {
+    setEmailError('');
+  };
+
+  const handlePurchase = async (product: Product) => {
+    if (!isSignedIn && !guestEmail.trim()) {
       setShowEmailInput(product);
+      setEmailError('');
       return;
     }
 
-    if (!isSignedIn && guestEmail && !validateEmail(guestEmail)) {
+    if (!isSignedIn && !validateEmail(guestEmail)) {
+      setShowEmailInput(product);
       setEmailError('Please enter a valid email address');
       return;
     }
@@ -53,7 +138,7 @@ export default function PricingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product,
-          guestEmail: !isSignedIn ? guestEmail : undefined,
+          guestEmail: !isSignedIn ? guestEmail.trim() : undefined,
         }),
       });
 
@@ -67,29 +152,34 @@ export default function PricingPage() {
       throw new Error(data?.error || 'No checkout URL returned');
     } catch (error: unknown) {
       console.error('Checkout error:', error);
-      const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong. Please try again.';
       alert(`Oops! ${message}`);
     } finally {
       setLoading(null);
     }
   };
 
-  const handleGuestCheckout = (product: 'osce' | 'quiz' | 'bundle') => {
+  const handleGuestCheckout = (product: Product) => {
     if (!validateEmail(guestEmail)) {
       setEmailError('Please enter a valid email address');
       return;
     }
-    handlePurchase(product);
+
+    void handlePurchase(product);
   };
 
-  const handleAdultWaitlist = async (e: React.FormEvent) => {
+  const handleAdultWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!validateEmail(adultEmail)) return;
-    await new Promise((r) => setTimeout(r, 400));
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
     setAdultSubmitted(true);
   };
 
-  // Already has full access
   if (!accessLoading && hasBundle) {
     return (
       <div className="min-h-screen bg-cream">
@@ -99,12 +189,16 @@ export default function PricingPage() {
             <div className="w-20 h-20 rounded-full bg-[var(--linen-deep)] flex items-center justify-center mx-auto mb-6">
               <Crown className="w-10 h-10 text-[var(--espresso)]" />
             </div>
+
             <h1 className="text-3xl md:text-4xl font-display text-[var(--espresso)] mb-4">
-              You have full access
+              You already have full access
             </h1>
+
             <p className="text-[var(--charcoal)] text-lg mb-8">
-              Lifetime access to everything — OSCE tool, quiz, and revision hub.
+              You have lifetime access to your OSCE practice, quiz content, and
+              revision hub.
             </p>
+
             <Link href="/dashboard" className="btn-primary text-lg px-8 py-4">
               Go to Dashboard
               <ArrowRight className="w-5 h-5" />
@@ -120,187 +214,282 @@ export default function PricingPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* Hero */}
-      <section className="pt-28 pb-14 px-6">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-xs uppercase tracking-widest text-[var(--charcoal-light)] mb-4">Pricing</p>
-          <h1 className="text-4xl md:text-5xl font-display text-[var(--espresso)] mb-5">
-            Simple pricing, lifetime access.
-          </h1>
-          <p className="text-[var(--charcoal)] text-lg max-w-xl">
-            One payment. No subscription. New content added regularly at no extra cost.
+      <section className="pt-28 pb-12 px-6">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-xs uppercase tracking-[0.22em] text-[var(--charcoal-light)] mb-4">
+            Pricing
           </p>
+
+          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 items-start">
+            <div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl leading-tight font-display text-[var(--espresso)] mb-5">
+                Revise for exams, practise OSCEs, and build nursing knowledge in
+                one place.
+              </h1>
+
+              <p className="text-lg md:text-xl text-[var(--charcoal)] max-w-2xl mb-5">
+                One payment for the tools and revision support that help you feel
+                more prepared on placement, in exams, and in OSCEs.
+              </p>
+
+              <div className="flex flex-wrap gap-3 text-sm text-[var(--charcoal)] mb-8">
+                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
+                  <Check className="w-4 h-4 text-[var(--espresso)]" />
+                  Lifetime access
+                </span>
+                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
+                  <Check className="w-4 h-4 text-[var(--espresso)]" />
+                  No subscription
+                </span>
+                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
+                  <Check className="w-4 h-4 text-[var(--espresso)]" />
+                  New content included
+                </span>
+                <span className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--linen-deep)] rounded-full">
+                  <Check className="w-4 h-4 text-[var(--espresso)]" />
+                  Mobile-friendly
+                </span>
+              </div>
+
+              {!isPro && (
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link href="/osce" className="btn-secondary text-sm px-6 py-3">
+                    Try OSCE preview
+                  </Link>
+                  <Link href="/quiz" className="btn-secondary text-sm px-6 py-3">
+                    Try quiz preview
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {!isSignedIn && showGuestTip && (
+              <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] p-5 rounded-xl relative">
+                <button
+                  onClick={() => setShowGuestTip(false)}
+                  className="absolute right-3 top-3 text-[var(--charcoal-light)] hover:text-[var(--espresso)] transition-colors"
+                  aria-label="Dismiss guest checkout note"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-start gap-3">
+                  <Info className="w-4 h-4 text-[var(--charcoal-light)] mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-[var(--espresso)] mb-1">
+                      No account needed
+                    </p>
+                    <p className="text-sm text-[var(--charcoal)] leading-relaxed">
+                      You can checkout as a guest with just your email, then create
+                      an account later to sync progress across devices.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       <main className="pb-20 px-6">
-        <div className="max-w-3xl mx-auto">
-
-          {/* Guest tip */}
-          {!isSignedIn && showGuestTip && (
-            <div className="mb-10 bg-[var(--linen-light)] border border-[var(--linen-deep)] p-4 flex items-start gap-3" style={{ borderRadius: '8px' }}>
-              <Info className="w-4 h-4 text-[var(--charcoal-light)] mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-[var(--charcoal)]">
-                <span className="font-medium">No account needed.</span> You can checkout as a guest with
-                just your email — create an account later to sync progress across devices.
-              </p>
-              <button
-                onClick={() => setShowGuestTip(false)}
-                className="text-[var(--charcoal-light)] hover:text-[var(--espresso)] transition-colors ml-auto flex-shrink-0"
-                aria-label="Dismiss"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {/* === CHILDREN'S BUNDLE === */}
-          <div className="bg-white border border-[var(--linen-deep)] overflow-hidden mb-6" style={{ borderRadius: '8px' }}>
-            <div className="p-7 md:p-8">
-              <div className="flex items-start justify-between gap-4 mb-6">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-[var(--charcoal-light)] mb-1">Most popular</p>
-                  <h2 className="text-2xl font-display text-[var(--espresso)]">Children&apos;s Bundle</h2>
-                  <p className="text-sm text-[var(--charcoal)] mt-1">
-                    OSCE tool + quiz + revision hub — everything for paeds nursing
-                  </p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-3xl font-display text-[var(--espresso)]">£9.99</div>
-                  <p className="text-xs text-[var(--charcoal-light)]">one-time</p>
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-2 mb-7 text-sm text-[var(--charcoal)]">
-                {[
-                  'Full Revision Hub access',
-                  "Children's OSCE Tool (50+ stations)",
-                  'Core Nursing Quiz (17 topics)',
-                  'All future updates included',
-                  'Progress tracking dashboard',
-                  'Lifetime access',
-                ].map((f) => (
-                  <div key={f} className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[var(--espresso)] flex-shrink-0" />
-                    {f}
-                  </div>
-                ))}
-              </div>
-
-              {showEmailInput === 'bundle' && !isSignedIn ? (
-                <div className="space-y-3 max-w-sm">
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
-                    <input
-                      type="email"
-                      placeholder="Your email address"
-                      value={guestEmail}
-                      onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-11 pr-4 py-3 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 focus:border-[var(--espresso)]/40 text-sm" style={{ borderRadius: '8px' }}
-                    />
-                  </div>
-                  {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
-                  <div className="flex gap-2">
-                    <button onClick={() => handleGuestCheckout('bundle')} disabled={loading !== null} className="btn-primary flex-1 py-3">
-                      {loading === 'bundle' ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <>Get Bundle</>}
-                    </button>
-                    <button onClick={() => setShowEmailInput(null)} className="btn-secondary py-3 px-4 text-sm">Cancel</button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col sm:flex-row gap-3 items-center">
-                  <button
-                    onClick={() => handlePurchase('bundle')}
-                    disabled={loading !== null}
-                    className="btn-primary py-3 px-8"
-                  >
-                    {loading === 'bundle' ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <>Get Children&apos;s Bundle — £9.99</>}
-                  </button>
-                  <p className="text-xs text-[var(--charcoal-light)] flex items-center gap-1">
-                    <Shield className="w-3 h-3" /> 7-day money-back guarantee
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* === ADULT BUNDLE (coming soon) === */}
-          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] overflow-hidden mb-6 opacity-75" style={{ borderRadius: '8px' }}>
-            <div className="p-7 md:p-8">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div>
-                  <span className="text-xs bg-[var(--charcoal-light)]/10 text-[var(--charcoal)] px-3 py-1 rounded-full font-medium">
-                    Coming soon
+        <div className="max-w-5xl mx-auto">
+          {/* Main bundle */}
+          <div className="bg-white border-2 border-[var(--espresso)]/15 shadow-sm overflow-hidden mb-8 rounded-2xl">
+            <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-0">
+              <div className="p-7 md:p-9 border-b lg:border-b-0 lg:border-r border-[var(--linen-deep)]">
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <span className="text-xs uppercase tracking-[0.2em] text-[var(--charcoal-light)]">
+                    Most popular
                   </span>
-                  <h2 className="text-2xl font-display text-[var(--espresso)] mt-2">Adult Nursing Bundle</h2>
-                  <p className="text-sm text-[var(--charcoal)] mt-1">
-                    NEWS2, sepsis, wound care, adult OSCE stations, and more
-                  </p>
+                  <span className="inline-flex items-center rounded-full bg-[var(--linen-light)] text-[var(--espresso)] text-xs font-medium px-3 py-1">
+                    Best value
+                  </span>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-3xl font-display text-[var(--espresso)]">£9.99</div>
-                  <p className="text-xs text-[var(--charcoal-light)]">one-time</p>
+
+                <h2 className="text-2xl md:text-3xl font-display text-[var(--espresso)] mb-2">
+                  Children&apos;s Bundle
+                </h2>
+
+                <p className="text-[var(--charcoal)] text-base md:text-lg mb-6 max-w-2xl">
+                  Everything you need for OSCE practice, nursing revision, and core
+                  knowledge building in one bundle.
+                </p>
+
+                <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                  {BUNDLE_FEATURES.map((feature) => (
+                    <div
+                      key={feature}
+                      className="flex items-start gap-2 text-sm text-[var(--charcoal)]"
+                    >
+                      <Check className="w-4 h-4 text-[var(--espresso)] mt-0.5 flex-shrink-0" />
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-xl p-4">
+                  <p className="text-sm font-medium text-[var(--espresso)] mb-1">
+                    What this helps with
+                  </p>
+                  <p className="text-sm text-[var(--charcoal)] leading-relaxed">
+                    Practise stations before OSCEs, revise high-yield nursing topics,
+                    and strengthen the knowledge you need for exams and placement.
+                  </p>
                 </div>
               </div>
 
-              <p className="text-sm text-[var(--charcoal)] mb-5">
-                Adult nursing content is in development. Leave your email and we&apos;ll let you know when it launches.
-              </p>
-
-              {adultSubmitted ? (
-                <p className="text-sm text-[var(--espresso)] font-medium">Got it — we&apos;ll email you when it&apos;s ready.</p>
-              ) : (
-                <form onSubmit={handleAdultWaitlist} className="flex gap-2 max-w-sm">
-                  <div className="relative flex-1">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
-                    <input
-                      type="email"
-                      placeholder="your@email.com"
-                      value={adultEmail}
-                      onChange={(e) => setAdultEmail(e.target.value)}
-                      required
-                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm" style={{ borderRadius: '8px' }}
-                    />
+              <div className="p-7 md:p-9 bg-[var(--linen-light)]">
+                <div className="mb-5">
+                  <p className="text-sm text-[var(--charcoal-light)] mb-2">
+                    One-time payment
+                  </p>
+                  <div className="flex items-end gap-3 mb-2">
+                    <span className="text-4xl md:text-5xl font-display text-[var(--espresso)]">
+                      £9.99
+                    </span>
                   </div>
-                  <button type="submit" className="btn-secondary py-2.5 px-5 text-sm flex-shrink-0">
-                    Notify me
-                  </button>
-                </form>
-              )}
+                  <p className="text-sm text-[var(--charcoal)]">{bundleValueText}</p>
+                </div>
+
+                {showEmailInput === 'bundle' && !isSignedIn ? (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-[var(--espresso)]">
+                      Checkout as guest
+                    </label>
+
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
+                      <input
+                        type="email"
+                        placeholder="Your email address"
+                        value={guestEmail}
+                        onChange={(e) => {
+                          setGuestEmail(e.target.value);
+                          resetEmailState();
+                        }}
+                        className="w-full pl-11 pr-4 py-3 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 focus:border-[var(--espresso)]/40 text-sm rounded-xl"
+                        aria-label="Guest email address"
+                      />
+                    </div>
+
+                    {emailError && (
+                      <p className="text-red-500 text-xs" role="alert">
+                        {emailError}
+                      </p>
+                    )}
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleGuestCheckout('bundle')}
+                        disabled={loading !== null}
+                        className="btn-primary flex-1 py-3"
+                      >
+                        {loading === 'bundle' ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>Get instant access — £9.99</>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowEmailInput(null);
+                          setEmailError('');
+                        }}
+                        className="btn-secondary py-3 px-4 text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handlePurchase('bundle')}
+                      disabled={loading !== null}
+                      className="btn-primary w-full justify-center py-3.5 px-8 mb-4"
+                    >
+                      {loading === 'bundle' ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>Get Children&apos;s Bundle — £9.99</>
+                      )}
+                    </button>
+
+                    <div className="space-y-2 text-sm text-[var(--charcoal)]">
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-[var(--espresso)]" />
+                        7-day money-back guarantee
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-[var(--espresso)]" />
+                        No subscription or recurring charges
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-[var(--espresso)]" />
+                        Guest checkout available
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-4 my-8">
+          {/* Individual options */}
+          <div className="flex items-center gap-4 my-10">
             <div className="flex-1 h-px bg-[var(--linen-deep)]" />
-            <span className="text-xs text-[var(--charcoal-light)]">or buy individually</span>
+            <span className="text-xs uppercase tracking-[0.18em] text-[var(--charcoal-light)]">
+              Or buy individually
+            </span>
             <div className="flex-1 h-px bg-[var(--linen-deep)]" />
           </div>
 
-          {/* Individual tools */}
-          <div className="grid md:grid-cols-2 gap-5 mb-16">
-            {/* OSCE */}
-            <div className={`bg-white border p-6 ${hasOsce ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'}`} style={{ borderRadius: '8px' }}>
+          <div className="grid md:grid-cols-2 gap-6 mb-14">
+            <div
+              className={`bg-white border p-6 rounded-2xl ${
+                hasOsce ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'
+              }`}
+            >
               {hasOsce && (
-                <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-3">
-                  <Check className="w-3 h-3" /> Owned
+                <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-4">
+                  <Check className="w-3 h-3" />
+                  Owned
                 </span>
               )}
+
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-[var(--linen-deep)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
+                <div className="w-11 h-11 bg-[var(--linen-deep)] flex items-center justify-center rounded-xl">
                   <ClipboardCheck className="w-5 h-5 text-[var(--espresso)]" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[var(--espresso)]">Children&apos;s OSCE Tool</h3>
-                  {!hasOsce && <span className="text-sm text-[var(--charcoal)]">£4.99</span>}
+                  <h3 className="font-semibold text-[var(--espresso)]">
+                    Children&apos;s OSCE Tool
+                  </h3>
+                  {!hasOsce && (
+                    <span className="text-sm text-[var(--charcoal)]">£4.99</span>
+                  )}
                 </div>
               </div>
-              <p className="text-sm text-[var(--charcoal)] mb-5">
-                50+ paediatric OSCE stations with marking checklists and timed exam mode.
+
+              <p className="text-sm text-[var(--charcoal)] leading-relaxed mb-5">
+                Practise 50+ paediatric OSCE stations with marking checklists and
+                timed exam mode so you can feel more prepared on the day.
               </p>
+
               {hasOsce ? (
-                <Link href="/osce" className="btn-secondary w-full justify-center py-2.5 text-sm">
-                  Open OSCE Tool <ArrowRight className="w-4 h-4" />
+                <Link
+                  href="/osce"
+                  className="btn-secondary w-full justify-center py-2.5 text-sm"
+                >
+                  Open OSCE Tool
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               ) : showEmailInput === 'osce' && !isSignedIn ? (
                 <div className="space-y-2">
@@ -310,45 +499,88 @@ export default function PricingPage() {
                       type="email"
                       placeholder="Your email"
                       value={guestEmail}
-                      onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm" style={{ borderRadius: '8px' }}
+                      onChange={(e) => {
+                        setGuestEmail(e.target.value);
+                        resetEmailState();
+                      }}
+                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm rounded-xl"
+                      aria-label="Guest email for OSCE checkout"
                     />
                   </div>
-                  {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
-                  <button onClick={() => handleGuestCheckout('osce')} disabled={loading !== null} className="btn-secondary w-full py-2.5 text-sm">
-                    {loading === 'osce' ? 'Processing...' : 'Continue to Checkout'}
+
+                  {emailError && (
+                    <p className="text-red-500 text-xs" role="alert">
+                      {emailError}
+                    </p>
+                  )}
+
+                  <button
+                    onClick={() => handleGuestCheckout('osce')}
+                    disabled={loading !== null}
+                    className="btn-secondary w-full py-2.5 text-sm"
+                  >
+                    {loading === 'osce' ? 'Processing...' : 'Continue to checkout'}
                   </button>
-                  <button onClick={() => setShowEmailInput(null)} className="text-xs text-[var(--charcoal-light)] w-full">Cancel</button>
+
+                  <button
+                    onClick={() => {
+                      setShowEmailInput(null);
+                      setEmailError('');
+                    }}
+                    className="text-xs text-[var(--charcoal-light)] w-full"
+                  >
+                    Cancel
+                  </button>
                 </div>
               ) : (
-                <button onClick={() => handlePurchase('osce')} disabled={loading !== null} className="btn-secondary w-full py-2.5 text-sm">
+                <button
+                  onClick={() => handlePurchase('osce')}
+                  disabled={loading !== null}
+                  className="btn-secondary w-full py-2.5 text-sm"
+                >
                   {loading === 'osce' ? 'Processing...' : 'Get OSCE Tool — £4.99'}
                 </button>
               )}
             </div>
 
-            {/* Quiz */}
-            <div className={`bg-white border p-6 ${hasQuiz ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'}`} style={{ borderRadius: '8px' }}>
+            <div
+              className={`bg-white border p-6 rounded-2xl ${
+                hasQuiz ? 'border-[var(--espresso)]/20' : 'border-[var(--linen-deep)]'
+              }`}
+            >
               {hasQuiz && (
-                <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-3">
-                  <Check className="w-3 h-3" /> Owned
+                <span className="inline-flex items-center gap-1 text-xs bg-[var(--espresso)] text-white px-2.5 py-1 rounded-full mb-4">
+                  <Check className="w-3 h-3" />
+                  Owned
                 </span>
               )}
+
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-[var(--linen-deep)] flex items-center justify-center" style={{ borderRadius: '8px' }}>
+                <div className="w-11 h-11 bg-[var(--linen-deep)] flex items-center justify-center rounded-xl">
                   <BookOpen className="w-5 h-5 text-[var(--espresso)]" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[var(--espresso)]">Core Nursing Quiz</h3>
-                  {!hasQuiz && <span className="text-sm text-[var(--charcoal)]">£4.99</span>}
+                  <h3 className="font-semibold text-[var(--espresso)]">
+                    Core Nursing Quiz
+                  </h3>
+                  {!hasQuiz && (
+                    <span className="text-sm text-[var(--charcoal)]">£4.99</span>
+                  )}
                 </div>
               </div>
-              <p className="text-sm text-[var(--charcoal)] mb-5">
-                17 topic areas with instant feedback and explanations — not just right or wrong.
+
+              <p className="text-sm text-[var(--charcoal)] leading-relaxed mb-5">
+                Build exam-ready nursing knowledge across 17 topic areas with
+                instant feedback and explanations, not just right or wrong answers.
               </p>
+
               {hasQuiz ? (
-                <Link href="/quiz" className="btn-secondary w-full justify-center py-2.5 text-sm">
-                  Open Quiz Tool <ArrowRight className="w-4 h-4" />
+                <Link
+                  href="/quiz"
+                  className="btn-secondary w-full justify-center py-2.5 text-sm"
+                >
+                  Open Quiz Tool
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               ) : showEmailInput === 'quiz' && !isSignedIn ? (
                 <div className="space-y-2">
@@ -358,18 +590,45 @@ export default function PricingPage() {
                       type="email"
                       placeholder="Your email"
                       value={guestEmail}
-                      onChange={(e) => { setGuestEmail(e.target.value); setEmailError(''); }}
-                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm" style={{ borderRadius: '8px' }}
+                      onChange={(e) => {
+                        setGuestEmail(e.target.value);
+                        resetEmailState();
+                      }}
+                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm rounded-xl"
+                      aria-label="Guest email for quiz checkout"
                     />
                   </div>
-                  {emailError && <p className="text-red-500 text-xs">{emailError}</p>}
-                  <button onClick={() => handleGuestCheckout('quiz')} disabled={loading !== null} className="btn-secondary w-full py-2.5 text-sm">
-                    {loading === 'quiz' ? 'Processing...' : 'Continue to Checkout'}
+
+                  {emailError && (
+                    <p className="text-red-500 text-xs" role="alert">
+                      {emailError}
+                    </p>
+                  )}
+
+                  <button
+                    onClick={() => handleGuestCheckout('quiz')}
+                    disabled={loading !== null}
+                    className="btn-secondary w-full py-2.5 text-sm"
+                  >
+                    {loading === 'quiz' ? 'Processing...' : 'Continue to checkout'}
                   </button>
-                  <button onClick={() => setShowEmailInput(null)} className="text-xs text-[var(--charcoal-light)] w-full">Cancel</button>
+
+                  <button
+                    onClick={() => {
+                      setShowEmailInput(null);
+                      setEmailError('');
+                    }}
+                    className="text-xs text-[var(--charcoal-light)] w-full"
+                  >
+                    Cancel
+                  </button>
                 </div>
               ) : (
-                <button onClick={() => handlePurchase('quiz')} disabled={loading !== null} className="btn-secondary w-full py-2.5 text-sm">
+                <button
+                  onClick={() => handlePurchase('quiz')}
+                  disabled={loading !== null}
+                  className="btn-secondary w-full py-2.5 text-sm"
+                >
                   {loading === 'quiz' ? 'Processing...' : 'Get Quiz Tool — £4.99'}
                 </button>
               )}
@@ -377,71 +636,130 @@ export default function PricingPage() {
           </div>
 
           {/* Trust signals */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-16 text-center">
-            {[
-              { icon: '🔒', label: 'Secure checkout', desc: 'Powered by Stripe' },
-              { icon: '⚡', label: 'Instant access', desc: 'Start right away' },
-              { icon: '↩️', label: '7-day refund', desc: 'No questions asked' },
-              { icon: '♾️', label: 'Lifetime access', desc: 'All updates included' },
-            ].map((item) => (
-              <div key={item.label} className="bg-white border border-[var(--linen-deep)] p-4" style={{ borderRadius: '8px' }}>
-                <div className="text-2xl mb-2">{item.icon}</div>
-                <div className="text-xs font-semibold text-[var(--espresso)] mb-0.5">{item.label}</div>
-                <div className="text-xs text-[var(--charcoal-light)]">{item.desc}</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
+            {TRUST_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="bg-white border border-[var(--linen-deep)] p-5 rounded-2xl text-center"
+                >
+                  <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-[var(--linen-light)] flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-[var(--espresso)]" />
+                  </div>
+                  <div className="text-sm font-semibold text-[var(--espresso)] mb-1">
+                    {item.title}
+                  </div>
+                  <div className="text-xs text-[var(--charcoal-light)]">
+                    {item.desc}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Adult bundle */}
+          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] rounded-2xl p-7 md:p-8 mb-12">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+              <div className="max-w-2xl">
+                <span className="inline-flex text-xs bg-[var(--charcoal-light)]/10 text-[var(--charcoal)] px-3 py-1 rounded-full font-medium mb-3">
+                  Coming soon
+                </span>
+
+                <h2 className="text-2xl font-display text-[var(--espresso)] mb-2">
+                  Adult Nursing Bundle
+                </h2>
+
+                <p className="text-sm text-[var(--charcoal)] leading-relaxed">
+                  Adult nursing content is in development, including topics like
+                  NEWS2, sepsis, wound care, adult OSCE stations, and more.
+                </p>
               </div>
-            ))}
+
+              <div className="md:text-right">
+                <div className="text-3xl font-display text-[var(--espresso)]">
+                  £9.99
+                </div>
+                <p className="text-xs text-[var(--charcoal-light)]">planned one-time price</p>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              {adultSubmitted ? (
+                <p className="text-sm text-[var(--espresso)] font-medium">
+                  Got it — we&apos;ll email you when it&apos;s ready.
+                </p>
+              ) : (
+                <form onSubmit={handleAdultWaitlist} className="flex flex-col sm:flex-row gap-2 max-w-md">
+                  <div className="relative flex-1">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--charcoal-light)]" />
+                    <input
+                      type="email"
+                      placeholder="your@email.com"
+                      value={adultEmail}
+                      onChange={(e) => setAdultEmail(e.target.value)}
+                      required
+                      className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--espresso)]/20 text-sm rounded-xl"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn-secondary py-2.5 px-5 text-sm flex-shrink-0"
+                  >
+                    Notify me
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
 
           {/* FAQ */}
-          <div className="bg-[var(--linen-light)] border border-[var(--linen-deep)] p-7 md:p-8 mb-12" style={{ borderRadius: '8px' }}>
-            <h2 className="text-xl font-display text-[var(--espresso)] mb-6">Questions</h2>
+          <div className="bg-white border border-[var(--linen-deep)] rounded-2xl p-7 md:p-8 mb-12">
+            <h2 className="text-xl md:text-2xl font-display text-[var(--espresso)] mb-6">
+              Questions
+            </h2>
+
             <div className="space-y-5">
-              {[
-                {
-                  q: 'Is this a subscription?',
-                  a: 'Nope. One payment, yours forever. No recurring charges.',
-                },
-                {
-                  q: 'Do I need an account?',
-                  a: "Not to buy — you can checkout as a guest with just your email. Create an account later to sync progress across devices.",
-                },
-                {
-                  q: "What if it's not for me?",
-                  a: "Full refund within 7 days, no questions asked. Just email and we'll sort it.",
-                },
-                {
-                  q: 'Will more content be added?',
-                  a: 'Yes — new resources are added regularly. All future updates are included with your purchase.',
-                },
-                {
-                  q: 'Does it work on my phone?',
-                  a: 'Yes, everything is mobile-friendly. Designed to work on placement, on the bus, wherever.',
-                },
-                {
-                  q: "What's the difference between the bundles?",
-                  a: "The Children's Bundle has everything available now — OSCE tool, quiz, and the full hub. The Adult Nursing Bundle is in development. The Complete Bundle (coming soon) will include both branches.",
-                },
-              ].map((faq, i) => (
-                <div key={i} className="border-b border-[var(--linen-deep)] last:border-0 pb-5 last:pb-0">
-                  <h4 className="font-medium text-[var(--espresso)] mb-1.5">{faq.q}</h4>
-                  <p className="text-sm text-[var(--charcoal)] leading-relaxed">{faq.a}</p>
+              {FAQS.map((faq) => (
+                <div
+                  key={faq.q}
+                  className="border-b border-[var(--linen-deep)] last:border-0 pb-5 last:pb-0"
+                >
+                  <h3 className="font-medium text-[var(--espresso)] mb-1.5">
+                    {faq.q}
+                  </h3>
+                  <p className="text-sm text-[var(--charcoal)] leading-relaxed">
+                    {faq.a}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Try free */}
           {!isPro && (
             <div className="text-center">
-              <p className="text-sm text-[var(--charcoal-light)] mb-4">Want to try before you buy?</p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/osce" className="btn-secondary text-sm px-6">
-                  🩺 Try OSCE preview
-                </Link>
-                <Link href="/quiz" className="btn-secondary text-sm px-6">
-                  📚 Try quiz preview
-                </Link>
-              </div>
+              <h2 className="text-2xl md:text-3xl font-display text-[var(--espresso)] mb-3">
+                Ready to get started?
+              </h2>
+              <p className="text-[var(--charcoal)] mb-5">
+                Get instant access to your OSCE practice, nursing quiz, and revision
+                support.
+              </p>
+              <button
+                onClick={() => handlePurchase('bundle')}
+                disabled={loading !== null}
+                className="btn-primary px-8 py-3.5"
+              >
+                {loading === 'bundle' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>Get Children&apos;s Bundle — £9.99</>
+                )}
+              </button>
             </div>
           )}
         </div>
