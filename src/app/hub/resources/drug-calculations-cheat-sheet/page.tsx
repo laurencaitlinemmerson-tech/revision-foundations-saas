@@ -166,27 +166,127 @@ export default function DrugCalculationsCheatSheetPage() {
             </div>
           </div>
 
-          {/* Unit conversions */}
-          <h2 className="ed-section-title">Unit Conversion Quick Reference</h2>
-          <div className="ed-grid-2" style={{ marginBottom: '32px' }}>
-            <div className="ed-cell">
-              <p className="ed-cell-title">Weight</p>
-              <ul className="ed-list">
-                <li>1 kg = 1,000 g</li>
-                <li>1 g = 1,000 mg</li>
-                <li>1 mg = 1,000 mcg</li>
-                <li>1 mcg = 1,000 ng</li>
-                <li>500 mcg = 0.5 mg</li>
-              </ul>
+          {/* Unit conversions — stair diagram */}
+          <h2 className="ed-section-title">Unit Conversion Staircase</h2>
+          <p style={{ fontSize: '13px', color: '#5A5750', fontWeight: 300, lineHeight: 1.7, marginBottom: '20px' }}>
+            Moving <strong style={{ fontWeight: 600 }}>down</strong> the staircase (to a smaller unit) — multiply by 1,000. Moving <strong style={{ fontWeight: 600 }}>up</strong> the staircase (to a larger unit) — divide by 1,000.
+          </p>
+
+          {/* Stair diagram */}
+          <div style={{ marginBottom: '32px', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', paddingBottom: '8px' }}>
+              {[
+                { unit: 'kg', label: 'kilogram', offset: 0 },
+                { unit: 'g', label: 'gram', offset: 1 },
+                { unit: 'mg', label: 'milligram', offset: 2 },
+                { unit: 'mcg', label: 'microgram', offset: 3 },
+                { unit: 'ng', label: 'nanogram', offset: 4 },
+              ].map((step, i) => (
+                <div key={step.unit} style={{ display: 'flex', alignItems: 'stretch' }}>
+                  {/* Indentation spacer */}
+                  <div style={{ width: `${step.offset * 56}px`, flexShrink: 0 }} />
+
+                  {/* The stair step */}
+                  <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    background: i === 2 ? '#FAEEDA' : i % 2 === 0 ? '#F5F3F0' : '#FAFAF8',
+                    borderTop: '0.5px solid rgba(0,0,0,0.12)',
+                    borderLeft: '0.5px solid rgba(0,0,0,0.12)',
+                    borderRight: '0.5px solid rgba(0,0,0,0.12)',
+                    borderBottom: i === 4 ? '0.5px solid rgba(0,0,0,0.12)' : 'none',
+                    padding: '14px 20px',
+                  }}>
+                    <span style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: '28px',
+                      fontStyle: 'italic',
+                      fontWeight: 400,
+                      color: i === 2 ? '#633806' : '#1A1815',
+                      minWidth: '52px',
+                    }}>{step.unit}</span>
+                    <span style={{
+                      fontFamily: "'Source Serif 4', serif",
+                      fontSize: '12px',
+                      color: i === 2 ? '#633806' : '#999',
+                      fontWeight: 300,
+                      letterSpacing: '0.06em',
+                    }}>{step.label}</span>
+                    {i < 4 && (
+                      <span style={{
+                        marginLeft: 'auto',
+                        fontFamily: "'Source Serif 4', serif",
+                        fontSize: '11px',
+                        color: '#5A5750',
+                        fontWeight: 300,
+                      }}>
+                        &darr; &times; 1,000 &nbsp;&nbsp; &uarr; &divide; 1,000
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="ed-cell">
-              <p className="ed-cell-title">Volume</p>
-              <ul className="ed-list">
-                <li>1 L = 1,000 ml</li>
-                <li>1 ml = 1,000 microlitres (μL)</li>
-                <li>5 ml ≈ 1 teaspoon</li>
-              </ul>
+
+            {/* Volume staircase */}
+            <div style={{ marginTop: '24px', position: 'relative' }}>
+              <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: '#aaa', marginBottom: '8px', fontFamily: "'Source Serif 4', serif" }}>Volume</p>
+              {[
+                { unit: 'L', label: 'litre', offset: 0 },
+                { unit: 'ml', label: 'millilitre', offset: 1 },
+                { unit: 'μL', label: 'microlitre', offset: 2 },
+              ].map((step, i) => (
+                <div key={step.unit} style={{ display: 'flex', alignItems: 'stretch' }}>
+                  <div style={{ width: `${step.offset * 56}px`, flexShrink: 0 }} />
+                  <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    background: i % 2 === 0 ? '#F5F3F0' : '#FAFAF8',
+                    borderTop: '0.5px solid rgba(0,0,0,0.12)',
+                    borderLeft: '0.5px solid rgba(0,0,0,0.12)',
+                    borderRight: '0.5px solid rgba(0,0,0,0.12)',
+                    borderBottom: i === 2 ? '0.5px solid rgba(0,0,0,0.12)' : 'none',
+                    padding: '14px 20px',
+                  }}>
+                    <span style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: '28px',
+                      fontStyle: 'italic',
+                      fontWeight: 400,
+                      color: '#1A1815',
+                      minWidth: '52px',
+                    }}>{step.unit}</span>
+                    <span style={{
+                      fontFamily: "'Source Serif 4', serif",
+                      fontSize: '12px',
+                      color: '#999',
+                      fontWeight: 300,
+                      letterSpacing: '0.06em',
+                    }}>{step.label}</span>
+                    {i < 2 && (
+                      <span style={{
+                        marginLeft: 'auto',
+                        fontFamily: "'Source Serif 4', serif",
+                        fontSize: '11px',
+                        color: '#5A5750',
+                        fontWeight: 300,
+                      }}>
+                        &darr; &times; 1,000 &nbsp;&nbsp; &uarr; &divide; 1,000
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+
+          <div className="ed-pearl" style={{ marginBottom: '32px' }}>
+            <p className="ed-pearl-label">How to use the staircase</p>
+            <p>Convert 0.25mg to mcg: moving one step <em>down</em> from mg to mcg, so multiply by 1,000. Answer: 250 mcg.<br />Convert 500ml to L: moving one step <em>up</em> from ml to L, so divide by 1,000. Answer: 0.5 L.</p>
           </div>
 
           {/* Safety reminders */}
