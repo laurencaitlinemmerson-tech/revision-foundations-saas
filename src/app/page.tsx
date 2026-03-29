@@ -65,44 +65,26 @@ export default function HomePage() {
       {/* ── Hero ── */}
       <section style={{ paddingTop: '120px', paddingBottom: '80px', borderBottom: `1px solid ${border}` }}>
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 24px' }}>
-
-          {/* Kicker with amber dot */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '22px' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: amber, flexShrink: 0 }} />
             <p style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: inkLight, fontWeight: 400, margin: 0 }}>
               OSCE prep · Theory revision · Placement survival
             </p>
           </div>
-
           <h1 style={{ fontFamily: display, fontSize: 'clamp(2.4rem, 6vw, 3.8rem)', fontWeight: 400, lineHeight: 1.08, color: ink, marginBottom: '24px', letterSpacing: '-0.01em' }}>
             Pass your nursing<br /><em>assessments.</em>
           </h1>
-
           <p style={{ fontFamily: serif, fontSize: '17px', color: inkMid, fontWeight: 300, lineHeight: 1.8, maxWidth: '480px', marginBottom: '40px' }}>
             Revision tools built by a nursing student, for nursing students. OSCE practice, theory quizzes, cheat sheets — no generic content.
           </p>
-
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' as const, alignItems: 'center', marginBottom: '18px' }}>
-            <Link href="/pricing" style={{
-              fontFamily: serif, fontSize: '14px', fontWeight: 400,
-              background: ink, color: cream,
-              padding: '12px 28px', borderRadius: '9999px',
-              textDecoration: 'none', letterSpacing: '0.01em',
-              transition: 'background 0.2s',
-            }}>
+            <Link href="/pricing" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: ink, color: cream, padding: '12px 28px', borderRadius: '9999px', textDecoration: 'none' }}>
               Get access — £9.99
             </Link>
-            <Link href="/quiz" style={{
-              fontFamily: serif, fontSize: '14px', fontWeight: 400,
-              background: 'transparent', color: ink,
-              padding: '11px 26px', borderRadius: '9999px',
-              border: `1px solid ${border}`,
-              textDecoration: 'none', transition: 'background 0.2s',
-            }}>
+            <Link href="/quiz" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: 'transparent', color: ink, padding: '11px 26px', borderRadius: '9999px', border: `1px solid ${border}`, textDecoration: 'none' }}>
               Try free preview →
             </Link>
           </div>
-
           <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' as const }}>
             {['One-time payment', 'Lifetime access', '7-day refund'].map((t, i) => (
               <span key={t} style={{ fontFamily: serif, fontSize: '12px', color: inkLight, fontWeight: 300, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -119,10 +101,7 @@ export default function HomePage() {
         <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', gap: '32px', flexWrap: 'wrap' as const }}>
           {trustItems.map(item => (
             <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '18px', height: '18px', borderRadius: '50%',
-                background: amberBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              }}>
+              <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: amberBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
                   <path d="M1.5 4.5L3.5 6.5L7.5 2.5" stroke={amber} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -143,18 +122,8 @@ export default function HomePage() {
             Which branch are you studying?
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-
-            <Link href="/hub/childrens" style={{
-              display: 'block', background: white,
-              border: `1px solid ${border}`, borderRadius: '16px',
-              padding: '28px', textDecoration: 'none',
-            }}>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '5px',
-                background: amberBg, color: amberText,
-                fontSize: '11px', fontFamily: serif, fontWeight: 500,
-                padding: '4px 10px', borderRadius: '9999px', marginBottom: '14px',
-              }}>
+            <Link href="/hub/childrens" style={{ display: 'block', background: white, border: `1px solid ${border}`, borderRadius: '16px', padding: '28px', textDecoration: 'none' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: amberBg, color: amberText, fontSize: '11px', fontFamily: serif, fontWeight: 500, padding: '4px 10px', borderRadius: '9999px', marginBottom: '14px' }}>
                 <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: amber }} />
                 Available now
               </div>
@@ -162,20 +131,10 @@ export default function HomePage() {
               <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, lineHeight: 1.75, fontWeight: 300, marginBottom: '20px' }}>
                 Paed obs, PEWS, paediatric OSCEs, family-centred care, developmental milestones, and more.
               </p>
-              <span style={{ fontFamily: serif, fontSize: '13px', color: amber, fontWeight: 400 }}>Browse resources →</span>
+              <span style={{ fontFamily: serif, fontSize: '13px', color: amber }}>Browse resources →</span>
             </Link>
-
-            <div style={{
-              background: parchment, border: `1px solid ${border}`,
-              borderRadius: '16px', padding: '28px', opacity: 0.75,
-            }}>
-              <div style={{
-                display: 'inline-block',
-                background: 'transparent', color: inkLight,
-                fontSize: '11px', fontFamily: serif,
-                padding: '4px 10px', borderRadius: '9999px',
-                border: `1px solid ${border}`, marginBottom: '14px',
-              }}>
+            <div style={{ background: parchment, border: `1px solid ${border}`, borderRadius: '16px', padding: '28px', opacity: 0.75 }}>
+              <div style={{ display: 'inline-block', background: 'transparent', color: inkLight, fontSize: '11px', fontFamily: serif, padding: '4px 10px', borderRadius: '9999px', border: `1px solid ${border}`, marginBottom: '14px' }}>
                 Coming soon
               </div>
               <h3 style={{ fontFamily: display, fontSize: '20px', fontWeight: 400, color: inkMid, marginBottom: '10px' }}>Adult Nursing</h3>
@@ -197,26 +156,13 @@ export default function HomePage() {
           <h2 style={{ fontFamily: display, fontSize: '28px', fontWeight: 400, color: ink, marginBottom: '32px' }}>
             Three tools, one payment.
           </h2>
-
-          {/* Numbered stacked tool list */}
           <div style={{ border: `1px solid ${border}`, borderRadius: '16px', overflow: 'hidden' }}>
             {tools.map((tool, i) => (
-              <Link
-                key={tool.href}
-                href={tool.href}
-                style={{
-                  display: 'flex', gap: '16px', alignItems: 'flex-start',
-                  padding: '24px', background: white, textDecoration: 'none',
-                  borderBottom: i < tools.length - 1 ? `1px solid ${border}` : 'none',
-                  transition: 'background 0.15s',
-                }}
+              <Link key={tool.href} href={tool.href} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', padding: '24px', background: white, textDecoration: 'none', borderBottom: i < tools.length - 1 ? `1px solid ${border}` : 'none', transition: 'background 0.15s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = cream; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = white; }}
               >
-                <span style={{
-                  fontFamily: display, fontSize: '22px', color: border,
-                  lineHeight: 1, paddingTop: '2px', flexShrink: 0, width: '32px',
-                }}>
+                <span style={{ fontFamily: display, fontSize: '22px', color: border, lineHeight: 1, paddingTop: '2px', flexShrink: 0, width: '32px' }}>
                   {tool.num}
                 </span>
                 <div style={{ flex: 1 }}>
@@ -224,11 +170,7 @@ export default function HomePage() {
                   <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, lineHeight: 1.75, fontWeight: 300, marginBottom: '12px' }}>{tool.desc}</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
                     {tool.tags.map(tag => (
-                      <span key={tag} style={{
-                        fontFamily: serif, fontSize: '11px',
-                        background: amberBg, color: amberText,
-                        padding: '3px 9px', borderRadius: '9999px', fontWeight: 400,
-                      }}>{tag}</span>
+                      <span key={tag} style={{ fontFamily: serif, fontSize: '11px', background: amberBg, color: amberText, padding: '3px 9px', borderRadius: '9999px', fontWeight: 400 }}>{tag}</span>
                     ))}
                   </div>
                 </div>
@@ -237,10 +179,7 @@ export default function HomePage() {
           </div>
 
           {/* Pricing block */}
-          <div style={{
-            background: ink, borderRadius: '20px',
-            padding: '36px', marginTop: '24px',
-          }}>
+          <div style={{ background: ink, borderRadius: '20px', padding: '36px', marginTop: '24px' }}>
             <p style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: '#7A6A5A', marginBottom: '6px' }}>
               Children&apos;s Bundle
             </p>
@@ -258,13 +197,7 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <Link href="/pricing" style={{
-              display: 'block', textAlign: 'center' as const,
-              background: amber, color: white,
-              fontFamily: serif, fontSize: '14px', fontWeight: 400,
-              padding: '14px', borderRadius: '9999px',
-              textDecoration: 'none', letterSpacing: '0.01em',
-            }}>
+            <Link href="/pricing" style={{ display: 'block', textAlign: 'center' as const, background: amber, color: white, fontFamily: serif, fontSize: '14px', fontWeight: 400, padding: '14px', borderRadius: '9999px', textDecoration: 'none' }}>
               Get Children&apos;s Bundle — £9.99
             </Link>
             <p style={{ fontFamily: serif, fontSize: '12px', color: '#5C4A38', textAlign: 'center' as const, marginTop: '12px', fontWeight: 300 }}>
@@ -308,20 +241,10 @@ export default function HomePage() {
             One-time access. Works on mobile. Built for nursing students.
           </p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' as const, marginBottom: '24px' }}>
-            <Link href="/pricing" style={{
-              fontFamily: serif, fontSize: '14px', fontWeight: 400,
-              background: ink, color: cream,
-              padding: '12px 28px', borderRadius: '9999px',
-              textDecoration: 'none',
-            }}>
+            <Link href="/pricing" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: ink, color: cream, padding: '12px 28px', borderRadius: '9999px', textDecoration: 'none' }}>
               Get Access — £9.99
             </Link>
-            <Link href="/quiz" style={{
-              fontFamily: serif, fontSize: '14px', fontWeight: 400,
-              background: 'transparent', color: ink,
-              padding: '11px 26px', borderRadius: '9999px',
-              border: `1px solid ${border}`, textDecoration: 'none',
-            }}>
+            <Link href="/quiz" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, background: 'transparent', color: ink, padding: '11px 26px', borderRadius: '9999px', border: `1px solid ${border}`, textDecoration: 'none' }}>
               Try for free →
             </Link>
           </div>
