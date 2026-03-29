@@ -201,22 +201,7 @@ export default function AboutPage() {
                   sizes="(max-width: 768px) 200px, 280px"
                   priority
                 />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: display,
-                    fontSize: '64px',
-                    color: softLine,
-                    zIndex: 0,
-                  }}
-                >
-                  L
-                </div>
-              </div>
+                
 
               <div className="about-facts-section">
                 <p style={{ ...smallCaps, marginBottom: '14px' }}>
