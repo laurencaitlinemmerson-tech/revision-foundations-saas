@@ -1,4 +1,8 @@
+import { useState } from "react";
+
 export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState("idle");
   return (
     <div className="min-h-screen bg-[#f4efe6] text-[#2b2118]">
       <header className="border-b border-[#d9cfbf]">
@@ -63,23 +67,40 @@ export default function ContactPage() {
               <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">Send a message</p>
               <form
                 className="mt-6 space-y-5"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
+                  setIsSubmitting(true);
+                  setStatus("idle");
+
                   const form = e.currentTarget;
                   const data = new FormData(form);
 
-                  const firstName = data.get('firstName') || '';
-                  const lastName = data.get('lastName') || '';
-                  const email = data.get('email') || '';
-                  const enquiryType = data.get('enquiryType') || 'General question';
-                  const message = data.get('message') || '';
+                  const payload = {
+                    firstName: data.get("firstName"),
+                    lastName: data.get("lastName"),
+                    email: data.get("email"),
+                    enquiryType: data.get("enquiryType"),
+                    message: data.get("message"),
+                  };
 
-                  const subject = encodeURIComponent(`New contact form enquiry: ${enquiryType}`);
-                  const body = encodeURIComponent(
-                    `Name: ${firstName} ${lastName}\nEmail: ${email}\nEnquiry: ${enquiryType}\n\nMessage:\n${message}`
-                  );
+                  try {
+                    const response = await fetch("/api/contact", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(payload),
+                    });
 
-                  window.location.href = `mailto:lauren@revisionfoundations.com?subject=${subject}&body=${body}`;
+                    if (!response.ok) throw new Error("Failed to send message");
+
+                    setStatus("success");
+                    form.reset();
+                  } catch (error) {
+                    setStatus("error");
+                  } finally {
+                    setIsSubmitting(false);
+                  }
                 }}
               >
                 <div className="grid gap-5 md:grid-cols-2">
@@ -133,16 +154,31 @@ export default function ContactPage() {
                   />
                 </label>
 
-                <div className="flex flex-col gap-4 border-t border-[#e2d8cb] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-4 border-t border-[#e2d8cb] pt-5">
+                  {status === "success" && (
+                    <p className="text-sm leading-6 text-[#5f5348]">
+                      Thank you. Your message has been sent successfully.
+                    </p>
+                  )}
+
+                  {status === "error" && (
+                    <p className="text-sm leading-6 text-[#8a4b3d]">
+                      Sorry, there was a problem sending your message. Please try again.
+                    </p>
+                  )}
+
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <p className="max-w-xs text-xs leading-5 text-[#7a6c60]">
                     Usually replies within 1–2 working days. For account issues, include the email you signed up with.
                   </p>
                   <button
                     type="submit"
-                    className="rounded-full bg-[#1f140d] px-6 py-3 text-sm text-[#f7efe4] transition hover:translate-y-[-1px]"
+                    disabled={isSubmitting}
+                    className="rounded-full bg-[#1f140d] px-6 py-3 text-sm text-[#f7efe4] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    Send message →
+                    {isSubmitting ? "Sending..." : "Send message →"}
                   </button>
+                  </div>
                 </div>
               </form>
             </div>
