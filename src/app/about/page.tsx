@@ -25,7 +25,7 @@ const sectionLabel: CSSProperties = {
   letterSpacing: '0.14em',
   textTransform: 'uppercase',
   color: inkLight,
-  marginBottom: '16px',
+  marginBottom: '14px',
 };
 
 const body: CSSProperties = {
@@ -36,17 +36,27 @@ const body: CSSProperties = {
   color: inkMid,
 };
 
+const smallCaps: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '11px',
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: inkLight,
+};
+
+const textLink: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '14px',
+  color: ink,
+  textDecoration: 'underline',
+  textUnderlineOffset: '3px',
+};
+
 const editorialCard: CSSProperties = {
   border: `1px solid ${border}`,
   borderRadius: '34px',
   background: parchment,
   overflow: 'hidden',
-};
-
-const softCard: CSSProperties = {
-  borderRadius: '30px',
-  background: paper,
-  boxShadow: '0 1px 0 rgba(28, 21, 16, 0.03)',
 };
 
 const chip: CSSProperties = {
@@ -62,21 +72,35 @@ const chip: CSSProperties = {
   background: blush,
 };
 
-const textLink: CSSProperties = {
-  fontFamily: serif,
-  fontSize: '14px',
-  color: ink,
-  textDecoration: 'underline',
-  textUnderlineOffset: '3px',
-};
+const introPoints = [
+  {
+    number: '01',
+    title: 'Thoughtful design',
+    text: 'Made to feel calm, clear, and easy to come back to when revision already feels heavy.',
+  },
+  {
+    number: '02',
+    title: 'Built from practice',
+    text: 'Shaped by placement learning, real nursing study, and the things I actually needed myself.',
+  },
+  {
+    number: '03',
+    title: 'Actually useful',
+    text: 'Created for OSCE prep, theory revision, placement support, and quick refreshers that save time.',
+  },
+  {
+    number: '04',
+    title: 'Still evolving',
+    text: 'Everything gets improved when it feels clunky, unclear, or not quite helpful enough.',
+  },
+];
 
-const smallCaps: CSSProperties = {
-  fontFamily: serif,
-  fontSize: '11px',
-  letterSpacing: '0.14em',
-  textTransform: 'uppercase',
-  color: inkLight,
-};
+const supportItems = [
+  'Resources that are clear before they are clever',
+  'Revision tools designed to feel calm, not chaotic',
+  'Useful support for both OSCE prep and theory',
+  'Content that gets updated when something needs improving',
+];
 
 const laurenFacts = [
   "Children's nursing student",
@@ -85,19 +109,12 @@ const laurenFacts = [
   'Purple everything',
 ];
 
-const supportItems = [
-  'OSCE preparation',
-  'Theory revision',
-  'Placement support',
-  'Quick refreshers',
-];
-
 export default function AboutPage() {
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      <section className="about-hero" style={{ padding: '132px 24px 80px' }}>
+      <section className="about-hero" style={{ padding: '132px 24px 60px' }}>
         <div
           style={{
             maxWidth: '920px',
@@ -125,7 +142,14 @@ export default function AboutPage() {
             style={{ position: 'relative', zIndex: 1 }}
           >
             <div>
-              <p style={sectionLabel}>About me</p>
+              <p
+                style={{
+                  ...smallCaps,
+                  marginBottom: '18px',
+                }}
+              >
+                Founder story · Revision Foundations
+              </p>
 
               <h1
                 className="about-headline"
@@ -146,13 +170,14 @@ export default function AboutPage() {
                 style={{
                   ...body,
                   fontSize: '18px',
-                  maxWidth: '580px',
+                  maxWidth: '590px',
                   marginBottom: '0',
                 }}
               >
                 I&apos;m a children&apos;s nursing student and the person behind
-                Revision Foundations. I made it because I wanted revision tools
-                that felt thoughtful, calm, and actually lovely to use.
+                Revision Foundations. I started making these resources because I
+                wanted revision tools that felt thoughtful, calm, and genuinely
+                lovely to use.
               </p>
             </div>
 
@@ -217,6 +242,47 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <section style={{ padding: '0 24px 72px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div className="intro-points-grid">
+            {introPoints.map((item) => (
+              <div
+                key={item.number}
+                style={{
+                  padding: '20px 0 0',
+                  borderTop: `1px solid ${softLine}`,
+                }}
+              >
+                <p style={{ ...smallCaps, marginBottom: '10px' }}>{item.number}</p>
+
+                <p
+                  style={{
+                    fontFamily: display,
+                    fontSize: '1.35rem',
+                    lineHeight: 1.15,
+                    color: ink,
+                    marginBottom: '8px',
+                  }}
+                >
+                  {item.title}
+                </p>
+
+                <p
+                  style={{
+                    ...body,
+                    fontSize: '15px',
+                    lineHeight: 1.85,
+                    maxWidth: '270px',
+                  }}
+                >
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section style={{ padding: '0 24px 68px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div className="founder-card" style={editorialCard}>
@@ -252,9 +318,9 @@ export default function AboutPage() {
                 <p style={sectionLabel}>How this started</p>
 
                 <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
-                  Before nursing, I worked as a medical photographer in
-                  hospitals. I loved being in clinical environments, but it
-                  never quite felt like the right fit for me.
+                  Before nursing, I worked as a medical photographer in hospitals.
+                  I loved being in clinical environments, but it never quite felt
+                  like the right fit for me.
                 </p>
 
                 <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
@@ -263,11 +329,42 @@ export default function AboutPage() {
                   From my first placement, I knew it was where I wanted to be.
                 </p>
 
-                <p style={{ ...body, marginBottom: '28px', maxWidth: '620px' }}>
-                  What I struggled with was revision. Most resources felt either
-                  overwhelming, badly designed, or just not that useful when you
-                  were already tired and trying to take everything in. So I
-                  started making my own.
+                <div className="founder-aside-grid">
+                  <div
+                    style={{
+                      padding: '16px 18px',
+                      borderRadius: '22px',
+                      background: 'rgba(249, 246, 240, 0.7)',
+                      border: `1px solid ${softLine}`,
+                    }}
+                  >
+                    <p style={{ ...smallCaps, marginBottom: '8px' }}>Why I made it</p>
+                    <p style={{ ...body, fontSize: '14px', lineHeight: 1.9 }}>
+                      Most revision resources felt overwhelming, badly designed,
+                      or just not very kind to use when you were already tired.
+                    </p>
+                  </div>
+
+                  <div
+                    style={{
+                      padding: '16px 18px',
+                      borderRadius: '22px',
+                      background: 'rgba(249, 246, 240, 0.7)',
+                      border: `1px solid ${softLine}`,
+                    }}
+                  >
+                    <p style={{ ...smallCaps, marginBottom: '8px' }}>What mattered</p>
+                    <p style={{ ...body, fontSize: '14px', lineHeight: 1.9 }}>
+                      I wanted resources that felt clear, calm, practical, and
+                      genuinely helpful in real revision moments.
+                    </p>
+                  </div>
+                </div>
+
+                <p style={{ ...body, margin: '26px 0 28px', maxWidth: '620px' }}>
+                  So I started making my own. At first they were just for me.
+                  Then people on my course started asking for them too, and
+                  that&apos;s when Revision Foundations slowly became a real thing.
                 </p>
 
                 <div
@@ -280,12 +377,6 @@ export default function AboutPage() {
                   }}
                 />
 
-                <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
-                  At first they were just for me. Then people on my course
-                  started asking for them too, and that&apos;s when Revision
-                  Foundations slowly became a real thing.
-                </p>
-
                 <p style={{ ...body, maxWidth: '620px' }}>
                   I still make everything in the same way — based on what
                   actually feels helpful when you&apos;re revising, not what
@@ -297,12 +388,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section style={{ padding: '0 24px 82px' }}>
+      <section style={{ padding: '0 24px 84px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div className="what-grid">
             <div
               style={{
-                padding: '26px 10px 18px 0',
+                padding: '24px 10px 18px 0',
                 alignSelf: 'center',
               }}
             >
@@ -330,14 +421,14 @@ export default function AboutPage() {
 
             <div
               style={{
-                ...softCard,
-                background: 'rgba(243, 238, 228, 0.75)',
+                borderRadius: '30px',
+                background: 'rgba(243, 238, 228, 0.82)',
                 border: `1px solid ${softLine}`,
-                marginTop: '20px',
+                marginTop: '18px',
               }}
             >
               <div style={{ padding: '30px 28px 32px' }}>
-                <p style={sectionLabel}>What it helps with</p>
+                <p style={sectionLabel}>What you can expect</p>
 
                 <div style={{ display: 'grid', gap: '0' }}>
                   {supportItems.map((item, index) => (
@@ -345,21 +436,28 @@ export default function AboutPage() {
                       key={item}
                       style={{
                         display: 'flex',
-                        alignItems: 'center',
+                        alignItems: 'flex-start',
                         gap: '14px',
                         padding: '14px 0',
                         borderTop: index === 0 ? 'none' : `1px solid ${softLine}`,
                         color: inkMid,
                       }}
                     >
-                      <span style={{ ...smallCaps, minWidth: '26px' }}>
+                      <span
+                        style={{
+                          ...smallCaps,
+                          minWidth: '26px',
+                          paddingTop: '4px',
+                        }}
+                      >
                         0{index + 1}
                       </span>
+
                       <span
                         style={{
                           fontFamily: serif,
                           fontSize: '15px',
-                          lineHeight: 1.5,
+                          lineHeight: 1.8,
                         }}
                       >
                         {item}
@@ -383,44 +481,105 @@ export default function AboutPage() {
           >
             <p style={sectionLabel}>A small note</p>
 
-            <p
-              style={{
-                fontFamily: display,
-                fontSize: 'clamp(2rem, 4vw, 2.6rem)',
-                lineHeight: 1.1,
-                color: ink,
-                marginBottom: '16px',
-                maxWidth: '560px',
-              }}
-            >
-              I still use these resources myself.
-            </p>
+            <div className="closing-grid">
+              <div>
+                <p
+                  style={{
+                    fontFamily: display,
+                    fontSize: 'clamp(2rem, 4vw, 2.6rem)',
+                    lineHeight: 1.1,
+                    color: ink,
+                    marginBottom: '16px',
+                    maxWidth: '560px',
+                  }}
+                >
+                  I still use these resources myself.
+                </p>
 
-            <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
-              Which means I notice pretty quickly when something feels unclear,
-              clunky, or like it needs improving.
-            </p>
+                <p style={{ ...body, marginBottom: '18px', maxWidth: '620px' }}>
+                  Which means I notice pretty quickly when something feels
+                  unclear, clunky, or like it needs improving.
+                </p>
 
-            <p style={{ ...body, marginBottom: '24px', maxWidth: '620px' }}>
-              If you ever have a question, spot something that doesn&apos;t make
-              sense, or just want to say hi, I really do read every message.
-            </p>
+                <p style={{ ...body, marginBottom: '24px', maxWidth: '620px' }}>
+                  If you ever have a question, spot something that doesn&apos;t
+                  make sense, or just want to say hi, I really do read every
+                  message.
+                </p>
 
-            <div
-              style={{
-                display: 'flex',
-                gap: '20px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              <Link href="/contact" style={textLink}>
-                Contact me →
-              </Link>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '20px',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Link href="/contact" style={textLink}>
+                    Contact me →
+                  </Link>
 
-              <Link href="/hub" style={textLink}>
-                Browse the hub →
-              </Link>
+                  <Link href="/hub" style={textLink}>
+                    Browse the hub →
+                  </Link>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  paddingTop: '8px',
+                }}
+              >
+                <p style={{ ...smallCaps, marginBottom: '14px' }}>
+                  What matters here
+                </p>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: '12px',
+                  }}
+                >
+                  {[
+                    'Keep things clear',
+                    'Make them easy to return to',
+                    'Improve what feels off',
+                    'Stay useful in real revision',
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        paddingBottom: '12px',
+                        borderBottom: `1px solid ${softLine}`,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: display,
+                          fontSize: '18px',
+                          color: '#BBAA96',
+                          lineHeight: 1,
+                        }}
+                      >
+                        ✓
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: serif,
+                          fontSize: '15px',
+                          color: inkMid,
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -450,23 +609,43 @@ export default function AboutPage() {
           border-left: 1px solid rgba(217, 208, 193, 0.7);
         }
 
+        .intro-points-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 18px 28px;
+        }
+
         .founder-card-inner {
           display: grid;
           grid-template-columns: 150px minmax(0, 1fr);
           gap: 0;
         }
 
+        .founder-aside-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+          margin-top: 26px;
+        }
+
         .what-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+          grid-template-columns: minmax(0, 1fr) minmax(250px, 330px);
           gap: 28px;
+          align-items: start;
+        }
+
+        .closing-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+          gap: 40px;
           align-items: start;
         }
 
         @media (max-width: 768px) {
           .about-hero {
             padding-top: 108px !important;
-            padding-bottom: 56px !important;
+            padding-bottom: 52px !important;
           }
 
           .about-hero-grid {
@@ -498,6 +677,11 @@ export default function AboutPage() {
             font-size: clamp(2.4rem, 9vw, 3.6rem) !important;
           }
 
+          .intro-points-grid {
+            grid-template-columns: 1fr;
+            gap: 18px;
+          }
+
           .founder-card-inner {
             grid-template-columns: 1fr;
           }
@@ -520,7 +704,12 @@ export default function AboutPage() {
             padding: 28px !important;
           }
 
-          .what-grid {
+          .founder-aside-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .what-grid,
+          .closing-grid {
             grid-template-columns: 1fr;
             gap: 18px;
           }
