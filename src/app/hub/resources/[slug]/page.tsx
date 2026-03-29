@@ -1,10 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import ResourceDiscussion from '@/components/ResourceDiscussion';
 import { getUserEntitlements } from '@/lib/entitlements';
-import { ArrowLeft, CheckCircle2, AlertTriangle, Lightbulb, FileText, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 // Resource content database
 const resources: Record<string, {
@@ -1462,129 +1460,216 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
     }
   }
 
-  // Color and icon for A-E sections
-  const getSectionIcon = (type?: string, title?: string) => {
-    if (title?.startsWith('A -')) return <CheckCircle2 className="w-6 h-6 text-red-500" />;
-    if (title?.startsWith('B -')) return <CheckCircle2 className="w-6 h-6 text-blue-500" />;
-    if (title?.startsWith('C -')) return <CheckCircle2 className="w-6 h-6 text-yellow-500" />;
-    if (title?.startsWith('D -')) return <CheckCircle2 className="w-6 h-6 text-purple-500" />;
-    if (title?.startsWith('E -')) return <CheckCircle2 className="w-6 h-6 text-green-600" />;
+  /* ── Callout style based on section type ── */
+  const getCalloutStyle = (type?: string) => {
     switch (type) {
-      case 'checklist': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-      case 'warning': return <AlertTriangle className="w-5 h-5 text-amber-500" />;
-      case 'tip': return <Lightbulb className="w-5 h-5 text-[var(--purple)]" />;
-      default: return <FileText className="w-5 h-5 text-[var(--plum-dark)]/50" />;
+      case 'warning': return {
+        bg: '#FFF8F6',
+        border: '#C2705A',
+        color: '#7A4A3D',
+      };
+      case 'tip': return {
+        bg: '#F4F8FB',
+        border: '#7BA3C4',
+        color: '#3D5A73',
+      };
+      default: return null;
     }
   };
 
-  // Color backgrounds for A-E
-  const getSectionStyle = (type?: string, title?: string) => {
-    const hoverStyle = 'transition-all duration-200 hover:border-[var(--purple)] hover:shadow-md hover:-translate-y-0.5 cursor-default';
-    if (title?.startsWith('A -')) return `bg-red-50 border-red-200 ${hoverStyle}`;
-    if (title?.startsWith('B -')) return `bg-blue-50 border-blue-200 ${hoverStyle}`;
-    if (title?.startsWith('C -')) return `bg-yellow-50 border-yellow-200 ${hoverStyle}`;
-    if (title?.startsWith('D -')) return `bg-purple-50 border-purple-200 ${hoverStyle}`;
-    if (title?.startsWith('E -')) return `bg-green-50 border-green-200 ${hoverStyle}`;
-    switch (type) {
-      case 'checklist': return `bg-emerald-50/50 border-emerald-200 ${hoverStyle}`;
-      case 'warning': return `bg-amber-50/50 border-amber-200 ${hoverStyle}`;
-      case 'tip': return `bg-[var(--lilac-soft)] border-[var(--lavender)] ${hoverStyle}`;
-      default: return `bg-white border-[var(--lilac-medium)] ${hoverStyle}`;
+  const CSS = `
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300;1,8..60,400&display=swap');
+    .slug-page *, .slug-page *::before, .slug-page *::after { box-sizing: border-box; box-shadow: none !important; }
+    .slug-page {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 300;
+      background: #FAFAF8;
+      color: #2C2A27;
+      line-height: 1.6;
+      min-height: 100vh;
     }
-  };
+    .slug-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 48px 100px;
+    }
+    .slug-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #706A63;
+      text-decoration: none;
+      margin-bottom: 44px;
+    }
+    .slug-back:hover { color: #555; }
+    .slug-badge {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 400;
+      padding: 4px 10px;
+      border-radius: 2px;
+      margin-right: 12px;
+    }
+    .slug-badge-free { background: #EEF5EE; color: #3D6B3D; }
+    .slug-badge-premium { background: #F3F1EE; color: #706A63; }
+    .slug-headline {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 48px;
+      font-weight: 400;
+      line-height: 1.1;
+      color: #1A1815;
+      margin-bottom: 18px;
+      letter-spacing: -0.01em;
+    }
+    .slug-standfirst {
+      font-size: 17px;
+      font-weight: 300;
+      color: #5A5750;
+      line-height: 1.68;
+      max-width: 680px;
+      margin-bottom: 14px;
+    }
+    .slug-byline {
+      font-size: 10px;
+      color: #706A63;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding-bottom: 36px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.1);
+      margin-bottom: 48px;
+    }
+    .slug-section {
+      margin-bottom: 40px;
+    }
+    .slug-h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: #1A1815;
+      margin: 0 0 18px;
+      padding-top: 24px;
+      border-top: 0.5px solid rgba(0,0,0,0.1);
+    }
+    .slug-ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .slug-ul li {
+      font-size: 14px;
+      color: #3D3A36;
+      line-height: 1.65;
+      padding: 6px 0 6px 16px;
+      position: relative;
+      font-weight: 300;
+      border-bottom: 0.5px solid rgba(0,0,0,0.04);
+    }
+    .slug-ul li:last-child { border-bottom: none; }
+    .slug-ul li::before {
+      content: '–';
+      position: absolute;
+      left: 0;
+      color: #C4C0B9;
+    }
+    .slug-callout {
+      padding: 18px 22px;
+      margin: 20px 0 24px;
+      border-radius: 0 2px 2px 0;
+    }
+    .slug-callout p {
+      font-size: 13px;
+      line-height: 1.65;
+      margin: 0;
+      font-weight: 300;
+    }
+    .slug-footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #706A63;
+      text-decoration: none;
+      padding-top: 32px;
+      border-top: 0.5px solid rgba(0,0,0,0.1);
+      margin-top: 48px;
+    }
+    .slug-footer-link:hover { color: #555; }
+    @media (max-width: 768px) {
+      .slug-wrap { padding: 24px 20px 80px; }
+      .slug-headline { font-size: 32px; }
+    }
+  `;
 
   return (
-    <div className="min-h-screen bg-cream">
-      <Navbar />
+    <div className="slug-page">
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          {/* Back link */}
-          <Link
-            href="/hub"
-            className="inline-flex items-center gap-2 text-[var(--purple)] font-medium mb-6 hover:underline"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Hub
-          </Link>
+      <div className="slug-wrap">
+        {/* Back */}
+        <Link href="/hub" className="slug-back">
+          <span>←</span> Hub
+        </Link>
 
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-3">
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                resource.isLocked
-                  ? 'bg-[var(--purple)]/10 text-[var(--purple)]'
-                  : 'bg-emerald-50 text-emerald-700'
-              }`}>
-                {resource.isLocked ? 'PREMIUM' : 'FREE'}
-              </span>
-              <span className="flex items-center gap-1 text-sm text-[var(--plum-dark)]/60">
-                <Clock className="w-4 h-4" />
-                {resource.readTime}
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl mb-3">{resource.title}</h1>
-            <p className="text-lg text-[var(--plum-dark)]/70">{resource.description}</p>
-          </div>
+        {/* Header */}
+        <div style={{ marginBottom: '8px' }}>
+          <span className={`slug-badge ${resource.isLocked ? 'slug-badge-premium' : 'slug-badge-free'}`}>
+            {resource.isLocked ? 'Premium' : 'Free'}
+          </span>
+          <span style={{ fontSize: '12px', color: '#706A63' }}>
+            <Clock className="inline w-3 h-3" style={{ marginRight: '4px', verticalAlign: '-1px' }} />
+            {resource.readTime}
+          </span>
+        </div>
+        <h1 className="slug-headline">{resource.title}</h1>
+        <p className="slug-standfirst">{resource.description}</p>
+        <p className="slug-byline">Revision Foundations · Children&apos;s Hub</p>
 
-          {/* Content sections */}
-          <div className="space-y-8">
-            {resource.sections.map((section, index) => (
-              <div
-                key={index}
-                className={`rounded-2xl border p-6 shadow-sm ${getSectionStyle(section.type, section.title)}`}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  {getSectionIcon(section.type, section.title)}
-                  <h2 className="text-xl font-bold tracking-tight" style={{letterSpacing: '0.01em'}}>{section.title}</h2>
-                </div>
-                {/* Quick summary/tip for each section */}
-                {section.title.startsWith('A -') && (
-                  <div className="mb-4 p-3 rounded-lg bg-red-100/60 text-red-800 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Airway is always first—look, listen, feel. Call for help early if in doubt!</div>
-                )}
-                {section.title.startsWith('B -') && (
-                  <div className="mb-4 p-3 rounded-lg bg-blue-100/60 text-blue-800 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Breathing: rate, effort, and oxygenation. Watch for silent chest!</div>
-                )}
-                {section.title.startsWith('C -') && (
-                  <div className="mb-4 p-3 rounded-lg bg-yellow-100/60 text-yellow-900 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Circulation: pulse, BP, perfusion. Shock can be subtle—check cap refill!</div>
-                )}
-                {section.title.startsWith('D -') && (
-                  <div className="mb-4 p-3 rounded-lg bg-purple-100/60 text-purple-900 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Disability: AVPU/GCS, glucose, pupils. Think reversible causes!</div>
-                )}
-                {section.title.startsWith('E -') && (
-                  <div className="mb-4 p-3 rounded-lg bg-green-100/60 text-green-900 text-sm font-medium flex items-center gap-2"><Lightbulb className="w-4 h-4" />Exposure: look everywhere, keep warm, preserve dignity.</div>
-                )}
-                <ul className="space-y-2">
+        {/* Content sections */}
+        {resource.sections.map((section, index) => {
+          const callout = getCalloutStyle(section.type);
+
+          return (
+            <div key={index} className="slug-section">
+              <h2 className="slug-h2">{section.title}</h2>
+
+              {/* Tip / warning callout if applicable */}
+              {callout ? (
+                <div
+                  className="slug-callout"
+                  style={{
+                    background: callout.bg,
+                    borderLeft: `3px solid ${callout.border}`,
+                  }}
+                >
                   {section.content.map((item, i) => (
-                    <li key={i} className={`flex items-start gap-3 p-2 -mx-2 rounded-lg transition-colors ${item.toLowerCase().includes('red flag') ? 'bg-amber-100/60 text-amber-900 font-semibold' : 'hover:bg-[var(--purple)]/5'}`}>
-                      {section.type === 'checklist' ? (
-                        <CheckCircle2 className={`w-4 h-4 mt-1 flex-shrink-0 ${section.title.startsWith('A -') ? 'text-red-400' : section.title.startsWith('B -') ? 'text-blue-400' : section.title.startsWith('C -') ? 'text-yellow-400' : section.title.startsWith('D -') ? 'text-purple-400' : section.title.startsWith('E -') ? 'text-green-500' : 'text-emerald-500'}`} />
-                      ) : (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--purple)] mt-2 flex-shrink-0" />
-                      )}
-                      <span className="text-[var(--plum-dark)]/80">{item}</span>
-                    </li>
+                    <p key={i} style={{ color: callout.color, marginBottom: i < section.content.length - 1 ? '8px' : 0 }}>
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <ul className="slug-ul">
+                  {section.content.map((item, i) => (
+                    <li key={i}>{item}</li>
                   ))}
                 </ul>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          );
+        })}
 
-          {/* Discussion */}
-          <ResourceDiscussion slug={slug} />
-
-          {/* Footer CTA */}
-          <div className="mt-12 text-center">
-            <p className="text-[var(--plum-dark)]/60 mb-4">Found this helpful?</p>
-            <Link
-              href="/hub"
-              className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-6 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all"
-            >
-              Explore More Resources
-            </Link>
-          </div>
-        </div>
-      </main>
+        {/* Footer nav */}
+        <Link href="/hub" className="slug-footer-link">
+          <span>←</span> Back to Hub
+        </Link>
+      </div>
     </div>
   );
 }
