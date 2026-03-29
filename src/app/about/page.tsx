@@ -194,7 +194,7 @@ export default function AboutPage() {
                 }}
               >
                 <Image
-                  src="//DSC00374.jpg"
+                  src="/DSC00374.jpg"
                   alt="Lauren"
                   fill
                   style={{ objectFit: 'cover' }}
