@@ -173,7 +173,7 @@ export default function NGTubeInsertionPage() {
           {[
             'Attach a 20–60ml syringe to the end of the NG tube.',
             'Gently pull back to aspirate gastric contents. You need a small amount — even 0.5ml is enough.',
-            'If no aspirate is obtained: try repositioning the child (left lateral), advance or withdraw the tube by 1–2cm, wait 15–30 minutes and try again.',
+            'If no aspirate is obtained, don\u2019t panic — work through these: (1) Turn the patient onto their left side. The stomach sits to the left, so this helps pool gastric contents around the tube tip. (2) Sit the patient more upright if possible. (3) Advance or withdraw the tube by 1\u20132cm. (4) Wait 15\u201330 minutes and try again. (5) If you still can\u2019t get aspirate after all of the above, request an X-ray as a last resort to confirm placement.',
             'Apply the aspirate to CE-marked pH indicator paper (not litmus paper).',
             'Read the pH against the colour chart immediately.',
             'Gastric placement is confirmed if pH is ≤5.5.',
@@ -341,6 +341,13 @@ export default function NGTubeInsertionPage() {
           <p style={{ fontFamily: "'Source Serif 4', serif", fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: '#633806', marginBottom: '6px', fontWeight: 400 }}>Exam pearl</p>
           <p style={{ fontFamily: "'Source Serif 4', serif", fontSize: '12px', color: '#633806', lineHeight: 1.6, fontWeight: 300, margin: 0 }}>
             The most common questions: &ldquo;Why do we use a large syringe?&rdquo; (pressure physics — larger barrel = lower suction pressure), &ldquo;What pH confirms gastric placement?&rdquo; (&le;5.5), and &ldquo;Why don&apos;t we use the whoosh test?&rdquo; (NPSA safety alert — it cannot distinguish gastric from pulmonary placement). Examiners also look for correct NEX measurement technique, confirmation that you would not use the tube until placement is verified, and that you know to escalate when pH is &gt;5.5 or aspirate cannot be obtained.
+          </p>
+        </div>
+
+        <div className="ed-pearl" style={{ marginTop: '16px' }}>
+          <p style={{ fontFamily: "'Source Serif 4', serif", fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: '#633806', marginBottom: '6px', fontWeight: 400 }}>&ldquo;What if you can&apos;t get aspirate?&rdquo;</p>
+          <p style={{ fontFamily: "'Source Serif 4', serif", fontSize: '12px', color: '#633806', lineHeight: 1.6, fontWeight: 300, margin: 0 }}>
+            This comes up a lot in OSCEs. Know the order: <strong style={{ fontWeight: 600 }}>turn the patient onto their left side</strong> (the stomach sits to the left of the body, so gravity pools gastric contents around the tube tip), <strong style={{ fontWeight: 600 }}>sit them more upright</strong> if possible, <strong style={{ fontWeight: 600 }}>advance or withdraw the tube by 1–2cm</strong>, then <strong style={{ fontWeight: 600 }}>wait 15–30 minutes</strong> and try again. If none of that works, <strong style={{ fontWeight: 600 }}>request an X-ray</strong> as a last resort. Never use the tube until placement is confirmed. Never inject air to try and free the tube — that&apos;s no longer safe practice.
           </p>
         </div>
       </section>
