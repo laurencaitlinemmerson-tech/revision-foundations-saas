@@ -8,25 +8,23 @@ export async function checkEntitlement(
 ): Promise<boolean> {
   const supabase = createServiceClient();
 
-  // Check for bundle first (gives access to everything)
   const { data: bundleEntitlement } = await supabase
     .from('entitlements')
     .select('*')
-    .eq('clerk_user_id', clerkUserId)
-    .eq('product', 'bundle')
+    .eq('user_id', clerkUserId)
+    .eq('entitlement', 'bundle')
     .eq('status', 'active')
-    .single();
+    .maybeSingle();
 
   if (bundleEntitlement) return true;
 
-  // Check for specific product
   const { data: productEntitlement } = await supabase
     .from('entitlements')
     .select('*')
-    .eq('clerk_user_id', clerkUserId)
-    .eq('product', product)
+    .eq('user_id', clerkUserId)
+    .eq('entitlement', product)
     .eq('status', 'active')
-    .single();
+    .maybeSingle();
 
   return !!productEntitlement;
 }
@@ -39,7 +37,7 @@ export async function getUserEntitlements(
   const { data, error } = await supabase
     .from('entitlements')
     .select('*')
-    .eq('clerk_user_id', clerkUserId)
+    .eq('user_id', clerkUserId)
     .eq('status', 'active');
 
   if (error) {
@@ -61,16 +59,19 @@ export async function createOrUpdateEntitlement(
 
   const { error } = await supabase
     .from('entitlements')
-    .upsert({
-      clerk_user_id: clerkUserId,
-      product,
-      status: 'active',
-      stripe_customer_id: stripeCustomerId,
-      stripe_subscription_id: stripeSubscriptionId,
-      expires_at: expiresAt,
-    }, {
-      onConflict: 'clerk_user_id,product'
-    });
+    .upsert(
+      {
+        user_id: clerkUserId,
+        entitlement: product,
+        status: 'active',
+        stripe_customer_id: stripeCustomerId,
+        stripe_subscription_id: stripeSubscriptionId,
+        expires_at: expiresAt,
+      },
+      {
+        onConflict: 'user_id,entitlement',
+      }
+    );
 
   if (error) {
     console.error('Error creating entitlement:', error);
@@ -98,10 +99,9 @@ export function hasAccessToContent(
   entitlements: Entitlement[],
   product: Product
 ): boolean {
-  // Bundle gives access to everything
-  if (entitlements.some(e => e.product === 'bundle' && e.status === 'active')) {
+  if (entitlements.some((e) => e.entitlement === 'bundle' && e.status === 'active')) {
     return true;
   }
-  // Check specific product
-  return entitlements.some(e => e.product === product && e.status === 'active');
+
+  return entitlements.some((e) => e.entitlement === product && e.status === 'active');
 }
