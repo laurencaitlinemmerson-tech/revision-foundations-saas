@@ -498,7 +498,18 @@ const STEPS = [
       },
       {
         header: 'Inspect',
-        items: ['Chest expansion', 'Symmetrical movement', 'Accessory muscle use', 'Intercostal recession', 'Tracheal position'],
+        items: [
+          'Chest expansion',
+          'Symmetrical movement',
+          'Accessory muscle use',
+          'Intercostal recession',
+          'Tracheal position',
+          'Head bobbing',
+          'Shoulder shrugging',
+          'Subcostal recession',
+          'See-saw breathing',
+          'Grunting',
+        ],
       },
       {
         header: 'Auscultate',
@@ -515,7 +526,16 @@ const STEPS = [
         ],
       },
     ],
-    redFlags: ['RR outside age norms', 'SpO₂ <94%', 'Tracheal deviation', 'Silent chest', 'Grunting', 'Severe recession'],
+    redFlags: [
+      'RR outside age norms',
+      'SpO₂ <94%',
+      'Tracheal deviation',
+      'Silent chest',
+      'Grunting',
+      'Severe recession',
+      'Head bobbing',
+      'See-saw breathing',
+    ],
     pearl: null,
   },
   {
@@ -795,52 +815,32 @@ export default function AEAssessmentGuidePage() {
           </div>
         ))}
 
-        {/* Vital signs table */}
-        <h2 className="ae-section-title">Paediatric Normal Vital Signs</h2>
-        <table className="ae-table">
-          <thead>
-            <tr>
-              {['Age group', 'RR (breaths/min)', 'HR (beats/min)', 'Systolic BP (mmHg)'].map((h) => (
-                <th key={h}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {VITALS.map((row) => (
-              <tr key={row.age}>
-                <td>{row.age}</td>
-                <td>{row.rr}</td>
-                <td>{row.hr}</td>
-                <td>{row.sbp}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Respiratory Distress Scenario */}
+        <h2 className="ae-section-title">Paediatric Respiratory Distress Scenario</h2>
+        <div className="ae-pearl">
+          <p className="ae-pearl-label">Respiratory Distress</p>
+          <p>A 3-year-old child is brought to the emergency department with a fever, cough, and difficulty breathing. The parent is concerned because the child has become quieter and more lethargic. The child's respiratory rate is 50 breaths per minute (elevated for their age), and the following signs are observed:</p>
+          <ul className="ae-col-list">
+            <li>Nasal flaring and intercostal recession</li>
+            <li>Grunting with each exhalation</li>
+            <li>Head bobbing with each breath</li>
+            <li>Wheezing audible on auscultation</li>
+            <li>SpO₂ is 90%, indicating hypoxia</li>
+            <li>The child is lethargic and non-responsive to verbal cues.</li>
+          </ul>
+          <p className="ae-pearl-label">Management Steps</p>
+          <ul className="ae-col-list">
+            <li>Check for airway obstruction. The airway is patent, but observe for signs of partial obstruction.</li>
+            <li>Administer supplemental oxygen to maintain SpO₂ >94%.</li>
+            <li>Prepare for nebulized bronchodilators if asthma or bronchospasm is suspected.</li>
+            <li>Assess circulation for signs of hypoperfusion. Consider a fluid bolus if necessary.</li>
+            <li>Monitor blood glucose and neurological status. If the child becomes unresponsive, prepare for escalation.</li>
+          </ul>
 
-        {/* Paeds considerations */}
-        <h2 className="ae-section-title">Paediatric Considerations by System</h2>
-        <div className="ae-paeds-grid">
-          {PAEDS_COLS.map((col) => (
-            <div key={col.title} className="ae-paeds-cell">
-              <p className="ae-paeds-cell-title">{col.title}</p>
-              <ul className="ae-paeds-list">
-                {col.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Quiet still child pearl */}
-        <div className="ae-pearl" style={{ marginTop: '24px' }}>
-          <p className="ae-pearl-label">Escalation reminder — the quiet still child</p>
-          <p>
-            A child who is unusually quiet, very still, and not interested in their surroundings is unwell
-            until proven otherwise. This is not a calm child — it is a child who no longer has the energy
-            to be distressed. Escalate immediately using SBAR. Do not wait for numbers to confirm what
-            you are clinically observing.
-          </p>
+          <div className="ae-pearl">
+            <p className="ae-pearl-label">Escalation Reminder</p>
+            <p>Escalate to the paediatric team immediately. Prepare for intubation if respiratory distress worsens.</p>
+          </div>
         </div>
 
         {/* After A–E checklist */}
