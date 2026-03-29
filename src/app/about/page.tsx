@@ -201,7 +201,7 @@ export default function AboutPage() {
                   sizes="(max-width: 768px) 200px, 280px"
                   priority
                 />
-                
+              </div>
 
               <div className="about-facts-section">
                 <p style={{ ...smallCaps, marginBottom: '14px' }}>
