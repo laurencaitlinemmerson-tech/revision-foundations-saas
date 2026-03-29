@@ -11,7 +11,6 @@ import { getOrganizationSchema, getWebsiteSchema } from "@/lib/seo";
 import "./globals.css";
 import "./premium-animations-vanilla.css";
 
-// Viewport configuration for better mobile support
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -23,12 +22,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://revisionfoundations.com"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.revisionfoundations.com"
+  ),
   title: {
     default: "Revision Foundations - Your Nursing Bestie for OSCEs & Exams",
     template: "%s | Revision Foundations",
   },
-  description: "Your nursing bestie for OSCEs & exams. Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students. Pass your exams with confidence.",
+  description:
+    "Your nursing bestie for OSCEs & exams. Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students. Pass your exams with confidence.",
   keywords: [
     "nursing",
     "OSCE",
@@ -56,7 +58,8 @@ export const metadata: Metadata = {
     locale: "en_GB",
     siteName: "Revision Foundations",
     title: "Revision Foundations - Your Nursing Bestie",
-    description: "Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students.",
+    description:
+      "Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students.",
     images: [
       {
         url: "/og-image.png",
@@ -84,8 +87,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    // Add your verification tokens here when available
-    // google: 'your-google-verification-token',
+    // google: "your-google-verification-token",
   },
   alternates: {
     canonical: "/",
@@ -93,52 +95,55 @@ export const metadata: Metadata = {
   category: "education",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <ClerkProvider>
-      <html lang="en-GB" dir="ltr" suppressHydrationWarning>
-        <head>
-          {/* Prevent flash of wrong theme */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function() {
-                  try {
-                    var theme = localStorage.getItem('theme');
-                    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                      document.documentElement.classList.add('dark');
-                    }
-                  } catch (e) {}
-                })();
-              `,
-            }}
-          />
-          {/* PWA manifest */}
-          <link rel="manifest" href="/manifest.json" />
-          <link rel="apple-touch-icon" href="/icon-192.png" />
-          
-          {/* Preconnect to external resources */}
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          
-          {/* DNS prefetch for third-party services */}
-          <link rel="dns-prefetch" href="https://clerk.com" />
-          <link rel="dns-prefetch" href="https://js.stripe.com" />
-          
-          {/* Structured data */}
-          <JsonLd data={getOrganizationSchema()} />
-          <JsonLd data={getWebsiteSchema()} />
-        </head>
-        <body className="antialiased">
+    <html lang="en-GB" dir="ltr" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (
+                    theme === 'dark' ||
+                    (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://clerk.com" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
+      </head>
+      <body className="antialiased">
+        <ClerkProvider>
           <ThemeProvider>
+            <JsonLd data={getOrganizationSchema()} />
+            <JsonLd data={getWebsiteSchema()} />
             <SkipToContent />
             <SmoothScroll>{children}</SmoothScroll>
             <PWAInstallPrompt />
           </ThemeProvider>
-          <Analytics />
-          <SpeedInsights />
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
   );
 }
