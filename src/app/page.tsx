@@ -21,6 +21,8 @@ const tagBg = '#EFE5D4';
 const green = '#1E8A4D';
 const greenBg = '#E6F4EA';
 
+const wrap = '1120px';
+
 const tools = [
   {
     num: '01',
@@ -141,75 +143,86 @@ export default function HomePage() {
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
+      {/* ── Hero ── */}
       <section style={{ padding: '128px 24px 108px', borderBottom: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <p style={sectionLabelStyle}>OSCE prep · theory revision · placement support</p>
-
-          <h1
-            style={{
-              fontFamily: display,
-              fontSize: 'clamp(2.9rem, 7vw, 4.6rem)',
-              fontWeight: 400,
-              lineHeight: 1.02,
-              letterSpacing: '-0.02em',
-              color: ink,
-              marginBottom: '24px',
-            }}
-          >
-            Pass your nursing
-            <br />
-            <em>assessments.</em>
-          </h1>
-
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: '18px',
-              lineHeight: 1.9,
-              fontWeight: 300,
-              color: inkMid,
-              maxWidth: '590px',
-              marginBottom: '34px',
-            }}
-          >
-            Revision tools built by a nursing student, for nursing students — with OSCE
-            practice, focused quizzes, and practical guides designed around what actually gets
-            tested.
-          </p>
-
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <div
             style={{
-              display: 'flex',
-              gap: '12px',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              marginBottom: '16px',
+              display: 'grid',
+              gridTemplateColumns: '1fr',
+              gap: '0',
+              maxWidth: '820px',
             }}
           >
-            <Link href="/pricing" style={primaryButton}>
-              Start revising →
-            </Link>
-            <Link href="/quiz" style={secondaryButton}>
-              Try free preview →
-            </Link>
-          </div>
+            <p style={sectionLabelStyle}>OSCE prep · theory revision · placement support</p>
 
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: '13px',
-              lineHeight: 1.8,
-              fontWeight: 300,
-              color: inkLight,
-            }}
-          >
-            £9.99 one-time payment · Lifetime access · 7-day guarantee
-          </p>
+            <h1
+              style={{
+                fontFamily: display,
+                fontSize: 'clamp(2.9rem, 7vw, 4.6rem)',
+                fontWeight: 400,
+                lineHeight: 1.02,
+                letterSpacing: '-0.02em',
+                color: ink,
+                marginBottom: '24px',
+              }}
+            >
+              Pass your nursing
+              <br />
+              <em>assessments.</em>
+            </h1>
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: '18px',
+                lineHeight: 1.9,
+                fontWeight: 300,
+                color: inkMid,
+                maxWidth: '590px',
+                marginBottom: '34px',
+              }}
+            >
+              Revision tools built by a nursing student, for nursing students — with OSCE
+              practice, focused quizzes, and practical guides designed around what actually gets
+              tested.
+            </p>
+
+            <div
+              style={{
+                display: 'flex',
+                gap: '12px',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                marginBottom: '16px',
+              }}
+            >
+              <Link href="/pricing" style={primaryButton}>
+                Start revising →
+              </Link>
+              <Link href="/quiz" style={secondaryButton}>
+                Try free preview →
+              </Link>
+            </div>
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: '13px',
+                lineHeight: 1.8,
+                fontWeight: 300,
+                color: inkLight,
+              }}
+            >
+              £9.99 one-time payment · Lifetime access · 7-day guarantee
+            </p>
+          </div>
         </div>
       </section>
 
+      {/* ── Branch selector ── */}
       <section style={{ padding: '84px 24px 72px' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>Choose your branch</p>
 
           <h2
@@ -228,7 +241,7 @@ export default function HomePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
               gap: '16px',
             }}
           >
@@ -245,7 +258,6 @@ export default function HomePage() {
               }}
             >
               <p style={{ ...sectionLabelStyle, marginBottom: '12px' }}>Available now</p>
-
               <h3
                 style={{
                   fontFamily: display,
@@ -257,7 +269,6 @@ export default function HomePage() {
               >
                 Children&apos;s Nursing
               </h3>
-
               <p
                 style={{
                   fontFamily: serif,
@@ -271,14 +282,7 @@ export default function HomePage() {
                 Paediatric observations, PEWS, paediatric OSCEs, family-centred care,
                 developmental milestones, and more.
               </p>
-
-              <span
-                style={{
-                  fontFamily: serif,
-                  fontSize: '14px',
-                  color: ink,
-                }}
-              >
+              <span style={{ fontFamily: serif, fontSize: '14px', color: ink }}>
                 Browse resources →
               </span>
             </Link>
@@ -293,7 +297,6 @@ export default function HomePage() {
               }}
             >
               <p style={{ ...sectionLabelStyle, marginBottom: '12px' }}>Coming soon</p>
-
               <h3
                 style={{
                   fontFamily: display,
@@ -305,7 +308,6 @@ export default function HomePage() {
               >
                 Adult Nursing
               </h3>
-
               <p
                 style={{
                   fontFamily: serif,
@@ -319,14 +321,7 @@ export default function HomePage() {
                 NEWS2, sepsis, wound care, medication management, and adult-specific OSCE
                 stations.
               </p>
-
-              <span
-                style={{
-                  fontFamily: serif,
-                  fontSize: '14px',
-                  color: inkMid,
-                }}
-              >
+              <span style={{ fontFamily: serif, fontSize: '14px', color: inkMid }}>
                 Join waitlist →
               </span>
             </div>
@@ -334,8 +329,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── What's included ── */}
       <section style={{ padding: '32px 24px 48px' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>What&apos;s included</p>
 
           <h2
@@ -433,13 +429,7 @@ export default function HomePage() {
                       {tool.desc}
                     </p>
 
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '10px',
-                      }}
-                    >
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                       {tool.tags.map((tag) => (
                         <span key={tag} style={tagStyle}>
                           {tag}
@@ -454,8 +444,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── A look inside ── */}
       <section style={{ padding: '36px 24px 84px', borderTop: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>A look inside</p>
 
           <h2
@@ -486,6 +477,7 @@ export default function HomePage() {
           </p>
 
           <div style={{ display: 'grid', gap: '18px', marginBottom: '18px' }}>
+            {/* ── OSCE A-E preview (full width) ── */}
             <div style={sampleCardStyle}>
               <div
                 style={{
@@ -571,21 +563,11 @@ export default function HomePage() {
                     {[
                       {
                         title: 'Look',
-                        items: [
-                          'Visible obstruction',
-                          'Lip or tongue swelling',
-                          'Facial trauma',
-                          'Accessory muscle use',
-                        ],
+                        items: ['Visible obstruction', 'Lip or tongue swelling', 'Facial trauma', 'Accessory muscle use'],
                       },
                       {
                         title: 'Listen',
-                        items: [
-                          'Stridor (obstruction)',
-                          'Gurgling (fluid)',
-                          'Snoring (soft tissue)',
-                          'Silence (complete block)',
-                        ],
+                        items: ['Stridor (obstruction)', 'Gurgling (fluid)', 'Snoring (soft tissue)', 'Silence (complete block)'],
                       },
                       {
                         title: 'Feel',
@@ -593,12 +575,7 @@ export default function HomePage() {
                       },
                       {
                         title: 'Act',
-                        items: [
-                          'Head tilt chin lift',
-                          'Jaw thrust if trauma',
-                          'Suction if secretions',
-                          'Call anaesthetics',
-                        ],
+                        items: ['Head tilt chin lift', 'Jaw thrust if trauma', 'Suction if secretions', 'Call anaesthetics'],
                       },
                     ].map((col, idx) => (
                       <div
@@ -622,13 +599,7 @@ export default function HomePage() {
                         >
                           {col.title}
                         </p>
-
-                        <div
-                          style={{
-                            display: 'grid',
-                            gap: '10px',
-                          }}
-                        >
+                        <div style={{ display: 'grid', gap: '10px' }}>
                           {col.items.map((item) => (
                             <p
                               key={item}
@@ -661,34 +632,15 @@ export default function HomePage() {
                     Red flags
                   </p>
 
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '10px',
-                      marginBottom: '18px',
-                    }}
-                  >
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '18px' }}>
                     {['Stridor', 'Silence', 'Cyanosis', 'Cannot speak/cry', 'Drooling'].map((item) => (
-                      <span
-                        key={item}
-                        style={{
-                          ...tagStyle,
-                          background: '#F6E6E6',
-                          color: '#B05A5A',
-                        }}
-                      >
+                      <span key={item} style={{ ...tagStyle, background: '#F6E6E6', color: '#B05A5A' }}>
                         {item}
                       </span>
                     ))}
                   </div>
 
-                  <div
-                    style={{
-                      background: '#F3E6CB',
-                      padding: '18px 20px',
-                    }}
-                  >
+                  <div style={{ background: '#F3E6CB', padding: '18px 20px' }}>
                     <p
                       style={{
                         fontFamily: serif,
@@ -718,13 +670,15 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* ── Three-column row: Quiz + Obs + Meds cheat sheet ── */}
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
                 gap: '18px',
               }}
             >
+              {/* Quiz preview */}
               <div style={sampleCardStyle}>
                 <div style={sampleInnerStyle}>
                   <SampleLabel>Quiz — paediatric observations</SampleLabel>
@@ -732,7 +686,7 @@ export default function HomePage() {
                   <h3
                     style={{
                       fontFamily: display,
-                      fontSize: '22px',
+                      fontSize: '20px',
                       fontWeight: 400,
                       lineHeight: 1.25,
                       color: ink,
@@ -742,7 +696,7 @@ export default function HomePage() {
                     What&apos;s the normal HR for a 2-year-old at rest?
                   </h3>
 
-                  <div style={{ display: 'grid', gap: '12px', marginBottom: '18px' }}>
+                  <div style={{ display: 'grid', gap: '10px', marginBottom: '18px' }}>
                     {[
                       { text: '60–100 bpm', correct: false },
                       { text: '80–120 bpm', correct: false },
@@ -755,7 +709,7 @@ export default function HomePage() {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '12px',
-                          padding: '14px 16px',
+                          padding: '12px 14px',
                           borderRadius: '999px',
                           border: `1px solid ${option.correct ? '#A4D8B7' : border}`,
                           background: option.correct ? greenBg : 'transparent',
@@ -763,25 +717,24 @@ export default function HomePage() {
                       >
                         <span
                           style={{
-                            width: '18px',
-                            height: '18px',
+                            width: '16px',
+                            height: '16px',
                             borderRadius: '999px',
                             border: option.correct ? 'none' : `1px solid #C9C1B5`,
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: green,
-                            fontSize: '12px',
+                            fontSize: '11px',
                             flexShrink: 0,
                           }}
                         >
                           {option.correct ? '✓' : ''}
                         </span>
-
                         <span
                           style={{
                             fontFamily: serif,
-                            fontSize: '14px',
+                            fontSize: '13px',
                             lineHeight: 1.5,
                             color: option.correct ? green : inkMid,
                             fontWeight: option.correct ? 400 : 300,
@@ -796,18 +749,18 @@ export default function HomePage() {
                   <p
                     style={{
                       fontFamily: serif,
-                      fontSize: '14px',
+                      fontSize: '13px',
                       lineHeight: 1.8,
                       color: inkMid,
                       fontWeight: 300,
                     }}
                   >
-                    Students often confuse paediatric and adult ranges — a common mistake in OSCE obs
-                    stations.
+                    Students often confuse paediatric and adult ranges — a common mistake in OSCE obs stations.
                   </p>
                 </div>
               </div>
 
+              {/* Obs ranges preview */}
               <div style={sampleCardStyle}>
                 <div style={sampleInnerStyle}>
                   <SampleLabel>Hub resource</SampleLabel>
@@ -815,7 +768,7 @@ export default function HomePage() {
                   <h3
                     style={{
                       fontFamily: display,
-                      fontSize: '22px',
+                      fontSize: '20px',
                       fontWeight: 400,
                       lineHeight: 1.25,
                       color: ink,
@@ -838,7 +791,7 @@ export default function HomePage() {
                         key={heading}
                         style={{
                           fontFamily: serif,
-                          fontSize: '12px',
+                          fontSize: '11px',
                           letterSpacing: '0.04em',
                           color: inkMid,
                           padding: '0 0 10px',
@@ -859,7 +812,7 @@ export default function HomePage() {
                           key={`${row[0]}-${cellIdx}`}
                           style={{
                             fontFamily: serif,
-                            fontSize: '14px',
+                            fontSize: '13px',
                             lineHeight: 1.6,
                             color: inkMid,
                             fontWeight: 300,
@@ -876,7 +829,7 @@ export default function HomePage() {
                   <p
                     style={{
                       fontFamily: serif,
-                      fontSize: '14px',
+                      fontSize: '13px',
                       lineHeight: 1.8,
                       color: inkMid,
                       fontWeight: 300,
@@ -886,9 +839,179 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
+
+              {/* Meds cheat sheet preview */}
+              <div style={sampleCardStyle}>
+                <div style={sampleInnerStyle}>
+                  <SampleLabel>Hub — drug calculations</SampleLabel>
+
+                  <h3
+                    style={{
+                      fontFamily: display,
+                      fontSize: '20px',
+                      fontWeight: 400,
+                      lineHeight: 1.25,
+                      color: ink,
+                      marginBottom: '18px',
+                    }}
+                  >
+                    Medication Cheat Sheet
+                  </h3>
+
+                  {/* Core formula */}
+                  <div
+                    style={{
+                      background: '#EEE8DE',
+                      padding: '16px 18px',
+                      borderRadius: '12px',
+                      marginBottom: '16px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontFamily: serif,
+                        fontSize: '11px',
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: inkLight,
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Core formula
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: display,
+                        fontSize: '22px',
+                        fontWeight: 400,
+                        fontStyle: 'italic',
+                        color: ink,
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      <span style={{ fontSize: '14px', fontStyle: 'normal', color: inkMid }}>Dose = </span>
+                      What you want
+                      <span style={{ fontSize: '14px', fontStyle: 'normal', color: inkMid }}> ÷ </span>
+                      What you&apos;ve got
+                      <span style={{ fontSize: '14px', fontStyle: 'normal', color: inkMid }}> × </span>
+                      Volume
+                    </p>
+                  </div>
+
+                  {/* Unit conversion staircase */}
+                  <p
+                    style={{
+                      fontFamily: serif,
+                      fontSize: '11px',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: inkLight,
+                      marginBottom: '10px',
+                    }}
+                  >
+                    Unit conversion staircase
+                  </p>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    {[
+                      { unit: 'kg', indent: 0 },
+                      { unit: 'g', indent: 1 },
+                      { unit: 'mg', indent: 2, highlight: true },
+                      { unit: 'mcg', indent: 3 },
+                      { unit: 'ng', indent: 4 },
+                    ].map((step, i) => (
+                      <div
+                        key={step.unit}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginLeft: `${step.indent * 18}px`,
+                          padding: '4px 0',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: display,
+                            fontSize: '15px',
+                            fontWeight: step.highlight ? 500 : 400,
+                            color: step.highlight ? ink : inkMid,
+                            minWidth: '32px',
+                          }}
+                        >
+                          {step.unit}
+                        </span>
+                        {i < 4 && (
+                          <span
+                            style={{
+                              fontFamily: serif,
+                              fontSize: '10px',
+                              color: inkLight,
+                            }}
+                          >
+                            ↓ ×1,000 &nbsp; ↑ ÷1,000
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* IV drip rate teaser */}
+                  <div
+                    style={{
+                      background: '#EEE8DE',
+                      padding: '14px 16px',
+                      borderRadius: '12px',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontFamily: serif,
+                        fontSize: '11px',
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: inkLight,
+                        marginBottom: '6px',
+                      }}
+                    >
+                      IV drip rate
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: display,
+                        fontSize: '16px',
+                        fontStyle: 'italic',
+                        color: ink,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      Volume (ml) × Drop factor
+                      <span style={{ fontSize: '13px', fontStyle: 'normal', color: inkMid }}> ÷ </span>
+                      Time (hours) × 60
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/hub/resources/drug-calculations-cheat-sheet"
+                    style={{
+                      fontFamily: serif,
+                      fontSize: '13px',
+                      color: ink,
+                      textDecoration: 'none',
+                      borderBottom: `0.5px solid ${border}`,
+                      paddingBottom: '1px',
+                    }}
+                  >
+                    View full cheat sheet →
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* ── Bundle CTA ── */}
           <div
             style={{
               marginTop: '44px',
@@ -936,14 +1059,7 @@ export default function HomePage() {
               }}
             />
 
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '10px',
-                marginBottom: '28px',
-              }}
-            >
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '28px' }}>
               {['50+ OSCE stations', 'Topic-based quizzes', 'Clinical guides', 'Future updates'].map(
                 (item) => (
                   <span key={item} style={tagStyle}>
@@ -971,8 +1087,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Why it exists ── */}
       <section style={{ padding: '84px 24px', background: parchment }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>Why it exists</p>
 
           <h2
@@ -991,7 +1108,7 @@ export default function HomePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
               gap: '36px',
             }}
           >
@@ -1029,8 +1146,9 @@ export default function HomePage() {
 
       <Testimonials />
 
+      {/* ── Final CTA ── */}
       <section style={{ padding: '88px 24px 96px', borderTop: `1px solid ${border}` }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>Ready</p>
 
           <h2
@@ -1067,6 +1185,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Contact strip ── */}
       <section
         style={{
           padding: '26px 24px',
