@@ -13,80 +13,82 @@ const inkMid = '#5C4A38';
 const inkLight = '#9C8878';
 const cream = '#F9F6F0';
 const parchment = '#F3EEE4';
-const panel = '#F6F0E5';
-const panelSoft = 'rgba(255,255,255,0.42)';
+const paper = '#F7F2E8';
 const border = '#D9D0C1';
-const tagBg = '#EFE5D4';
+const softLine = 'rgba(217, 208, 193, 0.7)';
+const blush = '#EEE4DE';
 
-const sectionLabelStyle: CSSProperties = {
+const sectionLabel: CSSProperties = {
   fontFamily: serif,
   fontSize: '11px',
-  letterSpacing: '0.12em',
+  letterSpacing: '0.14em',
   textTransform: 'uppercase',
   color: inkLight,
-  marginBottom: '14px',
+  marginBottom: '16px',
 };
 
-const primaryButton: CSSProperties = {
-  display: 'inline-block',
+const body: CSSProperties = {
   fontFamily: serif,
-  fontSize: '14px',
-  fontWeight: 400,
-  background: ink,
-  color: cream,
-  padding: '12px 24px',
-  borderRadius: '9999px',
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
-};
-
-const secondaryButton: CSSProperties = {
-  display: 'inline-block',
-  fontFamily: serif,
-  fontSize: '14px',
-  fontWeight: 400,
-  background: 'transparent',
-  color: ink,
-  padding: '11px 24px',
-  borderRadius: '9999px',
-  border: `1px solid ${border}`,
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
-};
-
-const bodyText: CSSProperties = {
-  fontFamily: serif,
-  fontSize: '15px',
-  lineHeight: 1.95,
+  fontSize: '16px',
+  lineHeight: 2,
   fontWeight: 300,
   color: inkMid,
 };
 
-const cardStyle: CSSProperties = {
+const editorialCard: CSSProperties = {
   border: `1px solid ${border}`,
-  borderRadius: '28px',
-  background: panel,
+  borderRadius: '34px',
+  background: parchment,
   overflow: 'hidden',
 };
 
-const chipStyle: CSSProperties = {
+const noteCard: CSSProperties = {
+  border: `1px solid ${border}`,
+  borderRadius: '30px',
+  background: paper,
+};
+
+const chip: CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontFamily: serif,
   fontSize: '13px',
-  color: inkMid,
-  background: tagBg,
-  padding: '8px 14px',
-  borderRadius: '999px',
   lineHeight: 1,
+  color: inkMid,
+  padding: '9px 15px',
+  borderRadius: '999px',
+  background: blush,
 };
 
-const littleThings = [
+const textLink: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '14px',
+  color: ink,
+  textDecoration: 'underline',
+  textUnderlineOffset: '3px',
+};
+
+const smallCaps: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '11px',
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: inkLight,
+};
+
+const laurenFacts = [
   'Children’s nursing student',
   'Former medical photographer',
-  'Pepsi Max Cherry loyalist',
+  'Pepsi Max Cherry',
   'Purple everything',
+];
+
+const supportItems = [
+  'OSCE preparation',
+  'Theory revision',
+  'Placement support',
+  'Quick refreshers',
 ];
 
 export default function AboutPage() {
@@ -94,360 +96,293 @@ export default function AboutPage() {
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      <section
-        style={{
-          padding: '128px 24px 96px',
-          borderBottom: `1px solid ${border}`,
-        }}
-      >
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <p style={sectionLabelStyle}>About me</p>
-
-          <h1
-            style={{
-              fontFamily: display,
-              fontSize: 'clamp(3rem, 7vw, 4.7rem)',
-              fontWeight: 400,
-              lineHeight: 1.02,
-              letterSpacing: '-0.02em',
-              color: ink,
-              marginBottom: '24px',
-              maxWidth: '760px',
-            }}
-          >
-            Hi, I’m Lauren.
-          </h1>
-
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: '18px',
-              lineHeight: 1.95,
-              fontWeight: 300,
-              color: inkMid,
-              maxWidth: '640px',
-              marginBottom: '32px',
-            }}
-          >
-            I’m a children’s nursing student, former medical photographer, and
-            the person behind Revision Foundations. I made this because I
-            couldn’t find revision tools I actually liked using.
-          </p>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: '10px',
-              flexWrap: 'wrap',
-              marginBottom: '34px',
-            }}
-          >
-            {littleThings.map((item) => (
-              <span key={item} style={chipStyle}>
-                {item}
-              </span>
-            ))}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}
-          >
-            <Link href="/hub" style={primaryButton}>
-              Explore the hub →
-            </Link>
-            <Link href="/contact" style={secondaryButton}>
-              Get in touch →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: '84px 24px 44px' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <p style={sectionLabelStyle}>How this started</p>
-
-          <div style={cardStyle}>
-            <div style={{ padding: '36px 32px' }}>
-              <p style={{ ...bodyText, marginBottom: '18px' }}>
-                Before nursing, I spent years working as a medical photographer
-                in hospitals. It was interesting work, and I liked being in that
-                environment, but it never quite felt like the right fit for me.
-              </p>
-
-              <p style={{ ...bodyText, marginBottom: '18px' }}>
-                At 25, I decided to change direction, applied to nursing, and
-                got in. Children’s nursing felt right very quickly. From my
-                first placement, I knew it was the branch for me.
-              </p>
-
-              <p style={bodyText}>
-                What was harder was finding revision resources that didn’t feel
-                boring, badly designed, overwhelming, or oddly expensive. So I
-                started making my own. At first they were just for me, then for
-                coursemates, and eventually that became Revision Foundations.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: '28px 24px 52px' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <p style={sectionLabelStyle}>What this is</p>
-
-          <h2
-            style={{
-              fontFamily: display,
-              fontSize: 'clamp(2.1rem, 4.3vw, 2.9rem)',
-              fontWeight: 400,
-              lineHeight: 1.14,
-              color: ink,
-              marginBottom: '18px',
-              maxWidth: '660px',
-            }}
-          >
-            Revision tools made the way I wanted them to feel.
-          </h2>
-
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: '16px',
-              lineHeight: 1.95,
-              fontWeight: 300,
-              color: inkMid,
-              maxWidth: '600px',
-              marginBottom: '36px',
-            }}
-          >
-            Clear, practical, and actually nice to come back to when your brain
-            is already full. The hub is built for OSCE prep, theory revision,
-            placement support, and those quick refreshers you end up needing all
-            the time.
-          </p>
-
+      <section style={{ padding: '132px 24px 88px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '16px',
+              gridTemplateColumns: 'minmax(0, 1.15fr) minmax(220px, 0.85fr)',
+              gap: '36px',
+              alignItems: 'end',
             }}
           >
-            {[
-              {
-                title: 'Made by someone doing the degree',
-                text: 'I’m making this alongside nursing school, so it stays close to real student life and what actually feels useful.',
-              },
-              {
-                title: 'Built to be easy to use',
-                text: 'I care a lot about making things feel clear, calm, and not like a giant wall of text you never want to open again.',
-              },
-              {
-                title: 'One payment',
-                text: 'No subscription. You pay once and keep access, including future updates as I keep adding to it.',
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
+            <div>
+              <p style={sectionLabel}>About me</p>
+
+              <h1
                 style={{
-                  border: `1px solid ${border}`,
-                  borderRadius: '24px',
-                  background: panelSoft,
-                  padding: '26px 24px',
+                  fontFamily: display,
+                  fontSize: 'clamp(3.2rem, 7.5vw, 5.4rem)',
+                  lineHeight: 0.98,
+                  fontWeight: 400,
+                  letterSpacing: '-0.025em',
+                  color: ink,
+                  marginBottom: '24px',
                 }}
               >
-                <h3
-                  style={{
-                    fontFamily: display,
-                    fontSize: '22px',
-                    fontWeight: 400,
-                    lineHeight: 1.2,
-                    color: ink,
-                    marginBottom: '12px',
-                  }}
-                >
-                  {item.title}
-                </h3>
+                Hi, I’m Lauren.
+              </h1>
 
-                <p style={bodyText}>{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section
-        style={{
-          padding: '36px 24px 88px',
-          borderTop: `1px solid ${border}`,
-        }}
-      >
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <p style={sectionLabelStyle}>A small note</p>
-
-          <div
-            style={{
-              padding: '44px 38px',
-              borderRadius: '28px',
-              background: panel,
-              border: `1px solid ${border}`,
-            }}
-          >
-            <p
-              style={{
-                fontFamily: display,
-                fontSize: 'clamp(2rem, 4vw, 2.7rem)',
-                lineHeight: 1.1,
-                color: ink,
-                marginBottom: '16px',
-                maxWidth: '620px',
-              }}
-            >
-              I still use these resources myself.
-            </p>
-
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: '15px',
-                lineHeight: 1.95,
-                color: inkMid,
-                maxWidth: '620px',
-                marginBottom: '24px',
-                fontWeight: 300,
-              }}
-            >
-              So if something feels unclear, clunky, or like it needs improving,
-              I usually notice it too. If you ever have a question, spot
-              something that needs updating, or just want to say hi, I really do
-              read every message.
-            </p>
+              <p
+                style={{
+                  ...body,
+                  fontSize: '18px',
+                  maxWidth: '640px',
+                  marginBottom: '0',
+                }}
+              >
+                I’m a children’s nursing student and the person behind Revision
+                Foundations. I made it because I wanted revision tools that felt
+                thoughtful, calm, and actually lovely to use.
+              </p>
+            </div>
 
             <div
               style={{
-                display: 'flex',
-                gap: '12px',
-                flexWrap: 'wrap',
+                paddingBottom: '10px',
               }}
             >
-              <Link href="/contact" style={primaryButton}>
-                Contact me →
-              </Link>
-              <Link href="/hub" style={secondaryButton}>
-                Browse resources →
-              </Link>
+              <div
+                style={{
+                  borderLeft: `1px solid ${softLine}`,
+                  paddingLeft: '24px',
+                }}
+              >
+                <p style={{ ...smallCaps, marginBottom: '14px' }}>A few Lauren things</p>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '10px',
+                  }}
+                >
+                  {laurenFacts.map((item) => (
+                    <span key={item} style={chip}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section style={{ padding: '84px 24px', background: parchment }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <p style={sectionLabelStyle}>Outside of revision</p>
-
-          <h2
-            style={{
-              fontFamily: display,
-              fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-              fontWeight: 400,
-              lineHeight: 1.15,
-              color: ink,
-              marginBottom: '18px',
-            }}
-          >
-            A few Lauren facts.
-          </h2>
-
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: '16px',
-              lineHeight: 1.95,
-              fontWeight: 300,
-              color: inkMid,
-              maxWidth: '620px',
-              marginBottom: '30px',
-            }}
-          >
-            Because an About page should probably feel a bit human.
-          </p>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '14px',
-            }}
-          >
-            {[
-              'I study children’s nursing.',
-              'I used to work as a medical photographer.',
-              'I will nearly always pick Pepsi Max Cherry.',
-              'I genuinely do love good design.',
-            ].map((item) => (
+      <section style={{ padding: '0 24px 76px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div style={editorialCard}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '150px minmax(0, 1fr)',
+                gap: '0',
+              }}
+            >
               <div
-                key={item}
                 style={{
-                  padding: '20px 20px',
-                  border: `1px solid ${border}`,
-                  borderRadius: '22px',
-                  background: cream,
+                  borderRight: `1px solid ${softLine}`,
+                  padding: '42px 24px 42px 32px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
                 }}
               >
-                <p
+                <div>
+                  <p
+                    style={{
+                      fontFamily: display,
+                      fontSize: '92px',
+                      lineHeight: 0.9,
+                      color: '#BBAA96',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    L
+                  </p>
+
+                  <p style={smallCaps}>Founder note</p>
+                </div>
+              </div>
+
+              <div style={{ padding: '42px 40px 46px' }}>
+                <p style={sectionLabel}>How this started</p>
+
+                <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
+                  Before nursing, I worked as a medical photographer in hospitals.
+                  I loved being in clinical environments, but it never quite felt
+                  like the right fit for me.
+                </p>
+
+                <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
+                  At 25, I decided to change direction, applied to nursing, and got
+                  in. Children’s nursing felt right almost immediately. From my
+                  first placement, I knew it was where I wanted to be.
+                </p>
+
+                <p style={{ ...body, marginBottom: '28px', maxWidth: '700px' }}>
+                  What I struggled with was revision. Most resources felt either
+                  overwhelming, badly designed, or just not that useful when you
+                  were already tired and trying to take everything in. So I started
+                  making my own.
+                </p>
+
+                <div
                   style={{
-                    fontFamily: serif,
-                    fontSize: '15px',
-                    lineHeight: 1.8,
-                    color: inkMid,
-                    fontWeight: 300,
+                    width: '100%',
+                    maxWidth: '640px',
+                    height: '1px',
+                    background: softLine,
+                    marginBottom: '28px',
                   }}
-                >
-                  {item}
+                />
+
+                <p style={{ ...body, marginBottom: '18px', maxWidth: '700px' }}>
+                  At first they were just for me. Then people on my course started
+                  asking for them too, and that’s when Revision Foundations slowly
+                  became a real thing.
+                </p>
+
+                <p style={{ ...body, maxWidth: '700px' }}>
+                  I still make everything in the same way — based on what actually
+                  feels helpful when you’re revising, not what sounds good on paper.
                 </p>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section
-        style={{
-          padding: '26px 24px',
-          background: cream,
-          borderTop: `1px solid ${border}`,
-          textAlign: 'center',
-        }}
-      >
-        <p
-          style={{
-            fontFamily: serif,
-            fontSize: '13px',
-            lineHeight: 1.8,
-            color: inkLight,
-            fontWeight: 300,
-          }}
-        >
-          Got a question or spotted something that needs updating?{' '}
-          <a
-            href="https://wa.me/447572650980"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: ink, textDecoration: 'underline' }}
+      <section style={{ padding: '0 24px 76px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 320px)',
+              gap: '18px',
+            }}
           >
-            WhatsApp me
-          </a>{' '}
-          or{' '}
-          <Link href="/contact" style={{ color: ink, textDecoration: 'underline' }}>
-            use the contact form
-          </Link>
-          .
-        </p>
+            <div style={noteCard}>
+              <div style={{ padding: '34px 34px 36px' }}>
+                <p style={sectionLabel}>What this is</p>
+
+                <p
+                  style={{
+                    fontFamily: display,
+                    fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+                    lineHeight: 1.08,
+                    color: ink,
+                    marginBottom: '16px',
+                    maxWidth: '520px',
+                  }}
+                >
+                  Revision tools made the way I wanted them to feel.
+                </p>
+
+                <p style={{ ...body, maxWidth: '620px' }}>
+                  Clear, practical, and actually nice to come back to. Built for
+                  OSCE prep, theory revision, placement support, and those quick
+                  refreshers you always seem to need at exactly the wrong moment.
+                </p>
+              </div>
+            </div>
+
+            <div
+              style={{
+                ...noteCard,
+                background: cream,
+              }}
+            >
+              <div style={{ padding: '34px 28px 36px' }}>
+                <p style={sectionLabel}>What it helps with</p>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: '10px',
+                  }}
+                >
+                  {supportItems.map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        padding: '14px 16px',
+                        borderRadius: '999px',
+                        border: `1px solid ${softLine}`,
+                        fontFamily: serif,
+                        fontSize: '14px',
+                        color: inkMid,
+                        textAlign: 'center',
+                        background: parchment,
+                      }}
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: '0 24px 96px' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div
+            style={{
+              ...editorialCard,
+              background: cream,
+            }}
+          >
+            <div
+              style={{
+                padding: '38px 36px 40px',
+              }}
+            >
+              <p style={sectionLabel}>A small note</p>
+
+              <p
+                style={{
+                  fontFamily: display,
+                  fontSize: 'clamp(2rem, 4vw, 2.6rem)',
+                  lineHeight: 1.1,
+                  color: ink,
+                  marginBottom: '16px',
+                  maxWidth: '620px',
+                }}
+              >
+                I still use these resources myself.
+              </p>
+
+              <p style={{ ...body, marginBottom: '18px', maxWidth: '660px' }}>
+                Which means I notice pretty quickly when something feels unclear,
+                clunky, or like it needs improving.
+              </p>
+
+              <p style={{ ...body, marginBottom: '24px', maxWidth: '660px' }}>
+                If you ever have a question, spot something that doesn’t make
+                sense, or just want to say hi, I really do read every message.
+              </p>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '20px',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                }}
+              >
+                <Link href="/contact" style={textLink}>
+                  Contact me →
+                </Link>
+
+                <Link href="/hub" style={textLink}>
+                  Browse the hub →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <Footer />
