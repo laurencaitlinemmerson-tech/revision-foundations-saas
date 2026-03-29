@@ -444,6 +444,7 @@ const CSS = `
 .ae-badge-e { background: #F1EFE8; color: #444441; }
 `;
 
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -518,7 +519,7 @@ const STEPS = [
       {
         header: 'Act',
         items: [
-          'O₂ if SpO₂ <94%',
+          'O₂ if SpO₂ &gt;94%',
           'Sniffing position',
           'Non-rebreather if needed',
           'Call paediatric team',
@@ -528,7 +529,7 @@ const STEPS = [
     ],
     redFlags: [
       'RR outside age norms',
-      'SpO₂ <94%',
+      'SpO₂ &lt;94%',
       'Tracheal deviation',
       'Silent chest',
       'Grunting',
@@ -550,7 +551,7 @@ const STEPS = [
       },
       {
         header: 'Perfusion',
-        items: ['CRT <2s (central)', 'Skin colour and temp', 'Mottling pattern', 'Behavioural change', 'Nappy output'],
+        items: ['CRT &lt;2s (central)', 'Skin colour and temp', 'Mottling pattern', 'Behavioural change', 'Nappy output'],
       },
       {
         header: 'Monitoring',
@@ -561,7 +562,7 @@ const STEPS = [
         items: ['IV or IO access', 'Fluid bolus 10 ml/kg', 'Reassess after bolus', 'Repeat bolus if needed', 'Escalate early'],
       },
     ],
-    redFlags: ['HR outside age norms', 'Hypotension (late sign)', 'CRT >2s', 'Mottled/pale/grey skin', 'No urine output'],
+    redFlags: ['HR outside age norms', 'Hypotension (late sign)', 'CRT &gt;2s', 'Mottled/pale/grey skin', 'No urine output'],
     pearl:
       'Children compensate remarkably well — then crash suddenly. Do not wait for hypotension before escalating. Fluid bolus in children is 10 ml/kg (not the adult 250 ml). Reassess after every bolus.',
   },
@@ -814,34 +815,6 @@ export default function AEAssessmentGuidePage() {
             </div>
           </div>
         ))}
-
-        {/* Respiratory Distress Scenario */}
-        <h2 className="ae-section-title">Paediatric Respiratory Distress Scenario</h2>
-        <div className="ae-pearl">
-          <p className="ae-pearl-label">Respiratory Distress</p>
-          <p>A 3-year-old child is brought to the emergency department with a fever, cough, and difficulty breathing. The parent is concerned because the child has become quieter and more lethargic. The child's respiratory rate is 50 breaths per minute (elevated for their age), and the following signs are observed:</p>
-          <ul className="ae-col-list">
-            <li>Nasal flaring and intercostal recession</li>
-            <li>Grunting with each exhalation</li>
-            <li>Head bobbing with each breath</li>
-            <li>Wheezing audible on auscultation</li>
-            <li>SpO₂ is 90%, indicating hypoxia</li>
-            <li>The child is lethargic and non-responsive to verbal cues.</li>
-          </ul>
-          <p className="ae-pearl-label">Management Steps</p>
-          <ul className="ae-col-list">
-            <li>Check for airway obstruction. The airway is patent, but observe for signs of partial obstruction.</li>
-            <li>Administer supplemental oxygen to maintain SpO₂ >94%.</li>
-            <li>Prepare for nebulized bronchodilators if asthma or bronchospasm is suspected.</li>
-            <li>Assess circulation for signs of hypoperfusion. Consider a fluid bolus if necessary.</li>
-            <li>Monitor blood glucose and neurological status. If the child becomes unresponsive, prepare for escalation.</li>
-          </ul>
-
-          <div className="ae-pearl">
-            <p className="ae-pearl-label">Escalation Reminder</p>
-            <p>Escalate to the paediatric team immediately. Prepare for intubation if respiratory distress worsens.</p>
-          </div>
-        </div>
 
         {/* After A–E checklist */}
         <h2 className="ae-section-title" style={{ marginBottom: '20px' }}>After A–E Checklist</h2>
