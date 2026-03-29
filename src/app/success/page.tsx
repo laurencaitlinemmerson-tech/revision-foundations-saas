@@ -57,31 +57,22 @@ function SuccessContent() {
     const controller = new AbortController();
 
     (async () => {
+      setClaiming(true);
+      setError(null);
+      setMessage(null);
       try {
-        setError(null);
-        setMessage(null);
-        setClaiming(true);
-
-        const res = await fetch('/api/purchases/claim', {
+        const res = await fetch(`/api/purchases/claim?session_id=${sessionId || ''}&product=${product || ''}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          // Send session_id if you have it (API can still fall back to email matching)
-          body: JSON.stringify({ sessionId, product }),
           signal: controller.signal,
         });
-
-        const data = (await res.json().catch(() => null)) as ClaimResponse | null;
-
+        const data: ClaimResponse = await res.json();
         if (!res.ok) {
           const errMsg =
             (data && 'error' in data && data.error) ||
             'Failed to claim your purchase. Please contact support.';
           throw new Error(errMsg);
         }
-
-        // Mark claimed even if API says "nothing to claim" — avoids infinite retries
         setClaimed(true);
-
         const friendly =
           (data && 'ok' in data && data.ok && (data.message || null)) ||
           'Your access has been unlocked!';

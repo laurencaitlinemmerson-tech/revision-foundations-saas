@@ -47,22 +47,21 @@ export default function Testimonials() {
   return (
     <section className="bg-[var(--linen-light)] border-y border-[var(--linen-deep)] py-16">
       <div className="max-w-4xl mx-auto px-6">
-        <h2 className="text-2xl text-[var(--espresso)] mb-2">What students say</h2>
-        <p className="text-sm text-[var(--charcoal-light)] mb-8">
-          These tools are new — here&apos;s what early users have said.
-        </p>
+        <p style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#aaa', fontWeight: 400, marginBottom: '12px' }}>Reviews</p>
+        <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '24px', fontWeight: 400, color: 'var(--espresso)', marginBottom: '8px' }}>What students say</h2>
+        <p style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: '14px', color: 'var(--charcoal)', fontWeight: 300, marginBottom: '32px' }}>Real feedback from nursing students.</p>
 
         <div className="grid md:grid-cols-2 gap-4">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-white rounded-xl p-5 border border-[var(--linen-deep)]">
+            <div key={review.id} className="bg-white p-5 border border-[var(--linen-deep)]" style={{ borderRadius: '8px' }}>
               <div className="flex gap-1 mb-3">
                 {[...Array(5)].map((_, j) => (
                   <Star
                     key={j}
                     className={`w-4 h-4 ${
                       j < review.rating
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
+                        ? 'fill-amber-500 text-amber-500'
+                        : 'text-[var(--linen-deep)]'
                     }`}
                   />
                 ))}
@@ -83,7 +82,7 @@ export default function Testimonials() {
           ))}
 
           {/* Honest invite — dashed border */}
-          <div className="bg-white rounded-xl p-5 border border-dashed border-[var(--linen-deep)] flex flex-col justify-center items-center text-center gap-2">
+          <div className="bg-white p-5 border border-dashed border-[var(--linen-deep)] flex flex-col justify-center items-center text-center gap-2" style={{ borderRadius: '8px' }}>
             <p className="text-sm text-[var(--charcoal-light)]">
               Used the tools? I&apos;d love to hear what you think — good or bad.
             </p>

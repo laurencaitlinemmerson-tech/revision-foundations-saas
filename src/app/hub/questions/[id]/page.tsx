@@ -12,7 +12,6 @@ import {
   User,
   Send,
   MessageCircle,
-  Sparkles,
   Crown,
   ImagePlus,
   Loader2,
@@ -169,7 +168,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
         <main className="pt-28 pb-20 px-6">
           <div className="max-w-3xl mx-auto text-center py-12">
             <h1 className="text-2xl mb-4">Question not found</h1>
-            <Link href="/hub/questions" className="text-[var(--purple)] hover:underline">
+            <Link href="/hub/questions" className="text-[var(--espresso)] hover:underline">
               ← Back to Q&A
             </Link>
           </div>
@@ -187,7 +186,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
           {/* Back link */}
           <Link
             href="/hub/questions"
-            className="inline-flex items-center gap-2 text-[var(--purple)] font-medium mb-6 hover:underline"
+            className="inline-flex items-center gap-2 text-[var(--espresso)] font-medium mb-6 hover:underline"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Q&A
@@ -202,7 +201,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                 </div>
               ) : (
                 <div className="w-10 h-10 rounded-full bg-[var(--lilac-soft)] flex items-center justify-center flex-shrink-0">
-                  <MessageCircle className="w-5 h-5 text-[var(--purple)]" />
+                  <MessageCircle className="w-5 h-5 text-[var(--espresso)]" />
                 </div>
               )}
               <div className="flex-1">
@@ -229,7 +228,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                   alt="Question attachment"
                   width={400}
                   height={300}
-                  className="rounded-xl object-contain max-w-full"
+                  className="object-contain max-w-full"
                 />
               </div>
             )}
@@ -239,7 +238,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                 {question.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs bg-[var(--lilac-soft)] text-[var(--plum-dark)]/70 px-2.5 py-1 rounded-full"
+                    className="text-xs bg-[var(--lilac-soft)] text-[var(--plum-dark)]/70 px-2.5 py-1"
                   >
                     {tag}
                   </span>
@@ -274,13 +273,13 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                     <div className="flex items-start gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         answer.is_from_lauren
-                          ? 'bg-gradient-to-br from-[var(--lavender)] to-[var(--pink)]'
+                          ? 'bg-[var(--espresso)]'
                           : 'bg-[var(--lilac)]'
                       }`}>
                         {answer.is_from_lauren ? (
                           <Crown className="w-4 h-4 text-white" />
                         ) : (
-                          <User className="w-4 h-4 text-[var(--purple)]" />
+                          <User className="w-4 h-4 text-[var(--espresso)]" />
                         )}
                       </div>
                       <div className="flex-1">
@@ -289,8 +288,8 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                             {answer.user_name}
                           </span>
                           {answer.is_from_lauren && (
-                            <span className="text-xs bg-[var(--purple)] text-white px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Sparkles className="w-3 h-3" />
+                            <span className="text-xs bg-[var(--espresso)] text-white px-2 py-0.5 flex items-center gap-1" style={{ borderRadius: '2px' }}>
+                              <Crown className="w-3 h-3" />
                               Lauren
                             </span>
                           )}
@@ -330,7 +329,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                   onChange={(e) => setAnswerBody(e.target.value)}
                   placeholder="Share your knowledge..."
                   rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-[var(--lilac-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] resize-none mb-4"
+                  className="w-full px-4 py-3 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] resize-none mb-4"
                   maxLength={2000}
                   required
                 />
@@ -366,7 +365,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      className="flex items-center gap-2 px-3 py-2 text-sm border border-dashed border-[var(--lilac-medium)] rounded-lg text-[var(--plum-dark)]/60 hover:border-[var(--purple)] hover:text-[var(--purple)] transition-all"
+                      className="flex items-center gap-2 px-3 py-2 text-sm border border-dashed border-[var(--linen-deep)] text-[var(--plum-dark)]/60 hover:border-[var(--purple)] hover:text-[var(--espresso)] transition-all"
                     >
                       {uploading ? (
                         <>
@@ -386,7 +385,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
                 <button
                   type="submit"
                   disabled={submitting || !answerBody.trim()}
-                  className="bg-[var(--purple)] text-white px-6 py-2.5 rounded-full font-semibold hover:bg-[var(--plum)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="bg-[var(--espresso)] text-white px-6 py-2.5 font-display hover:bg-[#3a2010] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   {submitting ? 'Posting...' : 'Post Answer'}
@@ -398,7 +397,7 @@ export default function QuestionPage({ params }: { params: Promise<{ id: string 
               <p className="text-[var(--plum-dark)]/70 mb-4">Sign in to answer this question</p>
               <Link
                 href="/sign-in"
-                className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-[var(--plum)] transition-all"
+                className="inline-flex items-center gap-2 bg-[var(--espresso)] text-white px-5 py-2.5 font-display hover:bg-[#3a2010] transition-all"
               >
                 Sign In
               </Link>

@@ -15,7 +15,7 @@ import {
   X,
   Send,
   User,
-  Sparkles,
+  BookOpen,
   ImagePlus,
   Loader2,
 } from 'lucide-react';
@@ -171,7 +171,7 @@ export default function QuestionsPage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl mb-2">Q&A Board</h1>
+              <h1 className="text-2xl md:text-3xl font-display mb-2">Q&A Board</h1>
               <p className="text-[var(--plum-dark)]/70">
                 Ask questions, share knowledge, help each other out
               </p>
@@ -179,7 +179,8 @@ export default function QuestionsPage() {
             {isSignedIn ? (
               <button
                 onClick={() => setShowAskForm(true)}
-                className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-5 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all"
+                className="inline-flex items-center gap-2 bg-[var(--espresso)] text-white px-5 py-3 font-semibold hover:bg-[#3a2010] transition-all"
+                style={{ borderRadius: '8px' }}
               >
                 <Plus className="w-5 h-5" />
                 Ask a Question
@@ -187,7 +188,7 @@ export default function QuestionsPage() {
             ) : (
               <Link
                 href="/sign-in"
-                className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-5 py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all"
+                className="inline-flex items-center gap-2 bg-[var(--espresso)] text-white px-5 py-3 font-display hover:bg-[#3a2010] transition-all"
               >
                 Sign in to ask
               </Link>
@@ -204,14 +205,14 @@ export default function QuestionsPage() {
                   placeholder="Search questions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full border border-[var(--lilac-medium)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] text-sm"
+                  className="w-full pl-10 pr-4 py-2.5 border border-[var(--linen-deep)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] text-sm"
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
                 <select
                   value={filterTag || ''}
                   onChange={(e) => setFilterTag(e.target.value || null)}
-                  className="px-4 py-2.5 rounded-full border border-[var(--lilac-medium)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
+                  className="px-4 py-2.5 border border-[var(--linen-deep)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
                 >
                   <option value="">All Topics</option>
                   {TAGS.map((tag) => (
@@ -221,7 +222,7 @@ export default function QuestionsPage() {
                 <select
                   value={filterAnswered || ''}
                   onChange={(e) => setFilterAnswered(e.target.value || null)}
-                  className="px-4 py-2.5 rounded-full border border-[var(--lilac-medium)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
+                  className="px-4 py-2.5 border border-[var(--linen-deep)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
                 >
                   <option value="">All Questions</option>
                   <option value="true">Answered</option>
@@ -234,7 +235,7 @@ export default function QuestionsPage() {
           {/* Ask Form Modal */}
           {showAskForm && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+              <div className="bg-white max-w-lg w-full max-h-[90vh] overflow-y-auto p-6" style={{ borderRadius: '8px' }}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-[var(--plum)]">Ask a Question</h2>
                   <button onClick={() => setShowAskForm(false)} className="p-2 hover:bg-[var(--lilac-soft)] rounded-full">
@@ -252,7 +253,7 @@ export default function QuestionsPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. How do I calculate IV drip rates?"
-                      className="w-full px-4 py-3 rounded-xl border border-[var(--lilac-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
+                      className="w-full px-4 py-3 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--lavender)]"
                       maxLength={200}
                       required
                     />
@@ -267,7 +268,7 @@ export default function QuestionsPage() {
                       onChange={(e) => setBody(e.target.value)}
                       placeholder="Explain your question in more detail..."
                       rows={4}
-                      className="w-full px-4 py-3 rounded-xl border border-[var(--lilac-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] resize-none"
+                      className="w-full px-4 py-3 border border-[var(--linen-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] resize-none"
                       maxLength={2000}
                       required
                     />
@@ -292,7 +293,7 @@ export default function QuestionsPage() {
                           alt="Uploaded image"
                           width={200}
                           height={200}
-                          className="rounded-xl object-cover"
+                          className="object-cover"
                         />
                         <button
                           type="button"
@@ -307,7 +308,7 @@ export default function QuestionsPage() {
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-[var(--lilac-medium)] rounded-xl text-[var(--plum-dark)]/60 hover:border-[var(--purple)] hover:text-[var(--purple)] transition-all"
+                        className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-[var(--linen-deep)] text-[var(--plum-dark)]/60 hover:border-[var(--purple)] hover:text-[var(--espresso)] transition-all"
                       >
                         {uploading ? (
                           <>
@@ -341,9 +342,9 @@ export default function QuestionsPage() {
                                 : [...prev, tag]
                             );
                           }}
-                          className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                          className={`px-3 py-1.5 text-sm transition-all ${
                             selectedTags.includes(tag)
-                              ? 'bg-[var(--purple)] text-white'
+                              ? 'bg-[var(--espresso)] text-white'
                               : 'bg-[var(--lilac-soft)] text-[var(--plum-dark)]/70 hover:bg-[var(--lilac)]'
                           }`}
                         >
@@ -356,7 +357,7 @@ export default function QuestionsPage() {
                   <button
                     type="submit"
                     disabled={submitting || !title.trim() || !body.trim()}
-                    className="w-full bg-[var(--purple)] text-white py-3 rounded-full font-semibold hover:bg-[var(--plum)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full bg-[var(--espresso)] text-white py-3 font-display hover:bg-[#3a2010] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Send className="w-4 h-4" />
                     {submitting ? 'Posting...' : 'Post Question'}
@@ -380,7 +381,7 @@ export default function QuestionsPage() {
               {isSignedIn && (
                 <button
                   onClick={() => setShowAskForm(true)}
-                  className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-[var(--plum)] transition-all"
+                  className="inline-flex items-center gap-2 bg-[var(--espresso)] text-white px-5 py-2.5 font-display hover:bg-[#3a2010] transition-all"
                 >
                   <Plus className="w-4 h-4" />
                   Ask a Question
@@ -393,7 +394,7 @@ export default function QuestionsPage() {
                 <Link
                   key={question.id}
                   href={`/hub/questions/${question.id}`}
-                  className="card block hover:border-[var(--lavender)] hover:shadow-md transition-all group"
+                  className="card block hover:border-[var(--lavender)] hover:border-[var(--linen-medium)] transition-all group"
                 >
                   <div className="flex items-start gap-4">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -402,11 +403,11 @@ export default function QuestionsPage() {
                       {question.is_answered ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                       ) : (
-                        <MessageCircle className="w-5 h-5 text-[var(--purple)]" />
+                        <MessageCircle className="w-5 h-5 text-[var(--espresso)]" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-[var(--plum)] group-hover:text-[var(--purple)] transition-colors line-clamp-2">
+                      <h3 className="font-semibold text-[var(--plum)] group-hover:text-[var(--espresso)] transition-colors line-clamp-2">
                         {question.title}
                       </h3>
                       <p className="text-sm text-[var(--plum-dark)]/60 line-clamp-2 mt-1">
@@ -435,14 +436,14 @@ export default function QuestionsPage() {
                         {question.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="text-xs bg-[var(--lilac-soft)] text-[var(--plum-dark)]/70 px-2 py-0.5 rounded-full"
+                            className="text-xs bg-[var(--lilac-soft)] text-[var(--plum-dark)]/70 px-2 py-0.5"
                           >
                             {tag}
                           </span>
                         ))}
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-[var(--plum-dark)]/30 group-hover:text-[var(--purple)] transition-colors flex-shrink-0" />
+                    <ChevronRight className="w-5 h-5 text-[var(--plum-dark)]/30 group-hover:text-[var(--espresso)] transition-colors flex-shrink-0" />
                   </div>
                 </Link>
               ))}
@@ -453,7 +454,7 @@ export default function QuestionsPage() {
           <div className="text-center mt-10">
             <Link
               href="/hub"
-              className="text-[var(--purple)] font-medium hover:underline"
+              className="text-[var(--espresso)] font-medium hover:underline"
             >
               ← Back to Hub
             </Link>
