@@ -17,6 +17,7 @@ export default function ContactPage() {
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -28,33 +29,45 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+    setSubmitted(false);
 
     try {
-      // Replace this with your real API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setSubmitted(true);
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: '',
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-    } catch (error) {
-      console.error('Contact form submission failed:', error);
-    } finally {
+
       setLoading(false);
+
+      if (response.ok) {
+        setSubmitted(true);
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: '',
+        });
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to send message. Please try again later.');
     }
   };
 
   return (
     <EditorialLayout
       kicker="Contact"
-      title="Get in Touch"
-      standfirst="Questions about the bundle, support, content updates, or feedback — send a message and I’ll get back to you."
+      title="We’d love to hear from you"
+      standfirst="Whether you have questions, feedback, or want to suggest a topic, we’re here to help."
       byline="Revision Foundations"
-      backHref="/dashboard"
-      backLabel="Back to Dashboard"
+      backHref="/"
+      backLabel="Back to Home"
     >
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
         <div className="bg-white rounded-2xl shadow p-6 md:p-8">
@@ -64,13 +77,12 @@ export default function ContactPage() {
                 <CheckCircle className="h-4 w-4" />
                 Message sent
               </div>
-
               <div>
                 <h2 className="text-2xl font-semibold text-[var(--plum-dark)]">
-                  Thanks for getting in touch
+                  Thanks for reaching out!
                 </h2>
                 <p className="mt-2 text-[var(--plum-dark)]/70">
-                  Your message has been received. I usually reply within 1–2 working days.
+                  We’ve received your message and will get back to you within 1–2 working days.
                 </p>
               </div>
 
@@ -89,9 +101,16 @@ export default function ContactPage() {
                   Send a message
                 </h2>
                 <p className="mt-2 text-sm text-[var(--plum-dark)]/70">
-                  Use the form below for support, feedback, business enquiries, or to suggest a topic.
+                  Need help, want to leave feedback, or have a question? Please use the form below.
                 </p>
               </div>
+
+              {error && (
+                <div className="mb-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -150,11 +169,11 @@ export default function ContactPage() {
                     className="w-full rounded-xl border border-[var(--plum-dark)]/15 bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--purple)] focus:ring-2 focus:ring-[var(--purple)]/10"
                   >
                     <option value="">Select a subject</option>
-                    <option value="general">General question</option>
-                    <option value="support">Technical support</option>
-                    <option value="content">Content update / correction</option>
-                    <option value="billing">Billing / refund</option>
-                    <option value="business">Business enquiry</option>
+                    <option value="General question">General question</option>
+                    <option value="Technical support">Technical support</option>
+                    <option value="Content update">Content update</option>
+                    <option value="Billing / refund">Billing / refund</option>
+                    <option value="Business enquiry">Business enquiry</option>
                   </select>
                 </div>
 
@@ -200,7 +219,7 @@ export default function ContactPage() {
         </div>
 
         <aside className="space-y-6">
-          <div className="bg-white rounded-2xl shadow p-6">
+          <div className="rounded-2xl bg-white p-6 shadow">
             <div className="flex items-start gap-3">
               <div className="rounded-xl bg-[var(--purple)]/10 p-2">
                 <Mail className="h-5 w-5 text-[var(--purple)]" />
@@ -218,43 +237,6 @@ export default function ContactPage() {
                 >
                   hello@revisionfoundations.com
                 </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h3 className="text-lg font-semibold text-[var(--plum-dark)]">
-              Support notes
-            </h3>
-            <ul className="mt-3 space-y-3 text-sm text-[var(--plum-dark)]/70">
-              <li>Replies usually within 1–2 working days</li>
-              <li>Use this page for support, corrections, or feedback</li>
-              <li>For urgent account issues, include the email used at checkout</li>
-            </ul>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h3 className="text-lg font-semibold text-[var(--plum-dark)]">
-              Common questions
-            </h3>
-            <div className="mt-4 space-y-4 text-sm text-[var(--plum-dark)]/70">
-              <div>
-                <p className="font-medium text-[var(--plum-dark)]">
-                  Do I get lifetime access?
-                </p>
-                <p className="mt-1">Yes — the bundle is a one-time payment with future updates included.</p>
-              </div>
-              <div>
-                <p className="font-medium text-[var(--plum-dark)]">
-                  Can I suggest a topic?
-                </p>
-                <p className="mt-1">Yes — feedback and topic requests are always welcome.</p>
-              </div>
-              <div>
-                <p className="font-medium text-[var(--plum-dark)]">
-                  Can I report an error?
-                </p>
-                <p className="mt-1">Absolutely. If you spot something outdated or incorrect, please send it over.</p>
               </div>
             </div>
           </div>
