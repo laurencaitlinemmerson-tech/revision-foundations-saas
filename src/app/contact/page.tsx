@@ -71,7 +71,7 @@ export default function ContactPage() {
     >
       <div className="bg-[#F9F9F9] p-8 rounded-2xl shadow-xl">
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Left: Form Section */}
+          {/* Left: Contact Form */}
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
             {submitted ? (
               <div className="flex flex-col items-start gap-4">
@@ -208,7 +208,7 @@ export default function ContactPage() {
             )}
           </div>
 
-          {/* Right: Support Email + WhatsApp */}
+          {/* Right: Contact Options (Email + WhatsApp) */}
           <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow p-6">
               <div className="flex items-start gap-3">
