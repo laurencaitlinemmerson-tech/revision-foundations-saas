@@ -49,238 +49,85 @@ export default function Navbar() {
     { href: '/about', label: 'About' },
   ];
 
-  const navStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 50,
-    transition: 'background-color 0.25s ease, border-color 0.25s ease',
-    backgroundColor: scrolled ? 'rgba(241,237,233,0.97)' : 'transparent',
-    borderBottom: scrolled ? '0.5px solid var(--linen-deep)' : '0.5px solid transparent',
-    backdropFilter: 'none',
-  };
+  const serif = "'Source Serif 4', Georgia, serif";
+  const display = "'Playfair Display', Georgia, serif";
+  const ink = '#1C1510';
+  const inkMid = '#5C4A38';
+  const cream = '#F9F6F0';
+  const border = '#DDD5C8';
 
   return (
-    <nav style={navStyle} role="navigation" aria-label="Main navigation">
+    <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, transition: 'background-color 0.25s ease, border-color 0.25s ease', backgroundColor: scrolled ? 'rgba(249,246,240,0.97)' : 'transparent', borderBottom: scrolled ? `1px solid ${border}` : '1px solid transparent' }}
+      role="navigation" aria-label="Main navigation">
       <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '68px' }}>
-
-          {/* Wordmark */}
-          <Link
-            href="/"
-            style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: '18px',
-              fontWeight: 600,
-              letterSpacing: '0.04em',
-              color: 'var(--espresso)',
-              textDecoration: 'none',
-              lineHeight: 1,
-            }}
-            aria-label="Revision Foundations — Home"
-          >
+          <Link href="/" style={{ fontFamily: display, fontSize: '17px', fontWeight: 400, letterSpacing: '0.01em', color: ink, textDecoration: 'none', lineHeight: 1 }} aria-label="Revision Foundations — Home">
             Revision Foundations
           </Link>
 
-          {/* Desktop nav */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="hidden md:flex" role="menubar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }} className="hidden md:flex">
             {navLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                style={{
-                  fontFamily: "'Source Serif 4', Georgia, serif",
-                  fontSize: '14px',
-                  fontWeight: isActive(link.href) ? 500 : 400,
-                  color: isActive(link.href) ? 'var(--espresso)' : 'var(--charcoal-light)',
-                  textDecoration: 'none',
-                  borderBottom: isActive(link.href) ? '1px solid var(--espresso)' : '1px solid transparent',
-                  paddingBottom: '1px',
-                  transition: 'color 0.15s',
-                }}
-                role="menuitem"
-                aria-current={isActive(link.href) ? 'page' : undefined}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--espresso)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = isActive(link.href) ? 'var(--espresso)' : 'var(--charcoal-light)'; }}
-              >
+              <Link key={link.href} href={link.href} style={{ fontFamily: serif, fontSize: '14px', fontWeight: isActive(link.href) ? 500 : 400, color: isActive(link.href) ? ink : inkMid, textDecoration: 'none', borderBottom: isActive(link.href) ? `1px solid ${ink}` : '1px solid transparent', paddingBottom: '1px', transition: 'color 0.15s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = ink; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = isActive(link.href) ? ink : inkMid; }}
+                aria-current={isActive(link.href) ? 'page' : undefined}>
                 {link.label}
               </Link>
             ))}
-
             <SignedIn>
-              <div style={{ width: '0.5px', height: '16px', background: 'var(--linen-deep)' }} aria-hidden="true" />
-              <Link
-                href="/dashboard"
-                style={{
-                  fontFamily: "'Source Serif 4', Georgia, serif",
-                  fontSize: '14px',
-                  fontWeight: isActive('/dashboard') ? 500 : 400,
-                  color: isActive('/dashboard') ? 'var(--espresso)' : 'var(--charcoal-light)',
-                  textDecoration: 'none',
-                  transition: 'color 0.15s',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--espresso)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = isActive('/dashboard') ? 'var(--espresso)' : 'var(--charcoal-light)'; }}
-              >
+              <div style={{ width: '1px', height: '16px', background: border }} aria-hidden="true" />
+              <Link href="/dashboard" style={{ fontFamily: serif, fontSize: '14px', fontWeight: isActive('/dashboard') ? 500 : 400, color: isActive('/dashboard') ? ink : inkMid, textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = ink; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = isActive('/dashboard') ? ink : inkMid; }}>
                 Dashboard
               </Link>
               <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: 'w-7 h-7' } }} />
             </SignedIn>
-
             <SignedOut>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Link
-                  href="/sign-in"
-                  style={{
-                    fontFamily: "'Source Serif 4', Georgia, serif",
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    color: 'var(--charcoal-light)',
-                    textDecoration: 'none',
-                    transition: 'color 0.15s',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--espresso)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--charcoal-light)'; }}
-                >
+                <Link href="/sign-in" style={{ fontFamily: serif, fontSize: '14px', fontWeight: 400, color: inkMid, textDecoration: 'none', transition: 'color 0.15s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = ink; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = inkMid; }}>
                   Sign in
                 </Link>
-                <Link
-                  href="/pricing"
-                  style={{
-                    fontFamily: "'Source Serif 4', Georgia, serif",
-                    fontSize: '13px',
-                    fontWeight: 400,
-                    color: 'var(--cream)',
-                    background: 'var(--espresso)',
-                    padding: '7px 18px',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    transition: 'background 0.15s',
-                    letterSpacing: '0.01em',
-                  }}
-                >
+                <Link href="/pricing" style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: cream, background: ink, padding: '8px 20px', borderRadius: '9999px', textDecoration: 'none' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#3a2010'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = ink; }}>
                   Get Access
                 </Link>
               </div>
             </SignedOut>
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-              color: 'var(--espresso)',
-            }}
+          <button className="md:hidden" style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', color: ink }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-expanded={mobileMenuOpen}
-            aria-controls={mobileMenuId}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            {mobileMenuOpen
-              ? <X style={{ width: '22px', height: '22px' }} aria-hidden="true" />
-              : <Menu style={{ width: '22px', height: '22px' }} aria-hidden="true" />
-            }
+            aria-expanded={mobileMenuOpen} aria-controls={mobileMenuId}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}>
+            {mobileMenuOpen ? <X style={{ width: '22px', height: '22px' }} /> : <Menu style={{ width: '22px', height: '22px' }} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div
-          id={mobileMenuId}
-          style={{
-            background: 'var(--cream)',
-            borderTop: '0.5px solid var(--linen-deep)',
-            padding: '20px 24px 28px',
-          }}
-          role="menu"
-          aria-label="Mobile navigation"
-        >
+        <div id={mobileMenuId} style={{ background: cream, borderTop: `1px solid ${border}`, padding: '20px 24px 28px' }} role="menu">
           {navLinks.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                display: 'block',
-                padding: '12px 0',
-                fontFamily: "'Source Serif 4', Georgia, serif",
-                fontSize: '16px',
-                fontWeight: isActive(link.href) ? 500 : 400,
-                color: isActive(link.href) ? 'var(--espresso)' : 'var(--charcoal)',
-                textDecoration: 'none',
-                borderBottom: '0.5px solid var(--linen-deep)',
-              }}
-              onClick={closeMobileMenu}
-              role="menuitem"
-              aria-current={isActive(link.href) ? 'page' : undefined}
-            >
+            <Link key={link.href} href={link.href} style={{ display: 'block', padding: '12px 0', fontFamily: serif, fontSize: '16px', fontWeight: isActive(link.href) ? 500 : 400, color: isActive(link.href) ? ink : inkMid, textDecoration: 'none', borderBottom: `1px solid ${border}` }}
+              onClick={closeMobileMenu} aria-current={isActive(link.href) ? 'page' : undefined}>
               {link.label}
             </Link>
           ))}
-
           <SignedIn>
-            <Link
-              href="/dashboard"
-              style={{
-                display: 'block',
-                padding: '12px 0',
-                fontFamily: "'Source Serif 4', Georgia, serif",
-                fontSize: '16px',
-                color: 'var(--charcoal)',
-                textDecoration: 'none',
-                borderBottom: '0.5px solid var(--linen-deep)',
-              }}
-              onClick={closeMobileMenu}
-              role="menuitem"
-            >
+            <Link href="/dashboard" style={{ display: 'block', padding: '12px 0', fontFamily: serif, fontSize: '16px', color: inkMid, textDecoration: 'none', borderBottom: `1px solid ${border}` }} onClick={closeMobileMenu}>
               Dashboard
             </Link>
-            <div style={{ paddingTop: '20px' }}>
-              <UserButton afterSwitchSessionUrl="/" />
-            </div>
+            <div style={{ paddingTop: '20px' }}><UserButton afterSwitchSessionUrl="/" /></div>
           </SignedIn>
-
           <SignedOut>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '20px' }}>
-              <Link
-                href="/sign-in"
-                style={{
-                  display: 'block',
-                  textAlign: 'center',
-                  padding: '10px',
-                  fontFamily: "'Source Serif 4', Georgia, serif",
-                  fontSize: '15px',
-                  color: 'var(--charcoal)',
-                  border: '0.5px solid var(--linen-deep)',
-                  borderRadius: '3px',
-                  textDecoration: 'none',
-                }}
-                onClick={closeMobileMenu}
-                role="menuitem"
-              >
+              <Link href="/sign-in" style={{ display: 'block', textAlign: 'center' as const, padding: '11px', fontFamily: serif, fontSize: '15px', color: inkMid, border: `1px solid ${border}`, borderRadius: '9999px', textDecoration: 'none' }} onClick={closeMobileMenu}>
                 Sign in
               </Link>
-              <Link
-                href="/pricing"
-                style={{
-                  display: 'block',
-                  textAlign: 'center',
-                  padding: '10px',
-                  fontFamily: "'Source Serif 4', Georgia, serif",
-                  fontSize: '15px',
-                  color: 'var(--cream)',
-                  background: 'var(--espresso)',
-                  borderRadius: '3px',
-                  textDecoration: 'none',
-                }}
-                onClick={closeMobileMenu}
-                role="menuitem"
-              >
+              <Link href="/pricing" style={{ display: 'block', textAlign: 'center' as const, padding: '11px', fontFamily: serif, fontSize: '15px', color: cream, background: ink, borderRadius: '9999px', textDecoration: 'none' }} onClick={closeMobileMenu}>
                 Get Access
               </Link>
             </div>
