@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 export default function ContactPage() {
@@ -28,12 +30,16 @@ export default function ContactPage() {
                 Get in touch about your revision resources.
               </h1>
               <p className="mt-6 max-w-lg text-base leading-7 text-[#5f5348] md:text-lg">
-                If you have a question about your access, need support, or want to discuss a collaboration, feel free to get in touch. I aim to respond within 1–2 working days.
+                If you have a question about your access, need support, or want
+                to discuss a collaboration, feel free to get in touch. I aim to
+                respond within 1–2 working days.
               </p>
 
               <div className="mt-10 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">Email</p>
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">
+                    Email
+                  </p>
                   <a
                     href="mailto:lauren@revisionfoundations.com"
                     className="mt-3 block break-all font-serif text-2xl hover:underline"
@@ -46,7 +52,9 @@ export default function ContactPage() {
                 </div>
 
                 <div className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-5">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">WhatsApp</p>
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">
+                    WhatsApp
+                  </p>
                   <a
                     href="https://wa.me/447572650980"
                     target="_blank"
@@ -55,7 +63,10 @@ export default function ContactPage() {
                   >
                     Message on WhatsApp →
                   </a>
-                  <a href="tel:07572650980" className="mt-4 block font-serif text-3xl hover:underline">
+                  <a
+                    href="tel:07572650980"
+                    className="mt-4 block font-serif text-3xl hover:underline"
+                  >
                     07572 650 980
                   </a>
                   <p className="mt-2 text-sm leading-6 text-[#6c5f53]">
@@ -66,7 +77,10 @@ export default function ContactPage() {
             </div>
 
             <div className="rounded-[32px] border border-[#d9cfbf] bg-[#f8f4ed] p-6 shadow-sm md:p-8">
-              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">Send a message</p>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">
+                Send a message
+              </p>
+
               <form
                 className="mt-6 space-y-5"
                 onSubmit={(e) => {
@@ -79,10 +93,13 @@ export default function ContactPage() {
                   const firstName = data.get("firstName") || "";
                   const lastName = data.get("lastName") || "";
                   const email = data.get("email") || "";
-                  const enquiryType = data.get("enquiryType") || "General question";
+                  const enquiryType =
+                    data.get("enquiryType") || "General question";
                   const message = data.get("message") || "";
 
-                  const subject = encodeURIComponent(`New enquiry: ${enquiryType}`);
+                  const subject = encodeURIComponent(
+                    `New enquiry: ${enquiryType}`
+                  );
                   const body = encodeURIComponent(
                     `Name: ${firstName} ${lastName}\nEmail: ${email}\nType: ${enquiryType}\n\nMessage:\n${message}`
                   );
@@ -94,7 +111,9 @@ export default function ContactPage() {
               >
                 <div className="grid gap-5 md:grid-cols-2">
                   <label className="block">
-                    <span className="mb-2 block text-sm text-[#5f5348]">First name</span>
+                    <span className="mb-2 block text-sm text-[#5f5348]">
+                      First name
+                    </span>
                     <input
                       type="text"
                       name="firstName"
@@ -102,8 +121,11 @@ export default function ContactPage() {
                       className="w-full rounded-2xl border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]"
                     />
                   </label>
+
                   <label className="block">
-                    <span className="mb-2 block text-sm text-[#5f5348]">Last name</span>
+                    <span className="mb-2 block text-sm text-[#5f5348]">
+                      Last name
+                    </span>
                     <input
                       type="text"
                       name="lastName"
@@ -114,7 +136,9 @@ export default function ContactPage() {
                 </div>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm text-[#5f5348]">Email address</span>
+                  <span className="mb-2 block text-sm text-[#5f5348]">
+                    Email address
+                  </span>
                   <input
                     type="email"
                     name="email"
@@ -124,7 +148,9 @@ export default function ContactPage() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm text-[#5f5348]">What can I help with?</span>
+                  <span className="mb-2 block text-sm text-[#5f5348]">
+                    What can I help with?
+                  </span>
                   <select
                     name="enquiryType"
                     className="w-full rounded-2xl border border-[#d9cfbf] bg-[#fbf8f2] px-4 py-3 text-sm outline-none transition focus:border-[#bca68d]"
@@ -137,7 +163,9 @@ export default function ContactPage() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm text-[#5f5348]">Message</span>
+                  <span className="mb-2 block text-sm text-[#5f5348]">
+                    Message
+                  </span>
                   <textarea
                     name="message"
                     rows={7}
@@ -148,8 +176,10 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-4 border-t border-[#e2d8cb] pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="max-w-xs text-xs leading-5 text-[#7a6c60]">
-                    Usually replies within 1–2 working days. For account issues, include the email you signed up with.
+                    Usually replies within 1–2 working days. For account issues,
+                    include the email you signed up with.
                   </p>
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -182,10 +212,19 @@ export default function ContactPage() {
                 body: "Available for urgent queries during working hours when you would prefer to speak directly.",
               },
             ].map((item) => (
-              <div key={item.title} className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-6">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">{item.eyebrow}</p>
-                <h2 className="mt-4 font-serif text-3xl leading-tight">{item.title}</h2>
-                <p className="mt-3 text-sm leading-6 text-[#66594d]">{item.body}</p>
+              <div
+                key={item.title}
+                className="rounded-[28px] border border-[#d9cfbf] bg-[#f7f2ea] p-6"
+              >
+                <p className="text-[11px] uppercase tracking-[0.24em] text-[#9a8874]">
+                  {item.eyebrow}
+                </p>
+                <h2 className="mt-4 font-serif text-3xl leading-tight">
+                  {item.title}
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-[#66594d]">
+                  {item.body}
+                </p>
               </div>
             ))}
           </div>
@@ -194,25 +233,34 @@ export default function ContactPage() {
         <section className="mx-auto max-w-6xl px-6 py-16 lg:px-10 lg:py-20">
           <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
             <div className="rounded-[32px] border border-[#d9cfbf] bg-[#f8f4ed] p-8 md:p-10">
-              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">A note from Lauren</p>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">
+                A note from Lauren
+              </p>
               <h2 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">
                 Built to support you properly.
               </h2>
               <p className="mt-5 text-base leading-7 text-[#5f5348]">
-                I created Revision Foundations to make OSCE preparation clearer, more structured, and less overwhelming. If something isn’t working for you, or you need help navigating the resources, I genuinely want to know.
+                I created Revision Foundations to make OSCE preparation clearer,
+                more structured, and less overwhelming. If something is not
+                working for you, or you need help navigating the resources, I
+                genuinely want to know.
               </p>
               <p className="mt-4 text-base leading-7 text-[#5f5348]">
-                Every message is read personally, and your feedback directly shapes updates and improvements.
+                Every message is read personally, and your feedback directly
+                shapes updates and improvements.
               </p>
               <p className="mt-6 font-serif text-lg">— Lauren</p>
             </div>
 
             <div className="flex items-center justify-center rounded-[32px] border border-[#d9cfbf] bg-[#f7f2ea] p-6 md:p-8">
               <div className="text-center">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-[#9a8874]">Students supported</p>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[#9a8874]">
+                  Students supported
+                </p>
                 <p className="mt-4 font-serif text-6xl">1,000+</p>
                 <p className="mt-3 text-sm text-[#6c5f53]">
-                  Nursing students using Revision Foundations for OSCEs and exams.
+                  Nursing students using Revision Foundations for OSCEs and
+                  exams.
                 </p>
               </div>
             </div>
@@ -222,12 +270,15 @@ export default function ContactPage() {
         <section className="border-y border-[#d9cfbf] bg-[#f7f2ea]">
           <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-20">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">Before you get in touch</p>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">
+                Before you get in touch
+              </p>
               <h2 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">
                 A few of the most common questions.
               </h2>
               <p className="mt-5 max-w-md text-base leading-7 text-[#5f5348]">
-                If your question is about access, downloads, or updates, these quick notes may help straight away.
+                If your question is about access, downloads, or updates, these
+                quick notes may help straight away.
               </p>
             </div>
 
@@ -235,20 +286,30 @@ export default function ContactPage() {
               {[
                 {
                   question: "How quickly will I get a reply?",
-                  answer: "Most messages are answered within 1–2 working days. During busy periods, replies may take a little longer.",
+                  answer:
+                    "Most messages are answered within 1–2 working days. During busy periods, replies may take a little longer.",
                 },
                 {
                   question: "What should I include in my message?",
-                  answer: "Please include the email you used at checkout and a short summary of the issue so I can help as quickly as possible.",
+                  answer:
+                    "Please include the email you used at checkout and a short summary of the issue so I can help as quickly as possible.",
                 },
                 {
                   question: "Can I use WhatsApp instead of email?",
-                  answer: "Yes — WhatsApp is ideal for quick questions. Email is usually best for anything detailed or account-related.",
+                  answer:
+                    "Yes — WhatsApp is ideal for quick questions. Email is usually best for anything detailed or account-related.",
                 },
               ].map((item) => (
-                <div key={item.question} className="rounded-[28px] border border-[#d9cfbf] bg-[#fbf8f2] p-6">
-                  <h3 className="font-serif text-2xl leading-tight">{item.question}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[#66594d]">{item.answer}</p>
+                <div
+                  key={item.question}
+                  className="rounded-[28px] border border-[#d9cfbf] bg-[#fbf8f2] p-6"
+                >
+                  <h3 className="font-serif text-2xl leading-tight">
+                    {item.question}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-[#66594d]">
+                    {item.answer}
+                  </p>
                 </div>
               ))}
             </div>
@@ -258,12 +319,15 @@ export default function ContactPage() {
         <section className="mx-auto max-w-6xl px-6 py-16 lg:px-10 lg:py-20">
           <div className="grid items-center gap-6 rounded-[32px] border border-[#d9cfbf] bg-[#f8f4ed] p-8 md:p-10 lg:grid-cols-[1fr_auto]">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">Need a quicker route?</p>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[#8b7a67]">
+                Need a quicker route?
+              </p>
               <h2 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">
                 Contact Lauren directly.
               </h2>
               <p className="mt-4 max-w-2xl text-base leading-7 text-[#5f5348]">
-                For urgent questions, you can call or send a WhatsApp message directly. For anything detailed, email is still the best option.
+                For urgent questions, you can call or send a WhatsApp message
+                directly. For anything detailed, email is still the best option.
               </p>
             </div>
 
@@ -290,29 +354,41 @@ export default function ContactPage() {
       <footer className="bg-[#1a120d] text-[#d9c7b2]">
         <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-4 lg:px-10">
           <div>
-            <div className="font-serif text-2xl text-[#f2e7d7]">Revision Foundations</div>
+            <div className="font-serif text-2xl text-[#f2e7d7]">
+              Revision Foundations
+            </div>
             <p className="mt-3 max-w-xs text-sm leading-6 text-[#b49f8a]">
-              Made with care for nursing students preparing for real assessments.
+              Made with care for nursing students preparing for real
+              assessments.
             </p>
           </div>
+
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#9f8b77]">Products</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#9f8b77]">
+              Products
+            </p>
             <div className="mt-4 space-y-2 text-sm">
               <a href="#" className="block hover:text-white">OSCE Tool</a>
               <a href="#" className="block hover:text-white">Core Quiz</a>
               <a href="#" className="block hover:text-white">Revision Hub</a>
             </div>
           </div>
+
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#9f8b77]">Company</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#9f8b77]">
+              Company
+            </p>
             <div className="mt-4 space-y-2 text-sm">
               <a href="#" className="block hover:text-white">About</a>
               <a href="#" className="block hover:text-white">Contact</a>
               <a href="#" className="block hover:text-white">Privacy Policy</a>
             </div>
           </div>
+
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#9f8b77]">Account</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#9f8b77]">
+              Account
+            </p>
             <div className="mt-4 space-y-2 text-sm">
               <a href="#" className="block hover:text-white">Sign in</a>
               <a href="#" className="block hover:text-white">Sign up</a>
