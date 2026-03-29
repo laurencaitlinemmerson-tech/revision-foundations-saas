@@ -115,10 +115,7 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
-                    <label
-                      htmlFor="name"
-                      className="mb-2 block text-sm font-medium text-[var(--plum-dark)]"
-                    >
+                    <label htmlFor="name" className="mb-2 block text-sm font-medium text-[var(--plum-dark)]">
                       Name
                     </label>
                     <input
@@ -134,10 +131,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="email"
-                      className="mb-2 block text-sm font-medium text-[var(--plum-dark)]"
-                    >
+                    <label htmlFor="email" className="mb-2 block text-sm font-medium text-[var(--plum-dark)]">
                       Email
                     </label>
                     <input
@@ -154,10 +148,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="subject"
-                    className="mb-2 block text-sm font-medium text-[var(--plum-dark)]"
-                  >
+                  <label htmlFor="subject" className="mb-2 block text-sm font-medium text-[var(--plum-dark)]">
                     Subject
                   </label>
                   <select
@@ -178,10 +169,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="message"
-                    className="mb-2 block text-sm font-medium text-[var(--plum-dark)]"
-                  >
+                  <label htmlFor="message" className="mb-2 block text-sm font-medium text-[var(--plum-dark)]">
                     Message
                   </label>
                   <textarea
