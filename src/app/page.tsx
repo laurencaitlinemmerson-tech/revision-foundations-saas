@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import Navbar from '@/components/Navbar';
@@ -143,7 +141,6 @@ export default function HomePage() {
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      {/* ── Hero ── */}
       <section style={{ padding: '128px 24px 108px', borderBottom: `1px solid ${border}` }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <div
@@ -220,7 +217,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Branch selector ── */}
       <section style={{ padding: '84px 24px 72px' }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>Choose your branch</p>
@@ -329,7 +325,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── What's included ── */}
       <section style={{ padding: '32px 24px 48px' }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>What&apos;s included</p>
@@ -444,7 +439,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── A look inside ── */}
       <section style={{ padding: '36px 24px 84px', borderTop: `1px solid ${border}` }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>A look inside</p>
@@ -477,7 +471,6 @@ export default function HomePage() {
           </p>
 
           <div style={{ display: 'grid', gap: '18px', marginBottom: '18px' }}>
-            {/* ── OSCE A-E preview (full width) ── */}
             <div style={sampleCardStyle}>
               <div
                 style={{
@@ -670,7 +663,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── Three-column row: Quiz + Obs + Meds cheat sheet ── */}
             <div
               style={{
                 display: 'grid',
@@ -678,7 +670,6 @@ export default function HomePage() {
                 gap: '18px',
               }}
             >
-              {/* Quiz preview */}
               <div style={sampleCardStyle}>
                 <div style={sampleInnerStyle}>
                   <SampleLabel>Quiz — paediatric observations</SampleLabel>
@@ -760,7 +751,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Obs ranges preview */}
               <div style={sampleCardStyle}>
                 <div style={sampleInnerStyle}>
                   <SampleLabel>Hub resource</SampleLabel>
@@ -840,7 +830,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Meds cheat sheet preview */}
               <div style={sampleCardStyle}>
                 <div style={sampleInnerStyle}>
                   <SampleLabel>Hub — drug calculations</SampleLabel>
@@ -858,7 +847,6 @@ export default function HomePage() {
                     Medication Cheat Sheet
                   </h3>
 
-                  {/* Core formula */}
                   <div
                     style={{
                       background: '#EEE8DE',
@@ -899,7 +887,6 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  {/* Unit conversion staircase */}
                   <p
                     style={{
                       fontFamily: serif,
@@ -957,7 +944,6 @@ export default function HomePage() {
                     ))}
                   </div>
 
-                  {/* IV drip rate teaser */}
                   <div
                     style={{
                       background: '#EEE8DE',
@@ -1011,7 +997,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ── Bundle CTA ── */}
           <div
             style={{
               marginTop: '44px',
@@ -1087,7 +1072,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Why it exists ── */}
       <section style={{ padding: '84px 24px', background: parchment }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>Why it exists</p>
@@ -1146,7 +1130,6 @@ export default function HomePage() {
 
       <Testimonials />
 
-      {/* ── Final CTA ── */}
       <section style={{ padding: '88px 24px 96px', borderTop: `1px solid ${border}` }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <p style={sectionLabelStyle}>Ready</p>
@@ -1185,7 +1168,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Contact strip ── */}
       <section
         style={{
           padding: '26px 24px',
