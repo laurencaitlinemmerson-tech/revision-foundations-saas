@@ -18,152 +18,102 @@
 
   body { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; overflow: auto; }
-
   .main-wrapper { min-height: 100%; width: 100%; }
 
   /* ---------- Background ---------- */
   .gradient-bg {
-    background: #FAFAF8; /* was linear-gradient(
-      135deg,
-      #1C1510 0%, */
-      #2A2118 25%,
-      #342A20 50%,
-      #3D3228 75%,
-      #463A30 100%
-    );
+    background: #F9F6F0;
     position: relative;
     overflow: hidden;
   }
+  .gradient-bg::before { display: none; }
+  #particles { display: none; }
 
-  .gradient-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 20% 20%, rgba(196, 149, 106, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(232, 201, 160, 0.15) 0%, transparent 50%);
-    pointer-events: none;
-  }
-
-  .particle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: transparent;
-    border-radius: 50%;
-    pointer-events: none;
-    animation: float 20s infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-    25% { transform: translate(30px, -30px) scale(1.2); opacity: 0.6; }
-    50% { transform: translate(-20px, -60px) scale(0.8); opacity: 0.4; }
-    75% { transform: translate(40px, -90px) scale(1.1); opacity: 0.5; }
-  }
-
-  /* ---------- Glass Cards ---------- */
+  /* ---------- Cards ---------- */
   .glass-card {
-    background: #FFFFFF;
-    backdrop-filter: none;
-    border: 0.5px solid rgba(0,0,0,0.12);
-    box-shadow:
-      
-      
+    background: #F3EEE4;
+    border: 1px solid #D9D0C1;
+    box-shadow: none;
   }
-
   .glass-card:hover {
-    border-color: rgba(196, 149, 106, 0.4);
+    border-color: #B8AD9E;
   }
 
   /* ---------- Buttons ---------- */
   .btn-gradient {
-    background: #FAFAF8; /* was linear-gradient(135deg, #C4956A 0%, #E8C9A0 100%);
-    transition: all 0.3s ease;
-    box-shadow: none;
+    background: #1C1510;
+    transition: all 0.2s ease;
   }
-
   .btn-gradient:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: none;
+    background: #2A2118;
   }
-
   .btn-gradient:focus-visible {
-    outline: 3px solid rgba(48, 25, 6, 0.3);
+    outline: 3px solid rgba(28, 21, 16, 0.3);
     outline-offset: 2px;
   }
 
   .btn-secondary {
-    background: rgba(148, 163, 184, 0.1);
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    transition: all 0.3s ease;
+    background: #F7F2E8;
+    border: 1px solid #D9D0C1;
+    transition: all 0.2s ease;
   }
-
   .btn-secondary:hover:not(:disabled) {
-    background: rgba(148, 163, 184, 0.2);
-    border-color: rgba(148, 163, 184, 0.5);
+    background: #F3EEE4;
+    border-color: #B8AD9E;
   }
-
   .btn-secondary:focus-visible {
-    outline: 3px solid rgba(148, 163, 184, 0.6);
+    outline: 3px solid rgba(28, 21, 16, 0.3);
     outline-offset: 2px;
   }
 
   /* ---------- Topic Cards ---------- */
   .topic-card {
-    background: #FFFFFF;
-    border: 0.5px solid rgba(0,0,0,0.12);
-    transition: all 0.3s ease;
+    background: #F7F2E8;
+    border: 1px solid #D9D0C1;
+    transition: all 0.2s ease;
     cursor: pointer;
   }
-
   .topic-card:hover {
-    border-color: rgba(0,0,0,0.25);
-    transform: translateY(-4px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #B8AD9E;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(28,21,16,0.06);
   }
-
   .topic-card:focus-visible {
-    outline: 3px solid rgba(48, 25, 6, 0.3);
+    outline: 3px solid rgba(28, 21, 16, 0.3);
     outline-offset: 2px;
   }
-
   .topic-card.selected {
-    border-color: #301906;
+    border-color: #1C1510;
     background: #F3EEE4;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
   /* ---------- Checklist Items ---------- */
   .checklist-item {
-    background: #FFFFFF;
+    background: #F9F6F0;
     border-left: 3px solid #D9D0C1;
     transition: all 0.2s ease;
   }
-
   .checklist-item.checked {
-    background: rgba(34, 197, 94, 0.15);
+    background: rgba(34, 197, 94, 0.1);
     border-left-color: #22c55e;
   }
-
   .checklist-item.critical {
     border-left-color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.07);
   }
 
   /* ---------- Tabs ---------- */
   .tab-button {
     transition: all 0.2s ease;
     border-bottom: 2px solid transparent;
+    color: #9C8878;
   }
-
   .tab-button.active {
-    border-bottom-color: #301906;
-    color: #301906;
+    border-bottom-color: #1C1510;
+    color: #1C1510;
   }
-
   .tab-button:focus-visible {
-    outline: 3px solid rgba(48, 25, 6, 0.3);
+    outline: 3px solid rgba(28, 21, 16, 0.3);
     outline-offset: 2px;
   }
 
@@ -171,7 +121,7 @@
   input[type="checkbox"]:focus-visible,
   textarea:focus-visible,
   input:focus-visible {
-    outline: 3px solid rgba(48, 25, 6, 0.3);
+    outline: 3px solid rgba(28, 21, 16, 0.3);
     outline-offset: 2px;
   }
 
@@ -182,26 +132,23 @@
     right: -400px;
     width: 400px;
     height: 100%;
-    background: rgba(250, 250, 248, 0.98);
-    backdrop-filter: none;
-    border-left: 0.5px solid rgba(0,0,0,0.12);
+    background: #F9F6F0;
+    border-left: 1px solid #D9D0C1;
     transition: right 0.3s ease;
     z-index: 1000;
     overflow-y: auto;
   }
-
   .navigator-drawer.open { right: 0; }
 
   .navigator-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(28, 21, 16, 0.5);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
     z-index: 999;
   }
-
   .navigator-overlay.visible {
     opacity: 1;
     pointer-events: auto;
@@ -209,70 +156,63 @@
 
   /* ---------- Animations ---------- */
   .fade-in { animation: fadeIn 0.4s ease-out; }
-
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   .timer-warning { animation: pulse 2s infinite; }
-
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
   }
 
   .hint-reveal { animation: highlightPulse 2s ease-out; }
-
   @keyframes highlightPulse {
-    0% { background: rgba(48, 25, 6, 0.08); transform: scale(1.02); }
-    100% { background: #FFFFFF; transform: scale(1); }
+    0% { background: rgba(28, 21, 16, 0.08); transform: scale(1.02); }
+    100% { background: #F3EEE4; transform: scale(1); }
   }
 
-  /* ---------- Red Pulsing Badge (Needs Work) ---------- */
   @keyframes redPulseGlow {
-    0%, 100% {
-      transform: scale(1);
-      box-shadow: 0 0 0 rgba(239, 68, 68, 0);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.04);
-      box-shadow: 0 0 28px rgba(239, 68, 68, 0.45);
-      opacity: 0.95;
-    }
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(239, 68, 68, 0); opacity: 1; }
+    50% { transform: scale(1.04); box-shadow: 0 0 28px rgba(239, 68, 68, 0.45); opacity: 0.95; }
   }
+  .pulse-red-badge { animation: redPulseGlow 1.3s ease-in-out infinite; }
 
-  .pulse-red-badge {
-    animation: redPulseGlow 1.3s ease-in-out infinite;
+  /* ---------- Difficulty + Type Pills ---------- */
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    border: 1px solid #D9D0C1;
+    background: #F7F2E8;
+    color: #5C4A38;
+    text-transform: uppercase;
   }
+  .pill-badge .dot {
+    width: 8px; height: 8px; border-radius: 999px;
+    background: #B8AD9E;
+  }
+  .pill-easy .dot { background: rgba(34,197,94,0.9); }
+  .pill-medium .dot { background: rgba(250,204,21,0.9); }
+  .pill-hard .dot { background: rgba(244,63,94,0.9); }
+  .pill-mcq .dot { background: rgba(34,211,238,0.9); }
+  .pill-tf .dot { background: rgba(168,85,247,0.9); }
+  .pill-multiselect .dot { background: rgba(236,72,153,0.9); }
 
-/* Difficulty + Type Pills */
-.pill-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.04em;
-  border:1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.85);
-  text-transform: uppercase;
-}
-.pill-badge .dot{
-  width:8px; height:8px; border-radius:999px;
-  background: rgba(255,255,255,0.55);
-}
-.pill-easy .dot{ background: rgba(34,197,94,0.95); }
-.pill-medium .dot{ background: rgba(250,204,21,0.95); }
-.pill-hard .dot{ background: rgba(244,63,94,0.95); }
-.pill-mcq .dot{ background: rgba(34,211,238,0.95); }
-.pill-tf .dot{ background: rgba(168,85,247,0.95); }
-.pill-multiselect .dot{ background: rgba(236,72,153,0.95); }
-
+  /* ---------- Tailwind overrides for light background ---------- */
+  .text-white { color: #1C1510 !important; }
+  .btn-gradient { color: #F9F6F0 !important; }
+  .text-slate-300 { color: #9C8878 !important; }
+  .text-slate-400 { color: #9C8878 !important; }
+  .bg-white { background-color: rgba(249,246,240,0.7) !important; }
+  .blur-3xl { display: none !important; }
+  .border-transparent { border-color: #D9D0C1 !important; }
 </style>
 
 
