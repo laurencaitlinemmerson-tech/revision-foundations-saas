@@ -1,6 +1,6 @@
-'use client';
+ 'use client';
 
-import { ReactNode, useMemo, useState } from 'react';
+import { ReactNode, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -47,11 +47,11 @@ export default function DashboardClient({
   firstName,
   hasAnyTool = false,
 }: DashboardClientProps) {
-  const [tasks, setTasks] = useState<string[]>([]); // Tasks state
-  const [completedTasks, setCompletedTasks] = useState<number>(0); // Completed tasks
+  useScrollAnimation();
 
-  // Manage greetings based on the time of day
+  const shouldReduceMotion = useReducedMotion();
   const hour = new Date().getHours();
+
   const greeting = useMemo(() => {
     if (hour < 12) return 'Good morning';
     if (hour < 18) return 'Good afternoon';
@@ -65,7 +65,7 @@ export default function DashboardClient({
   }, [hour]);
 
   const today = useMemo(() => formatToday(), []);
-  const shouldReduceMotion = useReducedMotion();
+
   const motionProps = shouldReduceMotion
     ? {}
     : {
@@ -73,31 +73,6 @@ export default function DashboardClient({
         animate: 'visible' as const,
         variants: containerVariants,
       };
-
-  // Add Task function
-  const addTask = () => {
-    const taskInput = (document.getElementById('new-task') as HTMLInputElement).value;
-    if (taskInput.trim() !== "") {
-      setTasks([...tasks, taskInput.trim()]);
-      document.getElementById('new-task')!.value = ""; // Clear input field
-      updateProgress(); // Update progress after adding a new task
-    }
-  };
-
-  // Update Progress Bar
-  const updateProgress = () => {
-    const totalTasks = tasks.length;
-    const completed = tasks.filter((task, index) => {
-      const checkbox = document.getElementById(`checkbox-${index}`) as HTMLInputElement;
-      return checkbox && checkbox.checked;
-    }).length;
-    setCompletedTasks(completed);
-    
-    // Update progress bar
-    const progressPercentage = (completed / totalTasks) * 100;
-    document.getElementById('progress')!.style.width = `${progressPercentage}%`;
-    document.getElementById('progress-text')!.textContent = `${Math.round(progressPercentage)}% completed`;
-  };
 
   return (
     <div className="min-h-screen bg-cream">
@@ -215,52 +190,6 @@ export default function DashboardClient({
               </p>
             </motion.div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Study Progress Section */}
-      <section>
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Progress Bar */}
-          <div className="card bg-white border border-[var(--linen-deep)] p-6">
-            <h3 className="text-xl font-display text-[var(--espresso)] mb-4">Your Progress</h3>
-            <div className="progress-container">
-              <div className="progress-bar">
-                <div className="progress" id="progress"></div>
-              </div>
-              <p id="progress-text">0% completed</p>
-            </div>
-          </div>
-
-          {/* Study Plan */}
-          <div className="card bg-white border border-[var(--linen-deep)] p-6">
-            <h3 className="text-xl font-display text-[var(--espresso)] mb-4">Today's Study Plan</h3>
-            <ul id="study-tasks" className="list-none">
-              {tasks.map((task, index) => (
-                <li key={index} className="flex items-center mb-3">
-                  <input
-                    type="checkbox"
-                    id={`checkbox-${index}`}
-                    className="mr-2"
-                    onChange={updateProgress}
-                  />
-                  <span>{task}</span>
-                </li>
-              ))}
-            </ul>
-            <input
-              type="text"
-              id="new-task"
-              className="p-2 border border-[var(--linen-deep)] rounded mb-2 w-full"
-              placeholder="Add new task..."
-            />
-            <button
-              className="w-full bg-[var(--espresso)] text-white py-2 mt-2 rounded"
-              onClick={addTask}
-            >
-              Add Task
-            </button>
-          </div>
         </div>
       </section>
 
