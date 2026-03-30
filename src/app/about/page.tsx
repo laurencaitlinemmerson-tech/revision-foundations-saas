@@ -373,27 +373,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-     <section style={{ padding: '40px 24px', backgroundColor: parchment }}>
-  <div style={{ maxWidth: '920px', margin: '0 auto' }}>
-    <h2 style={{ fontFamily: display, fontSize: '2rem', color: ink, marginBottom: '20px' }}>
-      Latest Blog Post
-    </h2>
-
-    <div style={{ background: paper, padding: '20px', borderRadius: '14px' }}>
-      <h3 style={{ fontFamily: display, fontSize: '1.5rem', color: ink }}>
-        Maintaining Wellness During Placement
-      </h3>
-      <p style={{ ...body, fontSize: '14px', color: inkMid, marginBottom: '12px' }}>
-        A look at how simple habits like meal prepping and exercise can help you stay healthy during a busy placement...
-      </p>
-      <Link href="/blog/wellness-placement" style={textLink}>
-        Read more →
-      </Link>
-    </div>
-  </div>
-</section>
-
-  
 
       <section style={{ padding: '0 24px 84px' }}>
         <div style={{ maxWidth: '920px', margin: '0 auto' }}>
