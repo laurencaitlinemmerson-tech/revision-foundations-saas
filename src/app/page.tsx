@@ -27,6 +27,9 @@ const tools = [
   {
     num: '01',
     title: "Children's OSCE Tool",
+    challenge: "I get nervous during OSCEs and struggle with the timed nature.",
+    solution: "Simulate real OSCE scenarios with timed stations that mirror the structure of your actual exam. Practice under pressure to build confidence and improve your performance.",
+    benefit: "Familiarize yourself with the exam format and reduce anxiety. Get comfortable with timed practice, and approach the real test with confidence.",
     desc: '50+ practice stations covering paediatric observations, A–E assessment, medication administration, safeguarding, and SBAR handover. Each station includes a marking checklist and timed mode.',
     tags: ['Paed obs', 'A–E', 'Medication admin', 'Safeguarding'],
     href: '/osce',
@@ -34,6 +37,9 @@ const tools = [
   {
     num: '02',
     title: 'Core Nursing Quiz',
+    challenge: "I struggle to retain key facts and formulas for my exams.",
+    solution: "Our Core Quizzes help you master critical nursing concepts with targeted practice. Each quiz adapts to your skill level, so you can improve at your own pace.",
+    benefit: "Track your progress and gain confidence with every quiz. Master the essential topics for your exams and retain what matters most.",
     desc: 'Topic-based revision across vital signs, drug calculations, anatomy and physiology, pharmacology, infection control, and fluid balance, with clear explanations throughout.',
     tags: ['Drug calculations', 'Vital signs', 'Pharmacology', 'Infection control'],
     href: '/quiz',
@@ -41,6 +47,9 @@ const tools = [
   {
     num: '03',
     title: 'Revision Hub',
+    challenge: "I waste time looking for the right revision material.",
+    solution: "Access concise and comprehensive revision notes organized by topic. All the material you need for exams is available in one place, making revision easy and effective.",
+    benefit: "Stay focused and save time by using expertly curated notes. No more searching through endless textbooks—everything is here, ready for you.",
     desc: 'Clinical guides, cheat sheets, and reference articles built around the topics nursing students actually use during placement and revision.',
     tags: ['Cheat sheets', 'Clinical guides', 'Placement tips', 'Q&A'],
     href: '/hub',
