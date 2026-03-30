@@ -221,72 +221,7 @@ export default function HomePage() {
 </section>
 
 
-{/* ── Placement Guides ── */}
-<section style={{ padding: '48px 24px', background: panelSoft }}>
-  <div style={{ maxWidth: wrap, margin: '0 auto' }}>
-    <h2
-      style={{
-        fontFamily: display,
-        fontSize: 'clamp(2rem, 5vw, 2.5rem)',
-        fontWeight: 500,
-        lineHeight: 1.2,
-        color: ink,
-        marginBottom: '24px',
-      }}
-    >
-      Placement Success Guides
-    </h2>
-
-    <p
-      style={{
-        fontFamily: serif,
-        fontSize: '16px',
-        lineHeight: 1.8,
-        fontWeight: 300,
-        color: inkMid,
-        maxWidth: '680px',
-        marginBottom: '36px',
-      }}
-    >
-      Expert tips and guides to help you succeed during your clinical placements. Prepare confidently with resources tailored to nursing students.
-    </p>
-
-    {/* Placement Guide Link */}
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-     <Link
-  href="/hub/resources/placement-survival"  // Corrected route to the placement survival guide
-  style={{
-    display: 'block',
-    background: tagBg,
-    padding: '18px',
-    borderRadius: '12px',
-    textDecoration: 'none',
-    color: ink,
-    textAlign: 'center',
-  }}
->
-  <h3
-    style={{
-      fontFamily: display,
-      fontSize: '20px',
-      fontWeight: 400,
-      lineHeight: 1.2,
-      marginBottom: '12px',
-    }}
-  >
-    Placement Success Tips
-  </h3>
-  <p
-    style={{
-      fontFamily: serif,
-      fontSize: '14px',
-      color: inkMid,
-      fontWeight: 300,
-    }}
-  >
-    Expert advice and actionable tips on navigating your clinical placements with confidence.
-  </p>
-</Link>
+</section>
 
       {/* ── Branch selector ── */}
       <section style={{ padding: '84px 24px 72px' }}>
@@ -1355,45 +1290,46 @@ export default function HomePage() {
 
       <Footer />
 
-{/* Mobile responsive overrides */}
-    <style>{`
-      @media (max-width: 768px) {
-        .home-sample-3col {
-          grid-template-columns: 1fr !important;
+      {/* Mobile responsive overrides */}
+      <style>{`
+        @media (max-width: 768px) {
+          .home-sample-3col {
+            grid-template-columns: 1fr !important;
+          }
+          .home-why-grid {
+            grid-template-columns: 1fr !important;
+            gap: 28px !important;
+          }
+          .home-osce-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .home-osce-4col {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+          .home-tool-row {
+            grid-template-columns: 1fr !important;
+          }
+          .home-bundle-cta {
+            padding: 32px 24px !important;
+          }
+          .home-hub-grid {
+            grid-template-columns: 1fr !important;
+          }
         }
-        .home-why-grid {
-          grid-template-columns: 1fr !important;
-          gap: 28px !important;
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .home-hub-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
         }
-        .home-osce-grid {
-          grid-template-columns: 1fr !important;
+        @media (max-width: 480px) {
+          .home-osce-4col {
+            grid-template-columns: 1fr !important;
+          }
         }
-        .home-osce-4col {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        .home-hub-card:hover {
+          border-color: #B8AD9E !important;
         }
-        .home-tool-row {
-          grid-template-columns: 1fr !important;
-        }
-        .home-bundle-cta {
-          padding: 32px 24px !important;
-        }
-        .home-hub-grid {
-          grid-template-columns: 1fr !important;
-        }
-      }
-      @media (min-width: 769px) and (max-width: 1024px) {
-        .home-hub-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-      }
-      @media (max-width: 480px) {
-        .home-osce-4col {
-          grid-template-columns: 1fr !important;
-        }
-      }
-      .home-hub-card:hover {
-        border-color: #B8AD9E !important;
-      }
-    `}</style>
-  </div>
-);
+      `}</style>
+    </div>
+  );
+}
