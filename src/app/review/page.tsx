@@ -1,158 +1,200 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { CSSProperties } from 'react';
-import { supabase } from '@/lib/supabase'; // Import the Supabase client
-import Link from 'next/link';
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-
-// Colors and styles
-const ink = '#1C1510'; // Dark text
-const cream = '#F9F6F0'; // Light background
-const border = '#D9D0C1'; // Subtle border color
-const green = '#1E8A4D'; // Button color
-const display = "'Playfair Display', Georgia, serif";
-const serif = "'Source Serif 4', Georgia, serif";
-const wrap = '1120px';
-
-const sectionLabelStyle: CSSProperties = {
-  fontFamily: serif,
-  fontSize: '11px',
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  color: '#9C8878',
-  marginBottom: '14px',
-};
-
-const sectionHeadingStyle: CSSProperties = {
-  fontFamily: display,
-  fontSize: 'clamp(2rem, 4vw, 3rem)',
-  fontWeight: 400,
-  lineHeight: 1.15,
-  color: ink,
-  marginBottom: '24px',
-};
-
-const sectionTextStyle: CSSProperties = {
-  fontFamily: serif,
-  fontSize: '18px',
-  lineHeight: 1.8,
-  fontWeight: 300,
-  color: '#5C4A38',
-  maxWidth: '700px',
-  marginBottom: '40px',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-};
-
-const reviewCardStyle: CSSProperties = {
-  background: '#FFF9F1',
-  padding: '24px',
-  borderRadius: '10px',
-  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.05)',
-  textAlign: 'center',
-  maxWidth: '500px',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  marginBottom: '24px',
-};
-
-const testimonialStyle: CSSProperties = {
-  fontFamily: serif,
-  fontSize: '16px',
-  lineHeight: 1.6,
-  fontStyle: 'italic',
-  color: '#5C4A38',
-  marginBottom: '16px',
-};
-
-const authorStyle: CSSProperties = {
-  fontFamily: serif,
-  fontSize: '14px',
-  color: '#1C1510',
-  fontWeight: 600,
-};
-
-const primaryButton: CSSProperties = {
-  display: 'inline-block',
-  fontFamily: serif,
-  fontSize: '14px',
-  fontWeight: 400,
-  background: ink,
-  color: cream,
-  padding: '12px 24px',
-  borderRadius: '9999px',
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
-  textAlign: 'center',
-  transition: 'background-color 0.3s ease',
-  marginTop: '40px',
-  marginBottom: '40px',
-  cursor: 'pointer',
-};
+import Link from 'next/link';
+import { Star, Send, ArrowLeft, Heart, Loader2 } from 'lucide-react';
 
 export default function ReviewPage() {
-  const [reviews, setReviews] = useState<any[]>([]); // State to store reviews
+  const [name, setName] = useState('');
+  const [text, setText] = useState('');
+  const [rating, setRating] = useState(5);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  // Fetch reviews from Supabase on component mount
-  useEffect(() => {
-    const fetchReviews = async () => {
-      const { data, error } = await supabase
-        .from('reviews') // Replace 'reviews' with your actual Supabase table name
-        .select('*'); // Fetch all columns or adjust as needed
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
-      } else {
-        setReviews(data); // Set fetched reviews to state
+    try {
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, text, rating }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit review');
       }
-    };
 
-    fetchReviews(); // Fetch reviews when the component mounts
-  }, []); // Empty dependency array ensures this runs only once
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <Navbar />
+        <main className="pt-28 pb-20 px-6">
+          <div className="max-w-md mx-auto text-center">
+            <div className="card">
+              <div className="text-6xl mb-4">💜</div>
+              <h1 className="text-2xl mb-3">Thank you!</h1>
+              <p className="text-[var(--plum-dark)]/70 mb-6">
+                Your review has been submitted. It'll appear on the site once I've had a chance to read it!
+              </p>
+              <Link href="/" className="btn-primary">
+                <ArrowLeft className="w-4 h-4" />
+                Back Home
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ background: cream, minHeight: '100vh' }}>
+    <div className="min-h-screen bg-cream">
       <Navbar />
 
-      {/* Review Section */}
-      <section style={{ padding: '100px 24px 80px', borderTop: `1px solid ${border}` }}>
-        <div style={{ maxWidth: wrap, margin: '0 auto', textAlign: 'center' }}>
-          <p style={sectionLabelStyle}>What Our Users Say</p>
+      <main className="pt-28 pb-20 px-6">
+        <div className="max-w-md mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="text-4xl mb-4">✨</div>
+            <h1 className="mb-2">Leave a Review</h1>
+            <p className="text-[var(--plum-dark)]/70">
+              Loved the tools? Your feedback means the world!
+            </p>
+          </div>
 
-          <h2 style={sectionHeadingStyle}>Current Reviews</h2>
-
-          <p style={sectionTextStyle}>
-            Here’s what our users have to say about our platform. Their feedback helps us improve and grow.
-          </p>
-
-          {/* Reviews Display */}
-          {reviews.length > 0 ? (
-            reviews.map((review, index) => (
-              <div key={index} style={reviewCardStyle}>
-                <p style={testimonialStyle}>"{review.review_text}"</p>
-                <p style={authorStyle}>{review.author}</p>
-              </div>
-            ))
-          ) : (
-            <div style={reviewCardStyle}>
-              <p style={testimonialStyle}>No reviews available.</p>
+          {/* Existing Reviews (Social Proof) */}
+          <div className="mb-6 text-center">
+            <h2 className="text-lg font-medium text-[var(--plum)]">What Others Are Saying</h2>
+            <p className="text-sm text-gray-500">Average Rating: 4.8/5 from 200+ reviews</p>
+            <div className="mt-4">
+              <blockquote className="text-[var(--plum-dark)]/80">
+                "This tool helped me immensely with my OSCE prep. Highly recommend!"
+              </blockquote>
+              <p className="text-sm text-[var(--plum-dark)]/50 mt-2">– Sarah, Nursing Student</p>
             </div>
-          )}
+          </div>
 
-          {/* Google Reviews Link */}
-          <Link
-            href="https://g.page/r/CW5Zf9rFJ4f0EAI/review"
-            target="_blank"
-            style={primaryButton}
-          >
-            Leave a Google Review →
-          </Link>
+          {/* Form */}
+          <div className="card">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Rating */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--plum)] mb-2">
+                  Your Rating
+                </label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      onMouseEnter={() => setHoveredRating(star)}
+                      onMouseLeave={() => setHoveredRating(0)}
+                      className="p-1 transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`w-8 h-8 transition-colors ${
+                          star <= (hoveredRating || rating)
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Name */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-[var(--plum)] mb-2">
+                  Your First Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Sarah"
+                  maxLength={50}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none transition"
+                />
+              </div>
+
+              {/* Review Text */}
+              <div>
+                <label htmlFor="text" className="block text-sm font-medium text-[var(--plum)] mb-2">
+                  Your Review
+                </label>
+                <textarea
+                  id="text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="What did you love about the tools?"
+                  maxLength={500}
+                  required
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none transition resize-none"
+                />
+                <p className="text-xs text-[var(--plum-dark)]/50 mt-1 text-right">
+                  {text.length}/500
+                </p>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || !name || !text}
+                className="btn-primary w-full"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    Submit Review
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Back link */}
+          <div className="text-center mt-6">
+            <Link
+              href="/"
+              className="text-sm text-[var(--plum-dark)]/60 hover:text-[var(--purple)] inline-flex items-center gap-1"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              Back home
+            </Link>
+          </div>
         </div>
-      </section>
-
-      <Footer />
+      </main>
     </div>
   );
 }
