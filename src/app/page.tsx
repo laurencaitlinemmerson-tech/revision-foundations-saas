@@ -164,19 +164,19 @@ export default function HomePage() {
       }}
     >
       {/* New Value Proposition Headline */}
-      <h1
-        style={{
-          fontFamily: display,
-          fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
-          fontWeight: 500,
-          lineHeight: 1.1,
-          color: ink,
-          marginBottom: '16px',
-        }}
-      >
-        Pass Your Nursing Exams with Confidence
-      </h1>
-
+    <h1
+  style={{
+    fontFamily: display,
+    fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
+    fontWeight: 500,
+    lineHeight: 1.1,
+    color: ink,
+    marginBottom: '16px',
+    fontStyle: 'italic',  // Italics added here
+  }}
+>
+  Pass Your Nursing Exams with Confidence
+</h1>
       {/* New Value Proposition Subheading (Including Placement and Wellness) */}
       <p
         style={{
