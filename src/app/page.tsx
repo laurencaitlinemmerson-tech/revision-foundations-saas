@@ -253,43 +253,40 @@ export default function HomePage() {
 
     {/* Placement Guide Link */}
     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-      <Link
-        href="/hub/placement-guides"  // Link to your existing placement guide
-        style={{
-          display: 'block',
-          background: tagBg,
-          padding: '18px',
-          borderRadius: '12px',
-          textDecoration: 'none',
-          color: ink,
-          textAlign: 'center',
-        }}
-      >
-        <h3
-          style={{
-            fontFamily: display,
-            fontSize: '20px',
-            fontWeight: 400,
-            lineHeight: 1.2,
-            marginBottom: '12px',
-          }}
-        >
-          Placement Success Tips
-        </h3>
-        <p
-          style={{
-            fontFamily: serif,
-            fontSize: '14px',
-            color: inkMid,
-            fontWeight: 300,
-          }}
-        >
-          Expert advice and actionable tips on navigating your clinical placements with confidence.
-        </p>
-      </Link>
-    </div>
-  </div>
-</section>
+     <Link
+  href="/hub/resources/placement-survival"  // Corrected route to the placement survival guide
+  style={{
+    display: 'block',
+    background: tagBg,
+    padding: '18px',
+    borderRadius: '12px',
+    textDecoration: 'none',
+    color: ink,
+    textAlign: 'center',
+  }}
+>
+  <h3
+    style={{
+      fontFamily: display,
+      fontSize: '20px',
+      fontWeight: 400,
+      lineHeight: 1.2,
+      marginBottom: '12px',
+    }}
+  >
+    Placement Success Tips
+  </h3>
+  <p
+    style={{
+      fontFamily: serif,
+      fontSize: '14px',
+      color: inkMid,
+      fontWeight: 300,
+    }}
+  >
+    Expert advice and actionable tips on navigating your clinical placements with confidence.
+  </p>
+</Link>
 
       {/* ── Branch selector ── */}
       <section style={{ padding: '84px 24px 72px' }}>
