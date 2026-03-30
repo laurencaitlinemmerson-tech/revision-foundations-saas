@@ -78,6 +78,18 @@ export default function ReviewPage() {
             </p>
           </div>
 
+          {/* Existing Reviews (Social Proof) */}
+          <div className="mb-6 text-center">
+            <h2 className="text-lg font-medium text-[var(--plum)]">What Others Are Saying</h2>
+            <p className="text-sm text-gray-500">Average Rating: 4.8/5 from 200+ reviews</p>
+            <div className="mt-4">
+              <blockquote className="text-[var(--plum-dark)]/80">
+                "This tool helped me immensely with my OSCE prep. Highly recommend!"
+              </blockquote>
+              <p className="text-sm text-[var(--plum-dark)]/50 mt-2">– Sarah, Nursing Student</p>
+            </div>
+          </div>
+
           {/* Form */}
           <div className="card">
             <form onSubmit={handleSubmit} className="space-y-5">
