@@ -1355,46 +1355,45 @@ export default function HomePage() {
 
       <Footer />
 
-      {/* Mobile responsive overrides */}
-      <style>{`
-        @media (max-width: 768px) {
-          .home-sample-3col {
-            grid-template-columns: 1fr !important;
-          }
-          .home-why-grid {
-            grid-template-columns: 1fr !important;
-            gap: 28px !important;
-          }
-          .home-osce-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .home-osce-4col {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          }
-          .home-tool-row {
-            grid-template-columns: 1fr !important;
-          }
-          .home-bundle-cta {
-            padding: 32px 24px !important;
-          }
-          .home-hub-grid {
-            grid-template-columns: 1fr !important;
-          }
+{/* Mobile responsive overrides */}
+    <style>{`
+      @media (max-width: 768px) {
+        .home-sample-3col {
+          grid-template-columns: 1fr !important;
         }
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .home-hub-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          }
+        .home-why-grid {
+          grid-template-columns: 1fr !important;
+          gap: 28px !important;
         }
-        @media (max-width: 480px) {
-          .home-osce-4col {
-            grid-template-columns: 1fr !important;
-          }
+        .home-osce-grid {
+          grid-template-columns: 1fr !important;
         }
-        .home-hub-card:hover {
-          border-color: #B8AD9E !important;
+        .home-osce-4col {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
-      `}</style>
-    </div>
-  );
-}
+        .home-tool-row {
+          grid-template-columns: 1fr !important;
+        }
+        .home-bundle-cta {
+          padding: 32px 24px !important;
+        }
+        .home-hub-grid {
+          grid-template-columns: 1fr !important;
+        }
+      }
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .home-hub-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+      }
+      @media (max-width: 480px) {
+        .home-osce-4col {
+          grid-template-columns: 1fr !important;
+        }
+      }
+      .home-hub-card:hover {
+        border-color: #B8AD9E !important;
+      }
+    `}</style>
+  </div>
+);
