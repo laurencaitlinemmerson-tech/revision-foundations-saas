@@ -145,80 +145,114 @@ export default function HomePage() {
 
       {/* ── Hero ── */}
       <section style={{ padding: '128px 24px 108px', borderBottom: `1px solid ${border}` }}>
-        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '0',
-              maxWidth: '820px',
-            }}
-          >
-            <p style={sectionLabelStyle}>OSCE prep · theory revision · placement support</p>
+  <div style={{ maxWidth: wrap, margin: '0 auto' }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gap: '0',
+        maxWidth: '820px',
+      }}
+    >
+      {/* New Value Proposition Headline */}
+      <h1
+        style={{
+          fontFamily: display,
+          fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
+          fontWeight: 500,
+          lineHeight: 1.1,
+          color: ink,
+          marginBottom: '20px',
+        }}
+      >
+        Empowering Nursing Students to Pass Clinical Exams with Confidence
+      </h1>
 
-            <h1
-              style={{
-                fontFamily: display,
-                fontSize: 'clamp(2.9rem, 7vw, 4.6rem)',
-                fontWeight: 400,
-                lineHeight: 1.02,
-                letterSpacing: '-0.02em',
-                color: ink,
-                marginBottom: '24px',
-              }}
-            >
-              Pass your nursing
-              <br />
-              <em>assessments.</em>
-            </h1>
+      {/* New Value Proposition Subheading */}
+      <p
+        style={{
+          fontFamily: serif,
+          fontSize: '18px',
+          lineHeight: 1.8,
+          fontWeight: 300,
+          color: inkMid,
+          maxWidth: '590px',
+          marginBottom: '34px',
+        }}
+      >
+        Practical OSCE tools, quizzes, and guides to help you prepare for exams and clinical
+        placements — all created by a nursing student, for nursing students.
+      </p>
 
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: '18px',
-                lineHeight: 1.9,
-                fontWeight: 300,
-                color: inkMid,
-                maxWidth: '590px',
-                marginBottom: '34px',
-              }}
-            >
-              Revision tools built by a nursing student, for nursing students — with OSCE
-              practice, focused quizzes, and practical guides designed around what actually gets
-              tested.
-            </p>
+      {/* Existing Section Label */}
+      <p style={sectionLabelStyle}>OSCE prep · theory revision · placement support</p>
 
-            <div
-              style={{
-                display: 'flex',
-                gap: '12px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                marginBottom: '16px',
-              }}
-            >
-              <Link href="/pricing" style={primaryButton}>
-                Start revising →
-              </Link>
-              <Link href="/quiz" style={secondaryButton}>
-                Try free preview →
-              </Link>
-            </div>
+      {/* Existing Hero Title */}
+      <h1
+        style={{
+          fontFamily: display,
+          fontSize: 'clamp(2.9rem, 7vw, 4.6rem)',
+          fontWeight: 400,
+          lineHeight: 1.02,
+          letterSpacing: '-0.02em',
+          color: ink,
+          marginBottom: '24px',
+        }}
+      >
+        Pass your nursing
+        <br />
+        <em>assessments.</em>
+      </h1>
 
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: '13px',
-                lineHeight: 1.8,
-                fontWeight: 300,
-                color: inkLight,
-              }}
-            >
-              £9.99 one-time payment · Lifetime access · 7-day guarantee
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Existing Hero Description */}
+      <p
+        style={{
+          fontFamily: serif,
+          fontSize: '18px',
+          lineHeight: 1.9,
+          fontWeight: 300,
+          color: inkMid,
+          maxWidth: '590px',
+          marginBottom: '34px',
+        }}
+      >
+        Revision tools built by a nursing student, for nursing students — with OSCE
+        practice, focused quizzes, and practical guides designed around what actually gets
+        tested.
+      </p>
+      
+      {/* CTA Buttons */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '12px',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          marginBottom: '16px',
+        }}
+      >
+        <Link href="/pricing" style={primaryButton}>
+          Start revising →
+        </Link>
+        <Link href="/quiz" style={secondaryButton}>
+          Try free preview →
+        </Link>
+      </div>
+
+      <p
+        style={{
+          fontFamily: serif,
+          fontSize: '13px',
+          lineHeight: 1.8,
+          fontWeight: 300,
+          color: inkLight,
+        }}
+      >
+        £9.99 one-time payment · Lifetime access · 7-day guarantee
+      </p>
+    </div>
+  </div>
+</section>
 
       {/* ── Branch selector ── */}
       <section style={{ padding: '84px 24px 72px' }}>
