@@ -220,9 +220,6 @@ export default function HomePage() {
   </div>
 </section>
 
-
-</section>
-
       {/* ── Branch selector ── */}
       <section style={{ padding: '84px 24px 72px' }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
