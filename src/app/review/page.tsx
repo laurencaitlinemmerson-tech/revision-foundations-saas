@@ -50,7 +50,8 @@ export default function ReviewPage() {
               <div className="text-6xl mb-4">💜</div>
               <h1 className="text-2xl mb-3">Thank you!</h1>
               <p className="text-[var(--plum-dark)]/70 mb-6">
-                Your review has been submitted. It'll appear on the site once I've had a chance to read it!
+                Your review has been submitted. It will appear on the site once I have had a
+                chance to read it!
               </p>
               <Link href="/" className="btn-primary">
                 <ArrowLeft className="w-4 h-4" />
