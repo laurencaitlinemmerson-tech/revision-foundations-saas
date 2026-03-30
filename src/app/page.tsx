@@ -144,7 +144,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── Hero ── */}
-      <section style={{ padding: '128px 24px 108px', borderBottom: `1px solid ${border}` }}>
+<section style={{ padding: '128px 24px 108px', borderBottom: `1px solid ${border}` }}>
   <div style={{ maxWidth: wrap, margin: '0 auto' }}>
     <div
       style={{
@@ -165,7 +165,7 @@ export default function HomePage() {
           marginBottom: '20px',
         }}
       >
-        Empowering Nursing Students to Pass Clinical Exams with Confidence
+        Pass Your Nursing Exams with Confidence
       </h1>
 
       {/* New Value Proposition Subheading */}
@@ -180,47 +180,12 @@ export default function HomePage() {
           marginBottom: '34px',
         }}
       >
-        Practical OSCE tools, quizzes, and guides to help you prepare for exams and clinical
-        placements — all created by a nursing student, for nursing students.
+        OSCE practice, quizzes, and guides built for nursing students.
       </p>
 
-      {/* Existing Section Label */}
+      {/* Existing Section Label (Retain as is if it's useful, otherwise remove) */}
       <p style={sectionLabelStyle}>OSCE prep · theory revision · placement support</p>
 
-      {/* Existing Hero Title */}
-      <h1
-        style={{
-          fontFamily: display,
-          fontSize: 'clamp(2.9rem, 7vw, 4.6rem)',
-          fontWeight: 400,
-          lineHeight: 1.02,
-          letterSpacing: '-0.02em',
-          color: ink,
-          marginBottom: '24px',
-        }}
-      >
-        Pass your nursing
-        <br />
-        <em>assessments.</em>
-      </h1>
-
-      {/* Existing Hero Description */}
-      <p
-        style={{
-          fontFamily: serif,
-          fontSize: '18px',
-          lineHeight: 1.9,
-          fontWeight: 300,
-          color: inkMid,
-          maxWidth: '590px',
-          marginBottom: '34px',
-        }}
-      >
-        Revision tools built by a nursing student, for nursing students — with OSCE
-        practice, focused quizzes, and practical guides designed around what actually gets
-        tested.
-      </p>
-      
       {/* CTA Buttons */}
       <div
         style={{
