@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { CSSProperties } from 'react';
-import Slider from 'react-slick';
 import { supabase } from '@/lib/supabase'; // Import the Supabase client
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -91,6 +90,7 @@ const primaryButton: CSSProperties = {
 
 export default function ReviewSection() {
   const [reviews, setReviews] = useState<any[]>([]); // State to store reviews
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0); // Track the current review index
 
   // Fetch reviews from Supabase on component mount
   useEffect(() => {
@@ -109,14 +109,22 @@ export default function ReviewSection() {
     fetchReviews();
   }, []);
 
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
+  // Next review function
+  const nextReview = () => {
+    if (currentReviewIndex < reviews.length - 1) {
+      setCurrentReviewIndex(currentReviewIndex + 1);
+    } else {
+      setCurrentReviewIndex(0); // Loop back to the first review
+    }
+  };
+
+  // Previous review function
+  const prevReview = () => {
+    if (currentReviewIndex > 0) {
+      setCurrentReviewIndex(currentReviewIndex - 1);
+    } else {
+      setCurrentReviewIndex(reviews.length - 1); // Loop back to the last review
+    }
   };
 
   return (
@@ -134,21 +142,33 @@ export default function ReviewSection() {
             Here’s what our users have to say about our platform. Their feedback helps us improve and grow.
           </p>
 
-          {/* Review Carousel */}
-          <Slider {...settings}>
-            {reviews.length > 0 ? (
-              reviews.map((review: any, index: number) => (
-                <div key={index} style={reviewCardStyle}>
-                  <p style={testimonialStyle}>"{review.review_text}"</p>
-                  <p style={authorStyle}>{review.author}</p>
-                </div>
-              ))
-            ) : (
-              <div style={reviewCardStyle}>
-                <p style={testimonialStyle}>No reviews available.</p>
-              </div>
-            )}
-          </Slider>
+          {/* Review Display */}
+          {reviews.length > 0 ? (
+            <div style={reviewCardStyle}>
+              <p style={testimonialStyle}>"{reviews[currentReviewIndex]?.review_text}"</p>
+              <p style={authorStyle}>{reviews[currentReviewIndex]?.author}</p>
+            </div>
+          ) : (
+            <div style={reviewCardStyle}>
+              <p style={testimonialStyle}>No reviews available.</p>
+            </div>
+          )}
+
+          {/* Carousel Controls */}
+          <div>
+            <button
+              style={{ margin: '0 20px', padding: '10px 20px', cursor: 'pointer' }}
+              onClick={prevReview}
+            >
+              Prev
+            </button>
+            <button
+              style={{ margin: '0 20px', padding: '10px 20px', cursor: 'pointer' }}
+              onClick={nextReview}
+            >
+              Next
+            </button>
+          </div>
 
           {/* Google Reviews Link */}
           <Link
