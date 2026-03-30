@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
+// Colors and styles
 const ink = '#1C1510'; // Dark text
 const cream = '#F9F6F0'; // Light background
 const border = '#D9D0C1'; // Subtle border color
@@ -51,9 +52,10 @@ const reviewCardStyle: CSSProperties = {
   borderRadius: '10px',
   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.05)',
   textAlign: 'center',
-  maxWidth: '300px',
+  maxWidth: '500px',
   marginLeft: 'auto',
   marginRight: 'auto',
+  marginBottom: '24px',
 };
 
 const testimonialStyle: CSSProperties = {
@@ -85,18 +87,19 @@ const primaryButton: CSSProperties = {
   whiteSpace: 'nowrap',
   textAlign: 'center',
   transition: 'background-color 0.3s ease',
-  marginTop: '20px',
+  marginTop: '40px',
+  marginBottom: '40px',
+  cursor: 'pointer',
 };
 
-export default function ReviewSection() {
+export default function ReviewPage() {
   const [reviews, setReviews] = useState<any[]>([]); // State to store reviews
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0); // Track the current review index
 
   // Fetch reviews from Supabase on component mount
   useEffect(() => {
     const fetchReviews = async () => {
       const { data, error } = await supabase
-        .from('reviews') // Replace 'reviews' with your table name
+        .from('reviews') // Replace 'reviews' with your actual Supabase table name
         .select('*'); // Fetch all columns or adjust as needed
 
       if (error) {
@@ -106,26 +109,8 @@ export default function ReviewSection() {
       }
     };
 
-    fetchReviews();
-  }, []);
-
-  // Next review function
-  const nextReview = () => {
-    if (currentReviewIndex < reviews.length - 1) {
-      setCurrentReviewIndex(currentReviewIndex + 1);
-    } else {
-      setCurrentReviewIndex(0); // Loop back to the first review
-    }
-  };
-
-  // Previous review function
-  const prevReview = () => {
-    if (currentReviewIndex > 0) {
-      setCurrentReviewIndex(currentReviewIndex - 1);
-    } else {
-      setCurrentReviewIndex(reviews.length - 1); // Loop back to the last review
-    }
-  };
+    fetchReviews(); // Fetch reviews when the component mounts
+  }, []); // Empty dependency array ensures this runs only once
 
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
@@ -142,33 +127,19 @@ export default function ReviewSection() {
             Here’s what our users have to say about our platform. Their feedback helps us improve and grow.
           </p>
 
-          {/* Review Display */}
+          {/* Reviews Display */}
           {reviews.length > 0 ? (
-            <div style={reviewCardStyle}>
-              <p style={testimonialStyle}>"{reviews[currentReviewIndex]?.review_text}"</p>
-              <p style={authorStyle}>{reviews[currentReviewIndex]?.author}</p>
-            </div>
+            reviews.map((review, index) => (
+              <div key={index} style={reviewCardStyle}>
+                <p style={testimonialStyle}>"{review.review_text}"</p>
+                <p style={authorStyle}>{review.author}</p>
+              </div>
+            ))
           ) : (
             <div style={reviewCardStyle}>
               <p style={testimonialStyle}>No reviews available.</p>
             </div>
           )}
-
-          {/* Carousel Controls */}
-          <div>
-            <button
-              style={{ margin: '0 20px', padding: '10px 20px', cursor: 'pointer' }}
-              onClick={prevReview}
-            >
-              Prev
-            </button>
-            <button
-              style={{ margin: '0 20px', padding: '10px 20px', cursor: 'pointer' }}
-              onClick={nextReview}
-            >
-              Next
-            </button>
-          </div>
 
           {/* Google Reviews Link */}
           <Link
@@ -178,7 +149,6 @@ export default function ReviewSection() {
           >
             Leave a Google Review →
           </Link>
-
         </div>
       </section>
 
