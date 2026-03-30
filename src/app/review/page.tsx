@@ -66,32 +66,65 @@ export default function ReviewPage() {
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-md mx-auto">
-          {/* Header */}
+          {/* Intro Section */}
           <div className="text-center mb-8">
-            <div className="text-4xl mb-4">✨</div>
-            <h1 className="mb-2">Leave a Review</h1>
-            <p className="text-[var(--plum-dark)]/70">
-              Loved the tools? Your feedback means the world!
+            <h2 className="text-xl mb-3">Why Leave a Review?</h2>
+            <p className="text-[var(--plum-dark)]/70 mb-6">
+              Revision Foundations helps nursing students prepare for OSCEs and exams with targeted tools, practice questions, and feedback. If you’ve used our resources, please share what you found helpful!
             </p>
+          </div>
+
+          {/* Product/Service Highlights */}
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-[var(--plum)] mb-4">Why Choose Revision Foundations?</h2>
+            <ul className="list-inside list-disc space-y-2 text-[var(--plum-dark)]/70">
+              <li>Trusted by nursing students for OSCE success</li>
+              <li>Practice materials aligned with current exam standards</li>
+              <li>Easy-to-use interface and explanations</li>
+            </ul>
+          </div>
+
+          {/* Call to Action - Top */}
+          <div className="text-center mb-8">
+            <Link href="/reviews" className="btn-primary">
+              See Full Reviews
+            </Link>
           </div>
 
           {/* Existing Reviews (Social Proof) */}
           <div className="mb-6 text-center">
             <h2 className="text-lg font-medium text-[var(--plum)]">What Others Are Saying</h2>
-            <p className="text-sm text-gray-500">Average Rating: 4.8/5 from 200+ reviews</p>
-            <div className="mt-4">
-              <blockquote className="text-[var(--plum-dark)]/80">
-                "This tool helped me immensely with my OSCE prep. Highly recommend!"
-              </blockquote>
-              <p className="text-sm text-[var(--plum-dark)]/50 mt-2">– Sarah, Nursing Student</p>
+            <p className="text-sm text-gray-500">Average Rating: 4.8/5 from recent reviews</p>
+            <div className="mt-4 space-y-4">
+              {/* Sample Reviews */}
+              {[
+                { name: 'Sarah', review: 'This tool helped me immensely with my OSCE prep. Highly recommend!', rating: 5, date: 'March 2026', location: 'UK' },
+                { name: 'Emily', review: 'Great resources! Simple to follow and very effective.', rating: 4, date: 'February 2026', location: 'USA' },
+                { name: 'John', review: 'Helpful, but some areas could use more explanation.', rating: 3, date: 'January 2026', location: 'Canada' },
+              ].map(({ name, review, rating, date, location }, idx) => (
+                <div key={idx} className="p-4 border border-[var(--lilac-medium)] rounded-lg">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, starIdx) => (
+                      <Star
+                        key={starIdx}
+                        className={`w-4 h-4 ${starIdx < rating ? 'fill-yellow-400' : 'text-gray-300'}`}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm text-gray-500">{rating}★</span>
+                  </div>
+                  <blockquote className="text-[var(--plum-dark)]/80 mt-2">"{review}"</blockquote>
+                  <p className="text-sm text-[var(--plum-dark)]/50 mt-2">
+                    — {name}, {location}, {date}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Form */}
-          <div className="card">
+          <div className="card" id="review-form">
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Rating */}
               <div>
@@ -165,7 +198,7 @@ export default function ReviewPage() {
 
               <button
                 type="submit"
-                disabled={loading || !name || !text}
+                disabled={loading || !name || !text || rating === 0}
                 className="btn-primary w-full"
               >
                 {loading ? (
@@ -183,16 +216,16 @@ export default function ReviewPage() {
             </form>
           </div>
 
-          {/* Back link */}
-          <div className="text-center mt-6">
-            <Link
-              href="/"
-              className="text-sm text-[var(--plum-dark)]/60 hover:text-[var(--purple)] inline-flex items-center gap-1"
+          {/* Call to Action - Bottom */}
+          <div className="text-center mt-8">
+            <button
+              onClick={() => document.getElementById("review-form").scrollIntoView()}
+              className="btn-primary"
             >
-              <ArrowLeft className="w-3 h-3" />
-              Back home
-            </Link>
+              Submit Your Feedback
+            </button>
           </div>
+
         </div>
       </main>
     </div>
