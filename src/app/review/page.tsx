@@ -1,200 +1,87 @@
 'use client';
 
-import { useState } from 'react';
-import Navbar from '@/components/Navbar';
 import Link from 'next/link';
-import { Star, Send, ArrowLeft, Heart, Loader2 } from 'lucide-react';
+import type { CSSProperties } from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
-export default function ReviewPage() {
-  const [name, setName] = useState('');
-  const [text, setText] = useState('');
-  const [rating, setRating] = useState(5);
-  const [hoveredRating, setHoveredRating] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
+const ink = '#1C1510';
+const cream = '#F9F6F0';
+const border = '#D9D0C1';
+const green = '#1E8A4D';
+const tagBg = '#EFE5D4';
+const display = "'Playfair Display', Georgia, serif";
+const serif = "'Source Serif 4', Georgia, serif";
+const wrap = '1120px';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+const primaryButton: CSSProperties = {
+  display: 'inline-block',
+  fontFamily: serif,
+  fontSize: '14px',
+  fontWeight: 400,
+  background: ink,
+  color: cream,
+  padding: '12px 24px',
+  borderRadius: '9999px',
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+};
 
-    try {
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, text, rating }),
-      });
+const sectionLabelStyle: CSSProperties = {
+  fontFamily: serif,
+  fontSize: '11px',
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: '#9C8878',
+  marginBottom: '14px',
+};
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit review');
-      }
-
-      setSubmitted(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-cream">
-        <Navbar />
-        <main className="pt-28 pb-20 px-6">
-          <div className="max-w-md mx-auto text-center">
-            <div className="card">
-              <div className="text-6xl mb-4">💜</div>
-              <h1 className="text-2xl mb-3">Thank you!</h1>
-              <p className="text-[var(--plum-dark)]/70 mb-6">
-                Your review has been submitted. It'll appear on the site once I've had a chance to read it!
-              </p>
-              <Link href="/" className="btn-primary">
-                <ArrowLeft className="w-4 h-4" />
-                Back Home
-              </Link>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
+export default function ReviewSection() {
   return (
-    <div className="min-h-screen bg-cream">
+    <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
 
-      <main className="pt-28 pb-20 px-6">
-        <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="text-4xl mb-4">✨</div>
-            <h1 className="mb-2">Leave a Review</h1>
-            <p className="text-[var(--plum-dark)]/70">
-              Loved the tools? Your feedback means the world!
-            </p>
-          </div>
+      {/* Review Section */}
+      <section style={{ padding: '100px 24px 80px', borderTop: `1px solid ${border}` }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto', textAlign: 'center' }}>
+          <p style={sectionLabelStyle}>Your Opinion Matters</p>
 
-          {/* Existing Reviews (Social Proof) */}
-          <div className="mb-6 text-center">
-            <h2 className="text-lg font-medium text-[var(--plum)]">What Others Are Saying</h2>
-            <p className="text-sm text-gray-500">Average Rating: 4.8/5 from 200+ reviews</p>
-            <div className="mt-4">
-              <blockquote className="text-[var(--plum-dark)]/80">
-                "This tool helped me immensely with my OSCE prep. Highly recommend!"
-              </blockquote>
-              <p className="text-sm text-[var(--plum-dark)]/50 mt-2">– Sarah, Nursing Student</p>
-            </div>
-          </div>
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontWeight: 400,
+              lineHeight: 1.15,
+              color: ink,
+              marginBottom: '24px',
+            }}
+          >
+            Share Your Experience with Us
+          </h2>
 
-          {/* Form */}
-          <div className="card">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Rating */}
-              <div>
-                <label className="block text-sm font-medium text-[var(--plum)] mb-2">
-                  Your Rating
-                </label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoveredRating(star)}
-                      onMouseLeave={() => setHoveredRating(0)}
-                      className="p-1 transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`w-8 h-8 transition-colors ${
-                          star <= (hoveredRating || rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '18px',
+              lineHeight: 1.8,
+              fontWeight: 300,
+              color: '#5C4A38',
+              maxWidth: '600px',
+              marginBottom: '40px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}
+          >
+            Your feedback helps us improve and better serve you. We’d love to hear how we’ve helped you in your nursing journey!
+          </p>
 
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-[var(--plum)] mb-2">
-                  Your First Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Sarah"
-                  maxLength={50}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none transition"
-                />
-              </div>
-
-              {/* Review Text */}
-              <div>
-                <label htmlFor="text" className="block text-sm font-medium text-[var(--plum)] mb-2">
-                  Your Review
-                </label>
-                <textarea
-                  id="text"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="What did you love about the tools?"
-                  maxLength={500}
-                  required
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-[var(--lilac-medium)] bg-white focus:border-[var(--lavender)] focus:outline-none transition resize-none"
-                />
-                <p className="text-xs text-[var(--plum-dark)]/50 mt-1 text-right">
-                  {text.length}/500
-                </p>
-              </div>
-
-              {error && (
-                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading || !name || !text}
-                className="btn-primary w-full"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    Submit Review
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Back link */}
-          <div className="text-center mt-6">
-            <Link
-              href="/"
-              className="text-sm text-[var(--plum-dark)]/60 hover:text-[var(--purple)] inline-flex items-center gap-1"
-            >
-              <ArrowLeft className="w-3 h-3" />
-              Back home
-            </Link>
-          </div>
+          <Link href="https://g.page/r/CW5Zf9rFJ4f0EAI/review" target="_blank" style={primaryButton}>
+            Leave a Review →
+          </Link>
         </div>
-      </main>
+      </section>
+
+      <Footer />
     </div>
   );
 }
