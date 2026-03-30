@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import { ReactNode, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
