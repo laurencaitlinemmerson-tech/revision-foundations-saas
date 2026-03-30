@@ -220,84 +220,8 @@ export default function HomePage() {
   </div>
 </section>
 
-      {/* ── Hero ── */}
-<section style={{ padding: '128px 24px 108px', borderBottom: `1px solid ${border}` }}>
-  <div style={{ maxWidth: wrap, margin: '0 auto' }}>
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gap: '0',
-        maxWidth: '820px',
-      }}
-    >
-      {/* New Value Proposition Headline */}
-      <h1
-        style={{
-          fontFamily: display,
-          fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
-          fontWeight: 500,
-          lineHeight: 1.1,
-          color: ink,
-          marginBottom: '16px',
-        }}
-      >
-        Pass Your Nursing Exams with Confidence
-      </h1>
 
-      {/* New Value Proposition Subheading */}
-      <p
-        style={{
-          fontFamily: serif,
-          fontSize: '18px',
-          lineHeight: 1.8,
-          fontWeight: 300,
-          color: inkMid,
-          maxWidth: '590px',
-          marginBottom: '34px',
-        }}
-      >
-        OSCE practice, quizzes, and guides built for nursing students. Get practical, expert-driven resources to excel in exams and clinical placements.
-      </p>
-
-      {/* Existing Section Label (Optional) */}
-      <p style={sectionLabelStyle}>OSCE prep · theory revision · placement support</p>
-
-      {/* CTA Buttons */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '12px',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          marginBottom: '16px',
-        }}
-      >
-        <Link href="/pricing" style={primaryButton}>
-          Start revising →
-        </Link>
-        <Link href="/quiz" style={secondaryButton}>
-          Try free preview →
-        </Link>
-      </div>
-
-      {/* Pricing Info */}
-      <p
-        style={{
-          fontFamily: serif,
-          fontSize: '13px',
-          lineHeight: 1.8,
-          fontWeight: 300,
-          color: inkLight,
-        }}
-      >
-        £9.99 one-time payment · Lifetime access · 7-day guarantee
-      </p>
-    </div>
-  </div>
-</section>
-
-{/* ── Placement & Wellness Guides ── */}
+{/* ── Placement Guides ── */}
 <section style={{ padding: '48px 24px', background: panelSoft }}>
   <div style={{ maxWidth: wrap, margin: '0 auto' }}>
     <h2
@@ -310,7 +234,7 @@ export default function HomePage() {
         marginBottom: '24px',
       }}
     >
-      Placement & Wellness Guides
+      Placement Success Guides
     </h2>
 
     <p
@@ -324,13 +248,13 @@ export default function HomePage() {
         marginBottom: '36px',
       }}
     >
-      Resources to help you stay focused, calm, and healthy during your placements. Access guides on managing your clinical experience, dealing with stress, and maintaining mental wellness.
+      Expert tips and guides to help you succeed during your clinical placements. Prepare confidently with resources tailored to nursing students.
     </p>
 
-    {/* Placement & Wellness Guide Links */}
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+    {/* Placement Guide Link */}
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
       <Link
-        href="/hub/placement-guides"
+        href="/hub/placement-guides"  // Link to your existing placement guide
         style={{
           display: 'block',
           background: tagBg,
@@ -360,42 +284,7 @@ export default function HomePage() {
             fontWeight: 300,
           }}
         >
-          Expert advice on acing your clinical placements with confidence.
-        </p>
-      </Link>
-
-      <Link
-        href="/hub/wellness"
-        style={{
-          display: 'block',
-          background: tagBg,
-          padding: '18px',
-          borderRadius: '12px',
-          textDecoration: 'none',
-          color: ink,
-          textAlign: 'center',
-        }}
-      >
-        <h3
-          style={{
-            fontFamily: display,
-            fontSize: '20px',
-            fontWeight: 400,
-            lineHeight: 1.2,
-            marginBottom: '12px',
-          }}
-        >
-          Wellness for Nurses
-        </h3>
-        <p
-          style={{
-            fontFamily: serif,
-            fontSize: '14px',
-            color: inkMid,
-            fontWeight: 300,
-          }}
-        >
-          Tips and techniques to stay calm and healthy during your studies.
+          Expert advice and actionable tips on navigating your clinical placements with confidence.
         </p>
       </Link>
     </div>
