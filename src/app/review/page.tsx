@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
-import { Star, Send, ArrowLeft, Heart, Loader2 } from 'lucide-react';
+import { Star, Send, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function ReviewPage() {
   const [name, setName] = useState('');
