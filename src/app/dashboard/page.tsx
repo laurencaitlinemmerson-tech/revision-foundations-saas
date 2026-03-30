@@ -4,7 +4,15 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import DashboardClient from './DashboardClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
-import { ArrowRight, ClipboardCheck, BookOpen, Crown, Sparkles, Lock } from 'lucide-react';
+import {
+  ArrowRight,
+  ClipboardCheck,
+  BookOpen,
+  Crown,
+  Sparkles,
+  Lock,
+  Play
+} from 'lucide-react';
 import {
   ContinueCard,
   StudyTipCard,
