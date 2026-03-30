@@ -208,11 +208,45 @@
   /* ---------- Tailwind overrides for light background ---------- */
   .text-white { color: #1C1510 !important; }
   .btn-gradient { color: #F9F6F0 !important; }
+  .text-slate-100, .text-slate-200 { color: #3A2F25 !important; }
   .text-slate-300 { color: #9C8878 !important; }
-  .text-slate-400 { color: #9C8878 !important; }
+  .text-slate-400, .text-slate-500 { color: #9C8878 !important; }
   .bg-white { background-color: rgba(249,246,240,0.7) !important; }
   .blur-3xl { display: none !important; }
   .border-transparent { border-color: #D9D0C1 !important; }
+
+  /* Accent icon colors → muted editorial tones */
+  .text-cyan-400 { color: #5C7A6A !important; }
+  .text-pink-400 { color: #A06050 !important; }
+  .text-yellow-300, .text-yellow-400 { color: #8B6914 !important; }
+  .text-amber-400, .text-amber-500 { color: #8B6914 !important; }
+
+  /* Correct/incorrect stay distinct but muted */
+  .text-green-400, .text-green-300 { color: #2E7D32 !important; }
+  .text-red-400, .text-red-300 { color: #A32D2D !important; }
+  .text-red-200 { color: #A32D2D !important; }
+  .text-red-100 { color: #5A3030 !important; }
+
+  /* Glass-card opacity backgrounds → editorial card fill */
+  .bg-opacity-5, .bg-opacity-10, .bg-opacity-20 { background-color: transparent !important; }
+  .bg-white.bg-opacity-5, .bg-white.bg-opacity-10 { background-color: #F5F2EE !important; }
+  .border-white { border-color: rgba(0,0,0,0.08) !important; }
+  .border-opacity-10, .border-opacity-30 { border-opacity: 1 !important; }
+
+  /* Review section cards */
+  .bg-green-500.bg-opacity-20 { background-color: #E8F5E9 !important; }
+  .bg-red-500.bg-opacity-20 { background-color: #FCEBEB !important; }
+  .bg-red-500.bg-opacity-10 { background-color: #FEF5F5 !important; }
+  .border-green-500 { border-color: #2E7D32 !important; }
+  .border-red-500 { border-color: #A32D2D !important; }
+  .border-opacity-25, .border-opacity-35 { opacity: 1 !important; }
+
+  /* Gradient backgrounds → flat editorial */
+  .bg-gradient-to-r { background-image: none !important; background-color: #FAEEDA !important; }
+  .from-amber-500\/20, .to-amber-300\/20 { background-color: #FAEEDA !important; }
+
+  /* Black overlay panels → editorial card style */
+  .bg-black.bg-opacity-20 { background-color: #F0EBE3 !important; color: #3A2F25 !important; }
 </style>
 
 
@@ -8601,10 +8635,11 @@ function getDifficultyClass(q){
           break;
         default:
           container.innerHTML = `
-            <div class="fade-in max-w-4xl mx-auto text-center">
-              <h1 class="text-4xl text-white font-bold mb-4">Coming Soon</h1>
-              <p class="text-slate-300 mb-8">Full functionality being implemented</p>
-              <button onclick="currentView='selection'; render();" class="btn-gradient px-8 py-3 rounded-xl text-white">
+            <div class="fade-in" style="max-width:600px; margin:0 auto; text-align:center; padding:80px 16px;">
+              <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:12px;">Under Construction</div>
+              <h1 style="font-family:'Playfair Display',Georgia,serif; font-size:36px; font-weight:700; color:#1A1815; margin:0 0 12px;">Coming Soon</h1>
+              <p style="font-family:'Source Serif 4',Georgia,serif; font-size:16px; color:#5A5750; margin-bottom:32px;">This feature is being built. Head back to the selection screen to get started.</p>
+              <button onclick="currentView='selection'; render();" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">
                 Back to Selection
               </button>
             </div>
@@ -8827,7 +8862,7 @@ function getDifficultyClass(q){
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 
-  // Ensure flaggedQuestions exists (your file didn’t have it before)
+  // Ensure flaggedQuestions exists (your file didn't have it before)
   window.flaggedQuestions = Array.isArray(window.flaggedQuestions) ? window.flaggedQuestions : [];
   const flaggedQuestions = window.flaggedQuestions;
 
@@ -8844,7 +8879,7 @@ function getDifficultyClass(q){
   const incorrectCount = totalQ - correctCount;
   const percentage = totalQ ? Math.round((correctCount / totalQ) * 100) : 0;
 
-  // Optional timer support (won’t crash if you don’t track it)
+  // Optional timer support (won't crash if you don't track it)
   const totalSeconds = Number(window.quizTimeSeconds || 0);
   const timeLabel = totalSeconds > 0
     ? `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}`
@@ -8884,13 +8919,13 @@ function getDifficultyClass(q){
     gradeMessage = 'Exceptional work — your knowledge is exam-ready.';
   } else if (percentage >= 75) {
     grade = 'Strong Pass'; gradeColor = '#84cc16'; gradeIcon = 'check-circle';
-    gradeMessage = 'Great performance — a few tweaks and you’re at mastery level.';
+    gradeMessage = "Great performance — a few tweaks and you're at mastery level.";
   } else if (percentage >= 60) {
     grade = 'Pass'; gradeColor = '#f59e0b'; gradeIcon = 'trending-up';
     gradeMessage = 'Solid foundation — target your weaker topics to improve quickly.';
   } else if (percentage >= 50) {
     grade = 'Borderline'; gradeColor = '#f97316'; gradeIcon = 'alert-circle';
-    gradeMessage = 'You’re close — focus revision on the weakest topic first.';
+    gradeMessage = "You're close — focus revision on the weakest topic first.";
   }
 
   // ---------- INSIGHTS ----------
@@ -9255,145 +9290,145 @@ function getDifficultyClass(q){
   `;
   // ---------- UI ----------
   container.innerHTML = `
-    <div class=”fade-in” style=”max-width:820px; margin:0 auto; padding:0 16px;”>
+    <div class="fade-in" style="max-width:820px; margin:0 auto; padding:0 16px;">
 
       <!-- MASTHEAD -->
-      <div style=”text-align:center; padding:48px 0 32px;”>
-        <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:12px;”>Quiz Complete</div>
-        <h1 style=”font-family:’Playfair Display’,Georgia,serif; font-size:40px; font-weight:700; color:#1A1815; margin:0 0 12px;”>${grade}</h1>
-        <p style=”font-family:’Source Serif 4’,Georgia,serif; font-size:17px; color:#5A5750; max-width:480px; margin:0 auto; line-height:1.6;”>${gradeMessage}</p>
+      <div style="text-align:center; padding:48px 0 32px;">
+        <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:12px;">Quiz Complete</div>
+        <h1 style="font-family:'Playfair Display',Georgia,serif; font-size:40px; font-weight:700; color:#1A1815; margin:0 0 12px;">${grade}</h1>
+        <p style="font-family:'Source Serif 4',Georgia,serif; font-size:17px; color:#5A5750; max-width:480px; margin:0 auto; line-height:1.6;">${gradeMessage}</p>
       </div>
 
       <!-- STATS GRID -->
-      <div style=”display:flex; flex-wrap:wrap; border-top:1px solid rgba(0,0,0,0.1); border-left:1px solid rgba(0,0,0,0.1); margin-bottom:40px;”>
-        <div style=”flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);”>
-          <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;”>Accuracy</div>
-          <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;”>${percentage}%</div>
+      <div style="display:flex; flex-wrap:wrap; border-top:1px solid rgba(0,0,0,0.1); border-left:1px solid rgba(0,0,0,0.1); margin-bottom:40px;">
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Accuracy</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${percentage}%</div>
         </div>
-        <div style=”flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);”>
-          <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;”>Correct</div>
-          <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:32px; font-weight:700; color:#2E7D32;”>${correctCount}</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Correct</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#2E7D32;">${correctCount}</div>
         </div>
-        <div style=”flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);”>
-          <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;”>Incorrect</div>
-          <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:32px; font-weight:700; color:#A32D2D;”>${incorrectCount}</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Incorrect</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#A32D2D;">${incorrectCount}</div>
         </div>
         ${totalSeconds > 0 ? `
-        <div style=”flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);”>
-          <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;”>Time</div>
-          <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;”>${timeLabel}</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Time</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${timeLabel}</div>
         </div>
-        <div style=”flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);”>
-          <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;”>Avg Pace</div>
-          <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;”>${avgPace ? `${avgPace}s` : ‘—‘}</div>
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Avg Pace</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#1A1815;">${avgPace ? `${avgPace}s` : '—'}</div>
         </div>
-        ` : ‘’}
-        <div style=”flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);”>
-          <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;”>Flagged</div>
-          <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:32px; font-weight:700; color:#633806;”>${flaggedQuestions.length}</div>
+        ` : ''}
+        <div style="flex:1; min-width:130px; padding:20px 24px; border-right:1px solid rgba(0,0,0,0.1); border-bottom:1px solid rgba(0,0,0,0.1);">
+          <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:6px;">Flagged</div>
+          <div style="font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:700; color:#633806;">${flaggedQuestions.length}</div>
         </div>
       </div>
 
       <!-- PERFORMANCE BY TOPIC -->
-      <div style=”margin-bottom:40px;”>
-        <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:20px;”>Performance by Topic</div>
+      <div style="margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:20px;">Performance by Topic</div>
         ${topicPerformance.map(tp => {
           const isPriority = tp.percentage < 75 && tp.total > 0;
           return `
-            <div style=”background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;”>
-              <div style=”display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;”>
+            <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
                 <div>
-                  <span style=”font-family:’Source Serif 4’,Georgia,serif; font-size:15px; font-weight:600; color:#1A1815;”>${safe(tp.topic.name)}</span>
-                  ${isPriority ? ‘<span style=”display:inline-block; margin-left:8px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; background:#FCEBEB; color:#A32D2D; border-radius:3px; padding:2px 7px; font-weight:600;”>Revise</span>’ : ‘’}
-                  <div style=”font-size:13px; color:#5A5750; margin-top:2px;”>${tp.correct} of ${tp.total} correct</div>
+                  <span style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; color:#1A1815;">${safe(tp.topic.name)}</span>
+                  ${isPriority ? '<span style="display:inline-block; margin-left:8px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; background:#FCEBEB; color:#A32D2D; border-radius:3px; padding:2px 7px; font-weight:600;">Revise</span>' : ''}
+                  <div style="font-size:13px; color:#5A5750; margin-top:2px;">${tp.correct} of ${tp.total} correct</div>
                 </div>
-                <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:22px; font-weight:700; color:${tp.percentage >= 75 ? ‘#2E7D32’ : tp.percentage >= 50 ? ‘#633806’ : ‘#A32D2D’};”>${tp.percentage}%</div>
+                <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:${tp.percentage >= 75 ? '#2E7D32' : tp.percentage >= 50 ? '#633806' : '#A32D2D'};">${tp.percentage}%</div>
               </div>
-              <div style=”background:rgba(0,0,0,0.08); border-radius:2px; height:3px; overflow:hidden;”>
-                <div style=”height:3px; border-radius:2px; background:${tp.percentage >= 75 ? ‘#2E7D32’ : tp.percentage >= 50 ? ‘#B8830A’ : ‘#A32D2D’}; width:${tp.percentage}%;”></div>
+              <div style="background:rgba(0,0,0,0.08); border-radius:2px; height:3px; overflow:hidden;">
+                <div style="height:3px; border-radius:2px; background:${tp.percentage >= 75 ? '#2E7D32' : tp.percentage >= 50 ? '#B8830A' : '#A32D2D'}; width:${tp.percentage}%;"></div>
               </div>
             </div>
           `;
-        }).join(‘’)}
+        }).join('')}
       </div>
 
       <!-- WHAT TO WORK ON NEXT -->
       ${insights.length ? `
-      <div style=”background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:4px; padding:20px 24px; margin-bottom:40px;”>
-        <div style=”font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#633806; margin-bottom:10px;”>What to Work on Next</div>
-        <ul style=”margin:0; padding:0; list-style:none;”>
-          ${insights.map(ins => `<li style=”font-family:’Source Serif 4’,Georgia,serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;”>${ins.text}</li>`).join(‘’)}
+      <div style="background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:4px; padding:20px 24px; margin-bottom:40px;">
+        <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#633806; margin-bottom:10px;">What to Work on Next</div>
+        <ul style="margin:0; padding:0; list-style:none;">
+          ${insights.map(ins => `<li style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;">${ins.text}</li>`).join('')}
         </ul>
       </div>
-      ` : ‘’}
+      ` : ''}
 
       <!-- QUESTION REVIEW -->
-      <div id=”quiz-review” style=”margin-bottom:40px;”>
-        <div style=”font-family:’Playfair Display’,Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:16px;”>Question Review</div>
+      <div id="quiz-review" style="margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:16px;">Question Review</div>
 
-        <div style=”display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;”>
-          <button onclick=”setQuizReviewFilter(‘all’)” style=”font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === ‘all’ ? ‘#1C1510’ : ‘#F5F2EE’}; color:${window.__quizReviewFilter === ‘all’ ? ‘#F9F6F0’ : ‘#5A5750’}; cursor:pointer; font-family:’Source Serif 4’,Georgia,serif;”>All (${totalQ})</button>
-          <button onclick=”setQuizReviewFilter(‘incorrect’)” style=”font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === ‘incorrect’ ? ‘#1C1510’ : ‘#F5F2EE’}; color:${window.__quizReviewFilter === ‘incorrect’ ? ‘#F9F6F0’ : ‘#5A5750’}; cursor:pointer; font-family:’Source Serif 4’,Georgia,serif;”>Incorrect (${incorrectCount})</button>
-          <button onclick=”setQuizReviewFilter(‘flagged’)” style=”font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === ‘flagged’ ? ‘#1C1510’ : ‘#F5F2EE’}; color:${window.__quizReviewFilter === ‘flagged’ ? ‘#F9F6F0’ : ‘#5A5750’}; cursor:pointer; font-family:’Source Serif 4’,Georgia,serif;”>Flagged (${flaggedQuestions.length})</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+          <button onclick="setQuizReviewFilter('all')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'all' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'all' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">All (${totalQ})</button>
+          <button onclick="setQuizReviewFilter('incorrect')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'incorrect' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'incorrect' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">Incorrect (${incorrectCount})</button>
+          <button onclick="setQuizReviewFilter('flagged')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'flagged' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'flagged' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">Flagged (${flaggedQuestions.length})</button>
         </div>
 
         ${reviewList.map(({ q, idx }) => {
           const userAns = answers[idx];
           const isCorrect = window.isAnswerCorrect(q, userAns);
-          const topic = topics.find(t => t.id === q.topic) || { name: q.topic || ‘Topic’, color: ‘#B8976A’ };
+          const topic = topics.find(t => t.id === q.topic) || { name: q.topic || 'Topic', color: '#B8976A' };
           const isFlagged = flaggedSet.has(idx);
-          const correctText = (q.type === ‘multiselect’)
-            ? (Array.isArray(q.correct) ? q.correct.map(i => q.options?.[i]).filter(Boolean).join(‘, ‘) : ‘—‘)
-            : (q.options?.[q.correct] ?? ‘—‘);
-          const yourText = (q.type === ‘multiselect’)
-            ? (Array.isArray(userAns) ? userAns.map(i => q.options?.[i]).filter(Boolean).join(‘, ‘) : ‘—‘)
-            : (q.options?.[userAns] ?? ‘—‘);
+          const correctText = (q.type === 'multiselect')
+            ? (Array.isArray(q.correct) ? q.correct.map(i => q.options?.[i]).filter(Boolean).join(', ') : '—')
+            : (q.options?.[q.correct] ?? '—');
+          const yourText = (q.type === 'multiselect')
+            ? (Array.isArray(userAns) ? userAns.map(i => q.options?.[i]).filter(Boolean).join(', ') : '—')
+            : (q.options?.[userAns] ?? '—');
 
           return `
-            <div style=”background:${isCorrect ? ‘#E8F5E9’ : ‘#FCEBEB’}; border:0.5px solid ${isCorrect ? ‘rgba(46,125,50,0.2)’ : ‘rgba(163,45,45,0.2)’}; border-radius:4px; padding:20px 24px; margin-bottom:10px;”>
-              <div style=”display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;”>
-                <div style=”flex:1;”>
-                  <div style=”display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;”>
-                    <span style=”font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:${isCorrect ? ‘#2E7D32’ : ‘#A32D2D’}; font-weight:600;”>${isCorrect ? ‘Correct’ : ‘Incorrect’} · Q${idx + 1}</span>
-                    <span style=”font-size:11px; color:#999; background:rgba(0,0,0,0.06); border-radius:2px; padding:1px 6px;”>${safe(topic.name)}</span>
+            <div style="background:${isCorrect ? '#E8F5E9' : '#FCEBEB'}; border:0.5px solid ${isCorrect ? 'rgba(46,125,50,0.2)' : 'rgba(163,45,45,0.2)'}; border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                    <span style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:${isCorrect ? '#2E7D32' : '#A32D2D'}; font-weight:600;">${isCorrect ? 'Correct' : 'Incorrect'} · Q${idx + 1}</span>
+                    <span style="font-size:11px; color:#999; background:rgba(0,0,0,0.06); border-radius:2px; padding:1px 6px;">${safe(topic.name)}</span>
                   </div>
-                  <div style=”font-family:’Source Serif 4’,Georgia,serif; font-size:15px; color:#1A1815; line-height:1.5;”>${safe(q.question)}</div>
+                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#1A1815; line-height:1.5;">${safe(q.question)}</div>
                 </div>
-                <button onclick=”toggleFlagQuestion(${idx})” style=”flex-shrink:0; font-size:11px; padding:4px 10px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.15); background:${isFlagged ? ‘#FAEEDA’ : ‘#F5F2EE’}; color:${isFlagged ? ‘#633806’ : ‘#5A5750’}; cursor:pointer; font-family:’Source Serif 4’,Georgia,serif;”>${isFlagged ? ‘Flagged’ : ‘Flag’}</button>
+                <button onclick="toggleFlagQuestion(${idx})" style="flex-shrink:0; font-size:11px; padding:4px 10px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.15); background:${isFlagged ? '#FAEEDA' : '#F5F2EE'}; color:${isFlagged ? '#633806' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">${isFlagged ? 'Flagged' : 'Flag'}</button>
               </div>
-              <div style=”border-top:0.5px solid rgba(0,0,0,0.1); padding-top:12px;”>
-                <div style=”font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;”>Correct answer</div>
-                <div style=”font-family:’Source Serif 4’,Georgia,serif; font-size:14px; color:#2E7D32; font-weight:600; margin-bottom:${!isCorrect ? ‘10px’ : ‘0’};”>${safe(correctText)}</div>
+              <div style="border-top:0.5px solid rgba(0,0,0,0.1); padding-top:12px;">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Correct answer</div>
+                <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#2E7D32; font-weight:600; margin-bottom:${!isCorrect ? '10px' : '0'};">${safe(correctText)}</div>
                 ${!isCorrect ? `
-                  <div style=”font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;”>Your answer</div>
-                  <div style=”font-family:’Source Serif 4’,Georgia,serif; font-size:14px; color:#A32D2D; font-weight:600; margin-bottom:10px;”>${safe(yourText)}</div>
-                ` : ‘’}
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Your answer</div>
+                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#A32D2D; font-weight:600; margin-bottom:10px;">${safe(yourText)}</div>
+                ` : ''}
                 ${q.explanation ? `
-                  <div style=”font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;”>Explanation</div>
-                  <div style=”font-family:’Source Serif 4’,Georgia,serif; font-size:14px; color:#5A5750; line-height:1.6;”>${safe(q.explanation)}</div>
-                ` : ‘’}
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Explanation</div>
+                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#5A5750; line-height:1.6;">${safe(q.explanation)}</div>
+                ` : ''}
               </div>
             </div>
           `;
-        }).join(‘’)}
+        }).join('')}
       </div>
 
       <!-- LEARNING RESOURCES (collapsed) -->
-      <div style=”background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; margin-bottom:40px; overflow:hidden;”>
-        <button onclick=”toggleLearningResources()” style=”width:100%; display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:none; border:none; cursor:pointer; text-align:left;”>
-          <span style=”font-family:’Playfair Display’,Georgia,serif; font-size:18px; font-weight:700; color:#1A1815;”>Revision Material Bank</span>
-          <i id=”resources-chevron” data-lucide=”chevron-down” style=”color:#5A5750; width:18px; height:18px;”></i>
+      <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; margin-bottom:40px; overflow:hidden;">
+        <button onclick="toggleLearningResources()" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:none; border:none; cursor:pointer; text-align:left;">
+          <span style="font-family:'Playfair Display',Georgia,serif; font-size:18px; font-weight:700; color:#1A1815;">Revision Material Bank</span>
+          <i id="resources-chevron" data-lucide="chevron-down" style="color:#5A5750; width:18px; height:18px;"></i>
         </button>
-        <div id=”learning-resources” class=”hidden” style=”padding:0 24px 20px;”>
+        <div id="learning-resources" class="hidden" style="padding:0 24px 20px;">
           ${renderLearningResources()}
         </div>
       </div>
 
       <!-- ACTION BUTTONS -->
-      <div style=”display:flex; flex-wrap:wrap; gap:12px; justify-content:center; padding-bottom:48px;”>
-        <button onclick=”tryAnotherQuiz()” style=”font-family:’Source Serif 4’,Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;”>Try Another Quiz</button>
-        <button onclick=”scrollToQuizReview()” style=”font-family:’Source Serif 4’,Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;”>Review Questions</button>
-        <button onclick=”downloadQuizResultsPDF()” style=”font-family:’Source Serif 4’,Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;”>Download PDF</button>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; padding-bottom:48px;">
+        <button onclick="tryAnotherQuiz()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">Try Another Quiz</button>
+        <button onclick="scrollToQuizReview()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;">Review Questions</button>
+        <button onclick="downloadQuizResultsPDF()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;">Download PDF</button>
       </div>
 
     </div>
@@ -9772,7 +9807,7 @@ function renderOSCE(container) {
     gradeMessage = 'Solid foundation! Target the domains below to strengthen your performance.';
   } else if (overallPercentage >= 50) {
     grade = 'Borderline'; gradeColor = '#f97316'; gradeIcon = 'alert-circle';
-    gradeMessage = 'You’re close! Focus practice on weak areas to push over the pass mark.';
+    gradeMessage = "You're close! Focus practice on weak areas to push over the pass mark.";
   }
 
   // --------- DOMAIN SUMMARY ----------

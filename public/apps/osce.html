@@ -181,19 +181,44 @@
   .pulse-red-badge { animation: redPulseGlow 1.3s ease-in-out infinite; }
 
   /* ---------- Tailwind overrides for light background ---------- */
-  /* text-white → ink on cream background */
   .text-white { color: #1C1510 !important; }
-  /* Restore cream text on dark (ink) button */
   .btn-gradient { color: #F9F6F0 !important; }
-  /* Slate tones → inkMid/inkLight */
+  .text-slate-100, .text-slate-200 { color: #3A2F25 !important; }
   .text-slate-300 { color: #9C8878 !important; }
-  .text-slate-400 { color: #9C8878 !important; }
-  /* Small count/badge bg inside topic cards */
+  .text-slate-400, .text-slate-500 { color: #9C8878 !important; }
   .bg-white { background-color: rgba(249,246,240,0.7) !important; }
-  /* Remove decorative blur blobs in results screens */
   .blur-3xl { display: none !important; }
-  /* Answer option buttons in quiz */
   .border-transparent { border-color: #D9D0C1 !important; }
+
+  /* Accent icon colors → muted editorial tones */
+  .text-cyan-400 { color: #5C7A6A !important; }
+  .text-pink-400 { color: #A06050 !important; }
+  .text-yellow-300, .text-yellow-400 { color: #8B6914 !important; }
+  .text-amber-400, .text-amber-500 { color: #8B6914 !important; }
+
+  /* Correct/incorrect stay distinct but muted */
+  .text-green-400, .text-green-300 { color: #2E7D32 !important; }
+  .text-red-400, .text-red-300 { color: #A32D2D !important; }
+  .text-red-200 { color: #A32D2D !important; }
+  .text-red-100 { color: #5A3030 !important; }
+
+  /* Glass-card opacity backgrounds → editorial card fill */
+  .bg-opacity-5, .bg-opacity-10, .bg-opacity-20 { background-color: transparent !important; }
+  .bg-white.bg-opacity-5, .bg-white.bg-opacity-10 { background-color: #F5F2EE !important; }
+  .border-white { border-color: rgba(0,0,0,0.08) !important; }
+
+  /* Review section cards */
+  .bg-green-500.bg-opacity-20 { background-color: #E8F5E9 !important; }
+  .bg-red-500.bg-opacity-20 { background-color: #FCEBEB !important; }
+  .bg-red-500.bg-opacity-10 { background-color: #FEF5F5 !important; }
+  .border-green-500 { border-color: #2E7D32 !important; }
+  .border-red-500 { border-color: #A32D2D !important; }
+
+  /* Gradient backgrounds → flat editorial */
+  .bg-gradient-to-r { background-image: none !important; background-color: #FAEEDA !important; }
+
+  /* Black overlay panels → editorial card style */
+  .bg-black.bg-opacity-20 { background-color: #F0EBE3 !important; color: #3A2F25 !important; }
 </style>
 
 
@@ -5773,10 +5798,11 @@
           break;
         default:
           container.innerHTML = `
-            <div class="fade-in max-w-4xl mx-auto text-center">
-              <h1 class="text-4xl text-white font-bold mb-4">Coming Soon</h1>
-              <p class="text-slate-300 mb-8">Full functionality being implemented</p>
-              <button onclick="currentView='selection'; render();" class="btn-gradient px-8 py-3 rounded-xl text-white">
+            <div class="fade-in" style="max-width:600px; margin:0 auto; text-align:center; padding:80px 16px;">
+              <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:12px;">Under Construction</div>
+              <h1 style="font-family:'Playfair Display',Georgia,serif; font-size:36px; font-weight:700; color:#1A1815; margin:0 0 12px;">Coming Soon</h1>
+              <p style="font-family:'Source Serif 4',Georgia,serif; font-size:16px; color:#5A5750; margin-bottom:32px;">This feature is being built. Head back to the selection screen to get started.</p>
+              <button onclick="currentView='selection'; render();" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">
                 Back to Selection
               </button>
             </div>
@@ -5918,7 +5944,7 @@
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 
-  // Ensure flaggedQuestions exists (your file didn’t have it before)
+  // Ensure flaggedQuestions exists (your file didn't have it before)
   window.flaggedQuestions = Array.isArray(window.flaggedQuestions) ? window.flaggedQuestions : [];
   const flaggedQuestions = window.flaggedQuestions;
 
@@ -5935,7 +5961,7 @@
   const incorrectCount = totalQ - correctCount;
   const percentage = totalQ ? Math.round((correctCount / totalQ) * 100) : 0;
 
-  // Optional timer support (won’t crash if you don’t track it)
+  // Optional timer support (won't crash if you don't track it)
   const totalSeconds = Number(window.quizTimeSeconds || 0);
   const timeLabel = totalSeconds > 0
     ? `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}`
@@ -5975,13 +6001,13 @@
     gradeMessage = 'Exceptional work — your knowledge is exam-ready.';
   } else if (percentage >= 75) {
     grade = 'Strong Pass'; gradeColor = '#84cc16'; gradeIcon = 'check-circle';
-    gradeMessage = 'Great performance — a few tweaks and you’re at mastery level.';
+    gradeMessage = "Great performance — a few tweaks and you're at mastery level.";
   } else if (percentage >= 60) {
     grade = 'Pass'; gradeColor = '#f59e0b'; gradeIcon = 'trending-up';
     gradeMessage = 'Solid foundation — target your weaker topics to improve quickly.';
   } else if (percentage >= 50) {
     grade = 'Borderline'; gradeColor = '#f97316'; gradeIcon = 'alert-circle';
-    gradeMessage = 'You’re close — focus revision on the weakest topic first.';
+    gradeMessage = "You're close — focus revision on the weakest topic first.";
   }
 
   // ---------- INSIGHTS ----------
@@ -6185,138 +6211,6 @@
         <button onclick="tryAnotherQuiz()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">Try Another Quiz</button>
         <button onclick="scrollToQuizReview()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;">Review Questions</button>
         <button onclick="downloadQuizResultsPDF()" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.12); color:#5A5750; border-radius:4px; padding:14px 32px; cursor:pointer;">Download PDF</button>
-      </div>
-
-    </div>
-  `;
-            <ul class="text-slate-100 text-sm space-y-1">
-              <li>• Example: Child weighs 25kg, prescribed 10mg/kg paracetamol → <strong>250mg</strong></li>
-              <li>• Critical check: Always verify dose is within safe range in <strong>BNFc</strong></li>
-            </ul>
-          </div>
-
-          <div class="rounded-2xl p-6" style="background: #FAFAF8; /* was linear-gradient(135deg, rgba(99,102,241,.35), rgba(34,211,238,.25)); border: 1px solid rgba(255,255,255,.12);">
-            <div class="text-white font-bold mb-2 flex items-center gap-2"><i data-lucide="droplet" class="w-5 h-5"></i>Volume Calculation</div>
-            <div class="bg-black bg-opacity-20 rounded-lg p-3 text-slate-100 mono text-sm mb-3">Volume = (Dose Required ÷ Stock Strength) × Stock Volume</div>
-            <ul class="text-slate-100 text-sm space-y-1">
-              <li>• Example: Need 250mg, stock is 100mg/5ml → <strong>12.5ml</strong></li>
-              <li>• Memory aid: “What you want ÷ what you’ve got × volume it’s in”</li>
-            </ul>
-          </div>
-
-          <div class="rounded-2xl p-6" style="background: #FAFAF8; /* was linear-gradient(135deg, rgba(20,184,166,.35), rgba(34,197,94,.25)); border: 1px solid rgba(255,255,255,.12);">
-            <div class="text-white font-bold mb-2 flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5"></i>IV Infusion Rate</div>
-            <div class="bg-black bg-opacity-20 rounded-lg p-3 text-slate-100 mono text-sm mb-3">Rate (ml/hr) = Volume (ml) ÷ Time (hours)</div>
-            <ul class="text-slate-100 text-sm space-y-1">
-              <li>• Example: Infuse 500ml over 4 hours → <strong>125ml/hr</strong></li>
-              <li>• Sense-check: Does the rate make sense? Not too fast/slow?</li>
-            </ul>
-          </div>
-
-          <div class="rounded-2xl p-6" style="background: #FAFAF8; /* was linear-gradient(135deg, rgba(132,204,22,.35), rgba(234,179,8,.25)); border: 1px solid rgba(255,255,255,.12);">
-            <div class="text-white font-bold mb-2 flex items-center gap-2"><i data-lucide="percent" class="w-5 h-5"></i>Percentage Strength</div>
-            <div class="bg-black bg-opacity-20 rounded-lg p-3 text-slate-100 mono text-sm mb-3">X% = X grams per 100ml (or X mg per 1ml)</div>
-            <ul class="text-slate-100 text-sm space-y-1">
-              <li>• Example: 0.9% sodium chloride → 0.9g/100ml → <strong>9mg per ml</strong></li>
-              <li>• Common use: Fluid concentrations, local anaesthetics</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="bg-red-500 bg-opacity-10 border border-red-500 border-opacity-30 rounded-xl p-5">
-          <div class="text-red-200 font-bold mb-2 flex items-center gap-2"><i data-lucide="shield-alert" class="w-5 h-5"></i>Critical Safety Checks</div>
-          <ul class="text-red-100 text-sm space-y-1">
-            <li>• Write it down: Never do calculations mentally — always write them out</li>
-            <li>• Check units: mg vs g, ml vs L — decimal errors cause 10-fold mistakes</li>
-            <li>• Verify weight: Always use actual documented weight, never estimate</li>
-            <li>• Second check: High-risk drugs require independent double-check</li>
-            <li>• Sense check: Is the dose realistic? Does volume seem reasonable?</li>
-            <li>• BNFc check: Confirm dose is within safe range for age and weight</li>
-          </ul>
-        </div>
-      </div>
-
-
-
-      <!-- QUESTION REVIEW -->
-      <div id="quiz-review" class="glass-card rounded-2xl p-8 mb-8">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <h2 class="text-white text-2xl font-bold flex items-center gap-3">
-            <i data-lucide="list-checks" class="w-7 h-7 text-cyan-400"></i>
-            Question Review
-          </h2>
-
-          <div class="flex gap-2">
-            <button onclick="setQuizReviewFilter('all')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'all' ? 'border border-amber-500' : ''}">All (${totalQ})</button>
-            <button onclick="setQuizReviewFilter('incorrect')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'incorrect' ? 'border border-amber-500' : ''}">Incorrect (${incorrectCount})</button>
-            <button onclick="setQuizReviewFilter('flagged')" class="btn-secondary px-4 py-2 rounded-lg text-sm text-white ${window.__quizReviewFilter === 'flagged' ? 'border border-amber-500' : ''}">Flagged (${flaggedQuestions.length})</button>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          ${reviewList.map(({ q, idx }) => {
-            const userAns = answers[idx];
-            const isCorrect = (userAns !== null && userAns !== undefined && userAns === q.correct);
-            const topic = topics.find(t => t.id === q.topic) || { name: q.topic || 'Topic', color: '#B8976A' };
-            const isFlagged = flaggedSet.has(idx);
-
-            return `
-              <div class="rounded-xl border-2 ${isCorrect ? 'border-green-500 border-opacity-25' : 'border-red-500 border-opacity-35'} bg-white bg-opacity-5 overflow-hidden">
-                <div class="p-4 flex items-start justify-between gap-4">
-                  <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-lg flex items-center justify-center ${isCorrect ? 'bg-green-500 bg-opacity-20' : 'bg-red-500 bg-opacity-20'}">
-                      <i data-lucide="${isCorrect ? 'check' : 'x'}" class="w-5 h-5 ${isCorrect ? 'text-green-400' : 'text-red-400'}"></i>
-                    </div>
-
-                    <div>
-                      <div class="flex items-center gap-2 mb-1">
-                        <span class="text-white font-bold">Question ${idx + 1}</span>
-                        <span class="text-xs px-2 py-0.5 rounded-full" style="background:${topic.color}22; color:${topic.color};">${safe(topic.name)}</span>
-                      </div>
-                      <div class="text-slate-200 text-sm">${safe(q.question)}</div>
-                    </div>
-                  </div>
-
-                  <button onclick="toggleFlagQuestion(${idx})" class="btn-secondary px-3 py-2 rounded-lg text-white text-xs">
-                    <i data-lucide="flag" class="w-4 h-4 inline mr-1 ${isFlagged ? 'text-yellow-400 fill-yellow-400' : ''}"></i>
-                    ${isFlagged ? 'Flagged' : 'Flag'}
-                  </button>
-                </div>
-
-                <div class="px-4 pb-4">
-                  <div class="bg-white bg-opacity-5 rounded-lg p-4">
-                    <div class="text-xs text-slate-400 mb-2">Correct answer:</div>
-                    <div class="text-green-300 font-semibold text-sm mb-3">${safe(q.options?.[q.correct])}</div>
-
-                    ${!isCorrect ? `
-                      <div class="text-xs text-slate-400 mb-2">Your answer:</div>
-                      <div class="text-red-300 font-semibold text-sm mb-3">${safe(q.options?.[userAns])}</div>
-                    ` : ''}
-
-                    <div class="text-xs text-slate-400 mb-2">Explanation:</div>
-                    <div class="text-slate-200 text-sm leading-relaxed">${safe(q.explanation || '—')}</div>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- ACTION BUTTONS -->
-      <div class="flex flex-wrap gap-4 justify-center pb-10">
-        <button onclick="downloadQuizResultsPDF()" class="btn-secondary px-10 py-4 rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform">
-          <i data-lucide="download" class="w-6 h-6 inline mr-2"></i>
-          Download PDF
-        </button>
-        <button onclick="scrollToQuizReview()" class="btn-secondary px-10 py-4 rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform">
-          <i data-lucide="eye" class="w-6 h-6 inline mr-2"></i>
-          Review Questions
-        </button>
-        <button onclick="tryAnotherQuiz()" class="btn-gradient px-10 py-4 rounded-xl text-white font-bold text-lg hover:scale-105 transition-transform shadow-2xl">
-          <i data-lucide="rotate-cw" class="w-6 h-6 inline mr-2"></i>
-          Try Another Quiz
-        </button>
       </div>
 
     </div>
@@ -6695,7 +6589,7 @@ function renderOSCE(container) {
     gradeMessage = 'Solid foundation! Target the domains below to strengthen your performance.';
   } else if (overallPercentage >= 50) {
     grade = 'Borderline'; gradeColor = '#f97316'; gradeIcon = 'alert-circle';
-    gradeMessage = 'You’re close! Focus practice on weak areas to push over the pass mark.';
+    gradeMessage = "You're close! Focus practice on weak areas to push over the pass mark.";
   }
 
   // --------- DOMAIN SUMMARY ----------
