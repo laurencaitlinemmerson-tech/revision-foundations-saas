@@ -115,7 +115,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="hero-title">
-              <span className="gradient-text">Revision Foundations</span>
+              <span className="gradient-text">The Nurse Lab</span>
             </h1>
 
 
@@ -466,7 +466,7 @@ export default function HomePage() {
           <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
             <div className="space-y-4">
               <div className="font-serif text-2xl font-semibold text-[var(--plum)]">
-                Revision Foundations
+                The Nurse Lab
               </div>
               <p className="text-sm">Made with 💜 by Lauren</p>
             </div>
@@ -524,7 +524,7 @@ export default function HomePage() {
           </div>
 
           <div className="border-t border-[var(--lavender)]/40 pt-6 text-center text-sm">
-            © 2026 Revision Foundations
+            © 2026 The Nurse Lab
           </div>
         </div>
       </footer>

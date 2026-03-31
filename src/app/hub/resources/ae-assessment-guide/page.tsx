@@ -735,7 +735,7 @@ export default function AEAssessmentGuidePage() {
           and always return to A after intervening. Covers airway, breathing, circulation, disability,
           and exposure with paediatric-specific values, red flags, and clinical pearls.
         </p>
-        <p className="ae-byline">Children&apos;s nursing · Paediatric OSCE prep · Revision Foundations</p>
+        <p className="ae-byline">Children&apos;s nursing · Paediatric OSCE prep · The Nurse Lab</p>
 
         {/* Golden rules */}
         <div className="ae-golden">

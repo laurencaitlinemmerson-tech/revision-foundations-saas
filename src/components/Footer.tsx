@@ -30,10 +30,10 @@ export default function Footer() {
 
           <div style={{ gridColumn: 'span 2' }} className="md:col-span-1">
             <p style={{ fontFamily: display, fontSize: '20px', fontWeight: 400, fontStyle: 'italic', color: '#F9F6F0', marginBottom: '10px', letterSpacing: '0.01em' }}>
-              Revision Foundations
+              The Nurse Lab
             </p>
             <p style={{ fontFamily: serif, fontSize: '13px', fontWeight: 300, color: '#5C4A38', lineHeight: 1.7 }}>
-              Made with care by Lauren.<br />Helping nursing students pass since 2024.
+              Made with care by Lauren.<br />Helping student nurses pass exams and thrive since 2024.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export default function Footer() {
 
         <div style={{ borderTop: '1px solid rgba(249,246,240,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '8px' }}>
           <p style={{ fontFamily: serif, fontSize: '12px', fontWeight: 300, color: '#3C2C1C' }}>
-            © {currentYear} Revision Foundations. All rights reserved.
+            © {currentYear} The Nurse Lab. All rights reserved.
           </p>
           <p style={{ fontFamily: serif, fontSize: '12px', fontWeight: 300, color: '#3C2C1C' }}>
             UK nursing students

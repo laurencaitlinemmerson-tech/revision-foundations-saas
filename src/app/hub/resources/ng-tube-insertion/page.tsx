@@ -8,7 +8,7 @@ export default function NGTubeInsertionPage() {
       kicker="Clinical Skills · Children's Nursing"
       title="NG Tube Insertion & Testing"
       standfirst="How to insert, confirm placement, and safely use a nasogastric tube in paediatric patients — including why syringe size matters and what to do when you can't get aspirate."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
       {/* ── Overview ── */}
       <section style={{ marginBottom: '48px' }}>

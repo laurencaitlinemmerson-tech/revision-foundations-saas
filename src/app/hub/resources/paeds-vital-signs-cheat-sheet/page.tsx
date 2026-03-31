@@ -27,7 +27,7 @@ export default function PaedsVitalSignsCheatSheet() {
       kicker="Children's Nursing · Free Resource"
       title="Paediatric Vital Signs Cheat Sheet"
       standfirst="Normal ranges by age group — from newborn to adolescent. Essential for OSCEs, placement, and recognising the deteriorating child."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       {/* Key principles */}

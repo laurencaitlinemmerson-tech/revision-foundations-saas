@@ -1,4 +1,4 @@
-// Revision Foundations Service Worker
+// The Nurse Lab Service Worker
 // Provides offline support and caching for better performance
 
 const CACHE_NAME = 'rf-cache-v1';

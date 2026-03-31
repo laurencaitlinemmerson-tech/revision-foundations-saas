@@ -1,7 +1,7 @@
 {
-  "name": "Revision Foundations",
-  "short_name": "RevFoundations",
-  "description": "Your nursing bestie for OSCEs & exams. Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students.",
+  "name": "The Nurse Lab",
+  "short_name": "NurseLab",
+  "description": "Study tools, OSCE practice, quizzes, and revision resources that help student nurses pass exams and thrive on placement.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

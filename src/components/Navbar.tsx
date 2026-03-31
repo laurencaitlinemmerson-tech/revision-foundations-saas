@@ -62,8 +62,8 @@ export default function Navbar() {
       role="navigation" aria-label="Main navigation">
       <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '68px' }}>
-          <Link href="/" style={{ fontFamily: display, fontSize: '17px', fontWeight: 400, letterSpacing: '0.01em', color: ink, textDecoration: 'none', lineHeight: 1 }} aria-label="Revision Foundations — Home">
-            Revision Foundations
+          <Link href="/" style={{ fontFamily: display, fontSize: '17px', fontWeight: 400, letterSpacing: '0.01em', color: ink, textDecoration: 'none', lineHeight: 1 }} aria-label="The Nurse Lab — Home">
+            The Nurse Lab
           </Link>
 
           <div className="nav-desktop-links" style={{ alignItems: 'center', gap: '28px' }}>

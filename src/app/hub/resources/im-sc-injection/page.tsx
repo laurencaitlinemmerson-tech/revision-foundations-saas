@@ -343,7 +343,7 @@ export default function IMSCInjectionPage() {
         <p className="inj-standfirst">
           A step-by-step guide to intramuscular and subcutaneous injection technique in paediatric patients — site selection, needle choice, and the mistakes that trip people up on placement.
         </p>
-        <p className="inj-byline">Revision Foundations · Children&apos;s Hub</p>
+        <p className="inj-byline">The Nurse Lab · Children&apos;s Hub</p>
 
         {/* ── Overview ── */}
         <div className="inj-info">

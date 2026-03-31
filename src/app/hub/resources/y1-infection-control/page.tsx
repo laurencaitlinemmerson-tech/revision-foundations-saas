@@ -20,7 +20,7 @@ export default function Y1InfectionControlPage() {
       kicker="Year 1 Essentials · Free Resource"
       title="Infection Prevention & Control"
       standfirst="Essential IPC knowledge to protect patients, yourself, and colleagues — from hand hygiene moments to isolation precautions."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       {/* Chain of Infection */}

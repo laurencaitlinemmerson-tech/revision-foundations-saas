@@ -4,7 +4,7 @@ import { getUserEntitlements } from '@/lib/entitlements';
 import HubClient from '../HubClient';
 
 export const metadata: Metadata = {
-  title: "Children's Nursing Hub | Revision Foundations",
+  title: "Children's Nursing Hub | The Nurse Lab",
   description:
     "OSCE guides, paediatric cheat sheets, and revision materials for children's nursing students.",
 };

@@ -9,7 +9,7 @@ export default function DrugCalculationsCheatSheetPage() {
       kicker="Medication Safety · Free Resource"
       title="Drug Calculations Cheat Sheet"
       standfirst="Essential formulas and step-by-step methods for common drug calculations — from oral liquids to IV rates and weight-based paediatric dosing."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
       <>
           {/* NHS Formula */}

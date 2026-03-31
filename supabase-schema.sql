@@ -1,4 +1,4 @@
--- Supabase Schema for Revision Foundations
+-- Supabase Schema for The Nurse Lab
 -- Run this in the Supabase SQL Editor
 
 -- Enable UUID extension if not already enabled

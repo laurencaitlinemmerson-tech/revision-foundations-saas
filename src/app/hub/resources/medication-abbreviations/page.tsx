@@ -114,7 +114,7 @@ export default function MedicationAbbreviationsPage() {
       kicker="Medication Safety · Free Resource"
       title="Medication Abbreviations Guide"
       standfirst="Essential abbreviations for prescriptions and drug charts — with clinical tips, warnings, and examples for safe medication practice."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       {/* Safety warnings */}

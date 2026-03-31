@@ -73,13 +73,13 @@ export default function ReviewPage() {
           <div className="text-center mb-8">
             <h2 className="text-xl mb-3">Why Leave a Review?</h2>
             <p className="text-[var(--plum-dark)]/70 mb-6">
-              Revision Foundations helps nursing students prepare for OSCEs and exams with targeted tools, practice questions, and feedback. If you’ve used our resources, please share what you found helpful!
+              The Nurse Lab helps student nurses prepare for OSCEs and exams with focused tools, practice questions, and feedback. If you’ve used the platform, please share what helped most.
             </p>
           </div>
 
           {/* Product/Service Highlights */}
           <div className="mb-8">
-            <h2 className="text-lg font-medium text-[var(--plum)] mb-4">Why Choose Revision Foundations?</h2>
+            <h2 className="text-lg font-medium text-[var(--plum)] mb-4">Why Choose The Nurse Lab?</h2>
             <ul className="list-inside list-disc space-y-2 text-[var(--plum-dark)]/70">
               <li>Trusted by nursing students for OSCE success</li>
               <li>Practice materials aligned with current exam standards</li>

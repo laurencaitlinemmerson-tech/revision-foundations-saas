@@ -38,7 +38,7 @@ export default function DeleteDataPage() {
       kicker="Delete Data"
       title="Request Data Deletion"
       standfirst="You can request deletion of your account and all associated data here."
-      byline="Revision Foundations"
+      byline="The Nurse Lab"
       backHref="/dashboard"
       backLabel="Back to Dashboard"
     >

@@ -1,4 +1,4 @@
-# Revision Foundations SaaS - Setup Guide
+# The Nurse Lab SaaS - Setup Guide
 
 ## Prerequisites
 

@@ -59,7 +59,7 @@ export default function HowToUsePage() {
       kicker="Quick Guide"
       title="How to Use Your Tools"
       standfirst="A simple way to revise with confidence, stay consistent, and make the most of your study time."
-      byline="Revision Foundations"
+      byline="The Nurse Lab"
       backHref="/dashboard"
       backLabel="Back to Dashboard"
     >

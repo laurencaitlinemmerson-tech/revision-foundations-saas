@@ -8,7 +8,7 @@ export default function Y1DocumentationPage() {
       kicker="Year 1 Essentials · Free Resource"
       title="Documentation & Record Keeping"
       standfirst="Essential documentation skills for safe, legal, and professional nursing practice. If it isn't documented, it didn't happen."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       <div className="ed-pearl" style={{ marginBottom: '40px' }}>

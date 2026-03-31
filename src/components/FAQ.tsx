@@ -20,7 +20,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "Can I access it on my phone?",
-    answer: "Absolutely! Revision Foundations is fully mobile-friendly. Study on the go during your commute, on placement breaks, or anywhere you have your phone.",
+    answer: "Absolutely! The Nurse Lab is fully mobile-friendly. Study on the go during your commute, on placement breaks, or anywhere you have your phone.",
   },
   {
     question: "Is there a subscription or recurring payment?",

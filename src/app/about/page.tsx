@@ -148,7 +148,7 @@ export default function AboutPage() {
                   marginBottom: '18px',
                 }}
               >
-                Founder story · Revision Foundations
+                Founder story · The Nurse Lab
               </p>
 
               <h1
@@ -175,7 +175,7 @@ export default function AboutPage() {
                 }}
               >
                 I&apos;m a children&apos;s nursing student and the person behind
-                Revision Foundations. I started making these resources because I
+                The Nurse Lab. I started making these resources because I
                 wanted revision tools that felt thoughtful, calm, and genuinely
                 lovely to use.
               </p>
@@ -349,7 +349,7 @@ export default function AboutPage() {
                 <p style={{ ...body, margin: '26px 0 28px', maxWidth: '620px' }}>
                   So I started making my own. At first they were just for me.
                   Then people on my course started asking for them too, and
-                  that&apos;s when Revision Foundations slowly became a real thing.
+                  that&apos;s when The Nurse Lab slowly became a real thing.
                 </p>
 
                 <div

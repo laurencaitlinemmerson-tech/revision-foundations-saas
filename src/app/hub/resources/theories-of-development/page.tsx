@@ -8,7 +8,7 @@ export default function TheoriesOfDevelopmentPage() {
       kicker="Children's Nursing · Free Resource"
       title="Theories of Development"
       standfirst="Essential developmental theories for nursing practice — from Piaget to Bowlby, with clinical applications for every stage."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       <div className="ed-pearl" style={{ marginBottom: '40px' }}>

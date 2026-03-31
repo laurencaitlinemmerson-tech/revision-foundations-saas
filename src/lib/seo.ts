@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 
 // Base URL for the site
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://revisionfoundations.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nurselab.co.uk';
 
 // Default SEO configuration
 export const defaultSEO = {
-  siteName: 'Revision Foundations',
-  title: 'Revision Foundations - Your Nursing Bestie for OSCEs & Exams',
-  description: 'Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students. Pass your nursing exams with confidence.',
+  siteName: 'The Nurse Lab',
+  title: 'The Nurse Lab | Nursing revision for OSCEs, exams, and placement',
+  description: 'Study tools, OSCE practice, core quizzes, and revision resources that help student nurses pass exams and thrive on placement.',
   locale: 'en_GB',
   type: 'website',
 } as const;
@@ -17,7 +17,7 @@ export function getOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Revision Foundations',
+    name: 'The Nurse Lab',
     url: siteUrl,
     logo: `${siteUrl}/logo.png`,
     description: defaultSEO.description,
@@ -34,7 +34,7 @@ export function getWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Revision Foundations',
+    name: 'The Nurse Lab',
     url: siteUrl,
     description: defaultSEO.description,
     potentialAction: {
@@ -57,7 +57,7 @@ export function getCourseSchema(courseName: string, description: string, price: 
     description,
     provider: {
       '@type': 'Organization',
-      name: 'Revision Foundations',
+      name: 'The Nurse Lab',
       url: siteUrl,
     },
     offers: {
@@ -90,11 +90,11 @@ export function getProductSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: 'Revision Foundations Pro Access',
-    description: 'Lifetime access to all nursing study resources, OSCE tools, and quizzes.',
+    name: 'The Nurse Lab Pro Access',
+    description: 'Lifetime access to nursing study resources, OSCE tools, and quizzes.',
     brand: {
       '@type': 'Brand',
-      name: 'Revision Foundations',
+      name: 'The Nurse Lab',
     },
     offers: {
       '@type': 'Offer',

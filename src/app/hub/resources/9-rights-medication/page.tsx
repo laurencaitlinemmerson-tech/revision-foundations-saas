@@ -75,7 +75,7 @@ export default function NineRightsMedicationPage() {
       kicker="Medication Safety · Free Resource"
       title="9 Rights of Medication Administration"
       standfirst="The essential safety checks before giving any medication — memorise these for OSCEs and apply them on every single placement, every time."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       <div className="ed-pearl" style={{ marginBottom: '40px' }}>

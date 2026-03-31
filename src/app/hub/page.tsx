@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Nursing Hub | Revision Foundations',
+  title: 'Nursing Hub | The Nurse Lab',
   description:
     'Choose your nursing branch to find OSCE guides, cheat sheets, and revision materials tailored to your pathway.',
 };
@@ -61,7 +61,7 @@ export default function HubPage() {
                 marginBottom: '10px',
               }}
             >
-              Revision Hub
+              Nursing Hub
             </p>
 
             <h1

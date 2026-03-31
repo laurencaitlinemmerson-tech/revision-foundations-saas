@@ -9,7 +9,7 @@ export default function PrivacyPage() {
       kicker="Privacy"
       title="Privacy Policy"
       standfirst="Last updated: January 2025"
-      byline="Revision Foundations"
+      byline="The Nurse Lab"
       backHref="/"
       backLabel="Back home"
     >
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Hi there!</h2>
           <p>
-            I'm Lauren, and I run Revision Foundations. I take your privacy seriously and want to be
+            I'm Lauren, and I run The Nurse Lab. I take your privacy seriously and want to be
             completely transparent about what data I collect and why. This policy explains everything
             in plain English - no confusing legal jargon!
           </p>

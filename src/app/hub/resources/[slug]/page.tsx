@@ -1629,7 +1629,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
         </div>
         <h1 className="slug-headline">{resource.title}</h1>
         <p className="slug-standfirst">{resource.description}</p>
-        <p className="slug-byline">Revision Foundations · Children&apos;s Hub</p>
+        <p className="slug-byline">The Nurse Lab · Children&apos;s Hub</p>
 
         {/* Content sections */}
         {resource.sections.map((section, index) => {
@@ -1673,4 +1673,3 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
     </div>
   );
 }
-

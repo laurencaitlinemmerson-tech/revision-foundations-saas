@@ -159,7 +159,7 @@ export default function GlossaryPage() {
       kicker="Nursing Terminology · Free Resource"
       title="Nursing Glossary A–Z"
       standfirst="Your complete reference to nursing terminology, abbreviations, and medical jargon — searchable and organised alphabetically."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
       {/* Search */}
           <div style={{ position: 'relative', marginBottom: '24px' }}>

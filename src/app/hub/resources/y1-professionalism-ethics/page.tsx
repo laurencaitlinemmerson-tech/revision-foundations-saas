@@ -8,7 +8,7 @@ export default function Y1ProfessionalismEthicsPage() {
       kicker="Year 1 Essentials · Free Resource"
       title="Professionalism & Ethics"
       standfirst="The professional values and ethical principles that underpin safe, compassionate nursing practice — from the NMC Code to the Mental Capacity Act."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       {/* NMC Code */}

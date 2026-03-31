@@ -23,14 +23,14 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://www.revisionfoundations.com"
+    process.env.NEXT_PUBLIC_APP_URL || "https://nurselab.co.uk"
   ),
   title: {
-    default: "Revision Foundations - Your Nursing Bestie for OSCEs & Exams",
-    template: "%s | Revision Foundations",
+    default: "The Nurse Lab | Nursing revision for OSCEs, exams, and placement",
+    template: "%s | The Nurse Lab",
   },
   description:
-    "Your nursing bestie for OSCEs & exams. Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students. Pass your exams with confidence.",
+    "Study tools, OSCE practice, quizzes, and revision resources that help student nurses pass exams, build confidence, and thrive on placement.",
   keywords: [
     "nursing",
     "OSCE",
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
     "pediatric nursing",
   ],
   authors: [{ name: "Lauren" }],
-  creator: "Revision Foundations",
-  publisher: "Revision Foundations",
+  creator: "The Nurse Lab",
+  publisher: "The Nurse Lab",
   formatDetection: {
     email: false,
     address: false,
@@ -56,23 +56,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_GB",
-    siteName: "Revision Foundations",
-    title: "Revision Foundations - Your Nursing Bestie",
+    siteName: "The Nurse Lab",
+    title: "The Nurse Lab | Nursing revision that helps you pass",
     description:
-      "Interactive OSCE practice, core nursing quizzes, and study resources for UK nursing students.",
+      "Study tools, OSCE practice, quizzes, and revision resources for student nurses who want to pass exams and thrive on placement.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Revision Foundations - Nursing Study Resources",
+        alt: "The Nurse Lab nursing study resources",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Revision Foundations",
-    description: "Your nursing bestie for OSCEs & exams.",
+    title: "The Nurse Lab",
+    description: "Nursing revision for OSCEs, exams, and placement confidence.",
     images: ["/og-image.png"],
   },
   robots: {

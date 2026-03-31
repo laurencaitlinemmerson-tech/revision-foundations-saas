@@ -226,7 +226,7 @@ export default function PricingPage() {
           </div>
         </main>
         <footer style={{ borderTop: `1px solid ${softLine}`, padding: '20px 24px', textAlign: 'center' }}>
-          <p style={{ fontFamily: serif, fontSize: '12px', color: inkLight }}>Revision Foundations &middot; {new Date().getFullYear()}</p>
+          <p style={{ fontFamily: serif, fontSize: '12px', color: inkLight }}>The Nurse Lab &middot; {new Date().getFullYear()}</p>
         </footer>
       </div>
     );

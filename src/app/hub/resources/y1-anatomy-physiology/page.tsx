@@ -8,7 +8,7 @@ export default function Y1AnatomyPhysiologyPage() {
       kicker="Year 1 Essentials · Free Resource"
       title="Anatomy & Physiology"
       standfirst="Essential body systems knowledge for Year 1 nursing students — with clinical links, normal ranges, and the values that actually come up on placement."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       <div className="ed-pearl" style={{ marginBottom: '40px' }}>

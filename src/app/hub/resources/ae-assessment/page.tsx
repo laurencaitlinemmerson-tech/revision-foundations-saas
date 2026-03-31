@@ -127,7 +127,7 @@ export default function AEAssessmentPage() {
       kicker="Children's Nursing · Free Resource"
       title="A-E Assessment Framework"
       standfirst="The systematic approach to assessing acutely unwell patients — assess in order, treat as you find, and call for help early."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       {/* Golden rules */}

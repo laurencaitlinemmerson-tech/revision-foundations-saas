@@ -90,7 +90,7 @@ export default function PWAInstallPrompt() {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-white text-sm mb-1">
-                  Install Revision Foundations
+                  Install The Nurse Lab
                 </h3>
                 <p className="text-gray-400 text-xs mb-3">
                   Access study resources offline, even with poor hospital WiFi!

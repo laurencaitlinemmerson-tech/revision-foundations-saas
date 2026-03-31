@@ -8,7 +8,7 @@ export default function PlacementSurvivalPage() {
       kicker="Children's Nursing · Free Resource"
       title="Placement Survival Guide"
       standfirst="Everything you need to know to survive and thrive on your nursing placements — from the night before to your final day."
-      byline="Revision Foundations · Children's Hub"
+      byline="The Nurse Lab · Children's Hub"
     >
 
       {/* Before You Go */}
