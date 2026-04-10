@@ -271,9 +271,6 @@ export default function HubPage() {
             <div>
               <p className="hub-branch-eyebrow">Branch one</p>
               <h2 className="hub-branch-title">Children&apos;s<br />Nursing</h2>
-              <p className="hub-branch-desc">
-                Paediatric assessment, OSCE prep, drug calculations, safeguarding, family-centred care, palliative care, development, and more.
-              </p>
               <div className="hub-branch-stats">
                 <div className="hub-branch-stat">
                   <span className="hub-branch-stat-num">22</span>
@@ -305,9 +302,6 @@ export default function HubPage() {
             <div>
               <p className="hub-branch-eyebrow">Branch two</p>
               <h2 className="hub-branch-title">Adult<br />Nursing</h2>
-              <p className="hub-branch-desc">
-                Sepsis 6, IV fluids, deterioration, pressure care, palliative care, escalation, documentation, professionalism, and more.
-              </p>
               <div className="hub-branch-stats">
                 <div className="hub-branch-stat">
                   <span className="hub-branch-stat-num">13</span>

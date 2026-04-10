@@ -59,9 +59,7 @@ export default function HubClient({
     branch === 'adult'
       ? {
           label: 'Live now',
-          title: 'Adult hub pages are live for practical revision and placement support.',
-          body:
-            'The adult route is currently strongest as a guide library. If you want the paid OSCE and quiz tools, the children\'s route is still the most complete paid setup right now.',
+          title: 'Adult hub pages',
           primaryHref: '/hub/resources/palliative-care-adult',
           primaryLabel: 'Open an adult guide',
           secondaryHref: '/pricing',
@@ -73,10 +71,8 @@ export default function HubClient({
           ],
         }
       : {
-          label: 'Most complete route',
-          title: 'Children\'s is the fullest route right now across free pages and paid tools.',
-          body:
-            'This is where the paediatric OSCE tool, core quiz, and hub guides currently connect most clearly. Start free first if you want to test the flow before buying.',
+          label: 'Live now',
+          title: "Children's hub pages",
           primaryHref: '/osce',
           primaryLabel: 'Try OSCE preview',
           secondaryHref: '/pricing',
@@ -217,9 +213,8 @@ export default function HubClient({
           <section className="hbc-briefing">
             <div className="hbc-briefing-copy">
               <span className="hbc-briefing-label">{branchBriefing.label}</span>
-              <h2 className="hbc-briefing-title">{branchBriefing.title}</h2>
-              <p className="hbc-briefing-desc">{branchBriefing.body}</p>
-              <div className="hbc-briefing-actions">
+              <h2 className="hbc-briefing-title" style={{ marginBottom: 0 }}>{branchBriefing.title}</h2>
+              <div className="hbc-briefing-actions" style={{ marginTop: '20px' }}>
                 <Link href={branchBriefing.primaryHref} className="hbc-briefing-btn-primary">
                   {branchBriefing.primaryLabel}
                 </Link>
@@ -338,12 +333,7 @@ export default function HubClient({
               </div>
 
               {!shouldShowFullShelf && (
-                <div className="hbc-browse-teaser">
-                  <span className="hbc-browse-teaser-label">Keep it lighter</span>
-                  <h3 className="hbc-browse-teaser-title">Open the full shelf only when you need it.</h3>
-                  <p className="hbc-browse-teaser-desc">
-                    Start with the picks above, or reveal the whole library once you know the route you want to take.
-                  </p>
+                <div style={{ textAlign: 'center', marginTop: '32px', marginBottom: '52px' }}>
                   <button type="button" className="hbc-browse-btn" onClick={revealFullShelf}>
                     Browse all {totalCount} resources &rarr;
                   </button>
@@ -401,7 +391,7 @@ export default function HubClient({
             </div>
 
             <div className="hbc-q-body">
-              <div className="hbc-q-list">
+              <div className="hbc-q-list" style={{ borderRight: 'none' }}>
                 {!questionsLoading && questionPreviews.length > 0
                   ? questionPreviews.slice(0, 3).map((question) => (
                       <Link
@@ -427,52 +417,36 @@ export default function HubClient({
                       </article>
                     ))}
               </div>
-
-              <aside className="hbc-q-sidebar">
-                <span className="hbc-q-sidebar-kicker">Board feel</span>
-                <p className="hbc-q-sidebar-title">
-                  {totalQuestionCount > 0
-                    ? 'A small board, kept useful.'
-                    : 'A quieter corner, ready when you need it.'}
-                </p>
-                <p className="hbc-q-sidebar-desc">
-                  {totalQuestionCount > 0
-                    ? `${questionCounts.answered} answered and ${questionCounts.open} still open. Short, practical questions tend to get the clearest replies.`
-                    : 'Good for placement worries, OSCE phrasing, calculations, and "where do I start?" questions that do not need a whole forum.'}
-                </p>
-              </aside>
             </div>
           </div>
 
           {/* Upsell */}
           {!isPro && (
-            <div className="hbc-upsell">
-              <div className="hbc-upsell-grid">
-                <div>
-                  <span className="hbc-upsell-kicker">Full library</span>
-                  <h2 className="hbc-upsell-title">Unlock the full study setup.</h2>
-                  <p className="hbc-upsell-desc">
-                    Get every resource, OSCE station pack, quiz topic, and progress tracking in one place
-                    instead of bouncing between tabs and tools.
-                  </p>
-                  <div className="hbc-upsell-features">
-                    <span className="hbc-upsell-feature">Hub resources</span>
-                    <span className="hbc-upsell-feature">OSCE station packs</span>
-                    <span className="hbc-upsell-feature">Quiz topics</span>
-                  </div>
-                </div>
-                <div className="hbc-upsell-card">
-                  <span className="hbc-upsell-price-label">One payment</span>
-                  <span className="hbc-upsell-price">From &pound;9.99</span>
-                  <p className="hbc-upsell-price-desc">
-                    Lifetime access to the current bundle, with the free hub still open whenever you want to browse first.
-                  </p>
-                  <Link href="/pricing" className="hbc-pricing-btn">
-                    See pricing &rarr;
-                  </Link>
-                  <span className="hbc-guarantee">7-day money-back guarantee</span>
-                </div>
+            <div style={{
+              padding: '24px 32px',
+              background: 'linear-gradient(135deg, rgba(250,238,218,0.4) 0%, rgba(245,243,240,0.6) 100%)',
+              border: `0.5px solid rgba(0,0,0,0.08)`,
+              marginBottom: '52px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '24px',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ maxWidth: '600px' }}>
+                <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: '20px', fontWeight: 400, color: '#1A1815', marginBottom: '8px' }}>
+                  Unlock the full study setup.
+                </h2>
+                <p style={{ fontSize: '13px', color: '#5A5750', fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
+                  Get every locked resource, OSCE station pack, and quiz topic in one place.
+                </p>
               </div>
+              <Link href="/pricing" style={{
+                fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#FAFAF8',
+                background: '#1A1815', padding: '10px 20px', textDecoration: 'none', whiteSpace: 'nowrap'
+              }}>
+                See pricing &rarr;
+              </Link>
             </div>
           )}
 

@@ -525,50 +525,7 @@ export const CSS = `
   background: white;
 }
 
-/* Browse teaser */
-.hbc-browse-teaser {
-  border: 0.5px solid rgba(0,0,0,0.1);
-  padding: 28px 32px;
-  margin-bottom: 52px;
-}
-.hbc-browse-teaser-label {
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 10px;
-  display: block;
-}
-.hbc-browse-teaser-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px;
-  font-weight: 400;
-  color: #1A1815;
-  margin-bottom: 8px;
-}
-.hbc-browse-teaser-desc {
-  font-size: 13px;
-  font-weight: 300;
-  color: #5A5750;
-  line-height: 1.7;
-  max-width: 560px;
-  margin-bottom: 20px;
-}
-.hbc-browse-btn {
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  border: none;
-  padding: 9px 20px;
-  cursor: pointer;
-  background: #1A1815;
-  color: #FAFAF8;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.hbc-browse-btn:hover { background: #2C2A27; }
+
 
 /* Empty state */
 .hbc-empty {
@@ -721,31 +678,7 @@ export const CSS = `
   overflow: hidden;
 }
 
-.hbc-q-sidebar {
-  padding: 22px 24px;
-}
-.hbc-q-sidebar-kicker {
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 10px;
-  display: block;
-}
-.hbc-q-sidebar-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #1A1815;
-  line-height: 1.2;
-  margin-bottom: 10px;
-}
-.hbc-q-sidebar-desc {
-  font-size: 12px;
-  font-weight: 300;
-  color: #5A5750;
-  line-height: 1.6;
-}
+
 
 /* Suggested prompts */
 .hbc-prompt-item {
@@ -777,102 +710,7 @@ export const CSS = `
   color: #5A5750;
 }
 
-/* ── Upsell section ───────────────────────────────────────────────────────── */
 
-.hbc-upsell {
-  border: 0.5px solid rgba(0,0,0,0.1);
-  padding: 36px 40px;
-  margin-bottom: 52px;
-}
-.hbc-upsell-grid {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 40px;
-  align-items: start;
-}
-.hbc-upsell-kicker {
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 12px;
-  display: block;
-}
-.hbc-upsell-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  font-weight: 400;
-  color: #1A1815;
-  line-height: 1.1;
-  margin-bottom: 10px;
-}
-.hbc-upsell-desc {
-  font-size: 13px;
-  font-weight: 300;
-  color: #5A5750;
-  line-height: 1.7;
-  max-width: 480px;
-  margin-bottom: 20px;
-}
-.hbc-upsell-features { display: flex; flex-wrap: wrap; gap: 6px; }
-.hbc-upsell-feature {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  padding: 4px 10px;
-  color: #5A5750;
-}
-.hbc-upsell-card {
-  border: 0.5px solid rgba(0,0,0,0.1);
-  padding: 24px 26px;
-  background: white;
-}
-.hbc-upsell-price-label {
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 8px;
-  display: block;
-}
-.hbc-upsell-price {
-  font-family: 'Playfair Display', serif;
-  font-size: 36px;
-  font-style: italic;
-  font-weight: 400;
-  color: #1A1815;
-  margin-bottom: 10px;
-  display: block;
-  line-height: 1;
-}
-.hbc-upsell-price-desc {
-  font-size: 12px;
-  font-weight: 300;
-  color: #5A5750;
-  line-height: 1.6;
-  margin-bottom: 18px;
-}
-.hbc-pricing-btn {
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  background: #1A1815;
-  color: #FAFAF8;
-  border: none;
-  padding: 9px 18px;
-  cursor: pointer;
-  font-family: inherit;
-  text-decoration: none;
-  display: inline-block;
-}
-.hbc-pricing-btn:hover { background: #2C2A27; }
-.hbc-guarantee {
-  font-size: 11px;
-  color: #aaa;
-  margin-top: 10px;
-  display: block;
-}
 
 /* ── Contact bar ──────────────────────────────────────────────────────────── */
 
@@ -907,9 +745,7 @@ export const CSS = `
   .hbc-pathway:nth-child(2n) { border-right: none; }
   .hbc-pathway:nth-child(n+3) { border-top: 0.5px solid rgba(0,0,0,0.1); }
   .hbc-resources-grid { grid-template-columns: repeat(2, 1fr); }
-  .hbc-q-body { grid-template-columns: 1fr; }
   .hbc-q-list { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
-  .hbc-upsell-grid { grid-template-columns: 1fr; gap: 24px; }
 }
 
 @media (max-width: 768px) {
@@ -924,6 +760,5 @@ export const CSS = `
   .hbc-q-header { flex-direction: column; }
   .hbc-q-actions { flex-direction: row; }
   .hbc-shelf { padding: 18px 20px; }
-  .hbc-upsell { padding: 24px 20px; }
 }
 `;
