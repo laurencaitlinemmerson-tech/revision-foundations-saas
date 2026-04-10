@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -608,6 +609,8 @@ export default function MedicationAbbreviationsPage() {
           <p className="ma-pearl-label">Before giving any medication</p>
           <p>Check the 9 Rights. Read the prescription carefully. If you cannot read it clearly, do not guess. Check allergies, make sure you know why the patient is having it, and document straight after giving.</p>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Medication Abbreviations" questions={quizQuestions} />
       </div>
     </div>
   );

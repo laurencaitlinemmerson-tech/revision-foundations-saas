@@ -3,6 +3,20 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'What are the four pillars of the NMC Code?', options: ['Care, Compassion, Competence, Communication', 'Prioritise people, Practise effectively, Preserve safety, Promote trust', 'Honesty, Integrity, Respect, Accountability', 'Assess, Plan, Implement, Evaluate'], answer: 1 },
+  { question: 'What are the four ethical principles (Beauchamp and Childress)?', options: ['Autonomy, Beneficence, Non-maleficence, Justice', 'Consent, Capacity, Competence, Communication', 'Privacy, Dignity, Respect, Honesty', 'Care, Compassion, Courage, Commitment'], answer: 0 },
+  { question: 'What makes consent valid?', options: ['The patient signs a form', 'Capacity, information, and voluntariness', 'The doctor approves it', 'The family agrees'], answer: 1 },
+  { question: 'What is the first principle of the Mental Capacity Act 2005?', options: ['Best interests come first', 'Assume capacity unless proven otherwise', 'Always get written consent', 'Refer to the courts'], answer: 1 },
+  { question: 'What does Gillick competence mean?', options: ['A child is over 16', 'A child under 16 who demonstrates sufficient understanding can consent', 'A child must always have parental consent', 'A legal test for all minors'], answer: 1 },
+  { question: 'What should you do if you witness a colleague breaching patient confidentiality?', options: ['Ignore it', 'Post about it on social media', 'Raise concerns through proper channels', 'Only mention it at the end of the year'], answer: 2 },
+  { question: 'What Act protects staff who raise genuine safety concerns in good faith?', options: ['Human Rights Act 1998', 'Mental Capacity Act 2005', 'Public Interest Disclosure Act 1998', 'Data Protection Act 2018'], answer: 2 },
+  { question: 'Which of these would be a serious fitness-to-practise concern?', options: ['Being 5 minutes late once', 'Falsifying patient records', 'Asking a mentor a question', 'Requesting feedback'], answer: 1 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -765,6 +779,8 @@ export default function Y1ProfessionalismEthicsPage() {
             </div>
           </div>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Professionalism &amp; Ethics" questions={quizQuestions} />
         </div>
       </div>
     </PremiumHubPageGate>

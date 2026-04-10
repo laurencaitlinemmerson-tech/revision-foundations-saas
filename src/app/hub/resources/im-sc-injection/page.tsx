@@ -3,6 +3,18 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+const quizQuestions = [
+  { question: 'What angle is used for an IM injection?', options: ['15°', '45°', '90°', '30°'], answer: 2 },
+  { question: 'What is the first-choice IM injection site for infants under 2?', options: ['Deltoid', 'Dorsogluteal', 'Vastus lateralis', 'Ventrogluteal'], answer: 2 },
+  { question: 'For a subcutaneous injection, should you pinch or spread the skin?', options: ['Spread the skin taut', 'Pinch a fold of skin', 'Neither — just insert', 'It depends on the drug'], answer: 1 },
+  { question: 'Why is the dorsogluteal site avoided in children?', options: ['It is too painful', 'Risk of sciatic nerve injury', 'The muscle is too large', 'It takes too long to find'], answer: 1 },
+  { question: 'What is the usual SC injection angle?', options: ['90°', '15°', '45°', '60°'], answer: 2 },
+  { question: 'Why should you change the needle after drawing up the medication?', options: ['To save time', 'The drawing-up needle gets blunter and causes more pain', 'It helps sterilise the drug', 'Hospital policy requires it'], answer: 1 },
+  { question: 'What should you do immediately after removing the needle?', options: ['Resheath it carefully', 'Wipe the site vigorously', 'Dispose of it in the sharps bin without resheathing', 'Leave it on the tray for later'], answer: 2 },
+  { question: 'What causes lipohypertrophy?', options: ['Using the wrong needle size', 'Repeated injections in the same spot', 'Injecting too quickly', 'Not rotating the syringe'], answer: 1 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -661,6 +673,8 @@ export default function IMSCInjectionPage() {
             <span>←</span> Back to Hub
           </Link>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: IM & SC Injections" questions={quizQuestions} />
         </div>
       </div>
     </PremiumHubPageGate>

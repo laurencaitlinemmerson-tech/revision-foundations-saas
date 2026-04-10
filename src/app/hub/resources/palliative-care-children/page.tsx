@@ -2,6 +2,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'What is the core goal of paediatric palliative care?', options: ['To cure the child', 'The best possible quality of life for the child and family', 'To extend life as long as possible', 'To reduce treatment costs'], answer: 1 },
+  { question: 'Which pain assessment tool is used for pre-verbal children?', options: ['Visual Analogue Scale', 'FLACC scale', 'McGill Pain Questionnaire', 'NEWS2'], answer: 1 },
+  { question: 'What is the first-line rescue medication for seizures in children?', options: ['Diazepam IV', 'Buccal midazolam', 'Phenytoin', 'Morphine'], answer: 1 },
+  { question: 'What phrase should you AVOID when talking to a child about dying?', options: ['"Your body is very poorly"', '"Going to sleep"', '"The medicines cannot make it better"', '"You can ask me anything"'], answer: 1 },
+  { question: 'What does "anticipatory prescribing" mean?', options: ['Giving medications before they are needed', 'Prescribing medications in advance so they are available when symptoms arise', 'Prescribing based on a prediction', 'Ordering repeat prescriptions automatically'], answer: 1 },
+  { question: 'What is a cold cot used for?', options: ['Keeping medications cold', 'Allowing families time with their child after death', 'Cooling a child with a fever', 'Storing equipment'], answer: 1 },
+  { question: 'What sibling support charity should you know about?', options: ['Macmillan', 'Winston\'s Wish', 'Cruse', 'Marie Curie'], answer: 1 },
+  { question: 'What does DNACPR mean in practice?', options: ['Do not treat the patient at all', 'Do not attempt to restart the heart, but all other care continues', 'The patient has given up', 'No more medications should be given'], answer: 1 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -819,6 +833,8 @@ export default function PalliativeCareChildrenPage() {
           <p className="pc-tip-label">Key organisations</p>
           <p>Together for Short Lives, Winston&apos;s Wish (sibling support), The Compassionate Friends, Rays of Sunshine, Make-A-Wish, and your local children&apos;s hospice are all worth knowing about.</p>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Palliative Care (Children)" questions={quizQuestions} />
       </div>
     </div>
   );

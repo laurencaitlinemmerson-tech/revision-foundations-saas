@@ -2,6 +2,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'How are most paediatric drug doses calculated?', options: ['By age alone', 'By weight in kilograms', 'By height', 'By body surface area only'], answer: 1 },
+  { question: 'What is the reference source for paediatric drug doses in the UK?', options: ['BNF for Adults', 'MIMS', 'BNF for Children (BNFC)', 'WHO drug guide'], answer: 2 },
+  { question: 'Why must you NEVER abbreviate "units" as "U"?', options: ['It is not medical terminology', 'It can be misread as "0", causing a 10-fold overdose', 'It saves too little time', 'Pharmacists reject it'], answer: 1 },
+  { question: 'What is the paracetamol dose for children?', options: ['10 mg/kg', '15 mg/kg every 4\u20136 hours', '20 mg/kg every 2 hours', '5 mg/kg every 8 hours'], answer: 1 },
+  { question: 'What should always be co-prescribed with opioids?', options: ['Antibiotics', 'A laxative', 'An antihistamine', 'A vitamin supplement'], answer: 1 },
+  { question: 'What syringe type must be used for insulin?', options: ['Standard syringe', 'Insulin syringe only', 'Any syringe with markings', 'The largest available'], answer: 1 },
+  { question: 'How many people must independently check high-risk medications?', options: ['1', '2', '3', 'It depends on the ward'], answer: 1 },
+  { question: 'If you make a medication error in an OSCE, what should you do?', options: ['Pretend it did not happen', 'Acknowledge it and state you would report it', 'Ask to restart the station', 'Blame the prescription'], answer: 1 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -694,6 +708,8 @@ export default function Y1PaedsMedicationsPage() {
           <p className="pm-tip-label">Always verify</p>
           <p>Doses in this guide are for reference only. Always check the current edition of the BNFC before prescribing or administering any paediatric medication. Local guidelines may differ.</p>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Paediatric Medications" questions={quizQuestions} />
       </div>
     </div>
   );

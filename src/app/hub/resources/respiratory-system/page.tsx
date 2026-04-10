@@ -3,6 +3,19 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import {
+  STUDY_COMPONENTS_CSS,
+  GlossaryChips,
+  FormulaBox,
+  ClinicalCallout,
+  MnemonicRow,
+  SplitCompare,
+  QuickRefGrid,
+  SentenceBank,
+  ConditionCard,
+  ExpandableSection,
+  RelatedResourceLink,
+} from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -838,7 +851,7 @@ const quizQuestions = [
 export default function RespiratorySystemPage() {
   return (
     <div className="rs-guide">
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS + STUDY_COMPONENTS_CSS }} />
 
       <div className="rs-wrap">
         {/* Back nav */}
@@ -859,11 +872,15 @@ export default function RespiratorySystemPage() {
           hubItemTitle="Respiratory System & Assessment"
         />
 
-        {/* Student note pearl */}
-        <div className="rs-pearl" style={{ marginBottom: '40px' }}>
-          <p className="rs-pearl-label">Student note</p>
-          <p>Alveoli are the tiny air sacs at the end of the lungs. Surfactant is the slippery lining that helps keep them open. Auscultation just means listening with your stethoscope. Perfusion means how well blood is reaching the tissues. Recession means the chest is visibly pulling in because breathing has become hard work. V/Q means how well airflow and blood flow are matching each other in the lungs.</p>
-        </div>
+        {/* Glossary chips */}
+        <GlossaryChips items={[
+          { term: 'Alveoli', definition: 'tiny air sacs where gas exchange happens' },
+          { term: 'Surfactant', definition: 'reduces surface tension and helps keep alveoli open' },
+          { term: 'Perfusion', definition: 'blood flow reaching tissue' },
+          { term: 'V/Q ratio', definition: 'relationship between ventilation and perfusion' },
+          { term: 'Recession', definition: 'visible pulling in of the chest during increased work of breathing' },
+          { term: 'Auscultation', definition: 'listening with your stethoscope' },
+        ]} />
 
         {/* Golden rules */}
         <div className="rs-golden">
@@ -922,6 +939,99 @@ export default function RespiratorySystemPage() {
               )}
 
               {/* Pearl */}
+              {/* Formula boxes for Section 1 (Gas Exchange) */}
+              {section.number === '1' && (
+                <>
+                  <FormulaBox
+                    name="Fick's Law of Diffusion"
+                    formula="Rate ∝ Surface area × Pressure gradient ÷ Membrane thickness"
+                    explanation="Gas exchange is faster when the surface area is large, the pressure difference is steep, and the membrane is thin. Disease processes that reduce surface area (e.g. collapse), thicken the membrane (e.g. pneumonia), or lower the gradient all impair gas exchange."
+                  />
+                  <ClinicalCallout variant="exam">
+                    <p>&ldquo;Gas exchange occurs by passive diffusion down a partial pressure gradient across the respiratory membrane.&rdquo;</p>
+                  </ClinicalCallout>
+                  <RelatedResourceLink
+                    href="/hub/resources/cell-biology"
+                    title="Cell Biology"
+                    description="For the underlying cell science behind diffusion and membrane transport, review Cell Biology."
+                  />
+                </>
+              )}
+
+              {/* Formula boxes for Section 3 (How Breathing Works) */}
+              {section.number === '3' && (
+                <>
+                  <FormulaBox
+                    name="Boyle's Law"
+                    formula="P₁V₁ = P₂V₂  —  Pressure and volume are inversely related"
+                    explanation="When the thoracic cavity expands during inspiration, pressure inside the chest drops below atmospheric pressure, and air rushes in. During expiration, the cavity shrinks, pressure rises, and air is pushed out."
+                  />
+                  <FormulaBox
+                    name="Poiseuille's Law"
+                    formula="Resistance ∝ 1 ÷ radius⁴"
+                    explanation="Airway resistance is inversely proportional to the fourth power of the radius. This is why a small reduction in airway diameter (e.g. 1mm of mucosal swelling in an infant) causes a massive increase in resistance and work of breathing."
+                  />
+                  <SplitCompare
+                    leftHeader="Inspiration"
+                    rightHeader="Expiration"
+                    leftItems={[
+                      'Active process — requires energy',
+                      'Diaphragm contracts and flattens',
+                      'External intercostals lift ribs up and out',
+                      'Thoracic volume increases → pressure drops → air enters',
+                    ]}
+                    rightItems={[
+                      'Quiet expiration is passive — elastic recoil',
+                      'Diaphragm relaxes and domes upward',
+                      'Thoracic volume decreases → pressure rises → air exits',
+                      'Forced expiration recruits internal intercostals and abdominals',
+                    ]}
+                  />
+                </>
+              )}
+
+              {/* V/Q comparison for Section 4 (Oxygen Transport) */}
+              {section.number === '4' && (
+                <>
+                  <SplitCompare
+                    leftHeader="Low V/Q (Shunt)"
+                    rightHeader="High V/Q (Dead Space)"
+                    leftItems={[
+                      'Poor ventilation but blood still flows past',
+                      'Blood passes unoxygenated → hypoxaemia',
+                      'Examples: pneumonia, bronchiolitis, pulmonary oedema',
+                    ]}
+                    rightItems={[
+                      'Good ventilation but poor blood flow',
+                      'Air reaches alveoli but cannot offload gas efficiently',
+                      'Examples: pulmonary embolism',
+                    ]}
+                  />
+                  <ClinicalCallout variant="exam">
+                    <p>&ldquo;In bronchiolitis, inflammation, oedema, and mucus narrow the bronchioles, reducing ventilation and causing a low V/Q mismatch.&rdquo;</p>
+                  </ClinicalCallout>
+                </>
+              )}
+
+              {/* Paediatric differences exam tip for Section 5 */}
+              {section.number === '5' && (
+                <>
+                  <ClinicalCallout variant="why">
+                    <p>Infants are more vulnerable to respiratory compromise because they have narrower airways, higher oxygen demand per kilogram, and less physiological reserve. A 4 mm airway with 1 mm of swelling loses roughly 75% of its cross-sectional area.</p>
+                  </ClinicalCallout>
+                  <ClinicalCallout variant="exam">
+                    <p>&ldquo;Infants are more vulnerable to respiratory compromise because they have narrower airways, higher oxygen demand, and less physiological reserve.&rdquo;</p>
+                  </ClinicalCallout>
+                </>
+              )}
+
+              {/* Assessment exam tip for Section 6 */}
+              {section.number === '6' && (
+                <ClinicalCallout variant="mistake">
+                  <p>Do not rely on SpO₂ alone. A child can maintain saturations while their work of breathing steadily increases. By the time saturations drop, the child may be close to exhaustion. Always assess the whole picture: effort, colour, behaviour, feeding, and trend.</p>
+                </ClinicalCallout>
+              )}
+
               {section.pearl && (
                 <div className="rs-pearl">
                   <p className="rs-pearl-label">Clinical pearl</p>
@@ -952,6 +1062,15 @@ export default function RespiratorySystemPage() {
             ))}
           </tbody>
         </table>
+
+        <MnemonicRow
+          label="Airway pathway"
+          steps={['Nose', 'Pharynx', 'Larynx', 'Trachea', 'Bronchi', 'Bronchioles', 'Alveoli']}
+        />
+
+        <ClinicalCallout variant="pearl">
+          <p>Remember: <strong>thin membrane</strong>, <strong>large surface area</strong>, and <strong>rich blood supply</strong> are the three structural reasons gas exchange is so efficient at the alveolar level.</p>
+        </ClinicalCallout>
 
         {/* Infant vs adult airway */}
         <h2 className="rs-section-title">Infant and Adult Airway Differences</h2>
@@ -1083,10 +1202,26 @@ export default function RespiratorySystemPage() {
           </tbody>
         </table>
 
-        <div className="rs-pearl" style={{ marginBottom: '32px' }}>
+        <div className="rs-pearl" style={{ marginBottom: '16px' }}>
           <p className="rs-pearl-label">Clinical pearl</p>
           <p>Do not examine the throat in suspected epiglottitis. It can trigger complete airway obstruction. Treat it as an emergency and get senior help immediately.</p>
         </div>
+
+        {/* Bronchiolitis structured teaching block */}
+        <ConditionCard
+          title="Bronchiolitis"
+          fields={[
+            { key: 'What it is', value: 'Viral lower respiratory tract infection, most commonly caused by RSV, affecting infants under 12 months.' },
+            { key: 'Pathophysiology', value: 'Inflammation, oedema, and mucus plug the bronchioles, trapping air and reducing ventilation. This creates a low V/Q mismatch and hypoxaemia.' },
+            { key: 'Key signs', value: 'Coryzal prodrome, tachypnoea, recession, wheeze or crackles, poor feeding, apnoea in young infants.' },
+            { key: 'Why children deteriorate', value: 'Narrow airways mean small amounts of swelling cause disproportionate obstruction. Higher metabolic rate depletes oxygen reserves faster. Immature immunity cannot clear the virus quickly.' },
+            { key: 'Nursing implications', value: 'Supportive care: monitor SpO₂, ensure hydration (NG if needed), minimal handling, high-flow nasal cannula if required. No routine antibiotics or bronchodilators.' },
+          ]}
+        />
+
+        <ClinicalCallout variant="redflag">
+          <p>Apnoea can be the presenting sign of bronchiolitis in infants under 6 weeks. A baby who pauses breathing, even briefly, in the context of coryzal symptoms needs urgent assessment.</p>
+        </ClinicalCallout>
 
         {/* Respiratory rates */}
         <h2 className="rs-section-title">Normal Respiratory Rates by Age</h2>
@@ -1185,6 +1320,34 @@ export default function RespiratorySystemPage() {
             </div>
           ))}
         </div>
+
+        {/* Quick-reference revision cards */}
+        <h2 className="rs-section-title">Quick-Reference Revision Facts</h2>
+        <QuickRefGrid items={[
+          { title: 'Oxygen transport', text: '~98.5% bound to haemoglobin (4 O₂ per Hb molecule), ~1.5% dissolved in plasma.' },
+          { title: 'CO₂ transport', text: '~70% as bicarbonate, ~23% bound to Hb, ~7% dissolved in plasma.' },
+          { title: 'Normal V/Q ratio', text: '~0.8 overall. Ideally matched ventilation to perfusion for efficient gas exchange.' },
+          { title: 'Why infants deteriorate faster', text: 'Narrower airways, higher O₂ consumption per kg, lower FRC, more compliant chest, and a diaphragm that tires quickly.' },
+          { title: 'Signs of increased WOB', text: 'Nasal flaring, tracheal tug, subcostal/intercostal/sternal recession, head bobbing, grunting.' },
+          { title: 'Target SpO₂ in children', text: '94–98% on room air. Aim ≥92% in bronchiolitis per NICE. Always assess alongside clinical picture.' },
+        ]} />
+
+        {/* Sentence bank */}
+        <h2 className="rs-section-title">High-Scoring Exam Phrasing</h2>
+        <SentenceBank sentences={[
+          'Gas exchange occurs by passive diffusion down a partial pressure gradient across the respiratory membrane.',
+          'In bronchiolitis, inflammation, oedema, and mucus narrow the bronchioles, reducing ventilation and causing a low V/Q mismatch.',
+          'Infants are more vulnerable to respiratory compromise because they have narrower airways, higher oxygen demand, and less physiological reserve.',
+          'Poiseuille\'s law tells us that halving the airway radius increases resistance sixteen-fold, explaining why small amounts of mucosal swelling cause disproportionate compromise in children.',
+          'A silent chest on auscultation is an ominous sign indicating critically reduced air entry and should prompt immediate escalation.',
+          'The oxygen-haemoglobin dissociation curve shifts right with increased CO₂, temperature, and acidosis, facilitating oxygen offloading to metabolically active tissues.',
+        ]} />
+
+        <ExpandableSection title="Deeper detail: Oxygen-Haemoglobin Dissociation Curve">
+          <p style={{ fontSize: '12px', color: '#5A5750', fontWeight: 300, lineHeight: 1.65 }}>
+            The curve describes how readily haemoglobin binds and releases oxygen at different partial pressures. A <strong>right shift</strong> (caused by increased CO₂, higher temperature, lower pH, or higher 2,3-DPG) means Hb releases oxygen more easily — helpful for active tissues. A <strong>left shift</strong> (caused by decreased CO₂, lower temperature, higher pH, or foetal haemoglobin) means Hb holds oxygen more tightly — useful for loading in the lungs and for foetal circulation.
+          </p>
+        </ExpandableSection>
 
         {/* Quiz */}
         <h2 className="rs-section-title" style={{ marginTop: '44px', marginBottom: '18px' }}>

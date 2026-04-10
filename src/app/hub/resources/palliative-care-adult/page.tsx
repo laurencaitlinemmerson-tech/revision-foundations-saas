@@ -2,6 +2,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'What is Dame Cicely Saunders\' concept of "total pain"?', options: ['Pain that cannot be treated', 'Pain that is physical, psychological, social, and spiritual', 'Pain that lasts more than 6 months', 'Pain requiring opioids'], answer: 1 },
+  { question: 'What is the first-line strong opioid for palliative pain?', options: ['Fentanyl', 'Codeine', 'Morphine', 'Tramadol'], answer: 2 },
+  { question: 'What should ALWAYS be co-prescribed with opioids?', options: ['Antibiotics and antifungals', 'A laxative and an antiemetic', 'Paracetamol only', 'Nothing — they work alone'], answer: 1 },
+  { question: 'What is a breakthrough dose of morphine calculated as?', options: ['Half the daily dose', 'One sixth (1/6th) of the total 24-hour dose', 'The same as the regular dose', 'Double the bedtime dose'], answer: 1 },
+  { question: 'Which device delivers continuous subcutaneous medication over 24 hours?', options: ['PCA pump', 'Nebuliser', 'Syringe driver', 'Infusion bag'], answer: 2 },
+  { question: 'What is the preferred language when discussing dying with families?', options: ['"Passing away"', '"Going to a better place"', '"Dying" — clear and honest', '"Moving on"'], answer: 2 },
+  { question: 'What is an ADRT?', options: ['A drug chart', 'An Advance Decision to Refuse Treatment, which is legally binding', 'A type of care plan', 'A referral form'], answer: 1 },
+  { question: 'What should families be told about the "death rattle"?', options: ['It means the patient is in pain', 'They should request suctioning', 'The patient is not aware of it and is not drowning', 'It requires immediate medical review'], answer: 2 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -810,6 +824,8 @@ export default function PalliativeCareAdultPage() {
           <p className="pc-tip-label">Key organisations</p>
           <p>Macmillan Cancer Support, Marie Curie, Cruse Bereavement Care, and your local hospice are all worth knowing about. They provide patient support, family support, and resources for staff.</p>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Palliative Care (Adult)" questions={quizQuestions} />
       </div>
     </div>
   );

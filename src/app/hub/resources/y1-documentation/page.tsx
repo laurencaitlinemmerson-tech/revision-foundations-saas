@@ -2,6 +2,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'What does SBAR stand for?', options: ['Situation, Background, Assessment, Recommendation', 'Summary, Brief, Action, Report', 'Situation, Baseline, Anxiety, Referral', 'Standard, Background, Analysis, Review'], answer: 0 },
+  { question: 'How should you correct an error in paper records?', options: ['Use correction fluid', 'Erase and rewrite', 'Single line through, sign, and date', 'Scribble it out heavily'], answer: 2 },
+  { question: 'When should medication administration be documented?', options: ['Before giving the drug', 'At the end of the shift', 'Immediately after giving it', 'The next morning'], answer: 2 },
+  { question: 'What ink colour should handwritten notes use?', options: ['Blue', 'Black', 'Red', 'Any colour'], answer: 1 },
+  { question: 'How long are children\'s health records usually retained?', options: ['5 years', '8 years', '15 years', '25 years'], answer: 3 },
+  { question: 'What is the "S" in SBAR?', options: ['Summary', 'Situation', 'Safety', 'Standard'], answer: 1 },
+  { question: 'Which body sets the record keeping standards for nurses in the UK?', options: ['CQC', 'GMC', 'NMC', 'NHS England'], answer: 2 },
+  { question: 'Which of these is an example of POOR documentation?', options: ['"Patient fine"', '"Pain reduced from 7/10 to 3/10 post-analgesia"', '"BP 128/76, HR 72, RR 16"', '"Dr Patel reviewed at 10:15"'], answer: 0 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -754,6 +768,8 @@ export default function Y1DocumentationPage() {
             </div>
           </div>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Documentation & Record Keeping" questions={quizQuestions} />
       </div>
     </div>
   );

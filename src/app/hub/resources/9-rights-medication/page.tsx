@@ -4,8 +4,20 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'How many "rights" of medication administration are there?', options: ['5', '7', '9', '12'], answer: 2 },
+  { question: 'Which right requires you to check the patient\'s wristband before giving a drug?', options: ['Right drug', 'Right patient', 'Right time', 'Right documentation'], answer: 1 },
+  { question: 'What should you do FIRST if a patient refuses their medication?', options: ['Force them to take it', 'Skip it and move on', 'Document the refusal and inform the prescriber', 'Give it at a later time without telling anyone'], answer: 2 },
+  { question: 'Why is "right reason" important?', options: ['It makes the chart look tidy', 'It ensures the drug matches the clinical indication', 'It saves money', 'It is optional for common drugs'], answer: 1 },
+  { question: 'When should you document a medication you have given?', options: ['At the end of the shift', 'Before giving it', 'Immediately after giving it', 'When you next see the patient'], answer: 2 },
+  { question: 'What does "right response" mean?', options: ['The drug must arrive quickly', 'You check whether the medication had the expected therapeutic effect', 'The patient must say thank you', 'The pharmacist approves the prescription'], answer: 1 },
+  { question: 'What is the correct action if a dose calculation looks unusually large for a child?', options: ['Give it anyway — trust the prescription', 'Recheck your calculation and query with the prescriber', 'Give half the dose', 'Ask the parent to decide'], answer: 1 },
+  { question: 'Which of these is a "never do" with medications?', options: ['Check the wristband twice', 'Pre-sign the MAR chart before giving the drug', 'Use two patient identifiers', 'Ask about allergies'], answer: 1 },
+];
 
 const rights = [
   {
@@ -529,6 +541,8 @@ export default function NineRightsMedicationPage() {
             'Skip documentation after giving',
           ].map(flag => <span key={flag} className="nr-red-pill">{flag}</span>)}
         </div>
+
+        <SelfTestQuiz title="Test Yourself: 9 Rights of Medication" questions={quizQuestions} />
         </div>
       </div>
     </PremiumHubPageGate>

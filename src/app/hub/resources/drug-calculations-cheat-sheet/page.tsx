@@ -3,6 +3,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'What is the basic drug calculation formula?', options: ['Dose ÷ Volume × Stock', 'What you want ÷ What you have × Volume', 'Volume × Rate ÷ Time', 'Stock × Dose ÷ Rate'], answer: 1 },
+  { question: 'A child needs 250mg of amoxicillin. The suspension contains 125mg per 5ml. How much do you give?', options: ['5ml', '10ml', '15ml', '2.5ml'], answer: 1 },
+  { question: 'How many micrograms are in 1 milligram?', options: ['100', '500', '1,000', '10,000'], answer: 2 },
+  { question: 'What is the IV drip rate formula?', options: ['Volume × Time', 'Volume ÷ Time (hours)', 'Volume × Drop factor ÷ Time (minutes)', 'Rate × Volume'], answer: 2 },
+  { question: 'A patient needs 500ml of fluid over 4 hours. What rate do you set the pump to?', options: ['100 ml/hr', '125 ml/hr', '150 ml/hr', '200 ml/hr'], answer: 1 },
+  { question: 'Why should you NEVER abbreviate micrograms as µg in handwriting?', options: ['It is old-fashioned', 'It looks like mg, which is 1000 times larger', 'It takes too long to write', 'Pharmacists do not recognise it'], answer: 1 },
+  { question: 'A paediatric giving set delivers how many drops per ml?', options: ['15', '20', '60', '100'], answer: 2 },
+  { question: 'What should you do if a calculated dose looks unusually large or small?', options: ['Give it anyway', 'Round it to the nearest whole number', 'Stop and recheck before giving', 'Give half and see what happens'], answer: 2 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -785,6 +799,8 @@ export default function DrugCalculationsCheatSheetPage() {
             'Unsure? Ask a pharmacist',
           ].map(flag => <span key={flag} className="dc-red-pill">{flag}</span>)}
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Drug Calculations" questions={quizQuestions} />
       </div>
     </div>
   );

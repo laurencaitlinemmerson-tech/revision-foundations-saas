@@ -2,6 +2,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'What does NEX stand for?', options: ['Nose, Ear, Xiphisternum', 'Nasal, External, Xiphoid', 'Naso-Enteral Xray', 'None of the above'], answer: 0 },
+  { question: 'What pH confirms gastric placement of an NG tube?', options: ['pH \u2264 7.0', 'pH \u2264 5.5', 'pH \u2264 3.0', 'pH \u2264 8.0'], answer: 1 },
+  { question: 'Why is the whoosh test (auscultation) no longer accepted?', options: ['It takes too long', 'Air in the lung sounds similar to air in the stomach', 'It requires special equipment', 'It is too painful for children'], answer: 1 },
+  { question: 'What minimum syringe size should you use to aspirate from an NG tube?', options: ['5ml', '10ml', '20ml', '2ml'], answer: 2 },
+  { question: 'Why is a larger syringe used?', options: ['It holds more fluid', 'It creates gentler suction so the tube is less likely to collapse', 'It is easier to grip', 'It is hospital standard'], answer: 1 },
+  { question: 'What type of pH paper should be used?', options: ['Litmus paper', 'Universal indicator paper', 'Approved pH indicator paper with 0.5 graduations', 'Any available test strip'], answer: 2 },
+  { question: 'If no aspirate is obtained, what should you try first?', options: ['Remove and reinsert the tube', 'Request an X-ray immediately', 'Turn the patient onto their left side and wait', 'Use a smaller syringe'], answer: 2 },
+  { question: 'When must NG tube placement be re-confirmed?', options: ['Only when first inserted', 'Before each bolus feed or medication', 'Once a day', 'Only after an X-ray'], answer: 1 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -843,6 +857,8 @@ export default function NGTubeInsertionPage() {
           <p className="ng-pearl-label">&ldquo;What if you can&apos;t get aspirate?&rdquo;</p>
           <p>This comes up a lot in OSCEs. Know the order: <strong style={{ fontWeight: 600 }}>turn the patient onto their left side</strong>, <strong style={{ fontWeight: 600 }}>sit them more upright</strong> if possible, <strong style={{ fontWeight: 600 }}>move the tube in or out by 1 to 2 cm</strong>, then <strong style={{ fontWeight: 600 }}>wait 15 to 30 minutes</strong> and try again. If none of that works, <strong style={{ fontWeight: 600 }}>request an X-ray</strong> as a last resort. Never use the tube until placement is confirmed.</p>
         </div>
+
+        <SelfTestQuiz title="Test Yourself: NG Tube Insertion &amp; Testing" questions={quizQuestions} />
       </div>
     </div>
   );

@@ -2,6 +2,18 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'How early should you arrive on your first day of placement?', options: ['Exactly on time', '5 minutes early', '15 minutes early', '30 minutes early'], answer: 2 },
+  { question: 'What reflective model is suggested for placement learning?', options: ['Driscoll', 'Kolb', 'Gibbs\' Reflective Cycle', 'Johns'], answer: 2 },
+  { question: 'If you witness poor practice on placement, what should you do?', options: ['Copy it to fit in', 'Ignore it', 'Report your concerns to your mentor or academic assessor', 'Discuss it on social media'], answer: 2 },
+  { question: 'What does the acronym PAD stand for?', options: ['Personal Assessment Document', 'Practice Assessment Document', 'Placement Administration Document', 'Professional Assessment Diary'], answer: 1 },
+  { question: 'Which phrase is most helpful when you do not know how to do something?', options: ['"I already know that"', '"I haven\'t done this before, can you show me?"', '"I\'ll figure it out myself"', '"Someone else can do it"'], answer: 1 },
+  { question: 'What should you do if you make a mistake on placement?', options: ['Hide it', 'Own it immediately and report honestly', 'Wait until the shift ends', 'Tell another student only'], answer: 1 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -763,6 +775,8 @@ export default function PlacementSurvivalPage() {
           </div>
         ))}
       </div>
+
+        <SelfTestQuiz title="Test Yourself: Placement Survival" questions={quizQuestions} />
     </div>
   );
 }

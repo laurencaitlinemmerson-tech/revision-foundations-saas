@@ -3,6 +3,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'Which theorist described how children THINK in stages?', options: ['Erikson', 'Piaget', 'Bowlby', 'Bandura'], answer: 1 },
+  { question: 'In Piaget\'s preoperational stage (2\u20137 years), a child may believe they caused their illness. What should you do?', options: ['Ignore it', 'Reassure them it is not their fault', 'Tell them they are wrong', 'Discuss it only with parents'], answer: 1 },
+  { question: 'Which Erikson stage involves the question "Who am I?"', options: ['Trust vs Mistrust', 'Autonomy vs Shame', 'Identity vs Role Confusion', 'Initiative vs Guilt'], answer: 2 },
+  { question: 'What attachment pattern shows no clear pattern and is linked to abuse or neglect?', options: ['Secure', 'Insecure-Avoidant', 'Insecure-Resistant', 'Disorganised'], answer: 3 },
+  { question: 'What is Vygotsky\'s "Zone of Proximal Development"?', options: ['What a child can do alone', 'The gap between solo ability and guided ability', 'The area of the brain that develops last', 'The distance from home to school'], answer: 1 },
+  { question: 'Which theorist said children learn by observing and imitating?', options: ['Kohlberg', 'Freud', 'Bandura', 'Bowlby'], answer: 2 },
+  { question: 'In Kohlberg\'s pre-conventional stage, what drives a young child\'s sense of right and wrong?', options: ['Abstract moral principles', 'Avoiding punishment and self-interest', 'Social approval', 'Following the law'], answer: 1 },
+  { question: 'Who developed the Ecological Systems Theory (micro, meso, exo, macrosystem)?', options: ['Bronfenbrenner', 'Vygotsky', 'Erikson', 'Piaget'], answer: 0 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -832,6 +846,8 @@ export default function TheoriesOfDevelopmentPage() {
             <span key={flag} className="td-red-pill">{flag}</span>
           ))}
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Theories of Development" questions={quizQuestions} />
       </div>
     </div>
   );

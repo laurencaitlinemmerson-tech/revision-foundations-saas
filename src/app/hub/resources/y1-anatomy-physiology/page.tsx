@@ -3,6 +3,20 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import SelfTestQuiz from '@/components/SelfTestQuiz';
+
+// ─── Quiz Data ─────────────────────────────────────────────────────────────────
+
+const quizQuestions = [
+  { question: 'How many chambers does the heart have?', options: ['2', '3', '4', '6'], answer: 2 },
+  { question: 'What is the normal adult resting heart rate?', options: ['40\u201360 bpm', '60\u2013100 bpm', '100\u2013120 bpm', '80\u2013140 bpm'], answer: 1 },
+  { question: 'Where does gas exchange happen in the lungs?', options: ['Bronchi', 'Trachea', 'Alveoli', 'Larynx'], answer: 2 },
+  { question: 'What is the normal SpO2 range on room air?', options: ['88\u201392%', '90\u201394%', '94\u201398%', '98\u2013100%'], answer: 2 },
+  { question: 'What does oliguria mean?', options: ['Excessive urine output', 'Less than 400ml urine in 24 hours', 'No urine output', 'Cloudy urine'], answer: 1 },
+  { question: 'Which part of the nervous system triggers "fight or flight"?', options: ['Parasympathetic', 'Sympathetic', 'Somatic', 'Central'], answer: 1 },
+  { question: 'What is the normal serum potassium range?', options: ['1.5\u20132.5 mmol/L', '3.5\u20135.0 mmol/L', '5.5\u20137.0 mmol/L', '135\u2013145 mmol/L'], answer: 1 },
+  { question: 'A GCS of 8 or below indicates what?', options: ['The patient is mildly drowsy', 'Serious concern about airway protection', 'Normal consciousness', 'Pain only'], answer: 1 },
+];
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -695,6 +709,8 @@ export default function Y1AnatomyPhysiologyPage() {
             <span key={flag} className="ap-red-pill">{flag}</span>
           ))}
         </div>
+
+        <SelfTestQuiz title="Test Yourself: Anatomy & Physiology" questions={quizQuestions} />
       </div>
     </div>
   );
