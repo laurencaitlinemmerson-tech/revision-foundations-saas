@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bronchiolitis Revision Booklet | The Nurse Lab</title>
+    <style>
+      :root {
+        --cream: #fafaf8;
+        --paper: #ffffff;
+        --parchment: #f5f3f0;
+        --linen: #ddd5cb;
+        --ink: #1a1815;
+        --ink-mid: #5a5750;
+        --ink-soft: #8d877d;
+        --teal: #2f8a7e;
+        --teal-bg: #e6f3f1;
+        --blue: #2e67b1;
+        --blue-bg: #e7eef8;
+        --coral: #d96c55;
+        --coral-bg: #f8e7e2;
+        --green: #1e8a4d;
+        --green-bg: #e6f4ea;
+        --amber: #c8700a;
+        --amber-bg: #fdf3e3;
+        --shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        margin: 0;
+        color: var(--ink);
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 13mm 14mm 12mm;
+        background: linear-gradient(180deg, #fffdf9 0%, var(--cream) 100%);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        page-break-after: always;
+        overflow: hidden;
+      }
+
+      .page:last-child {
+        page-break-after: auto;
+      }
+
+      .page::before {
+        content: "";
+        position: absolute;
+        top: -40mm;
+        right: -35mm;
+        width: 95mm;
+        height: 95mm;
+        background: radial-gradient(circle, rgba(47, 138, 126, 0.12) 0%, rgba(47, 138, 126, 0) 72%);
+        pointer-events: none;
+      }
+
+      .page::after {
+        content: "";
+        position: absolute;
+        bottom: -28mm;
+        left: -20mm;
+        width: 70mm;
+        height: 70mm;
+        background: radial-gradient(circle, rgba(217, 108, 85, 0.08) 0%, rgba(217, 108, 85, 0) 75%);
+        pointer-events: none;
+      }
+
+      .cover {
+        justify-content: space-between;
+        padding-top: 22mm;
+        padding-bottom: 18mm;
+      }
+
+      .topline {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 16px;
+        border-radius: 999px;
+        background: var(--teal-bg);
+        color: #0f6e56;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        width: fit-content;
+      }
+
+      .title {
+        font-size: 30pt;
+        line-height: 0.98;
+        max-width: 120mm;
+        margin-top: 10mm;
+        margin-bottom: 7mm;
+      }
+
+      .subtitle {
+        max-width: 138mm;
+        color: var(--ink-mid);
+        font-size: 12pt;
+        line-height: 1.58;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4mm;
+        margin-top: 10mm;
+      }
+
+      .stat {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 4mm 4mm;
+        box-shadow: var(--shadow);
+      }
+
+      .stat-value {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 26pt;
+        line-height: 1;
+        color: var(--teal);
+        margin-bottom: 2mm;
+      }
+
+      .stat-label {
+        font-size: 10pt;
+        color: var(--ink-mid);
+        line-height: 1.5;
+      }
+
+      .brandline {
+        margin-top: auto;
+        padding-top: 5mm;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--ink-soft);
+        font-size: 10.5pt;
+      }
+
+      .brandline strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5mm;
+        padding-bottom: 3mm;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .header-brand {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 15pt;
+      }
+
+      .header-meta {
+        font-size: 10pt;
+        color: var(--ink-soft);
+      }
+
+      .section-kicker {
+        font-size: 9.2pt;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 2mm;
+      }
+
+      .section-title {
+        font-size: 21pt;
+        line-height: 1.04;
+        margin-bottom: 2mm;
+      }
+
+      .section-intro {
+        color: var(--ink-mid);
+        font-size: 10pt;
+        line-height: 1.55;
+        margin-bottom: 4mm;
+        max-width: 150mm;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 4mm;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3mm;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 4mm;
+        box-shadow: var(--shadow);
+      }
+
+      .card h3,
+      .card h4 {
+        font-size: 14pt;
+        margin-bottom: 1.8mm;
+      }
+
+      .card h4 {
+        font-size: 12pt;
+      }
+
+      .muted {
+        color: var(--ink-mid);
+      }
+
+      .body {
+        color: var(--ink-mid);
+        font-size: 9.5pt;
+        line-height: 1.55;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2.3mm;
+        margin-top: 3mm;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 2mm 3.5mm;
+        border-radius: 999px;
+        font-size: 8.4pt;
+        line-height: 1;
+      }
+
+      .chip.teal { background: var(--teal-bg); color: #0f6e56; }
+      .chip.blue { background: var(--blue-bg); color: #185fa5; }
+      .chip.coral { background: var(--coral-bg); color: #993c1d; }
+      .chip.green { background: var(--green-bg); color: #1e8a4d; }
+      .chip.amber { background: var(--amber-bg); color: #7a3f04; }
+
+      .scenario {
+        background: linear-gradient(135deg, #ecebff 0%, #f3efff 100%);
+        border: 1px solid rgba(83, 74, 183, 0.12);
+      }
+
+      .scenario .section-kicker {
+        color: #534ab7;
+      }
+
+      .number-list,
+      .bullet-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .bullet-list li,
+      .number-list li {
+        color: var(--ink-mid);
+        font-size: 9.3pt;
+        line-height: 1.55;
+        margin-bottom: 1.2mm;
+        position: relative;
+        padding-left: 6mm;
+      }
+
+      .bullet-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 7px;
+        width: 6px;
+        height: 6px;
+        background: var(--teal);
+        border-radius: 999px;
+      }
+
+      .number-list {
+        counter-reset: step;
+      }
+
+      .number-list li::before {
+        counter-increment: step;
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 1px;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: var(--teal-bg);
+        color: #0f6e56;
+        font-size: 9.5pt;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .pathway {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1.6mm;
+        margin-top: 2mm;
+      }
+
+      .pathway-step {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 2.5mm 2mm;
+        text-align: center;
+        min-height: 21mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .pathway-step strong {
+        font-size: 8.2pt;
+        line-height: 1.3;
+      }
+
+      .pathway-step span {
+        margin-top: 0.8mm;
+        color: var(--ink-soft);
+        font-size: 7.4pt;
+        line-height: 1.35;
+      }
+
+      .arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ink-soft);
+        font-size: 11pt;
+      }
+
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.2mm;
+      }
+
+      .mini {
+        padding: 3mm 3.2mm;
+        background: var(--parchment);
+        border: 1px solid rgba(0, 0, 0, 0.07);
+      }
+
+      .mini strong {
+        display: block;
+        font-size: 9.2pt;
+        margin-bottom: 1mm;
+      }
+
+      .mini span {
+        font-size: 8.3pt;
+        line-height: 1.45;
+        color: var(--ink-mid);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 2.1mm 2mm;
+        font-size: 8.7pt;
+        line-height: 1.45;
+      }
+
+      th {
+        color: var(--ink-soft);
+        font-size: 8pt;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
+      .callout {
+        padding: 3.6mm;
+        border-left: 4px solid var(--teal);
+        background: var(--teal-bg);
+      }
+
+      .callout.coral {
+        background: var(--coral-bg);
+        border-left-color: var(--coral);
+      }
+
+      .callout.blue {
+        background: var(--blue-bg);
+        border-left-color: var(--blue);
+      }
+
+      .callout.amber {
+        background: var(--amber-bg);
+        border-left-color: var(--amber);
+      }
+
+      .callout h4 {
+        margin-bottom: 2mm;
+      }
+
+      .aetoe {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2.2mm;
+        margin-top: 2mm;
+      }
+
+      .aetoe .mini {
+        min-height: 43mm;
+      }
+
+      .pillbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.6mm;
+        margin-top: 2mm;
+      }
+
+      .pill {
+        padding: 1.6mm 2.8mm;
+        border-radius: 999px;
+        background: var(--paper);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        font-size: 7.8pt;
+        color: var(--ink-mid);
+      }
+
+      .footer {
+        display: none;
+      }
+
+      .sbar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 3mm;
+      }
+
+      .sbar-card {
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 3.6mm;
+      }
+
+      .sbar-letter {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 20pt;
+        color: var(--teal);
+        line-height: 1;
+        margin-bottom: 1mm;
+      }
+
+      .source-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .source-list li {
+        font-size: 8pt;
+        line-height: 1.45;
+        color: var(--ink-mid);
+        margin-bottom: 1.4mm;
+      }
+
+      .source-list.compact li {
+        font-size: 7.3pt;
+        line-height: 1.3;
+        margin-bottom: 1mm;
+      }
+
+      .tiny {
+        font-size: 7.8pt;
+        line-height: 1.45;
+        color: var(--ink-soft);
+      }
+
+      .tiny.compact {
+        font-size: 7.1pt;
+        line-height: 1.3;
+        margin-top: 1.2mm;
+      }
+
+      .final-page .header {
+        margin-bottom: 3.5mm;
+        padding-bottom: 2.2mm;
+      }
+
+      .final-page .section-kicker {
+        font-size: 8.7pt;
+        margin-bottom: 1.5mm;
+      }
+
+      .final-page .section-title {
+        font-size: 18.5pt;
+        margin-bottom: 1.4mm;
+      }
+
+      .final-page .section-intro {
+        font-size: 9.1pt;
+        line-height: 1.42;
+        margin-bottom: 3mm;
+      }
+
+      .final-page .grid-2,
+      .final-page .sbar {
+        gap: 3mm;
+      }
+
+      .final-page .sbar-card,
+      .final-page .card,
+      .final-page .callout {
+        padding: 3.1mm;
+      }
+
+      .final-page .sbar-letter {
+        font-size: 17pt;
+        margin-bottom: 0.6mm;
+      }
+
+      .final-page .card h4,
+      .final-page .callout h4,
+      .final-page .sbar-card h4 {
+        margin-bottom: 1.2mm;
+      }
+
+      .final-page .body,
+      .final-page .bullet-list li {
+        font-size: 8.7pt;
+        line-height: 1.42;
+      }
+
+      .final-page .bullet-list li {
+        margin-bottom: 0.9mm;
+      }
+
+      .final-page .pillbar {
+        margin-top: 2.5mm !important;
+      }
+
+      .final-page .pill {
+        padding: 1.3mm 2.5mm;
+        font-size: 7.2pt;
+      }
+
+      .final-page .mini-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2mm;
+      }
+
+      .final-page .mini {
+        min-height: 24mm;
+        padding: 2.6mm 2.8mm;
+      }
+
+      .final-page .mini strong {
+        font-size: 8.6pt;
+      }
+
+      .final-page .mini span {
+        font-size: 7.8pt;
+        line-height: 1.35;
+      }
+
+      .closing-page .mini-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .closing-page .mini {
+        min-height: 26mm;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="page cover">
+      <div>
+        <div class="topline">Children's Nursing · Respiratory</div>
+        <h1 class="title">Bronchiolitis Revision Booklet</h1>
+        <p class="subtitle">
+          A clearer, calmer guide for student nurses. This version keeps the clinical detail you need,
+          but explains it in a more practical way: what bronchiolitis is, why infants deteriorate,
+          how to spot red flags, and what your nursing priorities are on the ward.
+        </p>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value">1</div>
+            <div class="stat-label">core case scenario threaded through the booklet</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">A–E</div>
+            <div class="stat-label">structured assessment page you can actually use</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">8</div>
+            <div class="stat-label">student-friendly sections with key takeaways</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">NICE</div>
+            <div class="stat-label">management thresholds checked against UK guidance</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brandline">
+        <div><strong>The Nurse Lab</strong> · nurselab.co.uk</div>
+        <div>Bronchiolitis · nursing student revision booklet</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">Bronchiolitis · Ellie at a glance</div>
+      </div>
+
+      <div class="card scenario">
+        <div class="section-kicker">Scenario · Ellie, 10 months</div>
+        <h2 class="section-title" style="font-size: 22pt; margin-bottom: 3mm;">Start with the child, not the diagnosis.</h2>
+        <p class="section-intro" style="margin-bottom: 3mm; max-width: none;">
+          Ellie has had 3 days of cough, coryzal symptoms, and worsening feeding. She now has
+          <strong>RR 62/min</strong>, <strong>SpO₂ 90% on air</strong>, intercostal and subcostal recession,
+          grunting, and weight loss. Her mum Sara is distressed and has older children at home.
+        </p>
+        <div class="chips">
+          <span class="chip coral">RR 62/min</span>
+          <span class="chip coral">SpO₂ 90% on air</span>
+          <span class="chip amber">Intercostal recession</span>
+          <span class="chip amber">Subcostal recession</span>
+          <span class="chip coral">Grunting</span>
+          <span class="chip blue">Difficulty feeding</span>
+          <span class="chip amber">Weight loss</span>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 4mm;">
+        <div class="card">
+          <div class="section-kicker">What bronchiolitis actually is</div>
+          <h3>Keep the definition simple.</h3>
+          <ul class="bullet-list" style="margin-top: 3mm;">
+            <li>Bronchiolitis is a <strong>viral lower respiratory tract infection</strong> affecting the bronchioles.</li>
+            <li>It is most commonly caused by <strong>RSV</strong>, although other viruses can cause it too.</li>
+            <li>It usually starts like a cold, then progresses to <strong>increased work of breathing</strong>, poor feeding, and hypoxaemia in more severe cases.</li>
+            <li>Treatment is mainly <strong>supportive</strong>: oxygen if needed, fluids, feeding support, and escalation when the child is tiring.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="section-kicker">Why infants get sicker faster</div>
+          <h3>The bedside explanation.</h3>
+          <ul class="bullet-list" style="margin-top: 3mm;">
+            <li>Infants have <strong>smaller bronchioles</strong>, so swelling and mucus block airflow more easily.</li>
+            <li>They have <strong>less respiratory reserve</strong>, so they tire more quickly.</li>
+            <li>Breathing and feeding compete with each other, so <strong>poor feeding is a clinical sign</strong>, not just a comfort issue.</li>
+            <li>Young infants are largely <strong>nose breathers</strong>, so upper airway secretions can worsen both feeding and breathing.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 6mm;">
+        <div class="section-kicker">What you should be able to do after this booklet</div>
+        <div class="grid-3" style="margin-top: 2mm;">
+          <div class="mini">
+            <strong>Recognise severity</strong>
+            <span>Spot the red flags that tell you the child needs urgent escalation.</span>
+          </div>
+          <div class="mini">
+            <strong>Explain the physiology</strong>
+            <span>Link mucus, oedema, airway narrowing, and low oxygen saturations.</span>
+          </div>
+          <div class="mini">
+            <strong>Apply A–E</strong>
+            <span>Move from structured assessment to practical nursing action.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · Children’s nursing respiratory revision</div>
+        <div>Page 2</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">How bronchiolitis affects breathing</div>
+      </div>
+
+      <div class="section-kicker">Pathophysiology made clearer</div>
+      <h2 class="section-title">What is happening in Ellie’s lungs?</h2>
+      <p class="section-intro">
+        Start with the airflow problem. A child with bronchiolitis is not struggling because the lungs have suddenly
+        “forgotten how to breathe”. The problem is that inflamed, mucus-filled bronchioles make it much harder to
+        move air where it needs to go.
+      </p>
+
+      <div class="card">
+        <div class="section-kicker">Pathway</div>
+        <div class="pathway">
+          <div class="pathway-step"><strong>Virus infects bronchioles</strong><span>often RSV</span></div>
+          <div class="arrow">→</div>
+          <div class="pathway-step"><strong>Inflammation + oedema</strong><span>walls swell</span></div>
+          <div class="arrow">→</div>
+          <div class="pathway-step"><strong>More mucus</strong><span>secretions build up</span></div>
+          <div class="arrow">→</div>
+          <div class="pathway-step"><strong>Airflow falls</strong><span>especially in tiny airways</span></div>
+        </div>
+        <div class="pathway" style="grid-template-columns: repeat(7, 1fr); margin-top: 2mm;">
+          <div class="pathway-step"><strong>Ventilation drops</strong><span>less air reaches alveoli</span></div>
+          <div class="arrow">→</div>
+          <div class="pathway-step"><strong>Low V/Q mismatch</strong><span>blood keeps flowing past under-ventilated alveoli</span></div>
+          <div class="arrow">→</div>
+          <div class="pathway-step"><strong>SpO₂ falls</strong><span>hypoxaemia</span></div>
+          <div class="arrow">→</div>
+          <div class="pathway-step"><strong>Child tires</strong><span>feeding and breathing both become harder</span></div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 6mm;">
+        <div class="card">
+          <div class="section-kicker">Three laws worth knowing</div>
+          <div class="mini-grid">
+            <div class="mini">
+              <strong>Fick’s law</strong>
+              <span>Gas exchange works best with a large surface area, a steep pressure gradient, and a thin membrane. Inflammation and oedema make diffusion less efficient.</span>
+            </div>
+            <div class="mini">
+              <strong>Boyle’s law</strong>
+              <span>When thoracic volume rises, pressure falls and air moves in. When volume falls, pressure rises and air moves out.</span>
+            </div>
+            <div class="mini" style="grid-column: 1 / span 2;">
+              <strong>Poiseuille’s law</strong>
+              <span>Airway resistance rises sharply when radius falls. In a baby’s already narrow bronchioles, even small swelling makes breathing much harder.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-kicker">Translate the physiology at the bedside</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li><strong>Tachypnoea</strong> means the child is trying to maintain minute ventilation.</li>
+            <li><strong>Recession</strong> means the child is working hard to create negative pressure and pull air in.</li>
+            <li><strong>Grunting</strong> is a red flag because the child is creating intrinsic PEEP to keep alveoli open.</li>
+            <li><strong>Poor feeding</strong> often means work of breathing is so high that the child cannot safely coordinate suck, swallow, and breathe.</li>
+            <li><strong>Lower oxygen saturations</strong> reflect under-ventilated alveoli, not just “a bit of wheeze”.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout coral" style="margin-top: 6mm;">
+        <h4>Clinical translation for Ellie</h4>
+        <p class="body">
+          Ellie’s RR of 62, recession, grunting, feeding difficulty, and SpO₂ 90% on air all fit the same story:
+          her bronchioles are inflamed and narrowed, air movement is poor, and the effort needed to maintain oxygenation
+          is becoming unsustainable.
+        </p>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · Clearer bronchiolitis physiology</div>
+        <div>Page 3</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">Assessment and severity</div>
+      </div>
+
+      <div class="section-kicker">Assessment</div>
+      <h2 class="section-title">What signs matter most in infants?</h2>
+      <p class="section-intro">
+        Student answers are stronger when they move beyond listing signs and explain what those signs mean. Use the
+        child’s work of breathing, oxygenation, hydration, and level of alertness to judge severity.
+      </p>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Sign</th>
+              <th>What it suggests</th>
+              <th>Why it matters to nursing care</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Tachypnoea</strong></td>
+              <td>The child is compensating for reduced ventilation.</td>
+              <td>Repeat observations, watch for fatigue, and trend PEWS rather than relying on one number.</td>
+            </tr>
+            <tr>
+              <td><strong>Intercostal or subcostal recession</strong></td>
+              <td>Increased work of breathing and strong negative intrathoracic pressure.</td>
+              <td>Escalate if worsening; this is not a “minor” sign in infants.</td>
+            </tr>
+            <tr>
+              <td><strong>Grunting</strong></td>
+              <td>Intrinsic PEEP is being generated to keep alveoli open.</td>
+              <td>Severe respiratory distress; needs urgent review and escalation.</td>
+            </tr>
+            <tr>
+              <td><strong>Poor feeding or weight loss</strong></td>
+              <td>Breathing and feeding are competing; hydration and nutrition are at risk.</td>
+              <td>Think fluid balance, NG/OG support, and family-centred explanation early.</td>
+            </tr>
+            <tr>
+              <td><strong>Apnoea, listlessness, or reduced effort</strong></td>
+              <td>Possible impending respiratory failure.</td>
+              <td>Emergency escalation. Reduced effort can be more dangerous than noisy breathing.</td>
+            </tr>
+            <tr>
+              <td><strong>Low oxygen saturation</strong></td>
+              <td>Hypoxaemia from poor ventilation and low V/Q mismatch.</td>
+              <td>Follow age-specific thresholds and local escalation policy.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2" style="margin-top: 6mm;">
+        <div class="callout coral">
+          <h4>Red flags needing urgent escalation</h4>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Apnoea</li>
+            <li>Looks seriously unwell</li>
+            <li>Severe respiratory distress: grunting, marked chest recession, or RR &gt;70/min</li>
+            <li>Central cyanosis</li>
+            <li>Signs of exhaustion or recurrent apnoea</li>
+          </ul>
+        </div>
+
+        <div class="callout blue">
+          <h4>NICE thresholds worth remembering</h4>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Consider hospital referral if RR &gt;60/min, intake is only 50% to 75% of usual, there is clinical dehydration, or persistent SpO₂ is &lt;92% in air.</li>
+            <li>Admit if persistent SpO₂ is &lt;90% in children aged 6 weeks and over, or &lt;92% in babies under 6 weeks or children with underlying conditions.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 6mm;">
+        <div class="section-kicker">What this means for Ellie</div>
+        <h3>Ellie is already beyond “watch and wait”.</h3>
+        <p class="body" style="margin-top: 2mm;">
+          She has grunting, significant work of breathing, feeding difficulty, and a saturation of 90% on air.
+          That combination is enough to justify urgent senior review, oxygen as prescribed, close monitoring,
+          and active planning for hydration and escalation if she tires further.
+        </p>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · Recognising severity in bronchiolitis</div>
+        <div>Page 4</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">A–E applied to Ellie</div>
+      </div>
+
+      <div class="section-kicker">Structured assessment</div>
+      <h2 class="section-title">A–E keeps your thinking organised.</h2>
+      <p class="section-intro">
+        A strong paediatric assessment is systematic. You are not trying to sound clever; you are trying to notice
+        deterioration early and act on what you find.
+      </p>
+
+      <div class="aetoe">
+        <div class="mini">
+          <strong>A · Airway</strong>
+          <span>
+            If Ellie is crying or vocalising, the airway is patent. Check whether upper airway secretions are making
+            breathing or feeding harder. Position for comfort, minimise agitation, and only suction if secretions are
+            clearly contributing.
+          </span>
+        </div>
+        <div class="mini">
+          <strong>B · Breathing</strong>
+          <span>
+            RR 62/min, recession, grunting, and SpO₂ 90% on air make breathing your biggest concern. Apply oxygen as
+            prescribed, start continuous saturation monitoring, repeat full respiratory observations, and escalate.
+          </span>
+        </div>
+        <div class="mini">
+          <strong>C · Circulation</strong>
+          <span>
+            Check HR, CRT, colour, temperature of hands and feet, urine output, and hydration status. Weight loss and
+            poor feeding matter because they increase the risk of dehydration and fatigue.
+          </span>
+        </div>
+        <div class="mini">
+          <strong>D · Disability</strong>
+          <span>
+            Is Ellie alert, settling, irritable, or becoming listless? Reduced responsiveness can signal worsening
+            hypoxaemia or exhaustion. Consider blood glucose if intake has been poor.
+          </span>
+        </div>
+        <div class="mini">
+          <strong>E · Exposure</strong>
+          <span>
+            Check temperature, rash, hydration, weight, and the overall picture. Reassess the child after each
+            intervention rather than treating the A–E as a one-off task.
+          </span>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 6mm;">
+        <div class="card">
+          <div class="section-kicker">Immediate nursing actions</div>
+          <ol class="number-list" style="margin-top: 2mm;">
+            <li>Escalate early to the paediatric team or according to local PEWS policy.</li>
+            <li>Give oxygen if saturation meets the threshold for supplementation.</li>
+            <li>Trend work of breathing, not just the saturation number.</li>
+            <li>Start strict fluid balance and think early about feeding support.</li>
+            <li>Document clearly and reassess from A after any intervention.</li>
+          </ol>
+        </div>
+
+        <div class="callout amber">
+          <h4>Parent concerns matter</h4>
+          <p class="body">
+            Sara knows Ellie’s normal behaviour, breathing pattern, and feeding routine. If a parent is telling you
+            the child is “not right”, that is clinically relevant information. Use the trust’s rapid review or
+            deterioration pathway, including Martha’s Rule processes where available locally.
+          </p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 6mm;">
+        <div class="section-kicker">Common student mistake</div>
+        <h3>Do not treat A–E like a script with no action attached.</h3>
+        <p class="body" style="margin-top: 2mm;">
+          A better answer sounds like this: “On breathing, Ellie has RR 62/min, recession, grunting, and SpO₂ 90% on
+          air, suggesting significant respiratory distress and hypoxaemia. I would escalate urgently, apply oxygen as
+          prescribed, increase observation frequency, and reassess after intervention.”
+        </p>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · A–E for bronchiolitis</div>
+        <div>Page 5</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">Nursing management</div>
+      </div>
+
+      <div class="section-kicker">Management</div>
+      <h2 class="section-title">What your nursing priorities are on the ward</h2>
+      <p class="section-intro">
+        Bronchiolitis management is mainly supportive. The nurse’s role is central because the child’s condition can
+        change quickly, and the family needs clear, steady explanation while that is happening.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-kicker">Do</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Give oxygen if saturation is persistently below the relevant NICE threshold.</li>
+            <li>Consider upper airway suctioning if secretions are worsening respiratory distress or feeding.</li>
+            <li>Use NG or OG fluids if the child cannot take enough orally.</li>
+            <li>Use IV isotonic fluids if NG/OG is not tolerated or there is impending respiratory failure.</li>
+            <li>Escalate early if the child is tiring, becoming less responsive, or needing increasing oxygen support.</li>
+            <li>Support positioning, cluster care where possible, and reduce unnecessary distress.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="section-kicker">Do not routinely use</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Antibiotics</li>
+            <li>Salbutamol</li>
+            <li>Nebulised adrenaline</li>
+            <li>Hypertonic saline</li>
+            <li>Systemic or inhaled corticosteroids</li>
+            <li>Chest physiotherapy in children without relevant comorbidities</li>
+            <li>Blood gas testing unless there is severe worsening distress or suspected impending respiratory failure</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 6mm;">
+        <div class="callout blue">
+          <h4>Feeding and hydration are not side issues</h4>
+          <p class="body">
+            For infants, feeding is part of respiratory assessment. If the child is taking much less than normal,
+            desaturating during feeds, or losing weight, you need to think ahead about fluids, NG/OG support, and how
+            to explain that plan to the parent.
+          </p>
+          <div class="pillbar">
+            <span class="pill">Little and often if safe</span>
+            <span class="pill">Strict input/output</span>
+            <span class="pill">Daily weight if needed</span>
+            <span class="pill">NG/OG if oral intake inadequate</span>
+          </div>
+        </div>
+
+        <div class="callout coral">
+          <h4>When to think bigger than standard ward care</h4>
+          <p class="body">
+            If the child shows signs of exhaustion, recurrent apnoea, or is failing to maintain adequate saturation
+            despite oxygen, you need urgent senior review. NICE advises considering CPAP in babies and children with
+            impending respiratory failure.
+          </p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 6mm;">
+        <div class="section-kicker">Nursing priorities in the first hour</div>
+        <div class="grid-3" style="margin-top: 2mm;">
+          <div class="mini">
+            <strong>Observe</strong>
+            <span>Trend RR, work of breathing, SpO₂, PEWS, responsiveness, and feeding tolerance.</span>
+          </div>
+          <div class="mini">
+            <strong>Support</strong>
+            <span>Give oxygen or fluids as prescribed, position well, and minimise unnecessary handling.</span>
+          </div>
+          <div class="mini">
+            <strong>Communicate</strong>
+            <span>Tell the senior team what is changing, and keep the parent updated in plain language.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · Practical bronchiolitis management</div>
+        <div>Page 6</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">Family-centred care and discharge</div>
+      </div>
+
+      <div class="section-kicker">Holistic nursing care</div>
+      <h2 class="section-title">The child is unwell, but the family is under pressure too.</h2>
+      <p class="section-intro">
+        Ellie is 10 months old. Hospital is noisy, unfamiliar, and separating. Her mum Sara is worried and also trying
+        to manage siblings and home life. Nursing care needs to address both the physiology and the experience.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-kicker">Support the child</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Keep care calm and predictable where possible.</li>
+            <li>Use parent presence, comfort positioning, and familiar objects to reduce distress.</li>
+            <li>Cluster tasks so the child gets proper rest between observations and interventions.</li>
+            <li>Remember that crying increases oxygen demand and can worsen apparent work of breathing.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="section-kicker">Support the parent</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Explain what bronchiolitis is in plain language and say what you are watching for.</li>
+            <li>Validate distress rather than treating it as “overreacting”.</li>
+            <li>Include Sara in comfort measures and feeding discussions if she wants to be involved.</li>
+            <li>Ask about practical pressures: transport, childcare for siblings, overnight stay, and confidence about discharge.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 6mm;">
+        <div class="section-kicker">Who might be involved</div>
+        <div class="grid-3" style="margin-top: 2mm;">
+          <div class="mini">
+            <strong>Staff nurse</strong>
+            <span>Coordinates observations, oxygen, fluid balance, feeds, escalation, and family communication.</span>
+          </div>
+          <div class="mini">
+            <strong>Paediatric team</strong>
+            <span>Confirms diagnosis, prescribes treatment, and decides on escalation or higher-level care.</span>
+          </div>
+          <div class="mini">
+            <strong>Play specialist</strong>
+            <span>Helps reduce distress and make the environment more manageable for the child.</span>
+          </div>
+          <div class="mini">
+            <strong>Dietitian or feeding support</strong>
+            <span>Useful if intake is poor, weight loss is significant, or feeding issues persist.</span>
+          </div>
+          <div class="mini">
+            <strong>Social support</strong>
+            <span>Important where transport, finances, siblings, or home pressures affect care.</span>
+          </div>
+          <div class="mini">
+            <strong>GP / health visitor</strong>
+            <span>Key after discharge for recovery, feeding, growth, and reassurance at home.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 6mm;">
+        <div class="callout green">
+          <h4>Discharge checklist</h4>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Clinically stable</li>
+            <li>Adequate oral intake</li>
+            <li>Maintains oxygen saturation in air for 4 hours including sleep</li>
+            <li>Parent understands red flags and when to seek help</li>
+          </ul>
+        </div>
+
+        <div class="callout amber">
+          <h4>Saturation targets before discharge</h4>
+          <p class="body">
+            NICE advises maintaining sats in air at <strong>over 90%</strong> for children aged 6 weeks and over, or
+            <strong>over 92%</strong> for babies under 6 weeks or children with underlying health conditions, for
+            4 hours including a period of sleep.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · Family-centred bronchiolitis care</div>
+        <div>Page 7</div>
+      </div>
+    </section>
+
+    <section class="page final-page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">SBAR · exam help</div>
+      </div>
+
+      <div class="section-kicker">Other common respiratory conditions</div>
+      <h2 class="section-title">What else should be on your radar?</h2>
+      <p class="section-intro">
+        A breathless child is not automatically “just bronchiolitis”. For student nurses, the useful skill is pattern
+        recognition: what kind of noise is the child making, where is the airway problem likely to be, and what needs
+        escalating first?
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-kicker">Condition spotters</div>
+          <div class="mini-grid">
+            <div class="mini">
+              <strong>Bronchiolitis</strong>
+              <span>Usually infants. Coryza, cough, poor feeding, recession, wheeze or crackles. Lower small-airway problem. Supportive care is key.</span>
+            </div>
+            <div class="mini">
+              <strong>Croup</strong>
+              <span>Barking cough, hoarse voice, inspiratory stridor, often worse at night. Think upper airway narrowing. Keep the child calm and upright.</span>
+            </div>
+            <div class="mini">
+              <strong>Viral wheeze / asthma</strong>
+              <span>Expiratory wheeze, breathlessness, cough, prolonged expiration. Often triggered by viral illness, exercise, or allergens. Use the child’s action plan and local pathway.</span>
+            </div>
+            <div class="mini">
+              <strong>Pneumonia</strong>
+              <span>Fever, cough, increased work of breathing, and sometimes focal crackles. High fever or persistently focal chest findings make this differential more likely.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-kicker">Fast pattern recognition</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li><strong>Bark + stridor</strong> points you towards croup.</li>
+            <li><strong>Expiratory wheeze + prolonged expiration</strong> fits wheeze or asthma more than bronchiolitis.</li>
+            <li><strong>Infant + coryza + poor feeding + recession</strong> keeps bronchiolitis high on the list.</li>
+            <li><strong>High fever + focal crackles</strong> makes pneumonia more likely and is specifically highlighted in NICE bronchiolitis guidance as a differential to consider.</li>
+          </ul>
+
+          <div class="callout coral" style="margin-top: 3mm;">
+            <h4>Escalate before you over-label</h4>
+            <p class="body">
+              If the child is blue, apnoeic, increasingly drowsy, drooling, or failing to maintain oxygenation, the
+              immediate priority is escalation and airway/breathing support, not arguing about the perfect diagnosis.
+            </p>
+          </div>
+
+          <div class="callout blue" style="margin-top: 3mm;">
+            <h4>Useful nursing distinction</h4>
+            <p class="body">
+              Not every preschool child with wheeze has asthma. Viral-induced wheeze is common in younger children and
+              often occurs only during viral illnesses, which is why history and pattern matter.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 4mm;">
+        <div class="section-kicker">Safe high-level first thoughts</div>
+        <div class="grid-3" style="margin-top: 1.5mm;">
+          <div class="mini">
+            <strong>Croup</strong>
+            <span>Keep calm, sit upright, avoid steam, and recognise when stridor at rest or severe breathing difficulty needs urgent review.</span>
+          </div>
+          <div class="mini">
+            <strong>Wheeze / asthma</strong>
+            <span>Think inhaler via spacer, response to treatment, and follow the child’s action plan or local acute wheeze pathway.</span>
+          </div>
+          <div class="mini">
+            <strong>Pneumonia</strong>
+            <span>Think infection, hydration, sepsis screening if very unwell, and antibiotic treatment when clinically indicated.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">SBAR · exam help</div>
+      </div>
+
+      <div class="section-kicker">Communication and quick revision</div>
+      <h2 class="section-title">Finish with a handover you could actually give.</h2>
+      <p class="section-intro">
+        Students often know the content but lose marks because their communication sounds vague. SBAR helps you say
+        the important things clearly and ask for what the child needs next.
+      </p>
+
+      <div class="sbar">
+        <div class="sbar-card">
+          <div class="sbar-letter">S</div>
+          <h4>Situation</h4>
+          <p class="body">“I’m calling about Ellie, a 10-month-old with bronchiolitis. I’m concerned because her work of breathing is high and her SpO₂ is 90% on air.”</p>
+        </div>
+        <div class="sbar-card">
+          <div class="sbar-letter">B</div>
+          <h4>Background</h4>
+          <p class="body">“She has had 3 days of cough, coryzal symptoms, worsening feeding, and weight loss. Mum is at the bedside and is very worried.”</p>
+        </div>
+        <div class="sbar-card">
+          <div class="sbar-letter">A</div>
+          <h4>Assessment</h4>
+          <p class="body">“RR is 62/min, she has intercostal and subcostal recession, grunting, and looks fatigued. Her feeding has worsened.”</p>
+        </div>
+        <div class="sbar-card">
+          <div class="sbar-letter">R</div>
+          <h4>Recommendation</h4>
+          <p class="body">“Please review her urgently. I need support with oxygen management, escalation, and a plan for feeding and hydration.”</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 4mm;">
+        <div class="card">
+          <div class="section-kicker">Exam quick wins</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Explain the sign, then link it to what you would do.</li>
+            <li>Say “supportive management” and then name what that means.</li>
+            <li>Remember that poor feeding and parent concern are clinically important.</li>
+            <li>Use A–E to organise your answer if the question feels messy.</li>
+            <li>State when bronchiolitis treatments are <strong>not</strong> recommended.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="section-kicker">Common mistakes</div>
+          <ul class="bullet-list" style="margin-top: 2mm;">
+            <li>Calling bronchiolitis a bacterial illness and defaulting to antibiotics.</li>
+            <li>Focusing only on wheeze and ignoring feeding, hydration, and fatigue.</li>
+            <li>Listing observations with no interpretation.</li>
+            <li>Writing about family-centred care without linking it to nursing action.</li>
+            <li>Forgetting age-specific saturation thresholds.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · Bronchiolitis revision booklet</div>
+        <div>Page 8</div>
+      </div>
+    </section>
+
+    <section class="page closing-page">
+      <div class="header">
+        <div class="header-brand">The Nurse Lab</div>
+        <div class="header-meta">recap · sources</div>
+      </div>
+
+      <div class="section-kicker">Final takeaways</div>
+      <h2 class="section-title">End with the points examiners actually want.</h2>
+      <p class="section-intro">
+        The safest bronchiolitis answers focus on observation, supportive care, escalation, and communication.
+        Keep these takeaways in your head and your answer will sound more clinical and more nursing-focused.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-kicker">Sources checked for this version</div>
+          <ul class="source-list compact">
+            <li>NICE NG9, <em>Bronchiolitis in children: diagnosis and management</em> (published 2015, updated 2021): referral, admission, oxygen, suctioning, fluids, discharge, and treatments not recommended.</li>
+            <li>NICE NG250, <em>Pneumonia: diagnosis and management</em> (published 2 September 2025): community-acquired pneumonia in babies and children, including updated antibiotic guidance.</li>
+            <li>NHS.UK, <em>Croup</em>: hallmark symptoms, home care advice, and emergency red flags.</li>
+            <li>NHS.UK, <em>Asthma</em>: symptom overview and attack awareness. Acute wheeze or asthma management should always follow the child’s action plan and local pathway.</li>
+            <li>NHS England, <em>Martha’s Rule information for patients, families and carers</em>: rapid review concept and family escalation context.</li>
+          </ul>
+          <p class="tiny compact">
+            This booklet is for revision and does not replace local policy, PEWS guidance, medicines management, or
+            trust escalation procedures.
+          </p>
+        </div>
+
+        <div class="callout blue">
+          <h4>One sentence summary</h4>
+          <p class="body">
+            Bronchiolitis is mainly a supportive-care illness: recognise worsening work of breathing early, protect
+            oxygenation and hydration, escalate before the child tires, and keep the family informed all the way through.
+          </p>
+          <div class="pillbar" style="margin-top: 4mm;">
+            <span class="pill">Recognise</span>
+            <span class="pill">Support</span>
+            <span class="pill">Escalate</span>
+            <span class="pill">Reassure</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 4mm;">
+        <div class="section-kicker">Parent-facing language</div>
+        <p class="body" style="margin-bottom: 2.5mm;">
+          Strong nursing answers sound calm, specific, and honest. Use clear family language as well as clinical terms.
+        </p>
+        <div class="mini-grid" style="margin-top: 2.5mm;">
+          <div class="mini">
+            <strong>Explain simply</strong>
+            <span>“This is usually a viral breathing illness, so we’re closely watching breathing, oxygen levels, and feeding.”</span>
+          </div>
+          <div class="mini">
+            <strong>Name the worry</strong>
+            <span>“What concerns us is that the breathing looks harder work and they’re not drinking as well.”</span>
+          </div>
+          <div class="mini">
+            <strong>Say what you are doing</strong>
+            <span>“We’re repeating observations, supporting oxygen and fluids if needed, and getting senior review early.”</span>
+          </div>
+          <div class="mini">
+            <strong>Safety-net clearly</strong>
+            <span>“If breathing gets noisier, your baby gets more sleepy, or feeding drops further, tell us straight away.”</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · Bronchiolitis revision booklet</div>
+        <div>Page 8</div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+<svg width="1440" height="980" viewBox="0 0 1440 980" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="980" fill="#FAFAF8"/>
+
+  <rect x="0" y="0" width="1440" height="76" fill="#FAFAF8"/>
+  <line x1="0" y1="76.5" x2="1440" y2="76.5" stroke="rgba(0,0,0,0.08)"/>
+  <text x="92" y="46" fill="#1A1815" font-family="Georgia, serif" font-size="28">The Nurse Lab</text>
+  <text x="946" y="46" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="16">Hub</text>
+  <text x="1005" y="46" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="16">OSCE</text>
+  <text x="1078" y="46" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="16">Quiz</text>
+  <text x="1144" y="46" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="16">Pricing</text>
+  <rect x="1232" y="22" width="116" height="36" rx="18" fill="#1A1815"/>
+  <text x="1256" y="45" fill="#FAFAF8" font-family="Inter, Arial, sans-serif" font-size="14">Get Access</text>
+
+  <ellipse cx="1184" cy="782" rx="290" ry="184" fill="#F4EFE8"/>
+  <ellipse cx="1118" cy="298" rx="220" ry="152" fill="#F5F1EC"/>
+
+  <text x="112" y="170" fill="#9C8878" font-family="Inter, Arial, sans-serif" font-size="12" letter-spacing="2.2">CHILDREN'S NURSING REVISION</text>
+  <text x="112" y="254" fill="#1A1815" font-family="Georgia, serif" font-size="80">Structured</text>
+  <text x="112" y="336" fill="#1A1815" font-family="Georgia, serif" font-size="80">revision tools</text>
+  <text x="112" y="418" fill="#1A1815" font-family="Georgia, serif" font-size="80">for nursing</text>
+  <text x="112" y="500" fill="#1A1815" font-family="Georgia, serif" font-size="80">students</text>
+
+  <text x="112" y="570" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="28">Practice OSCE scenarios, revise core topics, and keep</text>
+  <text x="112" y="610" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="28">quick clinical guides close in one calm study space.</text>
+
+  <rect x="112" y="664" width="210" height="56" rx="28" fill="#1A1815"/>
+  <text x="156" y="699" fill="#FAFAF8" font-family="Inter, Arial, sans-serif" font-size="18">Explore the bundle</text>
+  <rect x="338" y="664" width="174" height="56" rx="28" fill="transparent" stroke="rgba(0,0,0,0.10)"/>
+  <text x="389" y="699" fill="#1A1815" font-family="Inter, Arial, sans-serif" font-size="18">Open the hub</text>
+
+  <text x="112" y="776" fill="#9C8878" font-family="Inter, Arial, sans-serif" font-size="13" letter-spacing="1.8">50+ OSCE STATIONS · TOPIC-BASED QUIZZES · ONE-TIME PAYMENT · LIFETIME ACCESS</text>
+
+  <g transform="translate(780 120)">
+    <rect x="0" y="20" width="548" height="710" rx="38" fill="#FFFFFF" stroke="rgba(0,0,0,0.08)"/>
+    <rect x="34" y="54" width="130" height="30" rx="15" fill="#E6EEF8"/>
+    <text x="60" y="74" fill="#2E67B1" font-family="Inter, Arial, sans-serif" font-size="12" letter-spacing="1.7">A–E GUIDE</text>
+    <text x="34" y="138" fill="#1A1815" font-family="Georgia, serif" font-size="54">A–E Assessment</text>
+    <text x="34" y="192" fill="#1A1815" font-family="Georgia, serif" font-size="54">Framework</text>
+    <text x="34" y="234" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="23">Real content preview, not a lifestyle image.</text>
+    <line x1="34" y1="276.5" x2="514" y2="276.5" stroke="rgba(0,0,0,0.08)"/>
+
+    <text x="34" y="358" fill="#2E67B1" font-family="Georgia, serif" font-size="88" font-style="italic">A</text>
+    <rect x="38" y="374" width="86" height="24" rx="5" fill="#E6EEF8"/>
+    <text x="59" y="390" fill="#2E67B1" font-family="Inter, Arial, sans-serif" font-size="10" letter-spacing="1.6">AIRWAY</text>
+
+    <text x="164" y="348" fill="#1A1815" font-family="Georgia, serif" font-size="34">Airway</text>
+    <text x="164" y="378" fill="#9C8878" font-family="Georgia, serif" font-size="18" font-style="italic">Is the airway open and protected?</text>
+
+    <rect x="164" y="406" width="162" height="164" fill="#FFFFFF" stroke="rgba(0,0,0,0.08)"/>
+    <rect x="326" y="406" width="162" height="164" fill="#FFFFFF" stroke="rgba(0,0,0,0.08)"/>
+    <text x="184" y="432" fill="#999999" font-family="Inter, Arial, sans-serif" font-size="10" letter-spacing="1.8">LOOK</text>
+    <line x1="184" y1="442.5" x2="306" y2="442.5" stroke="rgba(0,0,0,0.08)"/>
+    <text x="184" y="474" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Visible obstruction</text>
+    <text x="184" y="502" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Lip or tongue swelling</text>
+    <text x="184" y="530" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Facial trauma</text>
+    <text x="184" y="558" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Cyanosis</text>
+
+    <text x="346" y="432" fill="#999999" font-family="Inter, Arial, sans-serif" font-size="10" letter-spacing="1.8">ACT</text>
+    <line x1="346" y1="442.5" x2="468" y2="442.5" stroke="rgba(0,0,0,0.08)"/>
+    <text x="346" y="474" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Head tilt chin lift</text>
+    <text x="346" y="502" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Jaw thrust if trauma</text>
+    <text x="346" y="530" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Suction if needed</text>
+    <text x="346" y="558" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">– Call anaesthetics</text>
+
+    <text x="34" y="612" fill="#A32D2D" font-family="Inter, Arial, sans-serif" font-size="10" letter-spacing="2">RED FLAGS</text>
+    <rect x="34" y="626" width="76" height="24" rx="4" fill="#FCEBEB"/>
+    <rect x="118" y="626" width="72" height="24" rx="4" fill="#FCEBEB"/>
+    <rect x="198" y="626" width="86" height="24" rx="4" fill="#FCEBEB"/>
+    <text x="54" y="642" fill="#A32D2D" font-family="Inter, Arial, sans-serif" font-size="11">Stridor</text>
+    <text x="136" y="642" fill="#A32D2D" font-family="Inter, Arial, sans-serif" font-size="11">Silence</text>
+    <text x="218" y="642" fill="#A32D2D" font-family="Inter, Arial, sans-serif" font-size="11">Cyanosis</text>
+
+    <rect x="34" y="676" width="454" height="74" fill="#FAEEDA"/>
+    <text x="58" y="704" fill="#633806" font-family="Inter, Arial, sans-serif" font-size="11" letter-spacing="1.8">CLINICAL PEARL</text>
+    <text x="58" y="734" fill="#633806" font-family="Inter, Arial, sans-serif" font-size="18">Children can narrow quickly. Mild swelling matters.</text>
+
+    <g transform="translate(-48 520)">
+      <rect x="0" y="0" width="214" height="140" rx="28" fill="#FFFFFF" stroke="rgba(0,0,0,0.08)"/>
+      <rect x="22" y="22" width="108" height="24" rx="12" fill="#F4E8D3"/>
+      <text x="38" y="38" fill="#8A5A12" font-family="Inter, Arial, sans-serif" font-size="10" letter-spacing="1.5">DRUG CALCULATIONS</text>
+      <text x="22" y="76" fill="#1A1815" font-family="Georgia, serif" font-size="24">Worked examples</text>
+      <text x="22" y="104" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">Formula sheets and common checks.</text>
+    </g>
+    <g transform="translate(292 560)">
+      <rect x="0" y="0" width="206" height="128" rx="28" fill="#FFFFFF" stroke="rgba(0,0,0,0.08)"/>
+      <rect x="22" y="22" width="86" height="24" rx="12" fill="#E4F2EC"/>
+      <text x="43" y="38" fill="#0F6E56" font-family="Inter, Arial, sans-serif" font-size="10" letter-spacing="1.5">PLACEMENT</text>
+      <text x="22" y="76" fill="#1A1815" font-family="Georgia, serif" font-size="24">Survival guide</text>
+      <text x="22" y="104" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="15">Practical support for first shifts.</text>
+    </g>
+  </g>
+
+  <rect x="104" y="868" width="286" height="44" rx="22" fill="#F3F1EE"/>
+  <text x="132" y="896" fill="#5A5750" font-family="Inter, Arial, sans-serif" font-size="14">Recommended direction: split hero with proof</text>
+</svg>

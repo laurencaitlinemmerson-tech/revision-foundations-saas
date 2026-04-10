@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Common Children's Respiratory Conditions | The Nurse Lab</title>
+    <style>
+      :root {
+        --bg: #fcfbf8;
+        --paper: #ffffff;
+        --ink: #2c2723;
+        --muted: #7e766f;
+        --line: #ece5dc;
+        --teal: #27a48f;
+        --teal-bg: #def6f0;
+        --lilac: #8f85e8;
+        --lilac-bg: #ece8ff;
+        --amber: #d9a133;
+        --amber-bg: #fff4d8;
+        --coral: #de7f76;
+        --coral-bg: #ffe4e0;
+        --blue: #6f8fdf;
+        --blue-bg: #e8eeff;
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        margin: 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 13mm 15mm 14mm;
+        background: var(--bg);
+        page-break-after: always;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .page:last-child {
+        page-break-after: auto;
+      }
+
+      .cover {
+        justify-content: space-between;
+        padding-top: 22mm;
+      }
+
+      .topline {
+        display: inline-flex;
+        align-items: center;
+        padding: 2mm 5mm;
+        border-radius: 999px;
+        background: var(--teal-bg);
+        color: #197b68;
+        font-size: 9pt;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .cover h1 {
+        margin-top: 8mm;
+        font-size: 31pt;
+        line-height: 1.02;
+        max-width: 120mm;
+      }
+
+      .cover p {
+        margin-top: 5mm;
+        max-width: 120mm;
+        font-size: 12pt;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3mm;
+        margin-top: 10mm;
+      }
+
+      .stat {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 4mm;
+        text-align: center;
+      }
+
+      .stat strong {
+        display: block;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 22pt;
+        color: var(--teal);
+        margin-bottom: 1mm;
+      }
+
+      .stat span {
+        font-size: 9pt;
+        line-height: 1.4;
+        color: var(--muted);
+      }
+
+      .brandline {
+        margin-top: auto;
+        padding-top: 5mm;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        color: #b5aca4;
+        font-size: 9.2pt;
+      }
+
+      .brandline strong {
+        color: var(--ink);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 4mm;
+        margin-bottom: 5mm;
+        border-bottom: 1px solid var(--line);
+        color: #b5aca4;
+        font-size: 10pt;
+      }
+
+      .header .brand {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 15pt;
+        color: var(--ink);
+      }
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        gap: 4mm;
+        margin-bottom: 2mm;
+      }
+
+      .num {
+        width: 11mm;
+        height: 11mm;
+        border-radius: 999px;
+        background: var(--teal);
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 12pt;
+        flex-shrink: 0;
+      }
+
+      .page-title {
+        font-size: 23pt;
+        line-height: 1.05;
+      }
+
+      .subtitle {
+        font-size: 10pt;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 5mm;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4mm;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3mm;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3mm;
+      }
+
+      .box {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 4mm;
+        padding: 4mm;
+      }
+
+      .box.teal {
+        background: var(--teal-bg);
+        border-color: rgba(39, 164, 143, 0.24);
+      }
+
+      .box.lilac {
+        background: var(--lilac-bg);
+        border-color: rgba(143, 133, 232, 0.25);
+      }
+
+      .box.amber {
+        background: var(--amber-bg);
+        border-color: rgba(217, 161, 51, 0.28);
+      }
+
+      .box.coral {
+        background: var(--coral-bg);
+        border-color: rgba(222, 127, 118, 0.28);
+      }
+
+      .box.blue {
+        background: var(--blue-bg);
+        border-color: rgba(111, 143, 223, 0.28);
+      }
+
+      .label {
+        font-size: 8.2pt;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 1.8mm;
+        color: #8f8780;
+        font-weight: 700;
+      }
+
+      .body {
+        font-size: 9.5pt;
+        line-height: 1.62;
+        color: #5d554f;
+      }
+
+      .body strong {
+        color: var(--ink);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 5mm;
+      }
+
+      li {
+        margin-bottom: 1.6mm;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--paper);
+        border: 1px solid var(--line);
+      }
+
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 3mm;
+        border-bottom: 1px solid var(--line);
+        font-size: 8.7pt;
+        line-height: 1.5;
+      }
+
+      th {
+        font-size: 7.8pt;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #8f8780;
+        background: #fcfbf8;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .mini {
+        background: #fff;
+        border: 1px solid var(--line);
+        padding: 3mm;
+      }
+
+      .mini h4 {
+        font-size: 10.4pt;
+        margin-bottom: 1.2mm;
+      }
+
+      .mini p {
+        font-size: 8.4pt;
+        line-height: 1.5;
+        color: #5d554f;
+      }
+
+      .section-gap {
+        margin-top: 4mm;
+      }
+
+      .footer {
+        margin-top: auto;
+        padding-top: 4mm;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        color: #b5aca4;
+        font-size: 9pt;
+      }
+
+      .footer strong {
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="page cover">
+      <div>
+        <div class="topline">Children's nursing · respiratory starter guide</div>
+        <h1>Common children's respiratory conditions</h1>
+        <p>
+          A first-year-friendly guide to the patterns you are most likely to meet on placement:
+          bronchiolitis, croup, viral wheeze or asthma, and pneumonia. Simple language, clear red flags,
+          and practical nursing actions.
+        </p>
+
+        <div class="stat-grid">
+          <div class="stat">
+            <strong>4</strong>
+            <span>common conditions</span>
+          </div>
+          <div class="stat">
+            <strong>1</strong>
+            <span>simple way to compare them</span>
+          </div>
+          <div class="stat">
+            <strong>A–E</strong>
+            <span>placement-ready thinking</span>
+          </div>
+          <div class="stat">
+            <strong>Red flags</strong>
+            <span>you should not miss</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brandline">
+        <div><strong>The Nurse Lab</strong> · nurselab.co.uk</div>
+        <div>First-year children's nursing respiratory guide</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="brand">The Nurse Lab</div>
+        <div>How to think about a breathless child</div>
+      </div>
+
+      <div class="title-row">
+        <div class="num">1</div>
+        <h2 class="page-title">Start with what you can see and hear</h2>
+      </div>
+      <p class="subtitle">
+        First-year students do not need the perfect diagnosis in the first sentence. Start with a simple approach:
+        what noise is the child making, how hard are they working to breathe, and are they tiring or feeding poorly?
+      </p>
+
+      <div class="grid-3">
+        <div class="box teal">
+          <div class="label">Listen</div>
+          <p class="body">
+            <strong>Stridor</strong> usually means upper airway narrowing. <strong>Wheeze</strong> is more often lower airway.
+            <strong>Crackles</strong> can sit with bronchiolitis or pneumonia.
+          </p>
+        </div>
+        <div class="box amber">
+          <div class="label">Look</div>
+          <p class="body">
+            Check <strong>recession, respiratory rate, tracheal tug, nasal flaring, grunting, colour, alertness,</strong>
+            and whether the child can <strong>feed or talk</strong>.
+          </p>
+        </div>
+        <div class="box blue">
+          <div class="label">Think</div>
+          <p class="body">
+            Ask yourself: is this an <strong>upper airway</strong> problem, a <strong>lower airway</strong> problem,
+            or a child who looks generally unwell and needs urgent review?
+          </p>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <table>
+          <thead>
+            <tr>
+              <th>Clue</th>
+              <th>What it often suggests</th>
+              <th>Why it matters to nurses</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Barking cough + stridor</strong></td>
+              <td>Croup / upper airway narrowing</td>
+              <td>Keep the child calm and watch closely for worsening airway compromise</td>
+            </tr>
+            <tr>
+              <td><strong>Expiratory wheeze</strong></td>
+              <td>Viral wheeze or asthma pattern</td>
+              <td>Think spacer, response to treatment, and local wheeze pathway</td>
+            </tr>
+            <tr>
+              <td><strong>Infant + coryza + poor feeding</strong></td>
+              <td>Bronchiolitis pattern</td>
+              <td>Feeding, hydration, oxygenation, and fatigue matter as much as chest sounds</td>
+            </tr>
+            <tr>
+              <td><strong>High fever + focal crackles</strong></td>
+              <td>Pneumonia</td>
+              <td>Think infection, sepsis awareness, hydration, and escalation if very unwell</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="box coral">
+          <div class="label">Red flags</div>
+          <ul class="body">
+            <li>Looks blue or pale</li>
+            <li>Apnoea or severe tiredness</li>
+            <li>Stridor at rest</li>
+            <li>Grunting or marked recession</li>
+            <li>Poor feeding with worsening work of breathing</li>
+            <li>Hard to wake or less responsive</li>
+          </ul>
+        </div>
+        <div class="box lilac">
+          <div class="label">Placement sentence starter</div>
+          <p class="body">
+            “I’m worried because this child’s breathing looks harder work, and I want to escalate for review while we
+            keep reassessing oxygenation, observations, and feeding.”
+          </p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · nurselab.co.uk</div>
+        <div>Page 1</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="brand">The Nurse Lab</div>
+        <div>Common patterns at a glance</div>
+      </div>
+
+      <div class="title-row">
+        <div class="num">2</div>
+        <h2 class="page-title">Compare the common conditions</h2>
+      </div>
+      <p class="subtitle">
+        This is the simple level first-year nurses need: pattern recognition, not specialist respiratory medicine.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Condition</th>
+            <th>Typical pattern</th>
+            <th>Common sound</th>
+            <th>What you should notice</th>
+            <th>First nursing thoughts</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bronchiolitis</strong></td>
+            <td>Usually infants, often starts like a cold, then feeding and breathing worsen</td>
+            <td>Wheeze and/or crackles</td>
+            <td>Poor feeding, recession, fatigue, low saturations</td>
+            <td>Supportive care, oxygenation, hydration, feeding support, escalation if tiring</td>
+          </tr>
+          <tr>
+            <td><strong>Croup</strong></td>
+            <td>Barking cough, hoarse voice, worse at night</td>
+            <td>Stridor</td>
+            <td>Is the stridor only when upset, or also at rest? How distressed does the child look?</td>
+            <td>Keep calm, minimise upset, urgent review if stridor at rest or severe distress</td>
+          </tr>
+          <tr>
+            <td><strong>Viral wheeze / asthma</strong></td>
+            <td>Wheezy child, often previous episodes or triggers, may improve with treatment</td>
+            <td>Expiratory wheeze</td>
+            <td>Breathlessness, prolonged expiration, response to inhaler/spacer</td>
+            <td>Think local wheeze pathway, inhaler/spacer, and close reassessment</td>
+          </tr>
+          <tr>
+            <td><strong>Pneumonia</strong></td>
+            <td>Fever, cough, increased work of breathing, child may seem more generally unwell</td>
+            <td>Sometimes crackles, sometimes reduced air entry</td>
+            <td>High fever, focal chest findings, lethargy, hydration status</td>
+            <td>Think infection, fluids, sepsis awareness, antibiotics if prescribed, escalation if unwell</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="grid-2 section-gap">
+        <div class="box teal">
+          <div class="label">Keep it simple</div>
+          <p class="body">
+            <strong>Stridor = think upper airway.</strong><br />
+            <strong>Wheeze = think lower airway.</strong><br />
+            <strong>Crackles + high fever = think pneumonia more strongly.</strong>
+          </p>
+        </div>
+        <div class="box amber">
+          <div class="label">Useful reminder</div>
+          <p class="body">
+            Not every preschool child with wheeze has asthma. Viral-induced wheeze is common, especially during viral
+            illnesses. History and pattern matter.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · nurselab.co.uk</div>
+        <div>Page 2</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="brand">The Nurse Lab</div>
+        <div>What nurses do first</div>
+      </div>
+
+      <div class="title-row">
+        <div class="num">3</div>
+        <h2 class="page-title">First-year nursing actions</h2>
+      </div>
+      <p class="subtitle">
+        These are safe, high-level first thoughts. Always follow your local policy, pathway, PEWS, and escalation process.
+      </p>
+
+      <div class="grid-2">
+        <div class="box lilac">
+          <div class="label">Bronchiolitis</div>
+          <p class="body">
+            Think <strong>supportive care</strong>. Recheck observations, watch feeding, count wet nappies, keep the child
+            comfortable, and escalate if work of breathing or oxygenation worsens.
+          </p>
+        </div>
+        <div class="box teal">
+          <div class="label">Croup</div>
+          <p class="body">
+            Think <strong>upper airway</strong>. Keep the child calm and with their parent if possible. Do not upset them
+            unnecessarily. Escalate quickly if there is <strong>stridor at rest</strong> or severe distress.
+          </p>
+        </div>
+        <div class="box blue">
+          <div class="label">Viral wheeze / asthma</div>
+          <p class="body">
+            Think <strong>response to treatment</strong>. Use the wheeze/asthma pathway, check inhaler or spacer use,
+            and reassess breathing after treatment.
+          </p>
+        </div>
+        <div class="box amber">
+          <div class="label">Pneumonia</div>
+          <p class="body">
+            Think <strong>infection and hydration</strong>. Monitor observations, encourage/track fluids, watch for
+            deterioration, and escalate if the child looks septic or more unwell.
+          </p>
+        </div>
+      </div>
+
+      <div class="section-gap grid-4">
+        <div class="mini">
+          <h4>Look</h4>
+          <p>How hard is the child working to breathe? Are they tiring? Can they feed or speak normally?</p>
+        </div>
+        <div class="mini">
+          <h4>Listen</h4>
+          <p>Is it stridor, wheeze, crackles, or “just” noisy breathing? The sound helps guide your thinking.</p>
+        </div>
+        <div class="mini">
+          <h4>Measure</h4>
+          <p>Use RR, sats, temperature, heart rate, PEWS, and fluid balance to support what you are seeing.</p>
+        </div>
+        <div class="mini">
+          <h4>Escalate</h4>
+          <p>If the child looks worse than expected, escalate early. You do not need to wait until you are sure.</p>
+        </div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="box coral">
+          <div class="label">What not to do</div>
+          <p class="body">
+            Do not get stuck trying to sound clever. On placement, simple and safe is better: describe what you see,
+            explain why you are concerned, and escalate early.
+          </p>
+        </div>
+        <div class="box">
+          <div class="label">Good handover phrase</div>
+          <p class="body">
+            “This child has worsening work of breathing and I’m concerned they need urgent review. Their sats are low,
+            they are feeding poorly, and they look more tired.”
+          </p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · nurselab.co.uk</div>
+        <div>Page 3</div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="header">
+        <div class="brand">The Nurse Lab</div>
+        <div>Quick handover and family language</div>
+      </div>
+
+      <div class="title-row">
+        <div class="num">4</div>
+        <h2 class="page-title">What to say on placement</h2>
+      </div>
+      <p class="subtitle">
+        Students often know the signs but freeze on the wording. Keep your language calm, clear, and practical.
+      </p>
+
+      <div class="grid-2">
+        <div class="box lilac">
+          <div class="label">Simple SBAR</div>
+          <p class="body">
+            <strong>Situation:</strong> “I’m concerned about a child with worsening breathing.”<br /><br />
+            <strong>Background:</strong> “They have had cough/coryza/fever and are now feeding less.”<br /><br />
+            <strong>Assessment:</strong> “They have recession, increased RR, and I’m worried they are tiring.”<br /><br />
+            <strong>Recommendation:</strong> “Please review urgently while we continue observations and supportive care.”
+          </p>
+        </div>
+        <div class="box teal">
+          <div class="label">Parent-friendly language</div>
+          <p class="body">
+            “Your child is working quite hard to breathe, so we’re watching them closely.”<br /><br />
+            “The important things for us are breathing, oxygen levels, and whether they can drink enough.”<br /><br />
+            “If they become more sleepy, more blue, or breathing gets harder, tell us straight away.”
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="box amber">
+          <div class="label">For first years</div>
+          <ul class="body">
+            <li>Describe what you can see before trying to explain everything.</li>
+            <li>Use “I’m concerned because…” in handover.</li>
+            <li>Feeding matters in infants.</li>
+            <li>Escalating early is good practice, not failure.</li>
+          </ul>
+        </div>
+        <div class="box coral">
+          <div class="label">Safety note</div>
+          <p class="body">
+            This guide is for revision. It does not replace trust policy, PEWS, local respiratory pathways,
+            medicines guidance, or senior clinical judgement.
+          </p>
+        </div>
+      </div>
+
+      <div class="box section-gap">
+        <div class="label">Sources checked for this version</div>
+        <p class="body">
+          NICE bronchiolitis guidance, NICE pneumonia guidance, NHS croup, NHS asthma, and NHS England Martha’s Rule.
+          This is a high-level student guide, so treatment detail is intentionally simplified.
+        </p>
+      </div>
+
+      <div class="footer">
+        <div><strong>The Nurse Lab</strong> · nurselab.co.uk</div>
+        <div>Page 4</div>
+      </div>
+    </section>
+  </body>
+</html>

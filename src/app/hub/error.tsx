@@ -1,0 +1,73 @@
+'use client';
+
+import Link from 'next/link';
+
+export default function HubError({ reset }: { error: Error; reset: () => void }) {
+  return (
+    <div style={{
+      minHeight: '60vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '48px 24px',
+      fontFamily: "'Inter', -apple-system, sans-serif",
+    }}>
+      <div style={{ textAlign: 'center', maxWidth: '440px' }}>
+        <p style={{
+          fontSize: '9px',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase' as const,
+          color: '#aaa',
+          marginBottom: '14px',
+        }}>
+          Hub
+        </p>
+        <h1 style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: '28px',
+          fontWeight: 400,
+          color: '#1A1815',
+          marginBottom: '12px',
+        }}>
+          Something went wrong loading this page.
+        </h1>
+        <p style={{
+          fontSize: '14px',
+          fontWeight: 300,
+          color: '#5A5750',
+          lineHeight: 1.7,
+          marginBottom: '24px',
+        }}>
+          Try refreshing, or head back to the homepage and start again.
+        </p>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' as const }}>
+          <button onClick={reset} style={{
+            fontSize: '9px',
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase' as const,
+            background: '#1A1815',
+            color: '#FAFAF8',
+            border: 'none',
+            padding: '10px 20px',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}>
+            Try again
+          </button>
+          <Link href="/" style={{
+            fontSize: '9px',
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            background: 'transparent',
+            color: '#1A1815',
+            border: '0.5px solid rgba(0,0,0,0.12)',
+            padding: '10px 20px',
+            textDecoration: 'none',
+          }}>
+            Go home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,51 @@
+{
+  "name": "The Nurse Lab",
+  "short_name": "NurseLab",
+  "description": "Study tools, OSCE practice, quizzes, and revision resources that help student nurses pass exams and thrive on placement.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#805AD5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "medical"],
+  "lang": "en-GB",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Study Hub",
+      "short_name": "Hub",
+      "description": "Access study resources",
+      "url": "/hub",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Quiz Practice",
+      "short_name": "Quiz",
+      "description": "Practice with quizzes",
+      "url": "/quiz",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "OSCE Practice",
+      "short_name": "OSCE",
+      "description": "Practice OSCEs",
+      "url": "/osce",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
