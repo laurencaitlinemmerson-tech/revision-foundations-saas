@@ -76,7 +76,7 @@ export interface BodySystem {
 }
 
 export const bodySystems: BodySystem[] = [
-  { id: 'respiratory', label: 'Respiratory', description: 'Bronchiolitis, asthma, pneumonia, and airway management scenarios.', mockCount: 1 },
+  { id: 'respiratory', label: 'Respiratory', description: 'Bronchiolitis, asthma, pneumonia, and airway management scenarios.', mockCount: 2 },
   { id: 'gastrointestinal', label: 'Gastrointestinal', description: 'Gastroenteritis, appendicitis, and fluid management scenarios.', mockCount: 0 },
   { id: 'cardiovascular', label: 'Cardiovascular', description: 'Heart failure, congenital defects, and shock scenarios.', mockCount: 0 },
   { id: 'neurological', label: 'Neurological', description: 'Seizures, meningitis, and neurological assessment scenarios.', mockCount: 0 },

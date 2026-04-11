@@ -402,20 +402,20 @@ export default function HubPage() {
               </p>
               <div className="hub-branch-stats">
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">1</span>
-                  <span className="hub-branch-stat-label">System</span>
+                  <span className="hub-branch-stat-num">2</span>
+                  <span className="hub-branch-stat-label">Mocks</span>
                 </div>
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">8</span>
+                  <span className="hub-branch-stat-num">16</span>
                   <span className="hub-branch-stat-label">Questions</span>
                 </div>
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">12</span>
+                  <span className="hub-branch-stat-num">24</span>
                   <span className="hub-branch-stat-label">Sentence starters</span>
                 </div>
               </div>
               <div className="hub-branch-topics">
-                {['Bronchiolitis', 'Respiratory', 'Pathophysiology', 'Family-centred care', 'Developmental theory'].map(t => (
+                {['Bronchiolitis', 'Asthma', 'Respiratory', 'Pathophysiology', 'Family-centred care'].map(t => (
                   <span key={t} className="hub-branch-topic">{t}</span>
                 ))}
               </div>

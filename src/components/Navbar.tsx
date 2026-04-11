@@ -65,7 +65,6 @@ export default function Navbar() {
 
   const desktopProductLinks = [
     { href: '/hub', label: 'Hub' },
-    { href: '/hub/mocks', label: 'Mocks' },
     { href: '/osce', label: 'OSCE' },
     { href: '/quiz', label: 'Quiz' },
     { href: '/pricing', label: 'Pricing' },
@@ -90,7 +89,6 @@ export default function Navbar() {
   const signedInMobilePrimaryLinks = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/hub', label: 'Hub' },
-    { href: '/hub/mocks', label: 'Mock Exams' },
     { href: '/osce', label: 'OSCE' },
     { href: '/quiz', label: 'Quiz' },
     { href: '/pricing', label: 'Pricing' },
@@ -98,7 +96,6 @@ export default function Navbar() {
 
   const signedOutMobilePrimaryLinks = [
     { href: '/hub', label: 'Hub' },
-    { href: '/hub/mocks', label: 'Mock Exams' },
     { href: '/osce', label: 'OSCE' },
     { href: '/quiz', label: 'Quiz' },
     { href: '/pricing', label: 'Pricing' },
