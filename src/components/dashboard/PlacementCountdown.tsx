@@ -59,7 +59,10 @@ export default function PlacementCountdown() {
           <button
             onClick={handleSave}
             disabled={!input}
-            style={{ fontFamily: serif, fontSize: '12px', color: '#FAFAF8', background: ink, padding: '9px 16px', border: 'none', cursor: 'pointer', opacity: input ? 1 : 0.4 }}
+            title="Save your placement date"
+            style={{ fontFamily: serif, fontSize: '12px', color: '#FAFAF8', background: ink, padding: '9px 16px', border: 'none', cursor: 'pointer', opacity: input ? 1 : 0.4, transition: 'all 0.2s ease' }}
+            onMouseEnter={e => { if (input) { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLButtonElement).style.background = '#2C2A27'; } }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ''; (e.currentTarget as HTMLButtonElement).style.background = ink; }}
           >
             Set date
           </button>
@@ -96,7 +99,7 @@ export default function PlacementCountdown() {
         Placement countdown
       </p>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-        <span style={{ fontFamily: display, fontSize: '2.6rem', fontStyle: 'italic', fontWeight: 400, lineHeight: 1, color: numberColor }}>
+        <span className="placement-number" style={{ fontFamily: display, fontSize: '2.6rem', fontStyle: 'italic', fontWeight: 400, lineHeight: 1, color: numberColor }}>
           {isToday ? 'Today' : Math.abs(days ?? 0)}
         </span>
         {!isToday && (
@@ -112,10 +115,28 @@ export default function PlacementCountdown() {
       )}
       <button
         onClick={() => setEditing(true)}
-        style={{ fontFamily: serif, fontSize: '11px', color: muted, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '8px 0 0', display: 'block' }}
+        title="Change your placement date"
+        style={{ fontFamily: serif, fontSize: '11px', color: muted, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '8px 0 0', display: 'block', transition: 'color 0.15s ease' }}
+        onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.color = mid)}
+        onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.color = muted)}
       >
         Change date
       </button>
+
+      <style>{`
+        @keyframes countPulse {
+          0%   { opacity: 1; transform: scale(1); }
+          40%  { opacity: 0.7; transform: scale(1.04); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .placement-number {
+          display: inline-block;
+          animation: countPulse 0.8s ease-out both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .placement-number { animation: none; }
+        }
+      `}</style>
     </div>
   );
 }

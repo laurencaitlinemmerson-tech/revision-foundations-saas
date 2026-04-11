@@ -100,7 +100,7 @@ function StatCard({
   children?: React.ReactNode;
 }) {
   return (
-    <div style={{
+    <div className="dash-stat-card" style={{
       background: '#fff',
       border: `0.5px solid rgba(0,0,0,0.07)`,
       padding: '18px 20px',
@@ -143,19 +143,29 @@ function ProgressBar({
   label,
   pct,
   color,
+  index = 0,
 }: {
   label: string;
   pct: number;
   color: string;
+  index?: number;
 }) {
   return (
-    <div style={{ marginBottom: '13px' }}>
+    <div className="dash-pb-row" style={{ marginBottom: '13px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
         <span style={{ fontFamily: serif, fontSize: '12px', color: '#2C2A27' }}>{label}</span>
         <span style={{ fontFamily: serif, fontSize: '11px', color: '#B4A89C' }}>{pct}%</span>
       </div>
       <div style={{ height: '3px', background: 'rgba(0,0,0,0.06)' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: color }} />
+        <div
+          className="dash-pb-fill"
+          style={{
+            height: '100%',
+            background: color,
+            ['--bar-width' as string]: `${pct}%`,
+            animationDelay: `${index * 100}ms`,
+          }}
+        />
       </div>
     </div>
   );
@@ -246,8 +256,8 @@ export default async function DashboardPage() {
               }}>
                 Topic strength
               </p>
-              {topicStrength.map((t) => (
-                <ProgressBar key={t.label} label={t.label} pct={t.pct} color={t.color} />
+              {topicStrength.map((t, i) => (
+                <ProgressBar key={t.label} label={t.label} pct={t.pct} color={t.color} index={i} />
               ))}
             </div>
 
@@ -260,8 +270,8 @@ export default async function DashboardPage() {
               }}>
                 Quiz accuracy by area
               </p>
-              {topicStrength.map((t) => (
-                <ProgressBar key={t.label} label={t.label} pct={Math.min(t.pct + 14, 100)} color={t.color} />
+              {topicStrength.map((t, i) => (
+                <ProgressBar key={t.label} label={t.label} pct={Math.min(t.pct + 14, 100)} color={t.color} index={i} />
               ))}
             </div>
           </div>
@@ -362,6 +372,40 @@ export default async function DashboardPage() {
         }
         @media (max-width: 560px) {
           .dash-analytics-row { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* ── Stat card hover ── */
+        .dash-stat-card {
+          transition: transform 0.2s ease;
+          cursor: default;
+        }
+        .dash-stat-card:hover {
+          transform: scale(1.02);
+        }
+
+        /* ── Progress bar animate-in ── */
+        @keyframes dashBarGrow {
+          from { width: 0; }
+          to   { width: var(--bar-width, 0%); }
+        }
+        .dash-pb-fill {
+          width: var(--bar-width, 0%);
+          animation: dashBarGrow 0.6s ease-out both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .dash-pb-fill { animation: none; }
+        }
+
+        /* ── Progress bar row hover ── */
+        .dash-pb-row {
+          padding: 3px 6px;
+          margin-left: -6px;
+          margin-right: -6px;
+          transition: background 0.2s ease;
+          cursor: default;
+        }
+        .dash-pb-row:hover {
+          background: rgba(0,0,0,0.025);
         }
       `}</style>
     </DashboardClient>

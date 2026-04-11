@@ -84,7 +84,7 @@ export default function DashboardClient({
       <Navbar />
 
       <section className="border-b border-[rgba(26,24,21,0.08)] bg-[var(--cream)]">
-        <div className="mx-auto max-w-[1120px] px-6 pb-10 pt-[52px] md:px-10 md:pb-12">
+        <div className="mx-auto max-w-[1120px] px-6 pb-10 pt-[88px] md:px-10 md:pb-12">
           <motion.div
             {...motionProps}
             className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start"

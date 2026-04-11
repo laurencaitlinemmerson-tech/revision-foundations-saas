@@ -255,6 +255,10 @@ export default function QuickTopicSearch() {
           padding: 0;
           cursor: pointer;
           flex-shrink: 0;
+          transition: color 0.15s ease;
+        }
+        .dash-search-clear:hover {
+          color: ${ink};
         }
 
         .dash-search-panel {
@@ -289,13 +293,15 @@ export default function QuickTopicSearch() {
           color: ${bodyColor};
           background: rgba(255,255,255,0.86);
           border: 0.5px solid ${border};
-          transition: border-color 120ms ease, background 120ms ease;
+          cursor: pointer;
+          transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
         }
 
         .dash-search-shortcut:hover,
         .dash-search-result:hover {
           border-color: ${borderMid};
           background: rgba(255,255,255,1);
+          transform: translateY(-1px);
         }
 
         .dash-search-result-title {

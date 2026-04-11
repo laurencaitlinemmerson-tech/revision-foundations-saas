@@ -195,26 +195,32 @@ export default function RevisionWeekPlanner() {
           <button
             onClick={handleExport}
             disabled={icsState === 'done'}
+            title="Export this revision week to your calendar app"
             style={{
               fontFamily: serif, fontSize: '11px', letterSpacing: '0.08em',
               padding: '9px 20px', cursor: icsState === 'done' ? 'default' : 'pointer',
               border: 'none', whiteSpace: 'nowrap',
               background: icsState === 'done' ? '#6B9E87' : '#1A1815',
               color: '#FAFAF8',
-              transition: 'opacity 150ms',
+              transition: 'all 0.2s ease',
             }}
+            onMouseEnter={e => { if (icsState !== 'done') { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLButtonElement).style.background = '#2C2A27'; } }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ''; (e.currentTarget as HTMLButtonElement).style.background = icsState === 'done' ? '#6B9E87' : '#1A1815'; }}
           >
             {icsState === 'done' ? 'Downloaded ✓' : 'Add to calendar (.ics) ↓'}
           </button>
           <button
             onClick={handleCopy}
+            title="Copy revision week as plain text"
             style={{
               fontFamily: serif, fontSize: '11px', letterSpacing: '0.08em',
               padding: '9px 20px', cursor: 'pointer',
               border: '0.5px solid rgba(0,0,0,0.14)',
               background: '#fff', color: ink, whiteSpace: 'nowrap',
-              transition: 'background 150ms',
+              transition: 'all 0.2s ease',
             }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLButtonElement).style.background = '#F5F3F0'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ''; (e.currentTarget as HTMLButtonElement).style.background = '#fff'; }}
           >
             {copyState === 'done' ? 'Copied ✓' : 'Copy as text'}
           </button>
@@ -226,6 +232,7 @@ export default function RevisionWeekPlanner() {
         {WEEK.map((d) => (
           <div
             key={d.day}
+            className="rwp-day-tile"
             style={{
               background: '#fff',
               border: '0.5px solid rgba(0,0,0,0.07)',
@@ -329,6 +336,17 @@ export default function RevisionWeekPlanner() {
           display: grid;
           grid-template-columns: repeat(7, minmax(0, 1fr));
           gap: 8px;
+        }
+        .rwp-day-tile {
+          cursor: default;
+          transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .rwp-day-tile:hover {
+          transform: translateY(-2px);
+          border-color: rgba(0,0,0,0.16) !important;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .rwp-day-tile { transition: none; }
         }
         @media (max-width: 860px) {
           .rwp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }

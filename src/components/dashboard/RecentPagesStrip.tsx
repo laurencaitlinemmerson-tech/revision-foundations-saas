@@ -41,13 +41,28 @@ export default function RecentPagesStrip() {
         <Link
           key={page.href}
           href={page.href}
-          style={{ fontFamily: serif, fontSize: '12px', color: bodyColor, background: 'white', border: `0.5px solid ${border}`, borderLeft: `2px solid ${accentForHref(page.href)}`, padding: '6px 12px', textDecoration: 'none', transition: 'border-color 150ms' }}
-          onMouseEnter={e => (e.currentTarget.style.borderColor = borderMid)}
-          onMouseLeave={e => (e.currentTarget.style.borderColor = border)}
+          className="rps-chip"
+          style={{
+            fontFamily: serif, fontSize: '12px', color: bodyColor,
+            background: 'white', border: `0.5px solid ${border}`,
+            borderLeft: `2px solid ${accentForHref(page.href)}`,
+            padding: '6px 12px', textDecoration: 'none',
+          }}
         >
           {page.title}
         </Link>
       ))}
+
+      <style>{`
+        .rps-chip {
+          cursor: pointer;
+          transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .rps-chip:hover {
+          background: #F5F2EE !important;
+          border-color: ${borderMid} !important;
+        }
+      `}</style>
     </div>
   );
 }

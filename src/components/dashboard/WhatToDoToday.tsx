@@ -157,7 +157,9 @@ export default function WhatToDoToday() {
         </Link>
         <Link
           href={suggestion.secondaryHref}
-          style={{ fontFamily: serif, fontSize: '12px', color: bodyColor, textDecoration: 'underline', textUnderlineOffset: '3px' }}
+          style={{ fontFamily: serif, fontSize: '12px', color: bodyColor, textDecoration: 'underline', textUnderlineOffset: '3px', transition: 'opacity 0.15s ease', cursor: 'pointer' }}
+          onMouseEnter={e => (e.currentTarget.style.opacity = '0.65')}
+          onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
         >
           {suggestion.secondaryCta} →
         </Link>
@@ -172,6 +174,10 @@ export default function WhatToDoToday() {
           border: 0.5px solid ${borderMid};
           background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(250,250,248,0.98) 100%);
           padding: 22px 22px 24px;
+          transition: border-color 0.2s ease;
+        }
+        .dash-suggestion-shell:hover {
+          border-color: rgba(0,0,0,0.18);
         }
 
         .dash-suggestion-meta {
@@ -201,6 +207,12 @@ export default function WhatToDoToday() {
           background: ${ink};
           text-decoration: none;
           padding: 11px 16px;
+          cursor: pointer;
+          transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .dash-suggestion-primary:hover {
+          background: #2C2A27;
+          transform: scale(1.02);
         }
 
         @media (max-width: 760px) {
