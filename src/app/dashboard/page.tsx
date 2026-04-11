@@ -20,6 +20,7 @@ import {
   StudyBreakdownChart,
   WeeklyActivityChart,
 } from '@/components/DashboardCharts';
+import QuickStatsStrip from '@/components/dashboard/QuickStatsStrip';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -34,31 +35,41 @@ const mid     = '#5A5750';
 const muted   = '#9C8878';
 const border  = 'rgba(0,0,0,0.08)';
 
-// ── Section divider ────────────────────────────────────────────────────────────
+// ── Section divider with editorial numbering ──────────────────────────────────
 function SectionDivider({
   label,
   id,
   accent,
   context,
+  number,
 }: {
   label: string;
   id?: string;
   accent?: string;
   context?: string;
+  number?: number;
 }) {
   return (
     <div
       id={id}
       style={{
         borderTop: `0.5px solid ${border}`,
-        paddingTop: '13px',
+        paddingTop: '14px',
         marginBottom: '28px',
         marginTop: '52px',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '10px',
       }}
     >
+      {number != null && (
+        <span style={{
+          fontFamily: display, fontSize: '15px', fontStyle: 'italic',
+          color: accent || muted, lineHeight: 1, flexShrink: 0,
+        }}>
+          {String(number).padStart(2, '0')}
+        </span>
+      )}
       {accent && (
         <span style={{
           width: '6px', height: '6px', borderRadius: '50%',
@@ -67,17 +78,23 @@ function SectionDivider({
       )}
       <p style={{
         fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em',
-        textTransform: 'uppercase', color: muted, margin: 0,
+        textTransform: 'uppercase', color: muted, margin: 0, flex: 1,
       }}>
         {label}
       </p>
       {context && (
         <p style={{
-          marginLeft: 'auto', fontFamily: serif, fontSize: '11px',
+          fontFamily: serif, fontSize: '11px',
           color: '#C4B4A8', fontWeight: 300, margin: 0,
         }}>
           {context}
         </p>
+      )}
+      {accent && !context && (
+        <span style={{
+          height: '0.5px', flex: '0 0 48px',
+          background: `linear-gradient(90deg, ${accent}50, transparent)`,
+        }} />
       )}
     </div>
   );
@@ -189,9 +206,14 @@ export default async function DashboardPage() {
     <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz}>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
 
+        {/* ━━ 0 · AT A GLANCE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div style={{ marginTop: '40px' }}>
+          <QuickStatsStrip />
+        </div>
+
         {/* ━━ 1 · PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Your progress" accent="#D4A574" context="This week" />
+          <SectionDivider label="Your progress" accent="#D4A574" context="This week" number={1} />
 
           {/* 4-col analytics row */}
           <div className="dash-analytics-row">
@@ -273,7 +295,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 2 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Today's plan" id="todays-plan" accent="#8BBCAA" />
+          <SectionDivider label="Today's plan" id="todays-plan" accent="#8BBCAA" number={2} />
           <WhatToDoToday />
           <div style={{ marginTop: '12px' }}>
             <PlacementCountdown />
@@ -282,13 +304,13 @@ export default async function DashboardPage() {
 
         {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Sample revision week" id="revision-week" accent="#D4B896" context="Adjust to your schedule" />
+          <SectionDivider label="Sample revision week" id="revision-week" accent="#D4B896" context="Adjust to your schedule" number={3} />
           <RevisionWeekPlanner />
         </section>
 
         {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Find anything" id="search" accent="#7BA7CC" />
+          <SectionDivider label="Find anything" id="search" accent="#7BA7CC" number={4} />
           <QuickTopicSearch />
           <div style={{ marginTop: '20px' }}>
             <p style={{
@@ -303,7 +325,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Saved folders" id="saved-folders" accent="#D4B896" />
+          <SectionDivider label="Saved folders" id="saved-folders" accent="#D4B896" number={5} />
           <SavedFoldersDashboard />
         </section>
 

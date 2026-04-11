@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useMemo, useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -39,6 +39,124 @@ function formatToday() {
   }).format(new Date());
 }
 
+// ── Daily progress bar — thin gradient across hero top ───────────────────────
+function DailyProgressBar() {
+  const [completed, setCompleted] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const raw = localStorage.getItem('rf_daily_plan');
+      if (raw) {
+        const stored = JSON.parse(raw);
+        if (stored.date === new Date().toDateString()) {
+          const plan = stored.plan || {};
+          setCompleted(Object.values(plan).filter(Boolean).length);
+        }
+      }
+    } catch { /* noop */ }
+  }, []);
+
+  if (!mounted) return null;
+
+  const progress = (completed / 3) * 100;
+  const isComplete = completed === 3;
+
+  return (
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
+      background: 'rgba(0,0,0,0.03)', zIndex: 2, overflow: 'hidden',
+    }}>
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${progress}%` }}
+        transition={{ duration: 1, ease: 'easeOut', delay: 0.4 }}
+        style={{
+          height: '100%',
+          background: isComplete
+            ? 'linear-gradient(90deg, #8BBCAA, #0F6E56)'
+            : 'linear-gradient(90deg, #D4A574, #8BBCAA)',
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Daily progress ring — small ring showing plan completion ─────────────────
+function DailyProgressRing() {
+  const [completed, setCompleted] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const raw = localStorage.getItem('rf_daily_plan');
+      if (raw) {
+        const stored = JSON.parse(raw);
+        if (stored.date === new Date().toDateString()) {
+          const plan = stored.plan || {};
+          setCompleted(Object.values(plan).filter(Boolean).length);
+        }
+      }
+    } catch { /* noop */ }
+  }, []);
+
+  if (!mounted) return null;
+
+  const total = 3;
+  const size = 52;
+  const sw = 3.5;
+  const r = (size - sw) / 2;
+  const c = 2 * Math.PI * r;
+  const filled = (completed / total) * c;
+  const allDone = completed === total;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+      <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(0,0,0,0.05)" strokeWidth={sw} />
+          <motion.circle
+            cx={size / 2} cy={size / 2} r={r} fill="none"
+            stroke={allDone ? '#0F6E56' : '#8BBCAA'}
+            strokeWidth={sw} strokeLinecap="round"
+            initial={{ strokeDasharray: `0 ${c}` }}
+            animate={{ strokeDasharray: `${filled} ${c - filled}` }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
+          />
+        </svg>
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontFamily: display, fontSize: '15px', fontStyle: 'italic',
+            color: allDone ? '#0F6E56' : ink, lineHeight: 1, margin: 0,
+          }}>
+            {completed}
+          </p>
+        </div>
+      </div>
+      <div>
+        <p style={{
+          fontFamily: serif, fontSize: '12px',
+          color: allDone ? '#0F6E56' : mid,
+          fontWeight: allDone ? 500 : 300, margin: 0, lineHeight: 1.5,
+        }}>
+          {allDone ? 'All done for today' : `${completed} of 3 tasks done`}
+        </p>
+        <p style={{
+          fontFamily: serif, fontSize: '9px', letterSpacing: '0.14em',
+          textTransform: 'uppercase', color: muted, margin: '2px 0 0',
+        }}>
+          daily plan
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardClient({
   children,
   firstName,
@@ -67,7 +185,8 @@ export default function DashboardClient({
       <Navbar />
 
       {/* ── Hero shell ── */}
-      <section style={{ borderBottom: `0.5px solid ${border}`, background: '#FAFAF8' }}>
+      <section style={{ borderBottom: `0.5px solid ${border}`, background: '#FAFAF8', position: 'relative' }}>
+        <DailyProgressBar />
         <div className="dash-wrap" style={{ paddingTop: '52px', paddingBottom: '48px' }}>
           <motion.div {...motionProps}>
             <motion.div variants={itemVariants}>
@@ -115,9 +234,12 @@ export default function DashboardClient({
                     Guides, glossaries, and saved folders — your main revision base.
                   </p>
                 </div>
-                <Link href="/hub" className="dash-primary-btn">
-                  Continue →
-                </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                  <DailyProgressRing />
+                  <Link href="/hub" className="dash-primary-btn">
+                    Continue →
+                  </Link>
+                </div>
               </div>
 
               {/* ── Tier 2: Secondary cards ── */}
