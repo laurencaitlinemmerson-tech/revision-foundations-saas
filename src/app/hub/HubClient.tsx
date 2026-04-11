@@ -183,6 +183,23 @@ export default function HubClient({
     [branchHubItems],
   );
 
+  const tagCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    branchHubItems.forEach((item) => {
+      item.tags.forEach((tag) => {
+        counts.set(tag, (counts.get(tag) ?? 0) + 1);
+      });
+      counts.set(item.difficulty, (counts.get(item.difficulty) ?? 0) + 1);
+    });
+    return counts;
+  }, [branchHubItems]);
+
+  const tagShortcutDefs = useMemo(
+    () => ['Y1 Essentials', 'Assessment', 'Meds & Calculations', 'Deep Dive']
+      .filter((tag) => branchFilterTags.some((branchTag) => branchTag === tag)),
+    [branchFilterTags],
+  );
+
   const showRecommended = searchQuery === '' && selectedTags.size === 0 && !activePathway;
   const shouldShowFullShelf = !showRecommended || showFullShelf;
 
@@ -217,10 +234,30 @@ export default function HubClient({
   };
 
   const quickLenses = [
-    { id: 'free' as const, label: 'Free only', note: 'Open pages without a paywall' },
-    { id: 'quick' as const, label: 'Quick wins', note: 'Shorter refreshers for tired study sessions' },
-    { id: 'placement' as const, label: 'Placement', note: 'Practical refreshers before and after shift' },
-    { id: 'osce' as const, label: 'OSCE prep', note: 'Assessment structure, wording, and station-adjacent guides' },
+    {
+      id: 'free' as const,
+      label: 'Free only',
+      note: 'Open pages without a paywall',
+      count: branchHubItems.filter((item) => !item.isLocked).length,
+    },
+    {
+      id: 'quick' as const,
+      label: 'Quick wins',
+      note: 'Shorter refreshers for tired study sessions',
+      count: branchHubItems.filter((item) => item.difficulty === 'Quick Win').length,
+    },
+    {
+      id: 'placement' as const,
+      label: 'Placement',
+      note: 'Practical refreshers before and after shift',
+      count: branchHubItems.filter((item) => item.tags.includes('Placement')).length,
+    },
+    {
+      id: 'osce' as const,
+      label: 'OSCE prep',
+      note: 'Assessment structure, wording, and station-adjacent guides',
+      count: branchHubItems.filter((item) => item.tags.includes('OSCE')).length,
+    },
   ];
 
   return (
@@ -285,6 +322,7 @@ export default function HubClient({
               >
                 <span className="hbc-lens-title">{lens.label}</span>
                 <span className="hbc-lens-desc">{lens.note}</span>
+                <span className="hbc-lens-count">{lens.count} pages</span>
               </button>
             ))}
           </div>
@@ -302,6 +340,7 @@ export default function HubClient({
                 <span className="hbc-pathway-eyebrow">{pathway.eyebrow}</span>
                 <span className="hbc-pathway-title">{pathway.title}</span>
                 <span className="hbc-pathway-desc">{pathway.description}</span>
+                <span className="hbc-pathway-count">{pathway.itemIds.length} pages</span>
                 <span className="hbc-pathway-cta">
                   Open pathway
                   <span className="hbc-pathway-arrow">&rarr;</span>
@@ -349,6 +388,28 @@ export default function HubClient({
               <Link href="/hub/glossary">Open the glossary for a plain-English definition</Link>
             </span>
 
+            {tagShortcutDefs.length > 0 && (
+              <div className="hbc-shortcuts">
+                <span className="hbc-shortcuts-label">Browse faster</span>
+                <div className="hbc-shortcuts-row">
+                  {tagShortcutDefs.map((tag) => {
+                    const active = selectedTags.has(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        className={`hbc-shortcut-btn${active ? ' active' : ''}`}
+                        onClick={() => toggleTag(tag)}
+                      >
+                        {tag}
+                        <span>{tagCounts.get(tag) ?? 0}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="hbc-filters">
               {branchFilterTags.map((tag) => (
                 <button
@@ -358,6 +419,7 @@ export default function HubClient({
                   onClick={() => toggleTag(tag)}
                 >
                   {tag}
+                  <span className="hbc-filter-count">{tagCounts.get(tag) ?? 0}</span>
                 </button>
               ))}
               {selectedTags.size > 0 && (
@@ -405,6 +467,52 @@ export default function HubClient({
             </div>
 
             <p className="hbc-summary">{librarySummary}</p>
+
+            {(searchQuery.trim() || activeLens !== 'all' || activePathway || selectedTags.size > 0) && (
+              <div className="hbc-active-pills">
+                {searchQuery.trim() && (
+                  <button
+                    type="button"
+                    className="hbc-active-pill"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    Search: {searchQuery.trim()}
+                    <span>&times;</span>
+                  </button>
+                )}
+                {activeLens !== 'all' && (
+                  <button
+                    type="button"
+                    className="hbc-active-pill"
+                    onClick={() => setActiveLens('all')}
+                  >
+                    {quickLenses.find((lens) => lens.id === activeLens)?.label ?? activeLens}
+                    <span>&times;</span>
+                  </button>
+                )}
+                {activePathway && (
+                  <button
+                    type="button"
+                    className="hbc-active-pill"
+                    onClick={() => setActivePathwayId(null)}
+                  >
+                    {activePathway.title}
+                    <span>&times;</span>
+                  </button>
+                )}
+                {[...selectedTags].map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className="hbc-active-pill"
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                    <span>&times;</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Recommended / Editor's picks */}

@@ -233,6 +233,15 @@ export const CSS = `
   font-weight: 300;
 }
 
+.hbc-lens-count {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9A948C;
+}
+
 /* ── Pathways ─────────────────────────────────────────────────────────────── */
 
 .hbc-pathways {
@@ -285,6 +294,15 @@ export const CSS = `
   line-height: 1.6;
   margin-bottom: 14px;
   display: block;
+}
+
+.hbc-pathway-count {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9A948C;
 }
 
 .hbc-pathway-cta {
@@ -402,6 +420,55 @@ export const CSS = `
 }
 .hbc-glossary-hint a:hover { opacity: 0.7; }
 
+.hbc-shortcuts {
+  margin-bottom: 16px;
+}
+
+.hbc-shortcuts-label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #9A948C;
+  margin-bottom: 8px;
+}
+
+.hbc-shortcuts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hbc-shortcut-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: #F8F6F2;
+  color: #5A5750;
+  padding: 7px 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+}
+.hbc-shortcut-btn span {
+  color: #9A948C;
+}
+.hbc-shortcut-btn:hover {
+  background: #F1EEE8;
+  border-color: rgba(0,0,0,0.14);
+}
+.hbc-shortcut-btn.active {
+  background: #1A1815;
+  color: #FAFAF8;
+  border-color: #1A1815;
+}
+.hbc-shortcut-btn.active span {
+  color: rgba(250,250,248,0.7);
+}
+
 .hbc-filters {
   display: flex;
   flex-wrap: wrap;
@@ -440,6 +507,9 @@ export const CSS = `
   border-radius: 0;
 }
 .hbc-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -457,6 +527,14 @@ export const CSS = `
   color: #FAFAF8;
   border-color: #1A1815;
 }
+
+.hbc-filter-count {
+  color: #9A948C;
+}
+.hbc-filter-btn.active .hbc-filter-count {
+  color: rgba(250,250,248,0.72);
+}
+
 .hbc-filter-clear {
   font-size: 9px;
   letter-spacing: 0.12em;
@@ -475,6 +553,38 @@ export const CSS = `
   color: #aaa;
   letter-spacing: 0.03em;
   margin-top: 12px;
+}
+
+.hbc-active-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.hbc-active-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0.5px solid rgba(0,0,0,0.12);
+  background: #FFFFFF;
+  color: #1A1815;
+  padding: 7px 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.hbc-active-pill span {
+  color: #9A948C;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.hbc-active-pill:hover {
+  background: #F5F3F0;
 }
 
 /* ── Resource cards ───────────────────────────────────────────────────────── */
