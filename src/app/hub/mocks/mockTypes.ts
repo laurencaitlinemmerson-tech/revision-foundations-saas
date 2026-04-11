@@ -47,6 +47,8 @@ export interface MockQuestion {
   commonLowMarkAnswer: string;
   deterioration: DeteriorationThinking | null;
   revisionLinks: RevisionLink[];
+  markingCriteria?: string[];
+  priorityStack?: string[];
 }
 
 export interface MockExam {

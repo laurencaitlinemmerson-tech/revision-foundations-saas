@@ -98,6 +98,14 @@ export const allMocks: MockExam[] = [
           { label: 'Respiratory System & Assessment', href: '/hub/resources/respiratory-system' },
           { label: 'Cell Biology & the Body', href: '/hub/resources/cell-biology' },
         ],
+        markingCriteria: [
+          'Named upper and lower airway structures in anatomical order',
+          'Explained the function of each key structure',
+          'Described gas exchange at the alveolar level using correct mechanism (passive diffusion)',
+          'Mentioned the respiratory membrane and its significance',
+          'Referenced at least one anatomy and physiology source',
+          'Maintained focus on normal, healthy function throughout',
+        ],
       },
 
       // ── Q2 ─────────────────────────────────────────────────────────────────
@@ -147,6 +155,13 @@ export const allMocks: MockExam[] = [
         revisionLinks: [
           { label: 'Respiratory System & Assessment', href: '/hub/resources/respiratory-system' },
           { label: 'Cell Biology & the Body', href: '/hub/resources/cell-biology' },
+        ],
+        markingCriteria: [
+          'Defined ventilation as the movement of air in and out of the lungs',
+          'Explained inspiration mechanics using Boyle\u2019s law',
+          'Described expiration as a passive process during quiet breathing',
+          'Included the role of surfactant and consequences of its absence',
+          'Noted paediatric differences (diaphragm dependence, compliant chest wall)',
         ],
       },
 
@@ -204,6 +219,14 @@ export const allMocks: MockExam[] = [
           { label: 'Respiratory System & Assessment', href: '/hub/resources/respiratory-system' },
           { label: 'Cell Biology & the Body', href: '/hub/resources/cell-biology' },
         ],
+        markingCriteria: [
+          'Defined bronchiolitis and identified RSV as the most common cause',
+          'Described the inflammatory cascade in logical sequence',
+          'Explained airway resistance using Poiseuille\u2019s law',
+          'Linked pathology to V/Q mismatch and hypoxaemia',
+          'Used precise clinical terminology throughout',
+          'Referenced at least one source',
+        ],
       },
 
       // ── Q4 ─────────────────────────────────────────────────────────────────
@@ -260,6 +283,14 @@ export const allMocks: MockExam[] = [
           { label: 'A\u2013E Assessment Framework', href: '/hub/resources/ae-assessment-guide' },
           { label: 'Paediatric Vital Signs Cheat Sheet', href: '/hub/resources/paeds-vital-signs-cheat-sheet' },
         ],
+        markingCriteria: [
+          'Distinguished between signs and symptoms',
+          'Explained the physiological mechanism behind each key sign',
+          'Linked tachycardia to the sympathetic compensatory response',
+          'Included feeding difficulties and hydration concerns',
+          'Applied findings to Ellie\u2019s specific presentation',
+          'Referenced NICE or a paediatric nursing source',
+        ],
       },
 
       // ── Q5 ─────────────────────────────────────────────────────────────────
@@ -314,6 +345,21 @@ export const allMocks: MockExam[] = [
         revisionLinks: [
           { label: 'Respiratory System & Assessment', href: '/hub/resources/respiratory-system' },
           { label: 'Paediatric Vital Signs Cheat Sheet', href: '/hub/resources/paeds-vital-signs-cheat-sheet' },
+        ],
+        markingCriteria: [
+          'Named the suck-swallow-breathe cycle and explained its disruption',
+          'Identified obligate nasal breathing as a contributing factor',
+          'Connected reduced intake to dehydration and metabolic risk',
+          'Mentioned the NICE threshold for nasogastric feeding',
+          'Applied directly to Ellie\u2019s intake and wet nappy output',
+          'Stated what the nursing team should do (monitoring, NG feeding, escalation)',
+        ],
+        priorityStack: [
+          'Respiratory stabilisation (reduce work of breathing)',
+          'Feeding assessment (suck-swallow-breathe coordination)',
+          'Hydration monitoring (fluid balance, wet nappies)',
+          'Caloric intake support (NG feeding if <50% intake)',
+          'Escalation to medical team if deteriorating',
         ],
       },
     ],
@@ -372,6 +418,14 @@ export const allMocks: MockExam[] = [
           { label: 'Theories of Development', href: '/hub/resources/theories-of-development' },
           { label: 'Communicating with Children', href: '/hub/resources/y1-child-communication' },
         ],
+        markingCriteria: [
+          'Identified expected milestones for a 7-month-old across multiple domains',
+          'Applied Bowlby\u2019s attachment theory to Ellie\u2019s hospitalisation',
+          'Applied Erikson\u2019s trust vs. mistrust stage to Ellie\u2019s context',
+          'Applied Piaget\u2019s sensorimotor stage to Ellie\u2019s limited exploration',
+          'Discussed potential developmental regression',
+          'Suggested specific, practical nursing actions to support development',
+        ],
       },
 
       // ── Q7 ─────────────────────────────────────────────────────────────────
@@ -422,6 +476,14 @@ export const allMocks: MockExam[] = [
         revisionLinks: [
           { label: 'Theories of Development', href: '/hub/resources/theories-of-development' },
           { label: 'Communicating with Children', href: '/hub/resources/y1-child-communication' },
+        ],
+        markingCriteria: [
+          'Addressed emotional impact on Ellie (separation anxiety, unfamiliar environment)',
+          'Addressed emotional impact on Sara (anxiety, guilt, isolation)',
+          'Discussed practical impacts on Sara (transport, finances, support)',
+          'Defined and applied family-centred care with specific examples',
+          'Showed sensitivity to Sara\u2019s individual circumstances without assumptions',
+          'Referenced a source on family-centred care or psychosocial impact',
         ],
       },
 
@@ -478,6 +540,22 @@ export const allMocks: MockExam[] = [
           { label: 'A\u2013E Assessment Framework', href: '/hub/resources/ae-assessment-guide' },
           { label: 'Respiratory System & Assessment', href: '/hub/resources/respiratory-system' },
           { label: 'Sepsis 6 & Escalation', href: '/hub/resources/sepsis-6-escalation' },
+        ],
+        markingCriteria: [
+          'Structured clinical priorities using A\u2013E framework',
+          'Named specific MDT members and their roles',
+          'Integrated psychosocial support alongside clinical care',
+          'Included Sara in care planning with specific examples',
+          'Included discharge planning with safety-netting advice',
+          'Referenced NICE guidelines and/or NMC Code',
+        ],
+        priorityStack: [
+          'Airway and breathing management',
+          'Oxygenation and SpO\u2082 monitoring',
+          'Hydration and fluid balance',
+          'Feeding support (NG if indicated)',
+          'Psychosocial and family-centred care',
+          'Discharge planning and community follow-up',
         ],
       },
     ],
