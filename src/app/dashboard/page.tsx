@@ -380,7 +380,7 @@ export default async function DashboardPage() {
         .dash-page-stack {
           display: flex;
           flex-direction: column;
-          gap: 72px;
+          gap: 84px;
         }
         .dash-split {
           display: grid;
@@ -404,19 +404,18 @@ export default async function DashboardPage() {
           transition: transform 220ms ease, filter 220ms ease;
         }
         .dash-hover-shell:hover {
-          transform: translateY(-3px);
-          filter: drop-shadow(0 14px 28px rgba(26, 24, 21, 0.05));
+          transform: translateY(-2px);
+          filter: drop-shadow(0 16px 32px rgba(26, 24, 21, 0.04));
         }
         .dash-hover-card {
-          border: 0.5px solid ${border};
+          border: 0.5px solid var(--linen-deep);
           background: #fff;
-          transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
+          transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
         }
         .dash-hover-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 18px 40px rgba(26, 24, 21, 0.06);
-          border-color: rgba(26,24,21,0.16);
-          background: #fffdfa;
+          transform: translateY(-3px);
+          box-shadow: 0 20px 48px rgba(26, 24, 21, 0.05);
+          border-color: var(--linen-medium);
         }
         .dash-rail-card {
           padding: 20px 22px;
@@ -528,10 +527,11 @@ export default async function DashboardPage() {
         }
         .dash-reco-title {
           font-family: ${display};
-          font-size: 1.75rem;
-          line-height: 1.08;
+          font-size: 1.85rem;
+          line-height: 1.05;
+          letter-spacing: -0.01em;
           color: ${ink};
-          margin-top: 12px;
+          margin-top: 14px;
         }
         .dash-reco-body {
           font-family: ${serif};
@@ -557,10 +557,10 @@ export default async function DashboardPage() {
           padding-top: 16px;
         }
         .dash-library-frame {
-          margin-top: 24px;
-          border: 0.5px solid rgba(0,0,0,0.08);
-          background: rgba(255,255,255,0.74);
-          padding: 18px;
+          margin-top: 32px;
+          border: 0.5px solid var(--linen-deep);
+          background: #FFFFFF;
+          padding: 24px;
         }
         @media (max-width: 1040px) {
           .dash-split {

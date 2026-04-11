@@ -343,33 +343,33 @@ export function ContinueCard() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className="card bg-[rgba(245,243,240,0.72)] border border-[var(--linen-deep)] h-full flex flex-col justify-between"
+      className="card bg-[var(--espresso)] text-[var(--cream)] border-none shadow-xl h-full flex flex-col justify-between"
     >
       <div>
-        <p className="mb-3 text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]">
+        <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-[var(--cream)]/60">
           Continue where you left off
         </p>
 
         {activity ? (
           <>
-            <h3 className="max-w-md font-display text-[1.95rem] leading-[1.02] text-[var(--espresso)]">
+            <h3 className="max-w-md font-display text-[2rem] leading-[1.05] text-white">
               Pick up {activity.label.toLowerCase()} again.
             </h3>
-            <p className="mt-3 max-w-md text-sm font-light leading-7 text-[var(--charcoal)]">
+            <p className="mt-4 max-w-md text-sm font-light leading-7 text-[var(--cream)]/70">
               The last place you practised is still the easiest way back into a short session.
             </p>
 
-            <div className="mt-6 border-l border-[var(--linen-deep)] pl-4">
-              <p className="font-display text-[1.25rem] leading-[1.08] text-[var(--espresso)]">{activity.label}</p>
-              <p className="mt-1 text-xs font-light text-[var(--charcoal)]/60">{getRelativeTime(activity.timestamp)}</p>
+            <div className="mt-8 border-l border-[var(--cream)]/20 pl-5">
+              <p className="font-display text-[1.25rem] leading-[1.08] text-white">{activity.label}</p>
+              <p className="mt-1.5 text-[11px] uppercase tracking-[0.1em] text-[var(--cream)]/50">{getRelativeTime(activity.timestamp)}</p>
             </div>
           </>
         ) : (
           <>
-            <h3 className="max-w-md font-display text-[1.95rem] leading-[1.02] text-[var(--espresso)]">
+            <h3 className="max-w-md font-display text-[2rem] leading-[1.05] text-white">
               Start one short piece of practice.
             </h3>
-            <p className="mt-3 max-w-md text-sm font-light leading-7 text-[var(--charcoal)]">
+            <p className="mt-4 max-w-md text-sm font-light leading-7 text-[var(--cream)]/70">
               Open a station or a question set once, and this spot becomes your fastest route back in next time.
             </p>
           </>
@@ -377,9 +377,10 @@ export function ContinueCard() {
       </div>
 
       <Link href={activity?.path ?? '/hub'}
-        className="mt-8 inline-flex w-fit items-center bg-[var(--espresso)] px-4 py-2.5 text-sm text-white transition-colors hover:bg-[#3a2010]"
+        className="mt-10 inline-flex w-fit items-center bg-white px-5 py-3 text-sm text-[var(--espresso)] font-medium transition-transform hover:scale-[1.02]"
       >
         {activity ? 'Continue session' : 'Browse the hub'}
+        <span className="ml-2 font-serif opacity-60">→</span>
       </Link>
     </motion.div>
   );
@@ -447,10 +448,10 @@ export function TodaysPlanCard() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className="card bg-white border border-[var(--linen-deep)] h-full flex flex-col"
+      className="card bg-[var(--cream-pink)] border border-[var(--linen-deep)] h-full flex flex-col"
     >
       <div className="flex items-center justify-between mb-5">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]">Today&apos;s plan</p>
+        <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--charcoal)]/60">Today&apos;s plan</p>
         <AnimatePresence mode="wait">
           <motion.span key={completedCount}
             initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
@@ -535,7 +536,7 @@ export function FocusAreasCard() {
 
   if (!loaded) {
     return (
-      <div className="card bg-white border border-[var(--linen-deep)]">
+      <div className="card bg-[var(--amber-bg)] border border-[rgba(200,112,10,0.1)]">
         <div className="space-y-3">
           {[1, 2, 3].map(i => <div key={i} className="skeleton h-14" />)}
         </div>
@@ -546,14 +547,14 @@ export function FocusAreasCard() {
   if (weakTopics.length === 0) {
     return (
       <motion.div variants={cardVariants} initial="hidden" animate="visible"
-        className="card bg-white border border-[var(--linen-deep)]"
+        className="card bg-[var(--amber-bg)] border border-[rgba(200,112,10,0.1)]"
       >
         <div className="flex flex-col items-center text-center py-8">
-          <p className="font-display text-[var(--espresso)] mb-1">No topics here yet</p>
-          <p className="text-sm text-[var(--charcoal)] font-light max-w-xs leading-7">
+          <p className="font-display text-[var(--amber-text)] mb-1">No topics here yet</p>
+          <p className="text-sm text-[var(--amber-text)]/70 font-light max-w-xs leading-7">
             Once you&apos;ve done a few quiz questions, the topics worth revisiting will show up here.
           </p>
-          <Link href="/quiz" className="mt-4 text-sm text-[var(--espresso)] underline underline-offset-2 hover:no-underline font-light">
+          <Link href="/quiz" className="mt-4 text-sm text-[var(--amber-text)] underline underline-offset-2 hover:no-underline font-light">
             Start the Core Quiz →
           </Link>
         </div>
@@ -563,7 +564,7 @@ export function FocusAreasCard() {
 
   return (
     <motion.div ref={ref} variants={cardVariants} initial="hidden" animate={isInView ? 'visible' : 'hidden'}
-      className="card bg-white border border-[var(--linen-deep)]"
+      className="card bg-[var(--amber-bg)] border border-[rgba(200,112,10,0.1)]"
     >
       <div className="space-y-3">
         {weakTopics.map((topic, i) => {
@@ -641,7 +642,7 @@ export function CommunityStatsCard() {
 
   return (
     <motion.div ref={ref} variants={cardVariants} initial="hidden" animate={isInView ? 'visible' : 'hidden'}
-      className="card h-full min-h-[290px] border border-[var(--linen-deep)] bg-white"
+      className="card h-full min-h-[290px] border border-[var(--linen-deep)] bg-[#FBFAF8]"
     >
       <p className="mb-4 text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]">
         This week
