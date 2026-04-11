@@ -40,8 +40,8 @@ function getSuggestion(): Suggestion {
             accent: 'var(--blue-600)',
             accentSoft: 'var(--blue-50)',
             effort: '5-10 min',
-            secondaryHref: '/dashboard#weak-areas',
-            secondaryCta: 'See weak areas',
+            secondaryHref: '/dashboard#study-desk',
+            secondaryCta: 'Open study desk',
           };
         }
       }
@@ -59,7 +59,7 @@ function getSuggestion(): Suggestion {
           accent: 'var(--blue-600)',
           accentSoft: 'var(--blue-50)',
           effort: '5 min',
-          secondaryHref: '/dashboard#saved-resources',
+          secondaryHref: '/dashboard#saved-folders',
           secondaryCta: 'Open saved pages',
         };
       }
@@ -72,7 +72,7 @@ function getSuggestion(): Suggestion {
           accent: 'var(--teal-600)',
           accentSoft: 'var(--teal-50)',
           effort: '8-12 min',
-          secondaryHref: '/dashboard#exam-season',
+          secondaryHref: '/dashboard#revision-week',
           secondaryCta: 'See study blocks',
         };
       }
@@ -91,7 +91,7 @@ function getSuggestion(): Suggestion {
           accent: 'var(--sage-600)',
           accentSoft: 'var(--sage-50)',
           effort: '10 min',
-          secondaryHref: '/dashboard#today-block',
+          secondaryHref: '/dashboard#todays-plan',
           secondaryCta: 'Check today’s plan',
         };
       }
@@ -106,7 +106,7 @@ function getSuggestion(): Suggestion {
     accent: 'var(--sage-600)',
     accentSoft: 'var(--sage-50)',
     effort: '5-15 min',
-    secondaryHref: '/dashboard#saved-resources',
+    secondaryHref: '/dashboard#saved-folders',
     secondaryCta: 'Browse saved folders',
   };
 }

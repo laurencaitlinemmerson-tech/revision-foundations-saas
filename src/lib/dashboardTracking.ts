@@ -43,7 +43,7 @@ export function getRecentPages(): RecentPage[] {
 export function trackPageVisit(title: string, href: string): void {
   const pages = getRecentPages().filter(p => p.href !== href);
   pages.unshift({ title, href, timestamp: Date.now() });
-  save(TRACKING_KEYS.recentPages, pages.slice(0, 3));
+  save(TRACKING_KEYS.recentPages, pages.slice(0, 5));
 }
 
 export function getPlacementDate(): string | null {

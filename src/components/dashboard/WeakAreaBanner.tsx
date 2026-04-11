@@ -59,11 +59,11 @@ export default function WeakAreaBanner() {
       padding: '12px 18px',
     }}>
       <p style={{ fontFamily: serif, fontSize: '13px', color: bodyColor, margin: 0 }}>
-        Your lowest quiz area is still <strong style={{ fontWeight: 500 }}>{weakest.topic}</strong> at {weakest.score}%.
+        Your lowest quiz area is still <strong style={{ fontWeight: 500 }}>{weakest.topic}</strong> at {weakest.score}% after {weakest.attempts} {weakest.attempts === 1 ? 'attempt' : 'attempts'}.
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <Link href="/quiz" style={{ fontFamily: serif, fontSize: '12px', color: bodyColor, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-          Review now
+        <Link href={`/quiz?topic=${encodeURIComponent(weakest.topic)}`} style={{ fontFamily: serif, fontSize: '12px', color: bodyColor, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+          Practise now
         </Link>
         <button
           onClick={() => setDismissed(true)}
