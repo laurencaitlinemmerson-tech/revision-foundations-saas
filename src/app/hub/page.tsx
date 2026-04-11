@@ -246,11 +246,60 @@ const CSS = `
   line-height: 1.55;
 }
 
+/* Mock Exams featured section */
+.hub-mock-section {
+  border: 0.5px solid rgba(0,0,0,0.12);
+  background: #FBF8F3;
+  padding: 40px 44px 36px;
+  margin-bottom: 60px;
+}
+
+.hub-mock-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.hub-mock-text {
+  flex: 1;
+}
+
+.hub-mock-desc {
+  font-size: 13px;
+  font-weight: 300;
+  color: #5A5750;
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+
+.hub-mock-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  background: #1A1815;
+  color: #FAFAF8;
+  padding: 12px 24px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.hub-mock-cta:hover { background: #3a2010; }
+.hub-mock-cta .hub-branch-arrow { color: #FAFAF8; }
+
 @media (max-width: 768px) {
   .hub-main { padding: 48px 20px 64px; }
   .hub-branches { grid-template-columns: 1fr; }
   .hub-branch { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
   .hub-branch:last-child { border-bottom: none; }
+  .hub-mock-section { padding: 28px 24px; }
+  .hub-mock-inner { flex-direction: column; align-items: flex-start; gap: 24px; }
   .hub-more-grid { grid-template-columns: 1fr; }
   .hub-more-item { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
   .hub-more-item:last-child { border-bottom: none; }
@@ -339,11 +388,46 @@ export default function HubPage() {
           </Link>
         </div>
 
+        {/* Mock Exams — featured section */}
+        <div className="hub-mock-section">
+          <div className="hub-mock-inner">
+            <div className="hub-mock-text">
+              <p className="hub-branch-eyebrow">Exam practice</p>
+              <h2 className="hub-branch-title">Mock Exams</h2>
+              <p className="hub-mock-desc">
+                Practice real exam-style scenarios with guided support. Each mock includes examiner insight, clinical reasoning chains, answer structure guidance, and high-scoring phrasing — everything you need to write first-class answers.
+              </p>
+              <div className="hub-branch-stats">
+                <div className="hub-branch-stat">
+                  <span className="hub-branch-stat-num">1</span>
+                  <span className="hub-branch-stat-label">System</span>
+                </div>
+                <div className="hub-branch-stat">
+                  <span className="hub-branch-stat-num">8</span>
+                  <span className="hub-branch-stat-label">Questions</span>
+                </div>
+                <div className="hub-branch-stat">
+                  <span className="hub-branch-stat-num">12</span>
+                  <span className="hub-branch-stat-label">Sentence starters</span>
+                </div>
+              </div>
+              <div className="hub-branch-topics">
+                {['Bronchiolitis', 'Respiratory', 'Pathophysiology', 'Family-centred care', 'Developmental theory'].map(t => (
+                  <span key={t} className="hub-branch-topic">{t}</span>
+                ))}
+              </div>
+            </div>
+            <Link href="/hub/mocks" className="hub-mock-cta">
+              <span className="hub-mock-cta-text">Start a mock exam</span>
+              <span className="hub-branch-arrow">→</span>
+            </Link>
+          </div>
+        </div>
+
         {/* More ways */}
         <p className="hub-more-label">More ways to revise</p>
         <div className="hub-more-grid">
           {[
-            { href: '/hub/mocks', title: 'Mock Exams', desc: 'Practice real exam-style scenarios with guided support and learn how to write first-class answers.' },
             { href: '/hub/questions', title: 'Q&A Board', desc: 'Ask a question or browse what other students have asked about placements, OSCEs, and exams.' },
             { href: '/hub/glossary', title: 'Nursing Glossary', desc: 'A searchable A–Z of nursing words and abbreviations explained in plain English.' },
           ].map(item => (
