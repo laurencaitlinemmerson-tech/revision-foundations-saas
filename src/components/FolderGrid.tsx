@@ -4,9 +4,23 @@ import { useState } from 'react';
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Folder } from '@/lib/bookmarks/types';
 
+const COLOUR_MAP: Record<string, string> = {
+  sage:  '#8BBCAA',
+  warm:  '#D4A574',
+  slate: '#7BA7CC',
+  rose:  '#C89BB0',
+  ink:   '#3D3530',
+  sand:  '#C4B49A',
+};
+
+function folderColour(colour: string): string {
+  // Handles both the new id-based values and any legacy hex strings
+  return COLOUR_MAP[colour] ?? colour ?? '#8BBCAA';
+}
+
 interface FolderGridProps {
   folders: Folder[];
-  folderPreviews?: Map<
+  folderPreviews?: Map
     number,
     {
       latestSavedAt: string;
@@ -75,41 +89,22 @@ export default function FolderGrid({
 
   if (!folders.length) {
     return (
-      <div className="overflow-hidden border border-[rgba(26,24,21,0.08)] bg-[linear-gradient(135deg,rgba(240,249,247,0.9)_0%,rgba(241,246,255,0.92)_52%,rgba(255,247,237,0.88)_100%)] px-6 py-8 md:px-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]/70">Saved library</p>
-            <h3 className="mt-2 font-display text-[2rem] leading-[1.05] text-[var(--espresso)]">
-              No folders yet.
-            </h3>
-            <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--charcoal)]">
-              Save pages when you want a calmer way back to the guides you actually use. This works especially well for placement notes, OSCE prep, and quick-reference pages.
-            </p>
-            <button
-              type="button"
-              onClick={onCreateFolder}
-              className="mt-6 inline-flex items-center gap-2 bg-[var(--espresso)] px-5 py-2.5 text-sm text-white"
-            >
-              <Plus className="h-4 w-4" />
-              Create first folder
-            </button>
-          </div>
-
-          <div className="grid gap-3">
-            {[
-              { label: 'Placement notes', tone: 'bg-white text-[var(--teal-600)]' },
-              { label: 'Drug calculations', tone: 'bg-white text-[var(--blue-600)]' },
-              { label: 'OSCE prep', tone: 'bg-white text-[var(--coral-600)]' },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className={`border border-[rgba(26,24,21,0.08)] px-4 py-3 text-sm ${item.tone}`}
-              >
-                {item.label}
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="border border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.5)] px-6 py-10 md:px-8">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]/70">Saved library</p>
+        <h3 className="mt-2 font-display text-[2rem] leading-[1.05] text-[var(--espresso)]">
+          No folders yet.
+        </h3>
+        <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--charcoal)]/80">
+          Save pages as you go — folders are the quickest way back to guides you actually reuse.
+        </p>
+        <button
+          type="button"
+          onClick={onCreateFolder}
+          className="mt-6 inline-flex items-center gap-2 bg-[var(--espresso)] px-5 py-2.5 text-sm text-white transition hover:bg-[#3a2010]"
+        >
+          <Plus className="h-4 w-4" />
+          Create first folder
+        </button>
       </div>
     );
   }
@@ -130,6 +125,7 @@ export default function FolderGrid({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {folders.map((folder) => {
           const preview = folderPreviews?.get(folder.id);
+          const hex = folderColour(folder.colour);
 
           return (
             <div
@@ -142,9 +138,10 @@ export default function FolderGrid({
                   onClick={() => onOpenFolder(folder.id)}
                   className="flex min-w-0 flex-1 items-start gap-4 text-left"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center bg-[var(--linen-light)] text-2xl">
-                    {folder.emoji}
-                  </div>
+                  <div
+                    className="mt-1 h-8 w-8 flex-shrink-0 rounded-full"
+                    style={{ background: hex }}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/55">Folder</p>
                     <h3 className="truncate font-display text-[22px] text-[var(--espresso)]">{folder.name}</h3>
@@ -157,7 +154,9 @@ export default function FolderGrid({
                 <div className="relative">
                   <button
                     type="button"
-                    onClick={() => setMenuFolderId(menuFolderId === folder.id ? null : folder.id)}
+                    onClick={() =>
+                      setMenuFolderId(menuFolderId === folder.id ? null : folder.id)
+                    }
                     className="border border-black/8 bg-white p-2 text-[var(--charcoal)] transition hover:border-black/14"
                     aria-label={`Manage ${folder.name}`}
                   >
@@ -200,7 +199,9 @@ export default function FolderGrid({
                   className="mt-5 w-full border border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.62)] px-4 py-4 text-left transition hover:border-[rgba(26,24,21,0.16)]"
                 >
                   <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/55">Latest saved</p>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--espresso)]">{preview.latestTitle}</p>
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--espresso)]">
+                    {preview.latestTitle}
+                  </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {preview.previewItems.map((item) => (
                       <span
@@ -222,7 +223,6 @@ export default function FolderGrid({
                   type="button"
                   onClick={() => onOpenFolder(folder.id)}
                   className="inline-flex items-center gap-2 text-sm text-[var(--espresso)]"
-                  style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}
                 >
                   Open folder <span aria-hidden="true">→</span>
                 </button>
