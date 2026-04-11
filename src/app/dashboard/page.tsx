@@ -9,6 +9,7 @@ import WeakAreaBanner from '@/components/dashboard/WeakAreaBanner';
 import PlacementCountdown from '@/components/dashboard/PlacementCountdown';
 import QuickTopicSearch from '@/components/dashboard/QuickTopicSearch';
 import RecentPagesStrip from '@/components/dashboard/RecentPagesStrip';
+import StudySignalsRow from '@/components/dashboard/StudySignalsRow';
 import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
 
@@ -278,6 +279,9 @@ export default async function DashboardPage() {
           <WhatToDoToday />
           <div style={{ marginTop: '12px' }}>
             <PlacementCountdown />
+          </div>
+          <div style={{ marginTop: '12px' }}>
+            <StudySignalsRow />
           </div>
           <div style={{ marginTop: '20px' }}>
             <p style={{
