@@ -344,7 +344,7 @@ export function ContinueCard() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className="card !bg-[var(--espresso)] text-[var(--cream)] border-none shadow-xl h-full flex flex-col justify-between"
+      className="card-dark h-full flex flex-col justify-between"
     >
       <div>
         <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-[var(--cream)]/60">
