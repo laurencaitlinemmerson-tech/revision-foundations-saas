@@ -63,15 +63,7 @@ export default function SavedFoldersDashboard({
     [folders],
   );
 
-  const folderPreviews = useMemo(() => {
-    const previews = new Map
-      number,
-      {
-        latestSavedAt: string;
-        latestTitle: string;
-        previewItems: Array<{ title: string; type: string }>;
-      }
-    >();
+  const previews = new Map<number, { latestSavedAt: string; latestTitle: string; previewItems: Array<{ title: string; type: string }> }>();
 
     for (const bookmark of bookmarks) {
       const existing = previews.get(bookmark.folderId);
