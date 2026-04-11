@@ -1,16 +1,14 @@
 import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import QuizPageClient from '@/components/product-pages/QuizPageClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 
 export default async function QuizPage() {
   const { userId } = await auth();
+  if (!userId) redirect('/sign-in');
 
-  let hasPremium = false;
-
-  if (userId) {
-    const entitlements = await getUserEntitlements(userId);
-    hasPremium = hasAccessToContent(entitlements, 'quiz');
-  }
+  const entitlements = await getUserEntitlements(userId);
+  const hasPremium = hasAccessToContent(entitlements, 'quiz');
 
   return <QuizPageClient hasPremium={hasPremium} />;
 }

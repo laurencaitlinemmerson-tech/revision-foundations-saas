@@ -163,7 +163,7 @@ const CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 3px;
+  border-radius: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 400;
 }
@@ -255,7 +255,7 @@ const CSS = `
   background: #FCEBEB;
   color: #A32D2D;
   padding: 3px 11px;
-  border-radius: 2px;
+  border-radius: 0;
   font-weight: 300;
 }
 

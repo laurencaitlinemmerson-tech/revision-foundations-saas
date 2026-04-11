@@ -124,7 +124,7 @@ const CSS = `
   grid-template-columns: 1fr 1fr;
   border: 0.5px solid rgba(0,0,0,0.12);
   margin-bottom: 32px;
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 .inj-compare-col {
@@ -173,7 +173,7 @@ const CSS = `
   margin: 0 0 32px;
   font-size: 13px;
   border: 0.5px solid rgba(0,0,0,0.12);
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 .inj-table th {
@@ -205,7 +205,7 @@ const CSS = `
   border-left: 3px solid #C4C0B9;
   padding: 18px 22px;
   margin: 24px 0 28px;
-  border-radius: 0 2px 2px 0;
+  border-radius: 0;
 }
 
 .inj-pearl-title {
@@ -229,7 +229,7 @@ const CSS = `
   border-left: 3px solid #C2705A;
   padding: 18px 22px;
   margin: 24px 0 28px;
-  border-radius: 0 2px 2px 0;
+  border-radius: 0;
 }
 
 .inj-warn-title {
@@ -253,7 +253,7 @@ const CSS = `
   border-left: 3px solid #7BA3C4;
   padding: 18px 22px;
   margin: 24px 0 28px;
-  border-radius: 0 2px 2px 0;
+  border-radius: 0;
 }
 
 .inj-info p {
@@ -306,7 +306,7 @@ const CSS = `
 .inj-osce-card {
   background: #F3F1EE;
   padding: 18px 20px;
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 .inj-osce-card strong {
