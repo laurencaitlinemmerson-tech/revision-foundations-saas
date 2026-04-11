@@ -62,8 +62,9 @@ export default function SavedFoldersDashboard({
     () => folders.reduce((total, folder) => total + folder.itemCount, 0),
     [folders],
   );
+
   const folderPreviews = useMemo(() => {
-    const previews = new Map<
+    const previews = new Map
       number,
       {
         latestSavedAt: string;
@@ -92,7 +93,7 @@ export default function SavedFoldersDashboard({
     return previews;
   }, [bookmarks]);
 
-  async function handleCreateFolder(input: { name: string; emoji: string }) {
+  async function handleCreateFolder(input: { name: string; colour: string }) {
     try {
       const folder = await createFolder(input);
       showToast(`Created ${folder.name}`, 'success');
@@ -102,7 +103,7 @@ export default function SavedFoldersDashboard({
     }
   }
 
-  async function handleUpdateFolder(input: { name: string; emoji: string }) {
+  async function handleUpdateFolder(input: { name: string; colour: string }) {
     if (!editFolder) {
       return;
     }
@@ -157,11 +158,11 @@ export default function SavedFoldersDashboard({
                 Your quickest route back to the pages you actually reuse.
               </h3>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--charcoal)]">
-                Use folders for repeat reads, placement notes, and exam prep that you want close to hand. The aim is less hunting, more re-entry.
+                Use folders for repeat reads and pages you want close to hand. Less hunting, more re-entry.
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div className="border border-[rgba(26,24,21,0.08)] bg-white px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/60">Folders</p>
                 <p className="mt-1 font-display text-[1.8rem] leading-none text-[var(--espresso)]">{folders.length}</p>
@@ -169,10 +170,6 @@ export default function SavedFoldersDashboard({
               <div className="border border-[rgba(26,24,21,0.08)] bg-white px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/60">Saved pages</p>
                 <p className="mt-1 font-display text-[1.8rem] leading-none text-[var(--espresso)]">{totalSavedItems}</p>
-              </div>
-              <div className="border border-[rgba(26,24,21,0.08)] bg-white px-4 py-4">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/60">Best for</p>
-                <p className="mt-1 text-sm leading-6 text-[var(--espresso)]">Placement notes, quick reference, exam prep</p>
               </div>
             </div>
           </div>
