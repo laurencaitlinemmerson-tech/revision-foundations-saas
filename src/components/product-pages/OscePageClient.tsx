@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Clock, Play } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { saveLastActivity, recordSessionStart } from '@/components/DashboardWidgets';
 import ProductVisualShowcase from '@/components/product-pages/ProductVisualShowcase';
+import { getOsceLoopCards } from '@/lib/productLoop';
 
 const PREVIEW_TIME = 180;
 
@@ -148,6 +150,7 @@ function formatTime(seconds: number) {
 }
 
 export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) {
+  const searchParams = useSearchParams();
   const [enterApp, setEnterApp] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [timeLeft, setTimeLeft] = useState(PREVIEW_TIME);
@@ -156,6 +159,14 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const heroMode = heroModes[activeHeroMode] ?? heroModes[0];
+  const forwardedQuery = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `?${query}` : '';
+  }, [searchParams]);
+  const loopCards = useMemo(
+    () => getOsceLoopCards(searchParams.get('from')),
+    [searchParams],
+  );
 
   useEffect(() => {
     if (showPreview && !hasPremium && timeLeft > 0) {
@@ -183,7 +194,7 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
   if (hasPremium) {
     return (
       <iframe
-        src="/apps/osce.html"
+        src={`/apps/osce.html${forwardedQuery}`}
         className="fixed inset-0 w-full border-0"
         style={{ height: '100vh', width: '100vw' }}
         title="Children's OSCE Tool"
@@ -247,7 +258,7 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
           </div>
         </div>
         <iframe
-          src="/apps/osce.html?preview=1"
+          src={`/apps/osce.html?preview=1${forwardedQuery ? `&${forwardedQuery.slice(1)}` : ''}`}
           className="fixed bottom-0 left-0 right-0 w-full border-0"
           style={{ top: '44px', height: 'calc(100vh - 44px)' }}
           title="Children's OSCE Tool"
@@ -458,6 +469,51 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
           </div>
         </section>
 
+        <section style={{ padding: '48px 24px 56px', borderBottom: `1px solid ${border}` }}>
+          <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
+            <p style={sectionLabel}>Keep the loop moving</p>
+            <h2 style={{
+              fontFamily: display,
+              fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+              lineHeight: 1.1,
+              color: ink,
+              marginBottom: '14px',
+              maxWidth: '20ch',
+            }}>
+              Use one guide to steady the station, then back it up with recall.
+            </h2>
+            <p style={{ ...bodyText, maxWidth: '620px', marginBottom: '28px' }}>
+              The OSCE tool works best when the knowledge underneath it is close by, not in another tab you never return to.
+            </p>
+
+            <div className="osce-loop-grid">
+              {loopCards.map((card) => (
+                <Link
+                  key={`${card.eyebrow}-${card.title}`}
+                  href={card.href}
+                  style={{
+                    display: 'block',
+                    textDecoration: 'none',
+                    border: `0.5px solid ${border}`,
+                    background: paper,
+                    padding: '22px 22px 24px',
+                    color: ink,
+                  }}
+                >
+                  <p style={{ ...sectionLabel, marginBottom: '10px' }}>{card.eyebrow}</p>
+                  <h3 style={{ fontFamily: display, fontSize: '26px', lineHeight: 1.08, fontWeight: 400, marginBottom: '10px' }}>
+                    {card.title}
+                  </h3>
+                  <p style={{ ...bodyText, fontSize: '13px', marginBottom: '16px' }}>{card.description}</p>
+                  <span style={{ fontFamily: serif, fontSize: '12px', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+                    {card.cta} →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── Pricing ── */}
         <section style={{ padding: '48px 24px 96px' }}>
           <div className="osce-pricing-grid" style={{ maxWidth: '1120px', margin: '0 auto' }}>
@@ -540,9 +596,15 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 18px;
         }
+        .osce-loop-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 18px;
+        }
         @media (max-width: 860px) {
           .osce-hero-grid,
-          .osce-pricing-grid {
+          .osce-pricing-grid,
+          .osce-loop-grid {
             grid-template-columns: 1fr;
           }
           .osce-focus-grid {

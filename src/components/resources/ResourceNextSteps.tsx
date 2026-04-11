@@ -6,6 +6,7 @@ import {
   getCatalogItem,
   getRelatedCatalogItems,
 } from '@/lib/bookmarks/catalog';
+import { getResourceLoopActions } from '@/lib/productLoop';
 
 function getSlugFromPathname(pathname: string | null) {
   if (!pathname) return null;
@@ -27,13 +28,18 @@ export default function ResourceNextSteps() {
   const branchHref = isAdult ? '/hub/adult' : '/hub/childrens';
   const branchLabel = isAdult ? 'Return to adult hub' : "Return to children's hub";
 
-  const primaryAction = tags.includes('OSCE')
-    ? { href: '/osce', label: 'Practise the matching OSCE flow' }
-    : tags.includes('Meds & Calculations') || tags.includes('Assessment')
-    ? { href: '/quiz', label: 'Do a quick recall block in Quiz' }
-    : tags.includes('Placement')
-    ? { href: branchHref, label: 'Open more placement refreshers' }
-    : { href: '/quiz', label: 'Turn this into an active recall block' };
+  const loopActions = getResourceLoopActions(slug, tags);
+  const practiceCards = [
+    loopActions.quiz ? { tone: '#185FA5', soft: '#E7EEF8', eyebrow: 'Quiz next', ...loopActions.quiz } : null,
+    loopActions.osce ? { tone: '#2F8A7E', soft: '#E6F3F1', eyebrow: 'OSCE next', ...loopActions.osce } : null,
+  ].filter(Boolean) as Array<{
+    tone: string;
+    soft: string;
+    eyebrow: string;
+    href: string;
+    label: string;
+    description: string;
+  }>;
 
   const related = getRelatedCatalogItems(slug, 3);
 
@@ -133,24 +139,80 @@ export default function ResourceNextSteps() {
             You have already done the reading. The best next move is a short practice block or one related guide, while the details are still fresh.
           </p>
 
+          <div style={{ display: 'grid', gap: '10px', marginBottom: '18px' }}>
+            {practiceCards.length > 0 ? practiceCards.map((card) => (
+              <Link
+                key={card.label}
+                href={card.href}
+                style={{
+                  display: 'block',
+                  textDecoration: 'none',
+                  border: '0.5px solid rgba(26,24,21,0.11)',
+                  background: '#FFFFFF',
+                  padding: '14px 15px 15px',
+                  color: '#1A1815',
+                }}
+              >
+                <p
+                  style={{
+                    margin: '0 0 7px',
+                    fontSize: '10px',
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: card.tone,
+                  }}
+                >
+                  {card.eyebrow}
+                </p>
+                <p
+                  style={{
+                    margin: '0 0 6px',
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: '24px',
+                    lineHeight: 1.12,
+                    fontWeight: 400,
+                  }}
+                >
+                  {card.label}
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '12px',
+                    lineHeight: 1.7,
+                    color: '#5A5750',
+                    fontWeight: 300,
+                  }}
+                >
+                  {card.description}
+                </p>
+              </Link>
+            )) : (
+              <Link
+                href={branchHref}
+                style={{
+                  display: 'block',
+                  textDecoration: 'none',
+                  border: '0.5px solid rgba(26,24,21,0.11)',
+                  background: '#FFFFFF',
+                  padding: '14px 15px 15px',
+                  color: '#1A1815',
+                }}
+              >
+                <p style={{ margin: '0 0 7px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A948C' }}>
+                  Hub next
+                </p>
+                <p style={{ margin: '0 0 6px', fontFamily: "'Playfair Display', Georgia, serif", fontSize: '24px', lineHeight: 1.12, fontWeight: 400 }}>
+                  Open more related refreshers.
+                </p>
+                <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.7, color: '#5A5750', fontWeight: 300 }}>
+                  Stay in the same branch and keep the topic moving without opening a completely different lane.
+                </p>
+              </Link>
+            )}
+          </div>
+
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            <Link
-              href={primaryAction.href}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                background: '#1A1815',
-                color: '#FAFAF8',
-                textDecoration: 'none',
-                padding: '12px 20px',
-                fontSize: '13px',
-              }}
-            >
-              {primaryAction.label}
-              <span aria-hidden="true">→</span>
-            </Link>
             <Link
               href={branchHref}
               style={{

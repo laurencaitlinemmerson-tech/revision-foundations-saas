@@ -438,6 +438,115 @@
       { id: 'lines', name: 'Securing Lines/Tapes', icon: 'wrench', color: '#64748b' }
     ];
 
+    const OSCE_TOPIC_ROUTES = {
+      respiratory: {
+        guideHref: '/hub/resources/ae-assessment-guide',
+        guideTitle: 'A-E Assessment Framework',
+        guideLabel: 'Read the A-E guide',
+        nextHref: '/quiz?topic=respiratory',
+        nextLabel: 'Back it up with quiz recall'
+      },
+      circulation: {
+        guideHref: '/hub/resources/cardiovascular-system',
+        guideTitle: 'Cardiovascular System & Assessment',
+        guideLabel: 'Read the cardiovascular guide',
+        nextHref: '/quiz?topic=cardiovascular',
+        nextLabel: 'Back it up with quiz recall'
+      },
+      medication: {
+        guideHref: '/hub/resources/drug-calculations-cheat-sheet',
+        guideTitle: 'Drug Calculations Cheat Sheet',
+        guideLabel: 'Read the cheat sheet',
+        nextHref: '/quiz?topic=numeracy',
+        nextLabel: 'Back it up with quiz recall'
+      },
+      injection: {
+        guideHref: '/hub/resources/im-sc-injection',
+        guideTitle: 'IM & SC Injections',
+        guideLabel: 'Read the injection guide',
+        nextHref: '/quiz?topic=numeracy',
+        nextLabel: 'Back it up with quiz recall'
+      },
+      ngtubes: {
+        guideHref: '/hub/resources/ng-tube-insertion',
+        guideTitle: 'NG Tube Insertion & Testing',
+        guideLabel: 'Read the NG tube guide',
+        nextHref: '/hub/childrens',
+        nextLabel: 'Open more children’s pages'
+      },
+      handwashing: {
+        guideHref: '/hub/resources/y1-infection-control',
+        guideTitle: 'Infection Prevention & Control',
+        guideLabel: 'Read IPC essentials',
+        nextHref: '/quiz?topic=hospitalPrep',
+        nextLabel: 'Back it up with quiz recall'
+      },
+      communication: {
+        guideHref: '/hub/resources/y1-child-communication',
+        guideTitle: 'Y1 Communicating with Children',
+        guideLabel: 'Read the communication guide',
+        nextHref: '/quiz?topic=childDevelopment',
+        nextLabel: 'Back it up with quiz recall'
+      },
+      pain: {
+        guideHref: '/hub/resources/y1-pain-assessment',
+        guideTitle: 'Y1 Pain Assessment in Children',
+        guideLabel: 'Read the pain guide',
+        nextHref: '/hub/childrens',
+        nextLabel: 'Open more related pages'
+      },
+      deteriorating: {
+        guideHref: '/hub/resources/ae-assessment-guide',
+        guideTitle: 'A-E Assessment Framework',
+        guideLabel: 'Read the A-E guide',
+        nextHref: '/quiz?topic=respiratory',
+        nextLabel: 'Back it up with quiz recall'
+      }
+    };
+
+    function getOSCELoopRoute(topicId, weakDomainKey) {
+      if (OSCE_TOPIC_ROUTES[topicId]) return OSCE_TOPIC_ROUTES[topicId];
+
+      if (weakDomainKey === 'communication') return OSCE_TOPIC_ROUTES.communication;
+      if (weakDomainKey === 'documentation') {
+        return {
+          guideHref: '/hub/resources/y1-documentation',
+          guideTitle: 'Documentation & Record Keeping',
+          guideLabel: 'Read the documentation guide',
+          nextHref: '/quiz',
+          nextLabel: 'Back it up with quiz recall'
+        };
+      }
+      if (weakDomainKey === 'safetyRedFlags') return OSCE_TOPIC_ROUTES.respiratory;
+
+      return {
+        guideHref: '/hub/childrens',
+        guideTitle: "Children's nursing hub",
+        guideLabel: 'Open the hub',
+        nextHref: '/quiz',
+        nextLabel: 'Switch to the quiz'
+      };
+    }
+
+    function applyInitialRouting() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const requestedMode = params.get('mode');
+        if (requestedMode === 'quiz' || requestedMode === 'osce') sessionMode = requestedMode;
+
+        const requestedTopics = params
+          .getAll('topic')
+          .flatMap(value => String(value).split(','))
+          .map(value => value.trim())
+          .filter(Boolean);
+
+        if (requestedTopics.length) {
+          const valid = requestedTopics.filter(topicId => topics.some(topic => topic.id === topicId));
+          if (valid.length) selectedTopics = Array.from(new Set(valid));
+        }
+      } catch {}
+    }
+
     // ==================== STATE MANAGEMENT ====================
     let currentView = 'selection';
     let selectedTopics = [];
@@ -6732,6 +6841,20 @@ function renderOSCE(container) {
 
   const weakDomains = domainArray.filter(d => d.total > 0 && d.percentage < 75);
   const strongDomains = domainArray.filter(d => d.total > 0 && d.percentage >= 75).slice(-3);
+  const topicSummary = {};
+  stationResults.forEach(sr => {
+    const topicId = sr.station.topic || 'general';
+    if (!topicSummary[topicId]) topicSummary[topicId] = { checked: 0, total: 0 };
+    topicSummary[topicId].checked += sr.checkedCount;
+    topicSummary[topicId].total += sr.totalCount;
+  });
+  const weakestTopic = Object.entries(topicSummary)
+    .map(([topicId, data]) => ({
+      topicId,
+      percentage: data.total ? Math.round((data.checked / data.total) * 100) : 0
+    }))
+    .sort((a, b) => a.percentage - b.percentage)[0];
+  const loopRoute = getOSCELoopRoute(weakestTopic?.topicId, weakDomains[0]?.key);
 
   // --------- INSIGHTS ----------
   const insights = [];
@@ -6865,6 +6988,24 @@ function renderOSCE(container) {
         ` : ''}
       </div>
       ` : ''}
+
+      <div style="margin-bottom:40px;">
+        <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:20px;">Keep the Loop Moving</div>
+        <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px;">
+          <a href="${loopRoute.guideHref}" target="_top" style="display:block; text-decoration:none; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px;">
+            <div style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#999; margin-bottom:8px;">Read next</div>
+            <div style="font-family:'Playfair Display',Georgia,serif; font-size:24px; line-height:1.08; color:#1A1815; margin-bottom:8px;">${loopRoute.guideTitle}</div>
+            <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; line-height:1.6; color:#5A5750; margin-bottom:14px;">Keep one guide open for the section that felt least steady in this station run.</div>
+            <span style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#1A1815;">${loopRoute.guideLabel} &rarr;</span>
+          </a>
+          <a href="${loopRoute.nextHref}" target="_top" style="display:block; text-decoration:none; background:#FBF8F3; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px;">
+            <div style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#999; margin-bottom:8px;">Then reinforce</div>
+            <div style="font-family:'Playfair Display',Georgia,serif; font-size:24px; line-height:1.08; color:#1A1815; margin-bottom:8px;">Back up the station with recall.</div>
+            <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; line-height:1.6; color:#5A5750; margin-bottom:14px;">If the wording was shaky, a short recall block usually fixes the knowledge underneath it faster than another long run.</div>
+            <span style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#1A1815;">${loopRoute.nextLabel} &rarr;</span>
+          </a>
+        </div>
+      </div>
 
       <!-- ACTION BUTTONS -->
       <div class="app-results-actions" style="padding-bottom:48px;">
@@ -7129,6 +7270,7 @@ function renderOSCE(container) {
    // ==================== INITIALIZATION ====================
    function init() {
      createParticles();
+     applyInitialRouting();
      render();
    }
 
