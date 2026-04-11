@@ -48,8 +48,8 @@ export default function DashboardClient({
       };
 
   const railLinks = [
-    { href: '#continue', label: 'Continue', note: 'Return to the active thread' },
-    { href: '#today-block', label: 'Today', note: 'See the day at a glance' },
+    { href: '#todays-plan', label: 'Today', note: 'See the day at a glance' },
+    { href: '#revision-week', label: 'Week', note: 'Plan your revision week' },
     { href: '#search', label: 'Search', note: 'Open a guide fast' },
     { href: '#saved-folders', label: 'Library', note: 'Revisit saved material' },
   ];

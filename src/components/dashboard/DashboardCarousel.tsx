@@ -102,10 +102,9 @@ export default function DashboardCarousel({
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.35 }}
-            transition={{ duration: 0.32, delay: index * 0.04, ease: 'easeOut' }}
-            className="min-w-[86%] snap-start sm:min-w-[410px] lg:min-w-[360px]"
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.38, delay: 0.1 + index * 0.06, ease: 'easeOut' }}
+            className="min-w-[86%] flex-shrink-0 snap-start sm:min-w-[410px] lg:min-w-[360px]"
           >
             {item}
           </motion.div>

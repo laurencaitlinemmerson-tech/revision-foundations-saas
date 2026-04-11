@@ -172,7 +172,7 @@ export default async function DashboardPage() {
   const entitlements  = await getUserEntitlements(userId);
   const hasOsce       = hasAccessToContent(entitlements, 'osce');
   const hasQuiz       = hasAccessToContent(entitlements, 'quiz');
-  const hasFullAccess = hasOsce && hasQuiz;
+  const hasMocks      = hasAccessToContent(entitlements, 'osce'); // Bundled with OSCE access
 
   const quizStats = await getUserQuizStats(userId).catch(() => null);
   const osceStats = await getUserOsceStats(userId).catch(() => null);
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz}>
+    <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz} hasMocks={hasMocks}>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
 
         {/* ━━ 1 · PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
