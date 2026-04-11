@@ -4,13 +4,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const bodyColor = '#2C2A27';
-const mid = '#5A5750';
-const muted = '#999';
-const borderMid = 'rgba(0,0,0,0.12)';
+const serif = "var(--font-body)";
+const display = "var(--font-display)";
+const ink = "var(--espresso)";
+const bodyColor = "var(--charcoal)";
+const mid = "var(--charcoal-light)";
+const muted = "var(--charcoal-light)";
+const borderMid = "var(--border)";
 
 interface Suggestion {
   headline: string;
@@ -171,10 +171,10 @@ export default function WhatToDoToday() {
           grid-template-columns: minmax(0, 1fr) auto;
           gap: 20px 28px;
           align-items: start;
-          border: 0.5px solid ${borderMid};
-          background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(250,250,248,0.98) 100%);
-          padding: 22px 22px 24px;
-          transition: border-color 0.2s ease;
+          border: `0.5px solid ${borderMid}`,
+          background: '#FFFFFF',
+          padding: '28px 26px',
+          transition: 'border-color 0.2s ease',
         }
         .dash-suggestion-shell:hover {
           border-color: rgba(0,0,0,0.18);

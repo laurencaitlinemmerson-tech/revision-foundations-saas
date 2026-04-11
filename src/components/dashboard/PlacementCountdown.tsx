@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react';
 import { getPlacementDate, setPlacementDate } from '@/lib/dashboardTracking';
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const mid = '#5A5750';
-const muted = '#999';
-const border = 'rgba(0,0,0,0.1)';
-const borderMid = 'rgba(0,0,0,0.12)';
+const serif = "var(--font-body)";
+const display = "var(--font-display)";
+const ink = "var(--espresso)";
+const mid = "var(--charcoal)";
+const muted = "var(--charcoal-light)";
+const borderMid = "var(--border)";
 
 function daysUntil(dateStr: string): number {
   const target = new Date(dateStr);
@@ -45,7 +44,7 @@ export default function PlacementCountdown() {
 
   if (!date || editing) {
     return (
-      <div style={{ border: `0.5px solid ${borderMid}`, background: 'white', padding: '20px 22px 22px' }}>
+      <div style={{ border: borderMid, background: 'white', padding: '24px 26px' }}>
         <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '14px' }}>
           Placement countdown
         </p>
@@ -54,7 +53,7 @@ export default function PlacementCountdown() {
             type="date"
             value={input}
             onChange={e => setInput(e.target.value)}
-            style={{ fontFamily: serif, fontSize: '13px', color: ink, background: '#FAFAF8', border: `0.5px solid ${border}`, padding: '8px 10px', outline: 'none' }}
+            style={{ fontFamily: serif, fontSize: '13px', color: ink, background: '#FAFAF8', border: borderMid, padding: '8px 10px', outline: 'none' }}
           />
           <button
             onClick={handleSave}
@@ -94,7 +93,7 @@ export default function PlacementCountdown() {
     : null;
 
   return (
-    <div style={{ border: `0.5px solid ${borderMid}`, background: 'white', padding: '20px 22px 22px' }}>
+    <div style={{ border: borderMid, background: 'white', padding: '24px 26px' }}>
       <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '10px' }}>
         Placement countdown
       </p>

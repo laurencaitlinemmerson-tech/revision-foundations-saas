@@ -101,7 +101,7 @@ export default function DashboardClient({
     <div className="min-h-screen bg-[var(--cream)]">
       <Navbar />
 
-      <section className="border-b border-[rgba(26,24,21,0.07)] bg-[var(--cream)]">
+      <section className="border-b border-[var(--border)] bg-[var(--cream)]">
         <div className="mx-auto max-w-[1120px] px-6 pb-12 pt-[88px] md:px-10 md:pb-14">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_272px] lg:items-start">
 
@@ -181,13 +181,7 @@ export default function DashboardClient({
             </div>
 
             {/* ── Right: jump rail ── */}
-            <motion.div
-              {...(anim ? {
-                variants: railContainerVariants,
-                initial: 'hidden',
-                animate: 'visible',
-              } : {})}
-              className="border border-[rgba(26,24,21,0.06)] bg-white lg:mt-10"
+              className="border border-[var(--border)] bg-white lg:mt-10"
             >
               {railLinks.map((link, index) => (
                 <motion.div
@@ -199,7 +193,7 @@ export default function DashboardClient({
                   } : {})}
                   className={
                     index < railLinks.length - 1
-                      ? 'border-b border-[rgba(26,24,21,0.05)]'
+                      ? 'border-b border-[var(--border)]'
                       : ''
                   }
                 >

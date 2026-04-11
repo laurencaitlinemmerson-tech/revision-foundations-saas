@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getRecentPages, type RecentPage } from '@/lib/dashboardTracking';
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const bodyColor = '#2C2A27';
-const muted = '#999';
-const border = 'rgba(0,0,0,0.1)';
-const borderMid = 'rgba(0,0,0,0.12)';
+const serif = "var(--font-body)";
+const bodyColor = "var(--charcoal)";
+const muted = "var(--charcoal-light)";
+const border = "var(--border)";
+const borderMid = "var(--border)";
 
 export default function RecentPagesStrip() {
   const [pages, setPages] = useState<RecentPage[]>([]);
@@ -44,7 +44,7 @@ export default function RecentPagesStrip() {
           className="rps-chip"
           style={{
             fontFamily: serif, fontSize: '12px', color: bodyColor,
-            background: 'white', border: `0.5px solid ${border}`,
+            background: 'white', border: border,
             borderLeft: `2px solid ${accentForHref(page.href)}`,
             padding: '6px 12px', textDecoration: 'none',
           }}

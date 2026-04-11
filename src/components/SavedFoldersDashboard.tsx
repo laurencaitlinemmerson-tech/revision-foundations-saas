@@ -91,7 +91,7 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
   return (
     <>
       {showOverview && !activeFolder && folders.length > 0 ? (
-        <div className="mb-6 overflow-hidden border border-[rgba(26,24,21,0.08)] bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(240,249,247,0.86)_48%,rgba(241,246,255,0.88)_100%)] px-6 py-6 md:px-8">
+        <div className="mb-6 overflow-hidden border border-[var(--border)] bg-[#FAFAF8] px-6 py-6 md:px-8">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-end">
             <div>
               <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]/70">Saved library</p>
@@ -104,11 +104,11 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="border border-[rgba(26,24,21,0.08)] bg-white px-4 py-4">
+              <div className="border border-[var(--border)] bg-white px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/60">Folders</p>
                 <p className="mt-1 font-display text-[1.8rem] leading-none text-[var(--espresso)]">{folders.length}</p>
               </div>
-              <div className="border border-[rgba(26,24,21,0.08)] bg-white px-4 py-4">
+              <div className="border border-[var(--border)] bg-white px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/60">Saved pages</p>
                 <p className="mt-1 font-display text-[1.8rem] leading-none text-[var(--espresso)]">{totalSavedItems}</p>
               </div>

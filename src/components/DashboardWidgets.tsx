@@ -256,7 +256,7 @@ export function StudyStreakCard() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className="card bg-white border border-[var(--linen-deep)] h-full"
+      className="card border border-[var(--linen-deep)] bg-white h-full"
     >
       <div className="mb-5 flex items-start justify-between">
         <div>
@@ -344,7 +344,7 @@ export function ContinueCard() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className="card bg-[var(--espresso)] text-[var(--cream)] border-none shadow-xl h-full flex flex-col justify-between"
+      className="card !bg-[var(--espresso)] text-[var(--cream)] border-none shadow-xl h-full flex flex-col justify-between"
     >
       <div>
         <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-[var(--cream)]/60">
@@ -461,7 +461,7 @@ export function TodaysPlanCard() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className="card bg-[var(--cream-pink)] border border-[var(--linen-deep)] h-full flex flex-col"
+      className="card bg-[#FAF8F6] border border-[var(--linen-deep)] h-full flex flex-col"
     >
       <div className="flex items-center justify-between mb-5">
         <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--charcoal)]/60">Today&apos;s plan</p>
@@ -582,7 +582,7 @@ export function FocusAreasCard() {
 
   return (
     <motion.div ref={ref} variants={cardVariants} initial="hidden" animate={isInView ? 'visible' : 'hidden'}
-      className="card bg-[var(--amber-bg)] border border-[rgba(200,112,10,0.1)]"
+      className="card bg-[#FEFAF2] border border-[rgba(200,112,10,0.12)]"
     >
       <div className="space-y-3">
         {weakTopics.map((topic, i) => {
@@ -768,7 +768,7 @@ export function QuickAchievement() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className={`card border ${achieved ? 'bg-[var(--purple-50)] border-[rgba(83,74,183,0.15)]' : 'bg-[var(--linen-light)] border-[var(--linen-deep)]'}`}
+      className={`card border ${achieved ? 'bg-[#F9F8FF] border-[rgba(83,74,183,0.2)]' : 'bg-[#FAFAF8] border-[var(--linen-deep)]'}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">

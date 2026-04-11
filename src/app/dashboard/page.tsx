@@ -26,12 +26,12 @@ export const metadata: Metadata = {
 };
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
-const serif   = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink     = '#1A1815';
-const mid     = '#5A5750';
-const muted   = '#9C8878';
-const border  = 'rgba(0,0,0,0.08)';
+const serif   = "var(--font-body)";
+const display = "var(--font-display)";
+const ink     = "var(--espresso)";
+const mid     = "var(--charcoal)";
+const muted   = "var(--charcoal-light)";
+const border  = "var(--border)";
 
 // ── Section divider ────────────────────────────────────────────────────────────
 function SectionDivider({
@@ -50,12 +50,12 @@ function SectionDivider({
       id={id}
       style={{
         borderTop: `0.5px solid ${border}`,
-        paddingTop: '13px',
+        paddingTop: '16px',
         marginBottom: '28px',
-        marginTop: '52px',
+        marginTop: '64px',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '10px',
       }}
     >
       {accent && (
@@ -101,8 +101,8 @@ function StatCard({
   return (
     <div className="dash-stat-card" style={{
       background: '#fff',
-      border: `0.5px solid rgba(0,0,0,0.07)`,
-      padding: '18px 20px',
+      border: border,
+      padding: '24px 22px',
     }}>
       <p style={{
         fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
@@ -247,7 +247,7 @@ export default async function DashboardPage() {
           {/* Topic strength + quiz accuracy bars */}
           <div className="dash-prog-pair" style={{ marginTop: '12px' }}>
             <div style={{
-              background: '#fff', border: `0.5px solid rgba(0,0,0,0.07)`, padding: '20px 22px',
+              background: '#fff', border: border, padding: '24px 26px',
             }}>
               <p style={{
                 fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
@@ -261,7 +261,7 @@ export default async function DashboardPage() {
             </div>
 
             <div style={{
-              background: '#fff', border: `0.5px solid rgba(0,0,0,0.07)`, padding: '20px 22px',
+              background: '#fff', border: border, padding: '24px 26px',
             }}>
               <p style={{
                 fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',

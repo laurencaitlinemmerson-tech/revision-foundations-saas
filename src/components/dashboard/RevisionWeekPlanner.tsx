@@ -3,11 +3,12 @@
 import { useState } from 'react';
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
-const serif   = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink     = '#1A1815';
-const mid     = '#5A5750';
-const muted   = '#9C8878';
+const serif   = "var(--font-body)";
+const display = "var(--font-display)";
+const ink     = "var(--espresso)";
+const mid     = "var(--charcoal)";
+const muted   = "var(--charcoal-light)";
+const border  = "var(--border)";
 
 // ── Revision week data ─────────────────────────────────────────────────────────
 const WEEK = [
@@ -235,14 +236,14 @@ export default function RevisionWeekPlanner() {
             className="rwp-day-tile"
             style={{
               background: '#fff',
-              border: '0.5px solid rgba(0,0,0,0.07)',
+              border: border,
               opacity: d.rest ? 0.7 : 1,
             }}
           >
             {/* Day header */}
             <div style={{
               padding: '10px 12px 8px',
-              borderBottom: '0.5px solid rgba(0,0,0,0.06)',
+              borderBottom: border,
             }}>
               <p style={{
                 fontFamily: serif, fontSize: '10px', letterSpacing: '0.14em',
@@ -316,7 +317,7 @@ export default function RevisionWeekPlanner() {
       <p style={{
         fontFamily: serif, fontSize: '11px', color: '#B4A89C',
         fontWeight: 300, lineHeight: 1.7, marginTop: '18px',
-        paddingTop: '16px', borderTop: '0.5px solid rgba(0,0,0,0.07)',
+        paddingTop: '16px', borderTop: border,
       }}>
         The .ics file works with Google Calendar, Apple Calendar, and Outlook.
         Each study session is added as a timed event starting Monday at 9am —

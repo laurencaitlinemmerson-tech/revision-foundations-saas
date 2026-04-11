@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Search, X } from 'lucide-react';
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const bodyColor = '#2C2A27';
-const mid = '#5A5750';
-const muted = '#999';
-const border = 'rgba(0,0,0,0.1)';
-const borderMid = 'rgba(0,0,0,0.12)';
+const serif = "var(--font-body)";
+const display = "var(--font-display)";
+const ink = "var(--espresso)";
+const bodyColor = "var(--charcoal)";
+const mid = "var(--charcoal-light)";
+const muted = "var(--charcoal-light)";
+const borderMid = "var(--border)";
+const border = "var(--border)";
 
 const HUB_RESOURCES = [
   { title: 'A–E Assessment Framework', href: '/hub/resources/ae-assessment-guide', tag: 'OSCE' },
@@ -101,7 +101,7 @@ export default function QuickTopicSearch() {
     <div
       ref={ref}
       className="dash-search-shell"
-      style={{ border: `0.5px solid ${borderMid}` }}
+      style={{ border: borderMid }}
     >
       <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '12px' }}>
         Quick lookup
@@ -220,8 +220,8 @@ export default function QuickTopicSearch() {
       <style>{`
         .dash-search-shell {
           position: relative;
-          background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(250,250,248,0.98) 100%);
-          padding: 20px 22px 22px;
+          background: #FAFAF8;
+          padding: 24px 26px;
           min-height: 100%;
         }
 

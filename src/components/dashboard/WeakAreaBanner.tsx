@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const bodyColor = '#2C2A27';
-const muted = '#999';
+const serif = "var(--font-body)";
+const bodyColor = "var(--charcoal)";
+const muted = "var(--charcoal-light)";
+const border = "var(--border)";
 
 interface WeakTopic {
   topic: string;
@@ -34,11 +35,11 @@ export default function WeakAreaBanner() {
     if (!weakest && !dismissed) {
       return (
         <div style={{
-          border: '0.5px solid rgba(0,0,0,0.08)',
-          padding: '16px 20px',
+          border: border,
+          padding: '24px 26px',
           background: 'white',
         }}>
-          <p style={{ fontFamily: serif, fontSize: '13px', color: '#5A5750', fontWeight: 300, lineHeight: 1.7, margin: 0 }}>
+          <p style={{ fontFamily: serif, fontSize: '13px', color: 'var(--charcoal-light)', fontWeight: 300, lineHeight: 1.7, margin: 0 }}>
             No weak areas flagged yet. Run a few quiz sets and any topics under 80% will surface here.
           </p>
         </div>

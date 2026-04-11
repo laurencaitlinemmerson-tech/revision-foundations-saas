@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { getPlacementDate } from '@/lib/dashboardTracking';
 import { getLastActivity, getStudyStreak, STORAGE_KEYS } from '@/components/DashboardWidgets';
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const inkMid = '#5A5750';
-const inkLight = '#9C8878';
-const border = 'rgba(0,0,0,0.08)';
+const serif = "var(--font-body)";
+const display = "var(--font-display)";
+const ink = "var(--espresso)";
+const inkMid = "var(--charcoal)";
+const inkLight = "var(--charcoal-light)";
+const border = "var(--border)";
 
 interface WeakTopic {
   topic: string;
@@ -160,9 +160,9 @@ export default function ReadinessSnapshot() {
   return (
     <div
       style={{
-        border: `0.5px solid ${border}`,
+        border: border,
         background: '#FFFFFF',
-        padding: '20px 22px 22px',
+        padding: '24px 26px',
       }}
     >
       <div style={{ marginBottom: '16px' }}>
@@ -182,7 +182,7 @@ export default function ReadinessSnapshot() {
           <div
             key={card.label}
             style={{
-              border: `0.5px solid ${border}`,
+              border: border,
               background: '#FCFBF8',
               padding: '16px 16px 18px',
             }}
