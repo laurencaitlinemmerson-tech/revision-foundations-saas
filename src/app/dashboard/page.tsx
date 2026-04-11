@@ -5,517 +5,487 @@ import Link from 'next/link';
 import DashboardClient from './DashboardClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 import SavedFoldersDashboard from '@/components/SavedFoldersDashboard';
+import ExamSeasonPlanner from '@/components/dashboard/ExamSeasonPlanner';
+import WeakAreaBanner from '@/components/dashboard/WeakAreaBanner';
 import PlacementCountdown from '@/components/dashboard/PlacementCountdown';
 import QuickTopicSearch from '@/components/dashboard/QuickTopicSearch';
 import RecentPagesStrip from '@/components/dashboard/RecentPagesStrip';
-import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
-import QuickStatsStrip from '@/components/dashboard/QuickStatsStrip';
-import DashboardCarousel from '@/components/dashboard/DashboardCarousel';
+import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
+import OsceSparkline from '@/components/dashboard/OsceSparkline';
+
 import {
   ContinueCard,
+  TodaysPlanCard,
   FocusAreasCard,
   StudyStreakCard,
-  TodaysPlanCard,
+  CommunityStatsCard,
+  QuickAchievement,
+  StudyTipCard,
 } from '@/components/DashboardWidgets';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'Your editorial revision desk for progress, planning, and quick re-entry into study.',
+  description: 'Your study dashboard for tools, saved pages, and purchased content.',
 };
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const muted = '#9C8878';
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const serif     = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const display   = "'Playfair Display', Georgia, serif";
+const ink       = '#1A1815';
+const bodyColor = '#2C2A27';
+const mid       = '#5A5750';
+const muted     = '#9C8878';
+const border    = 'rgba(0,0,0,0.08)';
+const borderMid = 'rgba(0,0,0,0.10)';
 
-type TopicStrength = {
-  label: string;
-  pct: number;
-  color: string;
-};
-
-function SectionLabel({ children }: { children: string }) {
+// ── Section heading ───────────────────────────────────────────────────────────
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  accent,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  accent?: string;
+}) {
   return (
-    <p style={{
-      fontFamily: serif,
-      fontSize: '10px',
-      letterSpacing: '0.18em',
-      textTransform: 'uppercase' as const,
-      color: muted,
-      marginBottom: '10px',
-    }}>
-      {children}
-    </p>
-  );
-}
-
-function SectionHeader({ label, title, body }: { label: string; title: string; body: string }) {
-  return (
-    <div style={{ marginBottom: '28px' }}>
-      <SectionLabel>{label}</SectionLabel>
+    <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '32px', marginBottom: '28px' }}>
+      {eyebrow && (
+        <p style={{
+          fontFamily: serif,
+          fontSize: '10px',
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: accent || muted,
+          marginBottom: '12px',
+          borderLeft: accent ? `2px solid ${accent}` : undefined,
+          paddingLeft: accent ? '10px' : undefined,
+        }}>
+          {eyebrow}
+        </p>
+      )}
       <h2 style={{
         fontFamily: display,
-        fontSize: 'clamp(1.9rem, 2.8vw, 2.6rem)',
-        lineHeight: 1.06,
+        fontSize: 'clamp(1.5rem, 2.6vw, 2rem)',
+        fontWeight: 400,
+        lineHeight: 1.1,
         color: ink,
-        letterSpacing: '-0.02em',
-        marginBottom: '10px',
+        marginBottom: 0,
       }}>
         {title}
       </h2>
-      <p style={{
-        fontFamily: serif,
-        fontSize: '13.5px',
-        lineHeight: 1.85,
-        color: '#5A5750',
-        fontWeight: 300,
-        maxWidth: '52ch',
-      }}>
-        {body}
-      </p>
+      {description && (
+        <p style={{
+          fontFamily: serif,
+          fontSize: '13px',
+          color: mid,
+          fontWeight: 300,
+          lineHeight: 1.8,
+          maxWidth: '580px',
+          marginTop: '8px',
+        }}>
+          {description}
+        </p>
+      )}
     </div>
   );
 }
 
-function Meter({ label, pct, color }: { label: string; pct: number; color: string }) {
-  return (
-    <div style={{ marginBottom: '14px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-        <p style={{ fontFamily: serif, fontSize: '12.5px', color: '#2C2A27' }}>{label}</p>
-        <p style={{ fontFamily: serif, fontSize: '11px', color: '#8D7E71' }}>{pct}%</p>
-      </div>
-      <div style={{ height: '2px', background: 'rgba(0,0,0,0.06)', borderRadius: '1px' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '1px' }} />
-      </div>
-    </div>
-  );
-}
-
-function RecommendationCard({ eyebrow, title, body, href, cta }: {
-  eyebrow: string;
-  title: string;
-  body: string;
-  href: string;
-  cta: string;
+// ── Bundle upsell ─────────────────────────────────────────────────────────────
+function BundlePrompt({
+  hasOsce,
+  hasQuiz,
+  hasAnyTool,
+}: {
+  hasOsce: boolean;
+  hasQuiz: boolean;
+  hasAnyTool: boolean;
 }) {
+  const remainingLabel =
+    hasOsce && !hasQuiz ? 'core quiz'
+    : !hasOsce && hasQuiz ? 'OSCE tool'
+    : "children's bundle";
+
   return (
-    <Link href={href} className="dash-reco-card dash-hover-card">
+    <div style={{
+      borderTop: `0.5px solid ${border}`,
+      paddingTop: '28px',
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0,1fr) auto',
+      gap: '32px',
+      alignItems: 'start',
+    }}
+    className="dash-bundle-prompt"
+    >
       <div>
-        <p className="dash-reco-eyebrow">{eyebrow}</p>
-        <h3 className="dash-reco-title">{title}</h3>
-        <p className="dash-reco-body">{body}</p>
+        <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '10px' }}>
+          {hasAnyTool ? 'Unlock more' : 'Get started'}
+        </p>
+        <p style={{ fontFamily: display, fontSize: '1.4rem', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.15, color: ink, marginBottom: '10px' }}>
+          {hasAnyTool ? `Add the ${remainingLabel}.` : 'Build the full study setup.'}
+        </p>
+        <p style={{ fontFamily: serif, fontSize: '13px', color: mid, fontWeight: 300, lineHeight: 1.8, maxWidth: '480px' }}>
+          {hasAnyTool
+            ? 'Bring your practice back into one place so the dashboard becomes a proper revision home base.'
+            : 'Start with the free preview if you want a feel for it first, or unlock the bundle when you are ready.'}
+        </p>
       </div>
-      <p className="dash-reco-cta">{cta} <span aria-hidden="true">→</span></p>
-    </Link>
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flexShrink: 0, paddingTop: '4px' }}>
+        <Link
+          href="/pricing"
+          style={{ fontFamily: serif, fontSize: '13px', color: '#FAFAF8', background: ink, padding: '11px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}
+        >
+          View pricing
+        </Link>
+        {!hasAnyTool && (
+          <Link
+            href="/osce"
+            style={{ fontFamily: serif, fontSize: '13px', color: bodyColor, background: 'white', padding: '10px 20px', border: `0.5px solid ${borderMid}`, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}
+          >
+            Try free preview
+          </Link>
+        )}
+      </div>
+    </div>
   );
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in');
 
-  const user = await currentUser();
+  const user      = await currentUser();
   const firstName = user?.firstName ?? null;
 
-  const entitlements = await getUserEntitlements(userId);
-  const hasOsce = hasAccessToContent(entitlements, 'osce');
-  const hasQuiz = hasAccessToContent(entitlements, 'quiz');
-  const hasMocks = hasAccessToContent(entitlements, 'osce');
+  const entitlements  = await getUserEntitlements(userId);
+  const hasOsce       = hasAccessToContent(entitlements, 'osce');
+  const hasQuiz       = hasAccessToContent(entitlements, 'quiz');
+  const hasAnyTool    = hasOsce || hasQuiz;
+  const hasFullAccess = hasOsce && hasQuiz;
 
-  const quizStats = await getUserQuizStats(userId).catch(() => null);
-
-  const topicStrength = quizStats?.topicBreakdown ?? [
-    { label: 'Respiratory', pct: 60, color: '#8BBCAA' },
-    { label: 'Cardiac', pct: 54, color: '#D4A574' },
-    { label: 'Neurological', pct: 46, color: '#7BA7CC' },
-    { label: 'Pharmacology', pct: 38, color: '#C89BB0' },
-  ];
-
-  const strongestArea = quizStats?.strongestArea ?? topicStrength[0]?.label ?? 'Respiratory';
-  const weakestArea = quizStats?.weakestArea ?? topicStrength[topicStrength.length - 1]?.label ?? 'Pharmacology';
+  // Analytics gated — replace stubs with real fetches
+  const quizStats    = await getUserQuizStats(userId).catch(() => null);
+  const osceStats    = await getUserOsceStats(userId).catch(() => null);
+  const hasAnalytics = !!(quizStats?.totalAnswered || osceStats?.totalRuns);
 
   return (
-    <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz} hasMocks={hasMocks}>
-      <div className="dash-page-stack">
+    <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-        {/* Stats strip */}
-        <section>
-          <QuickStatsStrip />
+        {/* ── 1 · What to do right now ───────────────────────────────────
+            WhatToDoToday: full-width primary prose nudge
+            ContinueCard: secondary, picks up last session
+        ─────────────────────────────────────────────────────────────── */}
+        <section style={{ paddingBottom: '52px' }}>
+          <SectionHeading
+            eyebrow="Start here"
+            title="Choose the next useful thing."
+            description="This works best when it points you to one sensible next step — not every option at once."
+            accent="var(--sage-600)"
+          />
+          <div style={{ marginBottom: '16px' }}>
+            <WhatToDoToday />
+          </div>
+          <ContinueCard />
+          {!hasFullAccess && (
+            <div style={{ marginTop: '32px' }}>
+              <BundlePrompt hasOsce={hasOsce} hasQuiz={hasQuiz} hasAnyTool={hasAnyTool} />
+            </div>
+          )}
         </section>
 
-        {/* Continue */}
-        <section id="continue" className="dash-split">
-          <div className="dash-split-main">
-            <SectionHeader
-              label="Continue"
-              title="Pick up the live thread."
-              body="The most useful dashboard is the one that gets you back into active revision without asking you to decide everything again."
-            />
-            <ContinueCard />
-          </div>
-
-          <aside className="dash-split-side">
-            <div className="dash-rail-card dash-hover-card">
-              <SectionLabel>Quick starts</SectionLabel>
-              <div className="dash-rail-links">
-                <Link href="/hub" className="dash-rail-link"><span>Open the hub</span><span aria-hidden="true">→</span></Link>
-                <Link href={hasQuiz ? '/quiz' : '/pricing'} className="dash-rail-link">
-                  <span>{hasQuiz ? '10-question quiz' : 'Unlock the quiz'}</span><span aria-hidden="true">→</span>
-                </Link>
-                <Link href={hasOsce ? '/osce' : '/pricing'} className="dash-rail-link">
-                  <span>{hasOsce ? 'Run a timed station' : 'Unlock OSCE practice'}</span><span aria-hidden="true">→</span>
-                </Link>
-                <Link href={hasMocks ? '/hub/mocks' : '/pricing'} className="dash-rail-link">
-                  <span>{hasMocks ? 'Take a mock exam' : 'Unlock mock exams'}</span><span aria-hidden="true">→</span>
-                </Link>
-                <Link href="#saved-folders" className="dash-rail-link">
-                  <span>Open saved library</span><span aria-hidden="true">→</span>
-                </Link>
-              </div>
-            </div>
+        {/* ── 2 · Today ──────────────────────────────────────────────────
+            TodaysPlanCard + PlacementCountdown: both time-anchored
+        ─────────────────────────────────────────────────────────────── */}
+        <section id="today-block" style={{ paddingBottom: '52px' }}>
+          <SectionHeading
+            eyebrow="Today"
+            title="What deserves attention today."
+            description="A short checklist and one date can do most of the heavy lifting when your revision brain feels crowded."
+            accent="var(--amber-600)"
+          />
+          <div className="dash-today-grid">
+            <TodaysPlanCard />
             <PlacementCountdown />
-          </aside>
+          </div>
         </section>
 
-        {/* Divider */}
-        <div className="dash-divider" />
-
-        {/* Today */}
-        <section id="today-block" className="dash-split">
-          <div className="dash-split-main">
-            <SectionHeader
-              label="Today"
-              title="A clearer read on what matters now."
-              body="The day, the weak spots, and the shape of your revision — all visible at once."
-            />
-
-            <div className="dash-today-grid">
-              <TodaysPlanCard />
-
-              <div className="dash-progress-panel dash-hover-card">
-                <div className="dash-progress-top">
-                  <div>
-                    <SectionLabel>Progress</SectionLabel>
-                    <h3 className="dash-panel-title">Strength and accuracy</h3>
-                  </div>
-                  <p className="dash-panel-note">Strongest: {strongestArea}</p>
-                </div>
-
-                <div className="dash-progress-columns">
-                  <div>
-                    <SectionLabel>Topic strength</SectionLabel>
-                    <div style={{ marginTop: '12px' }}>
-                      {topicStrength.map((topic) => (
-                        <Meter key={topic.label} label={topic.label} pct={topic.pct} color={topic.color} />
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <SectionLabel>Exam pressure</SectionLabel>
-                    <p className="dash-side-copy">
-                      {weakestArea} still needs deliberate repetition. Use shorter sessions to stop it becoming drag.
-                    </p>
-                    <div className="dash-aside-note">
-                      <SectionLabel>Useful next move</SectionLabel>
-                      <p className="dash-note-copy">
-                        {hasQuiz
-                          ? `Run a short ${weakestArea.toLowerCase()} quiz set, then review one saved page.`
-                          : 'Use saved guides first, then add the quiz when you want targeted practice.'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* ── 3 · Search & recent ──────────────────────────────────────── */}
+        <section id="jump-back-in" style={{ paddingBottom: '52px', borderTop: `0.5px solid ${border}`, paddingTop: '32px' }}>
+          <div className="dash-utility-grid">
+            <QuickTopicSearch />
+            <div className="dash-utility-card">
+              <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '12px' }}>
+                Quick return
+              </p>
+              <h3 style={{ fontFamily: display, fontSize: '1.6rem', fontWeight: 400, lineHeight: 1.08, color: ink, marginBottom: '10px' }}>
+                Recent pages stay close.
+              </h3>
+              <p style={{ fontFamily: serif, fontSize: '13px', color: mid, fontWeight: 300, lineHeight: 1.8, marginBottom: '18px', maxWidth: '34rem' }}>
+                When you already know where you want to go, this should feel like the shortest path back rather than another section to think about.
+              </p>
+              <RecentPagesStrip />
             </div>
           </div>
+        </section>
 
-          <aside className="dash-split-side">
+        {/* ── 4 · Your progress ──────────────────────────────────────────
+            Streak + FocusAreas + QuickAchievement: momentum signals
+        ─────────────────────────────────────────────────────────────── */}
+        <section id="progress-block" style={{ paddingBottom: '52px' }}>
+          <SectionHeading
+            eyebrow="Your progress"
+            title="A small record of how often you've shown up."
+            description="Use these as nudges, not as another thing to manage."
+            accent="var(--teal-600)"
+          />
+          <div className="dash-progress-grid">
             <StudyStreakCard />
             <FocusAreasCard />
-          </aside>
+            <QuickAchievement />
+          </div>
         </section>
 
-        <div className="dash-divider" />
-
-        {/* Editorial carousel */}
-        <section>
-          <DashboardCarousel
-            eyebrow="Editorial track"
-            title="Use the dashboard like a working desk."
-            description="Move between your main routes without the page turning into a grid of generic tools."
-          >
-            <RecommendationCard eyebrow="Hub" title="Return to your reading base" body="Open guides, glossaries, and saved pages when you want the calmest way back into study." href="/hub" cta="Open hub" />
-            <RecommendationCard
-              eyebrow="Quiz"
-              title={hasQuiz ? `Bring ${weakestArea} up next` : 'Add short question sets'}
-              body={hasQuiz ? 'A quick question set gives you a direct read on recall without committing to a long session.' : 'The quiz is the cleanest way to turn weak topics into something measurable.'}
-              href={hasQuiz ? `/quiz?topic=${encodeURIComponent(weakestArea)}` : '/pricing'}
-              cta={hasQuiz ? 'Start quiz' : 'View quiz access'}
-            />
-            <RecommendationCard
-              eyebrow="OSCE"
-              title={hasOsce ? 'Shift from reading to performance' : 'Unlock timed practice'}
-              body={hasOsce ? 'When revision feels too passive, one station changes the pace immediately.' : 'Add practical timed work when you want exam-style preparation.'}
-              href={hasOsce ? '/osce' : '/pricing'}
-              cta={hasOsce ? 'Run station' : 'See OSCE access'}
-            />
-            <RecommendationCard
-              eyebrow="Mocks"
-              title={hasMocks ? 'Simulate exam conditions' : 'Unlock mock exams'}
-              body={hasMocks ? 'Full, long-answer exam scenarios with examiner feedback and marking criteria.' : 'Structured mock exams to build clinical reasoning and structure.'}
-              href={hasMocks ? '/hub/mocks' : '/pricing'}
-              cta={hasMocks ? 'Start mock exam' : 'See mock access'}
-            />
-            <RecommendationCard eyebrow="Library" title="Re-enter through saved material" body="Your saved folders are a personal archive of pages worth revisiting, not a dumping ground." href="#saved-folders" cta="Open library" />
-          </DashboardCarousel>
+        {/* ── 5 · Weak areas ─────────────────────────────────────────────
+            WeakAreaBanner: important but not the first thing every visit
+        ─────────────────────────────────────────────────────────────── */}
+        <section id="weak-areas" style={{ paddingBottom: '52px' }}>
+          <SectionHeading
+            eyebrow="Weak areas"
+            title="What still needs work."
+            description="Only worth looking at when you want to decide what to target next."
+            accent="var(--coral-600)"
+          />
+          <WeakAreaBanner />
         </section>
 
-        <div className="dash-divider" />
+        {/* ── 6 · Exam season ────────────────────────────────────────────
+            ExamSeasonPlanner: full width, earns its own section
+        ─────────────────────────────────────────────────────────────── */}
+        <section id="exam-season" style={{ paddingBottom: '52px' }}>
+          <SectionHeading
+            eyebrow="Exam season"
+            title="A few revision suggestions you can borrow, move, or ignore."
+            description="Use this only when you want help deciding what to do next."
+            accent="var(--blue-600)"
+          />
+          <ExamSeasonPlanner hasOsce={hasOsce} hasQuiz={hasQuiz} />
+        </section>
 
-        {/* Search */}
-        <section id="search" className="dash-split">
-          <div className="dash-split-main">
-            <SectionHeader
-              label="Search"
-              title="Find the exact page quickly."
-              body="The quickest route back into revision is often a precise page, not a whole tool."
+        {/* ── 7 · Analytics — only when real data exists ─────────────────
+            OsceSparkline + quiz stats, hidden for new users
+        ─────────────────────────────────────────────────────────────── */}
+        {hasAnalytics && (
+          <section id="analytics" style={{ paddingBottom: '52px' }}>
+            <SectionHeading
+              eyebrow="Analytics"
+              title="A small read on what still needs work."
+              description="Only the bits that help you choose the next revision block."
+              accent="var(--purple-600)"
             />
-            <QuickTopicSearch />
-            <div className="dash-recent-panel">
-              <SectionLabel>Recent pages</SectionLabel>
-              <div style={{ marginTop: '10px' }}>
-                <RecentPagesStrip />
+            <div className="dash-analytics-grid">
+
+              <OsceSparkline />
+
+              {quizStats && (
+                <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '20px' }}>
+                  <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '10px' }}>
+                    Quiz average
+                  </p>
+                  <p style={{ fontFamily: display, fontSize: '3rem', fontStyle: 'italic', lineHeight: 1, color: ink, marginBottom: '10px' }}>
+                    {quizStats.averagePercent}%
+                  </p>
+                  <p style={{ fontFamily: serif, fontSize: '13px', color: mid, fontWeight: 300, lineHeight: 1.75 }}>
+                    Correct across {quizStats.totalAnswered} questions. The rough pass line is 75% — keep weaker areas from dragging that down under pressure.
+                  </p>
+                  {(quizStats.strongestArea || quizStats.weakestArea) && (
+                    <div className="dash-analytics-sub">
+                      {quizStats.strongestArea && (
+                        <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '14px', marginTop: '16px' }}>
+                          <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: muted, marginBottom: '6px' }}>Strongest area</p>
+                          <p style={{ fontFamily: serif, fontSize: '13px', color: bodyColor }}>{quizStats.strongestArea}</p>
+                        </div>
+                      )}
+                      {quizStats.weakestArea && (
+                        <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '14px', marginTop: '16px' }}>
+                          <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: muted, marginBottom: '6px' }}>Most fragile area</p>
+                          <p style={{ fontFamily: serif, fontSize: '13px', color: bodyColor }}>{quizStats.weakestArea}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(quizStats?.weakAreas?.length ?? 0) > 0 && (
+                <div className="dash-analytics-wide" style={{ borderTop: `0.5px solid ${border}`, paddingTop: '20px' }}>
+                  <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '16px' }}>
+                    Weak areas
+                  </p>
+                  <div className="dash-weak-grid">
+                     {quizStats?.weakAreas?.map((item: { area: string; note: string }) => (
+                      <div key={item.area} style={{ borderTop: `0.5px solid ${border}`, paddingTop: '12px' }}>
+                        <p style={{ fontFamily: serif, fontSize: '12px', fontWeight: 400, color: bodyColor, marginBottom: '4px' }}>{item.area}</p>
+                        <p style={{ fontFamily: serif, fontSize: '12px', color: mid, fontWeight: 300, lineHeight: 1.65 }}>{item.note}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── 8 · Saved resources ────────────────────────────────────────
+            SavedFoldersDashboard: full width
+        ─────────────────────────────────────────────────────────────── */}
+        <section id="saved-resources" style={{ paddingBottom: '52px' }}>
+          <SectionHeading
+            eyebrow="Saved resources"
+            title="Saved pages."
+            description="Make folders only if they help. Otherwise this can stay quiet until there are pages you want to keep close."
+          />
+          <SavedFoldersDashboard />
+        </section>
+
+        {/* ── 9 · Signals ────────────────────────────────────────────────
+            CommunityStatsCard + StudyTipCard + closing note
+            Lightest content, naturally last
+        ─────────────────────────────────────────────────────────────── */}
+        <section id="signals" style={{ paddingBottom: '80px' }}>
+          <SectionHeading
+            eyebrow="Study signals"
+            title="A quick read on momentum and patterns."
+            description="Use these as nudges, not as another thing to manage."
+            accent="var(--purple-600)"
+          />
+          <div className="dash-signals-grid">
+            <CommunityStatsCard />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <StudyTipCard />
+              <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '28px' }}>
+                <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '12px' }}>
+                  Use this dashboard well
+                </p>
+                <p style={{ fontFamily: display, fontSize: '1.5rem', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.12, color: ink, marginBottom: '12px' }}>
+                  Keep the next step smaller than your stress.
+                </p>
+                <p style={{ fontFamily: serif, fontSize: '13px', color: mid, fontWeight: 300, lineHeight: 1.8, marginBottom: '18px' }}>
+                  The best version of this page is not the busiest one. Open one guide, run one station, or clear one short question set, then stop there if you need to.
+                </p>
+                <Link
+                  href="/how-to-use"
+                  style={{ fontFamily: serif, fontSize: '13px', color: bodyColor, textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                >
+                  Read the study method →
+                </Link>
               </div>
             </div>
           </div>
-
-          <aside className="dash-split-side">
-            <RevisionWeekPlanner />
-          </aside>
-        </section>
-
-        <div className="dash-divider" />
-
-        {/* Library */}
-        <section id="saved-folders" className="dash-split">
-          <div className="dash-split-main">
-            <SectionHeader
-              label="Library"
-              title="Keep saved material in reach."
-              body="Less like another dashboard module, more like a working archive of pages you actually come back to."
-            />
-            <div className="dash-library-frame">
-              <SavedFoldersDashboard showOverview={false} />
-            </div>
-          </div>
-
-          <aside className="dash-split-side">
-            <div className="dash-rail-card dash-hover-card">
-              <SectionLabel>Working rhythm</SectionLabel>
-              <p className="dash-side-copy">
-                Continue on the left, plan or search on the right, then drop into saved material when you need a familiar route back in.
-              </p>
-              <div className="dash-rail-links" style={{ marginTop: '18px' }}>
-                <Link href="/how-to-use" className="dash-rail-link"><span>Read the study method</span><span aria-hidden="true">→</span></Link>
-                <Link href="/hub" className="dash-rail-link"><span>Browse hub resources</span><span aria-hidden="true">→</span></Link>
-              </div>
-            </div>
-          </aside>
         </section>
 
       </div>
 
       <style>{`
-        .dash-page-stack {
-          display: flex;
-          flex-direction: column;
-          gap: 52px;
-          padding-bottom: 80px;
-        }
-        .dash-divider {
-          height: 0.5px;
-          background: rgba(0,0,0,0.07);
-          margin: 4px 0;
-        }
-        .dash-split {
+        .dash-today-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1.1fr) 300px;
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+          gap: 24px;
+          align-items: start;
+        }
+        .dash-utility-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+          gap: 20px;
+          align-items: stretch;
+        }
+        .dash-utility-card {
+          border: 0.5px solid ${borderMid};
+          background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(250,250,248,0.98) 100%);
+          padding: 20px 22px 24px;
+          min-height: 100%;
+        }
+        .dash-progress-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 24px;
+          align-items: start;
+        }
+        .dash-analytics-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 32px;
           align-items: start;
         }
-        .dash-split-main { min-width: 0; }
-        .dash-split-side {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          min-width: 0;
-          position: sticky;
-          top: 24px;
-        }
-        .dash-hover-card {
-          border: 0.5px solid rgba(0,0,0,0.08);
-          background: #fff;
-          transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
-        }
-        .dash-hover-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 32px rgba(26,24,21,0.05);
-          border-color: rgba(26,24,21,0.14);
-        }
-        .dash-rail-card { padding: 18px 20px; }
-        .dash-rail-links {
-          display: flex;
-          flex-direction: column;
-          margin-top: 10px;
-        }
-        .dash-rail-link {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 11px 0;
-          border-top: 0.5px solid rgba(0,0,0,0.06);
-          text-decoration: none;
-          color: ${ink};
-          font-family: ${serif};
-          font-size: 13px;
-          line-height: 1.5;
-          transition: padding-left 160ms ease;
-        }
-        .dash-rail-link:first-child { border-top: none; padding-top: 4px; }
-        .dash-rail-link:hover { padding-left: 3px; }
-        .dash-today-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-          gap: 16px;
-        }
-        .dash-progress-panel { padding: 20px 22px; }
-        .dash-progress-top {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 12px;
-          margin-bottom: 16px;
-          padding-bottom: 16px;
-          border-bottom: 0.5px solid rgba(0,0,0,0.06);
-        }
-        .dash-panel-title {
-          font-family: ${display};
-          font-size: 1.4rem;
-          line-height: 1.1;
-          color: ${ink};
-          margin-top: 6px;
-        }
-        .dash-panel-note {
-          font-family: ${serif};
-          font-size: 11px;
-          line-height: 1.6;
-          color: #8D7E71;
-          text-align: right;
-          white-space: nowrap;
-        }
-        .dash-progress-columns {
+        .dash-analytics-sub {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 20px;
+          gap: 16px;
         }
-        .dash-side-copy {
-          font-family: ${serif};
-          font-size: 12.5px;
-          line-height: 1.85;
-          color: #5A5750;
-          font-weight: 300;
-          margin-top: 8px;
+        .dash-analytics-wide {
+          grid-column: 1 / -1;
         }
-        .dash-aside-note {
-          margin-top: 14px;
-          padding-top: 12px;
-          border-top: 0.5px solid rgba(0,0,0,0.06);
+        .dash-weak-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 14px 40px;
         }
-        .dash-note-copy {
-          font-family: ${serif};
-          font-size: 12.5px;
-          line-height: 1.75;
-          color: #2C2A27;
-          margin-top: 6px;
+        .dash-signals-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 48px;
+          align-items: start;
         }
-        .dash-reco-card {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          min-height: 220px;
-          padding: 20px 20px 22px;
-          text-decoration: none;
+        .dash-bundle-prompt {
+          grid-template-columns: minmax(0, 1fr) auto;
         }
-        .dash-reco-eyebrow {
-          font-family: ${serif};
-          font-size: 10px;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: ${muted};
+        @media (max-width: 980px) {
+          .dash-progress-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
         }
-        .dash-reco-title {
-          font-family: ${display};
-          font-size: 1.65rem;
-          line-height: 1.06;
-          letter-spacing: -0.01em;
-          color: ${ink};
-          margin-top: 12px;
+        @media (max-width: 860px) {
+          .dash-today-grid,
+          .dash-utility-grid,
+          .dash-progress-grid,
+          .dash-analytics-grid,
+          .dash-signals-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+          .dash-analytics-wide { grid-column: 1; }
+          .dash-weak-grid { grid-template-columns: 1fr; }
+          .dash-signals-grid { gap: 32px; }
+          .dash-bundle-prompt { grid-template-columns: 1fr !important; }
         }
-        .dash-reco-body {
-          font-family: ${serif};
-          font-size: 12.5px;
-          line-height: 1.85;
-          color: #5A5750;
-          font-weight: 300;
-          margin-top: 10px;
-        }
-        .dash-reco-cta {
-          font-family: ${serif};
-          font-size: 13px;
-          color: ${ink};
-          margin-top: 18px;
-          transition: letter-spacing 160ms ease;
-        }
-        .dash-reco-card:hover .dash-reco-cta { letter-spacing: 0.02em; }
-        .dash-recent-panel {
-          margin-top: 20px;
-          padding-top: 16px;
-          border-top: 0.5px solid rgba(0,0,0,0.07);
-        }
-        .dash-library-frame {
-          margin-top: 4px;
-          border: 0.5px solid rgba(0,0,0,0.08);
-          background: #fff;
-          padding: 20px;
-        }
-        @media (max-width: 1040px) {
-          .dash-split { grid-template-columns: 1fr; }
-          .dash-split-side { position: static; }
-          .dash-today-grid { grid-template-columns: 1fr; }
-          .dash-progress-columns { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 680px) {
-          .dash-page-stack { gap: 40px; }
-          .dash-progress-panel,
-          .dash-rail-card,
-          .dash-library-frame { padding: 16px; }
+        @media (max-width: 560px) {
+          .dash-progress-grid { grid-template-columns: 1fr; }
+          .dash-utility-card { padding: 18px 18px 20px; }
         }
       `}</style>
     </DashboardClient>
   );
 }
 
+// ── Stubs — replace with your real data fetching ──────────────────────────────
 async function getUserQuizStats(_userId: string) {
   void _userId;
   return null as null | {
     totalAnswered: number;
     averagePercent: number;
-    weekOnWeekDelta: number;
-    streakDays: number;
-    hoursThisWeek: number;
     strongestArea: string;
     weakestArea: string;
-    topicBreakdown: TopicStrength[];
+    weakAreas: { area: string; note: string }[];
+  };
+}
+
+async function getUserOsceStats(_userId: string) {
+  void _userId;
+  return null as null | {
+    totalRuns: number;
+    averageScore: number;
   };
 }
