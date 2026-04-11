@@ -1354,6 +1354,43 @@ export default function RespiratorySystemPage() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: Respiratory System & Assessment" questions={quizQuestions} />
+
+        {/* Mock exam CTA */}
+        <div style={{
+          marginTop: '48px',
+          padding: '28px 32px',
+          background: 'linear-gradient(135deg, rgba(234,241,250,0.4) 0%, rgba(250,250,248,0.6) 100%)',
+          border: '0.5px solid rgba(24,95,165,0.12)',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '20px',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <div style={{ maxWidth: '520px' }}>
+            <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px', fontWeight: 400, color: '#1A1815', marginBottom: '8px' }}>
+              Test yourself: Respiratory Mock Exam
+            </h2>
+            <p style={{ fontSize: '13px', color: '#5A5750', fontWeight: 300, lineHeight: 1.65, margin: 0 }}>
+              Ready to apply what you have learned? Try a full exam-style mock with clinical scenarios, guided questions, and first-class answer support.
+            </p>
+          </div>
+          <Link
+            href="/hub/mocks/respiratory"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: '#FAFAF8',
+              background: '#1A1815',
+              padding: '10px 20px',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Start a mock &rarr;
+          </Link>
+        </div>
       </div>
     </div>
   );

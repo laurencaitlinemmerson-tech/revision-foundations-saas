@@ -72,6 +72,14 @@ export default function DashboardClient({
         description: 'Guides, glossaries, and saved folders.',
       },
       {
+        href: '/hub/mocks',
+        label: 'Mocks',
+        status: 'Ready',
+        statusColor: 'var(--sage-600)',
+        statusBg: 'var(--sage-50)',
+        description: 'Exam-style scenarios with guided support.',
+      },
+      {
         href: '/osce',
         label: 'OSCE',
         status: hasOsce ? 'Unlocked' : 'Preview',

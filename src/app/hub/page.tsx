@@ -207,6 +207,16 @@ const CSS = `
   border: 0.5px solid rgba(0,0,0,0.1);
 }
 
+.hub-more-grid:has(:nth-child(4)) {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 769px) {
+  .hub-more-grid:has(:nth-child(4)) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .hub-more-item {
   padding: 20px 24px;
   border-right: 0.5px solid rgba(0,0,0,0.1);
@@ -333,9 +343,9 @@ export default function HubPage() {
         <p className="hub-more-label">More ways to revise</p>
         <div className="hub-more-grid">
           {[
+            { href: '/hub/mocks', title: 'Mock Exams', desc: 'Practice real exam-style scenarios with guided support and learn how to write first-class answers.' },
             { href: '/hub/questions', title: 'Q&A Board', desc: 'Ask a question or browse what other students have asked about placements, OSCEs, and exams.' },
             { href: '/hub/glossary', title: 'Nursing Glossary', desc: 'A searchable A–Z of nursing words and abbreviations explained in plain English.' },
-            { href: '/pricing', title: 'Unlock Premium', desc: 'Get access to every locked resource — palliative care, safeguarding, paeds meds, and more.' },
           ].map(item => (
             <Link key={item.href} href={item.href} className="hub-more-item">
               <span className="hub-more-item-title">
