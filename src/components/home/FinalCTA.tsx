@@ -68,12 +68,7 @@ export default function FinalCTA() {
             </Link>
             <DesktopAppButton
               label="Download desktop app"
-              style={{
-                ...secondaryButton,
-                background: infoBg,
-                border: `0.5px solid ${blueLine}`,
-                color: blue,
-              }}
+              style={secondaryButton}
               title="Install The Nurse Lab as a desktop app"
             />
           </div>

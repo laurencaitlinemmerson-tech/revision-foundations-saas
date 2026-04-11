@@ -60,13 +60,13 @@ const CSS = `
   color: #5A5750;
   line-height: 1.7;
   max-width: 560px;
-  margin-bottom: 64px;
+  margin-bottom: 40px;
 }
 
 .hub-divider {
   border: none;
   border-top: 0.5px solid rgba(0,0,0,0.1);
-  margin: 72px 0 84px;
+  margin: 44px 0 84px;
 }
 
 /* Branch grid */

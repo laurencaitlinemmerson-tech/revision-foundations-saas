@@ -41,7 +41,7 @@ export default function DeleteFolderModal({
         <div>
           <div className="mb-4 flex items-center gap-3">
             <div
-              className="h-10 w-10 flex-shrink-0 rounded-full"
+              className="h-10 w-10 flex-shrink-0"
               style={{
                 background: folder?.emoji
                   ? (COLOUR_MAP[folder.emoji] ?? folder.emoji)
@@ -58,7 +58,7 @@ export default function DeleteFolderModal({
           </p>
         </div>
 
-        <div className="rounded-[18px] border border-red-200 bg-red-50 px-5 py-5 text-sm text-red-900">
+        <div className="border border-red-200 bg-red-50 px-5 py-5 text-sm text-red-900">
           <p className="font-medium">
             Delete &apos;{folder?.name}&apos; and {folder?.itemCount ?? 0}{' '}
             {(folder?.itemCount ?? 0) === 1 ? 'saved item' : 'saved items'}?
@@ -67,14 +67,14 @@ export default function DeleteFolderModal({
         </div>
 
         {error ? (
-          <p className="rounded-[16px] bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+          <p className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
         ) : null}
 
         <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-full border border-black/10 px-4 py-2 text-sm text-[var(--charcoal)] transition hover:border-black/16"
+            className="border border-black/10 px-4 py-2 text-sm text-[var(--charcoal)] transition hover:border-black/16"
           >
             Cancel
           </button>
@@ -93,7 +93,7 @@ export default function DeleteFolderModal({
               }
             }}
             disabled={isLoading}
-            className="rounded-full bg-red-700 px-5 py-2 text-sm text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-70"
+            className="bg-red-700 px-5 py-2 text-sm text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isLoading ? 'Deleting...' : 'Delete folder'}
           </button>

@@ -135,12 +135,11 @@ const PDF_CSS = `
     background: #FAFAF8;
     border: 0.5px solid rgba(0,0,0,0.15);
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s, color 0.2s;
   }
   .pdf-download-btn:hover {
     border-color: rgba(0,0,0,0.35);
     color: #1A1815;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
   .pdf-download-btn:disabled {
     opacity: 0.6;

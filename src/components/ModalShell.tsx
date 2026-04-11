@@ -42,7 +42,7 @@ export default function ModalShell({ isOpen, title, onClose, children }: ModalSh
         aria-label="Close modal"
       />
       <div
-        className="relative z-10 w-full max-w-md overflow-hidden rounded-[28px] border border-black/8 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.12)]"
+        className="relative z-10 w-full max-w-md overflow-hidden border border-[rgba(0,0,0,0.1)] bg-white"
         role="dialog"
         aria-modal="true"
         aria-label={title}

@@ -74,7 +74,7 @@ export default function EditFolderModal({
         <div>
           <div className="mb-4 flex items-center gap-3">
             <div
-              className="h-10 w-10 flex-shrink-0 rounded-full"
+              className="h-10 w-10 flex-shrink-0"
               style={{
                 background: COLOUR_OPTIONS.find((c) => c.id === emoji)?.hex ?? '#8BBCAA',
               }}
@@ -96,7 +96,7 @@ export default function EditFolderModal({
             value={name}
             maxLength={50}
             onChange={(event) => setName(event.target.value)}
-            className="w-full rounded-[18px] border border-black/10 bg-[var(--linen-light)] px-4 py-3 text-[var(--espresso)] outline-none transition focus:border-black/20"
+            className="w-full border border-black/10 bg-[var(--linen-light)] px-4 py-3 text-[var(--espresso)] outline-none transition focus:border-black/20"
             placeholder="Name this folder"
           />
         </label>
@@ -109,7 +109,7 @@ export default function EditFolderModal({
                 key={option.id}
                 type="button"
                 onClick={() => setEmoji(option.id)}
-                className="h-8 w-8 rounded-full transition-transform hover:scale-110"
+                className="h-8 w-8 transition-transform hover:scale-105"
                 style={{
                   background: option.hex,
                   outline: emoji === option.id ? `2px solid ${option.hex}` : 'none',
@@ -122,21 +122,21 @@ export default function EditFolderModal({
         </div>
 
         {error ? (
-          <p className="rounded-[16px] bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+          <p className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
         ) : null}
 
         <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-full border border-black/10 px-4 py-2 text-sm text-[var(--charcoal)] transition hover:border-black/16"
+            className="border border-black/10 px-4 py-2 text-sm text-[var(--charcoal)] transition hover:border-black/16"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="rounded-full bg-[var(--espresso)] px-5 py-2 text-sm text-white transition hover:bg-[#3a2010] disabled:cursor-not-allowed disabled:opacity-70"
+            className="bg-[var(--espresso)] px-5 py-2 text-sm text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Saving...' : 'Save changes'}
           </button>

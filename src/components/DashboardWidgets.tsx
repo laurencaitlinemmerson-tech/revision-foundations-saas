@@ -572,7 +572,7 @@ export function FocusAreasCard() {
           <p className="text-sm text-[var(--amber-text)]/80 font-light max-w-[240px] leading-7">
             Take the baseline diagnostic quiz to start tracking exactly where you need to focus.
           </p>
-          <Link href="/quiz" className="mt-6 inline-flex bg-white shadow-sm border border-[var(--amber-text)]/20 text-[var(--amber-text)] px-4 py-2 text-sm font-medium transition-transform hover:scale-105">
+          <Link href="/quiz" className="mt-6 inline-flex bg-white border border-[var(--amber-text)]/20 text-[var(--amber-text)] px-4 py-2 text-sm font-medium transition-transform hover:scale-105">
             Take Baseline Diagnostic →
           </Link>
         </div>

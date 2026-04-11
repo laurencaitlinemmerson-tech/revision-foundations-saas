@@ -29,15 +29,15 @@ export default function BackToTop() {
       aria-label="Back to top"
       className={`
         fixed bottom-6 right-6 z-50
-        w-12 h-12 rounded-full
-        bg-gradient-to-br from-[var(--purple)] to-[var(--lavender-dark)]
-        text-white shadow-lg
+        w-10 h-10
+        bg-[var(--espresso)] border border-[rgba(255,255,255,0.12)]
+        text-white
         flex items-center justify-center
         transition-all duration-300 ease-out
-        hover:scale-110 hover:shadow-xl
-        focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--lavender)]
-        ${isVisible 
-          ? 'opacity-100 translate-y-0 pointer-events-auto' 
+        hover:opacity-80
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--espresso)] focus-visible:ring-offset-2
+        ${isVisible
+          ? 'opacity-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 translate-y-4 pointer-events-none'
         }
       `}

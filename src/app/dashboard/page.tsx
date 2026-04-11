@@ -407,26 +407,68 @@ export default async function DashboardPage() {
   );
 }
 
-// ── Stubs — replace with real data fetching ────────────────────────────────────
-async function getUserQuizStats(_userId: string) {
-  void _userId;
-  return null as null | {
-    totalAnswered: number;
-    averagePercent: number;
-    weekOnWeekDelta: number;
-    streakDays: number;
-    hoursThisWeek: number;
-    strongestArea: string;
-    weakestArea: string;
-    topicBreakdown: { label: string; pct: number; color: string }[];
+// ── Data fetching ──────────────────────────────────────────────────────────────
+const TOPIC_COLORS = ['#8BBCAA', '#D4A574', '#7BA7CC', '#C89BB0', '#D4B896', '#8BBCAA'];
+
+async function getUserQuizStats(userId: string) {
+  const { createServiceClient } = await import('@/lib/supabase');
+  const supabase = createServiceClient();
+
+  const { data, error } = await supabase
+    .from('user_progress')
+    .select('topic, scores, streak_count')
+    .eq('clerk_user_id', userId)
+    .eq('product', 'quiz');
+
+  if (error || !data || data.length === 0) return null;
+
+  const allScores = data.flatMap((row) => row.scores as number[]);
+  if (allScores.length === 0) return null;
+
+  const totalAnswered  = allScores.length;
+  const averagePercent = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
+  const streakDays     = Math.max(...data.map((row) => (row.streak_count as number) ?? 0));
+
+  const topicBreakdown = data
+    .filter((row) => (row.scores as number[]).length > 0)
+    .map((row, i) => {
+      const scores = row.scores as number[];
+      const pct = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      return { label: row.topic as string, pct, color: TOPIC_COLORS[i % TOPIC_COLORS.length] };
+    })
+    .sort((a, b) => a.pct - b.pct)
+    .slice(0, 4);
+
+  return {
+    totalAnswered,
+    averagePercent,
+    weekOnWeekDelta: 0,
+    streakDays,
+    hoursThisWeek: 0,
+    strongestArea: topicBreakdown[topicBreakdown.length - 1]?.label ?? '',
+    weakestArea:   topicBreakdown[0]?.label ?? '',
+    topicBreakdown,
   };
 }
 
-async function getUserOsceStats(_userId: string) {
-  void _userId;
-  return null as null | {
-    totalRuns: number;
-    averageScore: number;
-    monthOnMonthDelta: number;
+async function getUserOsceStats(userId: string) {
+  const { createServiceClient } = await import('@/lib/supabase');
+  const supabase = createServiceClient();
+
+  const { data, error } = await supabase
+    .from('user_progress')
+    .select('scores')
+    .eq('clerk_user_id', userId)
+    .eq('product', 'osce');
+
+  if (error || !data || data.length === 0) return null;
+
+  const allScores = data.flatMap((row) => row.scores as number[]);
+  if (allScores.length === 0) return null;
+
+  return {
+    totalRuns:         allScores.length,
+    averageScore:      Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length),
+    monthOnMonthDelta: 0,
   };
 }
