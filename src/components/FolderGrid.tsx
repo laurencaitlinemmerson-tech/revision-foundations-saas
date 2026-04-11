@@ -14,11 +14,11 @@ const COLOUR_MAP: Record<string, string> = {
 };
 
 function folderColour(colour: string): string {
-  // Handles both the new id-based values and any legacy hex strings
   return COLOUR_MAP[colour] ?? colour ?? '#8BBCAA';
 }
 
 interface FolderGridProps {
+  folders: Folder[];
   folderPreviews?: Map<number, { latestSavedAt: string; latestTitle: string; previewItems: Array<{ title: string; type: string }> }>;
   loading?: boolean;
   error?: string | null;
