@@ -45,7 +45,7 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
     }
   }
 
-  async function handleCreateFolder(input: { name: string; colour: string }) {
+  async function handleCreateFolder(input: { name: string; emoji: string }) {
     try {
       const folder = await createFolder(input);
       showToast(`Created ${folder.name}`, 'success');
@@ -55,7 +55,7 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
     }
   }
 
-  async function handleUpdateFolder(input: { name: string; colour: string }) {
+  async function handleUpdateFolder(input: { name: string; emoji: string }) {
     if (!editFolder) return;
     try {
       await updateFolder({ folderId: editFolder.id, ...input });

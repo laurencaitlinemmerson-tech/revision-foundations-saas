@@ -46,7 +46,7 @@ export default function FolderView({
   onBack,
   onRemove,
 }: FolderViewProps) {
-  const hex = folderColour(folder.colour);
+  const hex = folderColour(folder.emoji);
 
   if (loading) {
     return (

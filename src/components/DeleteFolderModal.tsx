@@ -43,8 +43,8 @@ export default function DeleteFolderModal({
             <div
               className="h-10 w-10 flex-shrink-0 rounded-full"
               style={{
-                background: folder?.colour
-                  ? (COLOUR_MAP[folder.colour] ?? folder.colour)
+                background: folder?.emoji
+                  ? (COLOUR_MAP[folder.emoji] ?? folder.emoji)
                   : '#e5e7eb',
               }}
             />

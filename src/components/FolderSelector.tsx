@@ -80,7 +80,7 @@ export default function FolderSelector({
               >
                 <div
                   className="h-8 w-8 flex-shrink-0 rounded-full"
-                  style={{ background: folderColour(folder.colour) }}
+                  style={{ background: folderColour(folder.emoji) }}
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-[var(--espresso)]">{folder.name}</p>

@@ -21,7 +21,7 @@ export interface HubItemSummary {
 export interface Folder {
   id: number;
   name: string;
-  colour: string;
+  emoji: string;
   itemCount: number;
   createdAt: string;
   updatedAt: string;
@@ -31,7 +31,7 @@ export interface Folder {
 export interface BookmarkFolderSummary {
   id: number;
   name: string;
-  colour: string;
+  emoji: string;
 }
 
 export interface BookmarkItem {
@@ -54,7 +54,7 @@ export interface BookmarkListResponse {
 export interface FolderPayload {
   id: number;
   name: string;
-  colour: string;
+  emoji: string;
   created_at: string;
   updated_at: string;
 }

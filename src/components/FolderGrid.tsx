@@ -117,7 +117,7 @@ export default function FolderGrid({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {folders.map((folder) => {
           const preview = folderPreviews?.get(folder.id);
-          const hex = folderColour(folder.colour);
+          const hex = folderColour(folder.emoji);
 
           return (
             <div

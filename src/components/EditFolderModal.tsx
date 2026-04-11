@@ -18,7 +18,7 @@ interface EditFolderModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   onClose: () => void;
-  onSave: (input: { name: string; colour: string }) => Promise<void>;
+  onSave: (input: { name: string; emoji: string }) => Promise<void>;
 }
 
 export default function EditFolderModal({
@@ -30,13 +30,12 @@ export default function EditFolderModal({
 }: EditFolderModalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [name, setName] = useState(folder?.name ?? '');
-  const [colour, setColour] = useState(folder?.colour ?? 'sage');
+  const [emoji, setEmoji] = useState(folder?.emoji ?? 'sage');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
-    setName(folder?.name ?? '');
-    setColour(folder?.colour ?? 'sage');
+    setEmoji(folder?.emoji ?? 'sage');
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(frame);
   }, [isOpen, folder]);
@@ -62,7 +61,7 @@ export default function EditFolderModal({
 
     try {
       setError(null);
-      await onSave({ name: trimmedName, colour });
+      await onSave({ name: trimmedName, emoji });
       handleClose();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : 'Unable to update folder.');
@@ -77,7 +76,7 @@ export default function EditFolderModal({
             <div
               className="h-10 w-10 flex-shrink-0 rounded-full"
               style={{
-                background: COLOUR_OPTIONS.find((c) => c.id === colour)?.hex ?? '#8BBCAA',
+                background: COLOUR_OPTIONS.find((c) => c.id === emoji)?.hex ?? '#8BBCAA',
               }}
             />
             <div>
@@ -109,11 +108,11 @@ export default function EditFolderModal({
               <button
                 key={option.id}
                 type="button"
-                onClick={() => setColour(option.id)}
+                onClick={() => setEmoji(option.id)}
                 className="h-8 w-8 rounded-full transition-transform hover:scale-110"
                 style={{
                   background: option.hex,
-                  outline: colour === option.id ? `2px solid ${option.hex}` : 'none',
+                  outline: emoji === option.id ? `2px solid ${option.hex}` : 'none',
                   outlineOffset: '2px',
                 }}
                 aria-label={`Choose ${option.id}`}

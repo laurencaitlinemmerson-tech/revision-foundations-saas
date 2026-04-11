@@ -16,7 +16,7 @@ interface CreateFolderModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   onClose: () => void;
-  onCreate: (input: { name: string; colour: string }) => Promise<void>;
+  onCreate: (input: { name: string; emoji: string }) => Promise<void>;
 }
 
 export default function CreateFolderModal({
@@ -27,7 +27,7 @@ export default function CreateFolderModal({
 }: CreateFolderModalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [name, setName] = useState('');
-  const [colour, setColour] = useState('sage');
+  const [emoji, setEmoji] = useState('sage');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function CreateFolderModal({
 
   function handleClose() {
     setName('');
-    setColour('sage');
+    setEmoji('sage');
     setError(null);
     onClose();
   }
@@ -61,7 +61,7 @@ export default function CreateFolderModal({
 
     try {
       setError(null);
-      await onCreate({ name: trimmedName, colour });
+      await onCreate({ name: trimmedName, emoji });
       handleClose();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : 'Unable to create folder.');
@@ -76,7 +76,7 @@ export default function CreateFolderModal({
             <div
               className="h-10 w-10 rounded-full"
               style={{
-                background: COLOUR_OPTIONS.find((c) => c.id === colour)?.hex,
+                background: COLOUR_OPTIONS.find((c) => c.id === emoji)?.hex,
               }}
             />
             <div>
@@ -108,11 +108,11 @@ export default function CreateFolderModal({
               <button
                 key={option.id}
                 type="button"
-                onClick={() => setColour(option.id)}
+                onClick={() => setEmoji(option.id)}
                 className="h-8 w-8 rounded-full transition-transform hover:scale-110"
                 style={{
                   background: option.hex,
-                  outline: colour === option.id ? `2px solid ${option.hex}` : 'none',
+                  outline: emoji === option.id ? `2px solid ${option.hex}` : 'none',
                   outlineOffset: '2px',
                 }}
                 aria-label={`Choose ${option.id}`}
