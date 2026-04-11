@@ -151,7 +151,9 @@ export default function DashboardClient({
                     className="dash-primary-link"
                     style={{
                       fontFamily: serif, fontSize: '13px', color: '#FAFAF8',
-                      background: ink, padding: '11px 20px', textDecoration: 'none',
+                      background: 'linear-gradient(135deg, #2C2A27 0%, #4A3728 100%)',
+                      padding: '12px 24px', textDecoration: 'none',
+                      boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
                     }}
                   >
                     Open the hub
@@ -215,28 +217,28 @@ export default function DashboardClient({
           overflow: hidden;
           border-bottom: 0.5px solid ${borderMid};
           background:
-            linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(247,244,239,0.98) 100%);
+            linear-gradient(135deg, rgba(228,242,236,0.3) 0%, rgba(255,255,255,0.92) 35%, rgba(234,241,250,0.25) 70%, rgba(250,238,218,0.2) 100%);
         }
 
         .dash-hero-shell::before {
           content: '';
           position: absolute;
-          width: 380px;
-          height: 380px;
-          left: -120px;
-          bottom: -160px;
-          background: radial-gradient(circle, rgba(184,204,186,0.35) 0%, rgba(184,204,186,0) 70%);
+          width: 480px;
+          height: 480px;
+          left: -150px;
+          bottom: -200px;
+          background: radial-gradient(circle, rgba(139,188,170,0.25) 0%, rgba(139,188,170,0) 70%);
           pointer-events: none;
         }
 
         .dash-hero-shell::after {
           content: '';
           position: absolute;
-          width: 360px;
-          height: 360px;
-          right: -100px;
-          top: -140px;
-          background: radial-gradient(circle, rgba(230,241,251,0.4) 0%, rgba(230,241,251,0) 70%);
+          width: 440px;
+          height: 440px;
+          right: -120px;
+          top: -160px;
+          background: radial-gradient(circle, rgba(200,155,176,0.18) 0%, rgba(200,155,176,0) 70%);
           pointer-events: none;
         }
 
@@ -251,8 +253,8 @@ export default function DashboardClient({
           position: relative;
           z-index: 1;
           display: grid;
-          grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
-          gap: 40px;
+          grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+          gap: 56px;
           align-items: start;
         }
 
@@ -273,10 +275,11 @@ export default function DashboardClient({
         .dash-hero-panel {
           position: relative;
           z-index: 1;
-          border: 0.5px solid rgba(0,0,0,0.08);
-          background: rgba(255,255,255,0.85);
-          backdrop-filter: blur(12px);
-          padding: 20px;
+          border: 0.5px solid rgba(0,0,0,0.06);
+          background: rgba(255,255,255,0.88);
+          backdrop-filter: blur(16px);
+          padding: 24px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.04);
         }
 
         .dash-access-grid {
@@ -285,16 +288,23 @@ export default function DashboardClient({
         }
 
         .dash-access-card {
-          padding: 12px 14px;
+          padding: 14px 16px;
           text-decoration: none;
           border: 0.5px solid rgba(0,0,0,0.06);
           background: rgba(250,250,248,0.92);
-          transition: border-color 150ms ease, background 150ms ease;
+          transition: all 200ms ease;
+          border-left: 3px solid transparent;
         }
 
+        .dash-access-card:nth-child(1) { border-left-color: #8BBCAA; }
+        .dash-access-card:nth-child(2) { border-left-color: #D4A574; }
+        .dash-access-card:nth-child(3) { border-left-color: #7BA7CC; }
+        .dash-access-card:nth-child(4) { border-left-color: #C89BB0; }
+
         .dash-access-card:hover {
-          border-color: rgba(0,0,0,0.14);
-          background: rgba(255,255,255,0.98);
+          border-color: rgba(0,0,0,0.12);
+          background: rgba(255,255,255,1);
+          transform: translateX(2px);
         }
 
         .dash-access-row {

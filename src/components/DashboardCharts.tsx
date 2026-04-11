@@ -355,9 +355,10 @@ export function StudyBreakdownChart() {
       initial="hidden"
       animate={isInView ? 'visible' : 'hidden'}
       style={{
-        padding: '24px',
-        background: 'white',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        padding: '28px',
+        background: 'linear-gradient(135deg, rgba(212,165,116,0.06) 0%, rgba(255,255,255,0.95) 100%)',
+        border: '0.5px solid rgba(212,165,116,0.15)',
+        borderTop: '3px solid #D4A574',
       }}
     >
       <p style={{
@@ -429,9 +430,10 @@ export function WeeklyActivityChart() {
       initial="hidden"
       animate={isInView ? 'visible' : 'hidden'}
       style={{
-        padding: '24px',
-        background: 'white',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        padding: '28px',
+        background: 'linear-gradient(135deg, rgba(139,188,170,0.06) 0%, rgba(255,255,255,0.95) 100%)',
+        border: '0.5px solid rgba(139,188,170,0.15)',
+        borderTop: '3px solid #8BBCAA',
       }}
     >
       <div style={{
@@ -503,9 +505,10 @@ export function TopicStrengthChart() {
       initial="hidden"
       animate={isInView ? 'visible' : 'hidden'}
       style={{
-        padding: '24px',
-        background: 'white',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        padding: '28px',
+        background: 'linear-gradient(135deg, rgba(123,167,204,0.06) 0%, rgba(255,255,255,0.95) 100%)',
+        border: '0.5px solid rgba(123,167,204,0.15)',
+        borderTop: '3px solid #7BA7CC',
       }}
     >
       <p style={{
@@ -583,9 +586,10 @@ export function MockExamProgressChart() {
       initial="hidden"
       animate={isInView ? 'visible' : 'hidden'}
       style={{
-        padding: '24px',
-        background: 'white',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        padding: '28px',
+        background: 'linear-gradient(135deg, rgba(200,155,176,0.06) 0%, rgba(255,255,255,0.95) 100%)',
+        border: '0.5px solid rgba(200,155,176,0.15)',
+        borderTop: '3px solid #C89BB0',
       }}
     >
       <p style={{

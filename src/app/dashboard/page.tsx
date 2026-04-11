@@ -45,14 +45,26 @@ const border    = 'rgba(0,0,0,0.08)';
 const borderMid = 'rgba(0,0,0,0.10)';
 
 // ── Lightweight section divider ───────────────────────────────────────────────
-function SectionDivider({ label, id }: { label: string; id?: string }) {
+function SectionDivider({ label, id, accent }: { label: string; id?: string; accent?: string }) {
   return (
     <div id={id} style={{
       borderTop: `0.5px solid ${border}`,
-      paddingTop: '10px',
-      marginBottom: '24px',
-      marginTop: '8px',
+      paddingTop: '12px',
+      marginBottom: '28px',
+      marginTop: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
     }}>
+      {accent && (
+        <span style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          background: accent,
+          flexShrink: 0,
+        }} />
+      )}
       <p style={{
         fontFamily: serif,
         fontSize: '10px',
@@ -151,11 +163,11 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '56px' }}>
 
         {/* ━━ 1 · UP NEXT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Up next" id="up-next" />
+          <SectionDivider label="Up next" id="up-next" accent="#8BBCAA" />
 
           <div style={{ marginBottom: '16px' }}>
             <WhatToDoToday />
@@ -175,7 +187,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 2 · PRACTICE & PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Practice & progress" id="progress-block" />
+          <SectionDivider label="Practice & progress" id="progress-block" accent="#D4A574" />
 
           <div className="dash-progress-grid">
             <StudyStreakCard />
@@ -236,7 +248,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 2b · INSIGHTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Insights" id="insights" />
+          <SectionDivider label="Insights" id="insights" accent="#C89BB0" />
           <div className="dash-charts-grid">
             <TopicStrengthChart />
             <MockExamProgressChart />
@@ -245,7 +257,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 3 · YOUR RESOURCES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Your resources" id="saved-resources" />
+          <SectionDivider label="Your resources" id="saved-resources" accent="#7BA7CC" />
 
           <div className="dash-resources-grid">
             <QuickTopicSearch />
@@ -267,7 +279,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 4 · REVISION PLANNING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Revision planning" id="exam-season" />
+          <SectionDivider label="Revision planning" id="exam-season" accent="#D4B896" />
 
           <ExamSeasonPlanner hasOsce={hasOsce} hasQuiz={hasQuiz} />
 
@@ -304,35 +316,35 @@ export default async function DashboardPage() {
       <style>{`
         .dash-upnext-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-          gap: 16px;
+          grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+          gap: 20px;
           align-items: start;
         }
         .dash-progress-grid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 16px;
+          gap: 20px;
           align-items: start;
         }
         .dash-analytics-row {
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          gap: 24px;
+          gap: 28px;
           align-items: start;
-          padding: 20px;
+          padding: 24px;
           border: 0.5px solid ${border};
           background: rgba(255,255,255,0.6);
         }
         .dash-resources-grid {
           display: grid;
           grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
-          gap: 20px;
+          gap: 24px;
           align-items: start;
         }
         .dash-closing-grid {
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          gap: 24px;
+          gap: 28px;
           align-items: start;
         }
         @media (max-width: 980px) {
