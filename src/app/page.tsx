@@ -9,7 +9,7 @@ import WhatsIncluded from '@/components/home/WhatsIncluded';
 import AccessPaths from '@/components/home/AccessPaths';
 import SamplePreviews from '@/components/home/SamplePreviews';
 import StartHereDiagnostic from '@/components/home/StartHereDiagnostic';
-import StudyJourneyTimeline from '@/components/home/StudyJourneyTimeline';
+import NurseLabJourney from '@/components/home/NurseLabJourney';
 import BundleCTA from '@/components/home/BundleCTA';
 import HubGrid from '@/components/home/HubGrid';
 import WhySection from '@/components/home/WhySection';
@@ -23,7 +23,7 @@ export default function HomePage() {
       <Navbar />
       <HeroSection />
       <StartHereDiagnostic />
-      <StudyJourneyTimeline />
+      <NurseLabJourney />
       <Testimonials compact />
       <ToolsShowcase />
       <WhatsIncluded />

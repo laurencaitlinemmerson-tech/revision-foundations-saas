@@ -1,343 +1,388 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  serif, display, ink, inkMid, inkLight, cream, border, sectionLabelStyle, wrap,
+  serif,
+  display,
+  ink,
+  inkMid,
+  inkLight,
+  cream,
+  border,
+  sectionLabelStyle,
+  greenBg,
+  tealBg,
+  blueBg,
+  coralBg,
 } from './styles';
 
-// ── Stage data ─────────────────────────────────────────────────────────────────
 const STAGES = [
   {
-    num: '01',
+    index: '01',
     label: 'Start here',
-    accent: '#8BBCAA',
+    tags: ['Free', 'Hub'],
+    tone: '#C9A227',
+    toneBg: '#F7EDD0',
     heading: 'Start where your head is at.',
-    body: "You don't need a plan. You just need one useful next step. Open the hub, pick a topic that feels relevant, and spend ten minutes with it. That's enough to start.",
+    body: 'Open one practical page, not ten. A short useful block is usually enough to get moving again when revision has started to feel noisy.',
     actions: [
-      { label: 'Open the hub',          href: '/hub/childrens',                    primary: true  },
-      { label: 'Browse free resources', href: '/hub',                              primary: false },
+      { label: 'Open the hub', href: '/hub/childrens', primary: true },
+      { label: 'Browse free resources', href: '/hub', primary: false },
     ],
   },
   {
-    num: '02',
+    index: '02',
     label: 'Build the basics',
-    accent: '#D4A574',
+    tags: ['Guides', 'Quiz'],
+    tone: '#8E9CB1',
+    toneBg: blueBg,
     heading: 'Work through the core guides.',
-    body: 'Drug calculations, vital signs, A–E assessment, pharmacology. The clinical concepts that come up on placement, in exams, and in OSCEs. Built around how nursing students are actually assessed.',
+    body: 'Drug calculations, A–E assessment, observations, pharmacology, and the pieces that keep turning up across lectures, exams, and placement.',
     actions: [
-      { label: 'Browse core guides', href: '/hub',   primary: true  },
-      { label: 'Try quiz preview',   href: '/quiz',  primary: false },
+      { label: 'Browse core guides', href: '/hub', primary: true },
+      { label: 'Try quiz preview', href: '/quiz', primary: false },
     ],
   },
   {
-    num: '03',
-    label: 'Prepare for placement',
-    accent: '#C89BB0',
+    index: '03',
+    label: 'Placement',
+    tags: ['Placement', 'Refreshers'],
+    tone: '#7D998E',
+    toneBg: greenBg,
     heading: 'Go into your next shift feeling oriented.',
-    body: 'Observations, escalation, SBAR handover, documentation. A calm refresher on the situations that catch students off guard — before the shift starts, not during it.',
+    body: 'Refresh observations, escalation, documentation, and communication before placement days instead of trying to remember everything in the moment.',
     actions: [
-      { label: 'Placement survival guide', href: '/hub/resources/placement-survival', primary: true  },
-      { label: 'Open the hub',             href: '/hub/childrens',                    primary: false },
+      { label: 'Placement survival guide', href: '/hub/resources/placement-survival', primary: true },
+      { label: 'Open the children’s hub', href: '/hub/childrens', primary: false },
     ],
   },
   {
-    num: '04',
-    label: 'Practise under pressure',
-    accent: '#7BA7CC',
-    heading: 'Run OSCE stations and timed recall.',
-    body: '50+ paediatric stations with checklists, timed mode, and spoken structure. Active recall across 17 quiz topics. The kind of repetition that makes the real thing feel familiar.',
+    index: '04',
+    label: 'Practise',
+    tags: ['OSCE', 'Timed'],
+    tone: '#8AA9C3',
+    toneBg: tealBg,
+    heading: 'Practise under a little pressure.',
+    body: 'Once the basics are steadier, move into recall and repetition with short quiz blocks and structured OSCE runs that make the real thing feel less alien.',
     actions: [
-      { label: 'Start OSCE preview', href: '/osce',  primary: true  },
-      { label: 'Try quiz preview',   href: '/quiz',  primary: false },
+      { label: 'Start OSCE preview', href: '/osce', primary: true },
+      { label: 'Try quiz preview', href: '/quiz', primary: false },
     ],
   },
   {
-    num: '05',
-    label: 'Walk in calmer',
-    accent: '#D4B896',
-    heading: 'Exams, OSCEs, placement — with less noise.',
-    body: "You'll still feel the nerves. But there's a difference between nerves and unpreparedness. One payment. No subscription. Start free and unlock when you're ready.",
+    index: '05',
+    label: 'Ready',
+    tags: ['Bundle', 'Lifetime'],
+    tone: '#C7B39B',
+    toneBg: coralBg,
+    heading: 'Walk in calmer.',
+    body: 'Still nervous, probably. But clearer on the essentials, steadier in your wording, and less likely to feel completely thrown when it matters.',
     actions: [
-      { label: 'See pricing',   href: '/pricing',      primary: true  },
-      { label: 'Open the hub', href: '/hub/childrens', primary: false },
+      { label: 'See pricing', href: '/pricing', primary: true },
+      { label: 'Start free first', href: '/hub/childrens', primary: false },
     ],
   },
 ] as const;
 
-// ── Progress rail ──────────────────────────────────────────────────────────────
-function ProgressRail({ activeIndex }: { activeIndex: number }) {
-  return (
-    <div
-      style={{
-        position: 'sticky',
-        top: 96,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        paddingTop: 28,
-      }}
-    >
-      {STAGES.map((stage, i) => {
-        const isActive  = i === activeIndex;
-        const isPast    = i < activeIndex;
-        return (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {/* Dot */}
-            <div
-              style={{
-                width:        isActive ? 8  : 6,
-                height:       isActive ? 8  : 6,
-                borderRadius: '50%',
-                background:   isActive
-                  ? stage.accent
-                  : isPast
-                    ? 'rgba(0,0,0,0.22)'
-                    : 'rgba(0,0,0,0.1)',
-                transition: 'all 0.35s ease',
-                flexShrink: 0,
-              }}
-            />
-            {/* Connector */}
-            {i < STAGES.length - 1 && (
-              <div
-                style={{
-                  width:      '0.5px',
-                  height:     52,
-                  background: isPast ? 'rgba(0,0,0,0.16)' : border,
-                  transition: 'background 0.35s ease',
-                  flexShrink: 0,
-                }}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Single stage panel ─────────────────────────────────────────────────────────
-function StagePanel({ stage }: { stage: (typeof STAGES)[number] }) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.12 },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        padding:         '40px 0 40px 24px',
-        borderBottom:    `0.5px solid ${border}`,
-        borderLeft:      `2px solid ${stage.accent}`,
-        opacity:         visible ? 1 : 0,
-        transform:       visible ? 'none' : 'translateY(12px)',
-        transition:      'opacity 0.55s ease, transform 0.55s ease',
-      }}
-    >
-      {/* Stage meta */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <span style={{
-          fontFamily:     serif,
-          fontSize:       9,
-          fontWeight:     500,
-          letterSpacing:  '0.22em',
-          textTransform:  'uppercase',
-          color:          inkLight,
-        }}>
-          {stage.num}
-        </span>
-        <div style={{ width: '0.5px', height: 10, background: 'rgba(0,0,0,0.1)' }} />
-        <span style={{
-          fontFamily:    serif,
-          fontSize:      9,
-          fontWeight:    500,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color:         inkLight,
-        }}>
-          {stage.label}
-        </span>
-      </div>
-
-      {/* Heading */}
-      <h3 style={{
-        fontFamily:  display,
-        fontSize:    'clamp(1.35rem, 2.8vw, 1.85rem)',
-        fontWeight:  400,
-        fontStyle:   'italic',
-        lineHeight:  1.2,
-        color:       ink,
-        margin:      '0 0 14px',
-      }}>
-        {stage.heading}
-      </h3>
-
-      {/* Body */}
-      <p style={{
-        fontFamily:  serif,
-        fontSize:    14,
-        fontWeight:  300,
-        color:       inkMid,
-        lineHeight:  1.9,
-        margin:      '0 0 24px',
-        maxWidth:    440,
-      }}>
-        {stage.body}
-      </p>
-
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-        {stage.actions.map((action, ai) =>
-          action.primary ? (
-            <Link key={ai} href={action.href} className="nlj-primary-link">
-              {action.label} →
-            </Link>
-          ) : (
-            <Link key={ai} href={action.href} className="nlj-secondary-link">
-              {action.label}
-            </Link>
-          ),
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────────────────
 export default function NurseLabJourney() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const stageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const obs = new IntersectionObserver(
+    const visible = new Set<number>();
+
+    const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting && e.intersectionRatio >= 0.25) {
-            setActiveIndex(parseInt((e.target as HTMLElement).dataset.i ?? '0'));
-          }
+        entries.forEach((entry) => {
+          const index = Number((entry.target as HTMLElement).dataset.index ?? '0');
+          if (entry.isIntersecting) visible.add(index);
+          else visible.delete(index);
         });
+
+        if (visible.size > 0) {
+          setActiveIndex(Math.min(...visible));
+        }
       },
-      { threshold: 0.25 },
+      { rootMargin: '-12% 0px -62% 0px', threshold: 0 },
     );
-    panelRefs.current.forEach((p) => p && obs.observe(p));
-    return () => obs.disconnect();
+
+    stageRefs.current.forEach((element) => {
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <section style={{ background: cream, color: ink }}>
-
-      {/* ── Header ── */}
-      <div style={{
-        padding:      '72px 28px 56px',
-        maxWidth:     680,
-        margin:       '0 auto',
-        borderBottom: `0.5px solid ${border}`,
-      }}>
-        <p style={sectionLabelStyle}>Your revision journey</p>
-        <h2 style={{
-          fontFamily:  display,
-          fontSize:    'clamp(1.9rem, 4vw, 2.6rem)',
-          fontWeight:  400,
-          fontStyle:   'italic',
-          lineHeight:  1.18,
-          color:       ink,
-          margin:      '0 0 18px',
-        }}>
-          From overwhelmed to ready —<br />one step at a time.
-        </h2>
-        <p style={{
-          fontFamily:  serif,
-          fontSize:    15,
-          fontWeight:  300,
-          color:       inkMid,
-          lineHeight:  1.85,
-          maxWidth:    460,
-          margin:      0,
-        }}>
-          Wherever you are in your training, there's a useful next step. Pick the one that matches where you are right now.
-        </p>
-      </div>
-
-      {/* ── Two-column grid: rail + panels ── */}
-      <div style={{
-        maxWidth:              680,
-        margin:                '0 auto',
-        padding:               '0 28px',
-        display:               'grid',
-        gridTemplateColumns:   '20px 1fr',
-        gap:                   '0 40px',
-        alignItems:            'start',
-      }}>
-        <ProgressRail activeIndex={activeIndex} />
-        <div>
-          {STAGES.map((stage, i) => (
-            <div
-              key={i}
-              ref={(el) => { panelRefs.current[i] = el; }}
-              data-i={String(i)}
-            >
-              <StagePanel stage={stage} />
-            </div>
-          ))}
+    <section style={{ background: cream, borderTop: `0.5px solid ${border}` }}>
+      <div
+        style={{
+          maxWidth: '860px',
+          margin: '0 auto',
+          padding: '84px 28px 82px',
+        }}
+      >
+        <div style={{ maxWidth: '620px', marginBottom: '40px' }}>
+          <p style={sectionLabelStyle}>How it fits together</p>
+          <h2
+            style={{
+              fontFamily: display,
+              fontSize: 'clamp(2.1rem, 4.2vw, 3.35rem)',
+              fontWeight: 400,
+              lineHeight: 1.06,
+              color: ink,
+              margin: '0 0 14px',
+              maxWidth: '12ch',
+            }}
+          >
+            A calmer path through exams, OSCEs, and placement.
+          </h2>
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '15px',
+              lineHeight: 1.85,
+              fontWeight: 300,
+              color: inkMid,
+              margin: 0,
+              maxWidth: '42ch',
+            }}
+          >
+            Not a perfect system. Just a clearer order for what to open first, what to practise next, and where the tools start to help.
+          </p>
         </div>
-      </div>
 
-      {/* ── Coda ── */}
-      <div style={{
-        maxWidth:   680,
-        margin:     '0 auto',
-        padding:    '48px 28px 72px',
-        borderTop:  `0.5px solid ${border}`,
-      }}>
-        <p style={{
-          fontFamily:  display,
-          fontSize:    '1.05rem',
-          fontStyle:   'italic',
-          fontWeight:  400,
-          color:       inkMid,
-          lineHeight:  1.75,
-          marginBottom: 24,
-          maxWidth:    420,
-        }}>
-          Start free in the hub, or unlock the full bundle when you want the OSCE tool, quiz, and revision library together.
-        </p>
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Link href="/hub/childrens" className="nlj-primary-link">Start free →</Link>
-          <Link href="/pricing"       className="nlj-secondary-link">See pricing</Link>
+        <div className="nlj-list">
+          {STAGES.map((stage, index) => {
+            const isActive = index === activeIndex;
+
+            return (
+              <div
+                key={stage.index}
+                ref={(element) => {
+                  stageRefs.current[index] = element;
+                }}
+                data-index={String(index)}
+                className="nlj-row"
+                style={{
+                  opacity: isActive ? 1 : 0.28,
+                  transition: 'opacity 0.45s ease',
+                }}
+              >
+                <div className="nlj-rail-col">
+                  <div
+                    style={{
+                      width: isActive ? '18px' : '14px',
+                      height: isActive ? '18px' : '14px',
+                      borderRadius: '999px',
+                      background: isActive ? stage.tone : '#F5F3F0',
+                      border: `0.5px solid ${isActive ? stage.tone : 'rgba(26,24,21,0.12)'}`,
+                      transition: 'all 0.35s ease',
+                      position: 'relative',
+                      zIndex: 1,
+                    }}
+                  />
+                </div>
+
+                <div className="nlj-content-col">
+                  <div className="nlj-meta-line">
+                    <span className="nlj-time">{stage.index}:00</span>
+                    <span className="nlj-tag-row">
+                      {stage.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="nlj-tag"
+                          style={{
+                            color: isActive ? stage.tone : '#C9C1B7',
+                            background: isActive ? stage.toneBg : '#FBF8F3',
+                            borderColor: isActive ? 'transparent' : 'rgba(26,24,21,0.06)',
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+
+                  <p
+                    style={{
+                      fontFamily: serif,
+                      fontSize: '11px',
+                      letterSpacing: '0.16em',
+                      textTransform: 'uppercase',
+                      color: isActive ? stage.tone : inkLight,
+                      margin: '0 0 10px',
+                    }}
+                  >
+                    {stage.label}
+                  </p>
+
+                  <h3
+                    style={{
+                      fontFamily: display,
+                      fontSize: 'clamp(1.55rem, 2.6vw, 2.15rem)',
+                      lineHeight: 1.14,
+                      fontWeight: 400,
+                      color: ink,
+                      margin: '0 0 12px',
+                    }}
+                  >
+                    {stage.heading}
+                  </h3>
+
+                  <p
+                    style={{
+                      fontFamily: serif,
+                      fontSize: '14px',
+                      lineHeight: 1.85,
+                      fontWeight: 300,
+                      color: inkMid,
+                      margin: '0 0 18px',
+                      maxWidth: '44ch',
+                    }}
+                  >
+                    {stage.body}
+                  </p>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '18px',
+                      flexWrap: 'wrap',
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? 'translateY(0)' : 'translateY(4px)',
+                      transition: 'opacity 0.35s ease, transform 0.35s ease',
+                    }}
+                  >
+                    {stage.actions.map((action) =>
+                      action.primary ? (
+                        <Link key={action.label} href={action.href} className="nlj-primary-link">
+                          {action.label} →
+                        </Link>
+                      ) : (
+                        <Link key={action.label} href={action.href} className="nlj-secondary-link">
+                          {action.label}
+                        </Link>
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       <style>{`
-        .nlj-primary-link {
-          font-family:     ${serif};
-          font-size:       12px;
-          letter-spacing:  0.06em;
-          color:           ${ink};
-          text-decoration: none;
-          border-bottom:   0.5px solid ${ink};
-          padding-bottom:  2px;
-          transition:      opacity 0.15s ease;
+        .nlj-list {
+          position: relative;
         }
-        .nlj-primary-link:hover { opacity: 0.6; }
+
+        .nlj-list::before {
+          content: '';
+          position: absolute;
+          left: 6px;
+          top: 8px;
+          bottom: 108px;
+          width: 0.5px;
+          background: ${border};
+        }
+
+        .nlj-row {
+          display: grid;
+          grid-template-columns: 28px minmax(0, 1fr);
+          gap: 28px;
+        }
+
+        .nlj-rail-col {
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          padding-top: 2px;
+        }
+
+        .nlj-content-col {
+          padding-bottom: 74px;
+        }
+
+        .nlj-meta-line {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 10px;
+        }
+
+        .nlj-time {
+          font-family: ${serif};
+          font-size: 22px;
+          line-height: 1;
+          color: ${inkLight};
+        }
+
+        .nlj-tag-row {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+
+        .nlj-tag {
+          display: inline-flex;
+          align-items: center;
+          padding: 2px 7px;
+          border: 0.5px solid transparent;
+          font-family: ${serif};
+          font-size: 10px;
+          line-height: 1;
+        }
+
+        .nlj-primary-link {
+          font-family: ${serif};
+          font-size: 13px;
+          color: ${ink};
+          text-decoration: none;
+          border-bottom: 0.5px solid ${ink};
+          padding-bottom: 2px;
+          transition: opacity 0.15s ease;
+        }
+
+        .nlj-primary-link:hover {
+          opacity: 0.56;
+        }
 
         .nlj-secondary-link {
-          font-family:     ${serif};
-          font-size:       12px;
-          letter-spacing:  0.04em;
-          color:           ${inkLight};
+          font-family: ${serif};
+          font-size: 13px;
+          color: ${inkLight};
           text-decoration: none;
-          transition:      color 0.15s ease;
+          transition: color 0.15s ease;
         }
-        .nlj-secondary-link:hover { color: ${inkMid}; }
+
+        .nlj-secondary-link:hover {
+          color: ${inkMid};
+        }
+
+        @media (max-width: 768px) {
+          .nlj-list::before {
+            left: 5px;
+          }
+
+          .nlj-row {
+            grid-template-columns: 24px minmax(0, 1fr);
+            gap: 18px;
+          }
+
+          .nlj-content-col {
+            padding-bottom: 58px;
+          }
+
+          .nlj-time {
+            font-size: 18px;
+          }
+        }
       `}</style>
     </section>
   );
