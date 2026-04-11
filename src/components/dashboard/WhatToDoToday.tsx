@@ -40,8 +40,8 @@ function getSuggestion(): Suggestion {
             accent: 'var(--blue-600)',
             accentSoft: 'var(--blue-50)',
             effort: '5-10 min',
-            secondaryHref: '/dashboard#study-desk',
-            secondaryCta: 'Open study desk',
+            secondaryHref: '/dashboard#search',
+            secondaryCta: 'Search another topic',
           };
         }
       }

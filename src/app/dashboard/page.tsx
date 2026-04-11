@@ -11,14 +11,6 @@ import QuickTopicSearch from '@/components/dashboard/QuickTopicSearch';
 import RecentPagesStrip from '@/components/dashboard/RecentPagesStrip';
 import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
-import ReadinessSnapshot from '@/components/dashboard/ReadinessSnapshot';
-import {
-  ContinueCard,
-  FocusAreasCard,
-  QuickAchievement,
-  StudyTipCard,
-  TodaysPlanCard,
-} from '@/components/DashboardWidgets';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -280,28 +272,9 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* ━━ 2 · STUDY DESK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 2 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Study desk" id="study-desk" accent="#8BBCAA" context="Resume and orient" />
-          <div className="dash-study-grid">
-            <ContinueCard />
-            <div className="dash-study-stack">
-              <TodaysPlanCard />
-              <ReadinessSnapshot />
-            </div>
-          </div>
-          <div className="dash-support-grid" style={{ marginTop: '12px' }}>
-            <FocusAreasCard />
-            <div className="dash-support-stack">
-              <QuickAchievement />
-              <StudyTipCard />
-            </div>
-          </div>
-        </section>
-
-        {/* ━━ 3 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section>
-          <SectionDivider label="Today" id="todays-plan" accent="#8BBCAA" />
+          <SectionDivider label="Today's plan" id="todays-plan" accent="#8BBCAA" />
           <WhatToDoToday />
           <div style={{ marginTop: '12px' }}>
             <PlacementCountdown />
@@ -317,25 +290,25 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* ━━ 4 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
           <SectionDivider label="Sample revision week" id="revision-week" accent="#D4B896" context="Adjust to your schedule" />
           <RevisionWeekPlanner />
         </section>
 
-        {/* ━━ 5 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
           <SectionDivider label="Find anything" id="search" accent="#7BA7CC" />
           <QuickTopicSearch />
         </section>
 
-        {/* ━━ 6 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
           <SectionDivider label="Saved folders" id="saved-folders" accent="#D4B896" />
           <SavedFoldersDashboard />
         </section>
 
-        {/* ━━ 7 · CLOSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 6 · CLOSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <div style={{
           marginTop: '56px',
           paddingTop: '30px',
@@ -381,31 +354,12 @@ export default async function DashboardPage() {
           grid-template-columns: 1fr 1fr;
           gap: 12px;
         }
-        .dash-study-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-          gap: 12px;
-          align-items: stretch;
-        }
-        .dash-study-stack,
-        .dash-support-stack {
-          display: grid;
-          gap: 12px;
-        }
-        .dash-support-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(260px, 0.85fr);
-          gap: 12px;
-          align-items: start;
-        }
         @media (max-width: 980px) {
           .dash-analytics-row { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 860px) {
           .dash-analytics-row { grid-template-columns: 1fr 1fr; }
           .dash-prog-pair { grid-template-columns: 1fr; }
-          .dash-study-grid { grid-template-columns: 1fr; }
-          .dash-support-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 560px) {
           .dash-analytics-row { grid-template-columns: 1fr 1fr; }

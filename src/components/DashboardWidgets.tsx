@@ -454,7 +454,7 @@ export function TodaysPlanCard() {
     : !plan.quizQuestions
     ? { href: '/quiz', label: 'Start a short quiz' }
     : !plan.weakTopics
-    ? { href: '/dashboard#weak-areas', label: 'Review weak areas' }
+    ? { href: '/quiz', label: 'Review weak areas' }
     : lastActivity
     ? { href: lastActivity.path, label: `Open ${lastActivity.label}` }
     : { href: '/hub', label: 'Open the hub' };
