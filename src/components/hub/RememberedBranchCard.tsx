@@ -37,6 +37,7 @@ export default function RememberedBranchCard() {
   const remembered = branchCopy[branch];
 
   return (
+    <div
       style={{
         border: '0.5px solid rgba(0,0,0,0.1)',
         background: '#FBF8F3',
