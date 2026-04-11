@@ -20,7 +20,6 @@ function folderColour(colour: string): string {
 
 interface FolderGridProps {
   folderPreviews?: Map<number, { latestSavedAt: string; latestTitle: string; previewItems: Array<{ title: string; type: string }> }>;
-  >;
   loading?: boolean;
   error?: string | null;
   onRetry?: () => void;
