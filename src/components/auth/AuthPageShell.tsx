@@ -1,7 +1,5 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
 
 type AuthPageShellProps = {
   title: string;
@@ -13,89 +11,176 @@ type AuthPageShellProps = {
   mode: 'sign-in' | 'sign-up';
 };
 
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap');
+
+.auth-shell *, .auth-shell *::before, .auth-shell *::after {
+  box-sizing: border-box;
+  box-shadow: none !important;
+}
+
+.auth-shell {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 300;
+  background: #FAFAF8;
+  color: #2C2A27;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px 80px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 400px;
+}
+
+.auth-kicker {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.auth-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #1A1815;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+
+.auth-intro {
+  font-size: 14px;
+  font-weight: 300;
+  color: #5A5750;
+  line-height: 1.7;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: #fff;
+}
+
+.auth-card-body {
+  padding: 32px 28px 24px;
+}
+
+.auth-card-footer {
+  padding: 14px 28px;
+  border-top: 0.5px solid rgba(0,0,0,0.08);
+  background: #FBF8F3;
+  text-align: center;
+}
+
+.auth-card-footer p {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.auth-card-footer a {
+  color: #5A5750;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 400;
+  transition: color 0.15s;
+}
+.auth-card-footer a:hover {
+  color: #1A1815;
+}
+
+.auth-brand {
+  margin-top: 36px;
+  text-align: center;
+}
+
+.auth-brand-link {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 14px;
+  color: #bbb;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: color 0.15s;
+}
+.auth-brand-link:hover {
+  color: #999;
+}
+
+@media (max-width: 480px) {
+  .auth-main {
+    padding: 100px 16px 60px;
+  }
+  .auth-card-body {
+    padding: 24px 20px 20px;
+  }
+  .auth-card-footer {
+    padding: 12px 20px;
+  }
+}
+`;
+
 export default function AuthPageShell({
   title,
   intro,
-  helper,
   finePrint,
   children,
   mode,
 }: AuthPageShellProps) {
-  const formHeadingId = `${mode}-form-title`;
-  const formDescriptionId = `${mode}-form-description`;
-  const backgroundRuleStyle: React.CSSProperties = {
-    backgroundImage:
-      'repeating-linear-gradient(180deg, rgba(26,24,21,0.05) 0, rgba(26,24,21,0.05) 1px, transparent 1px, transparent 88px)',
-  };
-
   return (
-    <div className="min-h-screen bg-[var(--cream)] text-[var(--espresso)] flex flex-col">
-      <Navbar />
+    <div className="auth-shell">
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      <main id="main-content" className="flex-1 bg-[var(--cream)] flex flex-col relative">
-        <div className="absolute inset-x-0 top-0 h-[600px] bg-[linear-gradient(180deg,rgba(255,255,255,0.85),rgba(250,250,248,0.95)_60%,rgba(250,250,248,1))]" />
-        <div className="absolute inset-0 opacity-40 pointer-events-none" style={backgroundRuleStyle} />
+      <main className="auth-main">
+        <div className="auth-header">
+          <p className="auth-kicker">
+            {mode === 'sign-in' ? 'Welcome back' : 'Get started'}
+          </p>
+          <h1 className="auth-title">{title}</h1>
+          <p className="auth-intro">{intro}</p>
+        </div>
 
-        <div className="relative flex-1 flex flex-col justify-center items-center px-6 pt-32 pb-24 sm:px-8">
-          
-          <div className="w-full max-w-md text-center mb-10">
-            <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--charcoal-light)] mb-4">
-               {mode === 'sign-in' ? 'Welcome Back' : 'Create Account'}
-            </p>
-            <h1 
-              id={formHeadingId}
-              className="font-display text-[clamp(2.2rem,5vw,3rem)] leading-[1.06] tracking-[-0.02em] text-[var(--espresso)]"
+        <div className="auth-card">
+          <div className="auth-card-body">
+            <div
+              style={{ minWidth: 0, maxWidth: '100%' }}
+              className="auth-clerk-frame"
             >
-              {title}
-            </h1>
-            <p 
-              id={formDescriptionId}
-              className="mt-4 text-[15px] leading-[1.7] text-[var(--charcoal)] font-light max-w-[40ch] mx-auto"
-            >
-              {intro}
-            </p>
-            {helper && (
-              <p className="mt-2 text-[13px] leading-[1.6] text-[var(--charcoal-light)] max-w-[44ch] mx-auto">
-                {helper}
-              </p>
-            )}
-          </div>
-
-          <div className="w-full max-w-[400px] bg-white border border-black/8 shadow-[0_28px_90px_rgba(26,24,21,0.07)] overflow-hidden">
-            <div className="p-6 sm:p-8">
-              <div
-                className="auth-clerk-frame min-w-0 max-w-full"
-                style={
-                  {
-                    '--clerk-color-shadow': 'transparent',
-                    '--clerk-color-border': 'transparent',
-                    '--clerk-spacing': '0px',
-                  } as React.CSSProperties
-                }
-              >
-                {children}
-              </div>
-            </div>
-            
-            <div className="border-t border-black/8 bg-[var(--linen-light)] px-6 py-5 text-center">
-              <p className="text-[11px] leading-5 text-[var(--charcoal-light)] tracking-[0.02em]">
-                {finePrint}{' '}
-                <Link href="/privacy" className="font-medium text-[var(--charcoal)] underline underline-offset-3 hover:text-[var(--espresso)] transition-colors">
-                  Privacy
-                </Link>{' '}
-                &amp;{' '}
-                <Link href="/terms" className="font-medium text-[var(--charcoal)] underline underline-offset-3 hover:text-[var(--espresso)] transition-colors">
-                  Terms
-                </Link>
-                .
-              </p>
+              {children}
             </div>
           </div>
-          
+
+          <div className="auth-card-footer">
+            <p>
+              {finePrint}{' '}
+              <Link href="/privacy">Privacy</Link>
+              {' & '}
+              <Link href="/terms">Terms</Link>.
+            </p>
+          </div>
+        </div>
+
+        <div className="auth-brand">
+          <Link href="/" className="auth-brand-link">
+            The Nurse Lab
+          </Link>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
