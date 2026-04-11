@@ -4,6 +4,19 @@ import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Loader2, X } from 'lucide-react';
 import type { BookmarkItem, Folder } from '@/lib/bookmarks/types';
 
+const COLOUR_MAP: Record<string, string> = {
+  sage:  '#8BBCAA',
+  warm:  '#D4A574',
+  slate: '#7BA7CC',
+  rose:  '#C89BB0',
+  ink:   '#3D3530',
+  sand:  '#C4B49A',
+};
+
+function folderColour(colour: string): string {
+  return COLOUR_MAP[colour] ?? colour ?? '#8BBCAA';
+}
+
 interface FolderViewProps {
   folder: Folder;
   items: BookmarkItem[];
@@ -33,6 +46,8 @@ export default function FolderView({
   onBack,
   onRemove,
 }: FolderViewProps) {
+  const hex = folderColour(folder.colour);
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -78,7 +93,10 @@ export default function FolderView({
         </button>
 
         <div className="flex items-center gap-3 rounded-full border border-black/8 bg-white px-4 py-2 text-sm text-[var(--espresso)]">
-          <span className="text-xl">{folder.emoji}</span>
+          <div
+            className="h-5 w-5 flex-shrink-0 rounded-full"
+            style={{ background: hex }}
+          />
           <span>{folder.name}</span>
         </div>
       </div>
@@ -86,9 +104,10 @@ export default function FolderView({
       <div className="overflow-hidden rounded-[24px] border border-black/8 bg-white p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[var(--linen-light)] text-3xl">
-              {folder.emoji}
-            </div>
+            <div
+              className="h-14 w-14 flex-shrink-0 rounded-full"
+              style={{ background: hex }}
+            />
             <div>
               <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/70">Folder</p>
               <h2 className="mt-1 font-display text-2xl text-[var(--espresso)]">{folder.name}</h2>
