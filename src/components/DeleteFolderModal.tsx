@@ -4,6 +4,15 @@ import { useState } from 'react';
 import ModalShell from '@/components/ModalShell';
 import type { Folder } from '@/lib/bookmarks/types';
 
+const COLOUR_MAP: Record<string, string> = {
+  sage:  '#8BBCAA',
+  warm:  '#D4A574',
+  slate: '#7BA7CC',
+  rose:  '#C89BB0',
+  ink:   '#3D3530',
+  sand:  '#C4B49A',
+};
+
 interface DeleteFolderModalProps {
   folder: Folder | null;
   isOpen: boolean;
@@ -31,9 +40,14 @@ export default function DeleteFolderModal({
       <div className="space-y-5">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-red-50 text-2xl">
-              {folder?.emoji ?? '🗑️'}
-            </div>
+            <div
+              className="h-10 w-10 flex-shrink-0 rounded-full"
+              style={{
+                background: folder?.colour
+                  ? (COLOUR_MAP[folder.colour] ?? folder.colour)
+                  : '#e5e7eb',
+              }}
+            />
             <div>
               <p className="text-[11px] uppercase tracking-[0.12em] text-red-700">Delete folder</p>
               <h2 className="mt-1 font-display text-2xl text-[var(--espresso)]">Are you sure?</h2>
@@ -52,7 +66,9 @@ export default function DeleteFolderModal({
           <p className="mt-2 text-red-800/80">This cannot be undone.</p>
         </div>
 
-        {error ? <p className="rounded-[16px] bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
+        {error ? (
+          <p className="rounded-[16px] bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        ) : null}
 
         <div className="flex justify-end gap-3">
           <button
@@ -69,7 +85,11 @@ export default function DeleteFolderModal({
                 setError(null);
                 await onConfirm();
               } catch (confirmError) {
-                setError(confirmError instanceof Error ? confirmError.message : 'Unable to delete folder.');
+                setError(
+                  confirmError instanceof Error
+                    ? confirmError.message
+                    : 'Unable to delete folder.',
+                );
               }
             }}
             disabled={isLoading}
