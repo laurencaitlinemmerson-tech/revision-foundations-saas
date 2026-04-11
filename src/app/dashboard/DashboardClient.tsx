@@ -102,15 +102,15 @@ export default function DashboardClient({
       <Navbar />
 
       <section className="border-b border-[var(--border)] bg-[var(--cream)]">
-        <div className="mx-auto max-w-[1120px] px-6 pb-12 pt-[88px] md:px-10 md:pb-14">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_272px] lg:items-start">
+        <div className="mx-auto max-w-[1120px] px-6 pb-16 pt-[112px] md:px-10 md:pb-20">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_272px] lg:items-start">
 
             {/* ── Left: greeting ── */}
             <div>
               {/* Meta line — date + placement days */}
               <motion.div
                 {...fadeUp(0)}
-                className="mb-4 flex items-center gap-3"
+                className="mb-8 flex items-center gap-3"
               >
                 <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--charcoal)]/40">
                   {formatToday()}
@@ -136,13 +136,13 @@ export default function DashboardClient({
               {/* Supporting copy */}
               <motion.p
                 {...fadeUp(0.15)}
-                className="mt-5 max-w-[48ch] text-[15px] font-light leading-8 text-[var(--charcoal)]/75"
+                className="mt-8 max-w-[48ch] text-[15px] font-light leading-8 text-[var(--charcoal)]/75"
               >
                 Your revision desk. Pick up exactly where you left off, check your weak spots, and start practice without the set-up.
               </motion.p>
 
               {/* Navigation pills */}
-              <div className="mt-8 flex flex-wrap gap-2">
+              <div className="mt-12 flex flex-wrap gap-2">
                 {quickLinks.map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -181,6 +181,10 @@ export default function DashboardClient({
             </div>
 
             {/* ── Right: jump rail ── */}
+            <motion.div
+              variants={railContainerVariants}
+              initial="hidden"
+              animate="visible"
               className="border border-[var(--border)] bg-white lg:mt-10"
             >
               {railLinks.map((link, index) => (

@@ -37,17 +37,16 @@ export default function RememberedBranchCard() {
   const remembered = branchCopy[branch];
 
   return (
-    <div
       style={{
         border: '0.5px solid rgba(0,0,0,0.1)',
         background: '#FBF8F3',
-        padding: '18px 20px 20px',
-        marginBottom: '28px',
+        padding: '48px 52px 52px',
+        marginBottom: '64px',
       }}
     >
       <p
         style={{
-          margin: '0 0 10px',
+          margin: '0 0 24px',
           fontSize: '9px',
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
@@ -68,9 +67,9 @@ export default function RememberedBranchCard() {
         <div style={{ maxWidth: '42rem' }}>
           <h2
             style={{
-              margin: '0 0 6px',
+              margin: '0 0 16px',
               fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: '30px',
+              fontSize: '34px',
               lineHeight: 1.05,
               fontWeight: 400,
               color: '#1A1815',

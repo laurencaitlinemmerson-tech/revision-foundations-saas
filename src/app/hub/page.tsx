@@ -31,7 +31,7 @@ const CSS = `
   max-width: 1180px;
   margin: 0 auto;
   width: 100%;
-  padding: 72px 48px 96px;
+  padding: 112px 48px 140px;
 }
 
 /* Masthead */
@@ -40,7 +40,7 @@ const CSS = `
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #aaa;
-  margin-bottom: 14px;
+  margin-bottom: 32px;
 }
 
 .hub-headline {
@@ -50,7 +50,7 @@ const CSS = `
   line-height: 1.06;
   color: #1A1815;
   letter-spacing: -0.01em;
-  margin-bottom: 18px;
+  margin-bottom: 36px;
   max-width: 14ch;
 }
 
@@ -60,13 +60,13 @@ const CSS = `
   color: #5A5750;
   line-height: 1.7;
   max-width: 560px;
-  margin-bottom: 0;
+  margin-bottom: 64px;
 }
 
 .hub-divider {
   border: none;
   border-top: 0.5px solid rgba(0,0,0,0.1);
-  margin: 40px 0 52px;
+  margin: 72px 0 84px;
 }
 
 /* Branch grid */
@@ -74,14 +74,14 @@ const CSS = `
   display: grid;
   grid-template-columns: 1fr 1fr;
   border: 0.5px solid rgba(0,0,0,0.12);
-  margin-bottom: 60px;
+  margin-bottom: 84px;
 }
 
 .hub-branch {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 36px 40px 32px;
+  padding: 48px 52px 40px;
   text-decoration: none;
   border-right: 0.5px solid rgba(0,0,0,0.12);
   transition: background 0.15s;
@@ -219,13 +219,13 @@ const CSS = `
 }
 
 .hub-more-item {
-  padding: 20px 24px;
+  padding: 32px 36px;
   border-right: 0.5px solid rgba(0,0,0,0.1);
   text-decoration: none;
   transition: background 0.12s;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 .hub-more-item:last-child { border-right: none; }
 .hub-more-item:hover { background: #F5F3F0; }
@@ -251,8 +251,8 @@ const CSS = `
 .hub-mock-section {
   border: 0.5px solid rgba(0,0,0,0.12);
   background: #FBF8F3;
-  padding: 40px 44px 36px;
-  margin-bottom: 60px;
+  padding: 60px 64px 56px;
+  margin-bottom: 84px;
 }
 
 .hub-mock-inner {

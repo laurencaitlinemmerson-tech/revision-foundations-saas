@@ -142,7 +142,7 @@ export default function WhatToDoToday() {
           </span>
         </div>
 
-        <h3 style={{ fontFamily: display, fontSize: '1.9rem', lineHeight: 1.05, fontWeight: 400, color: ink, marginBottom: '10px' }}>
+        <h3 style={{ fontFamily: display, fontSize: '1.9rem', lineHeight: 1.05, fontWeight: 400, color: ink, marginBottom: '16px' }}>
           {suggestion.headline}
         </h3>
 
@@ -171,10 +171,10 @@ export default function WhatToDoToday() {
           grid-template-columns: minmax(0, 1fr) auto;
           gap: 20px 28px;
           align-items: start;
-          border: `0.5px solid ${borderMid}`,
-          background: '#FFFFFF',
-          padding: '28px 26px',
-          transition: 'border-color 0.2s ease',
+          border: 0.5px solid ${borderMid};
+          background: #FFFFFF;
+          padding: 40px 44px;
+          transition: border-color 0.2s ease;
         }
         .dash-suggestion-shell:hover {
           border-color: rgba(0,0,0,0.18);
@@ -185,7 +185,7 @@ export default function WhatToDoToday() {
           align-items: center;
           gap: 12px;
           flex-wrap: wrap;
-          margin-bottom: 14px;
+          margin-bottom: 24px;
         }
 
         .dash-suggestion-actions {
