@@ -27,15 +27,19 @@ export default function ResourceBookmark({ resourceId }: ResourceBookmarkProps) 
     <button
       onClick={toggleBookmark}
       title={bookmarked ? 'Remove bookmark' : 'Bookmark this resource'}
-      className="mr-3 p-2 rounded-full border-none bg-white shadow hover:bg-[var(--lilac-soft)] transition-colors"
+      className="mr-3 border-none p-2 transition-colors"
       aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this resource'}
       type="button"
-      style={{ flexShrink: 0 }}
+      style={{
+        flexShrink: 0,
+        background: bookmarked ? '#FBF8F3' : '#FFFFFF',
+        boxShadow: '0 1px 0 rgba(26,24,21,0.04)',
+      }}
     >
       {bookmarked ? (
-        <BookmarkCheck className="w-5 h-5 text-[var(--purple)]" />
+        <BookmarkCheck className="w-5 h-5" style={{ color: '#185FA5' }} />
       ) : (
-        <Bookmark className="w-5 h-5 text-[var(--lilac-medium)]" />
+        <Bookmark className="w-5 h-5" style={{ color: '#9A948C' }} />
       )}
     </button>
   );

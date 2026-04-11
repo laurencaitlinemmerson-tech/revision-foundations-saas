@@ -110,6 +110,7 @@ const SHAPE_OPTIONS: Array<{
   title: string;
   price: string;
   summary: string;
+  bestFor: string;
   points: string[];
   tone: CardTone;
   accent: string;
@@ -120,6 +121,7 @@ const SHAPE_OPTIONS: Array<{
     title: 'Free Hub',
     price: '£0',
     summary: 'Browse practical revision guides first if you want to check the tone and usefulness before paying.',
+    bestFor: 'Best if you want to look around first and only pay when something feels genuinely useful.',
     points: ['Selected free hub resources', 'No payment needed', 'Best if you want to explore first'],
     tone: 'free',
     accent: green,
@@ -130,6 +132,7 @@ const SHAPE_OPTIONS: Array<{
     title: "Children's Bundle",
     price: '£9.99',
     summary: 'Everything in one place — OSCE prep, quiz revision, and placement guides.',
+    bestFor: 'Best if you want one study space for placements, OSCE prep, and theory revision together.',
     points: ['OSCE Tool + Core Quiz + Hub', 'Best for placement and OSCE prep together', 'All future updates included'],
     tone: 'bundle',
     accent: ink,
@@ -140,6 +143,7 @@ const SHAPE_OPTIONS: Array<{
     title: 'OSCE Tool only',
     price: '£4.99',
     summary: 'Station practice only — if OSCEs are your immediate priority.',
+    bestFor: 'Best if your immediate problem is speaking stations more clearly and practising under time pressure.',
     points: ['50+ paediatric OSCE stations', 'Timed mode and marking checklists', 'Good for targeted station prep'],
     tone: 'osce',
     accent: teal,
@@ -150,8 +154,30 @@ const SHAPE_OPTIONS: Array<{
     title: 'Quiz only',
     price: '£4.99',
     summary: 'Question-based revision without the full bundle.',
+    bestFor: 'Best if you mainly want active recall for theory topics, drug calculations, and core knowledge.',
     points: ['17 quiz topics', 'Instant feedback and explanations', 'Good for high-yield recall practice'],
     tone: 'quiz',
+    accent: blue,
+    accentBg: blueBg,
+  },
+];
+
+const URGENT_USE_CASES = [
+  {
+    title: 'I need placement and exam support in one place',
+    body: 'Start with the bundle if you want one calm setup for practical refreshers, quiz revision, and OSCE practice.',
+    accent: green,
+    accentBg: greenBg,
+  },
+  {
+    title: 'I need OSCE practice first',
+    body: 'Choose the OSCE tool if your priority is station structure, timing, and sounding safer under pressure.',
+    accent: teal,
+    accentBg: tealBg,
+  },
+  {
+    title: 'I need theory recall first',
+    body: 'Choose Quiz if you want short question blocks, instant feedback, and a clearer view of what still feels weak.',
     accent: blue,
     accentBg: blueBg,
   },
@@ -294,7 +320,7 @@ export default function PricingPage() {
                   marginBottom: '28px',
                 }}
               >
-                The Children&apos;s Bundle brings together paediatric OSCE practice, core quiz revision, and placement-ready guides in one calm study space.
+                Choose the route that matches what feels most urgent right now, whether that is placement confidence, OSCE station practice, or sharper recall before an exam.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '28px' }}>
@@ -334,12 +360,12 @@ export default function PricingPage() {
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <p style={{ fontFamily: display, fontSize: '44px', lineHeight: 1, color: ink }}>£9.99</p>
                     <p style={{ fontFamily: serif, fontSize: '12px', color: inkLight, marginTop: '4px' }}>
-                      one payment
+                  one payment
                     </p>
                   </div>
                 </div>
                 <p style={{ fontFamily: serif, fontSize: '14px', lineHeight: 1.8, fontWeight: 300, color: inkMid }}>
-                  The full setup for OSCE practice, question revision, and quick clinical refreshers in one place.
+                  The full setup if you want one study space for placements, OSCE practice, and theory revision without juggling separate tools.
                 </p>
               </div>
 
@@ -428,6 +454,54 @@ export default function PricingPage() {
         </div>
       </section>
 
+      <section style={{ padding: '32px 24px 0' }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0,1fr))',
+              gap: '16px',
+              marginBottom: '18px',
+            }}
+            className="pricing-use-case-grid"
+          >
+            {URGENT_USE_CASES.map((item) => (
+              <div
+                key={item.title}
+                style={{
+                  border: `0.5px solid ${border}`,
+                  background: panel,
+                  padding: '20px 20px 22px',
+                }}
+              >
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '4px 10px',
+                    fontFamily: serif,
+                    fontSize: '11px',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: item.accent,
+                    background: item.accentBg,
+                    marginBottom: '12px',
+                  }}
+                >
+                  Best if
+                </span>
+                <h3 style={{ fontFamily: display, fontSize: '24px', fontWeight: 400, color: ink, lineHeight: 1.12, marginBottom: '10px' }}>
+                  {item.title}
+                </h3>
+                <p style={{ fontFamily: serif, fontSize: '13px', lineHeight: 1.78, fontWeight: 300, color: inkMid, margin: 0 }}>
+                  {item.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section style={{ padding: '48px 24px 0', borderBottom: `0.5px solid ${border}` }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
           <div style={{ marginBottom: '28px' }}>
@@ -507,6 +581,9 @@ export default function PricingPage() {
 
                     <p style={{ fontFamily: serif, fontSize: '13px', lineHeight: 1.75, fontWeight: 300, color: inkMid }}>
                       {item.summary}
+                    </p>
+                    <p style={{ fontFamily: serif, fontSize: '12px', lineHeight: 1.7, fontWeight: 300, color: inkLight, marginTop: '10px' }}>
+                      {item.bestFor}
                     </p>
                   </div>
 
@@ -790,6 +867,7 @@ export default function PricingPage() {
 
         @media (max-width: 1100px) {
           .pricing-shape-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+          .pricing-use-case-grid { grid-template-columns: 1fr !important; }
         }
 
         @media (max-width: 900px) {
@@ -805,6 +883,7 @@ export default function PricingPage() {
           .pricing-proof-strip { grid-template-columns: 1fr !important; }
           .pricing-steps-grid { grid-template-columns: 1fr !important; }
           .pricing-shape-grid { grid-template-columns: 1fr !important; }
+          .pricing-use-case-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

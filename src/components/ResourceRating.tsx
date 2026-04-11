@@ -22,7 +22,7 @@ export default function ResourceRating({ resourceId }: ResourceRatingProps) {
   }
 
   return (
-    <div className="flex items-center gap-1 mb-3 mt-2">
+    <div className="mb-3 mt-2 flex items-center gap-1">
       {/* Allow 0 hearts (clear rating) */}
       <button
         type="button"
@@ -31,9 +31,11 @@ export default function ResourceRating({ resourceId }: ResourceRatingProps) {
         onMouseLeave={() => setHover(null)}
         aria-label="Clear rating"
         className="focus:outline-none"
+        style={{ padding: '2px' }}
       >
         <svg
-          className={`w-6 h-6 ${hover === 0 ? 'text-pink-300' : rating === 0 ? 'text-gray-300' : 'text-pink-200'}`}
+          className="h-6 w-6"
+          style={{ color: hover === 0 ? '#B8AD9E' : rating === 0 ? '#D8D0C5' : '#E8E1D7' }}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -49,9 +51,11 @@ export default function ResourceRating({ resourceId }: ResourceRatingProps) {
           onMouseLeave={() => setHover(null)}
           aria-label={`Rate ${heart} heart${heart > 1 ? 's' : ''}`}
           className="focus:outline-none"
+          style={{ padding: '2px' }}
         >
           <svg
-            className={`w-6 h-6 ${heart <= (hover !== null ? hover : rating) ? 'text-pink-500' : 'text-gray-300'}`}
+            className="h-6 w-6"
+            style={{ color: heart <= (hover !== null ? hover : rating) ? '#B76B4A' : '#D8D0C5' }}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -59,7 +63,7 @@ export default function ResourceRating({ resourceId }: ResourceRatingProps) {
           </svg>
         </button>
       ))}
-      <span className="ml-3 text-xs text-gray-500 min-w-[70px] text-left">
+      <span className="ml-3 min-w-[90px] text-left text-xs" style={{ color: '#8F877D' }}>
         {rating ? `You rated ${rating}/5` : 'Not rated'}
       </span>
     </div>

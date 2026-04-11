@@ -17,13 +17,26 @@ export default function NotesToMyself() {
   }, [notes]);
 
   return (
-    <div className="card bg-[var(--lilac-soft)] border-[var(--lavender)]/60 mb-8">
-      <h2 className="text-lg font-semibold text-[var(--plum)] mb-2">📝 Notes to Myself</h2>
+    <div className="card mb-8 border border-black/8 bg-[#FBF8F3]">
+      <h2
+        className="mb-2 text-lg"
+        style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          color: '#1A1815',
+          fontWeight: 400,
+        }}
+      >
+        Notes to myself
+      </h2>
       <textarea
-        className="w-full min-h-[120px] p-3 rounded-lg border border-[var(--lavender)] bg-white text-[var(--plum-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--purple)] transition resize-vertical"
+        className="min-h-[120px] w-full resize-vertical border border-black/10 bg-white p-3 transition focus:outline-none"
         value={notes}
         onChange={e => setNotes(e.target.value)}
         placeholder="Jot down reminders, goals, or anything you like..."
+        style={{
+          color: '#1A1815',
+          lineHeight: 1.7,
+        }}
       />
     </div>
   );

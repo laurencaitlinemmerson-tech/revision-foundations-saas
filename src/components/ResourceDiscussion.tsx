@@ -78,8 +78,15 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
   };
 
   return (
-    <div className="mt-12 pt-8 border-t border-[var(--lilac-medium)]">
-      <h2 className="text-lg font-semibold text-[var(--plum)] mb-6 flex items-center gap-2">
+    <div className="mt-12 border-t border-black/10 pt-8">
+      <h2
+        className="mb-6 flex items-center gap-2 text-lg"
+        style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          color: '#1A1815',
+          fontWeight: 400,
+        }}
+      >
         <MessageCircle className="w-5 h-5" />
         Discussion ({comments.length})
       </h2>
@@ -92,24 +99,33 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Ask a question or share your thoughts..."
             rows={3}
-            className="w-full px-4 py-3 rounded-xl border border-[var(--lilac-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--lavender)] resize-none mb-3"
+            className="mb-3 w-full resize-none border border-black/10 bg-[#FBF8F3] px-4 py-3 focus:outline-none"
             maxLength={1000}
+            style={{
+              color: '#1A1815',
+              fontSize: '14px',
+              lineHeight: 1.7,
+            }}
           />
           <button
             type="submit"
             disabled={submitting || !newComment.trim()}
-            className="bg-[var(--purple)] text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex items-center gap-2 px-5 py-2 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ background: '#1A1815', color: '#FAFAF8' }}
           >
             <Send className="w-4 h-4" />
             {submitting ? 'Posting...' : 'Post Comment'}
           </button>
         </form>
       ) : (
-        <div className="card bg-[var(--lilac-soft)]/50 text-center mb-6">
-          <p className="text-[var(--plum-dark)]/70 mb-3">Sign in or create an account to join the discussion</p>
+        <div className="mb-6 border border-black/8 bg-[#FBF8F3] p-5 text-center">
+          <p className="mb-3 text-sm" style={{ color: '#5A5750' }}>
+            Sign in or create an account to join the discussion.
+          </p>
           <Link
             href="/sign-in"
-            className="inline-flex items-center gap-2 bg-[var(--purple)] text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--plum)] transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2 text-sm transition-all"
+            style={{ background: '#1A1815', color: '#FAFAF8' }}
           >
             Open account page
           </Link>
@@ -119,30 +135,30 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
       {/* Comments List */}
       {loading ? (
         <div className="text-center py-8">
-          <div className="animate-spin w-6 h-6 border-3 border-[var(--lavender)] border-t-transparent rounded-full mx-auto" />
+          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-[3px] border-[#D8D0C5] border-t-transparent" />
         </div>
       ) : comments.length === 0 ? (
-        <div className="text-center py-8 text-[var(--plum-dark)]/50">
+        <div className="py-8 text-center" style={{ color: '#8F877D' }}>
           <p>No comments yet. Be the first to start the discussion!</p>
         </div>
       ) : (
         <div className="space-y-4">
           {comments.map((comment) => (
-            <div key={comment.id} className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-[var(--lilac)] flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4 text-[var(--purple)]" />
+            <div key={comment.id} className="flex gap-3 border-b border-black/6 pb-4">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#F3F1EE]">
+                <User className="w-4 h-4" style={{ color: '#5A5750' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm text-[var(--plum)]">
+                  <span className="text-sm font-medium" style={{ color: '#1A1815' }}>
                     {comment.user_name}
                   </span>
-                  <span className="text-xs text-[var(--plum-dark)]/50 flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-xs" style={{ color: '#8F877D' }}>
                     <Clock className="w-3 h-3" />
                     {timeAgo(comment.created_at)}
                   </span>
                 </div>
-                <p className="text-sm text-[var(--plum-dark)]/80">{comment.body}</p>
+                <p className="text-sm leading-7" style={{ color: '#5A5750' }}>{comment.body}</p>
               </div>
             </div>
           ))}

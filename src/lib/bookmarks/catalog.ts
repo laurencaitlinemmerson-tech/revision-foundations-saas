@@ -214,6 +214,40 @@ export function getCatalogItem(hubItemId: string): HubItemSummary | null {
   };
 }
 
+export function getRelatedCatalogItems(hubItemId: string, limit = 3): HubItemSummary[] {
+  const current = catalogMap.get(hubItemId);
+  if (!current) {
+    return [];
+  }
+
+  return catalog
+    .filter((item) => item.hubItemId !== hubItemId)
+    .map((item) => {
+      const overlap = item.tags.filter((tag) => current.tags.includes(tag)).length;
+      const sameCategoryBonus =
+        (current.tags.includes('OSCE') && item.tags.includes('OSCE')) ||
+        (current.tags.includes('Placement') && item.tags.includes('Placement')) ||
+        (current.tags.includes('Meds & Calculations') && item.tags.includes('Meds & Calculations'))
+          ? 1
+          : 0;
+
+      return {
+        item,
+        score: overlap + sameCategoryBonus,
+      };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || a.item.title.localeCompare(b.item.title))
+    .slice(0, limit)
+    .map(({ item }) => ({
+      hubItemId: item.hubItemId,
+      title: item.title,
+      href: item.href,
+      type: inferHubItemType(item.title, item.tags),
+      tags: item.tags,
+    }));
+}
+
 export function humanizeHubItemId(hubItemId: string) {
   return hubItemId
     .split('-')

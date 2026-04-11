@@ -15,7 +15,52 @@ export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [pageViews, setPageViews] = useState(1);
+  const [readyToSurface, setReadyToSurface] = useState(false);
   const hideOnAuthPage = pathname?.startsWith('/sign-in') || pathname?.startsWith('/sign-up');
+  const isHighIntentRoute =
+    pathname?.startsWith('/dashboard') ||
+    pathname?.startsWith('/account') ||
+    pathname?.startsWith('/hub/childrens') ||
+    pathname?.startsWith('/hub/adult') ||
+    pathname?.startsWith('/hub/resources');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const currentViews = Number.parseInt(window.sessionStorage.getItem('tnl_page_views') || '0', 10) + 1;
+    window.sessionStorage.setItem('tnl_page_views', String(currentViews));
+    setPageViews(currentViews);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isHighIntentRoute) {
+      setReadyToSurface(false);
+      return;
+    }
+
+    let timeoutId: number | null = window.setTimeout(() => {
+      setReadyToSurface(true);
+    }, 18000);
+
+    const handleScroll = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollable <= 0) return;
+      const progress = window.scrollY / scrollable;
+      if (progress > 0.42) {
+        setReadyToSurface(true);
+        if (timeoutId !== null) {
+          window.clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isHighIntentRoute, pathname]);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -53,12 +98,6 @@ export default function PWAInstallPrompt() {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      
-      // Check if user dismissed before
-      const dismissedBefore = localStorage.getItem('pwa-install-dismissed');
-      if (!dismissedBefore) {
-        setShowInstallBanner(true);
-      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -67,6 +106,17 @@ export default function PWAInstallPrompt() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
   }, []);
+
+  useEffect(() => {
+    if (!deferredPrompt || hideOnAuthPage || dismissed || !isHighIntentRoute || !readyToSurface || pageViews < 2) {
+      return;
+    }
+
+    const dismissedBefore = localStorage.getItem('pwa-install-dismissed');
+    if (!dismissedBefore) {
+      setShowInstallBanner(true);
+    }
+  }, [deferredPrompt, dismissed, hideOnAuthPage, isHighIntentRoute, pageViews, readyToSurface]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -95,31 +145,78 @@ export default function PWAInstallPrompt() {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50"
+          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-[21rem] z-50"
         >
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-2xl">
+          <div
+            className="rounded-none p-4 shadow-2xl"
+            style={{
+              background: 'rgba(250,250,248,0.97)',
+              border: '0.5px solid rgba(26,24,21,0.12)',
+              backdropFilter: 'blur(14px)',
+            }}
+          >
             <button
               onClick={handleDismiss}
-              className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-300 transition-colors"
+              className="absolute top-2 right-2 p-1 transition-colors"
+              style={{ color: '#9A948C' }}
               aria-label="Dismiss"
             >
               <X className="w-4 h-4" />
             </button>
             
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center">
-                <Download className="w-5 h-5 text-purple-400" />
+              <div
+                className="flex-shrink-0 flex items-center justify-center"
+                style={{
+                  width: '2.6rem',
+                  height: '2.6rem',
+                  background: '#F3F1EE',
+                }}
+              >
+                <Download className="w-5 h-5" style={{ color: '#1A1815' }} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-white text-sm mb-1">
+                <p
+                  style={{
+                    margin: '0 0 5px',
+                    fontSize: '10px',
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: '#9A948C',
+                  }}
+                >
+                  App access
+                </p>
+                <h3
+                  className="text-sm mb-1"
+                  style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: '22px',
+                    lineHeight: 1.1,
+                    fontWeight: 400,
+                    color: '#1A1815',
+                    marginBottom: '8px',
+                  }}
+                >
                   Install The Nurse Lab
                 </h3>
-                <p className="text-gray-400 text-xs mb-3">
-                  Access study resources offline, even with poor hospital WiFi!
+                <p
+                  className="text-xs mb-3"
+                  style={{
+                    color: '#5A5750',
+                    lineHeight: 1.65,
+                    marginBottom: '14px',
+                  }}
+                >
+                  Keep your saved study space close to hand, especially when you are revising with patchy hospital WiFi or moving between placement and home.
                 </p>
                 <button
                   onClick={handleInstall}
-                  className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="w-full px-4 py-2 text-sm transition-colors"
+                  style={{
+                    background: '#1A1815',
+                    color: '#FAFAF8',
+                  }}
                 >
                   Install App
                 </button>

@@ -405,12 +405,12 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
         maxWidth: '20ch',
       }}
     >
-      See exactly how the quiz works before you open it.
+      See exactly how the OSCE flow works before you open it.
     </h2>
 
     <p style={{ ...bodyText, maxWidth: '620px', marginBottom: '28px' }}>
-      This is a real Osce app screen — not a demo. You can see how the question appears
-      and how feedback is shown before opening the full app.
+      This is a real OSCE app screen, not a demo. You can see how a station opens,
+      how the structure is laid out, and how the practice flow feels before opening the full app.
     </p>
 
     {/* Preview component */}

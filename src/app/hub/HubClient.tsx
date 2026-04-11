@@ -17,6 +17,7 @@ import {
 } from './hubData';
 import { CSS } from './hubStyles';
 import HubCard from './HubCard';
+import { savePreferredBranch } from '@/lib/hubPreferences';
 
 export default function HubClient({
   branch = 'childrens',
@@ -28,6 +29,10 @@ export default function HubClient({
   isSignedIn?: boolean;
 }) {
   useScrollAnimation();
+
+  useEffect(() => {
+    savePreferredBranch(branch);
+  }, [branch]);
 
   const branchMeta =
     branch === 'adult'

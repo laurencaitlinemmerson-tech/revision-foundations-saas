@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
+import RememberedBranchCard from '@/components/hub/RememberedBranchCard';
 import { generatePageMetadata } from '@/lib/seo';
 
 export const metadata = generatePageMetadata({
@@ -320,6 +321,8 @@ export default function HubPage() {
         <p className="hub-standfirst">
           Revision resources, cheat sheets, and OSCE prep written for the way student nurses actually study. Pick your branch to get started.
         </p>
+
+        <RememberedBranchCard />
 
         <hr className="hub-divider" />
 
