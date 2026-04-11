@@ -316,37 +316,73 @@ function ChartLegend({ items }: { items: { label: string; colour: string; value?
 // ═════════════════════════════════════════════
 
 // ─────────────────────────────────────────────
-// 1. STUDY BREAKDOWN PIE CHART
+// 1. STUDY BREAKDOWN PIE CHART — by section
 // ─────────────────────────────────────────────
 
+const SECTION_COLOURS: Record<string, string> = {
+  'Anatomy':         '#8BBCAA',  // sage
+  'Clinical Skills': '#D4A574',  // caramel
+  'Meds':            '#C89BB0',  // rose
+  'Placement':       '#7BA7CC',  // blue
+  'Paeds':           '#D4B896',  // sand
+  'OSCE':            '#A3C4BC',  // seafoam
+  'Assessment':      '#D9A7A7',  // blush
+  'Ethics':          '#9BB5D4',  // periwinkle
+  'Emergency':       '#CC8F8F',  // dusty coral
+  'Communication':   '#B8C9A3',  // leaf
+  'Reference':       '#C4B8A0',  // parchment
+  'Y1':              '#A8B4C0',  // slate
+};
+
+const HUB_SECTIONS = [
+  { title: 'A–E Assessment', tag: 'OSCE' },
+  { title: 'IM & SC Injections', tag: 'Clinical Skills' },
+  { title: 'NG Tube Insertion', tag: 'Clinical Skills' },
+  { title: 'Drug Calculations', tag: 'Meds' },
+  { title: 'Placement Survival', tag: 'Placement' },
+  { title: 'Paediatric Vital Signs', tag: 'Paeds' },
+  { title: 'Cardiovascular System', tag: 'Anatomy' },
+  { title: 'Respiratory System', tag: 'Anatomy' },
+  { title: 'Renal System', tag: 'Anatomy' },
+  { title: 'Brain & Nervous System', tag: 'Anatomy' },
+  { title: 'Medication Abbreviations', tag: 'Meds' },
+  { title: '9 Rights of Medication', tag: 'Meds' },
+  { title: 'Sepsis 6 & Escalation', tag: 'Emergency' },
+  { title: 'Pain Assessment', tag: 'Assessment' },
+  { title: 'Safeguarding', tag: 'Placement' },
+  { title: 'Consent & Gillick', tag: 'Ethics' },
+  { title: 'Paediatric Medications', tag: 'Meds' },
+  { title: 'Communicating with Children', tag: 'Communication' },
+  { title: 'Anatomy & Physiology Basics', tag: 'Y1' },
+  { title: 'Documentation', tag: 'Placement' },
+  { title: 'Infection Prevention', tag: 'Placement' },
+  { title: 'Professionalism & Ethics', tag: 'Ethics' },
+  { title: 'Theories of Development', tag: 'Paeds' },
+  { title: 'Nursing Glossary', tag: 'Reference' },
+  { title: 'Palliative Care', tag: 'Paeds' },
+];
+
+function buildSectionSlices(): PieSlice[] {
+  const counts: Record<string, number> = {};
+  for (const r of HUB_SECTIONS) {
+    counts[r.tag] = (counts[r.tag] || 0) + 1;
+  }
+  // Sort by count descending for visual clarity
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([tag, count]) => ({
+      label: tag,
+      value: count,
+      colour: SECTION_COLOURS[tag] || CHART_COLOURS[0],
+    }));
+}
+
 export function StudyBreakdownChart() {
-  const [stats, setStats] = useState<SessionStats | null>(null);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
-  useEffect(() => {
-    const s = load<SessionStats>(STORAGE_KEYS.stats, {
-      totalSessions: 0, totalQuestions: 0, totalOsceStations: 0,
-      weekSessions: Array(7).fill(0), lastWeekTotal: 0,
-    });
-    setStats(s);
-  }, []);
-
-  if (!stats) return null;
-
-  const hasData = stats.totalQuestions > 0 || stats.totalOsceStations > 0;
-
-  const slices: PieSlice[] = hasData
-    ? [
-        { label: 'Quiz questions', value: stats.totalQuestions, colour: CHART_COLOURS[0] },
-        { label: 'OSCE stations', value: stats.totalOsceStations, colour: CHART_COLOURS[1] },
-      ]
-    : [
-        { label: 'Quiz questions', value: 60, colour: CHART_COLOURS[0] },
-        { label: 'OSCE stations', value: 40, colour: CHART_COLOURS[1] },
-      ];
-
-  const total = stats.totalQuestions + stats.totalOsceStations;
+  const slices = buildSectionSlices();
+  const total = slices.reduce((sum, s) => sum + s.value, 0);
 
   return (
     <motion.div
@@ -363,9 +399,15 @@ export function StudyBreakdownChart() {
     >
       <p style={{
         fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-        color: '#9C8878', marginBottom: '18px',
+        color: '#9C8878', marginBottom: '6px',
       }}>
-        Study breakdown
+        Content by section
+      </p>
+      <p style={{
+        fontSize: '12px', fontWeight: 300, color: '#5A5750',
+        lineHeight: 1.6, marginBottom: '20px',
+      }}>
+        {total} resources across {slices.length} areas
       </p>
 
       <div style={{
@@ -374,27 +416,19 @@ export function StudyBreakdownChart() {
       }}>
         <DonutChart
           slices={slices}
-          size={140}
-          thickness={24}
-          centreValue={hasData ? String(total) : '—'}
-          centreLabel={hasData ? 'total' : 'no data yet'}
+          size={160}
+          thickness={26}
+          centreValue={String(slices.length)}
+          centreLabel="sections"
         />
-        <div style={{ flex: 1, minWidth: '120px' }}>
+        <div style={{ flex: 1, minWidth: '140px' }}>
           <ChartLegend
             items={slices.map(s => ({
               label: s.label,
               colour: s.colour,
-              value: hasData ? String(s.value) : '—',
+              value: String(s.value),
             }))}
           />
-          {!hasData && (
-            <p style={{
-              fontSize: '11px', fontWeight: 300, color: '#9C8878',
-              marginTop: '12px', lineHeight: 1.6,
-            }}>
-              Start a quiz or OSCE session and this chart will fill in automatically.
-            </p>
-          )}
         </div>
       </div>
     </motion.div>
