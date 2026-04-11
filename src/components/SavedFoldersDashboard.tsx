@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useMemo, useState } from 'react';
+import { startTransition, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import CreateFolderModal from '@/components/CreateFolderModal';
 import DeleteFolderModal from '@/components/DeleteFolderModal';
@@ -15,118 +15,67 @@ interface SavedFoldersDashboardProps {
   showOverview?: boolean;
 }
 
-export default function SavedFoldersDashboard({
-  showOverview = true,
-}: SavedFoldersDashboardProps) {
-  const {
-    folders,
-    loading,
-    error,
-    refetch,
-    createFolder,
-    updateFolder,
-    deleteFolder,
-    isCreating,
-    isUpdating,
-    isDeleting,
-  } = useFolders();
+export default function SavedFoldersDashboard({ showOverview = true }: SavedFoldersDashboardProps) {
+  const { folders, loading, error, refetch, createFolder, updateFolder, deleteFolder, isCreating, isUpdating, isDeleting } = useFolders();
 
   const [activeFolderId, setActiveFolderId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [editFolderId, setEditFolderId] = useState<number | null>(null);
   const [deleteFolderId, setDeleteFolderId] = useState<number | null>(null);
 
-  const activeFolder = useMemo(
-    () => folders.find((folder) => folder.id === activeFolderId) ?? null,
-    [activeFolderId, folders],
-  );
-  const editFolder = useMemo(
-    () => folders.find((folder) => folder.id === editFolderId) ?? null,
-    [editFolderId, folders],
-  );
-  const deleteTarget = useMemo(
-    () => folders.find((folder) => folder.id === deleteFolderId) ?? null,
-    [deleteFolderId, folders],
-  );
+  const activeFolder = folders.find((f) => f.id === activeFolderId) ?? null;
+  const editFolder = folders.find((f) => f.id === editFolderId) ?? null;
+  const deleteTarget = folders.find((f) => f.id === deleteFolderId) ?? null;
 
-  const {
-    bookmarks,
-    loading: bookmarksLoading,
-    error: bookmarksError,
-    refetch: refetchBookmarks,
-    removeBookmark,
-    isRemoving,
-  } = useBookmarks(activeFolderId ?? null);
+  const totalSavedItems = folders.reduce((total, folder) => total + folder.itemCount, 0);
 
-  const totalSavedItems = useMemo(
-    () => folders.reduce((total, folder) => total + folder.itemCount, 0),
-    [folders],
-  );
+  const { bookmarks, loading: bookmarksLoading, error: bookmarksError, refetch: refetchBookmarks, removeBookmark, isRemoving } = useBookmarks(activeFolderId ?? null);
 
-  const previews = new Map<number, { latestSavedAt: string; latestTitle: string; previewItems: Array<{ title: string; type: string }> }>();
-
-    for (const bookmark of bookmarks) {
-      const existing = previews.get(bookmark.folderId);
-
-      if (!existing) {
-        previews.set(bookmark.folderId, {
-          latestSavedAt: bookmark.savedAt,
-          latestTitle: bookmark.item.title,
-          previewItems: [{ title: bookmark.item.title, type: bookmark.item.type }],
-        });
-        continue;
-      }
-
-      if (existing.previewItems.length < 2) {
-        existing.previewItems.push({ title: bookmark.item.title, type: bookmark.item.type });
-      }
+  const folderPreviews = new Map<number, { latestSavedAt: string; latestTitle: string; previewItems: Array<{ title: string; type: string }> }>();
+  for (const bookmark of bookmarks) {
+    const existing = folderPreviews.get(bookmark.folderId);
+    if (!existing) {
+      folderPreviews.set(bookmark.folderId, {
+        latestSavedAt: bookmark.savedAt,
+        latestTitle: bookmark.item.title,
+        previewItems: [{ title: bookmark.item.title, type: bookmark.item.type }],
+      });
+    } else if (existing.previewItems.length < 2) {
+      existing.previewItems.push({ title: bookmark.item.title, type: bookmark.item.type });
     }
-
-    return previews;
-  }, [bookmarks]);
+  }
 
   async function handleCreateFolder(input: { name: string; colour: string }) {
     try {
       const folder = await createFolder(input);
       showToast(`Created ${folder.name}`, 'success');
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Unable to create folder.', 'error');
-      throw error;
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Unable to create folder.', 'error');
+      throw err;
     }
   }
 
   async function handleUpdateFolder(input: { name: string; colour: string }) {
-    if (!editFolder) {
-      return;
-    }
-
+    if (!editFolder) return;
     try {
-      await updateFolder({
-        folderId: editFolder.id,
-        ...input,
-      });
+      await updateFolder({ folderId: editFolder.id, ...input });
       showToast(`Updated ${input.name}`, 'success');
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Unable to update folder.', 'error');
-      throw error;
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Unable to update folder.', 'error');
+      throw err;
     }
   }
 
   async function handleDeleteFolder() {
-    if (!deleteTarget) {
-      return;
-    }
-
+    if (!deleteTarget) return;
     try {
       const result = await deleteFolder(deleteTarget.id);
-      if (activeFolderId === deleteTarget.id) {
-        setActiveFolderId(null);
-      }
+      if (activeFolderId === deleteTarget.id) setActiveFolderId(null);
       setDeleteFolderId(null);
       showToast(`Folder deleted (${result.itemsDeleted} ${result.itemsDeleted === 1 ? 'item' : 'items'})`, 'info');
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Unable to delete folder.', 'error');
-      throw error;
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Unable to delete folder.', 'error');
+      throw err;
     }
   }
 
@@ -134,8 +83,8 @@ export default function SavedFoldersDashboard({
     try {
       await removeBookmark(bookmarkId);
       showToast(`Removed from ${folderName}`, 'info');
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Unable to remove item.', 'error');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Unable to remove item.', 'error');
     }
   }
 
@@ -183,12 +132,8 @@ export default function SavedFoldersDashboard({
               loading={bookmarksLoading}
               error={bookmarksError}
               isRemoving={isRemoving}
-              onRetry={() => {
-                void refetchBookmarks();
-              }}
-              onBack={() => {
-                startTransition(() => setActiveFolderId(null));
-              }}
+              onRetry={() => { void refetchBookmarks(); }}
+              onBack={() => { startTransition(() => setActiveFolderId(null)); }}
               onRemove={handleRemoveBookmark}
             />
           </motion.div>
@@ -205,12 +150,8 @@ export default function SavedFoldersDashboard({
               folderPreviews={folderPreviews}
               loading={loading}
               error={error}
-              onRetry={() => {
-                void refetch();
-              }}
-              onOpenFolder={(folderId) => {
-                startTransition(() => setActiveFolderId(folderId));
-              }}
+              onRetry={() => { void refetch(); }}
+              onOpenFolder={(folderId) => { startTransition(() => setActiveFolderId(folderId)); }}
               onCreateFolder={() => setCreateOpen(true)}
               onEditFolder={(folderId) => setEditFolderId(folderId)}
               onDeleteFolder={(folderId) => setDeleteFolderId(folderId)}
