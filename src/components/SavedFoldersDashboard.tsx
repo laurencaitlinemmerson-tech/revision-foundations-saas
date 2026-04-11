@@ -11,13 +11,7 @@ import { useBookmarks } from '@/lib/hooks/useBookmarks';
 import { useFolders } from '@/lib/hooks/useFolders';
 import { showToast } from '@/lib/toast';
 
-interface SavedFoldersDashboardProps {
-  showOverview?: boolean;
-}
-
-export default function SavedFoldersDashboard({
-  showOverview = true,
-}: SavedFoldersDashboardProps) {
+export default function SavedFoldersDashboard() {
   const {
     folders,
     loading,
@@ -148,7 +142,7 @@ export default function SavedFoldersDashboard({
 
   return (
     <>
-      {showOverview && !activeFolder && folders.length > 0 ? (
+      {!activeFolder && folders.length > 0 ? (
         <div className="mb-6 overflow-hidden border border-[rgba(26,24,21,0.08)] bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(240,249,247,0.86)_48%,rgba(241,246,255,0.88)_100%)] px-6 py-6 md:px-8">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-end">
             <div>
