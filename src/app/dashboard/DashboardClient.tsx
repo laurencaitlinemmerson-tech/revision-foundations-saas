@@ -1,10 +1,11 @@
 'use client';
 
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, useReducedMotion } from 'framer-motion';
+import { getPlacementDate } from '@/lib/dashboardTracking';
 
 interface DashboardClientProps {
   children: ReactNode;
@@ -22,6 +23,14 @@ function formatToday() {
   }).format(new Date());
 }
 
+function daysUntil(dateStr: string): number {
+  const target = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 export default function DashboardClient({
   children,
   firstName,
@@ -31,6 +40,15 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const shouldReduceMotion = useReducedMotion();
   const hour = new Date().getHours();
+  const [placementDays, setPlacementDays] = useState<number | null>(null);
+
+  useEffect(() => {
+    const saved = getPlacementDate();
+    if (saved) {
+      const d = daysUntil(saved);
+      if (d > 0) setPlacementDays(d);
+    }
+  }, []);
 
   const greeting = useMemo(() => {
     if (hour < 12) return 'Good morning';
@@ -50,7 +68,7 @@ export default function DashboardClient({
   const railLinks = [
     { href: '#todays-plan', label: 'Today', note: 'See the day at a glance' },
     { href: '#revision-week', label: 'Week', note: 'Plan your revision week' },
-    { href: '#search', label: 'Search', note: 'Open a guide fast' },
+    { href: '#search', label: 'Search', note: 'Find a guide quickly' },
     { href: '#saved-folders', label: 'Library', note: 'Revisit saved material' },
   ];
 
@@ -69,8 +87,9 @@ export default function DashboardClient({
         <div className="mx-auto max-w-[1120px] px-6 pb-10 pt-[52px] md:px-10 md:pb-12">
           <motion.div
             {...motionProps}
-            className="grid gap-6 lg:grid-cols-[minmax(0,1.06fr)_320px] lg:items-end"
+            className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start"
           >
+            {/* ── Left: greeting + quick links ── */}
             <div>
               <div className="mb-3 flex items-center gap-3">
                 <motion.p
@@ -79,19 +98,24 @@ export default function DashboardClient({
                 >
                   {formatToday()}
                 </motion.p>
-                <div className="w-[1px] h-3 bg-[var(--charcoal)]/15" />
-                <motion.p
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
-                  className="text-[10px] uppercase tracking-[0.16em] text-[var(--espresso)] font-medium bg-[var(--linen-light)] px-2 py-0.5"
-                >
-                  🗓 32 Days to Core OSCEs
-                </motion.p>
+                {placementDays !== null && (
+                  <>
+                    <div className="w-[0.5px] h-3 bg-[var(--charcoal)]/12" />
+                    <motion.p
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }}
+                      className="text-[10px] uppercase tracking-[0.16em] text-[var(--charcoal)]/60 font-medium"
+                    >
+                      {placementDays} {placementDays === 1 ? 'day' : 'days'} to placement
+                    </motion.p>
+                  </>
+                )}
               </div>
+
               <h1 className="font-display text-[clamp(2.8rem,5vw,4.4rem)] leading-[1.02] tracking-[-0.01em] text-[var(--espresso)]">
                 {title}
               </h1>
               <p className="mt-5 max-w-[48ch] text-[15px] font-light leading-8 text-[var(--charcoal)]/80">
-                Your revision desk. Pick up exactly where you left off, check your weak spots, and start practice without repeating the baseline set up.
+                Your revision desk. Pick up exactly where you left off, check your weak spots, and start practice without the set-up.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-2">
@@ -104,45 +128,60 @@ export default function DashboardClient({
                   >
                     <Link
                       href={item.href}
-                      className={`inline-flex items-center gap-2 border px-5 py-2.5 text-sm transition-all ${
-                      item.available
-                        ? 'border-[var(--linen-deep)] bg-white text-[var(--espresso)] hover:border-[var(--linen-medium)] hover:shadow-sm'
-                        : 'border-transparent bg-[rgba(245,243,240,0.6)] text-[var(--charcoal)]/60 hover:bg-[rgba(245,243,240,0.9)]'
-                    }`}
-                  >
-                    {item.label}
-                    {!item.available ? <span className="text-[9px] font-medium uppercase tracking-[0.12em] opacity-80">Locked</span> : null}
-                    {item.available ? <span className="text-[10px] opacity-40 ml-1">→</span> : null}
-                  </Link>
+                      className={`group/ql inline-flex items-center gap-2 border px-5 py-2.5 text-sm transition-all duration-200 ${
+                        item.available
+                          ? 'border-[var(--linen-deep)] bg-white text-[var(--espresso)] hover:border-[var(--espresso)] hover:bg-[var(--espresso)] hover:text-white'
+                          : 'border-[var(--linen-light)] bg-[var(--linen-light)]/50 text-[var(--charcoal)]/50 hover:border-[var(--linen-deep)] hover:text-[var(--charcoal)]'
+                      }`}
+                    >
+                      <span className="transition-[letter-spacing] duration-200 group-hover/ql:tracking-[0.04em]">
+                        {item.label}
+                      </span>
+                      {!item.available && (
+                        <span className="text-[9px] font-medium uppercase tracking-[0.12em] opacity-60">
+                          Locked
+                        </span>
+                      )}
+                      {item.available && (
+                        <span className="text-[10px] opacity-40 transition-all duration-200 group-hover/ql:opacity-100 group-hover/ql:translate-x-0.5">
+                          →
+                        </span>
+                      )}
+                    </Link>
                   </motion.div>
                 ))}
               </div>
             </div>
 
-            <div className="border border-[var(--linen-deep)] bg-white shadow-[0_14px_28px_rgba(26,24,21,0.02)] relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--teal-50)] opacity-40 rounded-full blur-3xl" />
+            {/* ── Right: jump rail ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="border border-[var(--linen-deep)] bg-white lg:mt-1"
+            >
               {railLinks.map((link, index) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`group flex items-start justify-between gap-4 px-6 py-5 transition-colors hover:bg-[var(--bg-secondary)] relative z-10 ${
+                  className={`group/rail flex items-center justify-between gap-4 px-5 py-[14px] transition-all duration-200 hover:bg-[var(--linen-light)]/50 hover:pl-6 ${
                     index < railLinks.length - 1 ? 'border-b border-[var(--linen-light)]' : ''
                   }`}
                 >
-                  <div>
-                    <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-[var(--charcoal)]/50">
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-[var(--charcoal)]/40 transition-colors duration-200 group-hover/rail:text-[var(--charcoal)]/70">
                       {link.label}
                     </p>
-                    <p className="mt-1 text-sm font-light leading-6 text-[var(--espresso)]">
+                    <p className="mt-0.5 text-[13px] font-light leading-snug text-[var(--espresso)] transition-colors duration-200">
                       {link.note}
                     </p>
                   </div>
-                  <span className="mt-1 text-sm text-[var(--charcoal)]/30 transition-transform duration-200 group-hover:translate-x-1">
+                  <span className="flex-shrink-0 text-[13px] text-[var(--charcoal)]/20 transition-all duration-200 group-hover/rail:text-[var(--espresso)] group-hover/rail:translate-x-0.5">
                     →
                   </span>
                 </Link>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
