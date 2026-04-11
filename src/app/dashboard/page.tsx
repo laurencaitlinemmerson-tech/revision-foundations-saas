@@ -5,333 +5,392 @@ import Link from 'next/link';
 import DashboardClient from './DashboardClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 import SavedFoldersDashboard from '@/components/SavedFoldersDashboard';
-import QuickStatsStrip from '@/components/dashboard/QuickStatsStrip';
 import WeakAreaBanner from '@/components/dashboard/WeakAreaBanner';
 import PlacementCountdown from '@/components/dashboard/PlacementCountdown';
 import QuickTopicSearch from '@/components/dashboard/QuickTopicSearch';
 import RecentPagesStrip from '@/components/dashboard/RecentPagesStrip';
-import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
+import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import OsceSparkline from '@/components/dashboard/OsceSparkline';
-import DashboardCarousel from '@/components/dashboard/DashboardCarousel';
-import { TodaysPlanCard } from '@/components/DashboardWidgets';
+import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
+import {
+  StudyStreakCard,
+  StudyTipCard,
+} from '@/components/DashboardWidgets';
+import {
+  StudyBreakdownChart,
+  WeeklyActivityChart,
+} from '@/components/DashboardCharts';
+import QuickStatsStrip from '@/components/dashboard/QuickStatsStrip';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'Your calm study desk for progress, planning, and the next useful revision step.',
+  description: 'Your study dashboard for tools, saved pages, and purchased content.',
 };
 
-interface TopicStrength {
-  label: string;
-  pct: number;
-  color: string;
-}
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const serif   = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const display = "'Playfair Display', Georgia, serif";
+const ink     = '#1A1815';
+const mid     = '#5A5750';
+const muted   = '#9C8878';
+const border  = 'rgba(0,0,0,0.08)';
 
-function SectionIntro({
+// ── Section divider with editorial numbering ──────────────────────────────────
+function SectionDivider({
   label,
-  title,
-  body,
+  id,
+  accent,
+  context,
+  number,
 }: {
   label: string;
-  title: string;
-  body: string;
+  id?: string;
+  accent?: string;
+  context?: string;
+  number?: number;
 }) {
   return (
-    <div className="border-t border-[rgba(26,24,21,0.08)] pt-4">
-      <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--charcoal)]/48">
+    <div
+      id={id}
+      style={{
+        borderTop: `0.5px solid ${border}`,
+        paddingTop: '14px',
+        marginBottom: '28px',
+        marginTop: '52px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+      }}
+    >
+      {number != null && (
+        <span style={{
+          fontFamily: display, fontSize: '15px', fontStyle: 'italic',
+          color: accent || muted, lineHeight: 1, flexShrink: 0,
+        }}>
+          {String(number).padStart(2, '0')}
+        </span>
+      )}
+      {accent && (
+        <span style={{
+          width: '6px', height: '6px', borderRadius: '50%',
+          background: accent, flexShrink: 0,
+        }} />
+      )}
+      <p style={{
+        fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em',
+        textTransform: 'uppercase', color: muted, margin: 0, flex: 1,
+      }}>
         {label}
       </p>
-      <h2 className="mt-3 font-display text-[clamp(2rem,3vw,2.8rem)] leading-[1.04] tracking-[-0.02em] text-[var(--espresso)]">
-        {title}
-      </h2>
-      <p className="mt-3 max-w-[56ch] text-sm leading-7 text-[var(--charcoal)]/72">
-        {body}
-      </p>
+      {context && (
+        <p style={{
+          fontFamily: serif, fontSize: '11px',
+          color: '#C4B4A8', fontWeight: 300, margin: 0,
+        }}>
+          {context}
+        </p>
+      )}
+      {accent && !context && (
+        <span style={{
+          height: '0.5px', flex: '0 0 48px',
+          background: `linear-gradient(90deg, ${accent}50, transparent)`,
+        }} />
+      )}
     </div>
   );
 }
 
-function MetricBlock({
+// ── Analytics stat card ────────────────────────────────────────────────────────
+function StatCard({
   label,
   value,
-  detail,
+  unit,
+  delta,
+  deltaUp,
+  children,
 }: {
   label: string;
   value: string;
-  detail: string;
+  unit: string;
+  delta?: string;
+  deltaUp?: boolean;
+  children?: React.ReactNode;
 }) {
   return (
-    <div className="border border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.5)] px-4 py-4">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--charcoal)]/42">
+    <div style={{
+      background: '#fff',
+      border: `0.5px solid rgba(0,0,0,0.07)`,
+      padding: '18px 20px',
+    }}>
+      <p style={{
+        fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
+        textTransform: 'uppercase', color: muted, marginBottom: '11px',
+      }}>
         {label}
       </p>
-      <p className="mt-3 font-display text-[2.1rem] leading-none text-[var(--espresso)]">
+      <p style={{
+        fontFamily: display, fontSize: '2rem', fontStyle: 'italic',
+        color: ink, lineHeight: 1,
+      }}>
         {value}
       </p>
-      <p className="mt-2 text-sm leading-6 text-[var(--charcoal)]/62">
-        {detail}
+      <p style={{
+        fontFamily: serif, fontSize: '10px', color: '#B4A89C',
+        fontWeight: 300, marginTop: '4px',
+      }}>
+        {unit}
       </p>
+      {delta && (
+        <p style={{
+          fontFamily: serif, fontSize: '10px',
+          color: deltaUp ? '#6B9E87' : '#B07A8E',
+          marginTop: '10px', paddingTop: '9px',
+          borderTop: `0.5px solid rgba(0,0,0,0.06)`,
+        }}>
+          {deltaUp ? '↑' : '↓'} {delta}
+        </p>
+      )}
+      {children}
     </div>
   );
 }
 
-function TopicBar({ topic }: { topic: TopicStrength }) {
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-[var(--espresso)]">{topic.label}</p>
-        <p className="text-sm text-[var(--charcoal)]/56">{topic.pct}%</p>
-      </div>
-      <div className="mt-2 h-[3px] overflow-hidden bg-[rgba(26,24,21,0.08)]">
-        <div
-          className="h-full"
-          style={{ width: `${topic.pct}%`, background: topic.color }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function RecommendationCard({
-  eyebrow,
-  title,
-  body,
-  href,
-  cta,
+// ── Inline progress bar ────────────────────────────────────────────────────────
+function ProgressBar({
+  label,
+  pct,
+  color,
 }: {
-  eyebrow: string;
-  title: string;
-  body: string;
-  href: string;
-  cta: string;
+  label: string;
+  pct: number;
+  color: string;
 }) {
   return (
-    <Link
-      href={href}
-      className="flex h-full flex-col justify-between border border-[rgba(26,24,21,0.08)] bg-white px-5 py-5 transition-transform duration-200 hover:-translate-y-1 hover:border-[rgba(26,24,21,0.16)]"
-    >
-      <div>
-        <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--charcoal)]/44">
-          {eyebrow}
-        </p>
-        <h3 className="mt-3 font-display text-[1.65rem] leading-[1.06] text-[var(--espresso)]">
-          {title}
-        </h3>
-        <p className="mt-3 text-sm leading-7 text-[var(--charcoal)]/72">
-          {body}
-        </p>
+    <div style={{ marginBottom: '13px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+        <span style={{ fontFamily: serif, fontSize: '12px', color: '#2C2A27' }}>{label}</span>
+        <span style={{ fontFamily: serif, fontSize: '11px', color: '#B4A89C' }}>{pct}%</span>
       </div>
-      <p className="mt-6 text-sm text-[var(--espresso)]">
-        {cta} {'->'}
-      </p>
-    </Link>
+      <div style={{ height: '3px', background: 'rgba(0,0,0,0.06)' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: color }} />
+      </div>
+    </div>
   );
 }
 
+// ── Page ───────────────────────────────────────────────────────────────────────
 export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in');
 
-  const user = await currentUser();
+  const user      = await currentUser();
   const firstName = user?.firstName ?? null;
 
-  const entitlements = await getUserEntitlements(userId);
-  const hasOsce = hasAccessToContent(entitlements, 'osce');
-  const hasQuiz = hasAccessToContent(entitlements, 'quiz');
+  const entitlements  = await getUserEntitlements(userId);
+  const hasOsce       = hasAccessToContent(entitlements, 'osce');
+  const hasQuiz       = hasAccessToContent(entitlements, 'quiz');
+  const hasFullAccess = hasOsce && hasQuiz;
 
   const quizStats = await getUserQuizStats(userId).catch(() => null);
   const osceStats = await getUserOsceStats(userId).catch(() => null);
 
+  // Derive weak/strong areas for progress bars
   const topicStrength = quizStats?.topicBreakdown ?? [
-    { label: 'Respiratory', pct: 60, color: '#8BBCAA' },
-    { label: 'Cardiac', pct: 54, color: '#D4A574' },
+    { label: 'Respiratory',  pct: 60, color: '#8BBCAA' },
+    { label: 'Cardiac',      pct: 54, color: '#D4A574' },
     { label: 'Neurological', pct: 46, color: '#7BA7CC' },
     { label: 'Pharmacology', pct: 38, color: '#C89BB0' },
   ];
 
-  const strongestTopic = topicStrength[0]?.label ?? quizStats?.strongestArea ?? 'Respiratory';
-  const weakestTopic = topicStrength[topicStrength.length - 1]?.label ?? quizStats?.weakestArea ?? 'Pharmacology';
-
   return (
     <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz}>
-      <div className="flex flex-col gap-16 md:gap-20">
-        <section>
-          <QuickStatsStrip />
-        </section>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-        <section
-          id="today-block"
-          className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_360px]"
-        >
-          <div className="border border-[rgba(26,24,21,0.08)] bg-white px-6 py-6 md:px-7">
-            <SectionIntro
-              label="Study desk"
-              title="Progress, made readable."
-              body="The aim here is not to drown you in analytics. It is to make the state of your revision obvious enough that choosing the next action feels easy."
+        {/* ━━ 0 · AT A GLANCE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div style={{ marginTop: '40px' }}>
+          <QuickStatsStrip />
+        </div>
+
+        {/* ━━ 1 · PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <SectionDivider label="Your progress" accent="#D4A574" context="This week" number={1} />
+
+          {/* 4-col analytics row */}
+          <div className="dash-analytics-row">
+            <StatCard
+              label="Study streak"
+              value={String(quizStats?.streakDays ?? 14)}
+              unit="days in a row"
+            >
+              {/* Streak pips — 7 dots, last one = today */}
+              <div style={{ display: 'flex', gap: '4px', marginTop: '11px' }}>
+                {Array.from({ length: 7 }, (_, i) => (
+                  <span key={i} style={{
+                    width: '9px', height: '9px', borderRadius: '50%',
+                    background: i < 6 ? '#8BBCAA' : '#2C2A27',
+                    display: 'inline-block',
+                  }} />
+                ))}
+              </div>
+            </StatCard>
+
+            <StatCard
+              label="Quiz average"
+              value={quizStats ? `${quizStats.averagePercent}%` : '—'}
+              unit={quizStats ? `${quizStats.totalAnswered} questions answered` : 'No quiz data yet'}
+              delta={quizStats?.weekOnWeekDelta ? `${quizStats.weekOnWeekDelta}% from last week` : undefined}
+              deltaUp={(quizStats?.weekOnWeekDelta ?? 0) > 0}
             />
 
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <MetricBlock
-                label="Study streak"
-                value={String(quizStats?.streakDays ?? 14)}
-                detail="Quiet consistency matters more than perfect study days."
-              />
-              <MetricBlock
-                label="Quiz average"
-                value={quizStats ? `${quizStats.averagePercent}%` : '—'}
-                detail={quizStats ? `${quizStats.totalAnswered} questions answered so far.` : 'Run a short set and this becomes meaningful.'}
-              />
-              <MetricBlock
-                label="This week"
-                value={String(quizStats?.hoursThisWeek ?? '—')}
-                detail="Enough signal to tell whether the week is moving."
-              />
+            <StatCard
+              label="OSCE stations"
+              value={String(osceStats?.totalRuns ?? '—')}
+              unit="completed this month"
+              delta={osceStats?.monthOnMonthDelta ? `${osceStats.monthOnMonthDelta} more than last month` : undefined}
+              deltaUp={(osceStats?.monthOnMonthDelta ?? 0) > 0}
+            />
+
+            <StatCard
+              label="Hours this week"
+              value={String(quizStats?.hoursThisWeek ?? '—')}
+              unit="hours studied"
+            />
+          </div>
+
+          {/* Topic strength + quiz accuracy bars */}
+          <div className="dash-prog-pair" style={{ marginTop: '12px' }}>
+            <div style={{
+              background: '#fff', border: `0.5px solid rgba(0,0,0,0.07)`, padding: '20px 22px',
+            }}>
+              <p style={{
+                fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: muted, marginBottom: '16px',
+              }}>
+                Topic strength
+              </p>
+              {topicStrength.map((t) => (
+                <ProgressBar key={t.label} label={t.label} pct={t.pct} color={t.color} />
+              ))}
             </div>
 
-            <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="space-y-5">
-                <div className="border border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.56)] px-5 py-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--charcoal)]/44">
-                        Topic strength
-                      </p>
-                      <p className="mt-2 text-sm leading-7 text-[var(--charcoal)]/68">
-                        Use this to spot what is holding up under revision and what still needs deliberate repair.
-                      </p>
-                    </div>
-                    <p className="text-sm text-[var(--charcoal)]/56">
-                      Strongest: {strongestTopic}
-                    </p>
-                  </div>
-                  <div className="mt-5 space-y-4">
-                    {topicStrength.map((topic) => (
-                      <TopicBar key={topic.label} topic={topic} />
-                    ))}
-                  </div>
-                </div>
-
-                <div id="weak-areas">
-                  <WeakAreaBanner />
-                </div>
-              </div>
-
-              <div className="border border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.56)] px-5 py-5">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--charcoal)]/44">
-                  Applied signal
-                </p>
-                <p className="mt-3 font-display text-[2.3rem] leading-none text-[var(--espresso)]">
-                  {osceStats ? `${osceStats.averageScore}%` : '—'}
-                </p>
-                <p className="mt-2 text-sm leading-7 text-[var(--charcoal)]/68">
-                  {osceStats
-                    ? `${osceStats.totalRuns} stations completed. Keep pulling ${strongestTopic.toLowerCase()} into timed settings and bring ${weakestTopic.toLowerCase()} up next.`
-                    : 'Once you run a few stations, this starts to show whether recall is translating into practice.'}
-                </p>
-                <div className="mt-5">
-                  <OsceSparkline />
-                </div>
-              </div>
+            <div style={{
+              background: '#fff', border: `0.5px solid rgba(0,0,0,0.07)`, padding: '20px 22px',
+            }}>
+              <p style={{
+                fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: muted, marginBottom: '16px',
+              }}>
+                Quiz accuracy by area
+              </p>
+              {topicStrength.map((t) => (
+                <ProgressBar key={t.label} label={t.label} pct={Math.min(t.pct + 14, 100)} color={t.color} />
+              ))}
             </div>
           </div>
 
-          <div className="space-y-6">
-            <TodaysPlanCard />
+          <div style={{ marginTop: '16px' }}>
+            <WeakAreaBanner />
+          </div>
+        </section>
+
+        {/* ━━ 2 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <SectionDivider label="Today's plan" id="todays-plan" accent="#8BBCAA" number={2} />
+          <WhatToDoToday />
+          <div style={{ marginTop: '12px' }}>
             <PlacementCountdown />
           </div>
         </section>
 
+        {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <DashboardCarousel
-            eyebrow="Recommended next"
-            title="Guided progression, not filler."
-            description="A calm dashboard should still create movement. These are the next few directions that are most likely to be useful."
-          >
-            <RecommendationCard
-              eyebrow="Continue your track"
-              title="Resume the last thread"
-              body="The easiest way back into revision is usually the page, station, or question flow you already opened recently."
-              href="/hub"
-              cta="Open your last route"
-            />
-            <RecommendationCard
-              eyebrow="Build on a strength"
-              title={`${strongestTopic} under pressure`}
-              body="Use your strongest topic in a timed or more applied setting before the week gets too theoretical."
-              href={hasOsce ? '/osce' : '/hub'}
-              cta={hasOsce ? 'Launch OSCE practice' : 'Open the hub'}
-            />
-            <RecommendationCard
-              eyebrow="Repair the gap"
-              title={`Bring ${weakestTopic} above 80%`}
-              body="One precise short set here is likely to improve the overall dashboard more than another comfortable review session."
-              href={hasQuiz ? `/quiz?topic=${encodeURIComponent(weakestTopic)}` : '/pricing'}
-              cta={hasQuiz ? `Practise ${weakestTopic}` : 'Unlock targeted quizzes'}
-            />
-            <RecommendationCard
-              eyebrow="Use your archive"
-              title="Revisit saved material"
-              body="Your saved folders should feel like a personal revision library, not a place things disappear into."
-              href="#saved-resources"
-              cta="Open saved library"
-            />
-          </DashboardCarousel>
+          <SectionDivider label="Sample revision week" id="revision-week" accent="#D4B896" context="Adjust to your schedule" number={3} />
+          <RevisionWeekPlanner />
         </section>
 
-        <section id="saved-search">
-          <SectionIntro
-            label="Lookup and planning"
-            title="Search quickly, then shape the week."
-            body="One side helps you re-enter content fast. The other keeps revision structured enough that you know what a good week could look like."
-          />
-
-          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-            <div>
-              <QuickTopicSearch />
-              <div className="mt-4 border border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.5)] px-5 py-4">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--charcoal)]/44">
-                  Recent pages
-                </p>
-                <div className="mt-3">
-                  <RecentPagesStrip />
-                </div>
-              </div>
-            </div>
-
-            <RevisionWeekPlanner />
+        {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <SectionDivider label="Find anything" id="search" accent="#7BA7CC" number={4} />
+          <QuickTopicSearch />
+          <div style={{ marginTop: '20px' }}>
+            <p style={{
+              fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em',
+              textTransform: 'uppercase', color: muted, marginBottom: '10px',
+            }}>
+              Recent pages
+            </p>
+            <RecentPagesStrip />
           </div>
         </section>
 
-        <section id="saved-resources">
-          <SectionIntro
-            label="Saved library"
-            title="Your personal revision archive."
-            body="Saved folders work best when they feel collected and reusable, not forgotten. This should be the material you genuinely want close by."
-          />
-
-          <div className="mt-6 border border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.58)] p-4 md:p-6">
-            <SavedFoldersDashboard showOverview={false} />
-          </div>
+        {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <SectionDivider label="Saved folders" id="saved-folders" accent="#D4B896" number={5} />
+          <SavedFoldersDashboard />
         </section>
 
-        <section className="border-t border-[rgba(26,24,21,0.08)] pt-6 text-center">
-          <p className="font-display text-[1.35rem] leading-[1.2] text-[var(--espresso)]">
-            Keep the next step smaller than your stress.
+        {/* ━━ 6 · CLOSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div style={{
+          marginTop: '56px',
+          paddingTop: '30px',
+          borderTop: `0.5px solid rgba(0,0,0,0.07)`,
+          textAlign: 'center',
+          paddingBottom: '8px',
+        }}>
+          <p style={{
+            fontFamily: display, fontSize: '1.2rem', fontStyle: 'italic',
+            color: '#2C2A27', lineHeight: 1.5, maxWidth: '44ch',
+            margin: '0 auto 8px',
+          }}>
+            "Keep the next step smaller than your stress."
           </p>
-          <p className="mx-auto mt-3 max-w-[44ch] text-sm leading-7 text-[var(--charcoal)]/68">
-            One guide, one station, one focused question set. Enough to keep the system alive without turning it into noise.
+          <p style={{
+            fontFamily: serif, fontSize: '11px', color: '#C4B4A8', fontWeight: 300,
+          }}>
+            One guide, one station, one question — then rest if you need to.
           </p>
           <Link
             href="/how-to-use"
-            className="mt-4 inline-flex items-center gap-2 text-sm text-[var(--espresso)] underline underline-offset-4"
+            style={{
+              fontFamily: serif, fontSize: '12px', color: ink,
+              textDecoration: 'underline', textUnderlineOffset: '3px',
+              display: 'inline-block', marginTop: '12px',
+            }}
           >
-            Read the study method {'->'}
+            Read the study method →
           </Link>
-        </section>
+        </div>
+
       </div>
+
+      <style>{`
+        .dash-analytics-row {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+          margin-bottom: 0;
+        }
+        .dash-prog-pair {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        @media (max-width: 980px) {
+          .dash-analytics-row { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 860px) {
+          .dash-analytics-row { grid-template-columns: 1fr 1fr; }
+          .dash-prog-pair { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+          .dash-analytics-row { grid-template-columns: 1fr 1fr; }
+        }
+      `}</style>
     </DashboardClient>
   );
 }
 
+// ── Stubs — replace with real data fetching ────────────────────────────────────
 async function getUserQuizStats(_userId: string) {
   void _userId;
   return null as null | {
@@ -342,7 +401,7 @@ async function getUserQuizStats(_userId: string) {
     hoursThisWeek: number;
     strongestArea: string;
     weakestArea: string;
-    topicBreakdown: TopicStrength[];
+    topicBreakdown: { label: string; pct: number; color: string }[];
   };
 }
 
