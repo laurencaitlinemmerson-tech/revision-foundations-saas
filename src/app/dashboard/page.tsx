@@ -5,145 +5,163 @@ import Link from 'next/link';
 import DashboardClient from './DashboardClient';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 import SavedFoldersDashboard from '@/components/SavedFoldersDashboard';
-import ExamSeasonPlanner from '@/components/dashboard/ExamSeasonPlanner';
 import WeakAreaBanner from '@/components/dashboard/WeakAreaBanner';
 import PlacementCountdown from '@/components/dashboard/PlacementCountdown';
 import QuickTopicSearch from '@/components/dashboard/QuickTopicSearch';
 import RecentPagesStrip from '@/components/dashboard/RecentPagesStrip';
 import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import OsceSparkline from '@/components/dashboard/OsceSparkline';
+import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
+import {
+  StudyStreakCard,
+  StudyTipCard,
+} from '@/components/DashboardWidgets';
 import {
   StudyBreakdownChart,
   WeeklyActivityChart,
-  TopicStrengthChart,
-  MockExamProgressChart,
 } from '@/components/DashboardCharts';
-
-import {
-  ContinueCard,
-  TodaysPlanCard,
-  FocusAreasCard,
-  StudyStreakCard,
-  CommunityStatsCard,
-  QuickAchievement,
-  StudyTipCard,
-  WeeklyProgress,
-} from '@/components/DashboardWidgets';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your study dashboard for tools, saved pages, and purchased content.',
 };
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const serif     = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display   = "'Playfair Display', Georgia, serif";
-const ink       = '#1A1815';
-const mid       = '#5A5750';
-const muted     = '#9C8878';
-const border    = 'rgba(0,0,0,0.08)';
-const borderMid = 'rgba(0,0,0,0.10)';
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const serif   = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const display = "'Playfair Display', Georgia, serif";
+const ink     = '#1A1815';
+const mid     = '#5A5750';
+const muted   = '#9C8878';
+const border  = 'rgba(0,0,0,0.08)';
 
-// ── Lightweight section divider ───────────────────────────────────────────────
-function SectionDivider({ label, id, accent }: { label: string; id?: string; accent?: string }) {
+// ── Section divider ────────────────────────────────────────────────────────────
+function SectionDivider({
+  label,
+  id,
+  accent,
+  context,
+}: {
+  label: string;
+  id?: string;
+  accent?: string;
+  context?: string;
+}) {
   return (
-    <div id={id} style={{
-      borderTop: `0.5px solid ${border}`,
-      paddingTop: '12px',
-      marginBottom: '28px',
-      marginTop: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-    }}>
+    <div
+      id={id}
+      style={{
+        borderTop: `0.5px solid ${border}`,
+        paddingTop: '13px',
+        marginBottom: '28px',
+        marginTop: '52px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+    >
       {accent && (
         <span style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          background: accent,
-          flexShrink: 0,
+          width: '6px', height: '6px', borderRadius: '50%',
+          background: accent, flexShrink: 0,
         }} />
       )}
       <p style={{
-        fontFamily: serif,
-        fontSize: '10px',
-        letterSpacing: '0.18em',
-        textTransform: 'uppercase',
-        color: muted,
-        margin: 0,
+        fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em',
+        textTransform: 'uppercase', color: muted, margin: 0,
       }}>
         {label}
       </p>
+      {context && (
+        <p style={{
+          marginLeft: 'auto', fontFamily: serif, fontSize: '11px',
+          color: '#C4B4A8', fontWeight: 300, margin: 0,
+        }}>
+          {context}
+        </p>
+      )}
     </div>
   );
 }
 
-// ── Bundle upsell — compact ───────────────────────────────────────────────────
-function BundlePrompt({
-  hasOsce,
-  hasQuiz,
-  hasAnyTool,
+// ── Analytics stat card ────────────────────────────────────────────────────────
+function StatCard({
+  label,
+  value,
+  unit,
+  delta,
+  deltaUp,
+  children,
 }: {
-  hasOsce: boolean;
-  hasQuiz: boolean;
-  hasAnyTool: boolean;
+  label: string;
+  value: string;
+  unit: string;
+  delta?: string;
+  deltaUp?: boolean;
+  children?: React.ReactNode;
 }) {
-  const remainingLabel =
-    hasOsce && !hasQuiz ? 'core quiz'
-    : !hasOsce && hasQuiz ? 'OSCE tool'
-    : "children's bundle";
-
   return (
     <div style={{
+      background: '#fff',
+      border: `0.5px solid rgba(0,0,0,0.07)`,
       padding: '18px 20px',
-      background: 'linear-gradient(135deg, rgba(250,238,218,0.4) 0%, rgba(245,243,240,0.6) 100%)',
-      border: `0.5px solid ${border}`,
     }}>
       <p style={{
-        fontFamily: display, fontSize: '1.1rem', fontStyle: 'italic',
-        fontWeight: 400, lineHeight: 1.2, color: ink, marginBottom: '8px',
+        fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
+        textTransform: 'uppercase', color: muted, marginBottom: '11px',
       }}>
-        {hasAnyTool ? `Add the ${remainingLabel}.` : 'Build the full study setup.'}
+        {label}
       </p>
       <p style={{
-        fontFamily: serif, fontSize: '12px', color: mid, fontWeight: 300,
-        lineHeight: 1.7, marginBottom: '14px',
+        fontFamily: display, fontSize: '2rem', fontStyle: 'italic',
+        color: ink, lineHeight: 1,
       }}>
-        {hasAnyTool
-          ? 'Bring your practice into one place.'
-          : 'Start with the free preview, or unlock when ready.'}
+        {value}
       </p>
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-        <Link
-          href="/pricing"
-          style={{
-            fontFamily: serif, fontSize: '12px', color: '#FAFAF8',
-            background: ink, padding: '8px 16px', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center',
-          }}
-        >
-          View pricing
-        </Link>
-        {!hasAnyTool && (
-          <Link
-            href="/osce"
-            style={{
-              fontFamily: serif, fontSize: '12px', color: mid,
-              padding: '7px 16px', border: `0.5px solid ${borderMid}`,
-              textDecoration: 'none', display: 'inline-flex', alignItems: 'center',
-              background: 'white',
-            }}
-          >
-            Try free preview
-          </Link>
-        )}
+      <p style={{
+        fontFamily: serif, fontSize: '10px', color: '#B4A89C',
+        fontWeight: 300, marginTop: '4px',
+      }}>
+        {unit}
+      </p>
+      {delta && (
+        <p style={{
+          fontFamily: serif, fontSize: '10px',
+          color: deltaUp ? '#6B9E87' : '#B07A8E',
+          marginTop: '10px', paddingTop: '9px',
+          borderTop: `0.5px solid rgba(0,0,0,0.06)`,
+        }}>
+          {deltaUp ? '↑' : '↓'} {delta}
+        </p>
+      )}
+      {children}
+    </div>
+  );
+}
+
+// ── Inline progress bar ────────────────────────────────────────────────────────
+function ProgressBar({
+  label,
+  pct,
+  color,
+}: {
+  label: string;
+  pct: number;
+  color: string;
+}) {
+  return (
+    <div style={{ marginBottom: '13px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+        <span style={{ fontFamily: serif, fontSize: '12px', color: '#2C2A27' }}>{label}</span>
+        <span style={{ fontFamily: serif, fontSize: '11px', color: '#B4A89C' }}>{pct}%</span>
+      </div>
+      <div style={{ height: '3px', background: 'rgba(0,0,0,0.06)' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: color }} />
       </div>
     </div>
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Page ───────────────────────────────────────────────────────────────────────
 export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in');
@@ -154,238 +172,214 @@ export default async function DashboardPage() {
   const entitlements  = await getUserEntitlements(userId);
   const hasOsce       = hasAccessToContent(entitlements, 'osce');
   const hasQuiz       = hasAccessToContent(entitlements, 'quiz');
-  const hasAnyTool    = hasOsce || hasQuiz;
   const hasFullAccess = hasOsce && hasQuiz;
 
-  const quizStats    = await getUserQuizStats(userId).catch(() => null);
-  const osceStats    = await getUserOsceStats(userId).catch(() => null);
-  const hasAnalytics = !!(quizStats?.totalAnswered || osceStats?.totalRuns);
+  const quizStats = await getUserQuizStats(userId).catch(() => null);
+  const osceStats = await getUserOsceStats(userId).catch(() => null);
+
+  // Derive weak/strong areas for progress bars
+  const topicStrength = quizStats?.topicBreakdown ?? [
+    { label: 'Respiratory',  pct: 60, color: '#8BBCAA' },
+    { label: 'Cardiac',      pct: 54, color: '#D4A574' },
+    { label: 'Neurological', pct: 46, color: '#7BA7CC' },
+    { label: 'Pharmacology', pct: 38, color: '#C89BB0' },
+  ];
 
   return (
     <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '56px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-        {/* ━━ 1 · UP NEXT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 1 · PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Up next" id="up-next" accent="#8BBCAA" />
+          <SectionDivider label="Your progress" accent="#D4A574" context="This week" />
 
-          <div style={{ marginBottom: '16px' }}>
-            <WhatToDoToday />
+          {/* 4-col analytics row */}
+          <div className="dash-analytics-row">
+            <StatCard
+              label="Study streak"
+              value={String(quizStats?.streakDays ?? 14)}
+              unit="days in a row"
+            >
+              {/* Streak pips — 7 dots, last one = today */}
+              <div style={{ display: 'flex', gap: '4px', marginTop: '11px' }}>
+                {Array.from({ length: 7 }, (_, i) => (
+                  <span key={i} style={{
+                    width: '9px', height: '9px', borderRadius: '50%',
+                    background: i < 6 ? '#8BBCAA' : '#2C2A27',
+                    display: 'inline-block',
+                  }} />
+                ))}
+              </div>
+            </StatCard>
+
+            <StatCard
+              label="Quiz average"
+              value={quizStats ? `${quizStats.averagePercent}%` : '—'}
+              unit={quizStats ? `${quizStats.totalAnswered} questions answered` : 'No quiz data yet'}
+              delta={quizStats?.weekOnWeekDelta ? `${quizStats.weekOnWeekDelta}% from last week` : undefined}
+              deltaUp={(quizStats?.weekOnWeekDelta ?? 0) > 0}
+            />
+
+            <StatCard
+              label="OSCE stations"
+              value={String(osceStats?.totalRuns ?? '—')}
+              unit="completed this month"
+              delta={osceStats?.monthOnMonthDelta ? `${osceStats.monthOnMonthDelta} more than last month` : undefined}
+              deltaUp={(osceStats?.monthOnMonthDelta ?? 0) > 0}
+            />
+
+            <StatCard
+              label="Hours this week"
+              value={String(quizStats?.hoursThisWeek ?? '—')}
+              unit="hours studied"
+            />
           </div>
 
-          <div className="dash-upnext-grid">
-            <TodaysPlanCard />
-            <ContinueCard />
-          </div>
-
-          {!hasFullAccess && (
-            <div style={{ marginTop: '20px' }}>
-              <BundlePrompt hasOsce={hasOsce} hasQuiz={hasQuiz} hasAnyTool={hasAnyTool} />
+          {/* Topic strength + quiz accuracy bars */}
+          <div className="dash-prog-pair" style={{ marginTop: '12px' }}>
+            <div style={{
+              background: '#fff', border: `0.5px solid rgba(0,0,0,0.07)`, padding: '20px 22px',
+            }}>
+              <p style={{
+                fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: muted, marginBottom: '16px',
+              }}>
+                Topic strength
+              </p>
+              {topicStrength.map((t) => (
+                <ProgressBar key={t.label} label={t.label} pct={t.pct} color={t.color} />
+              ))}
             </div>
-          )}
-        </section>
 
-        {/* ━━ 2 · PRACTICE & PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section>
-          <SectionDivider label="Practice & progress" id="progress-block" accent="#D4A574" />
-
-          <div className="dash-progress-grid">
-            <StudyStreakCard />
-            <FocusAreasCard />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <QuickAchievement />
-              <PlacementCountdown />
-              <WeeklyProgress />
+            <div style={{
+              background: '#fff', border: `0.5px solid rgba(0,0,0,0.07)`, padding: '20px 22px',
+            }}>
+              <p style={{
+                fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: muted, marginBottom: '16px',
+              }}>
+                Quiz accuracy by area
+              </p>
+              {topicStrength.map((t) => (
+                <ProgressBar key={t.label} label={t.label} pct={Math.min(t.pct + 14, 100)} color={t.color} />
+              ))}
             </div>
           </div>
 
-          <div style={{ marginTop: '20px' }}>
+          <div style={{ marginTop: '16px' }}>
             <WeakAreaBanner />
           </div>
-
-          {/* Charts */}
-          <div className="dash-charts-grid" style={{ marginTop: '20px' }}>
-            <StudyBreakdownChart />
-            <WeeklyActivityChart />
-          </div>
-
-          {hasAnalytics && (
-            <div className="dash-analytics-row" style={{ marginTop: '20px' }}>
-              <OsceSparkline />
-
-              {quizStats && (
-                <div style={{ borderLeft: `0.5px solid ${border}`, paddingLeft: '24px' }}>
-                  <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '8px' }}>
-                    Quiz average
-                  </p>
-                  <p style={{ fontFamily: display, fontSize: '2.4rem', fontStyle: 'italic', lineHeight: 1, color: ink, marginBottom: '6px' }}>
-                    {quizStats.averagePercent}%
-                  </p>
-                  <p style={{ fontFamily: serif, fontSize: '12px', color: mid, fontWeight: 300, lineHeight: 1.65 }}>
-                    Across {quizStats.totalAnswered} questions.
-                  </p>
-                  {(quizStats.strongestArea || quizStats.weakestArea) && (
-                    <div style={{ display: 'flex', gap: '24px', marginTop: '12px', borderTop: `0.5px solid ${border}`, paddingTop: '10px' }}>
-                      {quizStats.strongestArea && (
-                        <div>
-                          <p style={{ fontFamily: serif, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted, marginBottom: '4px' }}>Strongest</p>
-                          <p style={{ fontFamily: serif, fontSize: '12px', color: ink }}>{quizStats.strongestArea}</p>
-                        </div>
-                      )}
-                      {quizStats.weakestArea && (
-                        <div>
-                          <p style={{ fontFamily: serif, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted, marginBottom: '4px' }}>Weakest</p>
-                          <p style={{ fontFamily: serif, fontSize: '12px', color: ink }}>{quizStats.weakestArea}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </section>
 
-        {/* ━━ 2b · INSIGHTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 2 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Insights" id="insights" accent="#C89BB0" />
-          <div className="dash-charts-grid">
-            <TopicStrengthChart />
-            <MockExamProgressChart />
+          <SectionDivider label="Today's plan" id="todays-plan" accent="#8BBCAA" />
+          <WhatToDoToday />
+          <div style={{ marginTop: '12px' }}>
+            <PlacementCountdown />
           </div>
         </section>
 
-        {/* ━━ 3 · YOUR RESOURCES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Your resources" id="saved-resources" accent="#7BA7CC" />
-
-          <div className="dash-resources-grid">
-            <QuickTopicSearch />
-            <div>
-              <p style={{
-                fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em',
-                textTransform: 'uppercase', color: muted, marginBottom: '10px',
-              }}>
-                Recent pages
-              </p>
-              <RecentPagesStrip />
-            </div>
-          </div>
-
-          <div style={{ marginTop: '24px' }}>
-            <SavedFoldersDashboard />
-          </div>
+          <SectionDivider label="Sample revision week" id="revision-week" accent="#D4B896" context="Adjust to your schedule" />
+          <RevisionWeekPlanner />
         </section>
 
-        {/* ━━ 4 · REVISION PLANNING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Revision planning" id="exam-season" accent="#D4B896" />
-
-          <ExamSeasonPlanner hasOsce={hasOsce} hasQuiz={hasQuiz} />
-
-          <div className="dash-closing-grid" style={{ marginTop: '24px' }}>
-            <CommunityStatsCard />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <StudyTipCard />
-              <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '18px' }}>
-                <p style={{
-                  fontFamily: display, fontSize: '1.2rem', fontStyle: 'italic',
-                  fontWeight: 400, lineHeight: 1.15, color: ink, marginBottom: '8px',
-                }}>
-                  Keep the next step smaller than your stress.
-                </p>
-                <p style={{
-                  fontFamily: serif, fontSize: '12px', color: mid,
-                  fontWeight: 300, lineHeight: 1.7, marginBottom: '12px',
-                }}>
-                  One guide, one station, or one short question set — then stop there if you need to.
-                </p>
-                <Link
-                  href="/how-to-use"
-                  style={{ fontFamily: serif, fontSize: '12px', color: ink, textDecoration: 'underline', textUnderlineOffset: '3px' }}
-                >
-                  Read the study method →
-                </Link>
-              </div>
-            </div>
+          <SectionDivider label="Find anything" id="search" accent="#7BA7CC" />
+          <QuickTopicSearch />
+          <div style={{ marginTop: '20px' }}>
+            <p style={{
+              fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em',
+              textTransform: 'uppercase', color: muted, marginBottom: '10px',
+            }}>
+              Recent pages
+            </p>
+            <RecentPagesStrip />
           </div>
         </section>
+
+        {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <SectionDivider label="Saved folders" id="saved-folders" accent="#D4B896" />
+          <SavedFoldersDashboard />
+        </section>
+
+        {/* ━━ 6 · CLOSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div style={{
+          marginTop: '56px',
+          paddingTop: '30px',
+          borderTop: `0.5px solid rgba(0,0,0,0.07)`,
+          textAlign: 'center',
+          paddingBottom: '8px',
+        }}>
+          <p style={{
+            fontFamily: display, fontSize: '1.2rem', fontStyle: 'italic',
+            color: '#2C2A27', lineHeight: 1.5, maxWidth: '44ch',
+            margin: '0 auto 8px',
+          }}>
+            "Keep the next step smaller than your stress."
+          </p>
+          <p style={{
+            fontFamily: serif, fontSize: '11px', color: '#C4B4A8', fontWeight: 300,
+          }}>
+            One guide, one station, one question — then rest if you need to.
+          </p>
+          <Link
+            href="/how-to-use"
+            style={{
+              fontFamily: serif, fontSize: '12px', color: ink,
+              textDecoration: 'underline', textUnderlineOffset: '3px',
+              display: 'inline-block', marginTop: '12px',
+            }}
+          >
+            Read the study method →
+          </Link>
+        </div>
 
       </div>
 
       <style>{`
-        .dash-upnext-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
-          gap: 20px;
-          align-items: start;
-        }
-        .dash-progress-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 20px;
-          align-items: start;
-        }
         .dash-analytics-row {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          gap: 28px;
-          align-items: start;
-          padding: 24px;
-          border: 0.5px solid ${border};
-          background: rgba(255,255,255,0.6);
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+          margin-bottom: 0;
         }
-        .dash-resources-grid {
+        .dash-prog-pair {
           display: grid;
-          grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
-          gap: 24px;
-          align-items: start;
-        }
-        .dash-closing-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          gap: 28px;
-          align-items: start;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
         }
         @media (max-width: 980px) {
-          .dash-progress-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
+          .dash-analytics-row { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 860px) {
-          .dash-upnext-grid,
-          .dash-progress-grid,
-          .dash-analytics-row,
-          .dash-resources-grid,
-          .dash-closing-grid,
-          .dash-charts-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-        .dash-charts-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 16px;
-          align-items: start;
+          .dash-analytics-row { grid-template-columns: 1fr 1fr; }
+          .dash-prog-pair { grid-template-columns: 1fr; }
         }
         @media (max-width: 560px) {
-          .dash-progress-grid { grid-template-columns: 1fr; }
-          .dash-charts-grid { grid-template-columns: 1fr; }
+          .dash-analytics-row { grid-template-columns: 1fr 1fr; }
         }
       `}</style>
     </DashboardClient>
   );
 }
 
-// ── Stubs — replace with your real data fetching ──────────────────────────────
+// ── Stubs — replace with real data fetching ────────────────────────────────────
 async function getUserQuizStats(_userId: string) {
   void _userId;
   return null as null | {
     totalAnswered: number;
     averagePercent: number;
+    weekOnWeekDelta: number;
+    streakDays: number;
+    hoursThisWeek: number;
     strongestArea: string;
     weakestArea: string;
-    weakAreas: { area: string; note: string }[];
+    topicBreakdown: { label: string; pct: number; color: string }[];
   };
 }
 
@@ -394,5 +388,6 @@ async function getUserOsceStats(_userId: string) {
   return null as null | {
     totalRuns: number;
     averageScore: number;
+    monthOnMonthDelta: number;
   };
 }
