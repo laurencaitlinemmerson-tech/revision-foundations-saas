@@ -12,6 +12,12 @@ import QuickTopicSearch from '@/components/dashboard/QuickTopicSearch';
 import RecentPagesStrip from '@/components/dashboard/RecentPagesStrip';
 import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import OsceSparkline from '@/components/dashboard/OsceSparkline';
+import {
+  StudyBreakdownChart,
+  WeeklyActivityChart,
+  TopicStrengthChart,
+  MockExamProgressChart,
+} from '@/components/DashboardCharts';
 
 import {
   ContinueCard,
@@ -185,6 +191,12 @@ export default async function DashboardPage() {
             <WeakAreaBanner />
           </div>
 
+          {/* Charts */}
+          <div className="dash-charts-grid" style={{ marginTop: '20px' }}>
+            <StudyBreakdownChart />
+            <WeeklyActivityChart />
+          </div>
+
           {hasAnalytics && (
             <div className="dash-analytics-row" style={{ marginTop: '20px' }}>
               <OsceSparkline />
@@ -220,6 +232,15 @@ export default async function DashboardPage() {
               )}
             </div>
           )}
+        </section>
+
+        {/* ━━ 2b · INSIGHTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <SectionDivider label="Insights" id="insights" />
+          <div className="dash-charts-grid">
+            <TopicStrengthChart />
+            <MockExamProgressChart />
+          </div>
         </section>
 
         {/* ━━ 3 · YOUR RESOURCES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
@@ -324,12 +345,20 @@ export default async function DashboardPage() {
           .dash-progress-grid,
           .dash-analytics-row,
           .dash-resources-grid,
-          .dash-closing-grid {
+          .dash-closing-grid,
+          .dash-charts-grid {
             grid-template-columns: 1fr;
           }
         }
+        .dash-charts-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+          align-items: start;
+        }
         @media (max-width: 560px) {
           .dash-progress-grid { grid-template-columns: 1fr; }
+          .dash-charts-grid { grid-template-columns: 1fr; }
         }
       `}</style>
     </DashboardClient>
