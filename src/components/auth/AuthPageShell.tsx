@@ -33,14 +33,12 @@ export default function AuthPageShell({
           </p>
         </div>
 
-        <div className="w-full max-w-[400px] border border-[rgba(0,0,0,0.1)] dark:border-[var(--linen-medium)] bg-white dark:bg-[var(--bg-card)] transition-colors duration-300">
-          <div className="p-8 pb-6 max-md:p-6 max-md:pb-5">
-            <div style={{ minWidth: 0, maxWidth: '100%' }}>
-              {children}
-            </div>
+        <div className="w-full max-w-[400px]">
+          <div style={{ minWidth: 0, maxWidth: '100%' }}>
+            {children}
           </div>
 
-          <div className="py-3.5 px-7 border-t border-[rgba(0,0,0,0.08)] dark:border-[var(--linen-medium)] bg-[var(--bg-secondary)] text-center transition-colors duration-300">
+          <div className="mt-6 text-center">
             <p className="text-[11px] text-[#999] leading-[1.6] m-0">
               {finePrint}{' '}
               <Link href="/privacy" className="text-[var(--charcoal)] underline underline-offset-3 font-normal transition-colors hover:text-[var(--espresso)]">Privacy</Link>
