@@ -867,6 +867,192 @@ export const MOCK_PAGE_CSS = `
   margin-bottom: 18px;
 }
 
+/* ── How to approach ── */
+.mk-approach {
+  padding: 20px 24px;
+  background: #F5F3F0;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  margin-bottom: 16px;
+}
+.mk-approach-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #633806;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mk-approach-label::before { content: '🧠'; font-size: 12px; }
+.mk-approach p {
+  font-size: 13px;
+  font-weight: 300;
+  color: #2C2A27;
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+.mk-approach p:last-child { margin-bottom: 0; }
+.mk-approach-command {
+  font-size: 12px;
+  font-weight: 400;
+  color: #633806;
+  background: #FAEEDA;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+.mk-approach-musts-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+/* ── Examiner insight ── */
+.mk-examiner {
+  padding: 20px 24px;
+  background: rgba(83,74,183,0.04);
+  border: 0.5px solid rgba(83,74,183,0.12);
+  margin-bottom: 16px;
+}
+.mk-examiner-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #534AB7;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mk-examiner-label::before { content: '🔍'; font-size: 12px; }
+.mk-examiner-sub {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 4px;
+}
+.mk-examiner p {
+  font-size: 13px;
+  font-weight: 300;
+  color: #2C2A27;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+.mk-examiner p:last-child { margin-bottom: 0; }
+
+/* ── Clinical reasoning chain ── */
+.mk-reasoning {
+  padding: 16px 20px;
+  background: #E4F2EC;
+  border: 0.5px solid rgba(28,122,103,0.12);
+  margin-bottom: 16px;
+}
+.mk-reasoning-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #1C7A67;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mk-reasoning-label::before { content: '🧠'; font-size: 12px; }
+.mk-reasoning p {
+  font-size: 13px;
+  font-weight: 300;
+  color: #2C2A27;
+  line-height: 1.7;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Low-mark answer warning ── */
+.mk-lowmark {
+  padding: 16px 20px;
+  background: rgba(161,74,87,0.05);
+  border: 0.5px solid rgba(161,74,87,0.12);
+  margin-bottom: 16px;
+}
+.mk-lowmark-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #A14A57;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mk-lowmark-label::before { content: '🚫'; font-size: 12px; }
+.mk-lowmark p {
+  font-size: 13px;
+  font-weight: 300;
+  color: #5A5750;
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Deterioration panel ── */
+.mk-deterioration {
+  padding: 20px 24px;
+  background: #FCEBEB;
+  border: 0.5px solid rgba(163,45,45,0.15);
+  margin-bottom: 16px;
+}
+.mk-deterioration-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #A32D2D;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mk-deterioration-label::before { content: '⚡'; font-size: 12px; }
+.mk-deterioration-row {
+  margin-bottom: 10px;
+}
+.mk-deterioration-row:last-child { margin-bottom: 0; }
+.mk-deterioration-sub {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #A32D2D;
+  margin-bottom: 3px;
+}
+.mk-deterioration p {
+  font-size: 13px;
+  font-weight: 300;
+  color: #2C2A27;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Part A progression ── */
+.mk-progression {
+  padding: 24px 28px;
+  background: #F5F3F0;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+}
+.mk-progression-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mk-progression-label::before { content: '🧠'; font-size: 12px; }
+
 /* Responsive */
 @media (max-width: 980px) {
   .mk-systems-grid { grid-template-columns: repeat(2, 1fr); }

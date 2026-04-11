@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
 import type { MockExam, MockQuestion } from '../../mockTypes';
 import { MOCK_PAGE_CSS } from '../../mockStyles';
 
-// ── localStorage helpers ───────────────────────��──────────────────���──────────
+// ── localStorage helpers ────────────────────────────────────────────────────
 
 function storageKey(mockId: string) {
   return `rf_mock_${mockId}`;
@@ -32,24 +32,24 @@ function saveProgress(mockId: string, progress: MockProgress) {
   } catch { /* ignore */ }
 }
 
-// ── Word count ────────────────────��──────────────────────────────────────────
+// ── Word count ──────────────────────────────────────────────────────────────
 
 function countWords(text: string) {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
-// ── Expandable section ─────────────────────────────��────────────────────────���
+// ── Expandable section ──────────────────────────────────────────────────────
 
 function ExpandablePanel({
   label,
   panelClass,
-  items,
+  children,
   isOpen,
   onToggle,
 }: {
   label: string;
   panelClass?: string;
-  items: string[];
+  children: ReactNode;
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -66,18 +66,14 @@ function ExpandablePanel({
       </button>
       {isOpen && (
         <div className={`mk-expand-body ${panelClass || ''}`}>
-          <ul className="mk-expand-list">
-            {items.map((item, i) => (
-              <li key={i}>{item}</li>
-            ))}
-          </ul>
+          {children}
         </div>
       )}
     </div>
   );
 }
 
-// ── Question block ─────────────────────────────────���────────────────────��────
+// ── Question block ──────────────────────────────────────────────────────────
 
 function QuestionBlock({
   question,
@@ -98,8 +94,13 @@ function QuestionBlock({
   onRevealStructure: (id: string) => void;
   savedAt: string | null;
 }) {
+  const approachKey = `${question.id}-approach`;
   const scoreKey = `${question.id}-score`;
   const thinkKey = `${question.id}-think`;
+  const examinerKey = `${question.id}-examiner`;
+  const reasoningKey = `${question.id}-reasoning`;
+  const lowmarkKey = `${question.id}-lowmark`;
+  const deteriorationKey = `${question.id}-deterioration`;
   const words = countWords(answer);
 
   return (
@@ -114,33 +115,26 @@ function QuestionBlock({
 
       <p className="mk-q-prompt">{question.prompt}</p>
 
-      {/* Expandable guidance */}
+      {/* How to approach this question */}
       <ExpandablePanel
-        label="To score highly"
-        panelClass="mk-score-body"
-        items={question.toScoreHighly}
-        isOpen={!!expandedSections[scoreKey]}
-        onToggle={() => onToggleSection(scoreKey)}
-      />
-
-      <ExpandablePanel
-        label="Think about"
-        panelClass="mk-think-body"
-        items={question.thinkAbout}
-        isOpen={!!expandedSections[thinkKey]}
-        onToggle={() => onToggleSection(thinkKey)}
-      />
-
-      {/* Revision links */}
-      {question.revisionLinks.length > 0 && (
-        <div className="mk-revision-links">
-          {question.revisionLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="mk-revision-link">
-              {link.label} &rarr;
-            </Link>
-          ))}
+        label="How to approach this question"
+        isOpen={!!expandedSections[approachKey]}
+        onToggle={() => onToggleSection(approachKey)}
+      >
+        <div className="mk-approach">
+          <p className="mk-approach-label">How to approach this question</p>
+          <p>{question.howToApproach.whatItsAsking}</p>
+          <div className="mk-approach-command">
+            <strong>Command word:</strong> {question.howToApproach.commandWord}
+          </div>
+          <p className="mk-approach-musts-label">A high-scoring answer must include</p>
+          <ul className="mk-expand-list">
+            {question.howToApproach.highScoringMustInclude.map((item, i) => (
+              <li key={i}>{item}</li>
+            ))}
+          </ul>
         </div>
-      )}
+      </ExpandablePanel>
 
       {/* Answer structure reveal */}
       {!structureRevealed ? (
@@ -158,6 +152,111 @@ function QuestionBlock({
               <li key={i}>{step}</li>
             ))}
           </ol>
+        </div>
+      )}
+
+      {/* To score highly */}
+      <ExpandablePanel
+        label="To score highly"
+        panelClass="mk-score-body"
+        isOpen={!!expandedSections[scoreKey]}
+        onToggle={() => onToggleSection(scoreKey)}
+      >
+        <ul className="mk-expand-list">
+          {question.toScoreHighly.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      </ExpandablePanel>
+
+      {/* Think about */}
+      <ExpandablePanel
+        label="Think about"
+        panelClass="mk-think-body"
+        isOpen={!!expandedSections[thinkKey]}
+        onToggle={() => onToggleSection(thinkKey)}
+      >
+        <ul className="mk-expand-list">
+          {question.thinkAbout.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      </ExpandablePanel>
+
+      {/* Examiner insight */}
+      <ExpandablePanel
+        label="Examiner insight"
+        isOpen={!!expandedSections[examinerKey]}
+        onToggle={() => onToggleSection(examinerKey)}
+      >
+        <div className="mk-examiner">
+          <p className="mk-examiner-label">Examiner insight</p>
+          <p className="mk-examiner-sub">What students commonly get wrong</p>
+          <p>{question.examinerInsight.commonMistakes}</p>
+          <p className="mk-examiner-sub">What pushes an answer into a First</p>
+          <p>{question.examinerInsight.whatPushesToFirst}</p>
+        </div>
+      </ExpandablePanel>
+
+      {/* Clinical reasoning chain */}
+      {question.clinicalReasoning && (
+        <ExpandablePanel
+          label="Clinical reasoning chain"
+          isOpen={!!expandedSections[reasoningKey]}
+          onToggle={() => onToggleSection(reasoningKey)}
+        >
+          <div className="mk-reasoning">
+            <p className="mk-reasoning-label">Clinical reasoning</p>
+            <p>{question.clinicalReasoning}</p>
+          </div>
+        </ExpandablePanel>
+      )}
+
+      {/* Common low-mark answer */}
+      <ExpandablePanel
+        label="Common low-mark answer"
+        isOpen={!!expandedSections[lowmarkKey]}
+        onToggle={() => onToggleSection(lowmarkKey)}
+      >
+        <div className="mk-lowmark">
+          <p className="mk-lowmark-label">Common low-mark answer</p>
+          <p>{question.commonLowMarkAnswer}</p>
+        </div>
+      </ExpandablePanel>
+
+      {/* If this patient deteriorates */}
+      {question.deterioration && (
+        <ExpandablePanel
+          label="If this patient deteriorates\u2026"
+          isOpen={!!expandedSections[deteriorationKey]}
+          onToggle={() => onToggleSection(deteriorationKey)}
+        >
+          <div className="mk-deterioration">
+            <p className="mk-deterioration-label">If this patient deteriorates</p>
+            <div className="mk-deterioration-row">
+              <p className="mk-deterioration-sub">What changes clinically</p>
+              <p>{question.deterioration.clinicalChanges}</p>
+            </div>
+            <div className="mk-deterioration-row">
+              <p className="mk-deterioration-sub">What this indicates</p>
+              <p>{question.deterioration.whatItIndicates}</p>
+            </div>
+            <div className="mk-deterioration-row">
+              <p className="mk-deterioration-sub">What the nurse should do</p>
+              <p>{question.deterioration.nurseAction}</p>
+            </div>
+          </div>
+        </ExpandablePanel>
+      )}
+
+      {/* Revision links */}
+      {question.revisionLinks.length > 0 && (
+        <div className="mk-revision-links">
+          {question.revisionLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="mk-revision-link">
+              {link.label} &rarr;
+            </Link>
+          ))}
         </div>
       )}
 
@@ -179,7 +278,7 @@ function QuestionBlock({
   );
 }
 
-// ── Sentence bank ──────────────────────────────────────────────────────────��─
+// ── Sentence bank ───────────────────────────────────────────────────────────
 
 function SentenceBank({ sentences }: { sentences: string[] }) {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
@@ -213,7 +312,7 @@ function SentenceBank({ sentences }: { sentences: string[] }) {
   );
 }
 
-// ── Main component ─────────────────────────────────────────────────────────���─
+// ── Main component ──────────────────────────────────────────────────────────
 
 export default function MockExamClient({ mock }: { mock: MockExam }) {
   const [progress, setProgress] = useState<MockProgress>(() => loadProgress(mock.id));
@@ -337,6 +436,18 @@ export default function MockExamClient({ mock }: { mock: MockExam }) {
 
           <p className="mk-scenario-family">{mock.scenario.familyContext}</p>
         </div>
+
+        {/* Part A progression */}
+        {mock.partAProgression.length > 0 && (
+          <div className="mk-progression">
+            <p className="mk-progression-label">Part A flow — how these questions build</p>
+            <ul className="mk-expand-list">
+              {mock.partAProgression.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Part A */}
         <p className="mk-part-label">Part A &mdash; Questions 1&ndash;5</p>

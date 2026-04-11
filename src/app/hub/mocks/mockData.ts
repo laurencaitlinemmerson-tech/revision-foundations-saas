@@ -329,7 +329,7 @@ export const allMocks: MockExam[] = [
         partLabel: 'Part B',
         number: 6,
         title: 'Development & Hospitalisation',
-        prompt: 'Discuss how Ellie\u2019s stage of development might be affected by her hospitalisation. Outline key developmental theories to support your answer and relate them to Ellie\u2019s case.',
+        prompt: 'Discuss how patients stage of development might be affected by her hospitalisation. Outline key developmental theories to support your answer and relate them to Ellie\u2019s case.',
         wordGuide: '400 words',
         howToApproach: {
           whatItsAsking: 'This question moves from clinical science to child development. It wants you to identify Ellie\u2019s developmental stage, name relevant theories, and explain how hospitalisation could disrupt her development. You must apply the theories to Ellie specifically \u2014 do not just describe them in the abstract.',
@@ -380,7 +380,7 @@ export const allMocks: MockExam[] = [
         partLabel: 'Part B',
         number: 7,
         title: 'Emotional & Practical Impact',
-        prompt: 'Explore the possible emotional and practical issues surrounding Ellie\u2019s hospitalisation. Consider the impacts on both Ellie and Sara. Support your answer with evidence.',
+        prompt: 'Explore the possible emotional and practical issues surrounding Ellie\u2019s hospitalisation. Consider the impacts on both patient and mum. Support your answer with evidence.',
         wordGuide: '350 words',
         howToApproach: {
           whatItsAsking: 'This is a psychosocial question. It wants you to think about how hospitalisation affects Ellie emotionally and practically, and equally, how it affects Sara. You must consider Sara\u2019s specific context: young, single, limited support, anxious. The question tests empathy, awareness of family dynamics, and knowledge of family-centred care.',
@@ -431,7 +431,7 @@ export const allMocks: MockExam[] = [
         partLabel: 'Part B',
         number: 8,
         title: 'Nursing Care & MDT Support',
-        prompt: 'Explain how the nurse and wider multidisciplinary team could support Ellie and Sara during admission and after discharge, ensuring both clinical and psychosocial needs are met. Support your answer with evidence.',
+        prompt: 'Explain how the nurse and wider multidisciplinary team could support patient and mum during admission and after discharge, ensuring both clinical and psychosocial needs are met. Support your answer with evidence.',
         wordGuide: '400 words',
         howToApproach: {
           whatItsAsking: 'This is the big-picture question. It wants a care plan that covers clinical management (airway, breathing, hydration, monitoring) and psychosocial support (family-centred care, parental education, MDT involvement), and extends beyond discharge. You need to show you can prioritise, coordinate, and think about the whole picture.',
