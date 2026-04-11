@@ -92,6 +92,8 @@ export default function HubClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [activePathwayId, setActivePathwayId] = useState<string | null>(null);
+  const [activeLens, setActiveLens] = useState<'all' | 'free' | 'quick' | 'placement' | 'osce'>('all');
+  const [sortMode, setSortMode] = useState<'alphabetical' | 'quick' | 'free'>('alphabetical');
   const [showFullShelf, setShowFullShelf] = useState(false);
   const [questionPreviews, setQuestionPreviews] = useState<QuestionPreview[]>([]);
   const [questionsLoading, setQuestionsLoading] = useState(true);
@@ -131,6 +133,7 @@ export default function HubClient({
 
   const toggleTag = (tag: string) => {
     setActivePathwayId(null);
+    setActiveLens('all');
     setShowFullShelf(true);
     setSelectedTags((prev) => {
       const next = new Set(prev);
@@ -146,6 +149,10 @@ export default function HubClient({
     const visible = branchHubItems.filter((item) => {
       if (searchQuery === '' && selectedTags.size === 0 && !activePathway && item.isRecommended) return false;
       if (activePathwayItems && !activePathwayItems.has(item.id)) return false;
+      if (activeLens === 'free' && item.isLocked) return false;
+      if (activeLens === 'quick' && item.difficulty !== 'Quick Win') return false;
+      if (activeLens === 'placement' && !item.tags.includes('Placement')) return false;
+      if (activeLens === 'osce' && !item.tags.includes('OSCE')) return false;
       const matchesSearch =
         q === '' ||
         item.title.toLowerCase().includes(q) ||
@@ -156,8 +163,20 @@ export default function HubClient({
       const matchesDeepDive = selectedTags.has('Deep Dive') && item.difficulty === 'Deep Dive';
       return matchesSearch && (matchesTags || matchesDeepDive);
     });
+
+    if (sortMode === 'quick') {
+      const difficultyOrder = { 'Quick Win': 0, Moderate: 1, 'Deep Dive': 2 };
+      return [...visible].sort(
+        (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty] || a.title.localeCompare(b.title),
+      );
+    }
+
+    if (sortMode === 'free') {
+      return [...visible].sort((a, b) => Number(a.isLocked) - Number(b.isLocked) || a.title.localeCompare(b.title));
+    }
+
     return sortHubItemsAlphabetically(visible);
-  }, [activePathway, branchHubItems, searchQuery, selectedTags]);
+  }, [activeLens, activePathway, branchHubItems, searchQuery, selectedTags, sortMode]);
 
   const recommendedItems = useMemo(
     () => sortHubItemsAlphabetically(branchHubItems.filter((item) => item.isRecommended)),
@@ -174,7 +193,7 @@ export default function HubClient({
   const freeCount = filteredItems.filter((item) => !item.isLocked).length;
   const premiumCount = filteredItems.filter((item) => item.isLocked).length;
   const totalQuestionCount = questionCounts.answered + questionCounts.open;
-  const isFilteringLibrary = Boolean(searchQuery.trim() || selectedTags.size > 0 || activePathway);
+  const isFilteringLibrary = Boolean(searchQuery.trim() || selectedTags.size > 0 || activePathway || activeLens !== 'all');
   const librarySummary = isFilteringLibrary
     ? `Showing ${filteredItems.length} resources \u00B7 ${freeCount} free \u00B7 ${premiumCount} premium`
     : `Shelf holds ${defaultShelfCount} more resources \u00B7 ${defaultShelfFreeCount} free \u00B7 ${defaultShelfPremiumCount} premium`;
@@ -183,6 +202,7 @@ export default function HubClient({
     setActivePathwayId(pathwayId);
     setSearchQuery('');
     setSelectedTags(new Set());
+    setActiveLens('all');
     setShowFullShelf(true);
     requestAnimationFrame(() => {
       document.getElementById('hbc-shelf')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -195,6 +215,13 @@ export default function HubClient({
       document.getElementById('hbc-shelf')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   };
+
+  const quickLenses = [
+    { id: 'free' as const, label: 'Free only', note: 'Open pages without a paywall' },
+    { id: 'quick' as const, label: 'Quick wins', note: 'Shorter refreshers for tired study sessions' },
+    { id: 'placement' as const, label: 'Placement', note: 'Practical refreshers before and after shift' },
+    { id: 'osce' as const, label: 'OSCE prep', note: 'Assessment structure, wording, and station-adjacent guides' },
+  ];
 
   return (
     <ToastProvider>
@@ -240,6 +267,27 @@ export default function HubClient({
           </section>
 
           <hr className="hbc-divider" />
+
+          <span className="hbc-section-label">Need a quicker route?</span>
+          <div className="hbc-lens-grid">
+            {quickLenses.map((lens) => (
+              <button
+                key={lens.id}
+                type="button"
+                className={`hbc-lens-card${activeLens === lens.id ? ' active' : ''}`}
+                onClick={() => {
+                  setActivePathwayId(null);
+                  setSelectedTags(new Set());
+                  setSearchQuery('');
+                  setActiveLens((prev) => (prev === lens.id ? 'all' : lens.id));
+                  setShowFullShelf(true);
+                }}
+              >
+                <span className="hbc-lens-title">{lens.label}</span>
+                <span className="hbc-lens-desc">{lens.note}</span>
+              </button>
+            ))}
+          </div>
 
           {/* Pathways */}
           <span className="hbc-section-label">Study pathways</span>
@@ -316,9 +364,42 @@ export default function HubClient({
                 <button
                   type="button"
                   className="hbc-filter-clear"
-                  onClick={() => setSelectedTags(new Set())}
+                  onClick={() => {
+                    setSelectedTags(new Set());
+                    setActiveLens('all');
+                  }}
                 >
                   Clear all
+                </button>
+              )}
+            </div>
+
+            <div className="hbc-controls-row">
+              <div className="hbc-sort-wrap">
+                <label htmlFor="hbc-sort" className="hbc-sort-label">Sort</label>
+                <select
+                  id="hbc-sort"
+                  className="hbc-sort-select"
+                  value={sortMode}
+                  onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+                >
+                  <option value="alphabetical">A–Z</option>
+                  <option value="quick">Quick wins first</option>
+                  <option value="free">Free first</option>
+                </select>
+              </div>
+
+              {(activeLens !== 'all' || selectedTags.size > 0 || activePathway) && (
+                <button
+                  type="button"
+                  className="hbc-filter-clear"
+                  onClick={() => {
+                    setActiveLens('all');
+                    setSelectedTags(new Set());
+                    setActivePathwayId(null);
+                  }}
+                >
+                  Reset routing
                 </button>
               )}
             </div>
@@ -363,6 +444,7 @@ export default function HubClient({
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedTags(new Set());
+                  setActiveLens('all');
                   setShowFullShelf(false);
                 }}
               >

@@ -58,6 +58,21 @@ export default function HomeStyles() {
         .home-hub-grid {
           grid-template-columns: 1fr !important;
         }
+        .home-journey-grid {
+          grid-template-columns: 1fr !important;
+        }
+        .home-journey-rail {
+          position: static !important;
+        }
+        .home-journey-step-grid {
+          grid-template-columns: 1fr !important;
+        }
+        .home-journey-meta {
+          border-left: none !important;
+          border-top: 0.5px solid rgba(0,0,0,0.08) !important;
+          padding-left: 0 !important;
+          padding-top: 14px !important;
+        }
         .home-bundle-cta {
           display: none !important;
         }
@@ -71,6 +86,9 @@ export default function HomeStyles() {
         }
         .home-hub-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        .home-journey-grid {
+          grid-template-columns: 220px minmax(0, 1fr) !important;
         }
       }
       @media (max-width: 480px) {

@@ -191,6 +191,48 @@ export const CSS = `
   margin-bottom: 24px;
 }
 
+.hbc-lens-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.hbc-lens-card {
+  text-align: left;
+  padding: 16px 16px 18px;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: #FFFFFF;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.hbc-lens-card:hover {
+  border-color: rgba(26,24,21,0.2);
+  background: #FBF8F3;
+  transform: translateY(-1px);
+}
+.hbc-lens-card.active {
+  background: #F5F3F0;
+  border-color: rgba(26,24,21,0.2);
+}
+
+.hbc-lens-title {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 19px;
+  line-height: 1.1;
+  color: #1A1815;
+  margin-bottom: 7px;
+}
+
+.hbc-lens-desc {
+  display: block;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #5A5750;
+  font-weight: 300;
+}
+
 /* ── Pathways ─────────────────────────────────────────────────────────────── */
 
 .hbc-pathways {
@@ -365,6 +407,37 @@ export const CSS = `
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 14px;
+}
+
+.hbc-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.hbc-sort-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hbc-sort-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9A948C;
+}
+
+.hbc-sort-select {
+  border: 0.5px solid rgba(0,0,0,0.12);
+  background: #FFFFFF;
+  color: #1A1815;
+  font-size: 12px;
+  padding: 9px 12px;
+  border-radius: 0;
 }
 .hbc-filter-btn {
   font-size: 9px;
@@ -741,6 +814,7 @@ export const CSS = `
 
 @media (max-width: 1024px) {
   .hbc-briefing { grid-template-columns: 1fr; }
+  .hbc-lens-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hbc-pathways { grid-template-columns: repeat(2, 1fr); }
   .hbc-pathway:nth-child(2n) { border-right: none; }
   .hbc-pathway:nth-child(n+3) { border-top: 0.5px solid rgba(0,0,0,0.1); }
@@ -751,6 +825,7 @@ export const CSS = `
 @media (max-width: 768px) {
   .hbc-main { padding: 48px 20px 64px; }
   .hbc-briefing-stats { grid-template-columns: 1fr; }
+  .hbc-lens-grid { grid-template-columns: 1fr; }
   .hbc-pathways { grid-template-columns: 1fr; }
   .hbc-pathway { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
   .hbc-pathway:last-child { border-bottom: none; }
@@ -760,5 +835,6 @@ export const CSS = `
   .hbc-q-header { flex-direction: column; }
   .hbc-q-actions { flex-direction: row; }
   .hbc-shelf { padding: 18px 20px; }
+  .hbc-controls-row { align-items: flex-start; }
 }
 `;
