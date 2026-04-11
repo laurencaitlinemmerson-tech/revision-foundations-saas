@@ -4,6 +4,19 @@ import { useDeferredValue, useMemo, useState } from 'react';
 import { Check, FolderPlus, Search } from 'lucide-react';
 import type { Folder } from '@/lib/bookmarks/types';
 
+const COLOUR_MAP: Record<string, string> = {
+  sage:  '#8BBCAA',
+  warm:  '#D4A574',
+  slate: '#7BA7CC',
+  rose:  '#C89BB0',
+  ink:   '#3D3530',
+  sand:  '#C4B49A',
+};
+
+function folderColour(colour: string): string {
+  return COLOUR_MAP[colour] ?? colour ?? '#8BBCAA';
+}
+
 interface FolderSelectorProps {
   folders: Folder[];
   selectedFolderIds: Set<number>;
@@ -24,10 +37,7 @@ export default function FolderSelector({
 
   const filteredFolders = useMemo(() => {
     const query = deferredSearch.trim().toLowerCase();
-    if (!query) {
-      return folders;
-    }
-
+    if (!query) return folders;
     return folders.filter((folder) => folder.name.toLowerCase().includes(query));
   }, [deferredSearch, folders]);
 
@@ -56,7 +66,6 @@ export default function FolderSelector({
         <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
           {filteredFolders.map((folder) => {
             const isSelected = selectedFolderIds.has(folder.id);
-
             return (
               <button
                 key={folder.id}
@@ -69,9 +78,10 @@ export default function FolderSelector({
                     : 'border-black/8 bg-white hover:border-black/16'
                 }`}
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[var(--linen-light)] text-xl">
-                  {folder.emoji}
-                </span>
+                <div
+                  className="h-8 w-8 flex-shrink-0 rounded-full"
+                  style={{ background: folderColour(folder.colour) }}
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-[var(--espresso)]">{folder.name}</p>
                   <p className="text-xs text-[var(--charcoal)]">
