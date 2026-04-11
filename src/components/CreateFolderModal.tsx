@@ -3,13 +3,20 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import ModalShell from '@/components/ModalShell';
 
-const emojiOptions = ['📚', '🩺', '🧠', '✨', '📝', '🎯', '💊', '🫁'];
+const COLOUR_OPTIONS = [
+  { id: 'sage',  hex: '#8BBCAA' },
+  { id: 'warm',  hex: '#D4A574' },
+  { id: 'slate', hex: '#7BA7CC' },
+  { id: 'rose',  hex: '#C89BB0' },
+  { id: 'ink',   hex: '#3D3530' },
+  { id: 'sand',  hex: '#C4B49A' },
+];
 
 interface CreateFolderModalProps {
   isOpen: boolean;
   isLoading?: boolean;
   onClose: () => void;
-  onCreate: (input: { name: string; emoji: string }) => Promise<void>;
+  onCreate: (input: { name: string; colour: string }) => Promise<void>;
 }
 
 export default function CreateFolderModal({
@@ -20,7 +27,7 @@ export default function CreateFolderModal({
 }: CreateFolderModalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [name, setName] = useState('');
-  const [emoji, setEmoji] = useState('📚');
+  const [colour, setColour] = useState('sage');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,7 +40,7 @@ export default function CreateFolderModal({
 
   function handleClose() {
     setName('');
-    setEmoji('📚');
+    setColour('sage');
     setError(null);
     onClose();
   }
@@ -54,7 +61,7 @@ export default function CreateFolderModal({
 
     try {
       setError(null);
-      await onCreate({ name: trimmedName, emoji });
+      await onCreate({ name: trimmedName, colour });
       handleClose();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : 'Unable to create folder.');
@@ -66,16 +73,19 @@ export default function CreateFolderModal({
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-[var(--linen-light)] text-2xl">
-              {emoji}
-            </div>
+            <div
+              className="h-10 w-10 rounded-full"
+              style={{
+                background: COLOUR_OPTIONS.find((c) => c.id === colour)?.hex,
+              }}
+            />
             <div>
               <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/70">New folder</p>
               <h2 className="mt-1 font-display text-2xl text-[var(--espresso)]">Create a folder</h2>
             </div>
           </div>
           <p className="text-sm text-[var(--charcoal)]/72">
-            Organise saved revision pages in a way that makes sense to you.
+            A place for pages you actually come back to.
           </p>
         </div>
 
@@ -87,27 +97,26 @@ export default function CreateFolderModal({
             maxLength={50}
             onChange={(event) => setName(event.target.value)}
             className="w-full rounded-[18px] border border-black/10 bg-[var(--linen-light)] px-4 py-3 text-[var(--espresso)] outline-none transition focus:border-black/20"
-            placeholder="Exam prep"
+            placeholder="Name this folder"
           />
         </label>
 
         <div>
-          <p className="mb-2 text-sm text-[var(--charcoal)]">Choose an icon</p>
-          <div className="flex flex-wrap gap-2">
-            {emojiOptions.map((option) => (
+          <p className="mb-2 text-sm text-[var(--charcoal)]">Colour</p>
+          <div className="flex gap-2">
+            {COLOUR_OPTIONS.map((option) => (
               <button
-                key={option}
+                key={option.id}
                 type="button"
-                onClick={() => setEmoji(option)}
-                className={`rounded-[16px] border px-3 py-2 text-xl transition ${
-                  emoji === option
-                    ? 'border-[var(--espresso)] bg-[var(--linen-light)]'
-                    : 'border-black/8 bg-white hover:border-black/14'
-                }`}
-                aria-label={`Choose ${option}`}
-              >
-                {option}
-              </button>
+                onClick={() => setColour(option.id)}
+                className="h-8 w-8 rounded-full transition-transform hover:scale-110"
+                style={{
+                  background: option.hex,
+                  outline: colour === option.id ? `2px solid ${option.hex}` : 'none',
+                  outlineOffset: '2px',
+                }}
+                aria-label={`Choose ${option.id}`}
+              />
             ))}
           </div>
         </div>
