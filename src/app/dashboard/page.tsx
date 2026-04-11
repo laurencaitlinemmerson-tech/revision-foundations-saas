@@ -145,6 +145,7 @@ export default async function DashboardPage() {
   const entitlements = await getUserEntitlements(userId);
   const hasOsce = hasAccessToContent(entitlements, 'osce');
   const hasQuiz = hasAccessToContent(entitlements, 'quiz');
+  const hasMocks = hasAccessToContent(entitlements, 'osce'); // Currently bundled with OSCE access
 
   const quizStats = await getUserQuizStats(userId).catch(() => null);
 
@@ -159,7 +160,7 @@ export default async function DashboardPage() {
   const weakestArea = quizStats?.weakestArea ?? topicStrength[topicStrength.length - 1]?.label ?? 'Pharmacology';
 
   return (
-    <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz}>
+    <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz} hasMocks={hasMocks}>
       <div className="dash-page-stack">
         <section>
           <QuickStatsStrip />
@@ -191,6 +192,10 @@ export default async function DashboardPage() {
                 </Link>
                 <Link href={hasOsce ? '/osce' : '/pricing'} className="dash-rail-link">
                   <span>{hasOsce ? 'Run a timed station' : 'Unlock OSCE practice'}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <Link href={hasMocks ? '/hub/mocks' : '/pricing'} className="dash-rail-link">
+                  <span>{hasMocks ? 'Take a mock exam' : 'Unlock mock exams'}</span>
                   <span aria-hidden="true">→</span>
                 </Link>
                 <Link href="#saved-folders" className="dash-rail-link">
@@ -293,6 +298,13 @@ export default async function DashboardPage() {
               body={hasOsce ? 'When revision feels too passive, one station changes the pace immediately.' : 'Add practical timed work when you want the dashboard to extend into exam-style preparation.'}
               href={hasOsce ? '/osce' : '/pricing'}
               cta={hasOsce ? 'Run station' : 'See OSCE access'}
+            />
+            <RecommendationCard
+              eyebrow="Mocks"
+              title={hasMocks ? 'Simulate exam conditions' : 'Unlock mock exams'}
+              body={hasMocks ? 'Practice full, long-answer exam scenarios with examiner feedback and marking criteria.' : 'Take structured mock exams to build your clinical reasoning and structure.'}
+              href={hasMocks ? '/hub/mocks' : '/pricing'}
+              cta={hasMocks ? 'Start mock exam' : 'See mock access'}
             />
             <RecommendationCard
               eyebrow="Library"

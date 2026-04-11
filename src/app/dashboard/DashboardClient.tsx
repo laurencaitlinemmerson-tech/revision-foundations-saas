@@ -11,6 +11,7 @@ interface DashboardClientProps {
   firstName: string | null;
   hasOsce: boolean;
   hasQuiz: boolean;
+  hasMocks: boolean;
 }
 
 function formatToday() {
@@ -26,6 +27,7 @@ export default function DashboardClient({
   firstName,
   hasOsce,
   hasQuiz,
+  hasMocks,
 }: DashboardClientProps) {
   const shouldReduceMotion = useReducedMotion();
   const hour = new Date().getHours();
@@ -54,6 +56,7 @@ export default function DashboardClient({
 
   const quickLinks = [
     { href: '/hub', label: 'Hub', available: true },
+    { href: hasMocks ? '/hub/mocks' : '/pricing', label: 'Mocks', available: hasMocks },
     { href: hasQuiz ? '/quiz' : '/pricing', label: 'Quiz', available: hasQuiz },
     { href: hasOsce ? '/osce' : '/pricing', label: 'OSCE', available: hasOsce },
   ];

@@ -8,6 +8,7 @@ interface SessionStats {
   totalSessions: number;
   totalQuestions: number;
   totalOsceStations: number;
+  totalMocks?: number;
   weekSessions: number[];
   lastWeekTotal: number;
 }
@@ -61,7 +62,7 @@ export default function QuickStatsStrip() {
   useEffect(() => {
     setMounted(true);
     setStats(load<SessionStats>(STORAGE_KEYS.stats, {
-      totalSessions: 0, totalQuestions: 0, totalOsceStations: 0,
+      totalSessions: 0, totalQuestions: 0, totalOsceStations: 0, totalMocks: 0,
       weekSessions: Array(7).fill(0), lastWeekTotal: 0,
     }));
     const s = load<StudyStreak>(STORAGE_KEYS.streak, {
@@ -84,6 +85,7 @@ export default function QuickStatsStrip() {
     { value: thisWeek, label: 'this week', accent: '#D4A574' },
     { value: stats.totalQuestions, label: 'questions', accent: '#7BA7CC' },
     { value: stats.totalOsceStations, label: 'stations', accent: '#C89BB0' },
+    ...(stats.totalMocks !== undefined ? [{ value: stats.totalMocks, label: 'mock exams', accent: '#D9A7A7' }] : []),
   ];
 
   return (
@@ -105,13 +107,20 @@ export default function QuickStatsStrip() {
       ))}
       <style>{`
         .qs-strip {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          display: flex;
+          justify-content: space-between;
           border-bottom: 0.5px solid rgba(0,0,0,0.08);
           margin-bottom: 8px;
           padding-bottom: 28px;
+          overflow-x: auto;
+          scrollbar-width: none; /* Firefox */
+        }
+        .qs-strip::-webkit-scrollbar {
+          display: none; /* Safari and Chrome */
         }
         .qs-item {
+          flex: 1;
+          min-width: 90px;
           text-align: center;
           padding: 0 12px;
           position: relative;
@@ -149,11 +158,14 @@ export default function QuickStatsStrip() {
           margin: 0;
           font-weight: 400;
         }
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
           .qs-strip {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px 0;
+            justify-content: flex-start;
           }
+          .qs-item {
+            flex: 0 0 auto;
+          }
+
           .qs-item:nth-child(3)::before {
             display: none;
           }
