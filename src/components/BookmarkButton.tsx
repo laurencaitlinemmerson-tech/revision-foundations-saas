@@ -78,7 +78,7 @@ export default function BookmarkButton({ hubItemId, hubItemTitle }: BookmarkButt
     }
   }
 
-  async function handleCreateFolder(input: { name: string; emoji: string }) {
+async function handleCreateFolder(input: { name: string; colour: string }) {
     try {
       const folder = await createFolder(input);
       await addBookmark({ folder_id: folder.id, hub_item_id: hubItemId });
