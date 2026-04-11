@@ -14,6 +14,23 @@ export interface RevisionLink {
   href: string;
 }
 
+export interface QuestionApproach {
+  whatItsAsking: string;
+  commandWord: string;
+  highScoringMustInclude: string[];
+}
+
+export interface ExaminerInsight {
+  commonMistakes: string;
+  whatPushesToFirst: string;
+}
+
+export interface DeteriorationThinking {
+  clinicalChanges: string;
+  whatItIndicates: string;
+  nurseAction: string;
+}
+
 export interface MockQuestion {
   id: string;
   partLabel: string;
@@ -21,10 +38,15 @@ export interface MockQuestion {
   title: string;
   prompt: string;
   wordGuide: string;
+  howToApproach: QuestionApproach;
+  answerStructure: string[];
   toScoreHighly: string[];
   thinkAbout: string[];
+  examinerInsight: ExaminerInsight;
+  clinicalReasoning: string | null;
+  commonLowMarkAnswer: string;
+  deterioration: DeteriorationThinking | null;
   revisionLinks: RevisionLink[];
-  answerStructure: string[];
 }
 
 export interface MockExam {
@@ -35,6 +57,7 @@ export interface MockExam {
   description: string;
   scenario: MockScenario;
   whatThisMockTests: string[];
+  partAProgression: string[];
   questionsPartA: MockQuestion[];
   questionsPartB: MockQuestion[];
   sentenceBank: string[];
