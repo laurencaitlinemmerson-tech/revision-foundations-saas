@@ -200,8 +200,8 @@ export default function ContactPage() {
                   value: supportEmail,
                   note: 'Best for anything that needs a proper reply',
                   timing: 'Usually within 1–2 working days',
-                  accent: blue,
-                  accentBg: blueBg,
+                  accent: inkMid,
+                  accentBg: tagBg,
                   href: `mailto:${supportEmail}`,
                 },
                 {
@@ -209,8 +209,8 @@ export default function ContactPage() {
                   value: 'Short message',
                   note: 'Quick questions only',
                   timing: 'Replies when available',
-                  accent: teal,
-                  accentBg: tealBg,
+                  accent: inkMid,
+                  accentBg: tagBg,
                   href: 'https://wa.me/447572650980',
                 },
               ].map((item, i) => (

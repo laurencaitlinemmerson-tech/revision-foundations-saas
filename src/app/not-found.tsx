@@ -24,10 +24,10 @@ export default function NotFound() {
       >
         <div className="text-center max-w-md">
           <div className="text-8xl mb-4" aria-hidden="true">🔍</div>
-          <h1 className="text-4xl font-display text-[var(--plum-dark)] mb-3">
+          <h1 className="text-4xl font-display text-[var(--espresso)] mb-3">
             Page Not Found
           </h1>
-          <p className="text-[var(--plum)] mb-8">
+          <p className="text-[var(--charcoal)] mb-8">
             Oops! This page seems to have wandered off. Let&apos;s get you back on track.
           </p>
           
@@ -49,8 +49,8 @@ export default function NotFound() {
           </div>
           
           {/* Helpful links */}
-          <div className="pt-6 border-t border-[var(--lilac)]">
-            <p className="text-sm text-[var(--plum-dark)]/60 mb-4">
+          <div className="pt-6 border-t border-black/10">
+            <p className="text-sm text-[var(--espresso)]/60 mb-4">
               Looking for something specific?
             </p>
 

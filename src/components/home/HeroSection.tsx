@@ -33,8 +33,6 @@ export default function HeroSection() {
               <span
                 style={{
                   ...tagStyle,
-                  background: greenBg,
-                  color: green,
                   padding: '6px 10px',
                 }}
               >
@@ -43,8 +41,6 @@ export default function HeroSection() {
               <span
                 style={{
                   ...tagStyle,
-                  background: infoBg,
-                  color: inkMid,
                   padding: '6px 10px',
                 }}
               >

@@ -934,7 +934,7 @@ export const CSS = `
 
 @media (max-width: 768px) {
   .hbc-main { padding: 48px 20px 64px; }
-  .hbc-briefing-stats { grid-template-columns: 1fr; }
+  .hbc-briefing-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .hbc-lens-grid { grid-template-columns: 1fr; }
   .hbc-pathways { grid-template-columns: 1fr; }
   .hbc-pathway { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
