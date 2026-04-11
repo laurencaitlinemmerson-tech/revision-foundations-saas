@@ -94,7 +94,7 @@ function StatCard({
   return (
     <div className="dash-stat-card" style={{
       background: '#fff',
-      border: border,
+      border: '0.5px solid rgba(0,0,0,0.12)',
       padding: '24px 22px',
     }}>
       <p style={{
@@ -199,19 +199,21 @@ export default async function DashboardPage() {
           <div className="dash-analytics-row">
             <StatCard
               label="Study streak"
-              value={String(quizStats?.streakDays ?? 14)}
-              unit="days in a row"
+              value={quizStats ? String(quizStats.streakDays) : '—'}
+              unit={quizStats ? 'days in a row' : 'No data yet'}
             >
-              {/* Streak pips — 7 dots, last one = today */}
-              <div style={{ display: 'flex', gap: '4px', marginTop: '11px' }}>
-                {Array.from({ length: 7 }, (_, i) => (
-                  <span key={i} style={{
-                    width: '9px', height: '9px', borderRadius: '50%',
-                    background: i < 6 ? '#8BBCAA' : '#2C2A27',
-                    display: 'inline-block',
-                  }} />
-                ))}
-              </div>
+              {/* Streak pips — 7 squares, last one = today */}
+              {quizStats && (
+                <div style={{ display: 'flex', gap: '4px', marginTop: '11px' }}>
+                  {Array.from({ length: 7 }, (_, i) => (
+                    <span key={i} style={{
+                      width: '9px', height: '9px',
+                      background: i < 6 ? '#8BBCAA' : '#2C2A27',
+                      display: 'inline-block',
+                    }} />
+                  ))}
+                </div>
+              )}
             </StatCard>
 
             <StatCard
@@ -232,15 +234,25 @@ export default async function DashboardPage() {
 
             <StatCard
               label="Hours this week"
-              value={String(quizStats?.hoursThisWeek ?? '—')}
+              value={quizStats?.hoursThisWeek ? String(quizStats.hoursThisWeek) : '—'}
               unit="hours studied"
             />
           </div>
 
+          {/* Empty state — shown only when no data exists yet */}
+          {!quizStats && !osceStats && (
+            <p style={{
+              fontFamily: serif, fontSize: '12px', fontWeight: 300,
+              color: muted, marginTop: '10px', fontStyle: 'italic',
+            }}>
+              Complete your first quiz or OSCE session to see your stats here.
+            </p>
+          )}
+
           {/* Topic strength + quiz accuracy bars */}
           <div className="dash-prog-pair" style={{ marginTop: '12px' }}>
             <div style={{
-              background: '#fff', border: border, padding: '24px 26px',
+              background: '#fff', border: '0.5px solid rgba(0,0,0,0.12)', padding: '24px 26px',
             }}>
               <p style={{
                 fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
@@ -254,7 +266,7 @@ export default async function DashboardPage() {
             </div>
 
             <div style={{
-              background: '#fff', border: border, padding: '24px 26px',
+              background: '#fff', border: '0.5px solid rgba(0,0,0,0.12)', padding: '24px 26px',
             }}>
               <p style={{
                 fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',

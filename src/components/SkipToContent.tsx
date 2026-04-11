@@ -32,12 +32,11 @@ export default function SkipToContent() {
       className="
         sr-only focus:not-sr-only
         fixed top-4 left-4 z-[100]
-        bg-[var(--purple)] text-white
-        px-6 py-3 rounded-xl
-        font-semibold text-sm
-        shadow-lg
-        focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--lavender)]
-        transition-transform
+        bg-[var(--espresso)] text-[var(--cream)]
+        px-6 py-3
+        font-medium text-sm
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--espresso)] focus-visible:ring-offset-2
+        transition-opacity
       "
     >
       Skip to main content

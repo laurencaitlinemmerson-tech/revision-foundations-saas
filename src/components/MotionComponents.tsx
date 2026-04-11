@@ -352,7 +352,7 @@ export function ScrollProgress({ className = '' }: { className?: string }) {
   
   return (
     <motion.div
-      className={`fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--lavender)] to-[var(--pink)] origin-left z-50 ${className}`}
+      className={`fixed top-0 left-0 right-0 h-[0.5px] bg-[var(--espresso)] origin-left z-50 ${className}`}
       style={{ scaleX: scrollYProgress }}
     />
   );

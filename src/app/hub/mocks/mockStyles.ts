@@ -1094,11 +1094,10 @@ export const MOCK_INTERACTIVE_CSS = `
 .mk-steps-inner { max-width: 1180px; margin: 0 auto; padding: 0 48px; display: flex; align-items: center; gap: 0; }
 .mk-step { display: flex; align-items: center; gap: 0; flex: 1; }
 .mk-step:last-child { flex: 0; }
-.mk-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #e8e4df; background: #FAFAF8; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 400; color: #bbb; cursor: default; transition: all 0.3s ease; flex-shrink: 0; }
+.mk-step-dot { width: 28px; height: 28px; border: 1.5px solid #e8e4df; background: #FAFAF8; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 400; color: #bbb; cursor: default; transition: border-color 0.3s ease, background 0.3s ease; flex-shrink: 0; }
 .mk-step-dot[data-state="completed"] { background: #1A1815; border-color: #1A1815; color: #FAFAF8; cursor: pointer; }
-.mk-step-dot[data-state="current"] { border-color: #1A1815; color: #1A1815; font-weight: 500; animation: mk-pulse 2s ease-in-out infinite; }
+.mk-step-dot[data-state="current"] { border-color: #1A1815; color: #1A1815; font-weight: 500; }
 .mk-step-dot[data-state="future"] { opacity: 0.5; }
-@keyframes mk-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(26,24,21,0.1); } 50% { box-shadow: 0 0 0 6px rgba(26,24,21,0.05); } }
 .mk-step-line { flex: 1; height: 1px; background: #e8e4df; transition: background 0.3s ease; }
 .mk-step-line[data-filled="true"] { background: #1A1815; }
 
@@ -1282,13 +1281,12 @@ export const MOCK_INTERACTIVE_CSS = `
 .mk-begin-cta {
   display: inline-flex; align-items: center; gap: 10px;
   font-size: 13px; letter-spacing: 0.04em; color: #FAFAF8;
-  background: linear-gradient(135deg, #1A1815 0%, #3A2E20 100%);
+  background: #1A1815;
   padding: 14px 32px; border: none; cursor: pointer; text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: opacity 0.2s;
   font-family: 'Inter', -apple-system, sans-serif;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
 }
-.mk-begin-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.mk-begin-cta:hover { opacity: 0.85; }
 
 /* ═══════════════════════════════════════════════════════════════════════
    PHASE 2 — SPLIT-SCREEN QUESTION UX
@@ -1308,7 +1306,7 @@ export const MOCK_INTERACTIVE_CSS = `
   scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent;
 }
 .mk-sidebar::-webkit-scrollbar { width: 3px; }
-.mk-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+.mk-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
 
 .mk-sidebar-label {
   font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
@@ -1347,9 +1345,8 @@ export const MOCK_INTERACTIVE_CSS = `
 .mk-scenario-fab {
   display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
   z-index: 100; padding: 10px 20px; font-size: 12px; letter-spacing: 0.08em;
-  color: #FAFAF8; background: rgba(26,24,21,0.92); backdrop-filter: blur(12px);
+  color: #FAFAF8; background: rgba(26,24,21,0.92);
   border: none; cursor: pointer; font-family: 'Inter', -apple-system, sans-serif;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 /* Mobile scenario sheet */
@@ -1357,7 +1354,7 @@ export const MOCK_INTERACTIVE_CSS = `
   display: none; position: fixed; bottom: 0; left: 0; right: 0;
   z-index: 200; max-height: 75vh; overflow-y: auto;
   background: #FAFAF8; border-top: 0.5px solid rgba(0,0,0,0.1);
-  padding: 24px 24px 32px; box-shadow: 0 -8px 40px rgba(0,0,0,0.1);
+  padding: 24px 24px 32px;
 }
 .mk-scenario-sheet[data-open="true"] { display: block; }
 .mk-scenario-sheet-close {
@@ -1399,8 +1396,8 @@ export const MOCK_INTERACTIVE_CSS = `
 .mk-perf-bars { margin-bottom: 32px; }
 .mk-perf-bar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
 .mk-perf-bar-label { font-size: 12px; font-weight: 300; color: #2C2A27; width: 160px; flex-shrink: 0; }
-.mk-perf-bar-track { flex: 1; height: 6px; background: rgba(0,0,0,0.04); border-radius: 3px; overflow: hidden; }
-.mk-perf-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+.mk-perf-bar-track { flex: 1; height: 4px; background: rgba(0,0,0,0.06); overflow: hidden; }
+.mk-perf-bar-fill { height: 100%; transition: width 0.8s ease; }
 .mk-perf-bar-pct { font-family: 'Playfair Display', serif; font-size: 14px; font-style: italic; color: #1A1815; width: 40px; text-align: right; }
 
 /* Question mini-review */

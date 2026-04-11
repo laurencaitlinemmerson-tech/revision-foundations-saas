@@ -45,7 +45,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <>
-            <span className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+            <span className="animate-spin w-4 h-4 border-2 border-current border-t-transparent" />
             Loading...
           </>
         ) : (
@@ -478,14 +478,14 @@ interface IconBoxProps {
 }
 
 const iconBoxSizes = {
-  sm: 'w-10 h-10 rounded-xl',
-  md: 'w-14 h-14 rounded-2xl',
-  lg: 'w-16 h-16 rounded-2xl',
+  sm: 'w-10 h-10',
+  md: 'w-14 h-14',
+  lg: 'w-16 h-16',
 };
 
-export function IconBox({ icon: Icon, gradient = 'from-[var(--lavender)] to-[var(--purple)]', size = 'md', className = '' }: IconBoxProps) {
+export function IconBox({ icon: Icon, gradient: _gradient = '', size = 'md', className = '' }: IconBoxProps) {
   return (
-    <div className={`${iconBoxSizes[size]} bg-gradient-to-br ${gradient} flex items-center justify-center shadow-md ${className}`}>
+    <div className={`${iconBoxSizes[size]} bg-[var(--espresso)] flex items-center justify-center ${className}`}>
       <Icon className={size === 'sm' ? 'w-5 h-5 text-white' : size === 'md' ? 'w-6 h-6 text-white' : 'w-7 h-7 text-white'} />
     </div>
   );

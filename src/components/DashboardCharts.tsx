@@ -192,12 +192,12 @@ function HorizontalBarChart({
             </span>
           </div>
           <div style={{
-            height: '6px', background: 'rgba(0,0,0,0.04)', borderRadius: '3px',
+            height: '4px', background: 'rgba(0,0,0,0.06)',
             overflow: 'hidden',
           }}>
             <motion.div
               style={{
-                height: '100%', borderRadius: '3px', background: item.colour,
+                height: '100%', background: item.colour,
               }}
               initial={{ width: 0 }}
               animate={isInView ? { width: `${Math.min((item.value / item.maxValue) * 100, 100)}%` } : {}}
@@ -249,12 +249,7 @@ function WeeklyBarGraph({ sessions }: { sessions: number[] }) {
               <motion.div
                 style={{
                   width: '100%', maxWidth: '28px',
-                  borderRadius: '4px 4px 2px 2px',
-                  background: isToday
-                    ? 'linear-gradient(180deg, #D4A574 0%, #C89570 100%)'
-                    : val > 0
-                    ? 'linear-gradient(180deg, #8BBCAA 0%, #7BAA98 100%)'
-                    : 'rgba(0,0,0,0.04)',
+                  background: isToday ? '#D4A574' : val > 0 ? '#8BBCAA' : 'rgba(0,0,0,0.04)',
                 }}
                 initial={{ height: 0 }}
                 animate={isInView ? { height: `${pct}%` } : {}}
@@ -290,8 +285,9 @@ function ChartLegend({ items }: { items: { label: string; colour: string; value?
       {items.map((item, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{
-            width: '8px', height: '8px', borderRadius: '50%',
+            width: '8px', height: '8px',
             background: item.colour, flexShrink: 0,
+            display: 'inline-block',
           }} />
           <span style={{
             fontSize: '12px', fontWeight: 300, color: '#2C2A27', flex: 1,
@@ -392,9 +388,9 @@ export function StudyBreakdownChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: 'linear-gradient(135deg, rgba(212,165,116,0.06) 0%, rgba(255,255,255,0.95) 100%)',
-        border: '0.5px solid rgba(212,165,116,0.15)',
-        borderTop: '3px solid #D4A574',
+        background: '#fff',
+        borderTop: '2px solid #D4A574',
+        border: '0.5px solid rgba(0,0,0,0.08)',
       }}
     >
       <p style={{
@@ -465,9 +461,9 @@ export function WeeklyActivityChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: 'linear-gradient(135deg, rgba(139,188,170,0.06) 0%, rgba(255,255,255,0.95) 100%)',
-        border: '0.5px solid rgba(139,188,170,0.15)',
-        borderTop: '3px solid #8BBCAA',
+        background: '#fff',
+        borderTop: '2px solid #8BBCAA',
+        border: '0.5px solid rgba(0,0,0,0.08)',
       }}
     >
       <div style={{
@@ -540,9 +536,9 @@ export function TopicStrengthChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: 'linear-gradient(135deg, rgba(123,167,204,0.06) 0%, rgba(255,255,255,0.95) 100%)',
-        border: '0.5px solid rgba(123,167,204,0.15)',
-        borderTop: '3px solid #7BA7CC',
+        background: '#fff',
+        borderTop: '2px solid #7BA7CC',
+        border: '0.5px solid rgba(0,0,0,0.08)',
       }}
     >
       <p style={{
@@ -621,9 +617,9 @@ export function MockExamProgressChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: 'linear-gradient(135deg, rgba(200,155,176,0.06) 0%, rgba(255,255,255,0.95) 100%)',
-        border: '0.5px solid rgba(200,155,176,0.15)',
-        borderTop: '3px solid #C89BB0',
+        background: '#fff',
+        borderTop: '2px solid #C89BB0',
+        border: '0.5px solid rgba(0,0,0,0.08)',
       }}
     >
       <p style={{

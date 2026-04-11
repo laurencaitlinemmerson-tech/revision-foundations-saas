@@ -13,9 +13,9 @@ export default function PrivacyPage() {
       backHref="/"
       backLabel="Back home"
     >
-      <div className="prose prose-sm max-w-none space-y-6 text-[var(--plum-dark)]/80">
+      <div className="prose prose-sm max-w-none space-y-6 text-[var(--charcoal)]">
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Hi there!</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">Hi there!</h2>
           <p>
             I'm Lauren, and I run The Nurse Lab. I take your privacy seriously and want to be
             completely transparent about what data I collect and why. This policy explains everything
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">What I Collect</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">What I Collect</h2>
           <p className="mb-3">I only collect what's necessary to provide you with the service:</p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           </ul>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">How I Use Your Data</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">How I Use Your Data</h2>
           <ul className="list-disc pl-5 space-y-2">
             <li>To give you access to the tools you've purchased</li>
             <li>To send you purchase confirmations and access details</li>
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Third-Party Services</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">Third-Party Services</h2>
           <p className="mb-3">I use a few trusted services to run the site:</p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
@@ -79,14 +79,14 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Cookies</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">Cookies</h2>
           <p>
             The site uses essential cookies to keep you logged in and remember your preferences.
             I don't use tracking cookies or analytics that follow you around the internet.
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Your Rights</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">Your Rights</h2>
           <p className="mb-3">You have the right to:</p>
           <ul className="list-disc pl-5 space-y-2">
             <li>Access the data I hold about you</li>
@@ -95,13 +95,13 @@ export default function PrivacyPage() {
             <li>Withdraw consent for marketing (if applicable)</li>
           </ul>
           <div className="mt-4">
-            <Link href="/delete-data" className="text-[var(--purple)] hover:underline text-sm">
+            <Link href="/delete-data" className="text-[var(--espresso)] underline underline-offset-4 text-sm">
               Request data deletion →
             </Link>
           </div>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Data Security</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">Data Security</h2>
           <p>
             I take security seriously. All data is transmitted over HTTPS, passwords are never stored
             in plain text, and payment processing is handled by Stripe (who are PCI compliant).
@@ -109,14 +109,14 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Changes to This Policy</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">Changes to This Policy</h2>
           <p>
             If I make any significant changes to this policy, I'll let you know via email or a notice
             on the website. Minor changes may be made without notice.
           </p>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-[var(--plum)] mb-3">Questions?</h2>
+          <h2 className="text-lg font-semibold text-[var(--espresso)] mb-3">Questions?</h2>
           <p>
             If you have any questions about this privacy policy or how I handle your data, please
             get in touch! I'm always happy to help.

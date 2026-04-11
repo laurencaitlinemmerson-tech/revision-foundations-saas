@@ -37,7 +37,7 @@ export default function ModalShell({ isOpen, title, onClose, children }: ModalSh
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
       <button
         type="button"
-        className="absolute inset-0 bg-black/28 backdrop-blur-[10px]"
+        className="absolute inset-0 bg-black/40"
         onClick={onClose}
         aria-label="Close modal"
       />
