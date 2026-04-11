@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Circle,
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -401,9 +402,12 @@ const DEFAULT_PLAN: DailyPlan = { osceStation: false, quizQuestions: false, weak
 export function TodaysPlanCard() {
   const [plan, setPlan] = useState<DailyPlan>(DEFAULT_PLAN);
   const [mounted, setMounted] = useState(false);
+  const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    setWeakTopics(load<WeakTopic[]>(STORAGE_KEYS.weakTopics, []));
+
     const stored = load<{ date: string; plan: DailyPlan }>(STORAGE_KEYS.plan, { date: '', plan: DEFAULT_PLAN });
     if (stored.date !== new Date().toDateString()) {
       save(STORAGE_KEYS.plan, { date: new Date().toDateString(), plan: DEFAULT_PLAN });
@@ -424,7 +428,16 @@ export function TodaysPlanCard() {
         save(STORAGE_KEYS.lastTool, { toolName: 'quiz', path: '/quiz', label: 'Core Quiz', timestamp: Date.now() });
 
       // All done → increment streak
-      if (next.osceStation && next.quizQuestions && next.weakTopics) recordStudySession();
+      if (next.osceStation && next.quizQuestions && next.weakTopics) {
+        recordStudySession();
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#D4A574', '#8BBCAA', '#C89BB0', '#7BA7CC'],
+          disableForReducedMotion: true,
+        });
+      }
 
       return next;
     });
@@ -472,7 +485,11 @@ export function TodaysPlanCard() {
       ) : (
         <>
           <div className="space-y-2 flex-1 mb-5">
-            {PLAN_ITEMS.map(({ key, label, duration }, i) => (
+            {[
+              { key: 'osceStation' as const, label: weakTopics.length > 0 ? `1 OSCE station (Focus: ${weakTopics[0].topic})` : '1 OSCE station', duration: '3 mins' },
+              { key: 'quizQuestions' as const, label: weakTopics.length > 1 ? `10 quiz questions (${weakTopics[1].topic} bias)` : '10 quiz questions', duration: '5 mins' },
+              { key: 'weakTopics' as const, label: 'Review weak topics', duration: '2 mins' }
+            ].map(({ key, label, duration }, i) => (
               <motion.button key={key} onClick={() => toggle(key)}
                 initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.08 }} whileTap={{ scale: 0.98 }}
@@ -547,15 +564,16 @@ export function FocusAreasCard() {
   if (weakTopics.length === 0) {
     return (
       <motion.div variants={cardVariants} initial="hidden" animate="visible"
-        className="card bg-[var(--amber-bg)] border border-[rgba(200,112,10,0.1)]"
+        className="card bg-[var(--amber-bg)] border border-[rgba(200,112,10,0.1)] relative overflow-hidden"
       >
-        <div className="flex flex-col items-center text-center py-8">
-          <p className="font-display text-[var(--amber-text)] mb-1">No topics here yet</p>
-          <p className="text-sm text-[var(--amber-text)]/70 font-light max-w-xs leading-7">
-            Once you&apos;ve done a few quiz questions, the topics worth revisiting will show up here.
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#ffeedd] opacity-40 rounded-full blur-3xl z-0 pointer-events-none" />
+        <div className="flex flex-col items-center text-center py-8 relative z-10">
+          <p className="font-display text-2xl text-[var(--amber-text)] mb-2">Uncover your blindspots</p>
+          <p className="text-sm text-[var(--amber-text)]/80 font-light max-w-[240px] leading-7">
+            Take the baseline diagnostic quiz to start tracking exactly where you need to focus.
           </p>
-          <Link href="/quiz" className="mt-4 text-sm text-[var(--amber-text)] underline underline-offset-2 hover:no-underline font-light">
-            Start the Core Quiz →
+          <Link href="/quiz" className="mt-6 inline-flex bg-white shadow-sm border border-[var(--amber-text)]/20 text-[var(--amber-text)] px-4 py-2 text-sm font-medium transition-transform hover:scale-105">
+            Take Baseline Diagnostic →
           </Link>
         </div>
       </motion.div>

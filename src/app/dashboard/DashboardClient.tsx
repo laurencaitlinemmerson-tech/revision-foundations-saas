@@ -72,12 +72,21 @@ export default function DashboardClient({
             className="grid gap-6 lg:grid-cols-[minmax(0,1.06fr)_320px] lg:items-end"
           >
             <div>
-              <motion.p
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
-                className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[var(--charcoal)]/48 font-medium"
-              >
-                {formatToday()}
-              </motion.p>
+              <div className="mb-3 flex items-center gap-3">
+                <motion.p
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
+                  className="text-[10px] uppercase tracking-[0.22em] text-[var(--charcoal)]/48 font-medium"
+                >
+                  {formatToday()}
+                </motion.p>
+                <div className="w-[1px] h-3 bg-[var(--charcoal)]/15" />
+                <motion.p
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
+                  className="text-[10px] uppercase tracking-[0.16em] text-[var(--espresso)] font-medium bg-[var(--linen-light)] px-2 py-0.5"
+                >
+                  🗓 32 Days to Core OSCEs
+                </motion.p>
+              </div>
               <h1 className="font-display text-[clamp(2.8rem,5vw,4.4rem)] leading-[1.02] tracking-[-0.01em] text-[var(--espresso)]">
                 {title}
               </h1>

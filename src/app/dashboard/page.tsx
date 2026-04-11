@@ -400,6 +400,12 @@ export default async function DashboardPage() {
           gap: 16px;
           min-width: 0;
         }
+        @media (min-width: 1040px) {
+          .dash-split-side {
+            position: sticky;
+            top: 24px;
+          }
+        }
         .dash-hover-shell {
           transition: transform 220ms ease, filter 220ms ease;
         }
