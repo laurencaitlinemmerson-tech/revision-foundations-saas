@@ -1,12 +1,10 @@
 'use client';
 
-import { ReactNode, useMemo, useEffect, useState } from 'react';
+import { ReactNode, useMemo } from 'react';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import Link from 'next/link';
-import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
-import { motion, Variants, useReducedMotion } from 'framer-motion';
-import PinnedNote from '@/components/dashboard/PinnedNote';
+import { motion, useReducedMotion } from 'framer-motion';
 
 interface DashboardClientProps {
   children: ReactNode;
@@ -15,146 +13,12 @@ interface DashboardClientProps {
   hasQuiz: boolean;
 }
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const serif   = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink     = '#1A1815';
-const mid     = '#5A5750';
-const muted   = '#9C8878';
-const border  = 'rgba(0,0,0,0.08)';
-
-// ── Motion ─────────────────────────────────────────────────────────────────────
-const containerVariants: Variants = {
-  hidden:  { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
-};
-const itemVariants: Variants = {
-  hidden:  { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
-};
-
 function formatToday() {
   return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long', day: 'numeric', month: 'long',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
   }).format(new Date());
-}
-
-// ── Daily progress bar — thin gradient across hero top ───────────────────────
-function DailyProgressBar() {
-  const [completed, setCompleted] = useState(0);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    try {
-      const raw = localStorage.getItem('rf_daily_plan');
-      if (raw) {
-        const stored = JSON.parse(raw);
-        if (stored.date === new Date().toDateString()) {
-          const plan = stored.plan || {};
-          setCompleted(Object.values(plan).filter(Boolean).length);
-        }
-      }
-    } catch { /* noop */ }
-  }, []);
-
-  if (!mounted) return null;
-
-  const progress = (completed / 3) * 100;
-  const isComplete = completed === 3;
-
-  return (
-    <div style={{
-      position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-      background: 'rgba(0,0,0,0.03)', zIndex: 2, overflow: 'hidden',
-    }}>
-      <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: `${progress}%` }}
-        transition={{ duration: 1, ease: 'easeOut', delay: 0.4 }}
-        style={{
-          height: '100%',
-          background: isComplete
-            ? 'linear-gradient(90deg, #8BBCAA, #0F6E56)'
-            : 'linear-gradient(90deg, #D4A574, #8BBCAA)',
-        }}
-      />
-    </div>
-  );
-}
-
-// ── Daily progress ring — small ring showing plan completion ─────────────────
-function DailyProgressRing() {
-  const [completed, setCompleted] = useState(0);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    try {
-      const raw = localStorage.getItem('rf_daily_plan');
-      if (raw) {
-        const stored = JSON.parse(raw);
-        if (stored.date === new Date().toDateString()) {
-          const plan = stored.plan || {};
-          setCompleted(Object.values(plan).filter(Boolean).length);
-        }
-      }
-    } catch { /* noop */ }
-  }, []);
-
-  if (!mounted) return null;
-
-  const total = 3;
-  const size = 52;
-  const sw = 3.5;
-  const r = (size - sw) / 2;
-  const c = 2 * Math.PI * r;
-  const filled = (completed / total) * c;
-  const allDone = completed === total;
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-      <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
-        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(0,0,0,0.05)" strokeWidth={sw} />
-          <motion.circle
-            cx={size / 2} cy={size / 2} r={r} fill="none"
-            stroke={allDone ? '#0F6E56' : '#8BBCAA'}
-            strokeWidth={sw} strokeLinecap="round"
-            initial={{ strokeDasharray: `0 ${c}` }}
-            animate={{ strokeDasharray: `${filled} ${c - filled}` }}
-            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
-          />
-        </svg>
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-        }}>
-          <p style={{
-            fontFamily: display, fontSize: '15px', fontStyle: 'italic',
-            color: allDone ? '#0F6E56' : ink, lineHeight: 1, margin: 0,
-          }}>
-            {completed}
-          </p>
-        </div>
-      </div>
-      <div>
-        <p style={{
-          fontFamily: serif, fontSize: '12px',
-          color: allDone ? '#0F6E56' : mid,
-          fontWeight: allDone ? 500 : 300, margin: 0, lineHeight: 1.5,
-        }}>
-          {allDone ? 'All done for today' : `${completed} of 3 tasks done`}
-        </p>
-        <p style={{
-          fontFamily: serif, fontSize: '9px', letterSpacing: '0.14em',
-          textTransform: 'uppercase', color: muted, margin: '2px 0 0',
-        }}>
-          daily plan
-        </p>
-      </div>
-    </div>
-  );
 }
 
 export default function DashboardClient({
@@ -163,7 +27,6 @@ export default function DashboardClient({
   hasOsce,
   hasQuiz,
 }: DashboardClientProps) {
-  useScrollAnimation();
   const shouldReduceMotion = useReducedMotion();
   const hour = new Date().getHours();
 
@@ -173,218 +36,101 @@ export default function DashboardClient({
     return 'Good evening';
   }, [hour]);
 
-  const today       = useMemo(() => formatToday(), []);
-  const headingName = firstName?.trim();
-
+  const title = firstName?.trim() ? `${greeting}, ${firstName.trim()}.` : `${greeting}.`;
   const motionProps = shouldReduceMotion
     ? {}
-    : { initial: 'hidden' as const, animate: 'visible' as const, variants: containerVariants };
+    : {
+        initial: { opacity: 0, y: 14 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const },
+      };
+
+  const railLinks = [
+    { href: '#continue', label: 'Continue', note: 'Return to the active thread' },
+    { href: '#today-block', label: 'Today', note: 'See the day at a glance' },
+    { href: '#search', label: 'Search', note: 'Open a guide fast' },
+    { href: '#saved-folders', label: 'Library', note: 'Revisit saved material' },
+  ];
+
+  const quickLinks = [
+    { href: '/hub', label: 'Hub', available: true },
+    { href: hasQuiz ? '/quiz' : '/pricing', label: 'Quiz', available: hasQuiz },
+    { href: hasOsce ? '/osce' : '/pricing', label: 'OSCE', available: hasOsce },
+  ];
 
   return (
-    <div style={{ background: '#FAFAF8', minHeight: '100vh' }}>
+    <div className="min-h-screen bg-[var(--cream)]">
       <Navbar />
 
-      {/* ── Hero shell ── */}
-      <section style={{ borderBottom: `0.5px solid ${border}`, background: '#FAFAF8', position: 'relative' }}>
-        <DailyProgressBar />
-        <div className="dash-wrap" style={{ paddingTop: '52px', paddingBottom: '48px' }}>
-          <motion.div {...motionProps}>
-            <motion.div variants={itemVariants}>
-
-              <p style={{
-                fontFamily: serif, fontSize: '10px', letterSpacing: '0.22em',
-                textTransform: 'uppercase', color: muted, marginBottom: '16px',
-              }}>
-                {today}
+      <section className="border-b border-[rgba(26,24,21,0.08)] bg-[var(--cream)]">
+        <div className="mx-auto max-w-[1120px] px-6 pb-10 pt-[52px] md:px-10 md:pb-12">
+          <motion.div
+            {...motionProps}
+            className="grid gap-6 lg:grid-cols-[minmax(0,1.06fr)_320px] lg:items-end"
+          >
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--charcoal)]/48">
+                {formatToday()}
               </p>
-
-              <h1 style={{
-                fontFamily: display,
-                fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
-                lineHeight: 1.05,
-                letterSpacing: '-0.02em',
-                fontWeight: 400,
-                color: ink,
-                marginBottom: '8px',
-              }}>
-                {headingName ? `${greeting}, ${headingName}.` : `${greeting}.`}
+              <h1 className="mt-4 font-display text-[clamp(2.4rem,4.6vw,3.9rem)] leading-[1.02] tracking-[-0.02em] text-[var(--espresso)]">
+                {title}
               </h1>
-
-              <p style={{
-                fontFamily: serif, fontSize: '12px', color: '#B4A89C',
-                fontWeight: 300, lineHeight: 1.7, marginBottom: '36px',
-              }}>
-                Pick up where you left off, or start something small.
+              <p className="mt-4 max-w-[44ch] text-[15px] leading-8 text-[var(--charcoal)]/72">
+                A calmer revision desk built around continuation, planning, and quick re-entry into the pages and tools you actually use.
               </p>
 
-              {/* ── Tier 1: Primary CTA ── */}
-              <div className="dash-primary-card">
-                <div>
-                  <p className="dash-eyebrow">Now · continue where you left off</p>
-                  <p style={{
-                    fontFamily: display, fontSize: '1.4rem', fontWeight: 400,
-                    color: ink, marginBottom: '6px', lineHeight: 1.15,
-                  }}>
-                    Open the Hub
-                  </p>
-                  <p style={{
-                    fontFamily: serif, fontSize: '12px', color: mid,
-                    fontWeight: 300, lineHeight: 1.65, maxWidth: '46ch',
-                  }}>
-                    Guides, glossaries, and saved folders — your main revision base.
-                  </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                  <DailyProgressRing />
-                  <Link href="/hub" className="dash-primary-btn">
-                    Continue →
+              <div className="mt-6 flex flex-wrap gap-2">
+                {quickLinks.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`inline-flex items-center gap-2 border px-4 py-2 text-sm transition-colors ${
+                      item.available
+                        ? 'border-[rgba(26,24,21,0.08)] bg-white text-[var(--espresso)] hover:border-[rgba(26,24,21,0.16)]'
+                        : 'border-[rgba(26,24,21,0.08)] bg-[rgba(245,243,240,0.9)] text-[var(--charcoal)]/72 hover:border-[rgba(26,24,21,0.16)]'
+                    }`}
+                  >
+                    {item.label}
+                    {!item.available ? <span className="text-[10px] uppercase tracking-[0.12em]">Locked</span> : null}
                   </Link>
-                </div>
+                ))}
               </div>
+            </div>
 
-              {/* ── Tier 2: Secondary cards ── */}
-              <div className="dash-sec-row">
+            <div className="border border-[rgba(26,24,21,0.08)] bg-white">
+              {railLinks.map((link, index) => (
                 <Link
-                  href={hasOsce ? '/osce' : '/pricing'}
-                  className="dash-sec-card dash-sec-osce"
+                  key={link.label}
+                  href={link.href}
+                  className={`group flex items-start justify-between gap-4 px-5 py-4 transition-colors hover:bg-[rgba(245,243,240,0.6)] ${
+                    index < railLinks.length - 1 ? 'border-b border-[rgba(26,24,21,0.08)]' : ''
+                  }`}
                 >
-                  <span className="dash-sec-arr">→</span>
-                  <p className="dash-eyebrow">OSCE practice</p>
-                  <p className="dash-sec-title">
-                    {hasOsce ? 'Run a timed station' : 'Try the free preview'}
-                  </p>
-                  <p className="dash-sec-sub">
-                    {hasOsce
-                      ? 'Pick a station and practise under exam conditions.'
-                      : 'One free station — no commitment needed.'}
-                  </p>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--charcoal)]/40">
+                      {link.label}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[var(--espresso)]">
+                      {link.note}
+                    </p>
+                  </div>
+                  <span className="mt-1 text-sm text-[var(--charcoal)]/30 transition-transform duration-200 group-hover:translate-x-1">
+                    →
+                  </span>
                 </Link>
-
-                <Link
-                  href={hasQuiz ? '/quiz' : '/pricing'}
-                  className="dash-sec-card dash-sec-quiz"
-                >
-                  <span className="dash-sec-arr">→</span>
-                  <p className="dash-eyebrow">Quiz · weak areas</p>
-                  <p className="dash-sec-title">
-                    {hasQuiz ? 'Spot-check weak topics' : 'Add the quiz'}
-                  </p>
-                  <p className="dash-sec-sub">
-                    {hasQuiz
-                      ? '10 questions, under 8 minutes.'
-                      : 'Short sets and weak-area spotting.'}
-                  </p>
-                </Link>
-              </div>
-
-              <div style={{ marginTop: '20px' }}>
-                <PinnedNote compact />
-              </div>
-
-            </motion.div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>
 
-      <main>
-        <div className="dash-wrap" style={{ paddingBottom: '80px' }}>
+      <main className="pb-20 pt-8 md:pt-10">
+        <div className="mx-auto max-w-[1120px] px-6 md:px-10">
           {children}
         </div>
       </main>
 
       <Footer />
-
-      <style>{`
-        .dash-wrap {
-          max-width: 1060px;
-          margin: 0 auto;
-          padding-left: 40px;
-          padding-right: 40px;
-        }
-        .dash-eyebrow {
-          font-family: ${serif};
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: ${muted};
-          margin-bottom: 9px;
-        }
-        .dash-primary-card {
-          background: #fff;
-          border: 0.5px solid rgba(0,0,0,0.09);
-          border-left: 3px solid #8BBCAA;
-          padding: 28px 32px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 24px;
-          transition: transform 180ms ease, box-shadow 180ms ease;
-        }
-        .dash-primary-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.06);
-        }
-        .dash-primary-btn {
-          background: #1A1815;
-          color: #FAFAF8;
-          font-family: ${serif};
-          font-size: 11px;
-          letter-spacing: 0.08em;
-          padding: 10px 22px;
-          text-decoration: none;
-          white-space: nowrap;
-          flex-shrink: 0;
-          display: inline-flex;
-          align-items: center;
-          transition: opacity 150ms;
-        }
-        .dash-primary-btn:hover { opacity: 0.85; }
-        .dash-sec-row {
-          margin-top: 14px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
-        .dash-sec-card {
-          background: #fff;
-          border: 0.5px solid rgba(0,0,0,0.07);
-          border-left: 3px solid transparent;
-          padding: 20px 22px;
-          text-decoration: none;
-          display: block;
-          position: relative;
-          transition: all 170ms ease;
-        }
-        .dash-sec-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-        }
-        .dash-sec-osce { border-left-color: #8BBCAA; }
-        .dash-sec-quiz { border-left-color: #C89BB0; }
-        .dash-sec-arr {
-          position: absolute; right: 18px; top: 20px;
-          font-size: 13px; color: #D4C4B8;
-          transition: transform 160ms;
-        }
-        .dash-sec-card:hover .dash-sec-arr { transform: translateX(3px); }
-        .dash-sec-title {
-          font-family: ${serif};
-          font-size: 13px; font-weight: 500; color: ${ink}; margin-bottom: 4px;
-        }
-        .dash-sec-sub {
-          font-family: ${serif};
-          font-size: 11px; color: ${mid}; font-weight: 300;
-          line-height: 1.6; padding-right: 20px;
-        }
-        @media (max-width: 860px) {
-          .dash-wrap { padding-left: 24px; padding-right: 24px; }
-          .dash-sec-row { grid-template-columns: 1fr; }
-          .dash-primary-card { flex-direction: column; align-items: flex-start; }
-        }
-        @media (max-width: 600px) {
-          .dash-wrap { padding-left: 20px; padding-right: 20px; }
-        }
-      `}</style>
     </div>
   );
 }
