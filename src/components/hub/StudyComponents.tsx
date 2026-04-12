@@ -266,9 +266,9 @@ export const STUDY_COMPONENTS_CSS = `
 }
 
 /* ── Source Links ── */
-.sc-sources { margin-top: 52px; padding-top: 28px; border-top: 0.5px solid rgba(0,0,0,0.1); }
-.sc-sources-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #aaa; margin-bottom: 14px; }
-.sc-source-link { display: block; font-size: 12px; font-weight: 300; color: #5A5750; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(0,0,0,0.18); padding: 7px 0; border-bottom: 0.5px solid rgba(0,0,0,0.06); transition: color 0.15s; }
+.sc-sources { margin-top: 56px; padding-top: 32px; border-top: 0.5px solid rgba(0,0,0,0.1); }
+.sc-sources-label { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #aaa; margin-bottom: 16px; }
+.sc-source-link { display: block; font-size: 13px; font-weight: 300; color: #5A5750; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(0,0,0,0.18); padding: 14px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); transition: color 0.15s; line-height: 1.55; }
 .sc-source-link:last-child { border-bottom: none; }
 .sc-source-link:hover { color: #1A1815; }
 `;
@@ -523,19 +523,30 @@ export function SourceLinks({
   sources: { citation: string; title: string; href: string }[];
 }) {
   return (
-    <div className="sc-sources">
-      <p className="sc-sources-label">Sources &amp; Further Reading</p>
-      {sources.map((s) => (
-        <a
-          key={s.citation}
-          href={s.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="sc-source-link"
-        >
-          {s.citation} — {s.title}
-        </a>
-      ))}
-    </div>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: SOURCE_LINKS_CSS }} />
+      <div className="sc-sources">
+        <p className="sc-sources-label">Sources &amp; References</p>
+        {sources.map((s) => (
+          <a
+            key={s.citation}
+            href={s.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sc-source-link"
+          >
+            {s.citation} — {s.title}
+          </a>
+        ))}
+      </div>
+    </>
   );
 }
+
+const SOURCE_LINKS_CSS = `
+  .sc-sources { margin-top: 56px; padding-top: 32px; border-top: 0.5px solid rgba(0,0,0,0.1); }
+  .sc-sources-label { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #aaa; margin-bottom: 16px; }
+  .sc-source-link { display: block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 13px; font-weight: 300; color: #5A5750; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(0,0,0,0.18); padding: 14px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); transition: color 0.15s; line-height: 1.55; }
+  .sc-source-link:last-child { border-bottom: none; }
+  .sc-source-link:hover { color: #1A1815; }
+`;
