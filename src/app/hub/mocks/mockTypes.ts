@@ -51,6 +51,13 @@ export interface MockQuestion {
   priorityStack?: string[];
 }
 
+export interface MockReference {
+  citation: string;
+  title: string;
+  href: string;
+  type: 'guideline' | 'textbook' | 'journal' | 'professional-body' | 'educational';
+}
+
 export interface MockExam {
   id: string;
   system: string;
@@ -66,6 +73,7 @@ export interface MockExam {
   whatGetsYouAFirst: string[];
   commonMistakes: string[];
   howToStructure: string[];
+  references: MockReference[];
 }
 
 export interface BodySystem {

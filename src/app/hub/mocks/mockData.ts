@@ -611,6 +611,51 @@ export const allMocks: MockExam[] = [
       'Close with a sentence that ties the answer together or states the clinical significance',
       'Stay within the word guide \u2014 conciseness is valued over volume. Every sentence should earn its place.',
     ],
+
+    references: [
+      {
+        citation: 'NICE (2021)',
+        title: 'Bronchiolitis in children: diagnosis and management (NG9)',
+        href: 'https://www.nice.org.uk/guidance/ng9',
+        type: 'guideline',
+      },
+      {
+        citation: 'NMC (2018)',
+        title: 'The Code: Professional standards of practice and behaviour for nurses, midwives and nursing associates',
+        href: 'https://www.nmc.org.uk/standards/code/',
+        type: 'professional-body',
+      },
+      {
+        citation: 'Resuscitation Council UK (2021)',
+        title: 'Paediatric Basic Life Support Guidelines',
+        href: 'https://www.resus.org.uk/library/2021-resuscitation-guidelines/paediatric-basic-life-support',
+        type: 'guideline',
+      },
+      {
+        citation: 'Waugh A & Grant A (2018)',
+        title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th ed) — Elsevier',
+        href: 'https://www.elsevier.com/books/ross-and-wilson-anatomy-and-physiology-in-health-and-illness/waugh/978-0-7020-7276-5',
+        type: 'textbook',
+      },
+      {
+        citation: 'Bowlby J (1969)',
+        title: 'Attachment Theory — overview and clinical application in paediatric nursing',
+        href: 'https://www.simplypsychology.org/bowlby.html',
+        type: 'educational',
+      },
+      {
+        citation: 'Erikson EH (1963)',
+        title: 'Erikson\'s Stages of Psychosocial Development — overview',
+        href: 'https://www.simplypsychology.org/erik-erikson.html',
+        type: 'educational',
+      },
+      {
+        citation: 'Shields L et al. (2012)',
+        title: 'Family-centred care for hospitalised children aged 0–12 years — Cochrane Review',
+        href: 'https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004811.pub3/full',
+        type: 'journal',
+      },
+    ],
   },
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -1243,6 +1288,57 @@ export const allMocks: MockExam[] = [
       'Name Jayden and Leanne throughout \u2014 this signals to the examiner that you are applying knowledge, not reciting it',
       'Close each answer with a sentence that states the clinical significance or ties the answer back to Jayden\u2019s care',
       'Stay within the word guide \u2014 every sentence should earn its place',
+    ],
+
+    references: [
+      {
+        citation: 'BTS/SIGN (2022)',
+        title: 'British Guideline on the Management of Asthma',
+        href: 'https://www.brit-thoracic.org.uk/quality-improvement/guidelines/asthma/',
+        type: 'guideline',
+      },
+      {
+        citation: 'NICE (2017, updated)',
+        title: 'Asthma: diagnosis, monitoring and chronic asthma management (NG80)',
+        href: 'https://www.nice.org.uk/guidance/ng80',
+        type: 'guideline',
+      },
+      {
+        citation: 'NMC (2018)',
+        title: 'The Code: Professional standards of practice and behaviour for nurses, midwives and nursing associates',
+        href: 'https://www.nmc.org.uk/standards/code/',
+        type: 'professional-body',
+      },
+      {
+        citation: 'Resuscitation Council UK (2021)',
+        title: 'Paediatric Basic Life Support Guidelines',
+        href: 'https://www.resus.org.uk/library/2021-resuscitation-guidelines/paediatric-basic-life-support',
+        type: 'guideline',
+      },
+      {
+        citation: 'Waugh A & Grant A (2018)',
+        title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th ed) — Elsevier',
+        href: 'https://www.elsevier.com/books/ross-and-wilson-anatomy-and-physiology-in-health-and-illness/waugh/978-0-7020-7276-5',
+        type: 'textbook',
+      },
+      {
+        citation: 'Erikson EH (1963)',
+        title: 'Erikson\'s Stages of Psychosocial Development — overview',
+        href: 'https://www.simplypsychology.org/erik-erikson.html',
+        type: 'educational',
+      },
+      {
+        citation: 'Piaget J (1954)',
+        title: 'Piaget\'s Theory of Cognitive Development — overview',
+        href: 'https://www.simplypsychology.org/piaget.html',
+        type: 'educational',
+      },
+      {
+        citation: 'Shields L et al. (2012)',
+        title: 'Family-centred care for hospitalised children aged 0–12 years — Cochrane Review',
+        href: 'https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004811.pub3/full',
+        type: 'journal',
+      },
     ],
   },
 ];

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { MockExam, MockQuestion } from '../../mockTypes';
+import type { MockExam, MockQuestion, MockReference } from '../../mockTypes';
 import { MOCK_PAGE_CSS } from '../../mockStyles';
 import { MOCK_INTERACTIVE_CSS } from '../../mockStyles';
 
@@ -1171,6 +1171,31 @@ export default function MockExamClient({ mock }: { mock: MockExam }) {
                 </ul>
               </div>
             </motion.div>
+
+            {/* References */}
+            {mock.references && mock.references.length > 0 && (
+              <div className="mk-references">
+                <p className="mk-references-title">Sources &amp; References</p>
+                <div className="mk-ref-list">
+                  {mock.references.map((ref: MockReference) => (
+                    <div key={ref.citation} className="mk-ref-item">
+                      <span className="mk-ref-type">{ref.type === 'professional-body' ? 'Prof. body' : ref.type}</span>
+                      <div className="mk-ref-body">
+                        <span className="mk-ref-citation">{ref.citation} — {ref.title}</span>
+                        <a
+                          href={ref.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mk-ref-link"
+                        >
+                          {ref.href}
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Completion actions */}
             <div className="mk-complete">
