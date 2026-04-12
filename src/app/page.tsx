@@ -22,16 +22,16 @@ export default function HomePage() {
     <div style={{ background: cream, minHeight: '100vh' }}>
       <Navbar />
       <HeroSection />
-      <StartHereDiagnostic />
       <NurseLabJourney />
-      <Testimonials compact />
+      <SamplePreviews />
       <ToolsShowcase />
       <WhatsIncluded />
+      <WhySection />
+      <Testimonials compact />
+      <StartHereDiagnostic />
       <AccessPaths />
-      <SamplePreviews />
       <BundleCTA />
       <HubGrid />
-      <WhySection />
       <FinalCTA />
       <Footer />
       <HomeStyles />
