@@ -16,74 +16,100 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
 
     setGenerating(true);
 
+    // ── Hide interactive / non-print elements ──
+    const hidden: HTMLElement[] = [];
+    const hide = (node: HTMLElement | null) => {
+      if (!node) return;
+      node.style.display = 'none';
+      hidden.push(node);
+    };
+
     try {
-      const html2pdf = (await import('html2pdf.js')).default;
-
-      // Extract title from the h1 for filename
-      const h1 = el.querySelector('h1');
-      const title = h1?.textContent?.trim().replace(/[^a-zA-Z0-9\s\-–]/g, '').replace(/\s+/g, '-') || 'resource';
-
-      // ── Hide interactive / non-print elements ──
-      const hidden: HTMLElement[] = [];
-      const hide = (node: HTMLElement | null) => {
-        if (!node) return;
-        node.style.display = 'none';
-        hidden.push(node);
-      };
-
       // Back navigation
       el.querySelectorAll<HTMLElement>('[class*="-back"]').forEach(hide);
       // Save / bookmark row
-      el.querySelectorAll<HTMLElement>('.mt-1.flex').forEach(hide);
+      el.querySelectorAll<HTMLElement>('.mt-6').forEach((node) => {
+        if (node.querySelector('button')) hide(node);
+      });
       // Download button itself
       el.querySelectorAll<HTMLElement>('.pdf-download-btn').forEach(hide);
-
-      // Checklist grids and their headings
+      // Checklist grids
       el.querySelectorAll<HTMLElement>('[class*="checklist"], [class*="check-item"]').forEach(hide);
-
-      // SelfTestQuiz components (mt-8 print:hidden wrapper)
+      // SelfTestQuiz components
       el.querySelectorAll<HTMLElement>('.mt-8.print\\:hidden').forEach(hide);
-
-      // Find and hide "Quick self-test" / "Checklist" section headings
+      // Self-test / checklist headings
       el.querySelectorAll<HTMLElement>('h2').forEach((h2) => {
         const text = h2.textContent?.trim().toLowerCase() || '';
-        if (text.includes('self-test') || text.includes('checklist')) {
-          hide(h2);
-        }
+        if (text.includes('self-test') || text.includes('checklist')) hide(h2);
       });
 
-      // ── Add page-break hints ──
       el.classList.add('pdf-generating');
 
-      const opt = {
-        margin: [12, 10, 14, 10] as [number, number, number, number],
-        filename: `${title}-TheNurseLab.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          scrollY: 0,
-          windowWidth: 860,
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait' as const,
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
-      };
+      // Extract title for filename
+      const h1 = el.querySelector('h1');
+      const title = h1?.textContent?.trim().replace(/[^a-zA-Z0-9\s\-–]/g, '').replace(/\s+/g, '-') || 'resource';
 
-      await html2pdf().set(opt).from(el).save();
-    } finally {
-      // Restore all hidden elements
-      const el = contentRef.current;
-      if (el) {
-        el.classList.remove('pdf-generating');
-        el.querySelectorAll<HTMLElement>('[style*="display: none"]').forEach((node) => {
-          node.style.display = '';
-        });
+      // Dynamic scale to stay under browser canvas limit (~16k px)
+      const elHeight = el.scrollHeight;
+      const scale = elHeight * 1.5 > 15000 ? 1 : 1.5;
+
+      const [html2canvas, { jsPDF }] = await Promise.all([
+        import('html2canvas').then((m) => m.default),
+        import('jspdf'),
+      ]);
+
+      const canvas = await html2canvas(el, {
+        scale,
+        useCORS: true,
+        letterRendering: true,
+        scrollY: 0,
+        windowWidth: 860,
+        logging: false,
+      });
+
+      // A4 dimensions in mm
+      const pageW = 210;
+      const pageH = 297;
+      const mTop = 12, mRight = 10, mBottom = 14, mLeft = 10;
+      const contentW = pageW - mLeft - mRight; // 190mm
+      const contentH = pageH - mTop - mBottom; // 271mm
+
+      // Total image height in mm at content width
+      const imgHeight = (canvas.height / canvas.width) * contentW;
+      const pagesCount = Math.ceil(imgHeight / contentH);
+
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      for (let i = 0; i < pagesCount; i++) {
+        if (i > 0) pdf.addPage();
+
+        // How many mm from the top of the full image this page starts
+        const yOffsetMm = i * contentH;
+        // Corresponding pixel offset in the source canvas
+        const sourceY = (yOffsetMm / imgHeight) * canvas.height;
+        // Pixels to take for this page
+        const sliceH = Math.min(
+          (contentH / imgHeight) * canvas.height,
+          canvas.height - sourceY,
+        );
+
+        // Render this slice to a temporary canvas
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = Math.ceil(sliceH);
+        const ctx = slice.getContext('2d')!;
+        ctx.drawImage(canvas, 0, sourceY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+
+        const imgData = slice.toDataURL('image/jpeg', 0.95);
+        // Height of this slice in mm
+        const sliceHMm = (sliceH / canvas.height) * imgHeight;
+        pdf.addImage(imgData, 'JPEG', mLeft, mTop, contentW, sliceHMm);
       }
+
+      pdf.save(`${title}-TheNurseLab.pdf`);
+    } finally {
+      el.classList.remove('pdf-generating');
+      hidden.forEach((node) => { node.style.display = ''; });
       setGenerating(false);
     }
   }, [generating]);
@@ -153,8 +179,8 @@ const PDF_CSS = `
   .pdf-download-spinner {
     width: 14px;
     height: 14px;
-    border: 1.5px solid rgba(0,0,0,0.15);
-    border-top-color: #2C2A27;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-top-color: #FAFAF8;
     border-radius: 50%;
     animation: pdf-spin 0.7s linear infinite;
     flex-shrink: 0;
@@ -165,21 +191,18 @@ const PDF_CSS = `
 
   /* ── PDF generation layout overrides ── */
 
-  /* Force backgrounds and colours to render in PDF */
   .pdf-generating * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
 
-  /* Reduce main wrap padding for more content space */
   .pdf-generating [class*="-wrap"] {
     padding-left: 28px !important;
     padding-right: 28px !important;
     padding-top: 24px !important;
   }
 
-  /* Fix sidebar/content overlap — shrink letter, narrow sidebar */
   .pdf-generating [class*="-step"] {
     grid-template-columns: 64px 1fr !important;
     page-break-inside: avoid;
@@ -198,12 +221,10 @@ const PDF_CSS = `
     padding-left: 16px !important;
   }
 
-  /* Golden rules: 2-column on PDF (4 is too cramped at 860px) */
   .pdf-generating [class*="-golden"] {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 
-  /* Tighten 4-column content grids for PDF */
   .pdf-generating [class*="-content-grid"] {
     grid-template-columns: repeat(4, 1fr) !important;
     font-size: 11px !important;
@@ -213,41 +234,35 @@ const PDF_CSS = `
     padding: 10px 10px 14px !important;
   }
 
-  /* Keep golden rules grid together */
   .pdf-generating [class*="-golden"],
   .pdf-generating [class*="golden-rules"] {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Keep pearl/callout boxes together */
   .pdf-generating [class*="-pearl"],
   .pdf-generating [class*="-callout"] {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Keep red flags section together */
   .pdf-generating [class*="-flags"],
   .pdf-generating [class*="red-flag"] {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Keep tables together */
   .pdf-generating table,
   .pdf-generating [class*="-table"] {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Keep data grids together */
   .pdf-generating [class*="-grid"] {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Avoid breaks after section titles */
   .pdf-generating h2,
   .pdf-generating [class*="section-title"] {
     page-break-after: avoid;
