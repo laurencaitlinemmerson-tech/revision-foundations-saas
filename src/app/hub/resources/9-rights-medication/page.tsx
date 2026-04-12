@@ -5,6 +5,7 @@ import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -543,6 +544,13 @@ export default function NineRightsMedicationPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: 9 Rights of Medication" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'BNFC', title: 'British National Formulary for Children', href: 'https://bnf.nice.org.uk/' },
+          { citation: 'NHS England', title: 'Medication safety resources', href: 'https://www.england.nhs.uk/patient-safety/medication-safety/' },
+          { citation: 'WHO', title: 'Medication Without Harm — Patient Safety Challenge', href: 'https://www.who.int/initiatives/medication-without-harm' },
+        ]} />
         </div>
       </div>
     </PremiumHubPageGate>

@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -848,6 +849,13 @@ export default function TheoriesOfDevelopmentPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Theories of Development" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'McLeod S (2024)', title: "Piaget's Theory of Cognitive Development", href: 'https://www.simplypsychology.org/piaget.html' },
+          { citation: 'McLeod S (2024)', title: "Erikson's Stages of Psychosocial Development", href: 'https://www.simplypsychology.org/erik-erikson.html' },
+          { citation: 'McLeod S (2024)', title: "Bowlby's Attachment Theory", href: 'https://www.simplypsychology.org/bowlby.html' },
+          { citation: 'McLeod S (2024)', title: "Kohlberg's Theory of Moral Development", href: 'https://www.simplypsychology.org/kohlberg.html' },
+        ]} />
       </div>
     </div>
   );

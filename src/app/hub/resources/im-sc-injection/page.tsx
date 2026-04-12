@@ -4,6 +4,7 @@ import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 const quizQuestions = [
   { question: 'What angle is used for an IM injection?', options: ['15°', '45°', '90°', '30°'], answer: 2 },
@@ -675,6 +676,13 @@ export default function IMSCInjectionPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: IM & SC Injections" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'BNFC', title: 'British National Formulary for Children — administration routes', href: 'https://bnf.nice.org.uk/' },
+          { citation: 'RCN (2022)', title: 'Standards for infusion therapy', href: 'https://www.rcn.org.uk/' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'NHS England', title: 'Medicines administration guidance', href: 'https://www.england.nhs.uk/patient-safety/medication-safety/' },
+        ]} />
         </div>
       </div>
     </PremiumHubPageGate>

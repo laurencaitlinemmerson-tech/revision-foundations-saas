@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -1343,6 +1344,13 @@ export default function CardiovascularSystemPage() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: Cardiovascular System & Assessment" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'Waugh A & Grant A (2018)', title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th edn)', href: 'https://www.elsevier.com/' },
+          { citation: 'NICE (2018)', title: 'Chronic heart failure in adults: diagnosis and management (NG106)', href: 'https://www.nice.org.uk/guidance/ng106' },
+          { citation: 'British Heart Foundation', title: 'Heart conditions — professional information', href: 'https://www.bhf.org.uk/' },
+          { citation: 'Resuscitation Council UK (2021)', title: '2021 Resuscitation Guidelines', href: 'https://www.resus.org.uk/library/2021-resuscitation-guidelines' },
+        ]} />
       </div>
     </div>
   );

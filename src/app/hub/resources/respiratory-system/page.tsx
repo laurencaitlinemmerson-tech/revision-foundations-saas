@@ -15,6 +15,7 @@ import {
   ConditionCard,
   ExpandableSection,
   RelatedResourceLink,
+  SourceLinks,
 } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -1391,6 +1392,14 @@ export default function RespiratorySystemPage() {
             Start a mock &rarr;
           </Link>
         </div>
+
+        <SourceLinks sources={[
+          { citation: 'NICE (2021)', title: 'Bronchiolitis in children: diagnosis and management (NG9)', href: 'https://www.nice.org.uk/guidance/ng9' },
+          { citation: 'BTS/SIGN (2022)', title: 'British Guideline on the Management of Asthma', href: 'https://brit-thoracic.org.uk/quality-improvement/guidelines/asthma/' },
+          { citation: 'Resuscitation Council UK (2021)', title: '2021 Resuscitation Guidelines', href: 'https://www.resus.org.uk/library/2021-resuscitation-guidelines' },
+          { citation: 'Waugh A & Grant A (2018)', title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th edn)', href: 'https://www.elsevier.com/' },
+          { citation: 'RCPCH (2020)', title: 'Paediatric Early Warning Systems', href: 'https://www.rcpch.ac.uk/' },
+        ]} />
       </div>
     </div>
   );

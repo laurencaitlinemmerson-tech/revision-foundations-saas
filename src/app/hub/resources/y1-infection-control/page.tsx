@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -804,6 +805,13 @@ export default function Y1InfectionControlPage() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: Infection Control" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'WHO (2009)', title: 'Hand hygiene in healthcare — technical reference manual', href: 'https://www.who.int/teams/integrated-health-services/infection-prevention-control' },
+          { citation: 'NICE (2017)', title: 'Healthcare-associated infections: prevention and control (NG125)', href: 'https://www.nice.org.uk/guidance/ng125' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'UKHSA', title: 'Standard infection control precautions (SICPs)', href: 'https://www.gov.uk/government/organisations/uk-health-security-agency' },
+        ]} />
       </div>
     </div>
   );

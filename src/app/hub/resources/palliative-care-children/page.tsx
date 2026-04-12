@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -835,6 +836,14 @@ export default function PalliativeCareChildrenPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Palliative Care (Children)" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: "NICE (2016)", title: "End of life care for infants, children and young people (NG61)", href: "https://www.nice.org.uk/guidance/ng61" },
+          { citation: "Together for Short Lives", title: "Clinical guidance and resources for children's palliative care", href: "https://www.togetherforshortlives.org.uk/" },
+          { citation: "RCPCH", title: "Palliative care for children", href: "https://www.rcpch.ac.uk/" },
+          { citation: "Winston's Wish", title: "Support for bereaved children and families", href: "https://www.winstonswish.org/" },
+          { citation: "NMC (2018)", title: "The Code: Professional standards of practice and behaviour for nurses", href: "https://www.nmc.org.uk/standards/code/" },
+        ]} />
       </div>
     </div>
   );

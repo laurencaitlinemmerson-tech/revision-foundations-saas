@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -711,6 +712,12 @@ export default function Y1AnatomyPhysiologyPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Anatomy & Physiology" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'Waugh A & Grant A (2018)', title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th edn)', href: 'https://www.elsevier.com/' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'NICE', title: 'Clinical guidelines and quality standards', href: 'https://www.nice.org.uk/' },
+        ]} />
       </div>
     </div>
   );

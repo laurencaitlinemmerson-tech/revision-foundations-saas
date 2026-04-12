@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -844,6 +845,13 @@ export default function AEAssessmentGuidePage() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: A–E Assessment" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'Resuscitation Council UK (2021)', title: '2021 Resuscitation Guidelines', href: 'https://www.resus.org.uk/library/2021-resuscitation-guidelines' },
+          { citation: 'NICE (2016)', title: 'Sepsis: recognition, diagnosis and early management (NG51)', href: 'https://www.nice.org.uk/guidance/ng51' },
+          { citation: 'NICE (2007)', title: 'Acutely ill adults in hospital: recognising and responding to deterioration (CG50)', href: 'https://www.nice.org.uk/guidance/cg50' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+        ]} />
       </div>
     </div>
   );

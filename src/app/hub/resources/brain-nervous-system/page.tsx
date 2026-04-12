@@ -4,6 +4,7 @@ import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -998,6 +999,13 @@ export default function BrainNervousSystemPage() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: Brain & Nervous System Assessment" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'Waugh A & Grant A (2018)', title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th edn)', href: 'https://www.elsevier.com/' },
+          { citation: 'NICE (2023)', title: 'Head injury: assessment and early management (NG232)', href: 'https://www.nice.org.uk/guidance/ng232' },
+          { citation: 'The Glasgow Coma Scale (2018)', title: 'GCS-40 official resource', href: 'https://www.glasgowcomascale.org/' },
+          { citation: 'NICE (2020)', title: 'Epilepsies in children, young people and adults (NG217)', href: 'https://www.nice.org.uk/guidance/ng217' },
+        ]} />
         </div>
       </div>
     </PremiumHubPageGate>

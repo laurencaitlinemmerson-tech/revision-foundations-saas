@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -1001,6 +1002,13 @@ export default function RenalSystemPage() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: Renal System & Assessment" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'Waugh A & Grant A (2018)', title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th edn)', href: 'https://www.elsevier.com/' },
+          { citation: 'NICE (2019)', title: 'Acute kidney injury: prevention, detection and management (NG148)', href: 'https://www.nice.org.uk/guidance/ng148' },
+          { citation: 'KDIGO (2012)', title: 'Clinical Practice Guideline for Acute Kidney Injury', href: 'https://kdigo.org/guidelines/acute-kidney-injury/' },
+          { citation: 'NICE (2014)', title: 'Chronic kidney disease in adults: assessment and management (NG203)', href: 'https://www.nice.org.uk/guidance/ng203' },
+        ]} />
       </div>
     </div>
   );

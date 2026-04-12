@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -859,6 +860,13 @@ export default function NGTubeInsertionPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: NG Tube Insertion &amp; Testing" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'NHS England (2022)', title: 'Patient safety alert: nasogastric tube misplacement', href: 'https://www.england.nhs.uk/patient-safety/patient-safety-alerts/' },
+          { citation: 'NICE (2006)', title: 'Nutrition support for adults (CG32)', href: 'https://www.nice.org.uk/guidance/cg32' },
+          { citation: 'RCN', title: 'Nasogastric tube guidance and clinical resources', href: 'https://www.rcn.org.uk/' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+        ]} />
       </div>
     </div>
   );

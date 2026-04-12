@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -801,6 +802,13 @@ export default function DrugCalculationsCheatSheetPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Drug Calculations" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'BNFC', title: 'British National Formulary for Children', href: 'https://bnf.nice.org.uk/' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'RCN', title: 'Medicines management guidance for nurses and healthcare professionals', href: 'https://www.rcn.org.uk/clinical-topics/medicines-management' },
+          { citation: 'NHS England', title: 'Medication safety resources', href: 'https://www.england.nhs.uk/patient-safety/medication-safety/' },
+        ]} />
       </div>
     </div>
   );

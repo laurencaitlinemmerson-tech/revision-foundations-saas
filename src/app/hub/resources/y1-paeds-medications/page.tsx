@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -710,6 +711,13 @@ export default function Y1PaedsMedicationsPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Paediatric Medications" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'BNFC', title: 'British National Formulary for Children', href: 'https://bnf.nice.org.uk/' },
+          { citation: 'RCPCH', title: 'Paediatric clinical guidance and standards', href: 'https://www.rcpch.ac.uk/' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'NHS England', title: 'Medication safety resources', href: 'https://www.england.nhs.uk/patient-safety/medication-safety/' },
+        ]} />
       </div>
     </div>
   );

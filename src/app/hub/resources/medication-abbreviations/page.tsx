@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -611,6 +612,13 @@ export default function MedicationAbbreviationsPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Medication Abbreviations" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'BNFC', title: 'British National Formulary for Children', href: 'https://bnf.nice.org.uk/' },
+          { citation: 'BNF', title: 'British National Formulary', href: 'https://bnf.nice.org.uk/' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'NHS England', title: 'Medication safety and prescribing resources', href: 'https://www.england.nhs.uk/patient-safety/medication-safety/' },
+        ]} />
       </div>
     </div>
   );

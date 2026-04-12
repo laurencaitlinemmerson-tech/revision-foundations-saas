@@ -4,6 +4,7 @@ import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -781,6 +782,13 @@ export default function Y1ProfessionalismEthicsPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Professionalism &amp; Ethics" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'NMC (2018)', title: 'Standards framework for nursing and midwifery education', href: 'https://www.nmc.org.uk/standards-for-education-and-training/standards-framework-for-nursing-and-midwifery-education/' },
+          { citation: 'Mental Capacity Act 2005', title: 'Legislation and statutory code of practice', href: 'https://www.legislation.gov.uk/ukpga/2005/9/contents' },
+          { citation: 'GMC', title: 'Ethical guidance for doctors and healthcare professionals', href: 'https://www.gmc-uk.org/ethical-guidance' },
+        ]} />
         </div>
       </div>
     </PremiumHubPageGate>

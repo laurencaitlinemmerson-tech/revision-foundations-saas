@@ -265,6 +265,13 @@ export const STUDY_COMPONENTS_CSS = `
   .sc-condition-row { grid-template-columns: 1fr; }
   .sc-condition-key { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.04); }
 }
+
+/* ── Source Links ── */
+.sc-sources { margin-top: 52px; padding-top: 28px; border-top: 0.5px solid rgba(0,0,0,0.1); }
+.sc-sources-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #aaa; margin-bottom: 14px; }
+.sc-source-link { display: block; font-size: 12px; font-weight: 300; color: #5A5750; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(0,0,0,0.18); padding: 7px 0; border-bottom: 0.5px solid rgba(0,0,0,0.06); transition: color 0.15s; }
+.sc-source-link:last-child { border-bottom: none; }
+.sc-source-link:hover { color: #1A1815; }
 `;
 
 // ─── GlossaryChips ────────────────────────────────────────────────────────────
@@ -506,5 +513,30 @@ export function RelatedResourceLink({
       </span>
       <i className="sc-related-arrow">→</i>
     </Link>
+  );
+}
+
+// ─── SourceLinks ──────────────────────────────────────────────────────────────
+
+export function SourceLinks({
+  sources,
+}: {
+  sources: { citation: string; title: string; href: string }[];
+}) {
+  return (
+    <div className="sc-sources">
+      <p className="sc-sources-label">Sources &amp; Further Reading</p>
+      {sources.map((s) => (
+        <a
+          key={s.citation}
+          href={s.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sc-source-link"
+        >
+          {s.citation} — {s.title}
+        </a>
+      ))}
+    </div>
   );
 }

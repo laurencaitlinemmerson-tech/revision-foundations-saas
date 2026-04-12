@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -727,6 +728,13 @@ export default function PaedsVitalSignsCheatSheet() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: Paediatric Vital Signs" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'NICE (2016)', title: 'Sepsis: recognition, diagnosis and early management (NG51)', href: 'https://www.nice.org.uk/guidance/ng51' },
+          { citation: 'Advanced Life Support Group (2021)', title: 'Advanced Paediatric Life Support (7th edn)', href: 'https://alsg.org/en/' },
+          { citation: 'RCPCH (2020)', title: 'Paediatric vital signs and clinical assessment guidance', href: 'https://www.rcpch.ac.uk/' },
+          { citation: 'Resuscitation Council UK (2021)', title: '2021 Resuscitation Guidelines', href: 'https://www.resus.org.uk/library/2021-resuscitation-guidelines' },
+        ]} />
       </div>
     </div>
   );

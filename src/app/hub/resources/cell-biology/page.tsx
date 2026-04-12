@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -1035,6 +1036,12 @@ export default function CellBiologyPage() {
           Quick self-test
         </h2>
         <SelfTestQuiz title="Test Yourself: Cell Biology & the Body" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'Waugh A & Grant A (2018)', title: 'Ross and Wilson Anatomy and Physiology in Health and Illness (13th edn)', href: 'https://www.elsevier.com/' },
+          { citation: 'Tortora GJ & Derrickson B (2017)', title: 'Principles of Anatomy and Physiology (15th edn)', href: 'https://www.wiley.com/' },
+          { citation: 'Khan Academy', title: 'Cell biology — AP Biology', href: 'https://www.khanacademy.org/science/ap-biology/cell-biology' },
+        ]} />
       </div>
     </div>
   );

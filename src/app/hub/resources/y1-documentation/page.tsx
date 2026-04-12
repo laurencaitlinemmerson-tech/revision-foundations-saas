@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -770,6 +771,13 @@ export default function Y1DocumentationPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Documentation & Record Keeping" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'NMC (2019)', title: 'The professional duty of candour', href: 'https://www.nmc.org.uk/standards/guidance/the-professional-duty-of-candour/' },
+          { citation: 'ICO', title: 'Guide to UK GDPR — data protection for health records', href: 'https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/' },
+          { citation: 'NHS England', title: 'Records management code of practice', href: 'https://www.england.nhs.uk/ig/records-management/' },
+        ]} />
       </div>
     </div>
   );

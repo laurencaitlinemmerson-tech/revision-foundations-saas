@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -826,6 +827,14 @@ export default function PalliativeCareAdultPage() {
         </div>
 
         <SelfTestQuiz title="Test Yourself: Palliative Care (Adult)" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'NICE (2019)', title: 'End of life care for adults: service delivery (NG142)', href: 'https://www.nice.org.uk/guidance/ng142' },
+          { citation: 'Gold Standards Framework', title: 'GSF programmes and clinical tools', href: 'https://goldstandardsframework.org.uk/' },
+          { citation: 'Macmillan Cancer Support', title: 'Professional resources for healthcare teams', href: 'https://www.macmillan.org.uk/' },
+          { citation: 'Marie Curie', title: 'Clinical information and end of life resources', href: 'https://www.mariecurie.org.uk/' },
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+        ]} />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
+import { SourceLinks } from '@/components/hub/StudyComponents';
 
 // ─── Quiz Data ─────────────────────────────────────────────────────────────────
 
@@ -777,6 +778,12 @@ export default function PlacementSurvivalPage() {
       </div>
 
         <SelfTestQuiz title="Test Yourself: Placement Survival" questions={quizQuestions} />
+
+        <SourceLinks sources={[
+          { citation: 'NMC (2018)', title: 'The Code: Professional standards of practice and behaviour for nurses', href: 'https://www.nmc.org.uk/standards/code/' },
+          { citation: 'NMC (2018)', title: 'Standards for student supervision and assessment', href: 'https://www.nmc.org.uk/standards-for-education-and-training/standards-for-student-supervision-and-assessment/' },
+          { citation: 'RCN', title: 'Student and learner resources', href: 'https://www.rcn.org.uk/' },
+        ]} />
     </div>
   );
 }
