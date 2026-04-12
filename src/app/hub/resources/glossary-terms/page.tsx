@@ -23,7 +23,7 @@ const CSS = `
 .gl-wrap {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 40px 48px 100px;
+  padding: 32px 48px 64px;
 }
 
 .gl-back {
@@ -71,9 +71,9 @@ const CSS = `
   color: #aaa;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding-bottom: 36px;
+  padding-bottom: 24px;
   border-bottom: 0.5px solid rgba(0,0,0,0.1);
-  margin-bottom: 52px;
+  margin-bottom: 36px;
 }
 
 .gl-pearl {

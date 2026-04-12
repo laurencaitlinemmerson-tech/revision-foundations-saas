@@ -37,7 +37,7 @@ const CSS = `
 .dc-wrap {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 40px 48px 100px;
+  padding: 32px 48px 64px;
 }
 
 /* Back nav */
@@ -88,9 +88,9 @@ const CSS = `
   color: #aaa;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding-bottom: 36px;
+  padding-bottom: 24px;
   border-bottom: 0.5px solid rgba(0,0,0,0.1);
-  margin-bottom: 52px;
+  margin-bottom: 36px;
 }
 
 /* Pearl */
@@ -120,9 +120,9 @@ const CSS = `
 .dc-step {
   display: grid;
   grid-template-columns: 96px 1fr;
-  margin-bottom: 52px;
+  margin-bottom: 36px;
   border-top: 0.5px solid rgba(0,0,0,0.1);
-  padding-top: 36px;
+  padding-top: 24px;
 }
 
 .dc-step-sidebar {
@@ -341,8 +341,8 @@ const CSS = `
   font-weight: 400;
   color: #1A1815;
   margin-bottom: 18px;
-  padding-top: 36px;
-  margin-top: 52px;
+  padding-top: 24px;
+  margin-top: 36px;
   padding-bottom: 16px;
   border-top: 0.5px solid rgba(0,0,0,0.1);
   border-bottom: 0.5px solid rgba(0,0,0,0.1);

@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, CheckCircle2, XCircle, RotateCcw, Trophy, ArrowRight } from 'lucide-react';
 
 interface QuizQuestion {
   question: string;
@@ -17,236 +15,276 @@ interface SelfTestQuizProps {
   onComplete?: (score: number, total: number) => void;
 }
 
-export default function SelfTestQuiz({ 
-  title = "Test Your Knowledge",
+export default function SelfTestQuiz({
+  title = 'Test Your Knowledge',
   questions,
-  onComplete
+  onComplete,
 }: SelfTestQuizProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [showResult, setShowResult] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
-  const [quizComplete, setQuizComplete] = useState(false);
-  const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
+  const [done, setDone] = useState(false);
 
-  const handleAnswerSelect = (index: number) => {
-    if (showResult) return;
-    setSelectedAnswer(index);
-    setShowResult(true);
-    
-    if (index === questions[currentQuestion].answer) {
-      setScore(prev => prev + 1);
-    }
-    setAnsweredQuestions(prev => new Set(prev).add(currentQuestion));
+  const handleSelect = (i: number) => {
+    if (revealed) return;
+    setSelected(i);
+    setRevealed(true);
+    if (i === questions[current].answer) setScore((s) => s + 1);
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(prev => prev + 1);
-      setSelectedAnswer(null);
-      setShowResult(false);
+  const handleNext = () => {
+    const isLast = current === questions.length - 1;
+    if (isLast) {
+      const finalScore = score + (selected === questions[current].answer ? 1 : 0);
+      setDone(true);
+      onComplete?.(finalScore, questions.length);
     } else {
-      setQuizComplete(true);
-      onComplete?.(score + (selectedAnswer === questions[currentQuestion].answer ? 1 : 0), questions.length);
+      setCurrent((c) => c + 1);
+      setSelected(null);
+      setRevealed(false);
     }
   };
 
-  const resetQuiz = () => {
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setShowResult(false);
+  const reset = () => {
+    setCurrent(0);
+    setSelected(null);
+    setRevealed(false);
     setScore(0);
-    setQuizComplete(false);
-    setAnsweredQuestions(new Set());
+    setDone(false);
   };
 
-  const getScoreEmoji = () => {
-    const percentage = (score / questions.length) * 100;
-    if (percentage >= 80) return '🎉';
-    if (percentage >= 60) return '👍';
-    if (percentage >= 40) return '💪';
-    return '📚';
-  };
+  const close = () => { setIsOpen(false); reset(); };
 
-  const getScoreMessage = () => {
-    const percentage = (score / questions.length) * 100;
-    if (percentage >= 80) return 'Excellent! You really know your stuff!';
-    if (percentage >= 60) return 'Good job! Review the ones you missed.';
-    if (percentage >= 40) return 'Getting there! Keep studying.';
-    return 'Time to review! Read through the content again.';
+  const pct = (n: number) => Math.round((n / questions.length) * 100);
+  const progressWidth = `${pct(current + (revealed ? 1 : 0))}%`;
+
+  const scoreMsg = () => {
+    const p = pct(score);
+    if (p >= 80) return 'Strong result.';
+    if (p >= 60) return 'Good — review the ones you missed.';
+    if (p >= 40) return 'Keep going — read through again.';
+    return 'Time to review the content carefully.';
   };
 
   return (
-    <div className="mt-8 print:hidden">
-      {/* Toggle Button */}
-      {!isOpen && (
-        <motion.button
+    <div style={{ marginTop: '40px' }} className="print:hidden">
+      {!isOpen ? (
+        <button
           onClick={() => setIsOpen(true)}
-          className="w-full bg-gradient-to-r from-[var(--purple)] to-[var(--lavender)] text-white rounded-2xl p-6 flex items-center justify-between hover:shadow-lg transition-shadow"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
+          style={{
+            width: '100%',
+            background: '#F5F3F0',
+            border: '0.5px solid rgba(0,0,0,0.1)',
+            padding: '18px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            textAlign: 'left',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = '#EEEDFE')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = '#F5F3F0')}
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <Brain className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h3 className="text-lg font-semibold">{title}</h3>
-              <p className="text-white/80 text-sm">{questions.length} quick questions to test yourself</p>
-            </div>
+          <div>
+            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', marginBottom: '5px', fontWeight: 400 }}>
+              Quick self-test
+            </p>
+            <p style={{ fontSize: '15px', fontWeight: 400, color: '#1A1815', fontFamily: "'Playfair Display', Georgia, serif" }}>
+              {title}
+            </p>
+            <p style={{ fontSize: '11px', color: '#999', fontWeight: 300, marginTop: '3px' }}>
+              {questions.length} questions
+            </p>
           </div>
-          <ArrowRight className="w-6 h-6" />
-        </motion.button>
-      )}
+          <span style={{ fontSize: '16px', color: '#aaa', flexShrink: 0, marginLeft: '16px' }}>→</span>
+        </button>
+      ) : (
+        <div style={{ border: '0.5px solid rgba(0,0,0,0.12)', background: '#FAFAF8' }}>
+          {/* Header */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '14px 24px',
+            borderBottom: '0.5px solid rgba(0,0,0,0.08)',
+          }}>
+            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', fontWeight: 400 }}>
+              Self-test
+            </p>
+            <button
+              onClick={close}
+              style={{
+                fontSize: '10px',
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: '#aaa',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 0',
+              }}
+            >
+              Close
+            </button>
+          </div>
 
-      {/* Quiz Content */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-gradient-to-br from-[var(--lilac-soft)] to-[var(--pink-soft)]/30 rounded-2xl border border-[var(--lilac-medium)] overflow-hidden"
-          >
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-display text-[var(--plum)]">{title}</h3>
-                <button 
-                  onClick={() => { setIsOpen(false); resetQuiz(); }}
-                  className="text-sm text-[var(--plum-dark)]/60 hover:text-[var(--plum)] transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-
-              {!quizComplete ? (
-                <>
-                  {/* Progress */}
-                  <div className="mb-6">
-                    <div className="flex justify-between text-sm text-[var(--plum-dark)]/60 mb-2">
-                      <span>Question {currentQuestion + 1} of {questions.length}</span>
-                      <span className="font-semibold text-[var(--purple)]">Score: {score}</span>
-                    </div>
-                    <div className="h-2 bg-white rounded-full overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-gradient-to-r from-[var(--purple)] to-[var(--lavender)]"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${((currentQuestion + (showResult ? 1 : 0)) / questions.length) * 100}%` }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </div>
+          <div style={{ padding: '24px' }}>
+            {!done ? (
+              <>
+                {/* Progress */}
+                <div style={{ marginBottom: '22px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '7px' }}>
+                    <span style={{ fontSize: '10px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                      {current + 1} of {questions.length}
+                    </span>
+                    <span style={{ fontSize: '10px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                      Score {score}
+                    </span>
                   </div>
+                  <div style={{ height: '1px', background: 'rgba(0,0,0,0.08)' }}>
+                    <div style={{ height: '100%', background: '#1A1815', width: progressWidth, transition: 'width 0.25s ease' }} />
+                  </div>
+                </div>
 
-                  {/* Question */}
-                  <motion.div
-                    key={currentQuestion}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="bg-white rounded-xl p-5 mb-4 shadow-sm"
-                  >
-                    <h4 className="text-lg font-semibold text-[var(--plum-dark)] mb-4">
-                      {questions[currentQuestion].question}
-                    </h4>
+                {/* Question */}
+                <p style={{ fontSize: '14px', fontWeight: 400, color: '#1A1815', lineHeight: 1.6, marginBottom: '16px' }}>
+                  {questions[current].question}
+                </p>
 
-                    <div className="space-y-2">
-                      {questions[currentQuestion].options.map((option, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleAnswerSelect(index)}
-                          disabled={showResult}
-                          className={`w-full p-4 rounded-xl text-left transition-all ${
-                            showResult
-                              ? index === questions[currentQuestion].answer
-                                ? 'bg-emerald-100 border-2 border-emerald-500'
-                                : selectedAnswer === index
-                                  ? 'bg-red-100 border-2 border-red-400'
-                                  : 'bg-gray-50 border-2 border-transparent opacity-50'
-                              : 'bg-[var(--lilac-soft)] border-2 border-transparent hover:border-[var(--lavender)] hover:bg-[var(--lilac)]'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {showResult && index === questions[currentQuestion].answer && (
-                              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                            )}
-                            {showResult && selectedAnswer === index && index !== questions[currentQuestion].answer && (
-                              <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                            )}
-                            <span className={`${
-                              showResult && index === questions[currentQuestion].answer
-                                ? 'text-emerald-800 font-medium'
-                                : showResult && selectedAnswer === index
-                                  ? 'text-red-800'
-                                  : 'text-[var(--plum-dark)]'
-                            }`}>
-                              {option}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Explanation */}
-                    {showResult && questions[currentQuestion].explanation && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200"
+                {/* Options */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
+                  {questions[current].options.map((opt, i) => {
+                    const isCorrect = i === questions[current].answer;
+                    const isSelected = selected === i;
+                    let bg = '#fff';
+                    let borderColor = 'rgba(0,0,0,0.1)';
+                    let color = '#2C2A27';
+                    let opacity = 1;
+                    if (revealed) {
+                      if (isCorrect) { bg = '#E1F5EE'; borderColor = '#0F6E56'; color = '#085041'; }
+                      else if (isSelected) { bg = '#FDF4F4'; borderColor = '#A32D2D'; color = '#5A3030'; }
+                      else { color = '#999'; opacity = 0.5; }
+                    }
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => handleSelect(i)}
+                        disabled={revealed}
+                        style={{
+                          width: '100%',
+                          padding: '11px 14px',
+                          border: `0.5px solid ${borderColor}`,
+                          background: bg,
+                          textAlign: 'left',
+                          fontSize: '12px',
+                          fontWeight: 300,
+                          color,
+                          cursor: revealed ? 'default' : 'pointer',
+                          lineHeight: 1.55,
+                          opacity,
+                          transition: 'background 0.12s, border-color 0.12s, opacity 0.12s',
+                        }}
                       >
-                        <p className="text-sm text-blue-800">
-                          <span className="font-semibold">💡 </span>
-                          {questions[currentQuestion].explanation}
-                        </p>
-                      </motion.div>
-                    )}
-                  </motion.div>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
 
-                  {/* Next Button */}
-                  {showResult && (
-                    <motion.button
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      onClick={handleNextQuestion}
-                      className="btn-primary w-full"
-                    >
-                      {currentQuestion < questions.length - 1 ? 'Next Question' : 'See Results'}
-                    </motion.button>
-                  )}
-                </>
-              ) : (
-                /* Results */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-6"
-                >
-                  <div className="text-6xl mb-4">{getScoreEmoji()}</div>
-                  <h4 className="text-2xl font-display text-[var(--plum-dark)] mb-2">Quiz Complete!</h4>
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Trophy className="w-6 h-6 text-amber-500" />
-                    <span className="text-3xl font-bold text-[var(--purple)]">{score}/{questions.length}</span>
+                {/* Explanation */}
+                {revealed && questions[current].explanation && (
+                  <div style={{
+                    padding: '12px 14px',
+                    background: '#F5F3F0',
+                    borderLeft: '2px solid rgba(0,0,0,0.12)',
+                    marginBottom: '16px',
+                  }}>
+                    <p style={{ fontSize: '12px', color: '#5A5750', fontWeight: 300, lineHeight: 1.65, margin: 0 }}>
+                      {questions[current].explanation}
+                    </p>
                   </div>
-                  <p className="text-[var(--plum-dark)]/70 mb-6">{getScoreMessage()}</p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <button onClick={resetQuiz} className="btn-secondary">
-                      <RotateCcw className="w-4 h-4" />
-                      Try Again
-                    </button>
-                    <button 
-                      onClick={() => { setIsOpen(false); resetQuiz(); }}
-                      className="btn-primary"
-                    >
-                      Done
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                )}
+
+                {/* Next */}
+                {revealed && (
+                  <button
+                    onClick={handleNext}
+                    style={{
+                      width: '100%',
+                      padding: '11px 16px',
+                      background: '#1A1815',
+                      color: '#FAFAF8',
+                      border: 'none',
+                      fontSize: '10px',
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {current < questions.length - 1 ? 'Next →' : 'See results →'}
+                  </button>
+                )}
+              </>
+            ) : (
+              /* Results */
+              <div style={{ textAlign: 'center', padding: '24px 0 16px' }}>
+                <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', marginBottom: '14px' }}>
+                  Result
+                </p>
+                <p style={{
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontSize: '52px',
+                  fontWeight: 400,
+                  color: '#1A1815',
+                  lineHeight: 1,
+                  marginBottom: '4px',
+                }}>
+                  {score}
+                  <span style={{ fontSize: '24px', color: '#aaa', fontWeight: 300 }}>/{questions.length}</span>
+                </p>
+                <p style={{ fontSize: '12px', color: '#5A5750', fontWeight: 300, marginTop: '10px', marginBottom: '28px', lineHeight: 1.6 }}>
+                  {scoreMsg()}
+                </p>
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                  <button
+                    onClick={reset}
+                    style={{
+                      padding: '9px 20px',
+                      border: '0.5px solid rgba(0,0,0,0.15)',
+                      background: '#fff',
+                      fontSize: '10px',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      color: '#5A5750',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Try again
+                  </button>
+                  <button
+                    onClick={close}
+                    style={{
+                      padding: '9px 20px',
+                      border: 'none',
+                      background: '#1A1815',
+                      fontSize: '10px',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      color: '#FAFAF8',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
