@@ -51,7 +51,8 @@ export default function AccessPaths() {
         {/* Featured bundle card */}
         <div
           style={{
-            background: ink,
+            background: parchment,
+            border: `0.5px solid ${border}`,
             padding: '36px 40px',
             marginBottom: '16px',
             display: 'flex',
@@ -69,14 +70,14 @@ export default function AccessPaths() {
                   fontSize: '11px',
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase' as const,
-                  color: '#C7B8A5',
-                  background: '#2A2420',
+                  color: '#FAFAF8',
+                  background: ink,
                   padding: '5px 10px',
                 }}
               >
                 Best value
               </span>
-              <span style={{ fontFamily: serif, fontSize: '12px', color: '#9C8878', fontWeight: 300 }}>
+              <span style={{ fontFamily: serif, fontSize: '12px', color: inkLight, fontWeight: 300 }}>
                 OSCE + Quiz + Hub — one payment
               </span>
             </div>
@@ -86,7 +87,7 @@ export default function AccessPaths() {
                 fontFamily: display,
                 fontSize: 'clamp(1.8rem, 3vw, 2.5rem)',
                 fontWeight: 400,
-                color: '#FAFAF8',
+                color: ink,
                 marginBottom: '10px',
                 lineHeight: 1.1,
               }}
@@ -100,7 +101,7 @@ export default function AccessPaths() {
                 fontSize: '14px',
                 lineHeight: 1.75,
                 fontWeight: 300,
-                color: '#C7B8A5',
+                color: inkMid,
                 maxWidth: '480px',
                 marginBottom: '18px',
               }}
@@ -115,8 +116,8 @@ export default function AccessPaths() {
                   style={{
                     fontFamily: serif,
                     fontSize: '11px',
-                    color: '#9C8878',
-                    background: '#2A2420',
+                    color: inkMid,
+                    background: '#E8E0D4',
                     padding: '5px 10px',
                     letterSpacing: '0.02em',
                   }}
@@ -133,7 +134,7 @@ export default function AccessPaths() {
                 fontFamily: display,
                 fontSize: 'clamp(2.8rem, 5vw, 4rem)',
                 lineHeight: 1,
-                color: '#FAFAF8',
+                color: ink,
                 marginBottom: '6px',
               }}
             >
@@ -143,7 +144,7 @@ export default function AccessPaths() {
               style={{
                 fontFamily: serif,
                 fontSize: '12px',
-                color: '#9C8878',
+                color: inkLight,
                 fontWeight: 300,
                 marginBottom: '20px',
               }}
@@ -156,8 +157,8 @@ export default function AccessPaths() {
                 display: 'inline-block',
                 fontFamily: serif,
                 fontSize: '13px',
-                background: '#FAFAF8',
-                color: ink,
+                background: ink,
+                color: '#FAFAF8',
                 padding: '11px 22px',
                 textDecoration: 'none',
                 letterSpacing: '0.02em',
