@@ -7,11 +7,11 @@ import Link from 'next/link';
 
 export const STUDY_COMPONENTS_CSS = `
 /* ── Glossary Chips ── */
-.sc-glossary { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 36px; }
+.sc-glossary { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
 .sc-glossary-chip {
   display: inline-flex; align-items: baseline; gap: 6px;
-  font-size: 11px; padding: 5px 12px; border-radius: 3px;
-  background: #F5F3F0; border: 0.5px solid rgba(0,0,0,0.06);
+  font-size: 11px; padding: 6px 14px; border-radius: 0;
+  background: #F5F3F0; border: 0.5px solid rgba(0,0,0,0.08);
   font-family: 'Inter', -apple-system, sans-serif;
   transition: background 0.15s;
 }
@@ -24,7 +24,7 @@ export const STUDY_COMPONENTS_CSS = `
   border: 0.5px solid rgba(83,74,183,0.2);
   background: linear-gradient(135deg, #FBFBFE 0%, #F6F5FE 100%);
   padding: 20px 24px 22px;
-  border-radius: 4px;
+  border-radius: 0;
   margin-bottom: 18px;
 }
 .sc-formula-label {
@@ -230,25 +230,24 @@ export const STUDY_COMPONENTS_CSS = `
 
 /* ── Related Resource Link ── */
 .sc-related {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 20px;
-  background: linear-gradient(135deg, #F5F3F0 0%, #F0EDE8 100%);
-  border: 0.5px solid rgba(0,0,0,0.06);
-  border-radius: 4px;
+  display: flex; align-items: center; gap: 18px;
+  padding: 16px 20px;
+  background: #F5F3F0;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 0;
   margin-bottom: 18px;
   text-decoration: none;
   transition: background 0.15s, border-color 0.15s;
 }
-.sc-related:hover { background: #EEEDFE; border-color: rgba(83,74,183,0.2); }
+.sc-related:hover { background: #EEEDFE; border-color: rgba(83,74,183,0.15); }
 .sc-related-icon {
-  font-size: 18px; flex-shrink: 0; width: 32px; height: 32px;
+  font-size: 16px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: #fff; border-radius: 50%; border: 0.5px solid rgba(0,0,0,0.08);
 }
 .sc-related-text { flex: 1; }
-.sc-related-title { font-size: 12px; font-weight: 500; color: #2C2A27; margin-bottom: 2px; }
-.sc-related-desc { font-size: 11px; font-weight: 300; color: #888; }
-.sc-related-arrow { font-size: 14px; color: #bbb; font-style: normal; }
+.sc-related-title { display: block; font-size: 12px; font-weight: 500; color: #2C2A27; margin-bottom: 3px; }
+.sc-related-desc { display: block; font-size: 11px; font-weight: 300; color: #888; line-height: 1.5; }
+.sc-related-arrow { font-size: 14px; color: #bbb; font-style: normal; flex-shrink: 0; }
 
 /* ── Responsive ── */
 @media (max-width: 860px) {
