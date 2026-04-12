@@ -77,6 +77,10 @@ export default function Footer() {
           </nav>
         </div>
 
+        <p style={{ fontFamily: serif, fontSize: '12px', fontWeight: 300, color: '#9C8878', lineHeight: 1.6, marginBottom: '20px', fontStyle: 'italic' }}>
+          This resource is designed to support revision and does not replace clinical teaching or university guidance.
+        </p>
+
         <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '8px' }}>
           <p style={{ fontFamily: serif, fontSize: '12px', fontWeight: 300, color: '#9C8878' }}>
             © {currentYear} The Nurse Lab. All rights reserved.
