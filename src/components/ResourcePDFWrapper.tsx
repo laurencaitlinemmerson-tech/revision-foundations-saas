@@ -61,7 +61,6 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
       const canvas = await html2canvas(el, {
         scale,
         useCORS: true,
-        letterRendering: true,
         scrollY: 0,
         windowWidth: 860,
         logging: false,
