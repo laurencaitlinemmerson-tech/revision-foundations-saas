@@ -1370,7 +1370,7 @@ export default function RespiratorySystemPage() {
         }}>
           <div style={{ maxWidth: '520px' }}>
             <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px', fontWeight: 400, color: '#1A1815', marginBottom: '8px' }}>
-              Test yourself: Respiratory Mock Exam
+              Test yourself: Respiratory Written Practice
             </h2>
             <p style={{ fontSize: '13px', color: '#5A5750', fontWeight: 300, lineHeight: 1.65, margin: 0 }}>
               Ready to apply what you have learned? Try a full exam-style mock with clinical scenarios, guided questions, and first-class answer support.

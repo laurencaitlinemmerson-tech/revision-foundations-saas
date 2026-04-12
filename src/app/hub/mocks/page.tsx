@@ -6,9 +6,9 @@ import { bodySystems } from './mockTypes';
 import { MOCK_PAGE_CSS } from './mockStyles';
 
 export const metadata = generatePageMetadata({
-  title: 'Mock Exams',
+  title: 'Written Practice',
   description:
-    'Practice real exam-style scenarios with guided support. Choose a body system to start a mock exam and learn how to write first-class answers.',
+    'Practice real exam-style scenarios with guided support. Choose a body system to start written practice and learn how to write first-class answers.',
   path: '/hub/mocks',
 });
 
@@ -27,8 +27,8 @@ export default function MockExamsPage() {
           <span aria-hidden="true">&larr;</span> Hub
         </Link>
 
-        <p className="mk-kicker">The Nurse Lab &middot; Mock Exams</p>
-        <h1 className="mk-headline">Mock Exams</h1>
+        <p className="mk-kicker">The Nurse Lab &middot; Written Practice</p>
+        <h1 className="mk-headline">Written Practice</h1>
         <p className="mk-standfirst">
           Practice real exam-style scenarios and learn how to achieve first-class answers. Choose a body system to begin.
         </p>

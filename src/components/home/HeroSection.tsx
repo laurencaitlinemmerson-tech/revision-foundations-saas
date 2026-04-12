@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import DesktopAppButton from '@/components/DesktopAppButton';
 import {
   serif, display, ink, inkMid, inkLight, cream, border, panel, parchment,
   green, greenBg, greenLine, blue, blueBg, blueLine, danger, dangerBg, dangerLine,
@@ -99,17 +98,12 @@ export default function HeroSection() {
                 marginBottom: '32px',
               }}
             >
-              <Link href="/hub/childrens" style={primaryButton}>
+              <Link href="/pricing" style={primaryButton}>
+                Get the bundle — £9.99 →
+              </Link>
+              <Link href="/hub/childrens" style={secondaryButton}>
                 Start free →
               </Link>
-              <Link href="/pricing" style={secondaryButton}>
-                Unlock the bundle →
-              </Link>
-              <DesktopAppButton
-                label="Download desktop app"
-                style={secondaryButton}
-                title="Install The Nurse Lab as a desktop app"
-              />
             </div>
 
             {/* Slim proof strip */}
@@ -124,9 +118,9 @@ export default function HeroSection() {
             >
               {[
                 { value: '50+', label: 'paeds OSCE stations' },
-                { value: '17', label: 'quiz topics' },
+                { value: 'Built by', label: 'a UK student nurse' },
                 { value: '£9.99', label: 'one payment' },
-                { value: 'Free', label: 'hub pages to start' },
+                { value: 'Free', label: 'to start' },
               ].map((item) => (
                 <div key={item.label}>
                   <p

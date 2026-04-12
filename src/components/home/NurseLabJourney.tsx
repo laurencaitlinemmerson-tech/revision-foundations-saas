@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   serif,
   display,
@@ -193,26 +192,12 @@ export default function NurseLabJourney() {
                     lineHeight: 1.78,
                     fontWeight: 300,
                     color: inkMid,
-                    margin: '0 0 14px',
+                    margin: 0,
                     maxWidth: '42ch',
                   }}
                 >
                   {stage.body}
                 </p>
-
-                <div className="nlj-actions">
-                  {stage.actions.map((action) =>
-                    action.primary ? (
-                      <Link key={action.label} href={action.href} className="nlj-primary-link">
-                        {action.label} →
-                      </Link>
-                    ) : (
-                      <Link key={action.label} href={action.href} className="nlj-secondary-link">
-                        {action.label}
-                      </Link>
-                    ),
-                  )}
-                </div>
               </div>
             </div>
           ))}
@@ -248,7 +233,7 @@ export default function NurseLabJourney() {
         }
 
         .nlj-content-col {
-          padding-bottom: 52px;
+          padding-bottom: 36px;
         }
 
         .nlj-meta-line {
@@ -283,39 +268,6 @@ export default function NurseLabJourney() {
           line-height: 1;
         }
 
-        .nlj-actions {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-
-        .nlj-primary-link {
-          font-family: ${serif};
-          font-size: 12px;
-          color: ${ink};
-          text-decoration: none;
-          border-bottom: 0.5px solid ${ink};
-          padding-bottom: 2px;
-          transition: opacity 0.15s ease;
-        }
-
-        .nlj-primary-link:hover {
-          opacity: 0.58;
-        }
-
-        .nlj-secondary-link {
-          font-family: ${serif};
-          font-size: 12px;
-          color: ${inkLight};
-          text-decoration: none;
-          transition: color 0.15s ease;
-        }
-
-        .nlj-secondary-link:hover {
-          color: ${inkMid};
-        }
-
         @media (max-width: 768px) {
           .nlj-row {
             grid-template-columns: 18px minmax(0, 1fr);
@@ -323,11 +275,11 @@ export default function NurseLabJourney() {
           }
 
           .nlj-content-col {
-            padding-bottom: 42px;
+            padding-bottom: 28px;
           }
 
           .nlj-list::before {
-            bottom: 72px;
+            bottom: 56px;
           }
         }
       `}</style>

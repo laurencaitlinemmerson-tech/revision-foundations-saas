@@ -626,7 +626,7 @@ export function MockExamProgressChart() {
         fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
         color: '#9C8878', marginBottom: '18px',
       }}>
-        Mock exam progress
+        Written practice progress
       </p>
 
       <div style={{

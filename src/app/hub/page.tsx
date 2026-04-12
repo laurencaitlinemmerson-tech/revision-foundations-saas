@@ -396,7 +396,7 @@ export default function HubPage() {
           <div className="hub-mock-inner">
             <div className="hub-mock-text">
               <p className="hub-branch-eyebrow">Exam practice</p>
-              <h2 className="hub-branch-title">Mock Exams</h2>
+              <h2 className="hub-branch-title">Written Practice</h2>
               <p className="hub-mock-desc">
                 Practice real exam-style scenarios with guided support. Each mock includes examiner insight, clinical reasoning chains, answer structure guidance, and high-scoring phrasing — everything you need to write first-class answers.
               </p>
@@ -421,7 +421,7 @@ export default function HubPage() {
               </div>
             </div>
             <Link href="/hub/mocks" className="hub-mock-cta">
-              <span className="hub-mock-cta-text">Start a mock exam</span>
+              <span className="hub-mock-cta-text">Start written practice</span>
               <span className="hub-branch-arrow">→</span>
             </Link>
           </div>

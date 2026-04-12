@@ -4,6 +4,7 @@ import {
   border,
   display,
   ink,
+  inkLight,
   inkMid,
   panel,
   parchment,
@@ -14,13 +15,16 @@ import {
 } from './styles';
 
 const toneMap = {
-  free: { color: '#8B6B52', background: '#F3ECE4' },
-  osce: { color: '#2F8A7E', background: '#E6F3F1' },
-  quiz: { color: '#2E67B1', background: '#E7EEF8' },
-  bundle: { color: ink, background: parchment },
+  free:  { color: '#8B6B52', background: '#F3ECE4' },
+  osce:  { color: '#2F8A7E', background: '#E6F3F1' },
+  quiz:  { color: '#2E67B1', background: '#E7EEF8' },
+  bundle:{ color: ink,       background: parchment  },
 };
 
 export default function AccessPaths() {
+  const bundle  = accessOptions.find((o) => o.id === 'bundle')!;
+  const others  = accessOptions.filter((o) => o.id !== 'bundle');
+
   return (
     <section
       style={{
@@ -30,79 +34,151 @@ export default function AccessPaths() {
       }}
     >
       <div style={{ maxWidth: wrap, margin: '0 auto' }}>
-        <div
+        <p style={sectionLabelStyle}>Pricing</p>
+        <h2
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            gap: '20px',
-            flexWrap: 'wrap',
+            fontFamily: display,
+            fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+            fontWeight: 400,
+            lineHeight: 1.1,
+            color: ink,
             marginBottom: '28px',
           }}
         >
-          <div style={{ maxWidth: '680px' }}>
-            <p style={sectionLabelStyle}>Ways in</p>
-            <h2
+          Start free. Unlock everything for £9.99.
+        </h2>
+
+        {/* Featured bundle card */}
+        <div
+          style={{
+            background: ink,
+            padding: '36px 40px',
+            marginBottom: '16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '32px',
+          }}
+        >
+          <div style={{ flex: '1 1 340px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase' as const,
+                  color: '#C7B8A5',
+                  background: '#2A2420',
+                  padding: '5px 10px',
+                }}
+              >
+                Best value
+              </span>
+              <span style={{ fontFamily: serif, fontSize: '12px', color: '#9C8878', fontWeight: 300 }}>
+                OSCE + Quiz + Hub — one payment
+              </span>
+            </div>
+
+            <h3
               style={{
                 fontFamily: display,
-                fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+                fontSize: 'clamp(1.8rem, 3vw, 2.5rem)',
                 fontWeight: 400,
+                color: '#FAFAF8',
+                marginBottom: '10px',
                 lineHeight: 1.1,
-                color: ink,
-                marginBottom: '12px',
               }}
             >
-              Free first, a single tool, or the full bundle.
-            </h2>
+              {bundle.title}
+            </h3>
+
             <p
               style={{
                 fontFamily: serif,
-                fontSize: '15px',
-                lineHeight: 1.85,
+                fontSize: '14px',
+                lineHeight: 1.75,
                 fontWeight: 300,
-                color: inkMid,
-                maxWidth: '560px',
+                color: '#C7B8A5',
+                maxWidth: '480px',
+                marginBottom: '18px',
               }}
             >
-              The clearest ways into the site, without having to decode what is free and what unlocks.
+              {bundle.summary}
             </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {bundle.highlights.map((h) => (
+                <span
+                  key={h}
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '11px',
+                    color: '#9C8878',
+                    background: '#2A2420',
+                    padding: '5px 10px',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {h}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div
-            style={{
-              maxWidth: '320px',
-              border: `0.5px solid ${border}`,
-              background: parchment,
-              padding: '16px 18px',
-            }}
-          >
-            <p style={{ ...sectionLabelStyle, marginBottom: '8px' }}>Live now</p>
+          <div style={{ textAlign: 'right' as const, flexShrink: 0 }}>
+            <p
+              style={{
+                fontFamily: display,
+                fontSize: 'clamp(2.8rem, 5vw, 4rem)',
+                lineHeight: 1,
+                color: '#FAFAF8',
+                marginBottom: '6px',
+              }}
+            >
+              {bundle.price}
+            </p>
             <p
               style={{
                 fontFamily: serif,
-                fontSize: '13px',
-                lineHeight: 1.7,
-                color: inkMid,
+                fontSize: '12px',
+                color: '#9C8878',
                 fontWeight: 300,
+                marginBottom: '20px',
               }}
             >
-              Children&apos;s is the most complete route today. The adult hub is available too for practical revision guides.
+              Tools separately: £9.98 · hub included free
             </p>
+            <Link
+              href={bundle.href}
+              style={{
+                display: 'inline-block',
+                fontFamily: serif,
+                fontSize: '13px',
+                background: '#FAFAF8',
+                color: ink,
+                padding: '11px 22px',
+                textDecoration: 'none',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {bundle.cta} →
+            </Link>
           </div>
         </div>
 
+        {/* Three secondary cards */}
         <div
           className="home-access-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
             gap: '16px',
           }}
         >
-          {accessOptions.map((option) => {
+          {others.map((option) => {
             const tone = toneMap[option.id];
-            const isBundle = option.id === 'bundle';
-
             return (
               <div
                 key={option.id}
@@ -113,19 +189,19 @@ export default function AccessPaths() {
                   flexDirection: 'column',
                 }}
               >
-                <div style={{ padding: '22px 22px 18px', borderBottom: `0.5px solid ${border}` }}>
+                <div style={{ padding: '22px 22px 16px', borderBottom: `0.5px solid ${border}` }}>
                   <span
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      padding: '5px 10px',
+                      padding: '4px 9px',
                       fontFamily: serif,
                       fontSize: '11px',
                       letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
+                      textTransform: 'uppercase' as const,
                       color: tone.color,
                       background: tone.background,
-                      marginBottom: '14px',
+                      marginBottom: '12px',
                     }}
                   >
                     {option.label}
@@ -135,17 +211,17 @@ export default function AccessPaths() {
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      gap: '12px',
                       alignItems: 'baseline',
-                      marginBottom: '10px',
+                      gap: '12px',
+                      marginBottom: '8px',
                     }}
                   >
                     <h3
                       style={{
                         fontFamily: display,
-                        fontSize: '24px',
+                        fontSize: '20px',
                         fontWeight: 400,
-                        lineHeight: 1.12,
+                        lineHeight: 1.15,
                         color: ink,
                       }}
                     >
@@ -154,7 +230,7 @@ export default function AccessPaths() {
                     <p
                       style={{
                         fontFamily: display,
-                        fontSize: '28px',
+                        fontSize: '22px',
                         lineHeight: 1,
                         color: ink,
                         flexShrink: 0,
@@ -168,7 +244,7 @@ export default function AccessPaths() {
                     style={{
                       fontFamily: serif,
                       fontSize: '13px',
-                      lineHeight: 1.75,
+                      lineHeight: 1.7,
                       fontWeight: 300,
                       color: inkMid,
                     }}
@@ -177,22 +253,8 @@ export default function AccessPaths() {
                   </p>
                 </div>
 
-                <div style={{ padding: '18px 22px', flexGrow: 1 }}>
-                  <p style={{ ...sectionLabelStyle, marginBottom: '10px' }}>Best for</p>
-                  <p
-                    style={{
-                      fontFamily: serif,
-                      fontSize: '13px',
-                      lineHeight: 1.7,
-                      fontWeight: 300,
-                      color: inkMid,
-                      marginBottom: '16px',
-                    }}
-                  >
-                    {option.bestFor}
-                  </p>
-
-                  <div style={{ display: 'grid', gap: '8px' }}>
+                <div style={{ padding: '14px 22px', flexGrow: 1 }}>
+                  <div style={{ display: 'grid', gap: '6px' }}>
                     {option.highlights.map((highlight) => (
                       <p
                         key={highlight}
@@ -201,10 +263,10 @@ export default function AccessPaths() {
                           fontSize: '12px',
                           lineHeight: 1.6,
                           fontWeight: 300,
-                          color: inkMid,
+                          color: inkLight,
                         }}
                       >
-                        - {highlight}
+                        — {highlight}
                       </p>
                     ))}
                   </div>
@@ -215,11 +277,8 @@ export default function AccessPaths() {
                     href={option.href}
                     style={{
                       ...secondaryButton,
-                      width: '100%',
+                      display: 'block',
                       textAlign: 'center',
-                      background: isBundle ? ink : 'transparent',
-                      color: isBundle ? '#FAFAF8' : ink,
-                      border: isBundle ? 'none' : secondaryButton.border,
                     }}
                   >
                     {option.cta} →

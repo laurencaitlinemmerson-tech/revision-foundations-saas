@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import DesktopAppButton from '@/components/DesktopAppButton';
 import {
-  serif, display, ink, inkMid, inkLight, border, parchment, blue, blueLine, infoBg,
+  serif, display, ink, inkMid, inkLight, border, parchment,
   sectionLabelStyle, primaryButton, secondaryButton, wrap,
 } from './styles';
 
@@ -41,7 +40,7 @@ export default function FinalCTA() {
           </p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
-            {['Start free first', 'One payment', 'Built for UK students'].map((item) => (
+            {['£9.99 one payment', 'Free to start', 'Built for UK students'].map((item) => (
               <span
                 key={item}
                 style={{
@@ -60,17 +59,12 @@ export default function FinalCTA() {
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            <Link href="/hub/childrens" style={primaryButton}>
+            <Link href="/pricing" style={primaryButton}>
+              Get the bundle — £9.99 →
+            </Link>
+            <Link href="/hub/childrens" style={secondaryButton}>
               Start free →
             </Link>
-            <Link href="/pricing" style={secondaryButton}>
-              Explore the bundle →
-            </Link>
-            <DesktopAppButton
-              label="Download desktop app"
-              style={secondaryButton}
-              title="Install The Nurse Lab as a desktop app"
-            />
           </div>
         </div>
       </section>

@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props) {
   const system = bodySystems.find((s) => s.id === systemId);
   if (!system) return {};
   return {
-    title: `${system.label} Mock Exams | The Nurse Lab`,
+    title: `${system.label} Written Practice | The Nurse Lab`,
     description: system.description,
   };
 }
@@ -37,7 +37,7 @@ export default async function SystemMocksPage({ params }: Props) {
           <span aria-hidden="true">&larr;</span> All systems
         </Link>
 
-        <p className="mk-kicker">Mock Exams &middot; {system.label}</p>
+        <p className="mk-kicker">Written Practice &middot; {system.label}</p>
         <h1 className="mk-headline">{system.label} Mocks</h1>
         <p className="mk-standfirst">{system.description}</p>
 

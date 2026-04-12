@@ -841,7 +841,7 @@ export default function MockExamClient({ mock }: { mock: MockExam }) {
         </Link>
 
         {/* Masthead  — always visible */}
-        <p className="mk-kicker">Mock Exam &middot; {mock.condition}</p>
+        <p className="mk-kicker">Written Practice &middot; {mock.condition}</p>
         <h1 className="mk-headline">{mock.title}</h1>
         <p className="mk-standfirst">{mock.description}</p>
 

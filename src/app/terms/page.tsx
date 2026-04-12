@@ -30,7 +30,7 @@ export default function TermsPage() {
           </p>
           <ul className="list-disc pl-5 space-y-2 leading-7">
             <li><strong>Free hub content</strong> — revision guides and cheat sheets available without a paid account.</li>
-            <li><strong>Paid tools</strong> — the OSCE practice tool, quiz tool, and mock exams, available via a one-time purchase.</li>
+            <li><strong>Paid tools</strong> — the OSCE practice tool, quiz tool, and written practice, available via a one-time purchase.</li>
           </ul>
           <p className="leading-7 mt-3">
             All content is intended for educational purposes only. It is not medical advice and should

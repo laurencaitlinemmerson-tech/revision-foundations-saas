@@ -85,7 +85,7 @@ export default function QuickStatsStrip() {
     { value: thisWeek, label: 'this week', accent: '#D4A574' },
     { value: stats.totalQuestions, label: 'questions', accent: '#7BA7CC' },
     { value: stats.totalOsceStations, label: 'stations', accent: '#C89BB0' },
-    ...(stats.totalMocks !== undefined ? [{ value: stats.totalMocks, label: 'mock exams', accent: '#D9A7A7' }] : []),
+    ...(stats.totalMocks !== undefined ? [{ value: stats.totalMocks, label: 'written practice', accent: '#D9A7A7' }] : []),
   ];
 
   return (

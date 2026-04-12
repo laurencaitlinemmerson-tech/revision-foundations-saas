@@ -66,7 +66,7 @@ const WEEK = [
   },
   {
     day: 'Sat',
-    theme: 'Mock exam',
+    theme: 'Written practice',
     durationHrs: 1,
     rest: false,
     tasks: [

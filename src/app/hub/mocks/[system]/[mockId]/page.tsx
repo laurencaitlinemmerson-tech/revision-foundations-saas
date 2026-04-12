@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props) {
   if (!mock) return {};
   const system = bodySystems.find((s) => s.id === systemId);
   return {
-    title: `${mock.title} | ${system?.label ?? ''} Mock Exam | The Nurse Lab`,
+    title: `${mock.title} | ${system?.label ?? ''} Written Practice | The Nurse Lab`,
     description: mock.description,
   };
 }
