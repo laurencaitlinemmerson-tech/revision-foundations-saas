@@ -64,7 +64,7 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
-          windowWidth: 1180,
+          windowWidth: 860,
         },
         jsPDF: {
           unit: 'mm',
@@ -165,23 +165,42 @@ const PDF_CSS = `
 
   /* ── PDF generation layout overrides ── */
 
+  /* Force backgrounds and colours to render in PDF */
+  .pdf-generating * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Reduce main wrap padding for more content space */
+  .pdf-generating [class*="-wrap"] {
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+    padding-top: 24px !important;
+  }
+
   /* Fix sidebar/content overlap — shrink letter, narrow sidebar */
   .pdf-generating [class*="-step"] {
-    grid-template-columns: 72px 1fr !important;
+    grid-template-columns: 64px 1fr !important;
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
   .pdf-generating [class*="-step-letter"] {
-    font-size: 52px !important;
+    font-size: 44px !important;
   }
 
   .pdf-generating [class*="-step-sidebar"] {
-    padding-right: 14px !important;
+    padding-right: 12px !important;
   }
 
   .pdf-generating [class*="-step-content"] {
-    padding-left: 20px !important;
+    padding-left: 16px !important;
+  }
+
+  /* Golden rules: 2-column on PDF (4 is too cramped at 860px) */
+  .pdf-generating [class*="-golden"] {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
   /* Tighten 4-column content grids for PDF */
@@ -192,12 +211,6 @@ const PDF_CSS = `
 
   .pdf-generating [class*="-content-col"] {
     padding: 10px 10px 14px !important;
-  }
-
-  /* Reduce main wrap padding for more content space */
-  .pdf-generating [class*="-wrap"] {
-    padding-left: 32px !important;
-    padding-right: 32px !important;
   }
 
   /* Keep golden rules grid together */
