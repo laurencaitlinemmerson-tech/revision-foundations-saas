@@ -1178,20 +1178,15 @@ export default function MockExamClient({ mock }: { mock: MockExam }) {
                 <p className="mk-references-title">Sources &amp; References</p>
                 <div className="mk-ref-list">
                   {mock.references.map((ref: MockReference) => (
-                    <div key={ref.citation} className="mk-ref-item">
-                      <span className="mk-ref-type">{ref.type === 'professional-body' ? 'Prof. body' : ref.type}</span>
-                      <div className="mk-ref-body">
-                        <span className="mk-ref-citation">{ref.citation} — {ref.title}</span>
-                        <a
-                          href={ref.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mk-ref-link"
-                        >
-                          {ref.href}
-                        </a>
-                      </div>
-                    </div>
+                    <a
+                      key={ref.citation}
+                      href={ref.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mk-ref-item mk-ref-link"
+                    >
+                      {ref.citation} — {ref.title}
+                    </a>
                   ))}
                 </div>
               </div>

@@ -814,56 +814,30 @@ export const MOCK_PAGE_CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #aaa;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .mk-ref-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .mk-ref-item {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 0.5px solid rgba(0,0,0,0.06);
 }
 .mk-ref-item:last-child { border-bottom: none; }
 
-.mk-ref-type {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #aaa;
-  flex-shrink: 0;
-  width: 80px;
-}
-
-.mk-ref-body {
-  flex: 1;
-}
-
-.mk-ref-citation {
-  font-size: 12px;
-  font-weight: 400;
-  color: #1A1815;
-  display: block;
-  margin-bottom: 1px;
-}
-
 .mk-ref-link {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 300;
   color: #5A5750;
   text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-color: rgba(0,0,0,0.2);
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(0,0,0,0.18);
   transition: color 0.15s;
-  word-break: break-all;
 }
-.mk-ref-link:hover { color: #1A1815; text-decoration-color: rgba(0,0,0,0.5); }
+.mk-ref-link:hover { color: #1A1815; }
 
 /* Completion state */
 .mk-complete {
