@@ -99,11 +99,19 @@ async function handleCreateFolder(input: { name: string; emoji: string }) {
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-label={isSaved ? 'Manage bookmark folders' : `Save ${hubItemTitle}`}
-        className={`inline-flex items-center gap-2 border px-4 py-2 text-sm transition ${
-          isSaved
-            ? 'border-[#d7e5f2] bg-[#eef3fa] text-[#185FA5]'
-            : 'border-black/10 bg-[#fbfaf7] text-[#1A1815] hover:border-black/20 hover:bg-white'
-        }`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          border: isSaved ? '0.5px solid rgba(24,95,165,0.25)' : '0.5px solid rgba(0,0,0,0.12)',
+          background: isSaved ? '#EEF3FA' : 'transparent',
+          padding: '6px 14px',
+          fontSize: '11px',
+          letterSpacing: '0.06em',
+          color: isSaved ? '#185FA5' : '#1A1815',
+          cursor: 'pointer',
+          transition: 'border-color 0.15s, background 0.15s',
+        }}
       >
         {isMutating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
