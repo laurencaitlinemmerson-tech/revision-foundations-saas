@@ -12,14 +12,16 @@ export default function EditorialSaveButton({
   hubItemTitle,
 }: EditorialSaveButtonProps) {
   return (
-    <div className="mt-1 flex flex-wrap items-center gap-3">
+    <div className="mt-6" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <p
-        className="text-[10px] uppercase tracking-[0.18em] text-black/50"
+        className="text-[10px] uppercase tracking-[0.18em] text-black/40"
         style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}
       >
         Save for later
       </p>
-      <BookmarkButton hubItemId={hubItemId} hubItemTitle={hubItemTitle} />
+      <div>
+        <BookmarkButton hubItemId={hubItemId} hubItemTitle={hubItemTitle} />
+      </div>
     </div>
   );
 }

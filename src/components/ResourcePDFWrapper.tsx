@@ -124,29 +124,30 @@ const PDF_CSS = `
     z-index: 900;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: 9px;
+    padding: 12px 20px;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 11px;
     font-weight: 400;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #2C2A27;
-    background: #FAFAF8;
-    border: 0.5px solid rgba(0,0,0,0.15);
+    color: #FAFAF8;
+    background: #1A1815;
+    border: none;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition: opacity 0.2s;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
   }
   .pdf-download-btn:hover {
-    border-color: rgba(0,0,0,0.35);
-    color: #1A1815;
+    opacity: 0.82;
   }
   .pdf-download-btn:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: wait;
   }
   .pdf-download-btn svg {
     flex-shrink: 0;
+    stroke: #FAFAF8;
   }
 
   .pdf-download-spinner {
