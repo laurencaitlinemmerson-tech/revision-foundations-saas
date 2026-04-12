@@ -611,6 +611,7 @@ export const MOCK_PAGE_CSS = `
   cursor: pointer;
   transition: background 0.15s;
   margin-top: 12px;
+  margin-bottom: 20px;
 }
 .mk-reveal-btn:hover { background: #F5F3F0; }
 
@@ -619,6 +620,7 @@ export const MOCK_PAGE_CSS = `
   background: #E4F2EC;
   border: 0.5px solid rgba(28,122,103,0.12);
   margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .mk-reveal-body ol {
