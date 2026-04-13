@@ -202,13 +202,13 @@ export default async function DashboardPage() {
               value={quizStats ? String(quizStats.streakDays) : '—'}
               unit={quizStats ? 'days in a row' : 'No data yet'}
             >
-              {/* Streak pips — 7 squares, last one = today */}
+              {/* Streak pips — 7 squares mapped to last 7 days */}
               {quizStats && (
                 <div style={{ display: 'flex', gap: '4px', marginTop: '11px' }}>
-                  {Array.from({ length: 7 }, (_, i) => (
+                  {quizStats.lastSevenDays.map((active, i) => (
                     <span key={i} style={{
                       width: '9px', height: '9px',
-                      background: i < 6 ? '#8BBCAA' : '#2C2A27',
+                      background: active ? (i === 6 ? '#2C2A27' : '#8BBCAA') : 'rgba(0,0,0,0.08)',
                       display: 'inline-block',
                     }} />
                   ))}
@@ -241,12 +241,30 @@ export default async function DashboardPage() {
 
           {/* Empty state — shown only when no data exists yet */}
           {!quizStats && !osceStats && (
-            <p style={{
-              fontFamily: serif, fontSize: '12px', fontWeight: 300,
-              color: muted, marginTop: '10px', fontStyle: 'italic',
-            }}>
-              Complete your first quiz or OSCE session to see your stats here.
-            </p>
+            <div style={{ marginTop: '16px' }}>
+              <p style={{ fontFamily: serif, fontSize: '11px', fontWeight: 300, color: muted, marginBottom: '14px' }}>
+                Complete a session to see your stats. Start here:
+              </p>
+              <div className="dash-empty-actions">
+                {[
+                  { href: '/quiz',          label: 'Try the Core Quiz →',       sub: '17 nursing topics with instant feedback' },
+                  { href: '/osce',          label: 'Run an OSCE station →',     sub: '50+ paediatric stations with checklists' },
+                  { href: '/hub/childrens', label: 'Read a hub guide →',        sub: 'Free clinical guides for nursing students' },
+                ].map((item) => (
+                  <Link key={item.href} href={item.href} style={{
+                    display: 'flex', flexDirection: 'column', gap: '5px',
+                    padding: '16px 20px',
+                    border: `0.5px solid ${border}`,
+                    background: '#fff',
+                    textDecoration: 'none',
+                    transition: 'background 0.12s',
+                  }}>
+                    <span style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: ink }}>{item.label}</span>
+                    <span style={{ fontFamily: serif, fontSize: '11px', fontWeight: 300, color: muted }}>{item.sub}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* Topic strength + quiz accuracy bars */}
@@ -365,6 +383,15 @@ export default async function DashboardPage() {
           gap: 12px;
           margin-bottom: 0;
         }
+        .dash-empty-actions {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .dash-empty-actions a:hover { background: #F5F3F0 !important; }
+        @media (max-width: 700px) {
+          .dash-empty-actions { grid-template-columns: 1fr; }
+        }
         .dash-prog-pair {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -454,6 +481,13 @@ async function getUserQuizStats(userId: string) {
     else if (i > 0) break;
   }
 
+  // Which of the last 7 days had activity (index 0 = 6 days ago, index 6 = today)
+  const lastSevenDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (6 - i));
+    return uniqueDates.includes(d.toDateString());
+  });
+
   const topicBreakdown = data
     .filter((row) => row.questions_attempted > 0)
     .map((row, i) => {
@@ -472,6 +506,7 @@ async function getUserQuizStats(userId: string) {
     averagePercent,
     weekOnWeekDelta: 0,
     streakDays,
+    lastSevenDays,
     hoursThisWeek: 0,
     strongestArea: topicBreakdown[topicBreakdown.length - 1]?.label ?? '',
     weakestArea:   topicBreakdown[0]?.label ?? '',

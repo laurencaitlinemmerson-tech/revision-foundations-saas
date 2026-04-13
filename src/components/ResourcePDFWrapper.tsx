@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, ReactNode, useCallback } from 'react';
+import { useRef, useState, ReactNode, useCallback, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import ResourceDiscussion from '@/components/ResourceDiscussion';
@@ -15,6 +15,33 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
   const slug = pathname?.split('/').pop() ?? '';
   const contentRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
+  const [showSaveNudge, setShowSaveNudge] = useState(false);
+  const nudgeDismissed = useRef(false);
+
+  // Show save nudge after scrolling 80% of the page
+  useEffect(() => {
+    const handleScroll = () => {
+      if (nudgeDismissed.current) return;
+      const el = contentRef.current;
+      if (!el) return;
+      const scrolled = window.scrollY + window.innerHeight;
+      const threshold = el.offsetTop + el.scrollHeight * 0.8;
+      if (scrolled >= threshold) setShowSaveNudge(true);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const dismissNudge = useCallback(() => {
+    nudgeDismissed.current = true;
+    setShowSaveNudge(false);
+  }, []);
+
+  const scrollToSave = useCallback(() => {
+    const saveBtn = contentRef.current?.querySelector('[class*="mt-6"]') as HTMLElement | null;
+    if (saveBtn) saveBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    dismissNudge();
+  }, [dismissNudge]);
 
   const handleDownload = useCallback(async () => {
     const el = contentRef.current;
@@ -141,6 +168,19 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
       {slug && slug !== 'resources' && (
         <div className="resource-discussion-wrap">
           <ResourceDiscussion slug={slug} />
+        </div>
+      )}
+
+      {/* ── Save nudge — appears after 80% scroll ── */}
+      {showSaveNudge && (
+        <div className="save-nudge">
+          <button className="save-nudge-action" onClick={scrollToSave}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            Save this guide for later
+          </button>
+          <button className="save-nudge-dismiss" onClick={dismissNudge} aria-label="Dismiss">×</button>
         </div>
       )}
 
@@ -312,6 +352,52 @@ const PDF_CSS = `
   @media print {
     .pdf-download-btn { display: none !important; }
   }
+
+  /* ── Save nudge ── */
+  .save-nudge {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #FAFAF8;
+    border: 0.5px solid rgba(0,0,0,0.14);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    animation: nudge-in 0.25s ease;
+  }
+  @keyframes nudge-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .save-nudge-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: #1A1815;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  .save-nudge-action:hover { background: #F5F3F0; }
+  .save-nudge-dismiss {
+    padding: 11px 13px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #999;
+    background: none;
+    border: none;
+    border-left: 0.5px solid rgba(0,0,0,0.08);
+    cursor: pointer;
+    line-height: 1;
+  }
+  .save-nudge-dismiss:hover { color: #555; }
 
   /* ── Quiz/OSCE cross-link CTA ── */
   .resource-quiz-cta {

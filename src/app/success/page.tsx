@@ -5,15 +5,26 @@ import { useSearchParams } from 'next/navigation';
 import { useUser, SignInButton } from '@clerk/nextjs';
 
 type ClaimResponse =
-  | {
-      ok: true;
-      claimedCount?: number;
-      message?: string;
-    }
-  | {
-      ok: false;
-      error: string;
-    };
+  | { ok: true; claimedCount?: number; message?: string }
+  | { ok: false; error: string };
+
+const NEXT_STEPS: Record<string, { label: string; href: string; desc: string }[]> = {
+  bundle: [
+    { label: 'Open the OSCE tool →',    href: '/osce',          desc: 'Start with any station — checklists and marking guides included' },
+    { label: 'Try the Core Quiz →',     href: '/quiz',          desc: 'Pick a topic and see where your recall is strongest' },
+    { label: 'Read a hub guide →',      href: '/hub/childrens', desc: 'Clinical guides written for the way student nurses actually study' },
+  ],
+  osce: [
+    { label: 'Open the OSCE tool →',    href: '/osce',          desc: 'Start with any station and use the marking checklist' },
+    { label: 'Set your placement date →',href: '/dashboard',    desc: 'Track countdown and see a suggested revision week' },
+    { label: 'Explore hub guides →',    href: '/hub/childrens', desc: 'Free clinical guides to read alongside OSCE practice' },
+  ],
+  quiz: [
+    { label: 'Try the Core Quiz →',     href: '/quiz',          desc: 'Pick any topic — respiratory, cardiac, pharmacology, and more' },
+    { label: 'Check your dashboard →',  href: '/dashboard',     desc: 'Your stats update after each session' },
+    { label: 'Explore hub guides →',    href: '/hub/childrens', desc: 'Free clinical guides to read before or after quizzing' },
+  ],
+};
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -21,26 +32,25 @@ function SuccessContent() {
 
   const [claiming, setClaiming] = useState(false);
   const [claimed, setClaimed] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const product = searchParams.get('product');
+  const product = searchParams.get('product') ?? 'bundle';
   const sessionId = searchParams.get('session_id');
 
   const productName = useMemo(() => {
     if (product === 'osce') return "Children's OSCE Tool";
     if (product === 'quiz') return 'Core Nursing Quiz';
-    if (product === 'bundle') return 'Complete Nursing Bundle';
-    return 'your product';
+    return "Children's Bundle";
   }, [product]);
 
   const productLink = useMemo(() => {
     if (product === 'osce') return '/osce';
     if (product === 'quiz') return '/quiz';
-    return '/dashboard';
+    return '/osce';
   }, [product]);
 
-  // IMPORTANT: preserve query params so the success page can claim after sign-in
+  const nextSteps = NEXT_STEPS[product] ?? NEXT_STEPS.bundle;
+
   const redirectTo = useMemo(() => {
     const params = new URLSearchParams();
     if (sessionId) params.set('session_id', sessionId);
@@ -50,33 +60,19 @@ function SuccessContent() {
   }, [sessionId, product]);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) return;
-    if (claimed || claiming) return;
-
+    if (!isLoaded || !isSignedIn || claimed || claiming) return;
     const controller = new AbortController();
-
     (async () => {
       setClaiming(true);
       setError(null);
-      setMessage(null);
       try {
-        const res = await fetch(`/api/purchases/claim?session_id=${sessionId || ''}&product=${product || ''}`, {
-          method: 'POST',
-          signal: controller.signal,
-        });
+        const res = await fetch(
+          `/api/purchases/claim?session_id=${sessionId || ''}&product=${product || ''}`,
+          { method: 'POST', signal: controller.signal },
+        );
         const data: ClaimResponse = await res.json();
-        if (!res.ok) {
-          const errMsg =
-            (data && 'error' in data && data.error) ||
-            'Failed to claim your purchase. Please contact support.';
-          throw new Error(errMsg);
-        }
+        if (!res.ok) throw new Error((data as { error: string }).error || 'Failed to claim purchase.');
         setClaimed(true);
-        const friendly =
-          (data && 'ok' in data && data.ok && (data.message || null)) ||
-          'Your access has been unlocked!';
-        setMessage(friendly);
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         setError(e instanceof Error ? e.message : 'Failed to claim your purchase. Please contact support.');
@@ -84,77 +80,67 @@ function SuccessContent() {
         setClaiming(false);
       }
     })();
-
     return () => controller.abort();
   }, [isLoaded, isSignedIn, claimed, claiming, sessionId, product]);
 
-  // If signed out: show sign-in CTA (with redirect that preserves params)
+  /* ── Signed-out state ─────────────────────────────────────────────────── */
   if (!isLoaded || !isSignedIn) {
     return (
-      <div className="min-h-screen bg-[var(--cream)] flex items-center justify-center p-6">
-        <div className="w-full max-w-md border border-[rgba(26,24,21,0.08)] bg-white px-8 py-10 text-center">
-          <div className="text-5xl mb-6">🎉</div>
-          <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]/55 mb-4">Purchase complete</p>
-          <h1 className="font-display text-[clamp(2rem,5vw,2.8rem)] leading-[0.97] tracking-[-0.03em] text-[var(--espresso)] mb-4">
-            Payment successful.
-          </h1>
-          <p className="text-sm font-light leading-7 text-[var(--charcoal)] mb-6">
-            To unlock access to <span className="font-medium text-[var(--espresso)]">{productName}</span>, please create an account or sign in.
+      <div style={page}>
+        <div style={card}>
+          <p style={kicker}>Purchase complete</p>
+          <h1 style={headline}>You&apos;re in.</h1>
+          <p style={body}>
+            To unlock your access to <strong style={{ fontWeight: 500, color: '#1A1815' }}>{productName}</strong>,
+            create an account or sign in below. We&apos;ll attach your purchase automatically.
           </p>
-
           <SignInButton forceRedirectUrl={redirectTo}>
-            <button className="inline-flex items-center justify-center w-full bg-[var(--espresso)] px-5 py-3 text-sm text-white transition-colors hover:bg-[#3a2010]">
-              Open account page to unlock access
-            </button>
+            <button style={primaryBtn}>Create account or sign in →</button>
           </SignInButton>
-
-          <p className="mt-4 text-sm font-light text-[var(--charcoal)]/60">
-            After you sign in or create your account, we&apos;ll automatically attach your purchase there.
-          </p>
+          <p style={footnote}>Already have an account? Signing in is enough.</p>
         </div>
       </div>
     );
   }
 
-  // Signed in: auto-claim runs
+  /* ── Signed-in state ──────────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[var(--cream)] flex items-center justify-center p-6">
-      <div className="w-full max-w-md border border-[rgba(26,24,21,0.08)] bg-white px-8 py-10 text-center">
-        <div className="text-5xl mb-6">🎉</div>
-        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]/55 mb-4">Purchase complete</p>
-        <h1 className="font-display text-[clamp(2rem,5vw,2.8rem)] leading-[0.97] tracking-[-0.03em] text-[var(--espresso)] mb-4">
-          Payment successful.
-        </h1>
-
-        <p className="text-sm font-light leading-7 text-[var(--charcoal)] mb-4">
-          Unlocking access to <span className="font-medium text-[var(--espresso)]">{productName}</span>
-          {sessionId ? '' : ' (no session ID found \u2014 matching by email)'}&hellip;
+    <div style={page}>
+      <div style={{ ...card, maxWidth: '560px' }}>
+        <p style={kicker}>Purchase complete</p>
+        <h1 style={headline}>You&apos;re in.</h1>
+        <p style={{ ...body, marginBottom: '6px' }}>
+          {claiming
+            ? `Unlocking ${productName}…`
+            : claimed
+            ? `${productName} is now active on your account.`
+            : `Setting up ${productName}…`}
         </p>
+        {error && <p style={{ fontFamily: inter, fontSize: '13px', color: '#B03030', marginBottom: '12px' }}>{error}</p>}
 
-        {claiming && (
-          <p className="text-sm font-light text-[var(--charcoal)]/70">Claiming your purchase…</p>
-        )}
-
-        {message && !error && (
-          <p className="text-sm font-light text-[var(--charcoal)]">{message}</p>
-        )}
-
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
-
-        <div className="mt-6 flex flex-col gap-3">
-          <a href={productLink} className="inline-flex items-center justify-center bg-[var(--espresso)] px-5 py-3 text-sm text-white transition-colors hover:bg-[#3a2010]">
-            Continue
-          </a>
-          <a href="/dashboard" className="inline-flex items-center justify-center border border-[rgba(26,24,21,0.12)] bg-white px-5 py-3 text-sm text-[var(--espresso)] transition-colors hover:border-[rgba(26,24,21,0.2)]">
-            Go to dashboard
-          </a>
+        {/* Next steps */}
+        <div style={{ marginTop: '28px', marginBottom: '28px' }}>
+          <p style={{ fontFamily: inter, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9C8878', marginBottom: '14px' }}>
+            Start here
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', border: '0.5px solid rgba(0,0,0,0.08)' }}>
+            {nextSteps.map((step) => (
+              <a key={step.href} href={step.href} style={stepCard}>
+                <span style={{ fontFamily: inter, fontSize: '13px', fontWeight: 400, color: '#1A1815' }}>{step.label}</span>
+                <span style={{ fontFamily: inter, fontSize: '11px', fontWeight: 300, color: '#9C8878', marginTop: '3px' }}>{step.desc}</span>
+              </a>
+            ))}
+          </div>
         </div>
 
-        <p className="mt-4 text-xs font-light text-[var(--charcoal)]/55">
-          If access doesn&apos;t appear within a minute, refresh this page.
-        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <a href={productLink} style={primaryBtn}>Open {productName} →</a>
+          <a href="/dashboard" style={secondaryBtn}>Go to dashboard</a>
+        </div>
+
+        {!error && (
+          <p style={footnote}>If access doesn&apos;t appear within a minute, refresh this page.</p>
+        )}
       </div>
     </div>
   );
@@ -164,8 +150,8 @@ export default function SuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[var(--cream)] flex items-center justify-center">
-          <div className="text-sm text-[var(--charcoal)]/60">Loading…</div>
+        <div style={{ minHeight: '100vh', background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ fontFamily: inter, fontSize: '13px', color: '#9C8878' }}>Loading…</p>
         </div>
       }
     >
@@ -173,3 +159,102 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
+
+/* ─── Styles ────────────────────────────────────────────────────────────────── */
+
+const inter = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
+
+const page: React.CSSProperties = {
+  minHeight: '100vh',
+  background: '#FAFAF8',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '40px 24px',
+};
+
+const card: React.CSSProperties = {
+  width: '100%',
+  maxWidth: '480px',
+  background: '#fff',
+  border: '0.5px solid rgba(26,24,21,0.1)',
+  padding: '48px 40px',
+};
+
+const kicker: React.CSSProperties = {
+  fontFamily: inter,
+  fontSize: '10px',
+  letterSpacing: '0.2em',
+  textTransform: 'uppercase',
+  color: '#9C8878',
+  marginBottom: '12px',
+};
+
+const headline: React.CSSProperties = {
+  fontFamily: playfair,
+  fontSize: 'clamp(2.4rem, 5vw, 3.2rem)',
+  fontWeight: 400,
+  lineHeight: 1.05,
+  color: '#1A1815',
+  marginBottom: '16px',
+};
+
+const body: React.CSSProperties = {
+  fontFamily: inter,
+  fontSize: '14px',
+  lineHeight: 1.8,
+  fontWeight: 300,
+  color: '#5A5750',
+  marginBottom: '24px',
+};
+
+const primaryBtn: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  padding: '14px 20px',
+  background: '#1A1815',
+  color: '#FAFAF8',
+  fontFamily: inter,
+  fontSize: '12px',
+  letterSpacing: '0.08em',
+  textDecoration: 'none',
+  border: 'none',
+  cursor: 'pointer',
+};
+
+const secondaryBtn: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  padding: '13px 20px',
+  background: 'transparent',
+  color: '#1A1815',
+  fontFamily: inter,
+  fontSize: '12px',
+  letterSpacing: '0.08em',
+  textDecoration: 'none',
+  border: '0.5px solid rgba(26,24,21,0.12)',
+};
+
+const stepCard: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  padding: '14px 18px',
+  textDecoration: 'none',
+  background: '#fff',
+  borderBottom: '0.5px solid rgba(0,0,0,0.07)',
+  transition: 'background 0.12s',
+};
+
+const footnote: React.CSSProperties = {
+  fontFamily: inter,
+  fontSize: '11px',
+  fontWeight: 300,
+  color: '#B8AD9E',
+  marginTop: '16px',
+  textAlign: 'center',
+};
