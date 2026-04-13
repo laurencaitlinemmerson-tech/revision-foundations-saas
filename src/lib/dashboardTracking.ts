@@ -2,7 +2,8 @@
 
 export const TRACKING_KEYS = {
   recentPages: 'rf_recent_pages',
-  placementDate: 'rf_placement_date',
+  placementDate: 'rf_placement_date',   // legacy — migrated on first load
+  countdownDates: 'rf_countdown_dates',
   osceScores: 'rf_osce_scores',
   pinnedNote: 'rf_pinned_note',
 } as const;
@@ -52,6 +53,32 @@ export function getPlacementDate(): string | null {
 
 export function setPlacementDate(date: string): void {
   save(TRACKING_KEYS.placementDate, date);
+}
+
+// ── Multi-date countdowns ──────────────────────────────────────────────────
+
+export interface CountdownDate {
+  id: string;
+  label: string; // e.g. "Placement", "Final exam", "Assignment"
+  date: string;  // YYYY-MM-DD
+}
+
+export function getCountdownDates(): CountdownDate[] {
+  const stored = load<CountdownDate[]>(TRACKING_KEYS.countdownDates, []);
+  // Migrate legacy single placement date on first load
+  if (stored.length === 0) {
+    const legacy = getPlacementDate();
+    if (legacy) {
+      const migrated: CountdownDate[] = [{ id: 'placement', label: 'Placement', date: legacy }];
+      save(TRACKING_KEYS.countdownDates, migrated);
+      return migrated;
+    }
+  }
+  return stored;
+}
+
+export function saveCountdownDates(dates: CountdownDate[]): void {
+  save(TRACKING_KEYS.countdownDates, dates);
 }
 
 export function getOsceScores(): OsceScore[] {
