@@ -191,6 +191,43 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
     }
   }, [hasPremium, enterApp, showPreview]);
 
+  // Sync quiz localStorage progress to Supabase (same-origin iframe shares localStorage)
+  useEffect(() => {
+    if (!hasPremium) return;
+
+    function syncProgress() {
+      try {
+        const raw = localStorage.getItem('ntq_history_v1');
+        if (!raw) return;
+        const history: Array<{ topic: string; correct: boolean; at: string }> = JSON.parse(raw);
+        if (!history.length) return;
+
+        const byTopic: Record<string, { attempted: number; correct: number; lastAt: string }> = {};
+        for (const ev of history) {
+          if (!byTopic[ev.topic]) byTopic[ev.topic] = { attempted: 0, correct: 0, lastAt: ev.at };
+          byTopic[ev.topic].attempted++;
+          if (ev.correct) byTopic[ev.topic].correct++;
+          if (ev.at > byTopic[ev.topic].lastAt) byTopic[ev.topic].lastAt = ev.at;
+        }
+
+        const topics = Object.entries(byTopic).map(([topicId, d]) => ({ topicId, ...d }));
+        fetch('/api/progress/quiz', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topics }),
+        }).catch(() => {});
+      } catch {}
+    }
+
+    syncProgress();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') syncProgress();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [hasPremium]);
+
   if (hasPremium) {
     return (
       <iframe

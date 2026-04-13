@@ -191,6 +191,26 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
     }
   }, [hasPremium, enterApp, showPreview]);
 
+  // Listen for OSCE station progress posted by the iframe on session complete
+  useEffect(() => {
+    if (!hasPremium) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== 'osce-progress') return;
+      const { stations } = event.data;
+      if (!Array.isArray(stations)) return;
+      fetch('/api/progress/osce', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stations }),
+      }).catch(() => {});
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [hasPremium]);
+
   if (hasPremium) {
     return (
       <iframe

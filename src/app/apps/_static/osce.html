@@ -7257,7 +7257,21 @@ function renderOSCE(container) {
       else flaggedStations.push(stationId);
       render();
     };
-    window.finishOSCE = () => { currentView = 'osceResults'; render(); };
+    window.finishOSCE = () => {
+      currentView = 'osceResults';
+      try {
+        const stations = sessionStations.map(function(station) {
+          var checklist = currentStationChecklist[station.id] || {};
+          var domains = ['preparation','assessment','interventions','communication','safetyRedFlags','documentation'];
+          var allItems = domains.reduce(function(acc, d) { return acc.concat(station.checklist && station.checklist[d] ? station.checklist[d] : []); }, []);
+          var checkedCount = Object.values(checklist).filter(Boolean).length;
+          var percentage = allItems.length ? Math.round((checkedCount / allItems.length) * 100) : 0;
+          return { stationId: station.id, score: percentage, attempts: 1 };
+        });
+        window.parent.postMessage({ type: 'osce-progress', stations: stations }, location.origin);
+      } catch(e) {}
+      render();
+    };
 
     // ==================== INITIALIZATION ====================
     async function onConfigChange(newConfig) {
@@ -7265,7 +7279,21 @@ function renderOSCE(container) {
       render();
     }
 
-    window.finishOSCE = () => { currentView = 'osceResults'; render(); };
+    window.finishOSCE = () => {
+      currentView = 'osceResults';
+      try {
+        const stations = sessionStations.map(function(station) {
+          var checklist = currentStationChecklist[station.id] || {};
+          var domains = ['preparation','assessment','interventions','communication','safetyRedFlags','documentation'];
+          var allItems = domains.reduce(function(acc, d) { return acc.concat(station.checklist && station.checklist[d] ? station.checklist[d] : []); }, []);
+          var checkedCount = Object.values(checklist).filter(Boolean).length;
+          var percentage = allItems.length ? Math.round((checkedCount / allItems.length) * 100) : 0;
+          return { stationId: station.id, score: percentage, attempts: 1 };
+        });
+        window.parent.postMessage({ type: 'osce-progress', stations: stations }, location.origin);
+      } catch(e) {}
+      render();
+    };
 
    // ==================== INITIALIZATION ====================
    function init() {
