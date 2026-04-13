@@ -428,11 +428,11 @@ export default function HubPage() {
         </div>
 
         {/* More ways */}
-        <p className="hub-more-label">More ways to revise</p>
+        <p className="hub-more-label">Community & reference</p>
         <div className="hub-more-grid">
           {[
-            { href: '/hub/questions', title: 'Q&A Board', desc: 'Ask a question or browse what other students have asked about placements, OSCEs, and exams.' },
-            { href: '/hub/glossary', title: 'Nursing Glossary', desc: 'A searchable A–Z of nursing words and abbreviations explained in plain English.' },
+            { href: '/hub/questions', title: 'Q&A Board', desc: 'Ask questions and see how other student nurses are handling placements, OSCEs, and exams. Students helping students.' },
+            { href: '/hub/glossary', title: 'Nursing Glossary', desc: 'A searchable A–Z of nursing terms and abbreviations explained in plain English — useful for placement and written work.' },
           ].map(item => (
             <Link key={item.href} href={item.href} className="hub-more-item">
               <span className="hub-more-item-title">

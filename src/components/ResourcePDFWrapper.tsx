@@ -1,12 +1,18 @@
 'use client';
 
 import { useRef, useState, ReactNode, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import ResourceDiscussion from '@/components/ResourceDiscussion';
 
 interface ResourcePDFWrapperProps {
   children: ReactNode;
 }
 
 export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps) {
+  const pathname = usePathname();
+  // Extract slug from e.g. /hub/resources/cell-biology → "cell-biology"
+  const slug = pathname?.split('/').pop() ?? '';
   const contentRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
 
@@ -117,6 +123,26 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
     <div ref={contentRef} className="resource-pdf-root">
       <style dangerouslySetInnerHTML={{ __html: PDF_CSS }} />
       {children}
+
+      {/* ── Quiz/OSCE cross-link — hidden during PDF generation ── */}
+      <div className="resource-quiz-cta">
+        <p className="resource-quiz-cta-label">Also practice with</p>
+        <div className="resource-quiz-cta-links">
+          <Link href="/quiz" className="resource-quiz-cta-link">
+            Core Quiz — test your recall →
+          </Link>
+          <Link href="/osce" className="resource-quiz-cta-link">
+            OSCE Stations — apply it clinically →
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Discussion — hidden during PDF generation ── */}
+      {slug && slug !== 'resources' && (
+        <div className="resource-discussion-wrap">
+          <ResourceDiscussion slug={slug} />
+        </div>
+      )}
 
       <button
         className="pdf-download-btn"
@@ -285,5 +311,51 @@ const PDF_CSS = `
 
   @media print {
     .pdf-download-btn { display: none !important; }
+  }
+
+  /* ── Quiz/OSCE cross-link CTA ── */
+  .resource-quiz-cta {
+    margin-top: 48px;
+    padding: 24px 28px;
+    border: 0.5px solid rgba(0,0,0,0.08);
+    background: #F5F3F0;
+  }
+  .resource-quiz-cta-label {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #9C8878;
+    margin-bottom: 14px;
+  }
+  .resource-quiz-cta-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .resource-quiz-cta-link {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #1A1815;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: rgba(0,0,0,0.25);
+  }
+  .resource-quiz-cta-link:hover {
+    text-decoration-color: #1A1815;
+  }
+
+  /* ── Discussion wrapper ── */
+  .resource-discussion-wrap {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 0.5px solid rgba(0,0,0,0.08);
+  }
+
+  /* Hide non-print sections during PDF generation */
+  .pdf-generating .resource-quiz-cta,
+  .pdf-generating .resource-discussion-wrap {
+    display: none !important;
   }
 `;

@@ -427,26 +427,42 @@ async function getUserQuizStats(userId: string) {
   const supabase = createServiceClient();
 
   const { data, error } = await supabase
-    .from('user_progress')
-    .select('topic, scores, streak_count')
-    .eq('clerk_user_id', userId)
-    .eq('product', 'quiz');
+    .from('quiz_progress')
+    .select('topic_id, questions_attempted, questions_correct, last_attempted_at')
+    .eq('clerk_user_id', userId);
 
   if (error || !data || data.length === 0) return null;
 
-  const allScores = data.flatMap((row) => row.scores as number[]);
-  if (allScores.length === 0) return null;
+  const totalAnswered = data.reduce((sum, row) => sum + (row.questions_attempted || 0), 0);
+  const totalCorrect  = data.reduce((sum, row) => sum + (row.questions_correct || 0), 0);
+  if (totalAnswered === 0) return null;
 
-  const totalAnswered  = allScores.length;
-  const averagePercent = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
-  const streakDays     = Math.max(...data.map((row) => (row.streak_count as number) ?? 0));
+  const averagePercent = Math.round((totalCorrect / totalAnswered) * 100);
+
+  // Streak: count consecutive days with activity up to today
+  const dates = data
+    .map((row) => row.last_attempted_at as string)
+    .filter(Boolean)
+    .map((d) => new Date(d).toDateString());
+  const uniqueDates = [...new Set(dates)].sort();
+  let streakDays = 0;
+  const today = new Date();
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    if (uniqueDates.includes(d.toDateString())) streakDays++;
+    else if (i > 0) break;
+  }
 
   const topicBreakdown = data
-    .filter((row) => (row.scores as number[]).length > 0)
+    .filter((row) => row.questions_attempted > 0)
     .map((row, i) => {
-      const scores = row.scores as number[];
-      const pct = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-      return { label: row.topic as string, pct, color: TOPIC_COLORS[i % TOPIC_COLORS.length] };
+      const pct = Math.round((row.questions_correct / row.questions_attempted) * 100);
+      const label = (row.topic_id as string)
+        .split(/[-_]/)
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      return { label, pct, color: TOPIC_COLORS[i % TOPIC_COLORS.length] };
     })
     .sort((a, b) => a.pct - b.pct)
     .slice(0, 4);
@@ -468,19 +484,23 @@ async function getUserOsceStats(userId: string) {
   const supabase = createServiceClient();
 
   const { data, error } = await supabase
-    .from('user_progress')
-    .select('scores')
-    .eq('clerk_user_id', userId)
-    .eq('product', 'osce');
+    .from('osce_progress')
+    .select('station_id, attempts, best_score')
+    .eq('clerk_user_id', userId);
 
   if (error || !data || data.length === 0) return null;
 
-  const allScores = data.flatMap((row) => row.scores as number[]);
-  if (allScores.length === 0) return null;
+  const totalRuns = data.reduce((sum, row) => sum + (row.attempts || 0), 0);
+  if (totalRuns === 0) return null;
+
+  const scoredRows = data.filter((row) => (row.best_score || 0) > 0);
+  const averageScore = scoredRows.length > 0
+    ? Math.round(scoredRows.reduce((sum, row) => sum + row.best_score, 0) / scoredRows.length)
+    : 0;
 
   return {
-    totalRuns:         allScores.length,
-    averageScore:      Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length),
+    totalRuns,
+    averageScore,
     monthOnMonthDelta: 0,
   };
 }

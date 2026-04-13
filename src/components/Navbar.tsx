@@ -103,6 +103,8 @@ export default function Navbar() {
 
   const mobileSecondaryLinks = [
     { href: '/', label: 'Home' },
+    { href: '/hub/questions', label: 'Q&A Board' },
+    { href: '/hub/glossary', label: 'Glossary' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
   ];

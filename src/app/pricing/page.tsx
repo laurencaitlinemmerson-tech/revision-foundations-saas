@@ -360,7 +360,10 @@ export default function PricingPage() {
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <p style={{ fontFamily: display, fontSize: '44px', lineHeight: 1, color: ink }}>£9.99</p>
                     <p style={{ fontFamily: serif, fontSize: '12px', color: inkLight, marginTop: '4px' }}>
-                  one payment
+                      one payment
+                    </p>
+                    <p style={{ fontFamily: serif, fontSize: '11px', color: inkLight, marginTop: '6px', maxWidth: '140px' }}>
+                      Tools separately: £9.98 · hub free
                     </p>
                   </div>
                 </div>
@@ -501,6 +504,8 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
+
+      <Testimonials compact />
 
       <section style={{ padding: '48px 24px 0', borderBottom: `0.5px solid ${border}` }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
@@ -802,8 +807,6 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
-
-      <Testimonials />
 
       {!isPro && (
         <section style={{ padding: '88px 24px 96px' }}>
