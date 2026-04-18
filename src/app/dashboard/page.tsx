@@ -407,6 +407,11 @@ export default async function DashboardPage() {
         @media (max-width: 560px) {
           .dash-analytics-row { grid-template-columns: 1fr 1fr; }
         }
+        @media (max-width: 420px) {
+          .dash-analytics-row { grid-template-columns: 1fr; }
+          .dash-stat-card { padding: 16px 16px !important; }
+          .dash-empty-actions { grid-template-columns: 1fr; }
+        }
 
         /* ── Stat card hover ── */
         .dash-stat-card {

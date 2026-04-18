@@ -216,6 +216,19 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ topics }),
         }).catch(() => {});
+
+        // Write rf_weak_topics for WeakAreaBanner
+        const weakTopics = topics
+          .filter((t) => t.attempted >= 3)
+          .map((t) => ({
+            topic: t.topicId,
+            score: Math.round((t.correct / t.attempted) * 100),
+            attempts: t.attempted,
+            lastSeen: t.lastAt,
+          }));
+        try {
+          localStorage.setItem('rf_weak_topics', JSON.stringify(weakTopics));
+        } catch {};
       } catch {}
     }
 

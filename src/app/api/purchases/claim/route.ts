@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createOrUpdateEntitlement } from '@/lib/entitlements';
 import { createServiceClient } from '@/lib/supabase';
+import { sendPurchaseConfirmation } from '@/lib/purchaseEmail';
 
 export async function POST(_req: NextRequest) {
   const { userId, sessionClaims } = await auth();
@@ -34,6 +35,11 @@ export async function POST(_req: NextRequest) {
     }).eq('id', purchase.id);
 
     results.push({ product_key: purchase.product_key, status: 'claimed' });
+  }
+
+  // Send one confirmation email for the first claimed product (fire-and-forget)
+  if (results.length > 0) {
+    sendPurchaseConfirmation(email as string, results[0].product_key).catch(() => {});
   }
 
   return NextResponse.json({ claimed: results });

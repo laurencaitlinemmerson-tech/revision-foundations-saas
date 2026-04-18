@@ -271,6 +271,12 @@ export const STUDY_COMPONENTS_CSS = `
 .sc-source-link { display: block; font-size: 13px; font-weight: 300; color: #5A5750; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(0,0,0,0.18); padding: 14px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); transition: color 0.15s; line-height: 1.55; }
 .sc-source-link:last-child { border-bottom: none; }
 .sc-source-link:hover { color: #1A1815; }
+
+/* ── Mobile: table horizontal scroll ── */
+@media (max-width: 680px) {
+  .rs-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .rs-table th, .rs-table td { min-width: 110px; }
+}
 `;
 
 // ─── GlossaryChips ────────────────────────────────────────────────────────────

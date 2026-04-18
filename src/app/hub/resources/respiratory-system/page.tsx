@@ -1224,6 +1224,66 @@ export default function RespiratorySystemPage() {
           <p>Apnoea can be the presenting sign of bronchiolitis in infants under 6 weeks. A baby who pauses breathing, even briefly, in the context of coryzal symptoms needs urgent assessment.</p>
         </ClinicalCallout>
 
+        {/* Asthma severity */}
+        <h2 className="rs-section-title">Paediatric Asthma Severity</h2>
+        <table className="rs-table" style={{ marginBottom: '16px' }}>
+          <thead>
+            <tr>
+              <th>Severity</th>
+              <th>Features</th>
+              <th>SpO₂</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ['Mild–moderate', 'SpO₂ ≥92%, able to talk in sentences, RR and HR mildly raised, no cyanosis', '≥92%'],
+              ['Severe', 'SpO₂ <92%, too breathless to complete sentences, RR >30 (>5 yr), HR >120, accessory muscle use', '<92%'],
+              ['Life-threatening', 'Silent chest, cyanosis, poor respiratory effort, exhaustion, altered consciousness, SpO₂ <92% despite O₂', '<92% on O₂'],
+            ].map(([sev, feat, spo2]) => (
+              <tr key={sev}>
+                <td>{sev}</td>
+                <td>{feat}</td>
+                <td>{spo2}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <ClinicalCallout variant="exam">
+          <p>A silent chest in a known asthmatic is a life-threatening emergency — it means air movement is so poor that wheeze has disappeared. Escalate immediately.</p>
+        </ClinicalCallout>
+
+        {/* PEWS */}
+        <h2 className="rs-section-title">Paediatric Early Warning Score (PEWS)</h2>
+        <p style={{ fontSize: '14px', fontWeight: 300, color: '#5A5750', lineHeight: 1.7, marginBottom: '16px' }}>
+          PEWS is a structured scoring system used to detect early deterioration in children. It scores behaviour, cardiovascular, and respiratory components, then triggers a defined escalation response.
+        </p>
+        <table className="rs-table" style={{ marginBottom: '16px' }}>
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Meaning</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ['0–2', 'Normal range', 'Continue observation per ward policy'],
+              ['3–4', 'Caution — increased concern', 'Inform nurse in charge; increase frequency of observations'],
+              ['5–6', 'Urgent — significant deterioration risk', 'Urgent medical review required'],
+              ['≥7', 'Emergency — immediate risk', 'Immediate emergency response; call for senior help now'],
+            ].map(([score, meaning, action]) => (
+              <tr key={score}>
+                <td>{score}</td>
+                <td>{meaning}</td>
+                <td>{action}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <ClinicalCallout variant="pearl">
+          <p>Always document PEWS alongside observations. A rising trend — even within the &ldquo;normal&rdquo; range — is clinically significant and should be communicated to the team.</p>
+        </ClinicalCallout>
+
         {/* Respiratory rates */}
         <h2 className="rs-section-title">Normal Respiratory Rates by Age</h2>
         <table className="rs-table" style={{ marginBottom: '32px' }}>
