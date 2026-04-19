@@ -422,6 +422,8 @@ const CSS = `
 .nd-badge-dyslexia { background: #FAECE7; color: #712B13; }
 .nd-tag-anxiety { color: #3A5F8A; }
 .nd-badge-anxiety { background: #E4EEF8; color: #24415F; }
+.nd-tag-audhd { color: #7A4B2E; }
+.nd-badge-audhd { background: #F6E7DC; color: #6A3E22; }
 
 @media (max-width: 980px) {
   .nd-intro-grid,
@@ -631,6 +633,49 @@ const SECTIONS = [
     secondaryLabel: 'Open the hub →',
   },
   {
+    tag: 'AuDHD',
+    colour: 'audhd',
+    name: 'If you need structure and stimulation at the same time',
+    question: 'How do I revise when one part of my brain wants sameness and the other part wants novelty?',
+    cols: [
+      {
+        header: 'Try',
+        items: [
+          'Keep the same session shape, but rotate the topic',
+          'Use a two-step plan: one quiz block, then one OSCE station',
+          'Set up the desk the same way each time',
+          'Write a visible finish line before you start',
+          'Keep one low-friction fallback for overload days',
+        ],
+      },
+      {
+        header: 'Helps because',
+        items: [
+          'Predictable structure lowers resistance while novelty keeps interest alive',
+          'A fixed order removes decision fatigue',
+          'Stable sensory cues make it easier to settle in',
+          'A clear ending stops the session from sprawling',
+          'Fallbacks protect momentum when your capacity drops fast',
+        ],
+      },
+      {
+        header: 'Avoid',
+        items: [
+          'Trying to make every session feel exactly the same',
+          'Building a huge revision plan before doing the first task',
+          'Forcing yourself through sensory discomfort for the sake of productivity',
+          'Switching tools every few minutes once you feel restless',
+        ],
+      },
+    ],
+    pearl:
+      'AuDHD revision often works best when the container stays familiar but the task inside it changes. Keep the routine steady; let the content provide enough freshness to hold attention.',
+    primaryHref: '/quiz',
+    primaryLabel: 'Start with a quiz block',
+    secondaryHref: '/osce',
+    secondaryLabel: 'Then try one OSCE station →',
+  },
+  {
     tag: 'Dyslexia',
     colour: 'dyslexia',
     name: 'If reading is the slowest part',
@@ -732,10 +777,10 @@ export default function NeurodivergentGuidePage() {
         <p className="nd-kicker">Study Skills · Neurodivergent-Friendly Guide</p>
         <h1 className="nd-headline">Revising with a brain that works differently</h1>
         <p className="nd-standfirst">
-          Nursing training was not built around ADHD, autism, dyslexia, or anxious brains — but your revision can be.
-          This is a practical guide to using the tools in a way that respects how you actually focus, read, and recover.
+          Nursing training was not built around ADHD, AuDHD, autism, dyslexia, or anxious brains — but your revision
+          can be. This is a practical guide to using the tools in a way that respects how you actually focus, read, and recover.
         </p>
-        <p className="nd-byline">ADHD · Autistic students · Dyslexia · Anxiety · The Nurse Lab</p>
+        <p className="nd-byline">ADHD · AuDHD · Autistic students · Dyslexia · Anxiety · The Nurse Lab</p>
 
         <EditorialSaveButton
           hubItemId="neurodivergent-guide"

@@ -677,22 +677,107 @@ const CSS = `
 .qt-sidebar {
   position: sticky;
   top: 32px;
+  display: grid;
+  gap: 16px;
 }
 
 .qt-sidebar-panel {
   border: 0.5px solid rgba(0,0,0,0.1);
-  margin-bottom: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.94) 100%);
+  box-shadow: 0 20px 36px rgba(26,24,21,0.05);
+  overflow: hidden;
 }
 
 .qt-sidebar-header {
   border-bottom: 0.5px solid rgba(0,0,0,0.08);
   padding: 14px 18px;
+  background: rgba(255,255,255,0.62);
 }
 .qt-sidebar-kicker {
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--charcoal-light);
+}
+
+.qt-sidebar-summary-body {
+  padding: 18px;
+}
+
+.qt-sidebar-summary-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.qt-sidebar-chip {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1A1815;
+  background: white;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+
+.qt-sidebar-summary-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 21px;
+  line-height: 1.12;
+  color: #1A1815;
+  margin-bottom: 10px;
+}
+
+.qt-sidebar-summary-desc {
+  font-size: 13px;
+  font-weight: 300;
+  color: #5A5750;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.qt-sidebar-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5px;
+  background: rgba(0,0,0,0.08);
+  margin-bottom: 18px;
+}
+
+.qt-sidebar-metric {
+  background: rgba(255,255,255,0.82);
+  padding: 14px 12px;
+}
+
+.qt-sidebar-metric-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--charcoal-light);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.qt-sidebar-metric-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #1A1815;
+  line-height: 1;
+}
+
+.qt-sidebar-metric-copy {
+  font-size: 12px;
+  font-weight: 300;
+  color: #2C2A27;
+  line-height: 1.5;
+}
+
+.qt-sidebar-summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .qt-sidebar-row {
@@ -733,7 +818,8 @@ const CSS = `
   letter-spacing: 0.1em;
   text-transform: uppercase;
   border: 0.5px solid rgba(0,0,0,0.1);
-  padding: 2px 7px;
+  background: rgba(255,255,255,0.82);
+  padding: 5px 9px;
   color: #5A5750;
 }
 
@@ -746,10 +832,36 @@ const CSS = `
 }
 
 .qt-sidebar-actions {
-  padding: 14px 18px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+}
+
+.qt-sidebar-next-copy {
+  padding: 18px 18px 0;
+}
+
+.qt-sidebar-next-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: #1A1815;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+
+.qt-sidebar-next-desc {
+  font-size: 12px;
+  font-weight: 300;
+  color: #5A5750;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.qt-sidebar-btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Responsive */
@@ -767,6 +879,9 @@ const CSS = `
   .qt-compose-surface { padding: 14px; }
   .qt-answers-header { flex-direction: column; align-items: flex-start; }
   .qt-answer { padding: 22px 20px 20px; }
+  .qt-sidebar-summary-body { padding: 16px; }
+  .qt-sidebar-next-copy,
+  .qt-sidebar-actions { padding: 16px; }
 }
 `;
 
@@ -1120,61 +1235,98 @@ export default function QuestionThreadClient({
           <aside className="qt-sidebar">
             <div className="qt-sidebar-panel">
               <div className="qt-sidebar-header">
-                <span className="qt-sidebar-kicker">Thread details</span>
+                <span className="qt-sidebar-kicker">Thread snapshot</span>
               </div>
 
-              <div className="qt-sidebar-row">
-                <span className="qt-sidebar-row-label">Status</span>
-                <span className="qt-sidebar-row-value">
+              <div className="qt-sidebar-summary-body">
+                <div className="qt-sidebar-summary-top">
+                  <span className={`qt-q-status ${question.is_answered ? 'answered' : 'open'}`}>
+                    {question.is_answered ? 'Solved' : 'Still open'}
+                  </span>
+                  {hasAcceptedAnswer && (
+                    <span className="qt-sidebar-chip">Best answer marked</span>
+                  )}
+                  {hasLaurenReply && (
+                    <span className="qt-sidebar-chip">Lauren replied</span>
+                  )}
+                </div>
+
+                <p className="qt-sidebar-summary-title">
                   {question.is_answered
-                    ? 'This thread has a reply marked as solved.'
-                    : 'This question is still open for replies.'}
-                </span>
-              </div>
+                    ? 'Start with the strongest answer, then skim the rest for extra context.'
+                    : 'This thread could still use one clear, practical reply.'}
+                </p>
+                <p className="qt-sidebar-summary-desc">
+                  {question.is_answered
+                    ? 'Use the accepted answer as the main path through the problem, then read supporting replies for nuance.'
+                    : isSignedIn
+                      ? 'If you know the next safe step, a calm answer here would probably help someone else too.'
+                      : 'If you know the next safe step, sign in and add it while the thread is still open.'}
+                </p>
 
-              <div className="qt-sidebar-row">
-                <span className="qt-sidebar-row-label">Replies</span>
-                <span className="qt-sidebar-num">{answers.length}</span>
-              </div>
+                <div className="qt-sidebar-metrics">
+                  <div className="qt-sidebar-metric">
+                    <span className="qt-sidebar-metric-label">Replies</span>
+                    <span className="qt-sidebar-metric-value">{answers.length}</span>
+                  </div>
+                  <div className="qt-sidebar-metric">
+                    <span className="qt-sidebar-metric-label">Posted</span>
+                    <span className="qt-sidebar-metric-copy">{timeAgo(question.created_at)}</span>
+                  </div>
+                  <div className="qt-sidebar-metric">
+                    <span className="qt-sidebar-metric-label">Asked by</span>
+                    <span className="qt-sidebar-metric-copy">{question.user_name}</span>
+                  </div>
+                  <div className="qt-sidebar-metric">
+                    <span className="qt-sidebar-metric-label">Status</span>
+                    <span className="qt-sidebar-metric-copy">
+                      {question.is_answered ? 'Accepted answer in thread' : 'Waiting for the clearest reply'}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="qt-sidebar-row">
-                <span className="qt-sidebar-row-label">Asked by</span>
-                <span className="qt-sidebar-row-value">{question.user_name}</span>
-                <span className="qt-answer-time" style={{ fontSize: '10px', color: 'var(--charcoal-light)', display: 'block', marginTop: '4px' }}>
-                  {timeAgo(question.created_at)}
-                </span>
-              </div>
-
-              {question.tags.length > 0 && (
-                <div className="qt-sidebar-row">
-                  <span className="qt-sidebar-row-label">Tags</span>
-                  <div className="qt-sidebar-tags">
+                {question.tags.length > 0 && (
+                  <div className="qt-sidebar-summary-tags">
                     {question.tags.map((tag) => (
                       <span key={tag} className="qt-sidebar-tag">{tag}</span>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             <div className="qt-sidebar-panel">
               <div className="qt-sidebar-header">
                 <span className="qt-sidebar-kicker">Next move</span>
               </div>
+              <div className="qt-sidebar-next-copy">
+                <p className="qt-sidebar-next-title">
+                  {isSignedIn
+                    ? question.is_answered
+                      ? 'Still unsure? Add the missing bit.'
+                      : 'Jump in with the clearest next step you know.'
+                    : 'Want to add context or a reply?'}
+                </p>
+                <p className="qt-sidebar-next-desc">
+                  {isSignedIn
+                    ? 'Keep it short, practical, and kind so someone can use it under pressure.'
+                    : 'Open your account, come back here, and you can reply or ask a similar question in one go.'}
+                </p>
+              </div>
               <div className="qt-sidebar-actions">
-                <Link href="/hub/questions" className="qt-btn-primary" style={{ textAlign: 'center' }}>
+                <Link href="/hub/questions" className="qt-btn-primary qt-sidebar-btn">
                   Browse questions
                 </Link>
                 {isSignedIn ? (
-                  <a href="#reply" className="qt-btn-secondary" style={{ textAlign: 'center' }}>
+                  <a href="#reply" className="qt-btn-secondary qt-sidebar-btn">
                     Jump to reply
                   </a>
                 ) : (
-                  <Link href="/sign-in" className="qt-btn-secondary" style={{ textAlign: 'center' }}>
+                  <Link href="/sign-in" className="qt-btn-secondary qt-sidebar-btn">
                     Sign in to reply
                   </Link>
                 )}
-                <Link href="/hub/questions?ask=1" className="qt-btn-secondary" style={{ textAlign: 'center' }}>
+                <Link href="/hub/questions?ask=1" className="qt-btn-secondary qt-sidebar-btn">
                   Ask a similar question
                 </Link>
               </div>

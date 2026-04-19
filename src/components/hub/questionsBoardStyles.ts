@@ -4,7 +4,7 @@ export const CSS = `
 
 .qb-page {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #FAFAF8;
+  background: linear-gradient(180deg, #FAFAF8 0%, #F7F4EF 18%, #FAFAF8 42%, #FAFAF8 100%);
   color: #2C2A27;
   min-height: 100vh;
   display: flex;
@@ -17,6 +17,17 @@ export const CSS = `
   margin: 0 auto;
   width: 100%;
   padding: 72px 48px 96px;
+  position: relative;
+}
+.qb-main::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: -140px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,223,181,0.28) 0%, rgba(255,223,181,0) 72%);
+  pointer-events: none;
 }
 
 .qb-breadcrumb {
@@ -58,10 +69,93 @@ export const CSS = `
   max-width: 560px;
 }
 
-.qb-divider {
-  border: none;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
-  margin: 36px 0 48px;
+.qb-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 36px;
+  align-items: end;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.96) 100%);
+  box-shadow: 0 26px 48px rgba(26,24,21,0.05);
+  padding: 34px 36px 32px;
+  margin-bottom: 36px;
+}
+.qb-hero::before {
+  content: '';
+  position: absolute;
+  left: -40px;
+  top: -70px;
+  width: 210px;
+  height: 210px;
+  background: radial-gradient(circle, rgba(239,203,182,0.38) 0%, rgba(239,203,182,0) 72%);
+  pointer-events: none;
+}
+.qb-hero::after {
+  content: '';
+  position: absolute;
+  right: -60px;
+  bottom: -90px;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(223,212,157,0.26) 0%, rgba(223,212,157,0) 72%);
+  pointer-events: none;
+}
+.qb-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.qb-hero-copy {
+  min-width: 0;
+}
+
+.qb-hero-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.qb-hero-point {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #5A5750;
+  background: rgba(255,255,255,0.82);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  padding: 7px 11px;
+}
+
+.qb-hero-note {
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.78);
+  padding: 18px 20px;
+}
+
+.qb-hero-note-kicker {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--charcoal-light);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.qb-hero-note-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  line-height: 1.15;
+  color: #1A1815;
+  margin-bottom: 8px;
+}
+
+.qb-hero-note-desc {
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: #5A5750;
 }
 
 /* Top bar */
@@ -674,21 +768,36 @@ export const CSS = `
 }
 
 .qb-modal {
-  background: #FAFAF8;
+  background: linear-gradient(180deg, rgba(250,250,248,1) 0%, rgba(247,244,239,0.96) 100%);
   border: 0.5px solid rgba(0,0,0,0.15);
+  box-shadow: 0 40px 90px rgba(26,24,21,0.2);
   width: 100%;
   max-width: 640px;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .qb-modal-header {
+  position: relative;
+  overflow: hidden;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
   border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(247,244,239,0.24) 100%);
   padding: 28px 32px 24px;
+}
+.qb-modal-header::after {
+  content: '';
+  position: absolute;
+  right: -70px;
+  top: -72px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(239,203,182,0.38) 0%, rgba(239,203,182,0) 72%);
+  pointer-events: none;
 }
 .qb-modal-meta { flex: 1; min-width: 0; }
 .qb-modal-kicker {
@@ -712,6 +821,7 @@ export const CSS = `
   font-weight: 300;
   color: #5A5750;
   line-height: 1.65;
+  max-width: 44ch;
 }
 .qb-modal-close {
   border: 0.5px solid rgba(0,0,0,0.12);
@@ -726,7 +836,10 @@ export const CSS = `
 .qb-modal-close:hover { background: #F5F3F0; }
 .qb-modal-close svg { width: 14px; height: 14px; color: #1A1815; }
 
-.qb-modal-body { padding: 28px 32px; }
+.qb-modal-body {
+  padding: 28px 32px;
+  background: rgba(255,255,255,0.58);
+}
 
 .qb-form-group { margin-bottom: 22px; }
 .qb-form-label {
@@ -865,6 +978,7 @@ export const CSS = `
 
 /* Responsive */
 @media (max-width: 900px) {
+  .qb-hero { grid-template-columns: 1fr; }
   .qb-top-bar { grid-template-columns: 1fr; }
   .qb-empty-grid { grid-template-columns: 1fr; }
   .qb-shelf-header,
@@ -880,6 +994,8 @@ export const CSS = `
 }
 @media (max-width: 768px) {
   .qb-main { padding: 48px 20px 64px; }
+  .qb-hero { padding: 26px 20px 22px; }
+  .qb-hero-note { padding: 16px 18px; }
   .qb-shelf { padding: 20px 18px; }
   .qb-shelf-title { font-size: 20px; }
   .qb-modal { margin: 0; }

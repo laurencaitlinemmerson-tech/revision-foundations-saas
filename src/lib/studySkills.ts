@@ -26,9 +26,9 @@ export const studySkillsGuides: StudySkillsGuide[] = [
     kicker: 'Neurodivergent-Friendly Guide',
     title: 'Neurodivergent Revision Guide',
     description:
-      'A practical, low-pressure guide for revising with ADHD, autism, dyslexia, anxiety, or any mix of them.',
+      'A practical, low-pressure guide for revising with ADHD, AuDHD, autism, dyslexia, anxiety, or any mix of them.',
     bestFor:
       'Students who need gentler starts, clearer structure, or a study setup that works with their brain rather than against it.',
-    tags: ['ADHD', 'Autism', 'Dyslexia', 'Anxiety'],
+    tags: ['ADHD', 'AuDHD', 'Autism', 'Dyslexia', 'Anxiety'],
   },
 ];

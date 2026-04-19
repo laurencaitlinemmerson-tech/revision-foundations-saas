@@ -150,13 +150,29 @@ export default function QuestionsBoardClient({
         </nav>
 
         {/* Masthead */}
-        <p className="qb-kicker">The Nurse Lab &middot; Student Questions</p>
-        <h1 className="qb-headline">Questions and answers for the messy bits of nursing school.</h1>
-        <p className="qb-standfirst">
-          Ask about placements, OSCEs, calculations, or where to start in the hub. Keep it practical, keep it general, and keep it study-safe.
-        </p>
+        <section className="qb-hero">
+          <div className="qb-hero-copy">
+            <p className="qb-kicker">The Nurse Lab &middot; Student Questions</p>
+            <h1 className="qb-headline">Questions and answers for the messy bits of nursing school.</h1>
+            <p className="qb-standfirst">
+              Ask about placements, OSCEs, calculations, or where to start in the hub. Keep it practical, keep it general, and keep it study-safe.
+            </p>
 
-        <hr className="qb-divider" />
+            <div className="qb-hero-points" aria-label="What makes a good thread">
+              <span className="qb-hero-point">Name the exact step</span>
+              <span className="qb-hero-point">Say what you already tried</span>
+              <span className="qb-hero-point">Add a screenshot if it helps</span>
+            </div>
+          </div>
+
+          <aside className="qb-hero-note">
+            <span className="qb-hero-note-kicker">What helps</span>
+            <p className="qb-hero-note-title">Clear threads get calmer answers.</p>
+            <p className="qb-hero-note-desc">
+              The best posts stay specific, give just enough context, and make it easy for someone else to answer without guessing.
+            </p>
+          </aside>
+        </section>
 
         {/* Top bar: actions + stats */}
         <div className="qb-top-bar">
