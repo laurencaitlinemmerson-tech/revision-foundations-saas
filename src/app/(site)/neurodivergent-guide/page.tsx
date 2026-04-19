@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 
@@ -26,20 +24,20 @@ const CSS = `
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: #666;
   text-decoration: none;
   margin-bottom: 44px;
 }
-.nd-back:hover { color: #555; }
+.nd-back:hover { color: #2C2A27; }
 
 .nd-kicker {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #999;
+  color: #666;
   margin-bottom: 14px;
 }
 
@@ -64,8 +62,8 @@ const CSS = `
 }
 
 .nd-byline {
-  font-size: 10px;
-  color: #aaa;
+  font-size: 12px;
+  color: #666;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 36px;
@@ -80,7 +78,7 @@ const CSS = `
 }
 
 .nd-pearl-label {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #633806;
@@ -88,7 +86,7 @@ const CSS = `
 }
 
 .nd-pearl p {
-  font-size: 12px;
+  font-size: 14px;
   color: #633806;
   line-height: 1.6;
   font-weight: 300;
@@ -119,7 +117,7 @@ const CSS = `
 }
 
 .nd-intro-title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
   color: #2C2A27;
   text-transform: uppercase;
@@ -128,10 +126,45 @@ const CSS = `
 }
 
 .nd-intro-text {
-  font-size: 12px;
-  color: #777;
+  font-size: 14px;
+  color: #555;
   line-height: 1.55;
   font-weight: 300;
+}
+
+.nd-jump-nav {
+  border: 0.5px solid rgba(0,0,0,0.12);
+  padding: 18px 20px;
+  margin-bottom: 60px;
+}
+
+.nd-jump-label {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.nd-jump-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nd-jump-list a {
+  font-size: 14px;
+  color: #1A1815;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.nd-jump-list a:hover { color: #633806; }
+.nd-jump-list a:focus-visible {
+  outline: 2px solid #1A1815;
+  outline-offset: 3px;
 }
 
 .nd-step {
@@ -140,6 +173,7 @@ const CSS = `
   margin-bottom: 52px;
   border-top: 0.5px solid rgba(0,0,0,0.1);
   padding-top: 36px;
+  scroll-margin-top: 24px;
 }
 
 .nd-step-sidebar {
@@ -161,7 +195,7 @@ const CSS = `
 }
 
 .nd-step-badge {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   padding: 3px 8px;
@@ -184,7 +218,7 @@ const CSS = `
 .nd-step-question {
   font-size: 13px;
   font-style: italic;
-  color: #999;
+  color: #666;
   margin-bottom: 22px;
 }
 
@@ -202,10 +236,10 @@ const CSS = `
 .nd-content-col:last-child { border-right: none; }
 
 .nd-col-header {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: #666;
   padding-bottom: 9px;
   margin-bottom: 11px;
   border-bottom: 0.5px solid rgba(0,0,0,0.1);
@@ -218,8 +252,8 @@ const CSS = `
 }
 
 .nd-col-list li {
-  font-size: 12px;
-  color: #5A5750;
+  font-size: 14px;
+  color: #555;
   line-height: 1.55;
   padding: 2px 0;
   font-weight: 300;
@@ -230,7 +264,7 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #ccc;
+  color: #999;
 }
 
 .nd-link-row {
@@ -247,7 +281,7 @@ const CSS = `
   color: #FAFAF8;
   padding: 11px 20px;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .nd-secondary-link {
@@ -257,7 +291,7 @@ const CSS = `
   color: #2C2A27;
   text-decoration: underline;
   text-underline-offset: 4px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .nd-section-title {
@@ -271,6 +305,14 @@ const CSS = `
   padding-bottom: 16px;
   border-top: 0.5px solid rgba(0,0,0,0.1);
   border-bottom: 0.5px solid rgba(0,0,0,0.1);
+}
+
+.nd-section-intro {
+  font-size: 15px;
+  color: #5A5750;
+  line-height: 1.7;
+  max-width: 68ch;
+  margin-bottom: 22px;
 }
 
 .nd-mini-grid {
@@ -287,17 +329,17 @@ const CSS = `
 .nd-mini-cell:last-child { border-right: none; }
 
 .nd-mini-label {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: #666;
   margin-bottom: 10px;
 }
 
 .nd-mini-text {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
-  color: #5A5750;
+  color: #555;
 }
 
 .nd-checklist-grid {
@@ -313,10 +355,10 @@ const CSS = `
 .nd-checklist-col:last-child { border-right: none; }
 
 .nd-checklist-col-title {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: #666;
   margin-bottom: 16px;
   padding-bottom: 10px;
   border-bottom: 0.5px solid rgba(0,0,0,0.08);
@@ -329,7 +371,7 @@ const CSS = `
 }
 
 .nd-checklist-list li {
-  font-size: 13px;
+  font-size: 14px;
   color: #555;
   line-height: 1.55;
   font-weight: 300;
@@ -341,7 +383,7 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #bbb;
+  color: #999;
 }
 
 .nd-route-grid {
@@ -358,10 +400,10 @@ const CSS = `
 }
 
 .nd-route-label {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: #666;
   margin-bottom: 10px;
 }
 
@@ -374,16 +416,16 @@ const CSS = `
 }
 
 .nd-route-copy {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.8;
-  color: #5A5750;
+  color: #555;
   margin-bottom: 16px;
 }
 
 .nd-route-link {
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
+  font-size: 14px;
   color: #1A1815;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -424,6 +466,10 @@ const CSS = `
 .nd-badge-anxiety { background: #E4EEF8; color: #24415F; }
 .nd-tag-audhd { color: #7A4B2E; }
 .nd-badge-audhd { background: #F6E7DC; color: #6A3E22; }
+.nd-tag-dyspraxia { color: #1F6B73; }
+.nd-badge-dyspraxia { background: #DFEEEF; color: #134348; }
+.nd-tag-dyscalculia { color: #6B3E5F; }
+.nd-badge-dyscalculia { background: #F1E3EC; color: #4A2B42; }
 
 @media (max-width: 980px) {
   .nd-intro-grid,
@@ -539,7 +585,7 @@ const START_PATHS = [
   {
     label: 'Need the page to feel easier first?',
     title: 'Change the reading settings before forcing yourself through it.',
-    text: 'Use the Accessibility button in the bottom-left corner to switch on easier reading mode: dyslexia-friendly font, looser spacing, and reduced motion.',
+    text: 'Use the Accessibility button in the bottom-left corner. It switches the whole site to Atkinson Hyperlegible (a dyslexia-friendly font), opens up line and paragraph spacing, and turns off scroll animations and transitions. The setting is saved to this device.',
     href: '/study-skills',
     cta: 'See all study skills →',
   },
@@ -548,6 +594,7 @@ const START_PATHS = [
 const SECTIONS = [
   {
     tag: 'ADHD',
+    slug: 'adhd',
     colour: 'adhd',
     name: 'If starting is the hardest part',
     question: 'How do I stop circling the desk and actually begin?',
@@ -591,6 +638,7 @@ const SECTIONS = [
   },
   {
     tag: 'Autistic',
+    slug: 'autistic',
     colour: 'autistic',
     name: 'If routine and clarity help you focus',
     question: 'How do I make the session predictable enough to commit to?',
@@ -634,6 +682,7 @@ const SECTIONS = [
   },
   {
     tag: 'AuDHD',
+    slug: 'audhd',
     colour: 'audhd',
     name: 'If you need structure and stimulation at the same time',
     question: 'How do I revise when one part of my brain wants sameness and the other part wants novelty?',
@@ -677,6 +726,7 @@ const SECTIONS = [
   },
   {
     tag: 'Dyslexia',
+    slug: 'dyslexia',
     colour: 'dyslexia',
     name: 'If reading is the slowest part',
     question: 'How do I revise without getting stuck on the page?',
@@ -719,7 +769,96 @@ const SECTIONS = [
     secondaryLabel: 'Open the hub guides →',
   },
   {
+    tag: 'Dyspraxia',
+    slug: 'dyspraxia',
+    colour: 'dyspraxia',
+    name: 'If the physical part of nursing is the hardest bit',
+    question: 'How do I practise clinical skills when my hands and planning do not always cooperate?',
+    cols: [
+      {
+        header: 'Try',
+        items: [
+          'Rehearse OSCE station steps out loud in order',
+          'Practise skills physically, not just by watching videos',
+          'Use templates for drug calculations, one step per line',
+          'Sign-post what your hands are doing as you do it',
+          'Ask for extra time on practical assessments through DSA',
+        ],
+      },
+      {
+        header: 'Helps because',
+        items: [
+          'Verbal sequencing cements the motor order',
+          'Dyspraxic memory is often movement-based, not visual',
+          'Single-variable steps stop calculations collapsing together',
+          'Narrating slows the hand down to match the plan',
+          'Reasonable adjustments are built for this, not a cheat',
+        ],
+      },
+      {
+        header: 'Avoid',
+        items: [
+          'Only learning by watching demonstrations',
+          'Cramming physical practice into one long session',
+          'Handwriting notes at speed for revision',
+          'Doing calculations in your head under pressure',
+        ],
+      },
+    ],
+    pearl:
+      'Dyspraxia is not an absence of skill — it is a different route to the same outcome. Physical rehearsal, spoken sequencing, and structured templates are not crutches; they are how the skill consolidates.',
+    primaryHref: '/osce',
+    primaryLabel: 'Practise OSCE stations step-by-step',
+    secondaryHref: '/hub/resources/drug-calculations-cheat-sheet',
+    secondaryLabel: 'Open the calculations sheet →',
+  },
+  {
+    tag: 'Dyscalculia',
+    slug: 'dyscalculia',
+    colour: 'dyscalculia',
+    name: 'If numbers and drug calculations feel like quicksand',
+    question: 'How do I revise calculations when digits slip away as I read them?',
+    cols: [
+      {
+        header: 'Try',
+        items: [
+          'Write the full formula before plugging numbers in',
+          'Use a calculator for every step — accuracy over pride',
+          'Do one variable per line, never combine steps',
+          'Say the numbers out loud as you write them',
+          'Estimate first: does the answer roughly sound right?',
+        ],
+      },
+      {
+        header: 'Helps because',
+        items: [
+          'The formula anchors the logic before the numbers move',
+          'A calculator frees up brain space for the clinical reasoning',
+          'Single-step lines prevent transposition errors',
+          'Speaking numbers engages a second memory route',
+          'A rough estimate catches decimal-point slips early',
+        ],
+      },
+      {
+        header: 'Avoid',
+        items: [
+          'Multi-step calculations done in your head',
+          'Trusting a number just because it "looks about right"',
+          'Copying digits off a screen without saying them',
+          'Revising calculations when you are already tired',
+        ],
+      },
+    ],
+    pearl:
+      'Dyscalculia rarely shows up as "I do not understand the drug" — it shows up as lost digits and shifted decimal places. Structure and redundancy are more useful than trying harder.',
+    primaryHref: '/hub/resources/drug-calculations-cheat-sheet',
+    primaryLabel: 'Open the drug calculations sheet',
+    secondaryHref: '/quiz',
+    secondaryLabel: 'Practise with the quiz →',
+  },
+  {
     tag: 'Anxiety',
+    slug: 'anxiety',
     colour: 'anxiety',
     name: 'If exams make your brain go quiet',
     question: 'How do I revise without making the fear worse?',
@@ -768,7 +907,7 @@ export default function NeurodivergentGuidePage() {
     <div className="nd-guide">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      <div className="nd-wrap">
+      <main id="main-content" className="nd-wrap">
         <Link href="/dashboard" className="nd-back">
           <span>←</span>
           Back to Dashboard
@@ -777,10 +916,11 @@ export default function NeurodivergentGuidePage() {
         <p className="nd-kicker">Study Skills · Neurodivergent-Friendly Guide</p>
         <h1 className="nd-headline">Revising with a brain that works differently</h1>
         <p className="nd-standfirst">
-          Nursing training was not built around ADHD, AuDHD, autism, dyslexia, or anxious brains — but your revision
-          can be. This is a practical guide to using the tools in a way that respects how you actually focus, read, and recover.
+          Nursing training was not built around ADHD, AuDHD, autism, dyslexia, dyspraxia, dyscalculia, or anxious
+          brains — but your revision can be. This is a practical guide to using the tools in a way that respects how
+          you actually focus, read, move, and recover.
         </p>
-        <p className="nd-byline">ADHD · AuDHD · Autistic students · Dyslexia · Anxiety · The Nurse Lab</p>
+        <p className="nd-byline">ADHD · AuDHD · Autistic · Dyslexia · Dyspraxia · Dyscalculia · Anxiety · The Nurse Lab</p>
 
         <EditorialSaveButton
           hubItemId="neurodivergent-guide"
@@ -792,7 +932,7 @@ export default function NeurodivergentGuidePage() {
           <p>
             Nothing in this guide replaces reasonable adjustments from your university or occupational health team.
             If you have not yet told your programme about your diagnosis, that is often the single most useful revision
-            tool available to you.
+            tool available to you — see the section on reasonable adjustments below.
           </p>
         </div>
 
@@ -805,6 +945,20 @@ export default function NeurodivergentGuidePage() {
             </div>
           ))}
         </div>
+
+        <nav className="nd-jump-nav" aria-label="Jump to profile">
+          <p className="nd-jump-label">Jump to a profile</p>
+          <ul className="nd-jump-list">
+            {SECTIONS.map((section) => (
+              <li key={section.slug}>
+                <a href={`#${section.slug}`}>{section.tag}</a>
+              </li>
+            ))}
+            <li>
+              <a href="#reasonable-adjustments">Reasonable adjustments</a>
+            </li>
+          </ul>
+        </nav>
 
         <h2 className="nd-section-title">Pick the lightest useful next step</h2>
         <div className="nd-route-grid">
@@ -821,14 +975,14 @@ export default function NeurodivergentGuidePage() {
         </div>
 
         {SECTIONS.map((section) => (
-          <div key={section.tag} className="nd-step">
+          <article key={section.tag} id={section.slug} className="nd-step">
             <div className="nd-step-sidebar">
               <span className={`nd-step-tag nd-tag-${section.colour}`}>{section.tag}</span>
               <span className={`nd-step-badge nd-badge-${section.colour}`}>Profile</span>
             </div>
 
             <div className="nd-step-content">
-              <h2 className="nd-step-name">{section.name}</h2>
+              <h3 className="nd-step-name">{section.name}</h3>
               <p className="nd-step-question">{section.question}</p>
 
               <div className="nd-content-grid">
@@ -858,8 +1012,86 @@ export default function NeurodivergentGuidePage() {
                 </Link>
               </div>
             </div>
-          </div>
+          </article>
         ))}
+
+        <h2 id="reasonable-adjustments" className="nd-section-title">Reasonable adjustments and DSA</h2>
+        <p className="nd-section-intro">
+          In the UK, universities have a legal duty to make reasonable adjustments for disabled students, which
+          includes most neurodivergent conditions when they affect study. Disabled Students&rsquo; Allowance (DSA)
+          is a separate fund that pays for assistive software, specialist 1-to-1 study support, and equipment.
+          Telling your programme early usually matters more than any single revision technique.
+        </p>
+        <div className="nd-checklist-grid">
+          <div className="nd-checklist-col">
+            <p className="nd-checklist-col-title">What to tell your university</p>
+            <ul className="nd-checklist-list">
+              <li>Your diagnosis or suspected diagnosis — a referral letter is enough to start.</li>
+              <li>Which parts of the course are affected (reading, numeracy, OSCEs, placement).</li>
+              <li>Any adjustments you already know help (extra time, quiet room, screen reader).</li>
+              <li>Whether you have applied for, or are waiting on, DSA funding.</li>
+              <li>Ask who your named disability adviser is and how to contact them directly.</li>
+            </ul>
+          </div>
+
+          <div className="nd-checklist-col">
+            <p className="nd-checklist-col-title">Common adjustments for OSCEs and exams</p>
+            <ul className="nd-checklist-list">
+              <li>25% extra time on written exams and calculation papers.</li>
+              <li>A separate, quieter room for OSCE stations or written assessments.</li>
+              <li>Rest breaks that do not count against your time.</li>
+              <li>Permission to read the OSCE prompt aloud or ask for it to be re-read.</li>
+              <li>Use of a calculator during drug-calc assessments (often standard now).</li>
+              <li>Sensory-friendly waiting areas before high-stakes assessments.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="nd-route-grid" style={{ marginTop: '32px' }}>
+          <div className="nd-route-card">
+            <p className="nd-route-label">Official UK guidance</p>
+            <h3 className="nd-route-title">Apply for Disabled Students&rsquo; Allowance</h3>
+            <p className="nd-route-copy">
+              The gov.uk page covers eligibility, how to apply, and what DSA can pay for. Apply as soon as you have
+              a diagnosis or referral — processing can take weeks.
+            </p>
+            <a
+              href="https://www.gov.uk/disabled-students-allowance-dsa"
+              className="nd-route-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open gov.uk DSA guidance →
+            </a>
+          </div>
+          <div className="nd-route-card">
+            <p className="nd-route-label">Student support</p>
+            <h3 className="nd-route-title">Equality Act adjustments at university</h3>
+            <p className="nd-route-copy">
+              A short explainer from Disability Rights UK on what counts as a reasonable adjustment in higher
+              education and how to request one if your programme has not offered it yet.
+            </p>
+            <a
+              href="https://www.disabilityrightsuk.org/resources/adjustments-disabled-students"
+              className="nd-route-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Read the explainer →
+            </a>
+          </div>
+          <div className="nd-route-card">
+            <p className="nd-route-label">On this site</p>
+            <h3 className="nd-route-title">Turn on Easier Reading Mode</h3>
+            <p className="nd-route-copy">
+              The Accessibility button in the bottom-left corner switches the site to Atkinson Hyperlegible font,
+              opens up line and paragraph spacing, and turns off scroll animations. The setting stays on this device.
+            </p>
+            <Link href="/study-skills" className="nd-route-link">
+              See all study skills →
+            </Link>
+          </div>
+        </div>
 
         <h2 className="nd-section-title">Sensory &amp; environment checklist</h2>
         <div className="nd-mini-grid">
@@ -961,7 +1193,7 @@ export default function NeurodivergentGuidePage() {
             Back to dashboard →
           </Link>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
