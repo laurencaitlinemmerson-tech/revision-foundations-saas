@@ -1,5 +1,4 @@
 export const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap');
 
 .hbc-page *, .hbc-page *::before, .hbc-page *::after { box-sizing: border-box; }
 

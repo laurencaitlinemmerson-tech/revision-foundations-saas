@@ -1,5 +1,4 @@
 export const MOCK_PAGE_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap');
 
 .mk *, .mk *::before, .mk *::after { box-sizing: border-box; box-shadow: none !important; }
 

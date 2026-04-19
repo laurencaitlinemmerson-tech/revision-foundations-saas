@@ -22,7 +22,6 @@ const quizQuestions = [
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap');
 
 .dc-guide *, .dc-guide *::before, .dc-guide *::after { box-sizing: border-box; box-shadow: none !important; }
 

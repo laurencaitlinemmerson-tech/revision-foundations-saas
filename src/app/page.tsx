@@ -8,8 +8,6 @@ import ToolsShowcase from '@/components/home/ToolsShowcase';
 import WhatsIncluded from '@/components/home/WhatsIncluded';
 import AccessPaths from '@/components/home/AccessPaths';
 import SamplePreviews from '@/components/home/SamplePreviews';
-import NurseLabJourney from '@/components/home/NurseLabJourney';
-import HubGrid from '@/components/home/HubGrid';
 import FinalCTA from '@/components/home/FinalCTA';
 import HomeStyles from '@/components/home/HomeStyles';
 import { cream } from '@/components/home/styles';
@@ -23,12 +21,11 @@ export default function HomePage() {
       <SamplePreviews />
       <ToolsShowcase />
       <WhatsIncluded />
-      <NurseLabJourney />
       <AccessPaths />
-      <HubGrid />
       <FinalCTA />
       <Footer />
       <HomeStyles />
     </div>
   );
 }
+
