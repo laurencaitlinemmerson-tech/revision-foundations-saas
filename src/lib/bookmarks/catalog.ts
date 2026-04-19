@@ -177,6 +177,12 @@ const catalog: CatalogItem[] = [
     tags: ['Paeds', 'Y1 Essentials'],
   },
   {
+    hubItemId: 'how-to-use',
+    title: 'How to Use The Nurse Lab',
+    href: '/how-to-use',
+    tags: ['Revision Plans', 'Study Skills', 'Getting Started'],
+  },
+  {
     hubItemId: 'neurodivergent-guide',
     title: 'Neurodivergent Revision Guide',
     href: '/neurodivergent-guide',

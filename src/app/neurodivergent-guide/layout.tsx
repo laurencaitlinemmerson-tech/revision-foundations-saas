@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { generatePageMetadata } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import { generatePageMetadata, getArticleSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generatePageMetadata({
   title: 'Neurodivergent Revision Guide',
@@ -13,5 +14,23 @@ export default function NeurodivergentGuideLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={getArticleSchema({
+          headline: 'Neurodivergent Revision Guide',
+          description:
+            'A practical, low-pressure guide to revising for nursing exams and OSCEs with ADHD, autism, dyslexia, or any mix of neurodivergent traits.',
+          path: '/neurodivergent-guide',
+          keywords: [
+            'nursing revision ADHD',
+            'nursing revision autism',
+            'dyslexia study guide nursing',
+            'student nurse neurodivergent revision',
+          ],
+        })}
+      />
+      {children}
+    </>
+  );
 }

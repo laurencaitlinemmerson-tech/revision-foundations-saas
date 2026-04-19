@@ -7,6 +7,7 @@ import SkipToContent from "@/components/SkipToContent";
 import JsonLd from "@/components/JsonLd";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AppProviders from "@/components/AppProviders";
+import { getA11yBootstrapScript } from "@/lib/accessibility";
 import { getOrganizationSchema, getWebsiteSchema, siteUrl } from "@/lib/seo";
 import "./globals.css";
 import "./premium-animations-vanilla.css";
@@ -168,6 +169,9 @@ export default function RootLayout({
         />
         <link rel="dns-prefetch" href="https://clerk.com" />
         <link rel="dns-prefetch" href="https://js.stripe.com" />
+        <script
+          dangerouslySetInnerHTML={{ __html: getA11yBootstrapScript() }}
+        />
       </head>
       <body className="antialiased">
         <ClerkProvider

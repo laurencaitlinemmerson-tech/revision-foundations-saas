@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useReducedMotion } from './useAccessibility';
 
 interface ParallaxOptions {
   speed?: number; // 0-1, where 0.5 is half speed
@@ -15,6 +16,7 @@ export function useParallax(options: ParallaxOptions = {}) {
   const { speed = 0.5, direction = 'up' } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
+  const { prefersReducedMotion } = useReducedMotion();
 
   const handleScroll = useCallback(() => {
     if (!ref.current) return;
@@ -25,17 +27,17 @@ export function useParallax(options: ParallaxOptions = {}) {
   }, [speed, direction]);
 
   useEffect(() => {
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion) {
+      return;
+    }
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial call
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+  }, [handleScroll, prefersReducedMotion]);
 
-  return { ref, offset };
+  return { ref, offset: prefersReducedMotion ? 0 : offset };
 }
 
 /**
@@ -44,10 +46,12 @@ export function useParallax(options: ParallaxOptions = {}) {
 export function useScrollProgress() {
   const ref = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
+  const { prefersReducedMotion } = useReducedMotion();
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion) {
+      return;
+    }
 
     const handleScroll = () => {
       if (!ref.current) return;
@@ -72,17 +76,18 @@ export function useScrollProgress() {
     handleScroll();
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [prefersReducedMotion]);
 
-  return { ref, progress };
+  return { ref, progress: prefersReducedMotion ? 0 : progress };
 }
 
 /**
  * useScrollReveal - Reveals elements as they scroll into view with stagger
  */
 export function useScrollReveal(threshold = 0.1) {
+  const { prefersReducedMotion } = useReducedMotion();
+
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
       // Show all elements immediately if reduced motion is preferred
       document.querySelectorAll('.scroll-reveal').forEach(el => {
@@ -107,5 +112,5 @@ export function useScrollReveal(threshold = 0.1) {
     });
 
     return () => observer.disconnect();
-  }, [threshold]);
+  }, [prefersReducedMotion, threshold]);
 }

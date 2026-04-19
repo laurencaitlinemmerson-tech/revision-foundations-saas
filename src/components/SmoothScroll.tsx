@@ -2,11 +2,17 @@
 
 import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
+import { useReducedMotion } from '@/lib/hooks/useAccessibility';
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
+  const { prefersReducedMotion } = useReducedMotion();
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      return;
+    }
+
     // Initialize Lenis
     const lenis = new Lenis({
       duration: 1.2,
@@ -32,7 +38,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   return <>{children}</>;
 }

@@ -2,6 +2,10 @@ import { readFile } from 'node:fs/promises';
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import {
+  getA11yBootstrapScript,
+  getA11yDocumentStyle,
+} from '@/lib/accessibility';
+import {
   getUserEntitlements,
   hasAccessToContent,
   type Product,
@@ -69,6 +73,19 @@ function injectPreviewGate(html: string, product: Product) {
   return `${html}${script}`;
 }
 
+function injectA11ySupport(html: string) {
+  const a11yMarkup = `
+<style>${getA11yDocumentStyle()}</style>
+<script>${getA11yBootstrapScript()}</script>
+`;
+
+  if (html.includes('</head>')) {
+    return html.replace('</head>', `${a11yMarkup}</head>`);
+  }
+
+  return `${a11yMarkup}${html}`;
+}
+
 function redirectToSignIn(request: NextRequest) {
   const signInUrl = new URL('/sign-in', request.url);
   signInUrl.searchParams.set('redirect_url', request.url);
@@ -93,7 +110,7 @@ export async function serveToolHtml(
     return redirectToSignIn(request);
   }
 
-  const html = await readHtml(fileUrl);
+  const html = injectA11ySupport(await readHtml(fileUrl));
   const body = isPreview && !hasPremium ? injectPreviewGate(html, product) : html;
 
   return new NextResponse(body, {

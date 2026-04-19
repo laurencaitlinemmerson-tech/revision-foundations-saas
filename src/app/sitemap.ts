@@ -19,6 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/quiz',
     '/privacy',
     '/terms',
+    '/study-skills',
     '/how-to-use',
     '/neurodivergent-guide',
   ];

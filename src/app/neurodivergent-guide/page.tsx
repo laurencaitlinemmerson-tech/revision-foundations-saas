@@ -345,6 +345,75 @@ const CSS = `
   color: #bbb;
 }
 
+.nd-route-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 44px;
+}
+
+.nd-route-card {
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: #FFFFFF;
+  padding: 22px 22px 24px;
+}
+
+.nd-route-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.nd-route-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  line-height: 1.1;
+  color: #1A1815;
+  margin-bottom: 10px;
+}
+
+.nd-route-copy {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #5A5750;
+  margin-bottom: 16px;
+}
+
+.nd-route-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  color: #1A1815;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.nd-summary-card {
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: #F5F3F0;
+  padding: 26px 24px 28px;
+  margin-top: 40px;
+}
+
+.nd-summary-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.08;
+  color: #1A1815;
+  margin-bottom: 10px;
+  max-width: 16ch;
+}
+
+.nd-summary-card p {
+  font-size: 14px;
+  line-height: 1.85;
+  color: #5A5750;
+  max-width: 48ch;
+}
+
 /* Section colours — each trait profile gets its own muted tone */
 .nd-tag-adhd { color: #5A4A9B; }
 .nd-badge-adhd { background: #EEEAFE; color: #43348A; }
@@ -358,6 +427,7 @@ const CSS = `
 @media (max-width: 980px) {
   .nd-intro-grid,
   .nd-content-grid,
+  .nd-route-grid,
   .nd-mini-grid,
   .nd-checklist-grid {
     grid-template-columns: 1fr 1fr;
@@ -383,6 +453,7 @@ const CSS = `
 
   .nd-intro-grid,
   .nd-content-grid,
+  .nd-route-grid,
   .nd-mini-grid,
   .nd-checklist-grid {
     grid-template-columns: 1fr;
@@ -448,6 +519,30 @@ const PRINCIPLES = [
     text: 'Finishing one small thing rebuilds momentum. Leaving a session half-finished on a bad note does the opposite.',
   },
 ];
+
+const START_PATHS = [
+  {
+    label: 'Need the gentlest possible start?',
+    title: 'Do the smallest useful version first.',
+    text: 'Three quiz questions, one OSCE intro, or one guide skim still counts. The first useful action matters more than the perfect plan.',
+    href: '/quiz',
+    cta: 'Open quiz practice →',
+  },
+  {
+    label: 'Need more structure first?',
+    title: 'Read the study method, then come back.',
+    text: 'If you are getting stuck deciding what order to do things in, use the general guide as the scaffold instead of making a fresh plan from scratch.',
+    href: '/how-to-use',
+    cta: 'Read the study method →',
+  },
+  {
+    label: 'Need the page to feel easier first?',
+    title: 'Change the reading settings before forcing yourself through it.',
+    text: 'Use the Accessibility button in the bottom-left corner to switch on easier reading mode: dyslexia-friendly font, looser spacing, and reduced motion.',
+    href: '/study-skills',
+    cta: 'See all study skills →',
+  },
+] as const;
 
 const SECTIONS = [
   {
@@ -667,6 +762,20 @@ export default function NeurodivergentGuidePage() {
           ))}
         </div>
 
+        <h2 className="nd-section-title">Pick the lightest useful next step</h2>
+        <div className="nd-route-grid">
+          {START_PATHS.map((path) => (
+            <div key={path.title} className="nd-route-card">
+              <p className="nd-route-label">{path.label}</p>
+              <h3 className="nd-route-title">{path.title}</h3>
+              <p className="nd-route-copy">{path.text}</p>
+              <Link href={path.href} className="nd-route-link">
+                {path.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+
         {SECTIONS.map((section) => (
           <div key={section.tag} className="nd-step">
             <div className="nd-step-sidebar">
@@ -782,9 +891,27 @@ export default function NeurodivergentGuidePage() {
           </p>
         </div>
 
+        <div className="nd-summary-card">
+          <p className="nd-pearl-label" style={{ marginBottom: '8px' }}>More study skills</p>
+          <h2>Build a calmer revision setup around this guide.</h2>
+          <p>
+            If this page helped, the wider study skills section now holds the general
+            study method too. Use it when you want more structure, a clearer order,
+            or just a lighter route back into the tools.
+          </p>
+          <div className="nd-link-row">
+            <Link href="/study-skills" className="nd-primary-link">
+              Browse study skills
+            </Link>
+            <Link href="/how-to-use" className="nd-secondary-link">
+              Read the general study method →
+            </Link>
+          </div>
+        </div>
+
         <div className="nd-link-row" style={{ marginTop: '32px' }}>
-          <Link href="/how-to-use" className="nd-primary-link">
-            Read the general study method
+          <Link href="/study-skills" className="nd-primary-link">
+            Back to study skills
           </Link>
           <Link href="/dashboard" className="nd-secondary-link">
             Back to dashboard →

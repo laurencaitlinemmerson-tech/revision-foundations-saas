@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Louis Charles Dalton | Wedding Flyer</title>
+    <style>
+      :root {
+        --paper: #f6f0e9;
+        --paper-strong: #efe5d8;
+        --ink: #231d1a;
+        --muted: #6f625b;
+        --gold: #b38a5d;
+        --gold-soft: rgba(179, 138, 93, 0.2);
+        --panel: rgba(255, 251, 247, 0.9);
+        --line: rgba(35, 29, 26, 0.12);
+        --shadow: 0 24px 60px rgba(42, 25, 14, 0.16);
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #ddd3c6;
+        color: var(--ink);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+      }
+
+      h1,
+      h2,
+      h3,
+      .brand,
+      .stat strong,
+      .price {
+        font-family: Baskerville, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 11mm;
+        background:
+          radial-gradient(circle at top left, rgba(255, 255, 255, 0.6), transparent 34%),
+          linear-gradient(180deg, rgba(255, 248, 241, 0.9), rgba(244, 236, 227, 0.92)),
+          var(--paper);
+      }
+
+      .canvas {
+        min-height: 275mm;
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.55), transparent 38%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02)),
+          linear-gradient(180deg, #f9f4ed 0%, #f1e6d9 100%);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .canvas::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(35, 29, 26, 0.08) 0, rgba(35, 29, 26, 0) 18%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 26%);
+        pointer-events: none;
+      }
+
+      .top {
+        display: grid;
+        grid-template-columns: 1.02fr 0.98fr;
+        min-height: 145mm;
+      }
+
+      .intro {
+        padding: 16mm 14mm 10mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 2.5mm;
+        font-size: 8.5pt;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 12mm;
+        height: 1px;
+        background: currentColor;
+      }
+
+      .brand {
+        margin-top: 5mm;
+        font-size: 31pt;
+        line-height: 0.95;
+        letter-spacing: 0.02em;
+        max-width: 74mm;
+      }
+
+      .headline {
+        margin-top: 7mm;
+        font-size: 15.5pt;
+        line-height: 1.45;
+        color: var(--muted);
+        max-width: 76mm;
+      }
+
+      .headline strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .hero-meta {
+        margin-top: 10mm;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2.4mm;
+      }
+
+      .stat {
+        padding: 4.2mm 3.4mm;
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(6px);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 17pt;
+        line-height: 1;
+        color: var(--ink);
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 1.4mm;
+        font-size: 8.6pt;
+        line-height: 1.4;
+        color: var(--muted);
+      }
+
+      .photo-wrap {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .photo-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(180deg, rgba(24, 13, 9, 0.06), rgba(24, 13, 9, 0.45)),
+          linear-gradient(270deg, rgba(31, 20, 14, 0.04), rgba(31, 20, 14, 0.32));
+      }
+
+      .photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 38%;
+        display: block;
+        filter: saturate(0.95) contrast(1.02);
+      }
+
+      .seal {
+        position: absolute;
+        right: 12mm;
+        bottom: 11mm;
+        width: 39mm;
+        height: 39mm;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        background: rgba(35, 29, 26, 0.56);
+        backdrop-filter: blur(7px);
+        color: #fff6ee;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        z-index: 1;
+      }
+
+      .seal strong {
+        font-family: Baskerville, "Iowan Old Style", serif;
+        font-size: 14pt;
+        line-height: 1;
+      }
+
+      .seal span {
+        margin-top: 1.2mm;
+        max-width: 24mm;
+        font-size: 7.2pt;
+        letter-spacing: 0.18em;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .bottom {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 0;
+        min-height: 130mm;
+        position: relative;
+        z-index: 1;
+      }
+
+      .notes {
+        padding: 12mm 10mm 12mm 14mm;
+        border-right: 1px solid var(--line);
+      }
+
+      .section-tag {
+        font-size: 8.2pt;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+
+      .notes h2,
+      .offer h2 {
+        margin-top: 3.2mm;
+        font-size: 22pt;
+        line-height: 1.04;
+      }
+
+      .notes p {
+        margin-top: 4mm;
+        font-size: 10.4pt;
+        line-height: 1.72;
+        color: var(--muted);
+      }
+
+      .checklist {
+        margin-top: 7mm;
+        padding-top: 5mm;
+        border-top: 1px solid var(--line);
+      }
+
+      .check {
+        padding: 0 0 4mm 0;
+        margin-bottom: 4mm;
+        border-bottom: 1px solid rgba(35, 29, 26, 0.08);
+      }
+
+      .check strong {
+        display: block;
+        font-size: 9.4pt;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .check span {
+        display: block;
+        margin-top: 1.4mm;
+        font-size: 9.5pt;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .offer {
+        padding: 12mm 14mm 12mm 10mm;
+      }
+
+      .card-grid {
+        margin-top: 7mm;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3.5mm;
+      }
+
+      .card {
+        min-height: 40mm;
+        padding: 5.4mm;
+        background: rgba(255, 252, 248, 0.84);
+        border: 1px solid rgba(35, 29, 26, 0.1);
+      }
+
+      .card h3 {
+        font-size: 12.5pt;
+        margin: 0;
+      }
+
+      .price {
+        margin-top: 2.5mm;
+        font-size: 23pt;
+        line-height: 1;
+      }
+
+      .card p,
+      .offer-copy,
+      .footer p {
+        font-size: 9.6pt;
+        line-height: 1.62;
+        color: var(--muted);
+      }
+
+      .card p {
+        margin-top: 2.5mm;
+      }
+
+      .offer-copy {
+        margin-top: 4mm;
+        max-width: 78mm;
+      }
+
+      .banner {
+        margin-top: 6mm;
+        padding: 5.4mm 5.6mm;
+        background: linear-gradient(135deg, rgba(179, 138, 93, 0.18), rgba(255, 255, 255, 0.62));
+        border: 1px solid rgba(179, 138, 93, 0.24);
+      }
+
+      .banner strong {
+        display: block;
+        font-size: 8.8pt;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .banner span {
+        display: block;
+        margin-top: 2mm;
+        font-family: Baskerville, "Iowan Old Style", serif;
+        font-size: 15pt;
+        line-height: 1.3;
+      }
+
+      .footer {
+        margin-top: 7mm;
+        padding-top: 5mm;
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 5mm;
+        align-items: end;
+      }
+
+      .footer strong {
+        display: block;
+        font-size: 8.8pt;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .site {
+        display: inline-block;
+        margin-top: 2.2mm;
+        font-family: Baskerville, "Iowan Old Style", serif;
+        font-size: 16pt;
+        color: var(--ink);
+        text-decoration: none;
+      }
+
+      .contact-note {
+        text-align: right;
+      }
+
+      .contact-note .cta {
+        display: inline-block;
+        margin-top: 2.5mm;
+        padding: 2.4mm 4mm;
+        border: 1px solid var(--gold-soft);
+        background: rgba(255, 255, 255, 0.48);
+        color: var(--ink);
+        font-size: 9.5pt;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="canvas">
+        <div class="top">
+          <div class="intro">
+            <div>
+              <div class="eyebrow">Wedding Photography &amp; Videography</div>
+              <div class="brand">Louis Charles Dalton</div>
+              <p class="headline">
+                <strong>Cinematic wedding stories</strong> for couples who want the day to feel natural, elevated,
+                and beautifully remembered.
+              </p>
+            </div>
+
+            <div>
+              <div class="hero-meta">
+                <div class="stat">
+                  <strong>150+</strong>
+                  <span>weddings captured across London, Surrey and the UK</span>
+                </div>
+                <div class="stat">
+                  <strong>50</strong>
+                  <span>five-star reviews from happy couples</span>
+                </div>
+                <div class="stat">
+                  <strong>&pound;735</strong>
+                  <span>starting price for all-day videography coverage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="photo-wrap">
+            <img
+              class="photo"
+              src="./louis-charles-dalton-flyer-hero.jpg"
+              alt="Bride and groom celebrating during wedding coverage by Louis Charles Dalton."
+            />
+            <div class="seal">
+              <strong>2026</strong>
+              <span>Dates now booking</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom">
+          <section class="notes">
+            <div class="section-tag">Why Couples Book Louis</div>
+            <h2>Relaxed on the day. Polished in the final film.</h2>
+            <p>
+              The style is documentary-led with a luxury finish: genuine moments, elegant colour, and coverage that
+              feels warm rather than staged. Ideal for couples who want a calm presence, strong storytelling, and a
+              gallery or film they will still love years from now.
+            </p>
+
+            <div class="checklist">
+              <div class="check">
+                <strong>Story First</strong>
+                <span>Natural moments, speeches, ceremony emotion, and the atmosphere that makes your day yours.</span>
+              </div>
+              <div class="check">
+                <strong>Flexible Coverage</strong>
+                <span>Videography on its own or combined photo + video packages for one joined-up creative team.</span>
+              </div>
+              <div class="check">
+                <strong>Premium Finish</strong>
+                <span>4K delivery, cinematic edits, optional drone footage, and beautifully curated final outputs.</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="offer">
+            <div class="section-tag">Package Snapshot</div>
+            <h2>Beautiful coverage, whether you want film, photos, or both.</h2>
+            <p class="offer-copy">
+              Current live pricing highlights all-day wedding videography from <strong>&pound;735</strong> and joint
+              photo + video packages from <strong>&pound;1,399</strong>, with full options available on enquiry.
+            </p>
+
+            <div class="card-grid">
+              <article class="card">
+                <h3>Videography</h3>
+                <div class="price">&pound;735</div>
+                <p>All-day wedding film coverage with a cinematic edit and a timeless, emotional feel.</p>
+              </article>
+              <article class="card">
+                <h3>Photo + Video</h3>
+                <div class="price">&pound;1,399</div>
+                <p>One seamless team capturing the full story in stills and motion from morning to dance floor.</p>
+              </article>
+            </div>
+
+            <div class="banner">
+              <strong>Perfect For</strong>
+              <span>City weddings, countryside celebrations, destination weekends, and couples who care about the
+                feeling as much as the visuals.</span>
+            </div>
+
+            <div class="footer">
+              <div>
+                <strong>See films, galleries &amp; availability</strong>
+                <a class="site" href="https://louischarlesdalton.com/">louischarlesdalton.com</a>
+                <p>Enquire through the website for the latest brochure, package details, and available dates.</p>
+              </div>
+              <div class="contact-note">
+                <strong>Fastest Reply</strong>
+                <div class="cta">Use the contact page or WhatsApp link on the website</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

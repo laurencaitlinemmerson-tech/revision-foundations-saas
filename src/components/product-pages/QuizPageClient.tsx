@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { Clock, Play } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import StudySkillsPrompt from '@/components/StudySkillsPrompt';
 import { saveLastActivity, recordSessionStart } from '@/components/DashboardWidgets';
 import ProductVisualShowcase from '@/components/product-pages/ProductVisualShowcase';
 import { getQuizLoopCards } from '@/lib/productLoop';
@@ -629,6 +630,20 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
               <Link href="/pricing" style={secondaryButton}>See bundle pricing →</Link>
             </div>
 
+          </div>
+        </section>
+
+        <section style={{ padding: '0 24px 96px' }}>
+          <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
+            <StudySkillsPrompt
+              eyebrow="Need a calmer way in?"
+              title="Read the neurodivergent guide if recall turns into overwhelm."
+              body="If questions blur together, reading feels sticky, or you keep bouncing off the start button, the guide gives gentler ways into quiz practice and shows how to use the site without making the session heavier."
+              primaryHref="/neurodivergent-guide"
+              primaryLabel="Open neurodivergent guide"
+              accent={accent}
+              accentSoft="#F4F7FC"
+            />
           </div>
         </section>
 

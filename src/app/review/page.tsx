@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { Send, ArrowLeft, Loader2 } from 'lucide-react';
@@ -28,6 +28,21 @@ export default function ReviewPage() {
   const [loading,       setLoading]       = useState(false);
   const [submitted,     setSubmitted]     = useState(false);
   const [error,         setError]         = useState('');
+  const [reviewSource,  setReviewSource]  = useState<'loading' | 'google' | 'supabase'>('loading');
+  const [googleReviewUrl, setGoogleReviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    void fetch('/api/reviews')
+      .then((response) => response.json())
+      .then((data) => {
+        setReviewSource(data.source === 'google' ? 'google' : 'supabase');
+        setGoogleReviewUrl(data.reviewUrl || null);
+      })
+      .catch(() => {
+        setReviewSource('supabase');
+        setGoogleReviewUrl(null);
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +57,13 @@ export default function ReviewPage() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to submit review');
+      if (!response.ok) {
+        if (response.status === 409 && data.reviewUrl) {
+          window.location.href = data.reviewUrl;
+          return;
+        }
+        throw new Error(data.error || 'Failed to submit review');
+      }
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -129,6 +150,130 @@ export default function ReviewPage() {
                 }}
               >
                 <ArrowLeft size={14} />
+                Back home
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (reviewSource === 'loading') {
+    return (
+      <div style={{ background: cream, minHeight: '100vh' }}>
+        <Navbar />
+        <main style={{ padding: '128px 24px 96px' }}>
+          <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+            <div
+              style={{
+                border: `0.5px solid ${border}`,
+                background: panel,
+                padding: '36px 36px 32px',
+                textAlign: 'center',
+              }}
+            >
+              <Loader2 size={18} className="spin" style={{ color: inkLight, marginBottom: '12px' }} />
+              <p style={{ fontFamily: serif, fontSize: '14px', color: inkMid, fontWeight: 300 }}>
+                Checking the latest review source…
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (reviewSource === 'google' && googleReviewUrl) {
+    return (
+      <div style={{ background: cream, minHeight: '100vh' }}>
+        <Navbar />
+        <main style={{ padding: '128px 24px 96px' }}>
+          <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+            <div style={{ marginBottom: '36px' }}>
+              <p
+                style={{
+                  fontFamily: serif,
+                  fontSize: '11px',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: inkLight,
+                  marginBottom: '14px',
+                }}
+              >
+                Leave a review
+              </p>
+              <h1
+                style={{
+                  fontFamily: display,
+                  fontSize: 'clamp(2rem, 5vw, 2.8rem)',
+                  fontWeight: 400,
+                  lineHeight: 1.1,
+                  color: ink,
+                  marginBottom: '14px',
+                }}
+              >
+                Reviews now go through Google.
+              </h1>
+              <p
+                style={{
+                  fontFamily: serif,
+                  fontSize: '15px',
+                  lineHeight: 1.85,
+                  fontWeight: 300,
+                  color: inkMid,
+                }}
+              >
+                New testimonials on the site are pulled from your Google Business Profile, so leaving a review now happens there instead of through the site form.
+              </p>
+            </div>
+
+            <div
+              style={{
+                border: `0.5px solid ${border}`,
+                background: panel,
+                padding: '36px 36px 32px',
+              }}
+            >
+              <a
+                href={googleReviewUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  width: '100%',
+                  fontFamily: serif,
+                  fontSize: '14px',
+                  fontWeight: 400,
+                  background: ink,
+                  color: cream,
+                  padding: '14px 24px',
+                  border: 'none',
+                  textDecoration: 'none',
+                }}
+              >
+                Leave a Google review
+              </a>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '24px' }}>
+              <Link
+                href="/"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontFamily: serif,
+                  fontSize: '13px',
+                  fontWeight: 300,
+                  color: inkLight,
+                  textDecoration: 'none',
+                }}
+              >
+                <ArrowLeft size={12} />
                 Back home
               </Link>
             </div>

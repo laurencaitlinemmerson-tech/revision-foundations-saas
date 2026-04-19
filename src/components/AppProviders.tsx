@@ -2,6 +2,7 @@
 
 import { ReactNode, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AccessibilitySettings from '@/components/AccessibilitySettings';
 import { ToastProvider } from '@/components/Toast';
 
 export default function AppProviders({ children }: { children: ReactNode }) {
@@ -23,7 +24,10 @@ export default function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>{children}</ToastProvider>
+      <ToastProvider>
+        {children}
+        <AccessibilitySettings />
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

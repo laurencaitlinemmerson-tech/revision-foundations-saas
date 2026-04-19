@@ -37,6 +37,9 @@ interface Review {
   text: string;
   rating: number;
   created_at?: string | null;
+  authorUrl?: string | null;
+  authorPhotoUrl?: string | null;
+  reviewUrl?: string | null;
 }
 
 interface ReviewSummary {
@@ -44,6 +47,8 @@ interface ReviewSummary {
   averageRating: number;
   latestApprovedAt?: string | null;
 }
+
+type ReviewSource = 'google' | 'supabase';
 
 interface TestimonialsProps {
   compact?: boolean;
@@ -69,6 +74,9 @@ export default function Testimonials({ compact = false, showProof = true }: Test
     averageRating: 0,
     latestApprovedAt: null,
   });
+  const [source, setSource] = useState<ReviewSource>('supabase');
+  const [reviewUrl, setReviewUrl] = useState<string | null>(null);
+  const [sortDescription, setSortDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -88,11 +96,17 @@ export default function Testimonials({ compact = false, showProof = true }: Test
             averageRating: data.summary?.averageRating || 0,
             latestApprovedAt: data.summary?.latestApprovedAt || null,
           });
+          setSource(data.source === 'google' ? 'google' : 'supabase');
+          setReviewUrl(data.reviewUrl || null);
+          setSortDescription(data.sortDescription || null);
         }
       } catch {
         if (!controller.signal.aborted) {
           setReviews([]);
           setSummary({ totalCount: 0, averageRating: 0, latestApprovedAt: null });
+          setSource('supabase');
+          setReviewUrl(null);
+          setSortDescription(null);
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -104,19 +118,25 @@ export default function Testimonials({ compact = false, showProof = true }: Test
     return () => controller.abort();
   }, []);
 
+  const isGoogleSource = source === 'google';
+
   const proofItems = useMemo(
     () => [
       {
-        label: 'Approved reviews',
+        label: isGoogleSource ? 'Google ratings' : 'Approved reviews',
         value: summary.totalCount > 0 ? String(summary.totalCount) : 'New',
-        note: summary.totalCount > 0 ? 'Student feedback live on site' : 'First feedback cycle in progress',
+        note: summary.totalCount > 0
+          ? (isGoogleSource ? 'Ratings shown from your Google Business Profile' : 'Student feedback live on site')
+          : 'First feedback cycle in progress',
         accent: teal,
         bg: tealBg,
       },
       {
         label: 'Average rating',
         value: summary.totalCount > 0 ? `${summary.averageRating.toFixed(1)}/5` : 'Student-led',
-        note: summary.totalCount > 0 ? 'Across approved reviews' : 'Built while studying children\'s nursing',
+        note: summary.totalCount > 0
+          ? (isGoogleSource ? 'Across Google ratings' : 'Across approved reviews')
+          : 'Built while studying children\'s nursing',
         accent: blue,
         bg: blueBg,
       },
@@ -135,7 +155,7 @@ export default function Testimonials({ compact = false, showProof = true }: Test
         bg: coralBg,
       },
     ],
-    [summary.averageRating, summary.totalCount],
+    [isGoogleSource, summary.averageRating, summary.totalCount],
   );
 
   const visibleReviews = compact ? reviews.slice(0, 3) : reviews;
@@ -209,25 +229,58 @@ export default function Testimonials({ compact = false, showProof = true }: Test
             </div>
             <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, fontWeight: 300 }}>
               {summary.totalCount > 0
-                ? `${summary.totalCount} approved review${summary.totalCount === 1 ? '' : 's'} · average ${summary.averageRating.toFixed(1)} / 5`
+                ? (isGoogleSource
+                    ? `${summary.totalCount} Google rating${summary.totalCount === 1 ? '' : 's'} · average ${summary.averageRating.toFixed(1)} / 5`
+                    : `${summary.totalCount} approved review${summary.totalCount === 1 ? '' : 's'} · average ${summary.averageRating.toFixed(1)} / 5`)
                 : 'Student feedback and reviews are building'}
             </p>
             {!compact && (
-              <Link
-                href="/review"
-                style={{
-                  fontFamily: serif,
-                  fontSize: '12px',
-                  color: ink,
-                  textDecoration: 'underline',
-                  textUnderlineOffset: '3px',
-                }}
-              >
-                Leave a review →
-              </Link>
+              reviewUrl ? (
+                <a
+                  href={reviewUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '12px',
+                    color: ink,
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '3px',
+                  }}
+                >
+                  {isGoogleSource ? 'Leave a Google review ↗' : 'Leave a review →'}
+                </a>
+              ) : (
+                <Link
+                  href="/review"
+                  style={{
+                    fontFamily: serif,
+                    fontSize: '12px',
+                    color: ink,
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '3px',
+                  }}
+                >
+                  Leave a review →
+                </Link>
+              )
             )}
           </div>
         </div>
+
+        {!loading && sortDescription && (
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: '12px',
+              color: inkLight,
+              fontWeight: 300,
+              marginBottom: '18px',
+            }}
+          >
+            {sortDescription}
+          </p>
+        )}
 
         {showProof && (
           <div
@@ -362,17 +415,52 @@ export default function Testimonials({ compact = false, showProof = true }: Test
                       flexWrap: 'wrap',
                     }}
                   >
-                    <p
-                      style={{
-                        fontFamily: serif,
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        color: ink,
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {r.name}
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {r.authorPhotoUrl && (
+                        <img
+                          src={r.authorPhotoUrl}
+                          alt=""
+                          width={28}
+                          height={28}
+                          style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '999px',
+                            objectFit: 'cover',
+                            background: parchment,
+                          }}
+                        />
+                      )}
+                      {r.authorUrl ? (
+                        <a
+                          href={r.authorUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            fontFamily: serif,
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            color: ink,
+                            lineHeight: 1.4,
+                            textDecoration: 'none',
+                          }}
+                        >
+                          {r.name}
+                        </a>
+                      ) : (
+                        <p
+                          style={{
+                            fontFamily: serif,
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            color: ink,
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {r.name}
+                        </p>
+                      )}
+                    </div>
 
                     <span
                       style={{
@@ -388,7 +476,7 @@ export default function Testimonials({ compact = false, showProof = true }: Test
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      Verified
+                      {isGoogleSource ? 'Google review' : 'Verified'}
                     </span>
                   </div>
                 </div>

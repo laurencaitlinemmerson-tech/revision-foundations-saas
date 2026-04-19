@@ -1,6 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import {
+  fetchGoogleReviews,
+  getConfiguredGoogleReviewUrl,
+  googleReviewsEnabled,
+  type ReviewPayload,
+} from '@/lib/googleReviews';
+
+async function fetchSupabaseReviews(): Promise<ReviewPayload> {
+  const supabase = createServiceClient();
+
+  const [{ data: reviews, error: reviewsError }, { data: allApproved, error: summaryError }] =
+    await Promise.all([
+      supabase
+        .from('reviews')
+        .select('id, name, text, rating, created_at')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+        .limit(6),
+      supabase
+        .from('reviews')
+        .select('rating, created_at')
+        .eq('approved', true)
+        .order('created_at', { ascending: false }),
+    ]);
+
+  if (reviewsError || summaryError) {
+    console.error('Error fetching reviews:', reviewsError || summaryError);
+    return {
+      reviews: [],
+      summary: {
+        totalCount: 0,
+        averageRating: 0,
+        latestApprovedAt: null,
+      },
+      source: 'supabase',
+      reviewUrl: null,
+      sortDescription: 'Newest approved reviews',
+    };
+  }
+
+  const approvedReviews = allApproved || [];
+  const totalCount = approvedReviews.length;
+  const averageRating = totalCount
+    ? approvedReviews.reduce((sum, review) => sum + review.rating, 0) / totalCount
+    : 0;
+  const latestApprovedAt = totalCount > 0 ? approvedReviews[0].created_at : null;
+
+  return {
+    reviews: reviews || [],
+    summary: {
+      totalCount,
+      averageRating,
+      latestApprovedAt,
+    },
+    source: 'supabase',
+    reviewUrl: null,
+    sortDescription: 'Newest approved reviews',
+  };
+}
 
 // GET - fetch approved reviews for display
 export async function GET(request: NextRequest) {
@@ -8,52 +67,47 @@ export async function GET(request: NextRequest) {
   if (limited) return limited;
 
   try {
-    const supabase = createServiceClient();
-
-    const [{ data: reviews, error: reviewsError }, { data: allApproved, error: summaryError }] =
-      await Promise.all([
-        supabase
-          .from('reviews')
-          .select('id, name, text, rating, created_at')
-          .eq('approved', true)
-          .order('created_at', { ascending: false })
-          .limit(6),
-        supabase
-          .from('reviews')
-          .select('rating, created_at')
-          .eq('approved', true)
-          .order('created_at', { ascending: false }),
-      ]);
-
-    if (reviewsError || summaryError) {
-      console.error('Error fetching reviews:', reviewsError || summaryError);
-      return NextResponse.json({ reviews: [] });
+    if (googleReviewsEnabled()) {
+      try {
+        const googleReviews = await fetchGoogleReviews();
+        if (googleReviews) {
+          return NextResponse.json(googleReviews);
+        }
+      } catch (error) {
+        console.error('Error fetching Google reviews, falling back to Supabase:', error);
+      }
     }
 
-    const approvedReviews = allApproved || [];
-    const totalCount = approvedReviews.length;
-    const averageRating = totalCount
-      ? approvedReviews.reduce((sum, review) => sum + review.rating, 0) / totalCount
-      : 0;
-    const latestApprovedAt = totalCount > 0 ? approvedReviews[0].created_at : null;
-
-    return NextResponse.json({
-      reviews: reviews || [],
-      summary: {
-        totalCount,
-        averageRating,
-        latestApprovedAt,
-      },
-    });
+    return NextResponse.json(await fetchSupabaseReviews());
   } catch (error) {
     console.error('Error in reviews GET:', error);
-    return NextResponse.json({ reviews: [] });
+    return NextResponse.json({
+      reviews: [],
+      summary: {
+        totalCount: 0,
+        averageRating: 0,
+        latestApprovedAt: null,
+      },
+      source: 'supabase',
+      reviewUrl: getConfiguredGoogleReviewUrl(),
+      sortDescription: null,
+    });
   }
 }
 
 // POST - submit a new review
 export async function POST(request: NextRequest) {
   try {
+    if (googleReviewsEnabled()) {
+      return NextResponse.json(
+        {
+          error: 'Reviews are now collected on Google.',
+          reviewUrl: getConfiguredGoogleReviewUrl(),
+        },
+        { status: 409 }
+      );
+    }
+
     const { name, text, rating } = await request.json();
 
     // Validate input

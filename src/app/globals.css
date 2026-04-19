@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400;1,14..32,500;1,14..32,600;1,14..32,700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400;1,14..32,500;1,14..32,600;1,14..32,700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap');
 @import "tailwindcss";
 
 /* Lenis smooth scroll */
@@ -29,6 +29,7 @@ html.lenis, html.lenis body {
   color-scheme: light;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Playfair Display', Georgia, serif;
+  --font-body-dyslexic: 'Atkinson Hyperlegible', 'Arial', sans-serif;
 
   /* Primary Palette - Editorial Paper */
   --cream: #FAFAF8;
@@ -958,6 +959,60 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
 /* =============================================
    ACCESSIBILITY
    ============================================= */
+html[data-a11y-font='dyslexic'] body,
+html[data-a11y-font='dyslexic'] body *:not(code):not(pre):not(kbd):not(samp):not(svg):not(path) {
+  font-family: var(--font-body-dyslexic) !important;
+}
+
+html[data-a11y-lineheight='loose'] body {
+  line-height: 1.9 !important;
+}
+
+html[data-a11y-lineheight='loose'] p,
+html[data-a11y-lineheight='loose'] li,
+html[data-a11y-lineheight='loose'] label,
+html[data-a11y-lineheight='loose'] input,
+html[data-a11y-lineheight='loose'] textarea,
+html[data-a11y-lineheight='loose'] button,
+html[data-a11y-lineheight='loose'] a,
+html[data-a11y-lineheight='loose'] span {
+  line-height: 1.95 !important;
+  letter-spacing: 0.012em;
+  word-spacing: 0.08em;
+}
+
+html[data-a11y-lineheight='loose'] h1,
+html[data-a11y-lineheight='loose'] h2,
+html[data-a11y-lineheight='loose'] h3,
+html[data-a11y-lineheight='loose'] h4,
+html[data-a11y-lineheight='loose'] h5,
+html[data-a11y-lineheight='loose'] h6 {
+  line-height: 1.2 !important;
+}
+
+html[data-a11y-motion='reduced'] *,
+html[data-a11y-motion='reduced'] *::before,
+html[data-a11y-motion='reduced'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-a11y-motion='reduced'] .rf-reveal,
+html[data-a11y-motion='reduced'] .animate-on-scroll,
+html[data-a11y-motion='reduced'] .scroll-reveal,
+html[data-a11y-motion='reduced'] .scroll-scale,
+html[data-a11y-motion='reduced'] .scroll-fade {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html[data-a11y-motion='reduced'] .parallax-bg {
+  transform: none !important;
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

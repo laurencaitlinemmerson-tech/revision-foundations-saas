@@ -1,6 +1,11 @@
 'use client';
 
 import { useEffect, useCallback, useState } from 'react';
+import {
+  A11Y_CHANGE_EVENT,
+  getEffectiveReducedMotion,
+  readA11ySettingsFromDocument,
+} from '@/lib/accessibility';
 
 interface UseReducedMotionReturn {
   prefersReducedMotion: boolean;
@@ -12,14 +17,25 @@ export function useReducedMotion(): UseReducedMotionReturn {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handler = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
+    const syncPreference = () => {
+      const settings = readA11ySettingsFromDocument(document.documentElement);
+      setPrefersReducedMotion(
+        getEffectiveReducedMotion(settings, mediaQuery.matches),
+      );
     };
 
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
+    syncPreference();
+
+    mediaQuery.addEventListener('change', syncPreference);
+    window.addEventListener(A11Y_CHANGE_EVENT, syncPreference as EventListener);
+
+    return () => {
+      mediaQuery.removeEventListener('change', syncPreference);
+      window.removeEventListener(
+        A11Y_CHANGE_EVENT,
+        syncPreference as EventListener,
+      );
+    };
   }, []);
 
   return { prefersReducedMotion };

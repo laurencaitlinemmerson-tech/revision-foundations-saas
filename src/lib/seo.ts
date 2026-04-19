@@ -171,3 +171,46 @@ export function getBreadcrumbSchema(items: Array<{ name: string; url: string }>)
     })),
   };
 }
+
+export function getArticleSchema({
+  headline,
+  description,
+  path,
+  datePublished = '2026-04-19',
+  dateModified = '2026-04-19',
+  image = `${siteUrl}/og-image.png`,
+  keywords = [],
+}: {
+  headline: string;
+  description: string;
+  path: string;
+  datePublished?: string;
+  dateModified?: string;
+  image?: string;
+  keywords?: string[];
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline,
+    description,
+    url: `${siteUrl}${path}`,
+    mainEntityOfPage: `${siteUrl}${path}`,
+    datePublished,
+    dateModified,
+    image: [image],
+    keywords,
+    author: {
+      '@type': 'Person',
+      name: 'Lauren',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'The Nurse Lab',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/logo.png`,
+      },
+    },
+  };
+}
