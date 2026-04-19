@@ -194,7 +194,7 @@ export default function Testimonials({ compact = false, showProof = true }: Test
       value: summary.totalCount > 0 ? `${summary.averageRating.toFixed(1)}/5` : 'Student-led',
       note: summary.totalCount > 0
         ? (isGoogleSource ? 'Across Google ratings' : 'Across approved reviews')
-        : 'Built while studying children's nursing",
+        : "Built while studying children's nursing",
       accent: '#2E67B1',
       bg: '#E7EEF8',
     },
