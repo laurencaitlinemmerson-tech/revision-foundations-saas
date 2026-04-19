@@ -63,28 +63,20 @@ export default function Navbar() {
     return pathname === path || pathname.startsWith(`${path}/`);
   };
 
-  const desktopProductLinks = [
+  const desktopLinks = [
     { href: '/hub', label: 'Hub' },
     { href: '/osce', label: 'OSCE' },
     { href: '/quiz', label: 'Quiz' },
     { href: '/pricing', label: 'Pricing' },
   ];
 
-  const desktopCompanyLinks = [
-    { href: '/study-skills', label: 'Study Skills' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
-  ];
-
   const signedInDesktopLinks = [
     { href: '/dashboard', label: 'Dashboard' },
-    ...desktopProductLinks,
-    ...desktopCompanyLinks,
+    ...desktopLinks,
   ];
 
   const signedOutDesktopLinks = [
-    ...desktopProductLinks,
-    ...desktopCompanyLinks,
+    ...desktopLinks,
   ];
 
   const signedInMobilePrimaryLinks = [
