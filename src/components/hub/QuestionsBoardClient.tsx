@@ -20,6 +20,12 @@ export interface Question {
   image_url?: string;
 }
 
+const STATUS_FILTERS: Array<{ label: string; value: string | null }> = [
+  { label: 'All questions', value: null },
+  { label: 'Open only', value: 'false' },
+  { label: 'Answered', value: 'true' },
+];
+
 export default function QuestionsBoardClient({
   initialQuestions,
   isSignedIn,
@@ -77,6 +83,11 @@ export default function QuestionsBoardClient({
   const hasActiveFilters = Boolean(searchQuery || filterTag || filterAnswered);
   const hasQuestions = questions.length > 0;
   const hasMatches = filteredQuestions.length > 0;
+  const activeFilterLabels = [
+    searchQuery ? 'Search active' : null,
+    filterAnswered === 'true' ? 'Answered only' : filterAnswered === 'false' ? 'Open only' : null,
+    filterTag,
+  ].filter(Boolean) as string[];
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -207,56 +218,99 @@ export default function QuestionsBoardClient({
 
         {/* Filter shelf */}
         <div className="qb-shelf">
-          <div className="qb-search-wrap">
-            <Search className="qb-search-icon" />
-            <input
-              type="text"
-              className="qb-search"
-              placeholder="Search questions, placements, calculations..."
-              aria-label="Search questions"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <select
-            className="qb-select"
-            aria-label="Filter questions by topic"
-            value={filterTag || ''}
-            onChange={(e) => setFilterTag(e.target.value || null)}
-          >
-            <option value="">All topics</option>
-            {TAGS.map((tag) => (
-              <option key={tag} value={tag}>{tag}</option>
-            ))}
-          </select>
-
-          <select
-            className="qb-select"
-            aria-label="Filter questions by answer status"
-            value={filterAnswered || ''}
-            onChange={(e) => setFilterAnswered(e.target.value || null)}
-          >
-            <option value="">All questions</option>
-            <option value="true">Answered</option>
-            <option value="false">Open</option>
-          </select>
-
-          {hasActiveFilters ? (
-            <button
-              type="button"
-              className="qb-clear-btn"
-              onClick={() => { setSearchQuery(''); setFilterTag(null); setFilterAnswered(null); }}
-            >
-              <X style={{ width: '12px', height: '12px' }} />
-              Clear
-            </button>
-          ) : (
+          <div className="qb-shelf-header">
+            <div>
+              <span className="qb-shelf-kicker">Refine the board</span>
+              <p className="qb-shelf-title">Find the right thread faster.</p>
+            </div>
             <span className="qb-filter-meta">
               {hasQuestions
                 ? `${filteredQuestions.length} ${filteredQuestions.length === 1 ? 'question' : 'questions'}`
                 : 'Ready for the first question'}
             </span>
+          </div>
+
+          <div className="qb-shelf-search-row">
+            <div className="qb-search-wrap">
+              <Search className="qb-search-icon" />
+              <input
+                type="text"
+                className="qb-search"
+                placeholder="Search questions, placements, calculations..."
+                aria-label="Search questions"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                className="qb-clear-btn"
+                onClick={() => { setSearchQuery(''); setFilterTag(null); setFilterAnswered(null); }}
+              >
+                <X style={{ width: '12px', height: '12px' }} />
+                Reset view
+              </button>
+            )}
+          </div>
+
+          <div className="qb-shelf-groups">
+            <div className="qb-filter-group">
+              <span className="qb-filter-label">Status</span>
+              <div className="qb-filter-pills" role="group" aria-label="Filter questions by answer status">
+                {STATUS_FILTERS.map((filter) => {
+                  const isActive = filterAnswered === filter.value;
+                  return (
+                    <button
+                      key={filter.label}
+                      type="button"
+                      className={`qb-filter-pill${isActive ? ' active' : ''}`}
+                      aria-pressed={isActive}
+                      onClick={() => setFilterAnswered(filter.value)}
+                    >
+                      {filter.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="qb-filter-group">
+              <span className="qb-filter-label">Topics</span>
+              <div className="qb-filter-pills qb-filter-pills-scroll" role="group" aria-label="Filter questions by topic">
+                <button
+                  type="button"
+                  className={`qb-filter-pill${filterTag === null ? ' active' : ''}`}
+                  aria-pressed={filterTag === null}
+                  onClick={() => setFilterTag(null)}
+                >
+                  All topics
+                </button>
+                {TAGS.map((tag) => {
+                  const isActive = filterTag === tag;
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      className={`qb-filter-pill${isActive ? ' active' : ''}`}
+                      aria-pressed={isActive}
+                      onClick={() => setFilterTag(isActive ? null : tag)}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {hasActiveFilters && (
+            <div className="qb-active-filters" aria-label="Active filters">
+              {activeFilterLabels.map((label) => (
+                <span key={label} className="qb-active-filter">{label}</span>
+              ))}
+            </div>
           )}
         </div>
 
@@ -444,50 +498,72 @@ export default function QuestionsBoardClient({
           </div>
         ) : (
           <div className="qb-q-list">
-            {filteredQuestions.map((question) => (
-              <Link
-                key={question.id}
-                href={`/hub/questions/${question.id}`}
-                className="qb-q-row"
-              >
-                <div className="qb-q-row-top">
-                  <div className="qb-q-row-meta">
-                    <span className={`qb-q-status ${question.is_answered ? 'answered' : 'open'}`}>
-                      {question.is_answered ? 'Answered' : 'Open'}
-                    </span>
-                    <span className="qb-q-user">{question.user_name}</span>
-                    <span className="qb-q-time">{timeAgo(question.created_at)}</span>
-                  </div>
-                  <span className="qb-q-arrow">&rarr;</span>
-                </div>
+            {filteredQuestions.map((question) => {
+              const visibleTags = question.tags.slice(0, 3);
+              const hiddenTagCount = Math.max(question.tags.length - visibleTags.length, 0);
 
-                <p className="qb-q-title">{question.title}</p>
-                <p className="qb-q-preview">{question.body}</p>
-
-                {question.image_url && (
-                  <div className="qb-q-image">
-                    <Image
-                      src={question.image_url}
-                      alt="Question attachment"
-                      width={200}
-                      height={130}
-                      style={{ display: 'block', objectFit: 'cover' }}
-                    />
-                  </div>
-                )}
-
-                {question.tags.length > 0 && (
-                  <div className="qb-q-footer">
-                    <div className="qb-q-tags">
-                      {question.tags.map((tag) => (
-                        <span key={tag} className="qb-q-tag">{tag}</span>
-                      ))}
+              return (
+                <Link
+                  key={question.id}
+                  href={`/hub/questions/${question.id}`}
+                  className={`qb-q-row ${question.is_answered ? 'answered' : 'open'}`}
+                >
+                  <div className="qb-q-row-top">
+                    <div className="qb-q-row-state">
+                      <span className={`qb-q-status ${question.is_answered ? 'answered' : 'open'}`}>
+                        {question.is_answered ? 'Answered' : 'Open'}
+                      </span>
+                      <span className="qb-q-state-note">
+                        {question.is_answered ? 'Solved thread, good for quick skims.' : 'Still waiting for a clear reply.'}
+                      </span>
                     </div>
-                    <span className="qb-q-open-link">Open thread &rarr;</span>
+
+                    <span className="qb-q-open-link">
+                      Open thread <span className="qb-q-open-arrow" aria-hidden="true">&rarr;</span>
+                    </span>
                   </div>
-                )}
-              </Link>
-            ))}
+
+                  <div className="qb-q-row-content">
+                    <div className="qb-q-row-copy">
+                      <p className="qb-q-title">{question.title}</p>
+                      <p className="qb-q-preview">{question.body}</p>
+                    </div>
+
+                    {question.image_url && (
+                      <div className="qb-q-image">
+                        <Image
+                          src={question.image_url}
+                          alt="Question attachment"
+                          width={220}
+                          height={150}
+                          style={{ display: 'block', objectFit: 'cover' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="qb-q-row-footer">
+                    <div className="qb-q-row-context">
+                      <span className="qb-q-context-label">Asked by</span>
+                      <span className="qb-q-user">{question.user_name}</span>
+                      <span className="qb-q-meta-sep" aria-hidden="true" />
+                      <span className="qb-q-time">{timeAgo(question.created_at)}</span>
+                    </div>
+
+                    {visibleTags.length > 0 && (
+                      <div className="qb-q-row-tags">
+                        {visibleTags.map((tag) => (
+                          <span key={tag} className="qb-q-tag">{tag}</span>
+                        ))}
+                        {hiddenTagCount > 0 && (
+                          <span className="qb-q-tag qb-q-tag-more">+{hiddenTagCount}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>

@@ -169,13 +169,27 @@ const CSS = `
 }
 
 .qt-answers-header {
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
-  padding-bottom: 20px;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.95) 100%);
+  box-shadow: 0 22px 42px rgba(26,24,21,0.05);
+  padding: 24px 28px;
   margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.qt-answers-header::after {
+  content: '';
+  position: absolute;
+  right: -70px;
+  top: -80px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(239,203,182,0.36) 0%, rgba(239,203,182,0) 72%);
+  pointer-events: none;
 }
 
 .qt-answers-kicker {
@@ -189,17 +203,19 @@ const CSS = `
 
 .qt-answers-count {
   font-family: 'Playfair Display', serif;
-  font-size: 22px;
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
   font-weight: 400;
   color: #1A1815;
   margin-bottom: 6px;
+  line-height: 1;
 }
 
 .qt-answers-desc {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 300;
   color: #5A5750;
-  line-height: 1.6;
+  line-height: 1.65;
+  max-width: 50ch;
 }
 
 .qt-answers-badges {
@@ -213,8 +229,9 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: 6px 10px;
   display: inline-block;
+  border-radius: 999px;
 }
 .qt-badge.accepted { background: #E6F5F1; color: #0F6E56; }
 .qt-badge.lauren { border: 0.5px solid rgba(0,0,0,0.1); background: white; color: #1A1815; }
@@ -249,35 +266,87 @@ const CSS = `
 
 /* Answer articles */
 .qt-answer-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5px;
-  background: rgba(0,0,0,0.06);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  display: grid;
+  gap: 18px;
   margin-bottom: 32px;
 }
 
 .qt-answer {
-  background: #FAFAF8;
-  padding: 26px 30px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,250,248,1) 100%);
+  padding: 26px 30px 24px;
   position: relative;
   overflow: hidden;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  box-shadow: 0 18px 34px rgba(26,24,21,0.04);
 }
-.qt-answer.lauren { background: #F0F9F7; }
-.qt-answer.accepted { background: white; }
+.qt-answer::after {
+  content: '';
+  position: absolute;
+  right: -58px;
+  bottom: -68px;
+  width: 170px;
+  height: 170px;
+  background: radial-gradient(circle, rgba(255,223,181,0.18) 0%, rgba(255,223,181,0) 72%);
+  pointer-events: none;
+}
+.qt-answer.lauren {
+  background: linear-gradient(180deg, rgba(240,249,247,0.98) 0%, rgba(250,250,248,1) 100%);
+  border-color: rgba(15,110,86,0.12);
+}
+.qt-answer.accepted {
+  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(240,249,247,0.78) 100%);
+  border-color: rgba(15,110,86,0.18);
+  box-shadow: 0 24px 44px rgba(15,110,86,0.08);
+}
 
 .qt-answer-stripe {
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
+  top: 18px;
+  bottom: 18px;
+  width: 4px;
 }
 .qt-answer-stripe.accepted { background: #0F6E56; }
 .qt-answer-stripe.lauren { background: rgba(47,138,126,0.4); }
 
+.qt-answer-highlight {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.qt-answer-highlight-badge {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+}
+.qt-answer-highlight-badge.accepted {
+  background: #0F6E56;
+  color: white;
+}
+.qt-answer-highlight-badge.lauren {
+  background: white;
+  color: #1A1815;
+  border: 0.5px solid rgba(0,0,0,0.12);
+}
+
+.qt-answer-highlight-copy {
+  font-size: 12px;
+  font-weight: 300;
+  color: #5A5750;
+  line-height: 1.55;
+  margin: 0;
+}
+
 .qt-answer-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-bottom: 14px;
@@ -299,29 +368,36 @@ const CSS = `
 
 .qt-answer-name {
   font-family: 'Playfair Display', serif;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 400;
   color: #1A1815;
 }
-.qt-answer-time { font-size: 10px; color: var(--charcoal-light); }
+.qt-answer-time {
+  font-size: 10px;
+  color: var(--charcoal-light);
+  letter-spacing: 0.03em;
+}
 
 .qt-answer-badges {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin-left: auto;
 }
 
 .qt-answer-body {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 300;
   color: #2C2A27;
-  line-height: 1.85;
+  line-height: 1.9;
   white-space: pre-wrap;
+  max-width: 68ch;
 }
 
 .qt-answer-image {
   border: 0.5px solid rgba(0,0,0,0.08);
-  padding: 4px;
+  background: white;
+  padding: 6px;
   display: inline-block;
   overflow: hidden;
   margin-top: 14px;
@@ -330,7 +406,25 @@ const CSS = `
 /* Reply form */
 .qt-reply {
   border: 0.5px solid rgba(0,0,0,0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.96) 100%);
+  box-shadow: 0 24px 48px rgba(26,24,21,0.05);
   padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.qt-reply::after {
+  content: '';
+  position: absolute;
+  right: -80px;
+  top: -70px;
+  width: 210px;
+  height: 210px;
+  background: radial-gradient(circle, rgba(239,203,182,0.34) 0%, rgba(239,203,182,0) 72%);
+  pointer-events: none;
+}
+.qt-reply > * {
+  position: relative;
+  z-index: 1;
 }
 
 .qt-reply-kicker {
@@ -343,32 +437,67 @@ const CSS = `
 }
 .qt-reply-title {
   font-family: 'Playfair Display', serif;
-  font-size: 22px;
+  font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 400;
   color: #1A1815;
   margin-bottom: 8px;
 }
 .qt-reply-desc {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 300;
   color: #5A5750;
-  line-height: 1.65;
-  margin-bottom: 22px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+  max-width: 54ch;
 }
 
 .qt-reply-grid {
   display: grid;
-  grid-template-columns: 1fr 240px;
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 22px;
   align-items: start;
+}
+
+.qt-reply-form {
+  display: grid;
+  gap: 14px;
+}
+
+.qt-compose-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.qt-compose-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--charcoal-light);
+}
+
+.qt-compose-note {
+  font-size: 12px;
+  font-weight: 300;
+  color: #5A5750;
+  margin: 0;
+}
+
+.qt-compose-surface {
+  border: 0.5px solid rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.9);
+  padding: 18px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
 .qt-form-textarea {
   width: 100%;
   border: 0.5px solid rgba(0,0,0,0.12);
-  background: white;
-  padding: 10px 14px;
-  font-size: 13px;
+  background: #FFFCF8;
+  padding: 14px 16px;
+  font-size: 14px;
   font-weight: 300;
   color: #2C2A27;
   outline: none;
@@ -376,7 +505,8 @@ const CSS = `
   border-radius: 0;
   resize: none;
   -webkit-appearance: none;
-  margin-bottom: 12px;
+  min-height: 220px;
+  margin-bottom: 14px;
 }
 .qt-form-textarea:focus { border-color: rgba(0,0,0,0.25); }
 .qt-form-textarea::placeholder { color: var(--charcoal-light); }
@@ -389,12 +519,28 @@ const CSS = `
   flex-wrap: wrap;
 }
 
+.qt-compose-helper {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.qt-compose-helper-copy,
+.qt-compose-helper-limit {
+  font-size: 12px;
+  font-weight: 300;
+  color: #5A5750;
+  margin: 0;
+}
+
 .qt-upload-btn {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   border: 0.5px dashed rgba(0,0,0,0.18);
-  padding: 7px 14px;
+  padding: 9px 14px;
   cursor: pointer;
   font-family: inherit;
   background: transparent;
@@ -427,13 +573,13 @@ const CSS = `
 .qt-img-remove svg { width: 12px; height: 12px; }
 
 .qt-submit-btn {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: #1A1815;
   color: #FAFAF8;
   border: none;
-  padding: 9px 18px;
+  padding: 10px 18px;
   cursor: pointer;
   font-family: inherit;
   display: inline-flex;
@@ -445,7 +591,8 @@ const CSS = `
 
 .qt-reply-tip {
   border: 0.5px solid rgba(0,0,0,0.1);
-  padding: 18px 20px;
+  background: rgba(255,255,255,0.78);
+  padding: 20px 22px;
 }
 .qt-reply-tip-kicker {
   font-size: 9px;
@@ -456,16 +603,16 @@ const CSS = `
   display: block;
 }
 .qt-reply-tip-title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
   color: #1A1815;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .qt-reply-tip-desc {
   font-size: 12px;
   font-weight: 300;
   color: #5A5750;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 /* Sign-in prompt */
@@ -610,12 +757,16 @@ const CSS = `
   .qt-layout { grid-template-columns: 1fr; }
   .qt-sidebar { position: static; }
   .qt-reply-grid { grid-template-columns: 1fr; }
+  .qt-answer-badges { margin-left: 0; }
 }
 @media (max-width: 768px) {
   .qt-main { padding: 48px 20px 64px; }
   .qt-question { padding: 22px 20px; }
   .qt-reply { padding: 20px; }
+  .qt-answers-header { padding: 20px; }
+  .qt-compose-surface { padding: 14px; }
   .qt-answers-header { flex-direction: column; align-items: flex-start; }
+  .qt-answer { padding: 22px 20px 20px; }
 }
 `;
 
@@ -780,48 +931,71 @@ export default function QuestionThreadClient({
                 </div>
               ) : (
                 <div className="qt-answer-list">
-                  {answers.map((answer) => (
-                    <article
-                      key={answer.id}
-                      className={`qt-answer${answer.is_from_lauren ? ' lauren' : ''}${answer.is_accepted ? ' accepted' : ''}`}
-                    >
-                      {(answer.is_from_lauren || answer.is_accepted) && (
-                        <div className={`qt-answer-stripe ${answer.is_accepted ? 'accepted' : 'lauren'}`} />
-                      )}
+                  {answers.map((answer) => {
+                    const highlight = answer.is_accepted
+                      ? {
+                          label: 'Best answer',
+                          className: 'accepted',
+                          copy: 'This reply has been marked as the clearest way through the problem.',
+                        }
+                      : answer.is_from_lauren
+                        ? {
+                            label: 'Lauren note',
+                            className: 'lauren',
+                            copy: 'Staff guidance with extra context for revision and placement confidence.',
+                          }
+                        : null;
 
-                      <div className="qt-answer-meta">
-                        <div className={`qt-answer-avatar ${answer.is_from_lauren ? 'lauren-av' : 'student-av'}`}>
-                          {answer.is_from_lauren ? 'L' : answer.user_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="qt-answer-name">{answer.user_name}</p>
-                          <p className="qt-answer-time">{timeAgo(answer.created_at)}</p>
-                        </div>
-                        <div className="qt-answer-badges">
-                          {answer.is_from_lauren && (
-                            <span className="qt-badge lauren">Lauren</span>
-                          )}
-                          {answer.is_accepted && (
-                            <span className="qt-badge accepted">Accepted</span>
-                          )}
-                        </div>
-                      </div>
+                    return (
+                      <article
+                        key={answer.id}
+                        className={`qt-answer${answer.is_from_lauren ? ' lauren' : ''}${answer.is_accepted ? ' accepted' : ''}`}
+                      >
+                        {(answer.is_from_lauren || answer.is_accepted) && (
+                          <div className={`qt-answer-stripe ${answer.is_accepted ? 'accepted' : 'lauren'}`} />
+                        )}
 
-                      <p className="qt-answer-body">{answer.body}</p>
+                        {highlight && (
+                          <div className="qt-answer-highlight">
+                            <span className={`qt-answer-highlight-badge ${highlight.className}`}>{highlight.label}</span>
+                            <p className="qt-answer-highlight-copy">{highlight.copy}</p>
+                          </div>
+                        )}
 
-                      {answer.image_url && (
-                        <div className="qt-answer-image">
-                          <Image
-                            src={answer.image_url}
-                            alt="Answer attachment"
-                            width={480}
-                            height={300}
-                            style={{ display: 'block', objectFit: 'contain' }}
-                          />
+                        <div className="qt-answer-meta">
+                          <div className={`qt-answer-avatar ${answer.is_from_lauren ? 'lauren-av' : 'student-av'}`}>
+                            {answer.is_from_lauren ? 'L' : answer.user_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="qt-answer-name">{answer.user_name}</p>
+                            <p className="qt-answer-time">{timeAgo(answer.created_at)}</p>
+                          </div>
+                          <div className="qt-answer-badges">
+                            {answer.is_from_lauren && (
+                              <span className="qt-badge lauren">Lauren</span>
+                            )}
+                            {answer.is_accepted && (
+                              <span className="qt-badge accepted">Accepted</span>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </article>
-                  ))}
+
+                        <p className="qt-answer-body">{answer.body}</p>
+
+                        {answer.image_url && (
+                          <div className="qt-answer-image">
+                            <Image
+                              src={answer.image_url}
+                              alt="Answer attachment"
+                              width={480}
+                              height={300}
+                              style={{ display: 'block', objectFit: 'contain' }}
+                            />
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -837,72 +1011,84 @@ export default function QuestionThreadClient({
                   </p>
 
                   <div className="qt-reply-grid">
-                    <form onSubmit={handleSubmitAnswer}>
-                      <label className="sr-only" htmlFor={answerBodyId}>Your answer</label>
-                      <textarea
-                        id={answerBodyId}
-                        className="qt-form-textarea"
-                        value={answerBody}
-                        onChange={(e) => setAnswerBody(e.target.value)}
-                        placeholder="Share what would help another student understand this more clearly..."
-                        rows={6}
-                        maxLength={2000}
-                        required
-                      />
+                    <form onSubmit={handleSubmitAnswer} className="qt-reply-form">
+                      <div className="qt-compose-meta">
+                        <span className="qt-compose-label">Compose your answer</span>
+                        <span className="qt-compose-note">Aim for the step, the safety bit, and the calm wording.</span>
+                      </div>
 
-                      <div className="qt-form-actions">
-                        <div>
-                          <input
-                            id={answerImageInputId}
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/png,image/gif,image/webp"
-                            onChange={handleImageUpload}
-                            style={{ display: 'none' }}
-                          />
-                          {answerImageUrl ? (
-                            <div className="qt-img-preview">
-                              <Image
-                                src={answerImageUrl}
-                                alt="Uploaded answer image"
-                                width={180}
-                                height={120}
-                                style={{ display: 'block', objectFit: 'cover' }}
-                              />
+                      <div className="qt-compose-surface">
+                        <label className="sr-only" htmlFor={answerBodyId}>Your answer</label>
+                        <textarea
+                          id={answerBodyId}
+                          className="qt-form-textarea"
+                          value={answerBody}
+                          onChange={(e) => setAnswerBody(e.target.value)}
+                          placeholder="Share what would help another student understand this more clearly..."
+                          rows={8}
+                          maxLength={2000}
+                          required
+                        />
+
+                        <div className="qt-form-actions">
+                          <div>
+                            <input
+                              id={answerImageInputId}
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/jpeg,image/png,image/gif,image/webp"
+                              onChange={handleImageUpload}
+                              style={{ display: 'none' }}
+                            />
+                            {answerImageUrl ? (
+                              <div className="qt-img-preview">
+                                <Image
+                                  src={answerImageUrl}
+                                  alt="Uploaded answer image"
+                                  width={180}
+                                  height={120}
+                                  style={{ display: 'block', objectFit: 'cover' }}
+                                />
+                                <button
+                                  type="button"
+                                  className="qt-img-remove"
+                                  aria-label="Remove uploaded answer image"
+                                  onClick={() => setAnswerImageUrl(null)}
+                                >
+                                  <X />
+                                </button>
+                              </div>
+                            ) : (
                               <button
                                 type="button"
-                                className="qt-img-remove"
-                                aria-label="Remove uploaded answer image"
-                                onClick={() => setAnswerImageUrl(null)}
+                                className="qt-upload-btn"
+                                aria-controls={answerImageInputId}
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
                               >
-                                <X />
+                                {uploading ? (
+                                  <><Loader2 style={{ width: '13px', height: '13px', animation: 'spin 1s linear infinite' }} /> Uploading...</>
+                                ) : (
+                                  <><ImagePlus style={{ width: '13px', height: '13px' }} /> Add image</>
+                                )}
                               </button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              className="qt-upload-btn"
-                              aria-controls={answerImageInputId}
-                              onClick={() => fileInputRef.current?.click()}
-                              disabled={uploading}
-                            >
-                              {uploading ? (
-                                <><Loader2 style={{ width: '13px', height: '13px', animation: 'spin 1s linear infinite' }} /> Uploading...</>
-                              ) : (
-                                <><ImagePlus style={{ width: '13px', height: '13px' }} /> Add image</>
-                              )}
-                            </button>
-                          )}
+                            )}
+                          </div>
+
+                          <button
+                            type="submit"
+                            className="qt-submit-btn"
+                            disabled={submitting || !answerBody.trim()}
+                          >
+                            <Send style={{ width: '13px', height: '13px' }} />
+                            {submitting ? 'Posting...' : 'Post answer'}
+                          </button>
                         </div>
 
-                        <button
-                          type="submit"
-                          className="qt-submit-btn"
-                          disabled={submitting || !answerBody.trim()}
-                        >
-                          <Send style={{ width: '13px', height: '13px' }} />
-                          {submitting ? 'Posting...' : 'Post answer'}
-                        </button>
+                        <div className="qt-compose-helper">
+                          <p className="qt-compose-helper-copy">Short paragraphs and one practical takeaway make answers easier to use on shift.</p>
+                          <p className="qt-compose-helper-limit">Max 2000 characters</p>
+                        </div>
                       </div>
                     </form>
 
