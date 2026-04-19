@@ -13,6 +13,13 @@ export const defaultSEO = {
   type: 'website',
 } as const;
 
+export interface HubResourceSeoInput {
+  title: string;
+  description: string;
+  slug: string;
+  keywords?: string[];
+}
+
 // JSON-LD structured data for organization
 export function getOrganizationSchema() {
   return {
@@ -107,6 +114,10 @@ export function getProductSchema() {
   };
 }
 
+export function getHubResourcePath(slug: string) {
+  return `/hub/resources/${slug}`;
+}
+
 // Generate metadata for pages
 export function generatePageMetadata({
   title,
@@ -158,6 +169,18 @@ export function generatePageMetadata({
   };
 }
 
+export function createHubResourceMetadata({
+  title,
+  description,
+  slug,
+}: HubResourceSeoInput): Metadata {
+  return generatePageMetadata({
+    title,
+    description,
+    path: getHubResourcePath(slug),
+  });
+}
+
 // Breadcrumb schema generator
 export function getBreadcrumbSchema(items: Array<{ name: string; url: string }>) {
   return {
@@ -169,6 +192,29 @@ export function getBreadcrumbSchema(items: Array<{ name: string; url: string }>)
       name: item.name,
       item: `${siteUrl}${item.url}`,
     })),
+  };
+}
+
+export function getHubResourceStructuredData({
+  title,
+  description,
+  slug,
+  keywords = [],
+}: HubResourceSeoInput) {
+  const path = getHubResourcePath(slug);
+
+  return {
+    article: getArticleSchema({
+      headline: title,
+      description,
+      path,
+      keywords,
+    }),
+    breadcrumb: getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Hub', url: '/hub' },
+      { name: title, url: path },
+    ]),
   };
 }
 

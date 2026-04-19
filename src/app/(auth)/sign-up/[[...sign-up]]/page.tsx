@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function SignUpPage() {
   const fallbackRedirectUrl =
-    process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL ?? '/dashboard';
+    process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL ?? '/onboarding?entry=signup';
   const signInFallbackRedirectUrl =
     process.env.NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL ?? '/dashboard';
 

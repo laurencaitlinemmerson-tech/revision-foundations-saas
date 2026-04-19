@@ -4,9 +4,10 @@ import HubResourceStructuredData from '@/components/resources/HubResourceStructu
 import { createHubResourceMetadata } from '@/lib/seo';
 
 const RESOURCE = {
-  slug: 'brain-nervous-system',
-  title: 'Brain & Nervous System | Nursing Revision',
-  description: 'Neurology basics for nursing students — CNS and PNS anatomy, neurological assessment, and common conditions in paediatric and adult settings.',
+  slug: 'y1-infection-control',
+  title: 'Infection Prevention & Control | Year 1 Nursing',
+  description:
+    'The infection-control basics you use all the time, from hand hygiene to isolation, explained in student-friendly language.',
 } as const;
 
 export const metadata: Metadata = createHubResourceMetadata(RESOURCE);

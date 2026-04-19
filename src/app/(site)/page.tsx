@@ -1,11 +1,4 @@
-import { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'The Nurse Lab - Calm Revision System for Nursing Students',
-  description: 'Practise OSCEs, brush up on core knowledge, and find cheat sheets built for the ways students actually study.',
-};
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { generatePageMetadata } from '@/lib/seo';
 import Testimonials from '@/components/Testimonials';
 import HeroSection from '@/components/home/HeroSection';
 import ToolsShowcase from '@/components/home/ToolsShowcase';
@@ -15,6 +8,13 @@ import SamplePreviews from '@/components/home/SamplePreviews';
 import FinalCTA from '@/components/home/FinalCTA';
 import HomeStyles from '@/components/home/HomeStyles';
 import { cream } from '@/components/home/styles';
+
+export const metadata = generatePageMetadata({
+  title: 'The calm revision system for UK nursing students',
+  description:
+    "Practise children's nursing OSCE stations, strengthen core nursing knowledge, and use placement-ready revision guides in one calm study space built for how student nurses actually revise.",
+  path: '/',
+});
 
 export default function HomePage() {
   return (
@@ -30,4 +30,3 @@ export default function HomePage() {
     </div>
   );
 }
-

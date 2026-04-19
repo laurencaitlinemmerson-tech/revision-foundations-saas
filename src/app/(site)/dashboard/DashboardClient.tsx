@@ -2,8 +2,6 @@
 
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { motion, useReducedMotion } from 'framer-motion';
 import { getPlacementDate } from '@/lib/dashboardTracking';
 
@@ -59,10 +57,16 @@ export default function DashboardClient({
 
   useEffect(() => {
     const saved = getPlacementDate();
-    if (saved) {
-      const d = daysUntil(saved);
-      if (d > 0) setPlacementDays(d);
-    }
+    if (!saved) return;
+
+    const d = daysUntil(saved);
+    if (d <= 0) return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      setPlacementDays(d);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
   }, []);
 
   const greeting = useMemo(() => {
@@ -139,6 +143,18 @@ export default function DashboardClient({
               >
                 Your revision desk. Pick up exactly where you left off, check your weak spots, and start practice without the set-up.
               </motion.p>
+              <motion.div
+                {...fadeUp(0.2)}
+                className="mt-5"
+              >
+                <Link
+                  href="/onboarding?entry=signup"
+                  className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[var(--charcoal)]/55 transition-colors duration-200 hover:text-[var(--espresso)]"
+                >
+                  <span>Need a clearer start?</span>
+                  <span>Use the start-here guide →</span>
+                </Link>
+              </motion.div>
 
               {/* Navigation pills */}
               <div className="mt-12 flex flex-wrap gap-2">

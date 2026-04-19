@@ -10,7 +10,7 @@ export default function SignInPage() {
   const fallbackRedirectUrl =
     process.env.NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL ?? '/dashboard';
   const signUpFallbackRedirectUrl =
-    process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL ?? '/dashboard';
+    process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL ?? '/onboarding?entry=signup';
 
   return (
     <AuthPageShell

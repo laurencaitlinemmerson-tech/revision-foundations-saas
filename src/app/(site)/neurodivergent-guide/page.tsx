@@ -66,10 +66,13 @@ const CSS = `
   color: #666;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding-bottom: 36px;
+  padding-bottom: 28px;
   border-bottom: 0.5px solid rgba(0,0,0,0.1);
-  margin-bottom: 52px;
+  margin-bottom: 24px;
 }
+
+.nd-save-wrap { margin-bottom: 16px; }
+.nd-save-wrap > div { margin-top: 0 !important; margin-bottom: 16px !important; }
 
 .nd-pearl {
   background: #FAEEDA;
@@ -97,7 +100,7 @@ const CSS = `
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   border: 0.5px solid rgba(0,0,0,0.12);
-  margin-bottom: 60px;
+  margin-bottom: 40px;
 }
 
 .nd-intro-cell {
@@ -135,7 +138,7 @@ const CSS = `
 .nd-jump-nav {
   border: 0.5px solid rgba(0,0,0,0.12);
   padding: 18px 20px;
-  margin-bottom: 60px;
+  margin-bottom: 20px;
 }
 
 .nd-jump-label {
@@ -170,9 +173,9 @@ const CSS = `
 .nd-step {
   display: grid;
   grid-template-columns: 120px 1fr;
-  margin-bottom: 52px;
+  margin-bottom: 44px;
   border-top: 0.5px solid rgba(0,0,0,0.1);
-  padding-top: 36px;
+  padding-top: 28px;
   scroll-margin-top: 24px;
 }
 
@@ -274,6 +277,45 @@ const CSS = `
   margin-top: 16px;
 }
 
+.nd-hub-pair {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 0.5px solid rgba(0,0,0,0.08);
+}
+
+.nd-hub-pair-label {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.nd-hub-pair-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.nd-hub-pair-list li { position: relative; }
+.nd-hub-pair-list li + li::before {
+  content: '·';
+  position: absolute;
+  left: -10px;
+  color: #999;
+}
+
+.nd-hub-pair-list a {
+  font-size: 14px;
+  color: #1A1815;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.nd-hub-pair-list a:hover { color: #633806; }
+
 .nd-primary-link {
   display: inline-flex;
   align-items: center;
@@ -300,9 +342,9 @@ const CSS = `
   font-weight: 400;
   color: #1A1815;
   margin-bottom: 18px;
-  padding-top: 36px;
-  margin-top: 52px;
-  padding-bottom: 16px;
+  padding-top: 24px;
+  margin-top: 32px;
+  padding-bottom: 14px;
   border-top: 0.5px solid rgba(0,0,0,0.1);
   border-bottom: 0.5px solid rgba(0,0,0,0.1);
 }
@@ -635,6 +677,11 @@ const SECTIONS = [
     primaryLabel: 'Start a 5-question quiz',
     secondaryHref: '/osce',
     secondaryLabel: 'Try one OSCE station →',
+    hubLinks: [
+      { href: '/hub/resources/placement-survival', label: 'Placement survival' },
+      { href: '/hub/resources/9-rights-medication', label: '9 rights of medication' },
+      { href: '/hub/resources/medication-abbreviations', label: 'Medication abbreviations' },
+    ],
   },
   {
     tag: 'Autistic',
@@ -679,6 +726,11 @@ const SECTIONS = [
     primaryLabel: 'Read the study method',
     secondaryHref: '/hub',
     secondaryLabel: 'Open the hub →',
+    hubLinks: [
+      { href: '/hub/resources/placement-survival', label: 'Placement survival' },
+      { href: '/hub/resources/theories-of-development', label: 'Theories of development' },
+      { href: '/hub/resources/ae-assessment-guide', label: 'A&E assessment guide' },
+    ],
   },
   {
     tag: 'AuDHD',
@@ -723,6 +775,11 @@ const SECTIONS = [
     primaryLabel: 'Start with a quiz block',
     secondaryHref: '/osce',
     secondaryLabel: 'Then try one OSCE station →',
+    hubLinks: [
+      { href: '/hub/resources/placement-survival', label: 'Placement survival' },
+      { href: '/hub/resources/drug-calculations-cheat-sheet', label: 'Drug calculations cheat sheet' },
+      { href: '/hub/resources/9-rights-medication', label: '9 rights of medication' },
+    ],
   },
   {
     tag: 'Dyslexia',
@@ -767,6 +824,11 @@ const SECTIONS = [
     primaryLabel: 'Practise out loud',
     secondaryHref: '/hub',
     secondaryLabel: 'Open the hub guides →',
+    hubLinks: [
+      { href: '/hub/resources/glossary-terms', label: 'Glossary of nursing terms' },
+      { href: '/hub/resources/medication-abbreviations', label: 'Medication abbreviations' },
+      { href: '/hub/resources/placement-survival', label: 'Placement survival' },
+    ],
   },
   {
     tag: 'Dyspraxia',
@@ -811,6 +873,11 @@ const SECTIONS = [
     primaryLabel: 'Practise OSCE stations step-by-step',
     secondaryHref: '/hub/resources/drug-calculations-cheat-sheet',
     secondaryLabel: 'Open the calculations sheet →',
+    hubLinks: [
+      { href: '/hub/resources/im-sc-injection', label: 'IM & SC injection technique' },
+      { href: '/hub/resources/ng-tube-insertion', label: 'NG tube insertion' },
+      { href: '/hub/resources/ae-assessment', label: 'A&E assessment station' },
+    ],
   },
   {
     tag: 'Dyscalculia',
@@ -855,6 +922,11 @@ const SECTIONS = [
     primaryLabel: 'Open the drug calculations sheet',
     secondaryHref: '/quiz',
     secondaryLabel: 'Practise with the quiz →',
+    hubLinks: [
+      { href: '/hub/resources/9-rights-medication', label: '9 rights of medication' },
+      { href: '/hub/resources/paeds-vital-signs-cheat-sheet', label: 'Paeds vital signs' },
+      { href: '/hub/resources/medication-abbreviations', label: 'Medication abbreviations' },
+    ],
   },
   {
     tag: 'Anxiety',
@@ -899,6 +971,11 @@ const SECTIONS = [
     primaryLabel: 'Gentle 5-question warm-up',
     secondaryHref: '/dashboard',
     secondaryLabel: 'Back to dashboard →',
+    hubLinks: [
+      { href: '/hub/resources/placement-survival', label: 'Placement survival' },
+      { href: '/hub/resources/ae-assessment-guide', label: 'A&E assessment guide' },
+      { href: '/hub/resources/9-rights-medication', label: '9 rights of medication' },
+    ],
   },
 ];
 
@@ -922,10 +999,12 @@ export default function NeurodivergentGuidePage() {
         </p>
         <p className="nd-byline">ADHD · AuDHD · Autistic · Dyslexia · Dyspraxia · Dyscalculia · Anxiety · The Nurse Lab</p>
 
-        <EditorialSaveButton
-          hubItemId="neurodivergent-guide"
-          hubItemTitle="Neurodivergent Revision Guide"
-        />
+        <div className="nd-save-wrap">
+          <EditorialSaveButton
+            hubItemId="neurodivergent-guide"
+            hubItemTitle="Neurodivergent Revision Guide"
+          />
+        </div>
 
         <div className="nd-pearl">
           <p className="nd-pearl-label">Before you start</p>
@@ -1011,6 +1090,19 @@ export default function NeurodivergentGuidePage() {
                   {section.secondaryLabel}
                 </Link>
               </div>
+
+              {section.hubLinks && section.hubLinks.length > 0 && (
+                <div className="nd-hub-pair">
+                  <p className="nd-hub-pair-label">Hub guides that pair well</p>
+                  <ul className="nd-hub-pair-list">
+                    {section.hubLinks.map((item) => (
+                      <li key={item.href}>
+                        <Link href={item.href}>{item.label}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </article>
         ))}

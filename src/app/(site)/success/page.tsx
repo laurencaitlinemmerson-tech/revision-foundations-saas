@@ -59,6 +59,12 @@ function SuccessContent() {
     return qs ? `/success?${qs}` : '/success';
   }, [sessionId, product]);
 
+  const onboardingHref = useMemo(() => {
+    const params = new URLSearchParams({ entry: 'success' });
+    if (product) params.set('product', product);
+    return `/onboarding?${params.toString()}`;
+  }, [product]);
+
   useEffect(() => {
     if (!isLoaded || !isSignedIn || claimed || claiming) return;
     const controller = new AbortController();
@@ -135,7 +141,8 @@ function SuccessContent() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <a href={productLink} style={primaryBtn}>Open {productName} →</a>
-          <a href="/dashboard" style={secondaryBtn}>Go to dashboard</a>
+          <a href={onboardingHref} style={secondaryBtn}>Start with a quick plan</a>
+          <a href="/dashboard" style={tertiaryBtn}>Go to dashboard</a>
         </div>
 
         {!error && (
@@ -238,6 +245,19 @@ const secondaryBtn: React.CSSProperties = {
   letterSpacing: '0.08em',
   textDecoration: 'none',
   border: '0.5px solid rgba(26,24,21,0.12)',
+};
+
+const tertiaryBtn: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  padding: '12px 20px',
+  background: 'transparent',
+  color: '#6A6158',
+  fontFamily: inter,
+  fontSize: '12px',
+  textDecoration: 'none',
 };
 
 const stepCard: React.CSSProperties = {
