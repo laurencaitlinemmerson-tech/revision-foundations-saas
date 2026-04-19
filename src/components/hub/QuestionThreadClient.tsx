@@ -1,11 +1,9 @@
 'use client';
 
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { Send, ImagePlus, Loader2, X } from 'lucide-react';
 import type { Question } from '@/components/hub/QuestionsBoardClient';
 
@@ -60,14 +58,14 @@ const CSS = `
 
 .qt-breadcrumb {
   font-size: 11px;
-  color: #bbb;
+  color: var(--charcoal-light);
   margin-bottom: 36px;
   display: flex;
   align-items: center;
   gap: 6px;
   letter-spacing: 0.02em;
 }
-.qt-breadcrumb a { color: #bbb; text-decoration: none; transition: color 0.1s; }
+.qt-breadcrumb a { color: var(--charcoal-light); text-decoration: none; transition: color 0.1s; }
 .qt-breadcrumb a:hover { color: #2C2A27; }
 
 /* Layout */
@@ -89,7 +87,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 14px;
   display: block;
 }
@@ -114,12 +112,12 @@ const CSS = `
 
 .qt-q-user {
   font-size: 10px;
-  color: #aaa;
+  color: var(--charcoal-light);
   letter-spacing: 0.02em;
 }
 .qt-q-time {
   font-size: 10px;
-  color: #aaa;
+  color: var(--charcoal-light);
 }
 
 .qt-q-title {
@@ -184,7 +182,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 8px;
   display: block;
 }
@@ -231,7 +229,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 10px;
   display: block;
 }
@@ -305,7 +303,7 @@ const CSS = `
   font-weight: 400;
   color: #1A1815;
 }
-.qt-answer-time { font-size: 10px; color: #aaa; }
+.qt-answer-time { font-size: 10px; color: var(--charcoal-light); }
 
 .qt-answer-badges {
   display: flex;
@@ -339,7 +337,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 10px;
   display: block;
 }
@@ -381,7 +379,7 @@ const CSS = `
   margin-bottom: 12px;
 }
 .qt-form-textarea:focus { border-color: rgba(0,0,0,0.25); }
-.qt-form-textarea::placeholder { color: #aaa; }
+.qt-form-textarea::placeholder { color: var(--charcoal-light); }
 
 .qt-form-actions {
   display: flex;
@@ -453,7 +451,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 8px;
   display: block;
 }
@@ -479,7 +477,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 10px;
   display: block;
 }
@@ -547,7 +545,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
 }
 
 .qt-sidebar-row {
@@ -559,7 +557,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 6px;
   display: block;
 }
@@ -590,6 +588,14 @@ const CSS = `
   border: 0.5px solid rgba(0,0,0,0.1);
   padding: 2px 7px;
   color: #5A5750;
+}
+
+.qt-form-textarea:focus-visible,
+.qt-upload-btn:focus-visible,
+.qt-img-remove:focus-visible,
+.qt-submit-btn:focus-visible {
+  outline: 3px solid var(--peach-warm);
+  outline-offset: 3px;
 }
 
 .qt-sidebar-actions {
@@ -630,6 +636,8 @@ export default function QuestionThreadClient({
   const [submitting, setSubmitting] = useState(false);
   const [answerImageUrl, setAnswerImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const answerBodyId = useId();
+  const answerImageInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const answerCountLabel = `${answers.length} ${answers.length === 1 ? 'answer' : 'answers'}`;
@@ -830,7 +838,9 @@ export default function QuestionThreadClient({
 
                   <div className="qt-reply-grid">
                     <form onSubmit={handleSubmitAnswer}>
+                      <label className="sr-only" htmlFor={answerBodyId}>Your answer</label>
                       <textarea
+                        id={answerBodyId}
                         className="qt-form-textarea"
                         value={answerBody}
                         onChange={(e) => setAnswerBody(e.target.value)}
@@ -843,6 +853,7 @@ export default function QuestionThreadClient({
                       <div className="qt-form-actions">
                         <div>
                           <input
+                            id={answerImageInputId}
                             ref={fileInputRef}
                             type="file"
                             accept="image/jpeg,image/png,image/gif,image/webp"
@@ -858,7 +869,12 @@ export default function QuestionThreadClient({
                                 height={120}
                                 style={{ display: 'block', objectFit: 'cover' }}
                               />
-                              <button type="button" className="qt-img-remove" onClick={() => setAnswerImageUrl(null)}>
+                              <button
+                                type="button"
+                                className="qt-img-remove"
+                                aria-label="Remove uploaded answer image"
+                                onClick={() => setAnswerImageUrl(null)}
+                              >
                                 <X />
                               </button>
                             </div>
@@ -866,6 +882,7 @@ export default function QuestionThreadClient({
                             <button
                               type="button"
                               className="qt-upload-btn"
+                              aria-controls={answerImageInputId}
                               onClick={() => fileInputRef.current?.click()}
                               disabled={uploading}
                             >
@@ -937,7 +954,7 @@ export default function QuestionThreadClient({
               <div className="qt-sidebar-row">
                 <span className="qt-sidebar-row-label">Asked by</span>
                 <span className="qt-sidebar-row-value">{question.user_name}</span>
-                <span className="qt-answer-time" style={{ fontSize: '10px', color: '#aaa', display: 'block', marginTop: '4px' }}>
+                <span className="qt-answer-time" style={{ fontSize: '10px', color: 'var(--charcoal-light)', display: 'block', marginTop: '4px' }}>
                   {timeAgo(question.created_at)}
                 </span>
               </div>

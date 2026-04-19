@@ -1,11 +1,9 @@
 'use client';
 
-import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { Search, Send, ImagePlus, Loader2, X } from 'lucide-react';
 import { CSS } from './questionsBoardStyles';
 import { TAGS, STARTER_PROMPTS, timeAgo } from './questionsBoardData';
@@ -46,6 +44,11 @@ export default function QuestionsBoardClient({
     if (typeof window === 'undefined') return false;
     return new URLSearchParams(window.location.search).get('ask') === '1';
   });
+  const questionTitleId = useId();
+  const questionDetailsId = useId();
+  const questionTopicsGroupId = useId();
+  const questionImageGroupId = useId();
+  const questionImageInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const shouldAutoOpenAsk = isSignedIn && autoOpenAsk && !askPromptDismissed;
@@ -210,6 +213,7 @@ export default function QuestionsBoardClient({
               type="text"
               className="qb-search"
               placeholder="Search questions, placements, calculations..."
+              aria-label="Search questions"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -217,6 +221,7 @@ export default function QuestionsBoardClient({
 
           <select
             className="qb-select"
+            aria-label="Filter questions by topic"
             value={filterTag || ''}
             onChange={(e) => setFilterTag(e.target.value || null)}
           >
@@ -228,6 +233,7 @@ export default function QuestionsBoardClient({
 
           <select
             className="qb-select"
+            aria-label="Filter questions by answer status"
             value={filterAnswered || ''}
             onChange={(e) => setFilterAnswered(e.target.value || null)}
           >
@@ -269,6 +275,7 @@ export default function QuestionsBoardClient({
                 <button
                   type="button"
                   className="qb-modal-close"
+                  aria-label="Close ask question dialog"
                   onClick={() => { setShowAskForm(false); setAskPromptDismissed(true); }}
                 >
                   <X />
@@ -277,8 +284,9 @@ export default function QuestionsBoardClient({
 
               <form onSubmit={handleSubmit} className="qb-modal-body">
                 <div className="qb-form-group">
-                  <label className="qb-form-label">Question title</label>
+                  <label className="qb-form-label" htmlFor={questionTitleId}>Question title</label>
                   <input
+                    id={questionTitleId}
                     type="text"
                     className="qb-form-input"
                     value={title}
@@ -290,8 +298,9 @@ export default function QuestionsBoardClient({
                 </div>
 
                 <div className="qb-form-group">
-                  <label className="qb-form-label">Details</label>
+                  <label className="qb-form-label" htmlFor={questionDetailsId}>Details</label>
                   <textarea
+                    id={questionDetailsId}
                     className="qb-form-textarea"
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
@@ -303,13 +312,14 @@ export default function QuestionsBoardClient({
                 </div>
 
                 <div className="qb-form-group">
-                  <label className="qb-form-label">Topics</label>
-                  <div className="qb-form-tags">
+                  <span id={questionTopicsGroupId} className="qb-form-label">Topics</span>
+                  <div className="qb-form-tags" role="group" aria-labelledby={questionTopicsGroupId}>
                     {TAGS.map((tag) => (
                       <button
                         key={tag}
                         type="button"
                         className={`qb-form-tag-btn${selectedTags.includes(tag) ? ' active' : ''}`}
+                        aria-pressed={selectedTags.includes(tag)}
                         onClick={() =>
                           setSelectedTags((prev) =>
                             prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
@@ -323,36 +333,45 @@ export default function QuestionsBoardClient({
                 </div>
 
                 <div className="qb-form-group">
-                  <label className="qb-form-label">Attach image <span style={{ fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
-                    onChange={handleImageUpload}
-                    style={{ display: 'none' }}
-                  />
-                  {imageUrl ? (
-                    <div className="qb-img-preview">
-                      <Image src={imageUrl} alt="Uploaded image" width={240} height={160} style={{ display: 'block', objectFit: 'cover' }} />
-                      <button type="button" className="qb-img-remove" onClick={() => setImageUrl(null)}>
-                        <X />
+                  <span id={questionImageGroupId} className="qb-form-label">Attach image <span style={{ fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></span>
+                  <div role="group" aria-labelledby={questionImageGroupId}>
+                    <input
+                      id={questionImageInputId}
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      onChange={handleImageUpload}
+                      style={{ display: 'none' }}
+                    />
+                    {imageUrl ? (
+                      <div className="qb-img-preview">
+                        <Image src={imageUrl} alt="Uploaded image" width={240} height={160} style={{ display: 'block', objectFit: 'cover' }} />
+                        <button
+                          type="button"
+                          className="qb-img-remove"
+                          aria-label="Remove uploaded image"
+                          onClick={() => setImageUrl(null)}
+                        >
+                          <X />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="qb-upload-btn"
+                        aria-controls={questionImageInputId}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        {uploading ? (
+                          <><Loader2 style={{ width: '13px', height: '13px', animation: 'spin 1s linear infinite' }} /> Uploading...</>
+                        ) : (
+                          <><ImagePlus style={{ width: '13px', height: '13px' }} /> Add image or GIF</>
+                        )}
                       </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="qb-upload-btn"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                    >
-                      {uploading ? (
-                        <><Loader2 style={{ width: '13px', height: '13px', animation: 'spin 1s linear infinite' }} /> Uploading...</>
-                      ) : (
-                        <><ImagePlus style={{ width: '13px', height: '13px' }} /> Add image or GIF</>
-                      )}
-                    </button>
-                  )}
-                  <span className="qb-form-hint">Max 5 MB. JPG, PNG, GIF, WebP.</span>
+                    )}
+                    <span className="qb-form-hint">Max 5 MB. JPG, PNG, GIF, WebP.</span>
+                  </div>
                 </div>
 
                 <button

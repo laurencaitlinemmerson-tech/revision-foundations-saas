@@ -21,21 +21,21 @@ export const CSS = `
 
 .qb-breadcrumb {
   font-size: 11px;
-  color: #bbb;
+  color: var(--charcoal-light);
   margin-bottom: 28px;
   display: flex;
   align-items: center;
   gap: 6px;
   letter-spacing: 0.02em;
 }
-.qb-breadcrumb a { color: #bbb; text-decoration: none; transition: color 0.1s; }
+.qb-breadcrumb a { color: var(--charcoal-light); text-decoration: none; transition: color 0.1s; }
 .qb-breadcrumb a:hover { color: #2C2A27; }
 
 .qb-kicker {
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 14px;
 }
 
@@ -123,7 +123,7 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 14px;
   display: block;
 }
@@ -142,7 +142,7 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 6px;
   display: block;
 }
@@ -169,7 +169,7 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 6px;
   display: block;
 }
@@ -206,7 +206,7 @@ export const CSS = `
   transform: translateY(-50%);
   width: 13px;
   height: 13px;
-  color: #aaa;
+  color: var(--charcoal-light);
   pointer-events: none;
 }
 .qb-search {
@@ -223,7 +223,7 @@ export const CSS = `
   -webkit-appearance: none;
 }
 .qb-search:focus { border-color: rgba(0,0,0,0.25); }
-.qb-search::placeholder { color: #aaa; }
+.qb-search::placeholder { color: var(--charcoal-light); }
 
 .qb-select {
   border: 0.5px solid rgba(0,0,0,0.12);
@@ -244,7 +244,7 @@ export const CSS = `
 
 .qb-filter-meta {
   font-size: 11px;
-  color: #aaa;
+  color: var(--charcoal-light);
   letter-spacing: 0.03em;
   white-space: nowrap;
 }
@@ -308,17 +308,17 @@ export const CSS = `
 
 .qb-q-user {
   font-size: 10px;
-  color: #aaa;
+  color: var(--charcoal-light);
   letter-spacing: 0.02em;
 }
 .qb-q-time {
   font-size: 10px;
-  color: #aaa;
+  color: var(--charcoal-light);
 }
 
 .qb-q-arrow {
   font-size: 13px;
-  color: #aaa;
+  color: var(--charcoal-light);
   transition: transform 0.12s;
   display: inline-block;
   flex-shrink: 0;
@@ -395,7 +395,7 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 12px;
   display: block;
 }
@@ -429,7 +429,7 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 8px;
   display: block;
 }
@@ -482,7 +482,7 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 10px;
   display: block;
 }
@@ -520,7 +520,7 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-bottom: 8px;
   display: block;
 }
@@ -538,7 +538,7 @@ export const CSS = `
   -webkit-appearance: none;
 }
 .qb-form-input:focus { border-color: rgba(0,0,0,0.25); }
-.qb-form-input::placeholder { color: #aaa; }
+.qb-form-input::placeholder { color: var(--charcoal-light); }
 
 .qb-form-textarea {
   width: 100%;
@@ -555,13 +555,27 @@ export const CSS = `
   -webkit-appearance: none;
 }
 .qb-form-textarea:focus { border-color: rgba(0,0,0,0.25); }
-.qb-form-textarea::placeholder { color: #aaa; }
+.qb-form-textarea::placeholder { color: var(--charcoal-light); }
 
 .qb-form-hint {
   font-size: 11px;
-  color: #aaa;
+  color: var(--charcoal-light);
   margin-top: 6px;
   display: block;
+}
+
+.qb-search:focus-visible,
+.qb-select:focus-visible,
+.qb-clear-btn:focus-visible,
+.qb-modal-close:focus-visible,
+.qb-form-input:focus-visible,
+.qb-form-textarea:focus-visible,
+.qb-form-tag-btn:focus-visible,
+.qb-upload-btn:focus-visible,
+.qb-img-remove:focus-visible,
+.qb-form-submit:focus-visible {
+  outline: 3px solid var(--peach-warm);
+  outline-offset: 3px;
 }
 
 .qb-form-tags { display: flex; flex-wrap: wrap; gap: 5px; }
