@@ -201,6 +201,14 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
       if (event.data?.type !== 'osce-progress') return;
       const { stations } = event.data;
       if (!Array.isArray(stations)) return;
+
+      // Local dashboard tracking
+      import('@/lib/dashboardTracking').then((m) => {
+        for (const s of stations) {
+          m.addOsceScore(s.score ?? 0, (s.stationId as string).replace(/-/g, ' '));
+        }
+      });
+
       fetch('/api/progress/osce', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

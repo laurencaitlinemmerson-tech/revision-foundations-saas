@@ -150,6 +150,8 @@ export const metadata: Metadata = {
   category: "education",
 };
 
+import CommandPalette from "@/components/CommandPalette";
+
 export default function RootLayout({
   children,
 }: {
@@ -187,6 +189,7 @@ export default function RootLayout({
             <PWAInstallPrompt />
           </AppProviders>
         </ClerkProvider>
+        <CommandPalette />
         <Analytics />
         <SpeedInsights />
       </body>

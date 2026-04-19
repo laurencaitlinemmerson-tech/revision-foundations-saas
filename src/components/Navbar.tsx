@@ -166,6 +166,29 @@ export default function Navbar() {
               ))}
             </SignedOut>
             <SignedIn>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'transparent',
+                  border: `0.5px solid ${border}`,
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  color: inkMid,
+                  cursor: 'pointer',
+                  fontFamily: serif,
+                  fontSize: '13px',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = ink; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,0,0,0.16)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = inkMid; (e.currentTarget as HTMLButtonElement).style.borderColor = border }}
+              >
+                <Search className="w-4 h-4" />
+                <span style={{ marginRight: '4px' }}>Search</span>
+                <kbd style={{ fontFamily: 'monospace', fontSize: '10px', opacity: 0.6 }}>⌘K</kbd>
+              </button>
               <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: 'w-7 h-7' } }} />
             </SignedIn>
             <SignedOut>

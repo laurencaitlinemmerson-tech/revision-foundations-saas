@@ -120,59 +120,6 @@ html.lenis, html.lenis body {
   --border-strong: rgba(0,0,0,0.25);
 }
 
-/* =============================================
-   DARK MODE VARIABLES
-   ============================================= */
-.dark {
-  /* Dark mode - warm dark browns */
-  --cream: #1E1A16;
-  --cream-pink: #231F1B;
-  --linen-light: #282420;
-  --linen-deep: #332E28;
-  --linen-medium: #3D3830;
-
-  /* Earthy accents - muted for dark */
-  --peach-warm: #6B4E3D;
-  --salmon: #6B4540;
-  --straw: #5C5535;
-  --apricot: #6B5535;
-  --stone: #4A4A44;
-
-  /* Text */
-  --charcoal: #E8E0D8;
-  --charcoal-light: #C8BFB5;
-  --espresso: #F1EDE9;
-
-  /* Compatibility aliases */
-  --lavender: #6B4E3D;
-  --lavender-dark: #8A6250;
-  --purple: #E8E0D8;
-  --plum: #E8E0D8;
-  --plum-dark: #F1EDE9;
-  --lilac-soft: #282420;
-  --lilac: #332E28;
-  --lilac-medium: #3D3830;
-  --pink-soft: #6B4540;
-  --pink: #C4836A;
-  --mint: #5C5535;
-  --peach: #6B5535;
-
-  /* Semantic colors */
-  --text-primary: #E8E0D8;
-  --text-secondary: rgba(232, 224, 216, 0.75);
-  --text-muted: rgba(232, 224, 216, 0.5);
-
-  /* Background */
-  --bg-primary: #1E1A16;
-  --bg-secondary: #282420;
-  --bg-card: #2E2921;
-
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.4);
-}
 
 /* Dark mode transition for smooth switching */
 html {
@@ -201,10 +148,6 @@ body {
   transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 
-.dark body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
 
 /* =============================================
    TYPOGRAPHY
@@ -285,10 +228,6 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
               background-color var(--transition-base);
 }
 
-.dark .card {
-  background: var(--bg-card);
-  border-color: var(--linen-medium);
-}
 
 @media (hover: hover) {
   .card:hover {
@@ -311,58 +250,6 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   padding: var(--space-xl);
 }
 
-.dark .card-glass {
-  background: var(--bg-secondary);
-  border-color: var(--linen-medium);
-}
-
-/* Dark mode utility overrides for common Tailwind patterns */
-.dark .bg-white {
-  background-color: var(--bg-card) !important;
-}
-
-.dark .bg-white\/90,
-.dark .bg-white\/95 {
-  background-color: rgba(45, 38, 64, 0.9) !important;
-}
-
-.dark input,
-.dark textarea,
-.dark select {
-  background-color: var(--bg-secondary);
-  border-color: var(--lilac-medium);
-  color: var(--text-primary);
-}
-
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: var(--text-muted);
-}
-
-/* Dark mode text color overrides - ensure readability */
-.dark [class*="text-[var(--plum-dark)]"] {
-  color: var(--text-primary) !important;
-}
-
-/* Override opacity variants to be more visible in dark mode */
-.dark .text-\[var\(--plum-dark\)\]\/80,
-.dark .text-\[var\(--plum-dark\)\]\/70 {
-  color: var(--text-secondary) !important;
-}
-
-.dark .text-\[var\(--plum-dark\)\]\/60,
-.dark .text-\[var\(--plum-dark\)\]\/50,
-.dark .text-\[var\(--plum-dark\)\]\/40 {
-  color: var(--text-muted) !important;
-}
-
-/* Gray text colors for dark mode */
-.dark .text-gray-300,
-.dark .text-gray-400,
-.dark .text-gray-500,
-.dark .text-gray-600 {
-  color: var(--text-muted) !important;
-}
 
 .card-dark {
   background: var(--espresso);
@@ -431,15 +318,6 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   outline-offset: 2px;
 }
 
-.dark .btn-secondary {
-  background: transparent;
-  color: var(--espresso);
-  border-color: var(--linen-medium);
-}
-
-.dark .btn-secondary:hover {
-  background: var(--linen-light);
-}
 
 .btn-outline-white {
   display: inline-flex;
@@ -608,19 +486,6 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   transition: transform var(--transition-smooth), border-color var(--transition-base);
 }
 
-.dark .testimonial-card {
-  background: var(--bg-card);
-  border-color: var(--border-color);
-}
-
-.dark .testimonial-card p,
-.dark .testimonial-card span {
-  color: white !important;
-}
-
-.dark .testimonial-card .text-gray-500 {
-  color: #d1d5db !important;
-}
 
 @media (hover: hover) {
   .testimonial-card:hover {

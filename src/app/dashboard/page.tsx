@@ -12,7 +12,7 @@ import RecentPagesStrip from '@/components/dashboard/RecentPagesStrip';
 import StudySignalsRow from '@/components/dashboard/StudySignalsRow';
 import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
-
+import OsceSparkline from '@/components/dashboard/OsceSparkline';
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your study dashboard for tools, saved pages, and purchased content.',
@@ -298,8 +298,9 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: '16px' }}>
+          <div className="dash-prog-pair" style={{ marginTop: '16px' }}>
             <WeakAreaBanner />
+            <OsceSparkline />
           </div>
         </section>
 

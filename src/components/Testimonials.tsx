@@ -3,33 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
-// ─── design tokens ────────────────────────────────────────────────────────────
-const serif    = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display  = "'Playfair Display', Georgia, serif";
-const ink      = '#1A1815';
-const inkMid   = '#5A5750';
-const inkLight = '#9C8878';
-const panel    = '#FFFFFF';
-const parchment = '#F5F3F0';
-const border   = 'rgba(0,0,0,0.08)';
-const green    = '#1E8A4D';
-const greenBg  = '#E6F4EA';
-const teal     = '#2F8A7E';
-const tealBg   = '#E6F3F1';
-const blue     = '#2E67B1';
-const blueBg   = '#E7EEF8';
-const coral    = '#D96C55';
-const coralBg  = '#F8E7E2';
-const wrap     = '1120px';
-
-const accents = [
-  { color: teal,  bg: tealBg  },
-  { color: blue,  bg: blueBg  },
-  { color: green, bg: greenBg },
-  { color: coral, bg: coralBg },
-  { color: teal,  bg: tealBg  },
-  { color: blue,  bg: blueBg  },
-];
+// ─── types ────────────────────────────────────────────────────────────
 
 interface Review {
   id: string;
@@ -55,17 +29,106 @@ interface TestimonialsProps {
   showProof?: boolean;
 }
 
+// ─── configuration ────────────────────────────────────────────────────────────
+
+const accents = [
+  { color: '#2F8A7E', bg: '#E6F3F1' }, // teal
+  { color: '#2E67B1', bg: '#E7EEF8' }, // blue
+  { color: '#1E8A4D', bg: '#E6F4EA' }, // green
+  { color: '#D96C55', bg: '#F8E7E2' }, // coral
+];
+
+function getAccent(i: number) {
+  return accents[i % accents.length];
+}
+
+// ─── sub-components ────────────────────────────────────────────────────────────
+
 function Stars({ count }: { count: number }) {
   return (
-    <div style={{ display: 'flex', gap: '3px', marginBottom: '14px' }}>
+    <div className="flex gap-[3px] mb-3.5">
       {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="13" height="13" viewBox="0 0 12 12" fill={green}>
+        <svg key={i} width="13" height="13" viewBox="0 0 12 12" fill="#1E8A4D">
           <path d="M6 0l1.545 3.13 3.455.502-2.5 2.436.59 3.44L6 7.895 2.91 9.508l.59-3.44L1 3.632l3.455-.502z" />
         </svg>
       ))}
     </div>
   );
 }
+
+function ProofGrid({
+  items,
+}: {
+  items: Array<{ label: string; value: string; note: string; accent: string; bg: string }>;
+}) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+      {items.map((item) => (
+        <div key={item.label} className="border border-[var(--border)] bg-white p-[18px_20px]">
+          <span
+            className="inline-flex items-center px-2.5 py-1 font-serif text-[11px] tracking-[0.08em] uppercase mb-2.5"
+            style={{ color: item.accent, backgroundColor: item.bg }}
+          >
+            {item.label}
+          </span>
+          <p className="font-display text-[26px] text-[var(--espresso)] leading-[1.05] mb-[5px]">
+            {item.value}
+          </p>
+          <p className="font-serif text-[12px] text-[var(--charcoal)] font-light leading-[1.6]">
+            {item.note}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ReviewCard({ r, isGoogleSource, accent }: { r: Review; isGoogleSource: boolean; accent: { color: string; bg: string; } }) {
+  return (
+    <div className="flex flex-col p-[24px_24px_22px] border border-[var(--border)] bg-white transition-all duration-200 hover:border-[#B8AD9E] hover:shadow-[0_16px_40px_rgba(15,23,42,0.06)] cursor-default">
+      <Stars count={r.rating} />
+      <p
+        className="font-display text-[40px] leading-[0.6] opacity-20 mb-2.5 select-none"
+        style={{ color: accent.color }}
+        aria-hidden="true"
+      >
+        &ldquo;
+      </p>
+      <p className="font-serif text-[14px] leading-[1.85] font-light text-[var(--charcoal)] flex-grow mb-5">
+        {r.text}
+      </p>
+      <div className="h-[1px] bg-[var(--border)] mb-3.5" />
+      <div className="flex items-center justify-between gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2.5">
+          {r.authorPhotoUrl && (
+            <img
+              src={r.authorPhotoUrl}
+              alt=""
+              width={28}
+              height={28}
+              className="w-7 h-7 rounded-full object-cover bg-[var(--linen-light)]"
+            />
+          )}
+          {r.authorUrl ? (
+            <a href={r.authorUrl} target="_blank" rel="noreferrer" className="font-serif text-[13px] font-medium text-[var(--espresso)] leading-[1.4] no-underline">
+              {r.name}
+            </a>
+          ) : (
+            <p className="font-serif text-[13px] font-medium text-[var(--espresso)] leading-[1.4]">{r.name}</p>
+          )}
+        </div>
+        <span
+          className="inline-flex items-center px-2.5 py-[5px] font-serif text-[11px] tracking-[0.08em] uppercase whitespace-nowrap"
+          style={{ color: accent.color, backgroundColor: accent.bg }}
+        >
+          {isGoogleSource ? 'Google review' : 'Verified'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── main component ────────────────────────────────────────────────────────────
 
 export default function Testimonials({ compact = false, showProof = true }: TestimonialsProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -84,10 +147,7 @@ export default function Testimonials({ compact = false, showProof = true }: Test
 
     async function fetchReviews() {
       try {
-        const response = await fetch('/api/reviews', {
-          method: 'GET',
-          signal: controller.signal,
-        });
+        const response = await fetch('/api/reviews', { method: 'GET', signal: controller.signal });
         const data = await response.json();
         if (!controller.signal.aborted) {
           setReviews(data.reviews || []);
@@ -114,49 +174,45 @@ export default function Testimonials({ compact = false, showProof = true }: Test
     }
 
     void fetchReviews();
-
     return () => controller.abort();
   }, []);
 
   const isGoogleSource = source === 'google';
 
-  const proofItems = useMemo(
-    () => [
-      {
-        label: isGoogleSource ? 'Google ratings' : 'Approved reviews',
-        value: summary.totalCount > 0 ? String(summary.totalCount) : 'New',
-        note: summary.totalCount > 0
-          ? (isGoogleSource ? 'Ratings shown from your Google Business Profile' : 'Student feedback live on site')
-          : 'First feedback cycle in progress',
-        accent: teal,
-        bg: tealBg,
-      },
-      {
-        label: 'Average rating',
-        value: summary.totalCount > 0 ? `${summary.averageRating.toFixed(1)}/5` : 'Student-led',
-        note: summary.totalCount > 0
-          ? (isGoogleSource ? 'Across Google ratings' : 'Across approved reviews')
-          : 'Built while studying children\'s nursing',
-        accent: blue,
-        bg: blueBg,
-      },
-      {
-        label: 'Free to try',
-        value: 'Hub pages',
-        note: 'Browse free practical pages before paying',
-        accent: green,
-        bg: greenBg,
-      },
-      {
-        label: 'Pricing model',
-        value: 'One payment',
-        note: 'No subscription or recurring charge',
-        accent: coral,
-        bg: coralBg,
-      },
-    ],
-    [isGoogleSource, summary.averageRating, summary.totalCount],
-  );
+  const proofItems = useMemo(() => [
+    {
+      label: isGoogleSource ? 'Google ratings' : 'Approved reviews',
+      value: summary.totalCount > 0 ? String(summary.totalCount) : 'New',
+      note: summary.totalCount > 0
+        ? (isGoogleSource ? 'Ratings shown from your Google Business Profile' : 'Student feedback live on site')
+        : 'First feedback cycle in progress',
+      accent: '#2F8A7E',
+      bg: '#E6F3F1',
+    },
+    {
+      label: 'Average rating',
+      value: summary.totalCount > 0 ? `${summary.averageRating.toFixed(1)}/5` : 'Student-led',
+      note: summary.totalCount > 0
+        ? (isGoogleSource ? 'Across Google ratings' : 'Across approved reviews')
+        : 'Built while studying children\\'s nursing',
+      accent: '#2E67B1',
+      bg: '#E7EEF8',
+    },
+    {
+      label: 'Free to try',
+      value: 'Hub pages',
+      note: 'Browse free practical pages before paying',
+      accent: '#1E8A4D',
+      bg: '#E6F4EA',
+    },
+    {
+      label: 'Pricing model',
+      value: 'One payment',
+      note: 'No subscription or recurring charge',
+      accent: '#D96C55',
+      bg: '#F8E7E2',
+    },
+  ], [isGoogleSource, summary.averageRating, summary.totalCount]);
 
   const visibleReviews = compact ? reviews.slice(0, 3) : reviews;
   const heading = compact
@@ -164,70 +220,28 @@ export default function Testimonials({ compact = false, showProof = true }: Test
     : 'From students who used it before placement and OSCEs.';
 
   return (
-    <section
-      style={{
-        padding: compact ? '56px 24px 64px' : '80px 24px 92px',
-        borderTop: compact ? 'none' : `1px solid ${border}`,
-        background: parchment,
-      }}
-    >
-      <div style={{ maxWidth: wrap, margin: '0 auto' }}>
-
-        {/* ── header ── */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            flexWrap: 'wrap',
-            gap: '16px',
-            marginBottom: '32px',
-          }}
-        >
+    <section className={`bg-[var(--linen-light)] ${compact ? 'pt-14 px-6 pb-16' : 'pt-20 px-6 pb-[92px] border-t border-[var(--border)]'}`}>
+      <div className="max-w-[1120px] mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-end flex-wrap gap-4 mb-8">
           <div>
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: '11px',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: inkLight,
-                marginBottom: '12px',
-              }}
-            >
+            <p className="font-serif text-[11px] tracking-[0.12em] uppercase text-[var(--charcoal-light)] mb-3">
               What students say
             </p>
-            <h2
-              style={{
-                fontFamily: display,
-                fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-                fontWeight: 400,
-                lineHeight: 1.12,
-                color: ink,
-                maxWidth: compact ? '16ch' : '18ch',
-              }}
-            >
+            <h2 className={`font-display text-[clamp(2rem,4vw,2.5rem)] font-normal leading-[1.12] text-[var(--espresso)] max-w-[${compact ? '16ch' : '18ch'}]`}>
               {heading}
             </h2>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              gap: '6px',
-              flexShrink: 0,
-            }}
-          >
-            <div style={{ display: 'flex', gap: '4px' }}>
+          <div className="flex flex-col items-end gap-1.5 shrink-0 mt-4 md:mt-0">
+            <div className="flex gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
-                <svg key={i} width="16" height="16" viewBox="0 0 12 12" fill={green}>
+                <svg key={i} width="16" height="16" viewBox="0 0 12 12" fill="#1E8A4D">
                   <path d="M6 0l1.545 3.13 3.455.502-2.5 2.436.59 3.44L6 7.895 2.91 9.508l.59-3.44L1 3.632l3.455-.502z" />
                 </svg>
               ))}
             </div>
-            <p style={{ fontFamily: serif, fontSize: '13px', color: inkMid, fontWeight: 300 }}>
+            <p className="font-serif text-[13px] text-[var(--charcoal)] font-light">
               {summary.totalCount > 0
                 ? (isGoogleSource
                     ? `${summary.totalCount} Google rating${summary.totalCount === 1 ? '' : 's'} · average ${summary.averageRating.toFixed(1)} / 5`
@@ -236,31 +250,11 @@ export default function Testimonials({ compact = false, showProof = true }: Test
             </p>
             {!compact && (
               reviewUrl ? (
-                <a
-                  href={reviewUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    fontFamily: serif,
-                    fontSize: '12px',
-                    color: ink,
-                    textDecoration: 'underline',
-                    textUnderlineOffset: '3px',
-                  }}
-                >
+                <a href={reviewUrl} target="_blank" rel="noreferrer" className="font-serif text-[12px] text-[var(--espresso)] underline underline-offset-4">
                   {isGoogleSource ? 'Leave a Google review ↗' : 'Leave a review →'}
                 </a>
               ) : (
-                <Link
-                  href="/review"
-                  style={{
-                    fontFamily: serif,
-                    fontSize: '12px',
-                    color: ink,
-                    textDecoration: 'underline',
-                    textUnderlineOffset: '3px',
-                  }}
-                >
+                <Link href="/review" className="font-serif text-[12px] text-[var(--espresso)] underline underline-offset-4">
                   Leave a review →
                 </Link>
               )
@@ -269,273 +263,39 @@ export default function Testimonials({ compact = false, showProof = true }: Test
         </div>
 
         {!loading && sortDescription && (
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: '12px',
-              color: inkLight,
-              fontWeight: 300,
-              marginBottom: '18px',
-            }}
-          >
+          <p className="font-serif text-[12px] text-[var(--charcoal-light)] font-light mb-[18px]">
             {sortDescription}
           </p>
         )}
 
-        {showProof && (
-          <div
-            className="testimonials-proof-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-              gap: '16px',
-              marginBottom: '28px',
-            }}
-          >
-            {proofItems.map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  border: `1px solid ${border}`,
-                  background: panel,
-                  padding: '18px 20px',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    padding: '4px 10px',
-                    fontFamily: serif,
-                    fontSize: '11px',
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    color: item.accent,
-                    background: item.bg,
-                    marginBottom: '10px',
-                  }}
-                >
-                  {item.label}
-                </span>
-                <p style={{ fontFamily: display, fontSize: '26px', color: ink, lineHeight: 1.05, marginBottom: '5px' }}>
-                  {item.value}
-                </p>
-                <p style={{ fontFamily: serif, fontSize: '12px', color: inkMid, fontWeight: 300, lineHeight: 1.6 }}>
-                  {item.note}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Proof Grid */}
+        {showProof && <ProofGrid items={proofItems} />}
 
-        {/* ── loading skeletons ── */}
+        {/* Loading Skeletons */}
         {loading && (
-          <div
-            className="testimonials-grid"
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: compact ? 3 : 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="skeleton-card"
-                style={{
-                  border: `1px solid ${border}`,
-                  background: panel,
-                  height: '200px',
-                }}
-              />
+              <div key={i} className="animate-pulse bg-[var(--linen-deep)]/20 border border-[var(--border)] h-[200px]" />
             ))}
           </div>
         )}
 
-        {/* ── reviews grid ── */}
+        {/* Reviews Grid */}
         {!loading && visibleReviews.length > 0 && (
-          <div
-            className="testimonials-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: '16px',
-            }}
-          >
-            {visibleReviews.map((r, i) => {
-              const accent = accents[i % accents.length];
-              return (
-                <div
-                  key={r.id}
-                  className="testimonial-card"
-                  style={{
-                    border: `1px solid ${border}`,
-                    background: panel,
-                    padding: '24px 24px 22px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'default',
-                  }}
-                >
-                  <Stars count={r.rating} />
-
-                  <p
-                    style={{
-                      fontFamily: display,
-                      fontSize: '40px',
-                      lineHeight: 0.6,
-                      color: accent.color,
-                      opacity: 0.2,
-                      marginBottom: '10px',
-                      userSelect: 'none',
-                    }}
-                    aria-hidden="true"
-                  >
-                    &ldquo;
-                  </p>
-
-                  <p
-                    style={{
-                      fontFamily: serif,
-                      fontSize: '14px',
-                      lineHeight: 1.85,
-                      fontWeight: 300,
-                      color: inkMid,
-                      flexGrow: 1,
-                      marginBottom: '20px',
-                    }}
-                  >
-                    {r.text}
-                  </p>
-
-                  <div style={{ height: '1px', background: border, marginBottom: '14px' }} />
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '10px',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      {r.authorPhotoUrl && (
-                        <img
-                          src={r.authorPhotoUrl}
-                          alt=""
-                          width={28}
-                          height={28}
-                          style={{
-                            width: '28px',
-                            height: '28px',
-                            borderRadius: '999px',
-                            objectFit: 'cover',
-                            background: parchment,
-                          }}
-                        />
-                      )}
-                      {r.authorUrl ? (
-                        <a
-                          href={r.authorUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{
-                            fontFamily: serif,
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            color: ink,
-                            lineHeight: 1.4,
-                            textDecoration: 'none',
-                          }}
-                        >
-                          {r.name}
-                        </a>
-                      ) : (
-                        <p
-                          style={{
-                            fontFamily: serif,
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            color: ink,
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          {r.name}
-                        </p>
-                      )}
-                    </div>
-
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '5px 10px',
-                        fontFamily: serif,
-                        fontSize: '11px',
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        color: accent.color,
-                        background: accent.bg,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {isGoogleSource ? 'Google review' : 'Verified'}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {visibleReviews.map((r, i) => (
+              <ReviewCard key={r.id} r={r} isGoogleSource={isGoogleSource} accent={getAccent(i)} />
+            ))}
           </div>
         )}
 
-        {/* ── empty state ── */}
+        {/* Empty state */}
         {!loading && visibleReviews.length === 0 && (
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: '14px',
-              color: inkLight,
-              fontWeight: 300,
-              textAlign: 'center',
-              padding: '40px 0',
-            }}
-          >
+          <p className="font-serif text-[14px] text-[var(--charcoal-light)] font-light text-center py-10">
             Reviews coming soon.
           </p>
         )}
       </div>
-
-      <style>{`
-        .testimonial-card {
-          transition:
-            transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
-            border-color 0.22s ease,
-            box-shadow 0.26s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .testimonial-card:hover {
-          border-color: #B8AD9E !important;
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.5; }
-          50%       { opacity: 0.2; }
-        }
-        .skeleton-card {
-          animation: pulse 1.6s ease-in-out infinite;
-        }
-        @media (max-width: 900px) {
-          .testimonials-proof-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          }
-          .testimonials-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          }
-        }
-        @media (max-width: 580px) {
-          .testimonials-proof-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .testimonials-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
