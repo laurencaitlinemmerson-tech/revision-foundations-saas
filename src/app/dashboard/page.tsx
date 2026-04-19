@@ -362,16 +362,29 @@ export default async function DashboardPage() {
           }}>
             One guide, one station, one question — then rest if you need to.
           </p>
-          <Link
-            href="/how-to-use"
-            style={{
-              fontFamily: serif, fontSize: '12px', color: ink,
-              textDecoration: 'underline', textUnderlineOffset: '3px',
-              display: 'inline-block', marginTop: '12px',
-            }}
-          >
-            Read the study method →
-          </Link>
+          <div style={{
+            display: 'flex', gap: '20px', justifyContent: 'center',
+            flexWrap: 'wrap', marginTop: '12px',
+          }}>
+            <Link
+              href="/how-to-use"
+              style={{
+                fontFamily: serif, fontSize: '12px', color: ink,
+                textDecoration: 'underline', textUnderlineOffset: '3px',
+              }}
+            >
+              Read the study method →
+            </Link>
+            <Link
+              href="/neurodivergent-guide"
+              style={{
+                fontFamily: serif, fontSize: '12px', color: ink,
+                textDecoration: 'underline', textUnderlineOffset: '3px',
+              }}
+            >
+              Neurodivergent revision guide →
+            </Link>
+          </div>
         </div>
 
       </div>

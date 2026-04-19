@@ -177,6 +177,12 @@ const catalog: CatalogItem[] = [
     tags: ['Paeds', 'Y1 Essentials'],
   },
   {
+    hubItemId: 'neurodivergent-guide',
+    title: 'Neurodivergent Revision Guide',
+    href: '/neurodivergent-guide',
+    tags: ['Revision Plans', 'Study Skills'],
+  },
+  {
     hubItemId: 'glossary',
     title: 'Nursing Glossary',
     href: '/hub/glossary',

@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/privacy',
     '/terms',
     '/how-to-use',
+    '/neurodivergent-guide',
   ];
   const hubResourceRoutes = [
     '/hub/resources/9-rights-medication',
