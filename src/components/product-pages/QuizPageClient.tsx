@@ -230,6 +230,8 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
         try {
           localStorage.setItem('rf_weak_topics', JSON.stringify(weakTopics));
         } catch {};
+
+        import('@/lib/dashboardTracking').then((m) => m.pingStudySession());
       } catch {}
     }
 

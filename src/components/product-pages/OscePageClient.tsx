@@ -207,6 +207,7 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
         for (const s of stations) {
           m.addOsceScore(s.score ?? 0, (s.stationId as string).replace(/-/g, ' '));
         }
+        m.pingStudySession();
       });
 
       fetch('/api/progress/osce', {

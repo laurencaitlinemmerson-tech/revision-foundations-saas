@@ -178,6 +178,13 @@ export default async function DashboardPage() {
 
   const quizStats = await getUserQuizStats(userId).catch(() => null);
   const osceStats = await getUserOsceStats(userId).catch(() => null);
+  const streakStats = await getUserStreakStats(userId).catch(() => null);
+
+  const effectiveStreak = streakStats?.totalDaysActive
+    ? { streakDays: streakStats.streakDays, lastSevenDays: streakStats.lastSevenDays }
+    : quizStats
+      ? { streakDays: quizStats.streakDays, lastSevenDays: quizStats.lastSevenDays }
+      : null;
 
   // Derive weak/strong areas for progress bars
   const topicStrength = quizStats?.topicBreakdown ?? [
@@ -199,13 +206,13 @@ export default async function DashboardPage() {
           <div className="dash-analytics-row">
             <StatCard
               label="Study streak"
-              value={quizStats ? String(quizStats.streakDays) : '—'}
-              unit={quizStats ? 'days in a row' : 'No data yet'}
+              value={effectiveStreak ? String(effectiveStreak.streakDays) : '—'}
+              unit={effectiveStreak ? 'days in a row' : 'No data yet'}
             >
               {/* Streak pips — 7 squares mapped to last 7 days */}
-              {quizStats && (
+              {effectiveStreak && (
                 <div style={{ display: 'flex', gap: '4px', marginTop: '11px' }}>
-                  {quizStats.lastSevenDays.map((active, i) => (
+                  {effectiveStreak.lastSevenDays.map((active, i) => (
                     <span key={i} style={{
                       width: '9px', height: '9px',
                       background: active ? (i === 6 ? '#2C2A27' : '#8BBCAA') : 'rgba(0,0,0,0.08)',
@@ -557,4 +564,40 @@ async function getUserOsceStats(userId: string) {
     averageScore,
     monthOnMonthDelta: 0,
   };
+}
+
+async function getUserStreakStats(userId: string) {
+  const { createServiceClient } = await import('@/lib/supabase');
+  const supabase = createServiceClient();
+
+  const { data, error } = await supabase
+    .from('study_sessions')
+    .select('study_date')
+    .eq('clerk_user_id', userId)
+    .order('study_date', { ascending: false })
+    .limit(365);
+
+  if (error || !data) return null;
+  const dateSet = new Set((data as { study_date: string }[]).map((r) => r.study_date));
+  const totalDaysActive = dateSet.size;
+  if (totalDaysActive === 0) return { streakDays: 0, lastSevenDays: Array(7).fill(false), totalDaysActive: 0 };
+
+  const today = new Date();
+  const toYmd = (d: Date) => d.toISOString().split('T')[0];
+
+  let streakDays = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    if (dateSet.has(toYmd(d))) streakDays++;
+    else if (i > 0) break;
+  }
+
+  const lastSevenDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (6 - i));
+    return dateSet.has(toYmd(d));
+  });
+
+  return { streakDays, lastSevenDays, totalDaysActive };
 }

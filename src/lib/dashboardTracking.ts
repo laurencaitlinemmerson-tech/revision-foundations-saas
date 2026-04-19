@@ -6,6 +6,7 @@ export const TRACKING_KEYS = {
   countdownDates: 'rf_countdown_dates',
   osceScores: 'rf_osce_scores',
   pinnedNote: 'rf_pinned_note',
+  lastSessionPing: 'rf_last_session_ping',
 } as const;
 
 export interface RecentPage {
@@ -45,6 +46,27 @@ export function trackPageVisit(title: string, href: string): void {
   const pages = getRecentPages().filter(p => p.href !== href);
   pages.unshift({ title, href, timestamp: Date.now() });
   save(TRACKING_KEYS.recentPages, pages.slice(0, 5));
+  pingStudySession();
+}
+
+let pingInFlight = false;
+
+export function pingStudySession(): void {
+  if (typeof window === 'undefined') return;
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    if (localStorage.getItem(TRACKING_KEYS.lastSessionPing) === today) return;
+  } catch {}
+  if (pingInFlight) return;
+  pingInFlight = true;
+  fetch('/api/progress/session', { method: 'POST' })
+    .then((res) => {
+      if (res.ok) {
+        try { localStorage.setItem(TRACKING_KEYS.lastSessionPing, today); } catch {}
+      }
+    })
+    .catch(() => {})
+    .finally(() => { pingInFlight = false; });
 }
 
 export function getPlacementDate(): string | null {
