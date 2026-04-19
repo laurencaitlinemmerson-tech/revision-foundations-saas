@@ -92,6 +92,64 @@ export function getResourceLoopActions(slug: string, tags: string[] = []) {
   return actions;
 }
 
+const topicToGuideSlug: Record<string, string> = {
+  respiratory: 'respiratory-system',
+  cardiovascular: 'cardiovascular-system',
+  renal: 'renal-system',
+  numeracy: 'drug-calculations-cheat-sheet',
+  hospitalPrep: 'y1-infection-control',
+  cellBiology: 'cell-biology',
+  fluidsElectrolytes: 'renal-system',
+  medication: 'drug-calculations-cheat-sheet',
+  circulation: 'cardiovascular-system',
+  injection: 'im-sc-injection',
+  ngtubes: 'ng-tube-insertion',
+  deteriorating: 'ae-assessment-guide',
+  handwashing: 'y1-infection-control',
+  pain: 'y1-pain-assessment',
+  communication: 'y1-child-communication',
+};
+
+const topicLabels: Record<string, string> = {
+  respiratory: 'Respiratory',
+  cardiovascular: 'Cardiovascular',
+  renal: 'Renal',
+  numeracy: 'Drug calculations',
+  hospitalPrep: 'Hospital prep',
+  cellBiology: 'Cell biology',
+  fluidsElectrolytes: 'Fluids & electrolytes',
+  medication: 'Medication',
+  circulation: 'Circulation',
+  injection: 'Injections',
+  ngtubes: 'NG tubes',
+  deteriorating: 'Deteriorating patient',
+  handwashing: 'Hand washing',
+  pain: 'Pain assessment',
+  communication: 'Communication',
+};
+
+export function getTopicLabel(topic: string): string {
+  if (topicLabels[topic]) return topicLabels[topic];
+  return topic
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .trim();
+}
+
+export interface TopicGuide {
+  slug: string;
+  title: string;
+  href: string;
+}
+
+export function getGuideForTopic(topic: string): TopicGuide | null {
+  const slug = topicToGuideSlug[topic];
+  if (!slug) return null;
+  const item = getCatalogItem(slug);
+  if (!item) return null;
+  return { slug, title: item.title, href: item.href };
+}
+
 export function getGuideCardFromSlug(slug: string | null | undefined): LoopGuideCard | null {
   if (!slug) return null;
   const guide = getCatalogItem(slug);

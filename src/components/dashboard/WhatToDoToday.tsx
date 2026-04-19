@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getGuideForTopic, getTopicLabel } from '@/lib/productLoop';
 
 const serif = "var(--font-body)";
 const display = "var(--font-display)";
@@ -32,11 +33,29 @@ function getSuggestion(): Suggestion {
       if (topics.length > 0) {
         const worst = [...topics].sort((a, b) => a.score - b.score)[0];
         if (worst.score < 70) {
+          const topicLabel = getTopicLabel(worst.topic);
+          const guide = getGuideForTopic(worst.topic);
+          const quizHref = `/quiz?topic=${encodeURIComponent(worst.topic)}`;
+
+          if (guide) {
+            return {
+              headline: `Start with the ${guide.title}.`,
+              text: `${topicLabel} is still your weakest area at ${worst.score}%. Read the guide to spot the gaps, then run a short quiz set to lock them in.`,
+              href: guide.href,
+              cta: 'Read the guide',
+              accent: 'var(--blue-600)',
+              accentSoft: 'var(--blue-50)',
+              effort: '10-15 min',
+              secondaryHref: quizHref,
+              secondaryCta: `Practise ${topicLabel.toLowerCase()}`,
+            };
+          }
+
           return {
-            headline: `Focus on ${worst.topic}.`,
+            headline: `Focus on ${topicLabel.toLowerCase()}.`,
             text: `It is still your weakest area at ${worst.score}%. A short, targeted question set is the quickest way to stop it hanging over you.`,
-            href: `/quiz?topic=${encodeURIComponent(worst.topic)}`,
-            cta: `Practise ${worst.topic}`,
+            href: quizHref,
+            cta: `Practise ${topicLabel.toLowerCase()}`,
             accent: 'var(--blue-600)',
             accentSoft: 'var(--blue-50)',
             effort: '5-10 min',
