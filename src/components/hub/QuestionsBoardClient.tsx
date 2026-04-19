@@ -126,7 +126,6 @@ export default function QuestionsBoardClient({
   return (
     <div className="qb-page">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <Navbar />
 
       <main className="qb-main">
         {/* Breadcrumb */}
@@ -474,7 +473,6 @@ export default function QuestionsBoardClient({
         )}
       </main>
 
-      <Footer />
     </div>
   );
 }

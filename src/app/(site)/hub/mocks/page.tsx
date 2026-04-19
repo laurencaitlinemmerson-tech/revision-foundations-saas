@@ -20,7 +20,6 @@ export default function MockExamsPage() {
   return (
     <div className="mk">
       <style dangerouslySetInnerHTML={{ __html: MOCK_PAGE_CSS }} />
-      <Navbar />
 
       <main className="mk-wrap">
         <Link href="/hub" className="mk-back">
@@ -81,7 +80,6 @@ export default function MockExamsPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
 import RememberedBranchCard from '@/components/hub/RememberedBranchCard';
 import { generatePageMetadata } from '@/lib/seo';
+import { hubItems, pathways, adultHubItems, adultPathways } from './hubData';
 
 export const metadata = generatePageMetadata({
   title: 'Nursing Hub',
@@ -311,7 +312,6 @@ export default function HubPage() {
   return (
     <div className="hub-page">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <Navbar />
 
       <main className="hub-main">
         {/* Masthead */}
@@ -334,15 +334,15 @@ export default function HubPage() {
               <h2 className="hub-branch-title">Children&apos;s<br />Nursing</h2>
               <div className="hub-branch-stats">
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">22</span>
+                  <span className="hub-branch-stat-num">{hubItems.length}</span>
                   <span className="hub-branch-stat-label">Resources</span>
                 </div>
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">15</span>
+                  <span className="hub-branch-stat-num">{hubItems.filter(i => !i.isLocked).length}</span>
                   <span className="hub-branch-stat-label">Free</span>
                 </div>
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">4</span>
+                  <span className="hub-branch-stat-num">{pathways.length}</span>
                   <span className="hub-branch-stat-label">Pathways</span>
                 </div>
               </div>
@@ -365,15 +365,15 @@ export default function HubPage() {
               <h2 className="hub-branch-title">Adult<br />Nursing</h2>
               <div className="hub-branch-stats">
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">13</span>
+                  <span className="hub-branch-stat-num">{adultHubItems.length}</span>
                   <span className="hub-branch-stat-label">Resources</span>
                 </div>
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">8</span>
+                  <span className="hub-branch-stat-num">{adultHubItems.filter(i => !i.isLocked).length}</span>
                   <span className="hub-branch-stat-label">Free</span>
                 </div>
                 <div className="hub-branch-stat">
-                  <span className="hub-branch-stat-num">4</span>
+                  <span className="hub-branch-stat-num">{adultPathways.length}</span>
                   <span className="hub-branch-stat-label">Pathways</span>
                 </div>
               </div>
@@ -445,7 +445,6 @@ export default function HubPage() {
       </main>
 
       <Testimonials />
-      <Footer />
     </div>
   );
 }

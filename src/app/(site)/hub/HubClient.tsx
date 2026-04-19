@@ -264,7 +264,6 @@ export default function HubClient({
     <ToastProvider>
       <div className="hbc-page">
         <style dangerouslySetInnerHTML={{ __html: CSS }} />
-        <Navbar />
 
         <main className="hbc-main">
           {/* Breadcrumb */}
@@ -655,7 +654,6 @@ export default function HubClient({
           </div>
         </main>
 
-        <Footer />
       </div>
     </ToastProvider>
   );

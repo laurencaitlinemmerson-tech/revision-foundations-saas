@@ -264,7 +264,6 @@ export default function GlossaryPage() {
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
-      <Navbar />
 
       {/* Header */}
       <section
@@ -394,7 +393,6 @@ export default function GlossaryPage() {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 }

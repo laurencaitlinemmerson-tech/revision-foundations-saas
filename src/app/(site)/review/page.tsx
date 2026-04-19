@@ -76,7 +76,6 @@ export default function ReviewPage() {
   if (submitted) {
     return (
       <div style={{ background: cream, minHeight: '100vh' }}>
-        <Navbar />
         <main style={{ padding: '128px 24px 96px' }}>
           <div style={{ maxWidth: '480px', margin: '0 auto', textAlign: 'center' }}>
             <div
@@ -162,7 +161,6 @@ export default function ReviewPage() {
   if (reviewSource === 'loading') {
     return (
       <div style={{ background: cream, minHeight: '100vh' }}>
-        <Navbar />
         <main style={{ padding: '128px 24px 96px' }}>
           <div style={{ maxWidth: '520px', margin: '0 auto' }}>
             <div
@@ -187,7 +185,6 @@ export default function ReviewPage() {
   if (reviewSource === 'google' && googleReviewUrl) {
     return (
       <div style={{ background: cream, minHeight: '100vh' }}>
-        <Navbar />
         <main style={{ padding: '128px 24px 96px' }}>
           <div style={{ maxWidth: '520px', margin: '0 auto' }}>
             <div style={{ marginBottom: '36px' }}>
@@ -288,7 +285,6 @@ export default function ReviewPage() {
 
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
-      <Navbar />
 
       <main style={{ padding: '128px 24px 96px' }}>
         <div style={{ maxWidth: '520px', margin: '0 auto' }}>

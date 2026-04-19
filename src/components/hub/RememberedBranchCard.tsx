@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import type { HubBranch } from '@/app/hub/hubTypes';
+import type { HubBranch } from '@/app/(site)/hub/hubTypes';
 import { getPreferredBranch } from '@/lib/hubPreferences';
 
 const branchCopy: Record<HubBranch, {

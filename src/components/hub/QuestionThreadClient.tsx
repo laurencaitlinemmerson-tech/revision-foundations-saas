@@ -692,7 +692,6 @@ export default function QuestionThreadClient({
   return (
     <div className="qt-page">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <Navbar />
 
       <main className="qt-main">
         {/* Breadcrumb */}
@@ -981,7 +980,6 @@ export default function QuestionThreadClient({
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

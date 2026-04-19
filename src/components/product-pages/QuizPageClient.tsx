@@ -256,7 +256,6 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
   if (previewExpired) {
     return (
       <div style={{ background: cream, minHeight: '100vh' }}>
-        <Navbar />
         <main style={{ padding: '132px 24px 96px' }}>
           <div style={{ maxWidth: '680px', margin: '0 auto' }}>
             <div style={{ background: paper, border: `0.5px solid ${border}`, padding: '42px 36px' }}>
@@ -280,7 +279,6 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -320,7 +318,6 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
 
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
-      <Navbar />
 
       <main>
 
@@ -649,7 +646,6 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
 
       </main>
 
-      <Footer />
 
       <style>{`
         .quiz-hero-grid {

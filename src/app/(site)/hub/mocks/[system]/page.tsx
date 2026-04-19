@@ -30,7 +30,6 @@ export default async function SystemMocksPage({ params }: Props) {
   return (
     <div className="mk">
       <style dangerouslySetInnerHTML={{ __html: MOCK_PAGE_CSS }} />
-      <Navbar />
 
       <main className="mk-wrap">
         <Link href="/hub/mocks" className="mk-back">
@@ -73,7 +72,6 @@ export default async function SystemMocksPage({ params }: Props) {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -65,7 +65,6 @@ export default async function AccountPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
 
       <section className="border-b border-[rgba(26,24,21,0.08)] bg-cream pt-24 pb-10 md:pt-28 md:pb-12">
         <div className="max-w-5xl mx-auto px-6">
@@ -384,7 +383,6 @@ export default async function AccountPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

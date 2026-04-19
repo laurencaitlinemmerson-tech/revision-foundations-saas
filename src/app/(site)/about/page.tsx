@@ -137,7 +137,6 @@ const lighterDetails = [
 export default function AboutPage() {
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
-      <Navbar />
 
       {/* ── Hero ── */}
       <section style={{ padding: '120px 24px 0', borderBottom: `0.5px solid ${softLine}` }}>
@@ -492,7 +491,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <Footer />
 
       <style>{`
         .about-hero-grid {

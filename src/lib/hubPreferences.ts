@@ -1,4 +1,4 @@
-import type { HubBranch } from '@/app/hub/hubTypes';
+import type { HubBranch } from '@/app/(site)/hub/hubTypes';
 
 export const HUB_PREFERENCE_KEY = 'tnl_preferred_branch';
 

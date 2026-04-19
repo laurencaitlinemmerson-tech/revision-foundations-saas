@@ -99,7 +99,6 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
-      <Navbar />
 
       <section className="border-b border-[var(--border)] bg-[var(--cream)]">
         <div className="mx-auto max-w-[1120px] px-6 pb-16 pt-[112px] md:px-10 md:pb-20">
@@ -231,7 +230,6 @@ export default function DashboardClient({
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

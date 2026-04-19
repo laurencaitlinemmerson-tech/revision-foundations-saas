@@ -1,5 +1,9 @@
-'use client';
+import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  title: 'The Nurse Lab - Calm Revision System for Nursing Students',
+  description: 'Practise OSCEs, brush up on core knowledge, and find cheat sheets built for the ways students actually study.',
+};
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
@@ -15,7 +19,6 @@ import { cream } from '@/components/home/styles';
 export default function HomePage() {
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
-      <Navbar />
       <HeroSection />
       <Testimonials compact />
       <SamplePreviews />
@@ -23,7 +26,6 @@ export default function HomePage() {
       <WhatsIncluded />
       <AccessPaths />
       <FinalCTA />
-      <Footer />
       <HomeStyles />
     </div>
   );

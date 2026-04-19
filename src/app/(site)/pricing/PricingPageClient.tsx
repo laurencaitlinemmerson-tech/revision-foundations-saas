@@ -246,7 +246,6 @@ export default function PricingPage() {
   if (!accessLoading && hasBundle) {
     return (
       <div style={{ background: cream, minHeight: '100vh' }}>
-        <Navbar />
         <main style={{ padding: '128px 24px 96px' }}>
           <div style={{ maxWidth: wrap, margin: '0 auto' }}>
             <div style={{ maxWidth: '520px', margin: '0 auto', textAlign: 'center' }}>
@@ -273,14 +272,12 @@ export default function PricingPage() {
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
-      <Navbar />
 
       <section style={{ padding: '128px 24px 0', borderBottom: `0.5px solid ${border}` }}>
         <div style={{ maxWidth: wrap, margin: '0 auto' }}>
@@ -853,7 +850,6 @@ export default function PricingPage() {
         </section>
       )}
 
-      <Footer />
 
       <style>{`
         .waitlist-input::placeholder { color: #B8AD9E; }

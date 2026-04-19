@@ -4,7 +4,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Search, X } from 'lucide-react';
-import { hubItems, adultHubItems } from '@/app/hub/hubData';
+import { hubItems, adultHubItems } from '@/app/(site)/hub/hubData';
 
 const serif = "var(--font-body)";
 const display = "var(--font-display)";

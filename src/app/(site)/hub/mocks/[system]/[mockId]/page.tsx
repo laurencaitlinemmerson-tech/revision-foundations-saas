@@ -27,9 +27,7 @@ export default async function MockExamPage({ params }: Props) {
 
   return (
     <>
-      <Navbar />
       <MockExamClient mock={mock} />
-      <Footer />
     </>
   );
 }

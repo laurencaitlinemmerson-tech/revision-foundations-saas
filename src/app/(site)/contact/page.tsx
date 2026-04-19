@@ -123,7 +123,6 @@ export default function ContactPage() {
 
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
-      <Navbar />
 
       {/* ── Hero ── */}
       <section style={{ padding: '128px 24px 0', borderBottom: `0.5px solid ${border}` }}>
@@ -656,7 +655,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <Footer />
 
       <style>{`
         .contact-input::placeholder {

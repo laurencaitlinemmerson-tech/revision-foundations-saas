@@ -28,7 +28,6 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   if (!question) {
     return (
       <div style={{ fontFamily: "'Inter', sans-serif", background: '#FAFAF8', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Navbar />
         <main style={{ flex: 1, maxWidth: '1180px', margin: '0 auto', width: '100%', padding: '72px 48px 96px' }}>
           <div style={{ border: '0.5px solid rgba(0,0,0,0.1)', padding: '48px 40px', textAlign: 'center', maxWidth: '560px', margin: '0 auto' }}>
             <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', marginBottom: '14px' }}>Q&amp;A board</p>
@@ -43,7 +42,6 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
             </Link>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }

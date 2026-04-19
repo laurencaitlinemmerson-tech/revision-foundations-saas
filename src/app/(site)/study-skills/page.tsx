@@ -16,7 +16,6 @@ const border = 'rgba(0,0,0,0.08)';
 export default function StudySkillsPage() {
   return (
     <div style={{ background: cream, minHeight: '100vh' }}>
-      <Navbar />
 
       <main>
         <section style={{ padding: '108px 24px 56px', borderBottom: `0.5px solid ${border}` }}>
@@ -236,7 +235,6 @@ export default function StudySkillsPage() {
         </section>
       </main>
 
-      <Footer />
 
       <style>{`
         @media (max-width: 760px) {
