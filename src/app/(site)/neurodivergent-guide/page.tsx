@@ -80,6 +80,11 @@ const CSS = `
   margin-bottom: 40px;
 }
 
+/* In-profile pearls sit between the 3-column grid and the CTA row — tighter. */
+.nd-step-content .nd-pearl {
+  margin-bottom: 22px;
+}
+
 .nd-pearl-label {
   font-size: 12px;
   letter-spacing: 0.18em;
@@ -172,10 +177,10 @@ const CSS = `
 
 .nd-step {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  margin-bottom: 44px;
+  grid-template-columns: 180px 1fr;
+  margin-bottom: 36px;
   border-top: 0.5px solid rgba(0,0,0,0.1);
-  padding-top: 28px;
+  padding-top: 26px;
   scroll-margin-top: 24px;
 }
 
@@ -186,15 +191,20 @@ const CSS = `
   padding-right: 24px;
   border-right: 0.5px solid rgba(0,0,0,0.1);
   padding-top: 4px;
+  min-width: 0;
 }
 
 .nd-step-tag {
   font-family: 'Playfair Display', serif;
-  font-size: 34px;
+  font-size: 28px;
   font-style: italic;
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 1.1;
   margin-bottom: 10px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .nd-step-badge {
@@ -523,11 +533,11 @@ const CSS = `
   }
 
   .nd-step {
-    grid-template-columns: 100px 1fr;
+    grid-template-columns: 140px 1fr;
   }
 
   .nd-step-tag {
-    font-size: 26px;
+    font-size: 24px;
   }
 
   .nd-headline {
@@ -600,12 +610,12 @@ const PRINCIPLES = [
   {
     n: '03',
     title: 'Senses matter',
-    text: 'Light, sound, temperature, posture. If your body is overstimulated, your brain cannot revise. Adjust the room before the plan.',
+    text: 'Light, sound, temperature, posture. If your body is overstimulated, it is much harder for your brain to settle into revision. Adjust the room before the plan.',
   },
   {
     n: '04',
     title: 'Done, not perfect',
-    text: 'Finishing one small thing rebuilds momentum. Leaving a session half-finished on a bad note does the opposite.',
+    text: 'Finishing one small thing rebuilds momentum. Leaving a session half-finished in frustration does the opposite.',
   },
 ];
 
@@ -654,10 +664,10 @@ const SECTIONS = [
       {
         header: 'Helps because',
         items: [
-          'Low-friction openings beat big plans',
-          'A small target reduces initiation load',
-          'A timer turns time back into something visible',
-          'Out of sight genuinely lowers pull',
+          'An easy, tiny opening beats a big plan',
+          'A small target makes starting less of a leap',
+          'A timer turns time back into something you can see',
+          'Out of sight genuinely lowers the pull',
           'Speaking activates a different gear',
         ],
       },
@@ -703,11 +713,11 @@ const SECTIONS = [
       {
         header: 'Helps because',
         items: [
-          'Predictable cues lower activation cost',
-          'An explicit plan removes hidden decisions',
-          'Completing feels cleaner than context-switching',
-          'Re-reading confirms the rules before starting',
-          'A bounded resource is calmer than open web',
+          'Predictable cues make it easier to get going',
+          'A written plan removes the hidden decisions',
+          'Finishing one thing feels cleaner than switching',
+          'Re-reading the prompt confirms the rules before you start',
+          'A fixed set of guides is calmer than the open web',
         ],
       },
       {
@@ -737,7 +747,7 @@ const SECTIONS = [
     slug: 'audhd',
     colour: 'audhd',
     name: 'If you need structure and stimulation at the same time',
-    question: 'How do I revise when one part of my brain wants sameness and the other part wants novelty?',
+    question: 'How do I revise when one part of me wants the same thing every time and another part gets bored fast?',
     cols: [
       {
         header: 'Try',
@@ -746,7 +756,7 @@ const SECTIONS = [
           'Use a two-step plan: one quiz block, then one OSCE station',
           'Set up the desk the same way each time',
           'Write a visible finish line before you start',
-          'Keep one low-friction fallback for overload days',
+          'Keep one easy backup session for overload days',
         ],
       },
       {
@@ -764,13 +774,13 @@ const SECTIONS = [
         items: [
           'Trying to make every session feel exactly the same',
           'Building a huge revision plan before doing the first task',
-          'Forcing yourself through sensory discomfort for the sake of productivity',
+          'Forcing yourself through sensory discomfort just to keep going',
           'Switching tools every few minutes once you feel restless',
         ],
       },
     ],
     pearl:
-      'AuDHD revision often works best when the container stays familiar but the task inside it changes. Keep the routine steady; let the content provide enough freshness to hold attention.',
+      'AuDHD revision often works best when the frame stays familiar but the task inside it changes. Keep the routine steady and let the topic bring the freshness.',
     primaryHref: '/quiz',
     primaryLabel: 'Start with a quiz block',
     secondaryHref: '/osce',
@@ -814,12 +824,12 @@ const SECTIONS = [
           'Dense paragraphs late at night',
           'Copying notes word-for-word',
           'Relying on one format only',
-          'Reading for hours with no active recall',
+          'Reading for hours without testing yourself',
         ],
       },
     ],
     pearl:
-      'Dyslexia does not mean you know the material less — it means you prove it through slower routes. OSCE practice out loud is often a faster way to show what you actually know.',
+      'Dyslexia does not mean you know the material less — it means the route to showing what you know can be slower. Saying OSCE answers out loud is often a quicker way to get at what you actually remember.',
     primaryHref: '/osce',
     primaryLabel: 'Practise out loud',
     secondaryHref: '/hub',
@@ -868,7 +878,7 @@ const SECTIONS = [
       },
     ],
     pearl:
-      'Dyspraxia is not an absence of skill — it is a different route to the same outcome. Physical rehearsal, spoken sequencing, and structured templates are not crutches; they are how the skill consolidates.',
+      'Dyspraxia is not an absence of skill — it is a different route to the same outcome. Physical rehearsal, spoken sequencing, and structured templates are not workarounds; they are how the skill consolidates.',
     primaryHref: '/osce',
     primaryLabel: 'Practise OSCE stations step-by-step',
     secondaryHref: '/hub/resources/drug-calculations-cheat-sheet',
@@ -917,7 +927,7 @@ const SECTIONS = [
       },
     ],
     pearl:
-      'Dyscalculia rarely shows up as "I do not understand the drug" — it shows up as lost digits and shifted decimal places. Structure and redundancy are more useful than trying harder.',
+      'Dyscalculia rarely shows up as "I do not understand the drug" — it shows up as lost digits and shifted decimal places. Clear steps and double-checks help far more than trying harder.',
     primaryHref: '/hub/resources/drug-calculations-cheat-sheet',
     primaryLabel: 'Open the drug calculations sheet',
     secondaryHref: '/quiz',
@@ -939,7 +949,7 @@ const SECTIONS = [
         header: 'Try',
         items: [
           'Do the topic you are avoiding first, briefly',
-          'Use the quiz as exposure, not judgement',
+          'Use the quiz as gentle practice, not a verdict',
           'Set a finish line, not a start line',
           'Breathe for thirty seconds before the station',
           'End the session on something you got right',
@@ -948,9 +958,9 @@ const SECTIONS = [
       {
         header: 'Helps because',
         items: [
-          'Avoidance grows fear; small contact shrinks it',
-          'Reframing removes the score as a verdict',
-          'Knowing when you stop lowers dread',
+          'Avoiding a topic makes the fear louder; brief, gentle contact quietens it',
+          'Treating a score as information, not a verdict, takes the sting out',
+          'Knowing when you stop lowers the dread',
           'A reset breath interrupts the spiral',
           'Ending well shapes how you feel next time',
         ],
@@ -966,7 +976,7 @@ const SECTIONS = [
       },
     ],
     pearl:
-      'The goal of revising anxious is not to feel calm. It is to show yourself, over and over, that you can do the thing even when the feeling is there.',
+      'When you revise with anxiety, the goal is not to feel calm. It is to show yourself, over and over, that you can do the thing even when the feeling is there.',
     primaryHref: '/quiz',
     primaryLabel: 'Gentle 5-question warm-up',
     secondaryHref: '/dashboard',
@@ -1009,9 +1019,9 @@ export default function NeurodivergentGuidePage() {
         <div className="nd-pearl">
           <p className="nd-pearl-label">Before you start</p>
           <p>
-            Nothing in this guide replaces reasonable adjustments from your university or occupational health team.
-            If you have not yet told your programme about your diagnosis, that is often the single most useful revision
-            tool available to you — see the section on reasonable adjustments below.
+            This guide sits alongside, not in place of, reasonable adjustments from your university or occupational
+            health team. If you have not yet shared your diagnosis with your programme, doing that is often the single
+            most useful revision step available to you — more on how, in the section below.
           </p>
         </div>
 
@@ -1109,18 +1119,19 @@ export default function NeurodivergentGuidePage() {
 
         <h2 id="reasonable-adjustments" className="nd-section-title">Reasonable adjustments and DSA</h2>
         <p className="nd-section-intro">
-          In the UK, universities have a legal duty to make reasonable adjustments for disabled students, which
-          includes most neurodivergent conditions when they affect study. Disabled Students&rsquo; Allowance (DSA)
-          is a separate fund that pays for assistive software, specialist 1-to-1 study support, and equipment.
-          Telling your programme early usually matters more than any single revision technique.
+          In the UK, universities have a legal duty to make reasonable adjustments for disabled and neurodivergent
+          students whose studies are affected — and that covers most of the profiles on this page. Disabled
+          Students&rsquo; Allowance (DSA) is a separate pot of funding that pays for assistive software, one-to-one
+          specialist study support, and equipment. Sharing all this with your programme early usually matters more
+          than any single revision technique.
         </p>
         <div className="nd-checklist-grid">
           <div className="nd-checklist-col">
-            <p className="nd-checklist-col-title">What to tell your university</p>
+            <p className="nd-checklist-col-title">What to share with your programme</p>
             <ul className="nd-checklist-list">
               <li>Your diagnosis or suspected diagnosis — a referral letter is enough to start.</li>
               <li>Which parts of the course are affected (reading, numeracy, OSCEs, placement).</li>
-              <li>Any adjustments you already know help (extra time, quiet room, screen reader).</li>
+              <li>Any adjustments you already know help you (extra time, quiet room, screen reader).</li>
               <li>Whether you have applied for, or are waiting on, DSA funding.</li>
               <li>Ask who your named disability adviser is and how to contact them directly.</li>
             </ul>
@@ -1202,7 +1213,7 @@ export default function NeurodivergentGuidePage() {
           <div className="nd-mini-cell">
             <p className="nd-mini-label">Body</p>
             <p className="nd-mini-text">
-              Water within reach, a snack, a blanket if you run cold. A dysregulated body reads revision as a threat.
+              Water within reach, a snack, a blanket if you run cold. If your body is uncomfortable, your brain treats revision as one more thing to get away from.
             </p>
           </div>
         </div>
@@ -1231,7 +1242,7 @@ export default function NeurodivergentGuidePage() {
         <h2 className="nd-section-title">When to stop for the day</h2>
         <div className="nd-checklist-grid">
           <div className="nd-checklist-col">
-            <p className="nd-checklist-col-title">Red flags worth respecting</p>
+            <p className="nd-checklist-col-title">Signs it is time to stop</p>
             <ul className="nd-checklist-list">
               <li>You are re-reading the same line three times.</li>
               <li>Your jaw, shoulders, or hands have gone tight.</li>
