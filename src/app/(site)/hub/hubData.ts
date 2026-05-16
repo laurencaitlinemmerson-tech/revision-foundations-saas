@@ -112,6 +112,7 @@ export const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: false,
     href: '/hub/resources/respiratory-system',
+    category: 'Anatomy & Physiology',
   },
   {
     id: 'cardiovascular-system',
@@ -121,6 +122,7 @@ export const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: false,
     href: '/hub/resources/cardiovascular-system',
+    category: 'Anatomy & Physiology',
   },
   {
     id: 'renal-system',
@@ -130,6 +132,7 @@ export const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: false,
     href: '/hub/resources/renal-system',
+    category: 'Anatomy & Physiology',
   },
   {
     id: 'gastrointestinal-system',
@@ -139,6 +142,7 @@ export const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: false,
     href: '/hub/resources/gastrointestinal-system',
+    category: 'Anatomy & Physiology',
   },
   {
     id: 'dehydration',
@@ -157,6 +161,7 @@ export const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: true,
     href: '/hub/resources/brain-nervous-system',
+    category: 'Anatomy & Physiology',
   },
   {
     id: 'cell-biology',
@@ -166,6 +171,7 @@ export const hubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: false,
     href: '/hub/resources/cell-biology',
+    category: 'Anatomy & Physiology',
   },
   {
     id: '15',
@@ -221,6 +227,7 @@ export const hubItems: HubItem[] = [
     difficulty: 'Moderate',
     isLocked: false,
     href: '/hub/resources/y1-anatomy-physiology',
+    category: 'Anatomy & Physiology',
   },
   {
     id: '23',
@@ -463,6 +470,7 @@ export const adultHubItems: HubItem[] = [
     difficulty: 'Deep Dive',
     isLocked: false,
     href: '/hub/resources/cell-biology',
+    category: 'Anatomy & Physiology',
   },
 ];
 

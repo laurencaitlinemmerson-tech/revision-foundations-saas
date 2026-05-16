@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import { ToastProvider } from '@/components/Toast';
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation';
 import { Search, MessageCircle } from 'lucide-react';
-import type { HubBranch, QuestionPreview } from './hubTypes';
+import type { HubBranch, HubItem, QuestionPreview } from './hubTypes';
 import {
   hubItems, adultHubItems,
   filterTags, adultFilterTags,
@@ -211,9 +211,24 @@ export default function HubClient({
   const premiumCount = filteredItems.filter((item) => item.isLocked).length;
   const totalQuestionCount = questionCounts.answered + questionCounts.open;
   const isFilteringLibrary = Boolean(searchQuery.trim() || selectedTags.size > 0 || activePathway || activeLens !== 'all');
+  const useGroupedShelf = !isFilteringLibrary;
   const librarySummary = isFilteringLibrary
     ? `Showing ${filteredItems.length} resources \u00B7 ${freeCount} free \u00B7 ${premiumCount} premium`
     : `Shelf holds ${defaultShelfCount} more resources \u00B7 ${defaultShelfFreeCount} free \u00B7 ${defaultShelfPremiumCount} premium`;
+
+  const groupedShelf = useMemo(() => {
+    if (!useGroupedShelf) return null;
+    const anatomy: HubItem[] = [];
+    const other: HubItem[] = [];
+    filteredItems.forEach((item) => {
+      if (item.category === 'Anatomy & Physiology') {
+        anatomy.push(item);
+      } else {
+        other.push(item);
+      }
+    });
+    return { anatomy, other };
+  }, [filteredItems, useGroupedShelf]);
 
   const handleActivatePathway = (pathwayId: string) => {
     setActivePathwayId(pathwayId);
@@ -535,8 +550,8 @@ export default function HubClient({
             </>
           )}
 
-          {/* All resources label */}
-          {showRecommended && shouldShowFullShelf && filteredItems.length > 0 && (
+          {/* All resources label (only shown in flat-grid mode, since grouped mode has its own headings) */}
+          {showRecommended && shouldShowFullShelf && filteredItems.length > 0 && !useGroupedShelf && (
             <span className="hbc-section-label" style={{ marginBottom: '20px' }}>All resources</span>
           )}
 
@@ -558,6 +573,31 @@ export default function HubClient({
                 Clear filters
               </button>
             </div>
+          ) : shouldShowFullShelf && useGroupedShelf && groupedShelf ? (
+            <>
+              {groupedShelf.anatomy.length > 0 && (
+                <>
+                  <span className="hbc-section-label" style={{ marginBottom: '8px' }}>Body systems</span>
+                  <h3 className="hbc-section-heading">Anatomy &amp; Physiology</h3>
+                  <div className="hbc-resources-grid" style={{ marginBottom: '40px' }}>
+                    {groupedShelf.anatomy.map((item) => (
+                      <HubCard key={item.id} item={item} isPro={isPro} isSignedIn={isSignedIn} />
+                    ))}
+                  </div>
+                </>
+              )}
+              {groupedShelf.other.length > 0 && (
+                <>
+                  <span className="hbc-section-label" style={{ marginBottom: '8px' }}>Everything else</span>
+                  <h3 className="hbc-section-heading">Clinical skills, placement &amp; revision</h3>
+                  <div className="hbc-resources-grid">
+                    {groupedShelf.other.map((item) => (
+                      <HubCard key={item.id} item={item} isPro={isPro} isSignedIn={isSignedIn} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
           ) : shouldShowFullShelf ? (
             <div className="hbc-resources-grid">
               {filteredItems.map((item) => (

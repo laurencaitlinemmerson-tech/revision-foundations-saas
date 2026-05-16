@@ -1,5 +1,7 @@
 import React from 'react';
 
+export type HubCategory = 'Anatomy & Physiology';
+
 export interface HubItem {
   id: string;
   title: string;
@@ -9,6 +11,7 @@ export interface HubItem {
   isLocked: boolean;
   href: string;
   isRecommended?: boolean;
+  category?: HubCategory;
 }
 
 export interface QuestionPreview {
