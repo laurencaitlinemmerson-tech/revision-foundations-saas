@@ -4730,24 +4730,6 @@ export default function OperatorDashboardClient() {
   // Lift the Apple Health fetch so multiple slot renders share one network call.
   const healthStream = useHealthStream(authed ? opPw : '');
 
-  const scrollToDashboardSection = useCallback((target: string) => {
-    if (typeof document === 'undefined') return;
-
-    const sectionMap: Record<string, string> = {
-      Story: 'operator-story',
-      Trends: 'operator-health-stream',
-      Health: 'operator-health-stream',
-      Today: 'operator-today',
-      Action: 'operator-action',
-      Plan: 'operator-plan',
-      Projections: 'operator-projections',
-      Ledger: 'operator-projections',
-    };
-    const sectionId = sectionMap[target] ?? 'operator-overview';
-
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
   if (!authed) {
     return <Lock onUnlock={() => {
       // auth state was set in Lock before calling onUnlock
@@ -4798,29 +4780,6 @@ export default function OperatorDashboardClient() {
     ? `BMR ${nutrition.bmr.toLocaleString('en-GB')} + active ${(activeKcalToday ?? 0).toLocaleString('en-GB')} kcal`
     : 'Awaiting Apple Health sync';
   const weightTodaySub = `${targetDelta <= 0 ? `${Math.abs(targetDelta).toFixed(1)} kg under` : `${targetDelta.toFixed(1)} kg to go`} · goal ${goal.toFixed(1)} kg`;
-  const sectionGuide = [
-    {
-      id: 'operator-today',
-      label: 'Today',
-      note: 'Start with calories, deficit, weight and tracking quality.',
-    },
-    {
-      id: 'operator-action',
-      label: 'Action',
-      note: 'Decide the next move while the day is still easy to influence.',
-    },
-    {
-      id: 'operator-health-stream',
-      label: 'Trends',
-      note: 'Check what is moving across nutrition, sleep and recovery.',
-    },
-    {
-      id: 'operator-story',
-      label: 'Story',
-      note: 'Zoom out into the full weight line, phase changes and visual evidence.',
-    },
-  ] as const;
-
   return (
     <div className="fitness-reference-shell">
       <main className="wrap fitness-redesign" id="operator-overview">
@@ -4965,82 +4924,6 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
 
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
-
-        <section className="fit-anchor-section fit-reading-guide" aria-label="Dashboard guide">
-          <div className="fit-reading-guide-head">
-            <span className="fit-reading-guide-kicker">Read order</span>
-            <p className="fit-reading-guide-copy">
-              Start with where the day stands, move straight into what to do next, then zoom out into the trends and the long body-composition story.
-            </p>
-          </div>
-          <div className="fit-reading-guide-grid">
-            {sectionGuide.map((section, index) => (
-              <button
-                key={section.id}
-                type="button"
-                className="fit-reading-stop"
-                onClick={() => scrollToDashboardSection(section.label)}
-              >
-                <span className="fit-reading-step">{String(index + 1).padStart(2, '0')}</span>
-                <span className="fit-reading-label">{section.label}</span>
-                <span className="fit-reading-note">{section.note}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="fit-anchor-section" id="operator-action">
-          {/* ───────────────────────── ACTION ────────────────────────── */}
-          <EditorialDivider eyebrow="Action" note="Today, one move." />
-
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="weekCompare" />
-
-          <div className="fit-panel">
-            <div className="fit-panel-head">
-              <div>
-                <h3>This <em>week</em></h3>
-                <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
-              </div>
-            </div>
-            <div className="week-grid">
-              {weekRows.map((row) => (
-                <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
-                  <div className="dow">{row.day}</div>
-                  <div className="date">{row.date}</div>
-                  <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
-                  <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
-                  <div className="icons"><span>{row.detail}</span></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="fit-anchor-section" id="operator-health-stream">
-          {/* ───────────────────────── TRENDS ────────────────────────── */}
-          <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
-          <AnalyticsSection
-            latest={latest}
-            sorted={dashboardSource}
-            goal={goal}
-            nutrition={nutrition}
-            state={state}
-            rollingAverage={rollingAverage}
-            cadence={cadence}
-            syncSummary={syncSummary}
-            opPw={opPw}
-            healthStream={healthStream}
-          />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
-        </section>
-
         <section className="fit-anchor-section" id="operator-story">
           {/* ───────────────────────── STORY ─────────────────────────── */}
           <EditorialDivider eyebrow="Story" note="The long line — every reading, every phase." />
@@ -5132,6 +5015,60 @@ export default function OperatorDashboardClient() {
               </div>
             </aside>
           </section>
+        </section>
+
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
+
+        <section className="fit-anchor-section" id="operator-health-stream">
+          {/* ───────────────────────── TRENDS ────────────────────────── */}
+          <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
+          <AnalyticsSection
+            latest={latest}
+            sorted={dashboardSource}
+            goal={goal}
+            nutrition={nutrition}
+            state={state}
+            rollingAverage={rollingAverage}
+            cadence={cadence}
+            syncSummary={syncSummary}
+            opPw={opPw}
+            healthStream={healthStream}
+          />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
+        </section>
+
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
+
+        <section className="fit-anchor-section" id="operator-action">
+          {/* ───────────────────────── ACTION ────────────────────────── */}
+          <EditorialDivider eyebrow="Action" note="Today, one move." />
+
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="weekCompare" />
+
+          <div className="fit-panel">
+            <div className="fit-panel-head">
+              <div>
+                <h3>This <em>week</em></h3>
+                <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+              </div>
+            </div>
+            <div className="week-grid">
+              {weekRows.map((row) => (
+                <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                  <div className="dow">{row.day}</div>
+                  <div className="date">{row.date}</div>
+                  <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                  <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                  <div className="icons"><span>{row.detail}</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
       </main>
