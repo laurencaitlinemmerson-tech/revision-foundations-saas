@@ -258,6 +258,47 @@ function Rule({ weight=0.5, style }: { weight?: number; style?: CSSProperties })
 function ThickRule({ style }: { style?: CSSProperties }) {
   return <div style={{ borderTop:`2px solid ${T.ink}`, ...style }} />;
 }
+function AccordionPanel({
+  kicker,
+  title,
+  summary,
+  children,
+  defaultOpen = false,
+  style,
+}: {
+  kicker: string;
+  title: string;
+  summary: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  style?: CSSProperties;
+}) {
+  return (
+    <details
+      open={defaultOpen}
+      style={{
+        border: `1px solid ${T.line}`,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(251,248,243,0.96) 100%)',
+        padding: '0 20px',
+        ...style,
+      }}
+    >
+      <summary style={{ cursor: 'pointer', padding: '18px 0 16px' }}>
+        <Kicker style={{ marginBottom: 8 }}>{kicker}</Kicker>
+        <div style={{ fontFamily: T.display, fontStyle: 'italic', fontSize: 18, color: T.ink, marginBottom: 6 }}>
+          {title}
+        </div>
+        <p style={{ fontFamily: T.sans, fontSize: 12, color: T.body, fontWeight: 300, lineHeight: 1.6, margin: 0, maxWidth: '52ch' }}>
+          {summary}
+        </p>
+      </summary>
+      <div style={{ padding: '0 0 20px' }}>
+        <Rule style={{ marginBottom: 18 }} />
+        {children}
+      </div>
+    </details>
+  );
+}
 function Wrap({ children, style }: { children: React.ReactNode; style?: CSSProperties }) {
   return (
     <div style={{ maxWidth:1120, margin:'0 auto', padding:'clamp(28px, 4vw, 56px) clamp(16px, 4vw, 40px) 120px', ...style }}>
@@ -407,29 +448,33 @@ function StatusStrip({ state, latest, goal, setTab }: {
   ];
 
   return (
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 30, background: 'rgba(250,250,248,0.94)',
-      backdropFilter: 'blur(12px)',
-      borderTop: `0.5px solid ${T.line}`, borderBottom: `0.5px solid ${T.ink}`,
-      boxShadow: '0 10px 30px rgba(26,24,21,0.04)',
-      margin: '0 calc(clamp(16px, 4vw, 40px) * -1) 24px',
-      padding: '0 clamp(16px, 4vw, 40px)',
-    }}>
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:16, flexWrap:'wrap', marginBottom:12 }}>
+        <div>
+          <Kicker style={{ marginBottom: 4 }}>At a glance</Kicker>
+          <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'48ch' }}>
+            These are the four numbers worth checking before you dig into any of the deeper tabs.
+          </p>
+        </div>
+        <Kicker color={T.muted}>Goal · {goal.toFixed(1)} kg</Kicker>
+      </div>
       <ScrollRail minWidth={760}>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4, minmax(170px, 1fr))', maxWidth:1000, margin:'0 auto' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4, minmax(170px, 1fr))', gap:12 }}>
           {cells.map((c, i) => (
             <button key={i} onClick={c.onClick} style={{
-              padding:'10px 14px',
-              borderRight: i < 3 ? `0.5px solid ${T.line}` : 'none',
-              background:'none', border:'none', cursor:'pointer',
-              textAlign:'left', fontFamily:T.sans,
+              padding:'16px 16px 14px',
+              border:`1px solid ${T.line}`,
+              background:'rgba(255,255,255,0.76)',
+              cursor:'pointer',
+              textAlign:'left',
+              fontFamily:T.sans,
             }}>
-              <Kicker style={{ marginBottom:4, fontSize:9 }}>{c.kicker}</Kicker>
-              <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:2 }}>
-                <span style={{ fontFamily:T.display, fontSize:20, color:T.ink, letterSpacing:'-0.01em', lineHeight:1 }}>{c.value}</span>
-                <span style={{ fontFamily:T.sans, fontSize:9, color:T.muted, letterSpacing:'0.1em' }}>{c.unit}</span>
+              <Kicker style={{ marginBottom:8, fontSize:9 }}>{c.kicker}</Kicker>
+              <div style={{ display:'flex', alignItems:'baseline', gap:6, marginBottom:6 }}>
+                <span style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{c.value}</span>
+                <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted, letterSpacing:'0.1em', textTransform:'uppercase' }}>{c.unit}</span>
               </div>
-              <span style={{ fontFamily:T.sans, fontSize:8, fontWeight:600, letterSpacing:'0.14em', color:c.subColor }}>{c.sub}</span>
+              <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.14em', color:c.subColor, textTransform:'uppercase' }}>{c.sub}</span>
             </button>
           ))}
         </div>
@@ -503,59 +548,58 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
 
   return (
     <div style={{
-      position:'relative',
-      overflow:'hidden',
-      background:`linear-gradient(145deg, rgba(250,238,218,0.85) 0%, rgba(251,248,243,0.97) 42%, rgba(234,241,250,0.78) 100%)`,
+      background:'linear-gradient(135deg, rgba(251,248,243,0.98) 0%, rgba(255,255,255,0.92) 100%)',
       border:`1px solid ${T.line}`,
       boxShadow:CARD_SHADOW,
-      padding:'clamp(20px, 4vw, 32px)',
+      padding:'clamp(20px, 4vw, 30px)',
       marginBottom:28,
     }}>
-      <div style={{ position:'absolute', inset:'auto -40px -70px auto', width:180, height:180, borderRadius:'50%', background:'rgba(24,95,165,0.08)', filter:'blur(6px)' }} />
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap:20, position:'relative' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:20 }}>
         <div>
-          <Kicker style={{ marginBottom:10 }}>Command Deck</Kicker>
+          <Kicker style={{ marginBottom:10 }}>This week&apos;s focus</Kicker>
           <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'7px 12px', background:focus.soft, color:focus.color, marginBottom:14 }}>
             <span style={{ width:8, height:8, borderRadius:'50%', background:focus.color }} />
             <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase' }}>{focus.label}</span>
           </div>
-          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:23, color:T.ink, lineHeight:1.35, margin:'0 0 12px', maxWidth:'18ch' }}>
-            Call the next move <em>clearly</em>.
+          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.ink, lineHeight:1.25, margin:'0 0 12px', maxWidth:'16ch' }}>
+            See the signal first, then act on it.
           </p>
           <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:0, maxWidth:'58ch' }}>
             {focus.copy}
           </p>
-        </div>
-        <div style={{
-          border:`1px solid ${T.line}`,
-          background:'rgba(255,255,255,0.62)',
-          padding:'18px 18px 16px',
-          backdropFilter:'blur(6px)',
-        }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:12, marginBottom:14, flexWrap:'wrap' }}>
-            <Kicker>Actions</Kicker>
-            <Kicker color={syncColor}>{syncLabel}</Kicker>
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(140px, 1fr))', gap:10, marginBottom:14 }}>
+          <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginTop:18 }}>
             {[
-              { label:'File reading', sub:'Open composer', action:() => setCompose(true) },
-              { label:'Open plan', sub:'Weekly rules', action:() => setTab('Plan') },
-              { label:'Review ledger', sub:'See every entry', action:() => setTab('Ledger') },
+              { label:'File reading', action:() => setCompose(true), solid:true },
+              { label:'Open plan', action:() => setTab('Plan') },
+              { label:'Open ledger', action:() => setTab('Ledger') },
             ].map((action) => (
               <button key={action.label} onClick={action.action} style={{
-                background:'rgba(250,250,248,0.9)',
-                border:`1px solid ${T.line}`,
-                padding:'14px 14px 12px',
-                textAlign:'left',
+                background: action.solid ? T.ink : 'transparent',
+                color: action.solid ? T.paper : T.ink,
+                border: `1px solid ${action.solid ? T.ink : T.line}`,
                 cursor:'pointer',
+                padding:'11px 16px',
+                fontFamily:T.sans,
+                fontSize:10,
+                fontWeight:600,
+                letterSpacing:'0.14em',
+                textTransform:'uppercase',
               }}>
-                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:17, color:T.ink, marginBottom:4 }}>{action.label}</div>
-                <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:500, color:T.muted, letterSpacing:'0.1em', textTransform:'uppercase' }}>{action.sub}</span>
+                {action.label}
               </button>
             ))}
           </div>
-          <Rule />
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))', gap:10, marginTop:14 }}>
+        </div>
+        <div style={{
+          border:`1px solid ${T.line}`,
+          background:'rgba(255,255,255,0.78)',
+          padding:'18px 18px 16px',
+        }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:12, marginBottom:14, flexWrap:'wrap' }}>
+            <Kicker>Quick status</Kicker>
+            <Kicker color={syncColor}>{syncLabel}</Kicker>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))', gap:10 }}>
             <div>
               <Kicker style={{ marginBottom:5 }}>Latest</Kicker>
               <div style={{ fontFamily:T.display, fontSize:22, color:T.ink, lineHeight:1 }}>{latest.weight.toFixed(1)} kg</div>
@@ -571,7 +615,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
           </div>
         </div>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:12, marginTop:18, position:'relative' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:12, marginTop:18 }}>
         {callouts.map((item) => (
           <div key={item.kicker} style={{ border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.72)', padding:'14px 16px' }}>
             <Kicker style={{ marginBottom:8 }}>{item.kicker}</Kicker>
@@ -2684,8 +2728,8 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.025em', lineHeight:0.98, color:T.ink, margin:'0 0 12px' }}>
         A plan you can <em>actually follow</em>.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.muted, margin:'0 0 36px', maxWidth:'52ch', lineHeight:1.5 }}>
-        Specific numbers, specific actions, no vague advice. Built from {sorted.length} of your own readings.
+      <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, margin:'0 0 36px', maxWidth:'56ch', lineHeight:1.7 }}>
+        The essentials stay visible. The more detailed examples and troubleshooting live in expandable sections so the page feels usable instead of endless.
       </p>
 
       {/* The Mission */}
@@ -2734,15 +2778,12 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
         ))}
       </div>
 
-      {/* Day of eating */}
-      <div style={sectionGap}>
-        <Kicker style={{ marginBottom:10 }}>II · A Day of Eating</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 8px' }}>
-          What <em>{intake.toLocaleString()}</em> kcal &amp; <em>{protein}g</em> of protein actually looks like.
-        </h3>
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, margin:'0 0 18px' }}>
-          one possible day — adjust for your preferences, but match the totals.
-        </p>
+      <AccordionPanel
+        kicker="II · A Day of Eating"
+        title="See an example day."
+        summary={`Open this for one concrete example of roughly ${intake.toLocaleString()} kcal and ${protein}g of protein.`}
+        style={sectionGap}
+      >
         <ScrollRail minWidth={760}>
           <div style={{ borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
             {[
@@ -2769,14 +2810,14 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             </div>
           </div>
         </ScrollRail>
-      </div>
+      </AccordionPanel>
 
-      {/* Training split */}
-      <div style={sectionGap}>
-        <Kicker style={{ marginBottom:10 }}>III · The Training Split</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
-          Three sessions a week. <em>Forty-five minutes each.</em>
-        </h3>
+      <AccordionPanel
+        kicker="III · The Training Split"
+        title="See the three-session week."
+        summary="Open this for the weekly gym structure and the key movements for each day."
+        style={sectionGap}
+      >
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
           {[
             { day:'Monday',    focus:'Lower body',      exs:['Goblet squat 3×10','Romanian deadlift 3×10','Glute bridge 3×12','Leg press 3×12','Plank 3×30s'] },
@@ -2797,14 +2838,14 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
         <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'14px 0 0', fontStyle:'italic' }}>
           Add a 30-minute walk on rest days. Aim for 8,000 steps daily. Movement is the multiplier.
         </p>
-      </div>
+      </AccordionPanel>
 
-      {/* Weekly check-in */}
-      <div style={sectionGap}>
-        <Kicker style={{ marginBottom:10 }}>IV · Weekly Check-in Protocol</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
-          Every Monday morning. <em>Seven minutes, no skipping.</em>
-        </h3>
+      <AccordionPanel
+        kicker="IV · Weekly Check-in"
+        title="Open the Monday reset."
+        summary="Use this when it is time to review the week in a few minutes and decide the next adjustment."
+        style={sectionGap}
+      >
         <ol style={{ counterReset:'step', listStyle:'none', padding:0, margin:0, borderTop:`2px solid ${T.ink}` }}>
           {[
             'Step on the scale at the same time, in the same state (fasted, after bathroom, before clothes).',
@@ -2820,14 +2861,14 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             </li>
           ))}
         </ol>
-      </div>
+      </AccordionPanel>
 
-      {/* Troubleshooting */}
-      <div style={sectionGap}>
-        <Kicker style={{ marginBottom:10 }}>V · Troubleshooting</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
-          When the plan <em>stalls</em>.
-        </h3>
+      <AccordionPanel
+        kicker="V · Troubleshooting"
+        title="Open the problem-solving notes."
+        summary="Most weeks go off-track in predictable ways. Open this for the common issues and the calmer response to each one."
+        style={sectionGap}
+      >
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
           {[
             { p:'Weight hasn&apos;t moved in 2 weeks',                d:`Check calories actually consumed (use a fresh 3-day log). Likely intake has crept up ${100}-${200} kcal/day. Tighten the count, do not cut further.` },
@@ -2843,15 +2884,14 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             </div>
           ))}
         </div>
-      </div>
+      </AccordionPanel>
 
-      {/* The closing piece */}
-      <div style={{ ...sectionGap, padding:'40px 36px', background:T.goldSoft, borderLeft:`3px solid ${T.gold}` }}>
+      <div style={{ ...sectionGap, padding:'28px 30px', background:T.goldSoft, borderLeft:`3px solid ${T.gold}` }}>
         <Kicker color={T.gold} style={{ marginBottom:12 }}>The Closing Thought</Kicker>
-        <p style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:24, color:T.ink, lineHeight:1.45, margin:'0 0 12px' }}>
+        <p style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:22, color:T.ink, lineHeight:1.4, margin:'0 0 10px' }}>
           {sorted.length} readings show that you can lose weight; you have done it before, from {Math.max(...sorted.map(r=>r.weight))} kg down to {Math.min(...sorted.map(r=>r.weight))} kg.
         </p>
-        <p style={{ fontFamily:T.sans, fontSize:15, color:T.body, fontWeight:300, lineHeight:1.7, margin:0, maxWidth:'62ch' }}>
+        <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.7, margin:0, maxWidth:'62ch' }}>
           The work this time is different. It is not about losing — it is about <strong style={{ color:T.ink, fontWeight:500 }}>staying lost</strong>. Follow the five rules. File the weekly reading. Add it to the ledger. Trust the line.
         </p>
       </div>
@@ -3043,27 +3083,42 @@ export default function OperatorDashboardClient() {
     { label:'1 year',   kg:projAt(365), delta:projAt(365)-latest.weight },
   ] : [];
 
-  const TABS = ['Overview','Health','Projections','Plan','Charts','Ledger'];
+  const TABS = [
+    { label:'Overview', helper:'Start here for the signal, the latest reading, and the one chart that matters first.' },
+    { label:'Plan', helper:'What to do this week, with the detailed plan tucked behind sections you can open on demand.' },
+    { label:'Health', helper:'Body composition, weight-change patterns, and longer-term markers.' },
+    { label:'Projections', helper:'Trend direction, likely outcomes, and the pace needed to close the gap.' },
+    { label:'Charts', helper:'All core visuals together when you want the full picture.' },
+    { label:'Ledger', helper:'Every recorded weigh-in, newest first.' },
+  ];
+  const activeTabMeta = TABS.find((item) => item.label === tab) ?? TABS[0];
 
   return (
     <div style={{ background:T.paper, minHeight:'100vh' }}>
       <Wrap>
 
         {/* ── MASTHEAD ─────────────────────────────── */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:28 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:16, flexWrap:'wrap', marginBottom:22 }}>
           <div>
-            <Kicker>The Operator Log · Vol. 01 · Issue {sorted.length.toString().padStart(2,'0')}</Kicker>
+            <Kicker>Operator dashboard</Kicker>
+            <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'8px 0 0' }}>
+              Private fitness log · {sorted.length} recorded readings
+            </p>
           </div>
-          <Kicker color={T.ink}>{fmtDate(latest.date, { long:true })}</Kicker>
+          <div style={{ textAlign:'right' }}>
+            <Kicker color={T.ink}>{fmtDate(latest.date, { long:true })}</Kicker>
+            <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'8px 0 0' }}>
+              Goal · {goal.toFixed(1)} kg
+            </p>
+          </div>
         </div>
 
-        <h1 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.025em', lineHeight:0.96, color:T.ink, margin:'0 0 24px', maxWidth:'16ch' }}>
-          Weight, composition &amp; the <em>line headed home</em>.
+        <h1 style={{ fontFamily:T.display, fontWeight:400, fontSize: 30, letterSpacing:'-0.03em', lineHeight:0.98, color:T.ink, margin:'0 0 14px', maxWidth:'14ch' }}>
+          A calmer view of the trend.
         </h1>
 
-        <p style={{ fontFamily:T.sans, fontSize:18, fontWeight:300, lineHeight:1.7, color:T.body, margin:'0 0 24px', maxWidth:'58ch' }}>
-          {sorted.length === 7 ? 'Seventh' : `${sorted.length}th`} recorded weigh-in since November. A private operator log charting the slow march of the body, the slope of the trend, and what the regression projects forward against the{' '}
-          <em style={{ fontFamily:T.display, color:T.gold }}>{goal.toFixed(1)} kg</em> goal.
+        <p style={{ fontFamily:T.sans, fontSize:16, fontWeight:300, lineHeight:1.7, color:T.body, margin:'0 0 24px', maxWidth:'58ch' }}>
+          The dashboard now leads with the next decision instead of every possible metric. Start with the overview, then open the deeper tabs only when you need the detail.
         </p>
 
         <CommandDeck
@@ -3077,7 +3132,7 @@ export default function OperatorDashboardClient() {
           setTab={setTab}
         />
 
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0', borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}`, gap:24, flexWrap:'wrap', marginBottom:6 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0', borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}`, gap:24, flexWrap:'wrap', marginBottom:20 }}>
           <div style={{ display:'flex', gap:32, flexWrap:'wrap', alignItems:'baseline' }}>
             <Kicker>
               <span style={{ display:'inline-block', width:6, height:6, background: cloudOk?T.green:T.muted, marginRight:7, verticalAlign:'middle' }} />
@@ -3091,34 +3146,42 @@ export default function OperatorDashboardClient() {
         </div>
 
         {/* ── TABS ─────────────────────────────────── */}
-        <ScrollRail style={{ marginBottom:56 }}>
-          <nav style={{ display:'flex', gap:12, padding:'16px 0', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, minWidth:'max-content' }}>
-            {TABS.map(label => {
+        <div style={{ marginBottom:28 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:12 }}>
+            {TABS.map(({ label }) => {
               const active = tab===label;
               return (
                 <button key={label} onClick={()=>setTab(label)} style={{
-                  background: active ? T.ink : 'transparent',
+                  background: active ? T.ink : 'rgba(255,255,255,0.78)',
                   border:`1px solid ${active ? T.ink : T.line}`,
                   cursor:'pointer',
-                  padding:'10px 16px',
+                  padding:'14px 16px 13px',
                   fontFamily: active ? T.display : T.sans,
                   fontStyle: active ? 'italic' : 'normal',
-                  fontSize: active ? 16 : 10,
+                  fontSize: active ? 18 : 11,
                   fontWeight: active ? 400 : 600,
-                  letterSpacing: active ? '-0.01em' : '0.18em',
+                  letterSpacing: active ? '-0.01em' : '0.14em',
                   textTransform: active ? 'none' : 'uppercase',
-                  color: active ? T.paper : T.muted,
+                  color: active ? T.paper : T.ink,
                   transition:'all 180ms ease',
-                  whiteSpace:'nowrap',
+                  textAlign:'left',
                 }}>
-                  {active ? label.toLowerCase() : label}
+                  {active ? label : label}
                 </button>
               );
             })}
-          </nav>
-        </ScrollRail>
+          </div>
+          <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.68)' }}>
+            <Kicker style={{ marginBottom:6 }}>Current tab</Kicker>
+            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, marginBottom:6 }}>
+              {activeTabMeta.label}
+            </div>
+            <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'58ch' }}>
+              {activeTabMeta.helper}
+            </p>
+          </div>
+        </div>
 
-        {/* Sticky context strip — always visible across every tab */}
         <StatusStrip state={state} latest={latest} goal={goal} setTab={setTab} />
 
         {/* ── OVERVIEW ─────────────────────────────── */}
@@ -3126,23 +3189,40 @@ export default function OperatorDashboardClient() {
           <div>
             <ThisWeek state={state} latest={latest} setCompose={setCompose} setTab={setTab} />
 
-            <GoalCard state={state} latest={latest} goal={goal} />
-
             <div style={{ marginBottom:28 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:8 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:16, flexWrap:'wrap', marginBottom:10 }}>
                 <div>
-                  <Kicker style={{ marginBottom:4 }}>The useful chart</Kicker>
-                  <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, margin:0 }}>
-                    raw readings, smoothed trend, and the phase context that matters.
+                  <Kicker style={{ marginBottom:4 }}>The chart to check first</Kicker>
+                  <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'42ch' }}>
+                    Raw readings, the smoothed trend, and the phase bands in one place.
                   </p>
                 </div>
               </div>
               <PhaseChart sorted={sorted} goal={goal} range="all" />
             </div>
 
-            <HeroReading latest={latest} previous={previous} sorted={sorted} />
-            <ThisWeekGrid sorted={sorted} state={state} />
-            <DetailLaunchpad setCompose={setCompose} setTab={setTab} />
+            <GoalCard state={state} latest={latest} goal={goal} />
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:16 }}>
+              <AccordionPanel
+                kicker="Recent detail"
+                title="Open the latest pattern."
+                summary="Week-on-week movement, the latest figure, and this week’s weigh-in rhythm live here."
+              >
+                <HeroReading latest={latest} previous={previous} sorted={sorted} />
+                <ThisWeekGrid sorted={sorted} state={state} />
+              </AccordionPanel>
+
+              <AccordionPanel
+                kicker="Context"
+                title="Open the bigger story."
+                summary="Use this when you want the key moments in the journey and the short notes that put the current number into context."
+              >
+                <JourneyStory sorted={sorted} state={state} />
+                <CommandNotes sorted={sorted} state={state} latest={latest} />
+                <DetailLaunchpad setCompose={setCompose} setTab={setTab} />
+              </AccordionPanel>
+            </div>
           </div>
         )}
 
