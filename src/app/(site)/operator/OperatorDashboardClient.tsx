@@ -721,7 +721,7 @@ export default function OperatorDashboardClient() {
   const loadData = useCallback(async (pw: string) => {
     // Start with local data immediately so the UI is responsive
     const localRaw = localStorage.getItem(STORAGE_KEY);
-    const local: FitnessReading[] = localRaw ? JSON.parse(localRaw) : SEED_READINGS;
+    const local: FitnessReading[] = localRaw ? JSON.parse(localRaw) : SEED;
     setReadings(local);
     if (!localRaw) saveLocal(local);
 
