@@ -1448,3 +1448,371 @@
   letter-spacing: 0.04em;
   margin: 8px 0 0;
 }
+
+/* ── Health section v2 polish ──────────────────────────────────────────── */
+
+.fitness-reference-shell .op-health-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 26px;
+  line-height: 1.15;
+  color: var(--ink);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 6px 0 0;
+}
+
+.fitness-reference-shell .op-health-head-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.fitness-reference-shell .op-health-head-dot {
+  color: var(--ink-dim);
+}
+
+.fitness-reference-shell .op-health-empty-box {
+  padding: 24px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+}
+
+.fitness-reference-shell .op-health-empty-box p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.fitness-reference-shell .op-health-empty-box code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--ink);
+  background: var(--brass-haze);
+  padding: 1px 4px;
+}
+
+/* Today snapshot strip */
+
+.fitness-reference-shell .op-today-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  border: 0.5px solid var(--rule);
+  background: var(--paper);
+  margin-bottom: 20px;
+}
+
+@media (max-width: 980px) {
+  .fitness-reference-shell .op-today-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .fitness-reference-shell .op-today-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.fitness-reference-shell .op-snap-cell {
+  padding: 16px 18px;
+  border-right: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fitness-reference-shell .op-snap-cell:last-child {
+  border-right: none;
+}
+
+@media (max-width: 980px) {
+  .fitness-reference-shell .op-snap-cell:nth-child(3n) {
+    border-right: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .fitness-reference-shell .op-snap-cell:nth-child(2n) {
+    border-right: none;
+  }
+}
+
+.fitness-reference-shell .op-snap-label {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+
+.fitness-reference-shell .op-snap-value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  color: var(--ink);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.fitness-reference-shell .op-snap-baseline {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.fitness-reference-shell .op-snap-delta {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-snap-delta.good { color: var(--good); }
+.fitness-reference-shell .op-snap-delta.warn { color: var(--warn); }
+.fitness-reference-shell .op-snap-delta.neutral { color: var(--ink-mute); }
+
+/* Grid v2 */
+
+.fitness-reference-shell .op-health-grid-v2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr) 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.fitness-reference-shell .op-card-wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 1100px) {
+  .fitness-reference-shell .op-health-grid-v2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .fitness-reference-shell .op-card-wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-health-grid-v2 {
+    grid-template-columns: 1fr;
+  }
+  .fitness-reference-shell .op-card-wide {
+    grid-column: span 1;
+  }
+}
+
+/* Rings */
+
+.fitness-reference-shell .op-rings-row {
+  display: flex;
+  gap: 28px;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--brass-deep);
+}
+
+.fitness-reference-shell .op-ring {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fitness-reference-shell .op-ring-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.fitness-reference-shell .op-ring-num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 15px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.fitness-reference-shell .op-ring-lbl {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-top: 3px;
+}
+
+/* Bar chart */
+
+.fitness-reference-shell .op-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.fitness-reference-shell .op-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fitness-reference-shell .op-bar {
+  background: var(--ink-soft);
+  min-height: 1px;
+  width: 100%;
+  align-self: flex-end;
+}
+
+.fitness-reference-shell .op-bar.is-today {
+  background: var(--brass-deep);
+}
+
+.fitness-reference-shell .op-bar-lbl {
+  font-size: 8px;
+  text-align: center;
+  color: var(--ink-mute);
+  letter-spacing: 0.06em;
+}
+
+/* Line mini */
+
+.fitness-reference-shell .op-line-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-line-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.fitness-reference-shell .op-line-mini {
+  flex: 1;
+}
+
+/* Sleep week bars */
+
+.fitness-reference-shell .op-sleep-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  align-items: end;
+  height: 120px;
+  padding-top: 4px;
+}
+
+.fitness-reference-shell .op-sleep-night {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.fitness-reference-shell .op-sleep-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  background: var(--rule-soft);
+  min-height: 4px;
+}
+
+.fitness-reference-shell .op-sleep-stack-seg {
+  width: 100%;
+  display: block;
+}
+
+.fitness-reference-shell .op-sleep-night-lbl {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-sleep-night-lbl.is-today {
+  color: var(--brass-deep);
+  font-weight: 500;
+}
+
+.fitness-reference-shell .op-sleep-night-val {
+  font-size: 9px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Workouts: types breakdown */
+
+.fitness-reference-shell .op-workout-types {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0 8px;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-type-row {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+}
+
+.fitness-reference-shell .op-workout-type-name {
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fitness-reference-shell .op-workout-type-bar {
+  height: 4px;
+  background: var(--rule-soft);
+  display: block;
+  position: relative;
+}
+
+.fitness-reference-shell .op-workout-type-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--brass-deep);
+  display: block;
+}
+
+.fitness-reference-shell .op-workout-type-val {
+  font-size: 10px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.fitness-reference-shell .op-workout-recent-head {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-top: 4px;
+}
