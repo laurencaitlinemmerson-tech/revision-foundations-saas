@@ -3,6 +3,9 @@
 import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties,
 } from 'react';
+import FitnessLineChart from '@/components/operator/fitness/FitnessLineChart';
+import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
+import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -3832,17 +3835,287 @@ async function apiImportAppleHealth(pw:string, file: File) {
   }
 }
 
+type ReferenceMetricTone = 'good' | 'warn' | 'brass' | 'neutral';
+
+interface ReferenceMetric {
+  label: string;
+  value: string;
+  status: string;
+  tone: ReferenceMetricTone;
+}
+
+interface ReferencePhaseMarker {
+  id: string;
+  label: string;
+  start: string;
+  end: string;
+}
+
+interface ReferencePhaseRow {
+  id: string;
+  swatch: 'lean' | 'bulk' | 'cut' | 'recomp';
+  name: string;
+  emphasis: string;
+  when: string;
+  duration: string;
+  start: string;
+  end: string;
+  delta: string;
+  deltaClass: 'up' | 'down' | 'flat';
+  current?: boolean;
+}
+
+interface ReferenceWeekRow {
+  day: string;
+  date: string;
+  weight: number | null;
+  delta: string;
+  detail: string;
+  isToday: boolean;
+}
+
+const REFERENCE_DAY = 24 * 60 * 60 * 1000;
+
+function referenceMetric(
+  label: string,
+  value: string,
+  status: string,
+  tone: ReferenceMetricTone = 'neutral',
+): ReferenceMetric {
+  return { label, value, status, tone };
+}
+
+function formatReferenceDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function formatReferenceMonth(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function formatWeightDelta(value: number) {
+  if (!Number.isFinite(value) || Math.abs(value) < 0.05) return '+/-0.0kg';
+  return `${value > 0 ? '+' : ''}${value.toFixed(1)}kg`;
+}
+
+function nearestReadingByDays(sorted: FitnessReading[], entry: FitnessReading, days: number) {
+  const target = new Date(entry.date).getTime() - days * REFERENCE_DAY;
+  return sorted.reduce((best, row) => {
+    const diff = Math.abs(new Date(row.date).getTime() - target);
+    const bestDiff = Math.abs(new Date(best.date).getTime() - target);
+    return diff < bestDiff ? row : best;
+  }, sorted[0]);
+}
+
+function loggingCadence(sorted: FitnessReading[], windowDays = 14) {
+  const latest = sorted[sorted.length - 1];
+  const latestMs = new Date(latest.date).getTime();
+  const cutoff = latestMs - windowDays * REFERENCE_DAY;
+  const uniqueDays = new Set(
+    sorted
+      .filter((row) => new Date(row.date).getTime() >= cutoff)
+      .map((row) => row.date.slice(0, 10)),
+  ).size;
+  return {
+    count: uniqueDays,
+    score: Math.min(100, Math.round((uniqueDays / windowDays) * 100)),
+  };
+}
+
+function buildWeightSeries(sorted: FitnessReading[]) {
+  return sorted.map((row) => ({ date: row.date, value: row.weight }));
+}
+
+function buildRollingAverage(sorted: FitnessReading[], windowDays = 45) {
+  return sorted.map((row) => {
+    const target = new Date(row.date).getTime();
+    const sample = sorted.filter((item) => {
+      const time = new Date(item.date).getTime();
+      return time >= target - windowDays * REFERENCE_DAY && time <= target;
+    });
+    const average = sample.reduce((sum, item) => sum + item.weight, 0) / Math.max(1, sample.length);
+    return { date: row.date, value: Math.round(average * 10) / 10 };
+  });
+}
+
+function buildReferencePhaseMarkers(sorted: FitnessReading[]): ReferencePhaseMarker[] {
+  if (sorted.length < 2) return [];
+  const lastIndex = sorted.length - 1;
+  const bounds = [
+    0,
+    Math.max(1, Math.floor(lastIndex * 0.24)),
+    Math.max(2, Math.floor(lastIndex * 0.52)),
+    Math.max(3, Math.floor(lastIndex * 0.78)),
+    lastIndex,
+  ].map((index, position, arr) => {
+    const min = position === 0 ? 0 : arr[position - 1];
+    return Math.min(lastIndex, Math.max(min, index));
+  });
+
+  return [
+    { id: 'p1', label: 'lean phase', start: sorted[bounds[0]].date, end: sorted[bounds[1]].date },
+    { id: 'p2', label: 'bulk phase', start: sorted[bounds[1]].date, end: sorted[bounds[2]].date },
+    { id: 'p3', label: 'fat loss push', start: sorted[bounds[2]].date, end: sorted[bounds[3]].date },
+    { id: 'p4', label: 'recomposition', start: sorted[bounds[3]].date, end: sorted[bounds[4]].date },
+  ];
+}
+
+function formatPhaseDuration(startIso: string, endIso: string) {
+  const months = Math.max(
+    1,
+    Math.round((new Date(endIso).getTime() - new Date(startIso).getTime()) / (REFERENCE_DAY * 30)),
+  );
+  if (months >= 24) return `${Math.round(months / 12)} years`;
+  if (months >= 12) return `${Math.round(months / 12)} year`;
+  return `${months} months`;
+}
+
+function buildReferencePhaseRows(sorted: FitnessReading[]) {
+  const phases = buildReferencePhaseMarkers(sorted);
+  return phases
+    .map((phase, index): ReferencePhaseRow => {
+      const startReading = sorted.find((row) => row.date === phase.start) ?? sorted[0];
+      const endReading = sorted.find((row) => row.date === phase.end) ?? sorted[sorted.length - 1];
+      const delta = endReading.weight - startReading.weight;
+      const current = index === phases.length - 1;
+      const descriptors: Record<string, { name: string; emphasis: string; swatch: ReferencePhaseRow['swatch'] }> = {
+        'lean phase': { name: 'Lean', emphasis: 'phase', swatch: 'lean' },
+        'bulk phase': { name: 'Bulk', emphasis: 'phase', swatch: 'bulk' },
+        'fat loss push': { name: 'Fat loss', emphasis: 'push', swatch: 'cut' },
+        'recomposition': { name: 'Recomposition', emphasis: current ? '- live' : 'phase', swatch: 'recomp' },
+      };
+      const descriptor = descriptors[phase.label] ?? descriptors.recomposition;
+
+      return {
+        id: phase.id,
+        swatch: descriptor.swatch,
+        name: descriptor.name,
+        emphasis: descriptor.emphasis,
+        when: current ? `${formatReferenceMonth(phase.start)} - present` : `${formatReferenceMonth(phase.start)} - ${formatReferenceMonth(phase.end)}`,
+        duration: formatPhaseDuration(phase.start, phase.end),
+        start: `${startReading.weight.toFixed(1)}kg start`,
+        end: current ? `${endReading.weight.toFixed(1)}kg now` : `${endReading.weight.toFixed(1)}kg end`,
+        delta: `${delta > 0 ? '+' : ''}${delta.toFixed(1)}kg`,
+        deltaClass: delta > 0.05 ? 'up' : delta < -0.05 ? 'down' : 'flat',
+        current,
+      };
+    })
+    .reverse();
+}
+
+function buildPhotoMilestones(sorted: FitnessReading[]): FitnessPhotoMilestone[] {
+  const picks = [
+    sorted[0],
+    sorted[Math.floor((sorted.length - 1) * 0.25)],
+    sorted[Math.floor((sorted.length - 1) * 0.5)],
+    sorted[Math.floor((sorted.length - 1) * 0.75)],
+    sorted[sorted.length - 1],
+  ].filter(Boolean) as FitnessReading[];
+
+  const unique = Array.from(new Map(picks.map((row) => [row.date, row])).values());
+  return unique.map((row, index) => ({
+    id: `pm-${index}-${row.date}`,
+    date: row.date,
+    label: index === 0 ? 'Start line' : index === unique.length - 1 ? 'Latest scan' : formatReferenceDate(row.date),
+    weightKg: Math.round(row.weight * 10) / 10,
+    bodyFat: Math.round(row.bodyFat * 10) / 10,
+    note: index === 0 ? 'Opening reference point' : index === unique.length - 1 ? 'Current reference point' : 'Archived milestone',
+  }));
+}
+
+function buildWeekRows(sorted: FitnessReading[]): ReferenceWeekRow[] {
+  const latest = sorted[sorted.length - 1];
+  const today = new Date(latest.date);
+  const dayOfWeek = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+  monday.setHours(0, 0, 0, 0);
+  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  return dayLabels.map((day, index) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + index);
+    const isoDate = date.toISOString().slice(0, 10);
+    const entry = sorted.find((row) => row.date.slice(0, 10) === isoDate);
+    const previousDate = new Date(date);
+    previousDate.setDate(date.getDate() - 1);
+    const previousEntry = sorted.find((row) => row.date.slice(0, 10) === previousDate.toISOString().slice(0, 10));
+    const weight = entry?.weight ?? null;
+    const delta = weight !== null && previousEntry
+      ? formatWeightDelta(weight - previousEntry.weight)
+      : weight !== null
+      ? '+/-0.0kg'
+      : 'No log';
+
+    return {
+      day,
+      date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      weight,
+      delta,
+      detail: entry
+        ? `BF ${entry.bodyFat.toFixed(1)}% · BMI ${entry.bmi.toFixed(1)}`
+        : 'No weigh-in',
+      isToday: isoDate === latest.date.slice(0, 10),
+    };
+  });
+}
+
+function buildHeroMetrics(sorted: FitnessReading[]) {
+  const latest = sorted[sorted.length - 1];
+  const monthAgo = nearestReadingByDays(sorted, latest, 30);
+  const discipline = loggingCadence(sorted);
+  const bodyFatDelta = latest.bodyFat - monthAgo.bodyFat;
+  const muscleDelta = latest.muscleMass - monthAgo.muscleMass;
+  const boneDelta = latest.boneMass - monthAgo.boneMass;
+  const bmiLabel = bmiStatus(latest.bmi)[0];
+  const waterLabel = waterStatus(latest.water)[0];
+
+  return [
+    referenceMetric('Body fat', `${latest.bodyFat.toFixed(1)}%`, `${bodyFatDelta > 0 ? '+' : ''}${bodyFatDelta.toFixed(1)} in 30d`, bodyFatDelta <= 0 ? 'good' : 'warn'),
+    referenceMetric('Muscle mass', `${latest.muscleMass.toFixed(1)}%`, `${muscleDelta > 0 ? '+' : ''}${muscleDelta.toFixed(1)} in 30d`, muscleDelta >= 0 ? 'good' : 'warn'),
+    referenceMetric('BMI', latest.bmi.toFixed(1), bmiLabel, latest.bmi < 30 ? 'good' : 'warn'),
+    referenceMetric('Bone mass', `${latest.boneMass.toFixed(2)}kg`, boneDelta >= 0 ? 'Stable or up' : 'Watch trend', boneDelta >= 0 ? 'good' : 'neutral'),
+    referenceMetric('Water', `${latest.water.toFixed(1)}%`, waterLabel, latest.water >= 40 ? 'good' : 'warn'),
+    referenceMetric('Discipline', `${discipline.score}/100`, `${discipline.count}/14 days logged`, discipline.score >= 80 ? 'brass' : discipline.score >= 60 ? 'neutral' : 'warn'),
+  ];
+}
+
+function buildSideMetrics(sorted: FitnessReading[], goal: number, reg: Reg | null) {
+  const latest = sorted[sorted.length - 1];
+  const monthAgo = nearestReadingByDays(sorted, latest, 30);
+  const monthlyDelta = latest.weight - monthAgo.weight;
+  const weeklyRate = reg ? reg.slope * 7 : 0;
+
+  return [
+    referenceMetric('Weight', `${latest.weight.toFixed(1)}kg`, latest.weight <= goal ? 'At goal' : `${(latest.weight - goal).toFixed(1)}kg to goal`, latest.weight <= goal ? 'good' : 'warn'),
+    referenceMetric('BMI', latest.bmi.toFixed(1), bmiStatus(latest.bmi)[0], latest.bmi < 30 ? 'good' : 'warn'),
+    referenceMetric('Body fat', `${latest.bodyFat.toFixed(1)}%`, fatStatus(latest.bodyFat)[0], latest.bodyFat < 39 ? 'good' : 'warn'),
+    referenceMetric('Water', `${latest.water.toFixed(1)}%`, waterStatus(latest.water)[0], latest.water >= 40 ? 'good' : 'warn'),
+    referenceMetric('Monthly delta', formatWeightDelta(monthlyDelta), monthlyDelta <= 0 ? 'Moving lower' : 'Moving higher', monthlyDelta <= 0 ? 'good' : 'warn'),
+    referenceMetric('Trend rate', reg ? `${weeklyRate > 0 ? '+' : ''}${weeklyRate.toFixed(2)}kg/wk` : 'Need more data', reg ? (weeklyRate < 0 ? 'Regression line down' : 'Regression line up') : 'Awaiting trend', reg ? (weeklyRate < 0 ? 'good' : 'warn') : 'neutral'),
+  ];
+}
+
 // ─── Main app ─────────────────────────────────────────────────────────────────
 
 export default function OperatorDashboardClient() {
   const [authed, setAuthed]   = useState(false);
   const [opPw, setOpPw]       = useState('');
-  const [tab, setTab]         = useState('Overview');
   const [readings, setReadings] = useState<FitnessReading[]>([]);
   const [goal, setGoal]       = useState(60.0);
   const [compose, setCompose] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
+  const [appleHealthFile, setAppleHealthFile] = useState<File | null>(null);
+  const [appleHealthStatus, setAppleHealthStatus] = useState<{ tone: 'ok' | 'err' | 'neutral'; message: string } | null>(null);
+  const [importingAppleHealth, setImportingAppleHealth] = useState(false);
 
   const saveLocal = useCallback((rs:FitnessReading[]) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(rs)); }, []);
 
@@ -3866,6 +4139,19 @@ export default function OperatorDashboardClient() {
     if (!opPw) return;
     await loadData(opPw);
   }, [loadData, opPw]);
+
+  const handleAppleHealthImport = useCallback(async () => {
+    if (!opPw || !appleHealthFile) return;
+    setImportingAppleHealth(true);
+    setAppleHealthStatus({ tone: 'neutral', message: 'Reading Apple Health export...' });
+    const result = await apiImportAppleHealth(opPw, appleHealthFile);
+    if (result.ok) {
+      await refreshCloudReadings();
+      setAppleHealthFile(null);
+    }
+    setAppleHealthStatus({ tone: result.ok ? 'ok' : 'err', message: result.message });
+    setImportingAppleHealth(false);
+  }, [appleHealthFile, opPw, refreshCloudReadings]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -3902,10 +4188,17 @@ export default function OperatorDashboardClient() {
   }, [readings, opPw, saveLocal]);
 
   const sorted   = useMemo(() => [...readings].sort((a,b)=>a.date.localeCompare(b.date)), [readings]);
-  const reg      = useMemo(() => regress(sorted), [sorted]);
-  const latest   = sorted[sorted.length-1];
-  const previous = sorted.length>=2 ? sorted[sorted.length-2] : latest;
+  const dashboardSource = sorted.length > 0 ? sorted : SEED;
+  const reg      = useMemo(() => regress(dashboardSource), [dashboardSource]);
+  const latest   = dashboardSource[dashboardSource.length - 1];
   const state    = useMemo(() => assessState(sorted.length > 0 ? sorted : SEED, goal), [sorted, goal]);
+  const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(dashboardSource), [dashboardSource]);
+  const phaseRows = useMemo(() => buildReferencePhaseRows(dashboardSource), [dashboardSource]);
+  const photoMilestones = useMemo(() => buildPhotoMilestones(dashboardSource), [dashboardSource]);
+  const heroMetrics = useMemo(() => buildHeroMetrics(dashboardSource), [dashboardSource]);
+  const rollingAverage = useMemo(() => buildRollingAverage(dashboardSource), [dashboardSource]);
+  const sideMetrics = useMemo(() => buildSideMetrics(dashboardSource, goal, reg), [dashboardSource, goal, reg]);
+  const weekRows = useMemo(() => buildWeekRows(dashboardSource), [dashboardSource]);
 
   if (!authed) {
     return <Lock onUnlock={() => {
@@ -3915,253 +4208,320 @@ export default function OperatorDashboardClient() {
   }
 
   if (!latest) return <div style={{ background:T.paper, minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted }}>No readings yet.</p></div>;
-
-  const slopePerWeek = reg ? reg.slope*7 : 0;
-  const remaining = latest.weight - goal;
-  const reqRate6m = remaining/26;
-  const reqRate1y = remaining/52;
-
-  const projAt = (d:number) => reg ? project(reg, daysFrom(reg, new Date(latest.date)) + d) : 0;
-  const projections = reg ? [
-    { label:'1 month',  kg:projAt(30),  delta:projAt(30)-latest.weight },
-    { label:'3 months', kg:projAt(90),  delta:projAt(90)-latest.weight },
-    { label:'6 months', kg:projAt(180), delta:projAt(180)-latest.weight },
-    { label:'1 year',   kg:projAt(365), delta:projAt(365)-latest.weight },
-  ] : [];
-
-  const TABS = [
-    { label:'Overview', helper:'Start here for the next decision, the weekly rhythm, and the current state without all the graphs.' },
-    { label:'Plan', helper:'What to do this week, with the detailed plan tucked behind sections you can open on demand.' },
-    { label:'Health', helper:'Every visual lives here now: timeline, projections, composition, BMI and monthly pattern.' },
-    { label:'Projections', helper:'Likely outcomes, required pace, milestones and the phased route back to goal.' },
-    { label:'Ledger', helper:'Every recorded weigh-in, newest first.' },
-  ];
-  const activeTabMeta = TABS.find((item) => item.label === tab) ?? TABS[0];
+  const previousWeek = nearestReadingByDays(dashboardSource, latest, 7);
+  const monthAgo = nearestReadingByDays(dashboardSource, latest, 30);
+  const cadence = loggingCadence(dashboardSource);
+  const nutrition = nutritionTargets(latest);
+  const targetDelta = latest.weight - goal;
+  const sevenDayDelta = latest.weight - previousWeek.weight;
+  const projectedGoal = reg ? goalDate(reg, goal) : null;
+  const peakWeight = Math.max(...dashboardSource.map((row) => row.weight));
+  const progress = peakWeight <= goal ? 100 : Math.max(0, Math.min(100, ((peakWeight - latest.weight) / (peakWeight - goal)) * 100));
+  const syncSummary = cloudOk === null ? 'Local-first mode' : cloudOk ? (syncing ? 'Cloud syncing now' : 'Cloud sync active') : 'Local backup only';
 
   return (
-    <div style={{
-      background:`radial-gradient(circle at 10% 0%, rgba(24,95,165,0.08), transparent 34%), radial-gradient(circle at 90% 10%, rgba(99,56,6,0.08), transparent 30%), ${T.paper}`,
-      minHeight:'100vh',
-    }}>
-      <Wrap>
-
-        {/* ── MASTHEAD ─────────────────────────────── */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:16, flexWrap:'wrap', marginBottom:18 }}>
+    <div className="fitness-reference-shell">
+      <main className="wrap fitness-redesign">
+        <div className="fitness-utility-bar">
           <div>
-            <Kicker>Operator dashboard</Kicker>
-            <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'8px 0 0' }}>
-              Private fitness log · {sorted.length} recorded readings
-            </p>
+            <div className="fitness-utility-kicker">Operator fitness</div>
+            <div className="fitness-utility-meta">
+              {dashboardSource.length} readings · {syncSummary}
+            </div>
           </div>
-          <button onClick={() => { localStorage.removeItem(AUTH_KEY); setAuthed(false); }} style={{ background:'transparent', border:0, cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, padding:'0 0 3px' }}>
+          <button
+            type="button"
+            className="fitness-lock-btn"
+            onClick={() => {
+              localStorage.removeItem(AUTH_KEY);
+              setAuthed(false);
+            }}
+          >
             Lock
           </button>
         </div>
 
-        <TodayGlanceStrip
-          latest={latest}
-          goal={goal}
-          state={state}
-          reg={reg}
-          cloudOk={cloudOk}
-          syncing={syncing}
-          setCompose={setCompose}
-          setTab={setTab}
-        />
-
-        <DashboardHero
-          latest={latest}
-          previous={previous}
-          sorted={sorted}
-          state={state}
-          goal={goal}
-          cloudOk={cloudOk}
-          syncing={syncing}
-        />
-
-        {/* ── TABS ─────────────────────────────────── */}
-        <div style={{ marginBottom:28 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:12 }}>
-            {TABS.map(({ label }) => {
-              const active = tab===label;
-              return (
-                <button key={label} onClick={()=>setTab(label)} style={{
-                  background: active ? T.ink : 'rgba(255,255,255,0.82)',
-                  border:`1px solid ${active ? T.ink : T.line}`,
-                  boxShadow: active ? 'none' : '0 12px 30px rgba(26,24,21,0.03)',
-                  cursor:'pointer',
-                  padding:'14px 16px 13px',
-                  fontFamily: active ? T.display : T.sans,
-                  fontStyle: active ? 'italic' : 'normal',
-                  fontSize: active ? 18 : 11,
-                  fontWeight: active ? 400 : 600,
-                  letterSpacing: active ? '-0.01em' : '0.14em',
-                  textTransform: active ? 'none' : 'uppercase',
-                  color: active ? T.paper : T.ink,
-                  transition:'all 180ms ease',
-                  textAlign:'left',
-                }}>
-                  {active ? label : label}
-                </button>
-              );
-            })}
+        <section className="fit-today">
+          <div className="fit-today-head">
+            <span className="fit-today-label">Today at a glance</span>
+            <span className="muted">{formatReferenceDate(latest.date)}</span>
           </div>
-          <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.74)' }}>
-            <Kicker style={{ marginBottom:6 }}>Current tab</Kicker>
-            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, marginBottom:6 }}>
-              {activeTabMeta.label}
-            </div>
-            <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'58ch' }}>
-              {activeTabMeta.helper}
-            </p>
-          </div>
-        </div>
 
-        {/* ── OVERVIEW ─────────────────────────────── */}
-        {tab==='Overview' && (
-          <OverviewTabView
-            latest={latest}
-            sorted={sorted}
-            goal={goal}
-            state={state}
-            setCompose={setCompose}
-            setTab={setTab}
-          />
-        )}
-
-        {/* ── HEALTH ───────────────────────────────── */}
-        {tab==='Health' && <HealthTab sorted={sorted} goal={goal} reg={reg} />}
-
-        {/* ── PLAN ─────────────────────────────────── */}
-        {tab==='Plan' && <PlanTab sorted={sorted} goal={goal} state={state} setTab={setTab} />}
-
-        {/* ── PROJECTIONS ──────────────────────────── */}
-        {tab==='Projections' && reg && (
-          <div>
-            <Kicker style={{ marginBottom:10 }}>Section IV · Projections</Kicker>
-            <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 32px', maxWidth:'18ch' }}>
-              At the current rate, here is where the line <em>leads</em>.
-            </h2>
-
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:24, alignItems:'baseline', padding:'28px 0', borderTop:`2px solid ${T.ink}`, borderBottom:`2px solid ${T.ink}`, marginBottom:48 }}>
-              <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 32, color: slopePerWeek>=0 ? T.rose : T.green, letterSpacing:'-0.03em', lineHeight:0.9 }}>
-                {slopePerWeek>=0?'+':''}{slopePerWeek.toFixed(2)}
-                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize: 20, opacity:0.7 }}> kg/wk</span>
-              </span>
-              <div>
-                <Kicker color={slopePerWeek>=0?T.rose:T.green} style={{ marginBottom:8 }}>Current Trend Rate</Kicker>
-                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, lineHeight:1.4, marginBottom:4 }}>
-                  {slopePerWeek>=0 ? 'gaining' : 'losing'} weight at a steady pace.
+          <div className="fit-glance-row">
+            <div className="glance-card glance-cal-balance">
+              <div className="gcb-row">
+                <div className="gcb-col">
+                  <div className="gcb-num">{latest.weight.toFixed(1)}</div>
+                  <div className="gcb-lbl">kg logged</div>
+                  <div className="gcb-sub muted">BMI {latest.bmi.toFixed(1)} · body fat {latest.bodyFat.toFixed(1)}%</div>
                 </div>
-                <div style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300 }}>
-                  Confidence — high. Linear fit explains <strong style={{ color:T.ink }}>{Math.round(reg.r2*100)}%</strong> of variance across {sorted.length} readings.
+                <div className="gcb-divider" />
+                <div className="gcb-col">
+                  <div className={`gcb-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{Math.abs(targetDelta).toFixed(1)}</div>
+                  <div className="gcb-lbl">{targetDelta <= 0 ? 'kg under goal' : 'kg to target'}</div>
+                  <div className="gcb-sub muted">Goal line {goal.toFixed(1)}kg</div>
+                </div>
+                <div className="gcb-divider" />
+                <div className="gcb-col">
+                  <div className={`gcb-num ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>{formatWeightDelta(latest.weight - monthAgo.weight).replace('kg', '')}</div>
+                  <div className="gcb-lbl">30-day move</div>
+                  <div className={`gcb-sub ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>
+                    {latest.weight - monthAgo.weight <= 0 ? 'Trend is quieter' : 'Drift needs tightening'}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <Kicker style={{ marginBottom:14 }}>Horizons · Naïve Linear Extrapolation</Kicker>
-            {slopePerWeek > 0 && (
-              <div style={{ background:T.roseSoft, border:`0.5px solid ${T.rose}`, padding:'14px 18px', marginBottom:18 }}>
-                <p style={{ fontFamily:T.sans, fontSize:13, color:T.rose, fontWeight:500, margin:0, letterSpacing:'0.02em' }}>
-                  ⚠ You are currently gaining weight. These projections show where the trend leads if nothing changes.
+            <div className="glance-card">
+              <div className="gc-icon">%</div>
+              <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
+              <div className="gc-lbl">body fat</div>
+              <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
+            </div>
+
+            <div className="glance-card">
+              <div className="gc-icon">B</div>
+              <div className="gc-num">{latest.bmi.toFixed(1)}</div>
+              <div className="gc-lbl">BMI</div>
+              <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
+            </div>
+
+            <div className="glance-card">
+              <div className="gc-icon">14</div>
+              <div className="gc-num">{cadence.count}</div>
+              <div className="gc-lbl">days logged</div>
+              <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
+            </div>
+
+            <div className="glance-card">
+              <div className="gc-icon">A</div>
+              <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
+              <div className="gc-lbl">sync mode</div>
+              <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
+            </div>
+          </div>
+        </section>
+
+        <section className="fit-hero">
+          <div className="fit-hero-top">
+            <div>
+              <div className="fit-eyebrow">
+                <span>Fitness</span>
+                <span className="slash">/</span>
+                <span className="pill brass">Auto sync live</span>
+                <span className="pill neutral">Last log {formatReferenceDate(latest.date)}</span>
+              </div>
+              <h1>Body composition <em>timeline</em></h1>
+              <div className="sub">
+                <span>{formatReferenceDate(dashboardSource[0].date)} start</span>
+                <span className="dot" />
+                <span>{dashboardSource.length.toLocaleString('en-GB')} readings</span>
+                <span className="dot" />
+                <span>{phaseMarkers.length} phases logged</span>
+                <span className="dot" />
+                <span className="muted">{syncSummary}</span>
+              </div>
+            </div>
+            <div className="fit-headline-stat">
+              <div className="lbl">Today - {formatReferenceDate(latest.date)}</div>
+              <div className="num">{latest.weight.toFixed(1)}<small>kg</small></div>
+              <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} - 7-day marker</div>
+            </div>
+          </div>
+
+          <div className="fit-stat-strip">
+            {heroMetrics.map((metric) => (
+              <div className="cell" key={metric.label}>
+                <div className="lbl">{metric.label}</div>
+                <div className="v">{metric.value}</div>
+                <div className={`meta ${metric.tone}`}>{metric.status}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="fit-grid">
+          <div className="fit-main">
+            <FitnessLineChart
+              title={<>Weight, phases and <em>evidence</em></>}
+              subtitle="Raw readings - smoothed trend - phase bands - pinned events"
+              points={buildWeightSeries(dashboardSource)}
+              color="oklch(0.70 0.012 70 / 0.48)"
+              minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
+              maxY={Math.ceil(Math.max(...dashboardSource.map((row) => row.weight)) + 2)}
+              annotations={[
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Leanest point',
+                },
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Peak weight',
+                },
+                { date: latest.date, value: latest.weight, title: 'Today' },
+              ]}
+              secondaryPoints={rollingAverage}
+              secondaryColor="oklch(0.70 0.12 76)"
+              secondaryLabel="45-day trend"
+              phases={phaseMarkers}
+              targetWeight={goal}
+              showRangeToggle
+            />
+
+            <div className="fit-panel">
+              <div className="fit-panel-head">
+                <div>
+                  <h3>This <em>week</em></h3>
+                  <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+                </div>
+              </div>
+              <div className="week-grid">
+                {weekRows.map((row) => (
+                  <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                    <div className="dow">{row.day}</div>
+                    <div className="date">{row.date}</div>
+                    <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                    <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                    <div className="icons"><span>{row.detail}</span></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="fit-panel">
+              <div className="fit-panel-head">
+                <div>
+                  <h3>Phase <em>log</em></h3>
+                  <div className="meta">The story rendered in the same cadence as the reference dashboard</div>
+                </div>
+              </div>
+              <div className="phase-log">
+                {phaseRows.map((row) => (
+                  <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
+                    <div className={`swatch ${row.swatch}`} />
+                    <div className="name">{row.name} <em>{row.emphasis}</em><span className="when">{row.when}</span></div>
+                    <div className="duration">{row.duration}</div>
+                    <div className="start">{row.start}</div>
+                    <div className="end">{row.end}</div>
+                    <div className={`delta ${row.deltaClass}`}>{row.delta}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="fit-panel fit-photo-panel">
+              <div className="fit-panel-head">
+                <div>
+                  <h3>Visual <em>evidence</em></h3>
+                  <div className="meta">Date-stamped progress slots wired to this same timeline</div>
+                </div>
+              </div>
+              <PhotoTimeline items={photoMilestones} />
+            </div>
+          </div>
+
+          <aside className="fit-side">
+            <div className="goal-card">
+              <div className="head"><span>Current goal</span><span className="pill brass">{targetDelta <= 0 ? 'On target' : 'Active cut'}</span></div>
+              <div className="target">{goal.toFixed(1)}kg <em>working line</em></div>
+              <div className="by">
+                {projectedGoal
+                  ? `Projected from current slope - ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                  : 'Projection appears once the trend line starts moving down'}
+              </div>
+              <div className="bar">
+                <span className="fill" style={{ width: `${progress}%` }} />
+                <span className="marker" style={{ left: '100%' }} />
+              </div>
+              <div className="stats">
+                <div><div className="lbl">To goal</div><div className="v">{targetDelta.toFixed(1)}kg</div></div>
+                <div><div className="lbl">7-day move</div><div className="v">{formatWeightDelta(sevenDayDelta)}</div></div>
+                <div><div className="lbl">Intake plan</div><div className="v">{nutrition.intake.toLocaleString()} kcal</div></div>
+                <div><div className="lbl">BMR estimate</div><div className="v">{nutrition.bmr.toLocaleString()} kcal</div></div>
+              </div>
+            </div>
+
+            <div className="fit-panel side-panel">
+              <div className="fit-panel-head"><h3>Today <em>scan</em></h3></div>
+              <div className="side-metric-grid">
+                {sideMetrics.map((metric) => (
+                  <div className="side-metric" key={metric.label}>
+                    <span>{metric.label}</span>
+                    <strong>{metric.value}</strong>
+                    <em className={metric.tone}>{metric.status}</em>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="fit-panel side-panel">
+              <div className="fit-panel-head"><h3>Command <em>notes</em></h3></div>
+              <div className="command-notes">
+                <p>
+                  The layout now mirrors your reference dashboard directly, while still reading from the same operator fitness ledger and Apple Health sync path.
+                </p>
+                <p>
+                  Your iPhone auto-export app should keep posting into <code>/api/operator/fitness/auto-sync</code>. If that ever misses a day, you can use the XML fallback here without breaking the daily timeline.
+                </p>
+
+                <div className="fitness-command-row">
+                  <button type="button" className="fitness-action-btn primary" onClick={() => setCompose(true)}>
+                    File weigh-in
+                  </button>
+                  <button type="button" className="fitness-action-btn secondary" onClick={() => { void refreshCloudReadings(); }}>
+                    Refresh cloud
+                  </button>
+                </div>
+
+                <label className="fitness-file-input">
+                  <span>Apple Health XML fallback</span>
+                  <input
+                    type="file"
+                    accept=".xml,text/xml,application/xml"
+                    onChange={(event) => {
+                      setAppleHealthFile(event.target.files?.[0] ?? null);
+                      setAppleHealthStatus(null);
+                    }}
+                  />
+                </label>
+
+                <div className="fitness-command-row">
+                  <button
+                    type="button"
+                    className="fitness-action-btn secondary"
+                    disabled={!appleHealthFile || importingAppleHealth}
+                    onClick={() => { void handleAppleHealthImport(); }}
+                  >
+                    {importingAppleHealth ? 'Importing...' : 'Import Apple Health'}
+                  </button>
+                  <button
+                    type="button"
+                    className="fitness-action-btn subtle"
+                    onClick={() => {
+                      setAppleHealthFile(null);
+                      setAppleHealthStatus(null);
+                    }}
+                  >
+                    Clear file
+                  </button>
+                </div>
+
+                {appleHealthStatus && (
+                  <p className={`fitness-inline-note ${appleHealthStatus.tone}`}>
+                    {appleHealthStatus.message}
+                  </p>
+                )}
+
+                <p className="fitness-inline-note">
+                  Current mode: <code>{syncSummary}</code>
                 </p>
               </div>
-            )}
-            <ScrollRail minWidth={620}>
-              <div style={{ borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
-                  <Kicker>Horizon</Kicker><Kicker style={{ textAlign:'right' }}>Projected weight</Kicker><Kicker style={{ textAlign:'right' }}>Δ from today</Kicker>
-                </div>
-                {projections.map((p,i) => (
-                  <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'22px 0', borderBottom: i<projections.length-1 ? `0.5px solid ${T.softLine}` : 'none', alignItems:'baseline' }}>
-                    <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.ink }}>{p.label}</div>
-                    <div style={{ fontFamily:T.display, fontSize: 20, color:T.ink, textAlign:'right', letterSpacing:'-0.01em' }}>
-                      {p.kg.toFixed(1)} <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
-                    </div>
-                    <div style={{ textAlign:'right' }}>
-                      <span style={{ fontFamily:T.sans, fontSize:11, fontWeight:500, padding:'4px 10px', background: p.delta>=0?T.roseSoft:T.greenSoft, color: p.delta>=0?T.rose:T.green, letterSpacing:'0.2em', textTransform:'uppercase' }}>
-                        {p.delta>=0?'↑':'↓'} {Math.abs(p.delta).toFixed(1)} kg
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollRail>
-
-            <Kicker style={{ marginTop:56, marginBottom:14 }}>Required Pace · To Close the Gap</Kicker>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:56 }}>
-              {[
-                { label:'To hit goal in 6 months', value:-reqRate6m, unit:'kg / week', accent:T.gold },
-                { label:'To hit goal in 1 year',   value:-reqRate1y, unit:'kg / week', accent:T.gold },
-                { label:'Distance from goal',       value:remaining,  unit:'kilograms', accent:T.rose },
-              ].map((m,i) => (
-                <div key={i} style={{ padding:'26px 26px', borderRight: i<2?`0.5px solid ${T.line}`:'none' }}>
-                  <Kicker style={{ marginBottom:12 }}>{m.label}</Kicker>
-                  <div style={{ display:'flex', alignItems:'baseline', gap:6 }}>
-                    <span style={{ fontFamily:T.display, fontSize: 24, color:m.accent, letterSpacing:'-0.02em', lineHeight:1 }}>
-                      {(m.value>=0?'+':'')+m.value.toFixed(2)}
-                    </span>
-                  </div>
-                  <Kicker color={T.muted} style={{ marginTop:6 }}>{m.unit}</Kicker>
-                </div>
-              ))}
             </div>
-
-            <div style={{ padding:'18px 20px', background:'rgba(255,255,255,0.72)', border:`1px solid ${T.line}`, marginBottom:56 }}>
-              <Kicker style={{ marginBottom:8 }}>Visual note</Kicker>
-              <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.65, margin:0, maxWidth:'56ch' }}>
-                The projection chart now lives in <strong style={{ color:T.ink, fontWeight:500 }}>Health</strong> with the rest of the visuals, so this tab can stay focused on pacing, milestones and the route back to goal.
-              </p>
-            </div>
-
-            <Milestones sorted={sorted} reg={reg} goal={goal} />
-            <CutStrategies sorted={sorted} goal={goal} />
-            <Phases sorted={sorted} goal={goal} reg={reg} />
-          </div>
-        )}
-
-        {/* ── LEDGER ───────────────────────────────── */}
-        {tab==='Ledger' && (
-          <div>
-            <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', flexWrap:'wrap', gap:18, marginBottom:28 }}>
-              <div>
-                <Kicker style={{ marginBottom:10 }}>Section VII · The Ledger</Kicker>
-                <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:0 }}>Every <em>weigh-in</em>, in order.</h2>
-              </div>
-              <button onClick={()=>setCompose(true)} style={{ background:T.ink, color:T.paper, border:0, cursor:'pointer', padding:'14px 30px', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase' }}>
-                Compose new →
-              </button>
-            </div>
-            <ThickRule />
-            <ScrollRail minWidth={920}>
-              <div style={{ display:'grid', gridTemplateColumns:'1.6fr repeat(6,1fr) 0.5fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
-                {['Date','Weight','BMI','Body Fat','Water','Muscle','Bone',''].map((h,i) => (
-                  <Kicker key={i} style={{ textAlign: i>0?'right':'left' }}>{h}</Kicker>
-                ))}
-              </div>
-              {[...sorted].reverse().map((r) => (
-                <div key={r.id} style={{ display:'grid', gridTemplateColumns:'1.6fr repeat(6,1fr) 0.5fr', padding:'18px 0', borderBottom:`0.5px solid ${T.softLine}`, alignItems:'baseline' }}>
-                  <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.ink }}>{fmtDate(r.date)}</div>
-                  {[
-                    r.weight.toFixed(1)+'kg', r.bmi.toFixed(1), r.bodyFat.toFixed(1)+'%',
-                    r.water.toFixed(1)+'%', r.muscleMass.toFixed(1)+'%', r.boneMass.toFixed(2)+'%',
-                  ].map((v,j)=>(
-                    <div key={j} style={{ fontFamily:T.sans, fontSize:14, color:T.body, textAlign:'right' }}>{v}</div>
-                  ))}
-                  <div style={{ textAlign:'right' }}>
-                    {!r.id.startsWith('s') && (
-                      <button onClick={()=>handleDelete(r.id)} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:9, letterSpacing:'0.16em', color:T.muted, textTransform:'uppercase' }}>del</button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </ScrollRail>
-
-            <ImportNote opPw={opPw} onImported={refreshCloudReadings} />
-          </div>
-        )}
-
-      </Wrap>
+          </aside>
+        </section>
+      </main>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />
     </div>
