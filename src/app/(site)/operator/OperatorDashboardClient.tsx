@@ -496,6 +496,7 @@ function AnalyticsSection({
   rollingAverage,
   cadence,
   syncSummary,
+  opPw,
 }: {
   latest: FitnessReading;
   sorted: FitnessReading[];
@@ -505,13 +506,39 @@ function AnalyticsSection({
   rollingAverage: { date: string; value: number }[];
   cadence: { count: number; score: number };
   syncSummary: string;
+  opPw: string;
 }) {
+  interface WorkoutSummary {
+    id: string;
+    startedAt: string;
+    type: string | null;
+    durationMin: number | null;
+    energyKcal: number | null;
+    source: string | null;
+  }
+
+  const [workouts, setWorkouts] = useState<WorkoutSummary[]>([]);
+  const [workoutState, setWorkoutState] = useState<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
+
+  useEffect(() => {
+    if (!opPw) return;
+    setWorkoutState('loading');
+    fetch('/api/operator/workouts?limit=7', { headers: { 'x-operator-pw': opPw } })
+      .then((res) => res.json())
+      .then((data) => {
+        const fetched = (data?.workouts ?? []) as WorkoutSummary[];
+        setWorkouts(fetched);
+        setWorkoutState(fetched.length === 0 ? 'empty' : 'ready');
+      })
+      .catch(() => setWorkoutState('error'));
+  }, [opPw]);
+
   const startingWeight = sorted[0]?.weight ?? latest.weight;
   const totalChange = latest.weight - startingWeight;
   const remainingWeight = Math.max(0, latest.weight - goal);
   const dailyDeficit = nutrition.activeTdee - nutrition.intake;
   const weeklyDeficit = dailyDeficit * 7;
-  const expectedLoss = weeklyDeficit / 7700;
+  const expectedLoss = weeklyDeficit > 0 ? weeklyDeficit / 7700 : 0;
   const expectedTrend = -0.45;
   const trendDifference = Number.isFinite(state.trendKgPerWeek)
     ? state.trendKgPerWeek - expectedTrend
@@ -522,7 +549,7 @@ function AnalyticsSection({
     ? `${trendDifference.toFixed(2)} kg/wk slower than target`
     : `${Math.abs(trendDifference).toFixed(2)} kg/wk faster than target`;
   const trendDirection = latest.weight <= goal
-    ? 'Goal line reached or below'
+    ? 'At goal or below'
     : state.trendKgPerWeek < 0
     ? 'Moving toward goal'
     : state.trendKgPerWeek > 0
@@ -556,81 +583,103 @@ function AnalyticsSection({
     ? 'Protein priority'
     : 'Calories need review';
   const activitySupport = cadence.score >= 80
-    ? 'Consistency is strong'
+    ? 'Consistent training'
     : cadence.score >= 60
-    ? 'Consistency is moderate'
+    ? 'OK cadence'
     : 'Needs steadier logs';
   const rollingValue = rollingAverage[rollingAverage.length - 1]?.value;
+  const workoutMinutesWeek = workouts.reduce((sum, w) => sum + (w.durationMin ?? 0), 0);
+  const workoutKcalWeek = workouts.reduce((sum, w) => sum + (w.energyKcal ?? 0), 0);
+  const recentWorkouts = workouts.slice(0, 3);
 
   return (
     <section className="fit-panel" style={{ marginBottom: 28 }}>
       <div className="fit-panel-head">
         <div>
-          <h3>Analytics <em>dashboard</em></h3>
-          <div className="meta">Calorie deficit, weight trend, activity and nutrition signals from the operator ledger.</div>
+          <h3>Performance summary</h3>
+          <div className="meta">Deficit, weight trend and support signals for the current operator fitness cycle.</div>
         </div>
       </div>
+
       <div style={{ display: 'grid', gap: 18, marginTop: 18 }}>
-        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
-            <Kicker style={{ marginBottom: 10 }}>Calorie deficit</Kicker>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 14 }}>
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 18 }}>
               <div>
-                <div style={{ fontFamily: T.display, fontSize: 24, color: T.ink }}>{nutrition.activeTdee.toLocaleString()} kcal</div>
-                <div style={{ fontFamily: T.sans, fontSize: 11, color: T.muted }}>Estimated maintenance (TDEE)</div>
+                <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Calorie plan</div>
+                <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Target and deficit from the current menu.</div>
               </div>
               <span style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 700, color: deficitTone, textTransform: 'uppercase' }}>{deficitStatus}</span>
             </div>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Current target</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Estimated daily deficit</span><strong>{dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Estimated weekly deficit</span><strong>{weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Expected weight loss</span><strong>{weeklyDeficit > 0 ? `${expectedLoss.toFixed(2)} kg/wk` : '0.00 kg/wk'}</strong></div>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Maintenance</span><strong>{nutrition.activeTdee.toLocaleString()} kcal</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Target intake</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Daily deficit</span><strong>{dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly deficit</span><strong>{weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Expected loss</span><strong>{weeklyDeficit > 0 ? `${expectedLoss.toFixed(2)} kg/wk` : '0.00 kg/wk'}</strong></div>
             </div>
           </div>
 
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
-            <Kicker style={{ marginBottom: 10 }}>Weight trend</Kicker>
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontFamily: T.display, fontSize: 24, color: T.ink }}>{latest.weight.toFixed(1)} kg</div>
-              <div style={{ fontFamily: T.sans, fontSize: 11, color: T.muted }}>Current weight</div>
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Weight progress</div>
+              <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Trend, goal distance and current momentum.</div>
             </div>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Starting weight</span><strong>{startingWeight.toFixed(1)} kg</strong></div>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Current weight</span><strong>{latest.weight.toFixed(1)} kg</strong></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Goal weight</span><strong>{goal.toFixed(1)} kg</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Change so far</span><strong>{formatWeightDelta(totalChange)}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Change since start</span><strong>{formatWeightDelta(totalChange)}</strong></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Remaining to goal</span><strong>{remainingWeight.toFixed(1)} kg</strong></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly trend</span><strong>{state.trendKgPerWeek >= 0 ? '+' : ''}{state.trendKgPerWeek.toFixed(2)} kg/wk</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Trend vs target</span><strong>{trendComparison}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>45-day rolling avg</span><strong>{rollingValue !== undefined ? `${rollingValue.toFixed(1)} kg` : 'Not enough data yet'}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Moving status</span><strong>{trendDirection}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Projected target date</span><strong>{etaLabel}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Trend gap</span><strong>{trendComparison}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Rolling avg</span><strong>{rollingValue !== undefined ? `${rollingValue.toFixed(1)} kg` : 'Not enough data yet'}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Momentum</span><strong>{trendDirection}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Target date</span><strong>{etaLabel}</strong></div>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
-            <Kicker style={{ marginBottom: 10 }}>Fitness / activity</Kicker>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Training sessions</span><strong>{cadence.count} logs in 14d</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly training target</span><strong>3 sessions</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Steps summary</span><strong>Not available</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Active energy / exercise</span><strong>Not available</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Latest log date</span><strong>{formatReferenceDate(latest.date)}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Activity support</span><strong>{activitySupport}</strong></div>
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Workout details</div>
+              <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Recent sessions and calories burned from synced workouts.</div>
             </div>
-            <p style={{ marginTop: 14, fontFamily: T.sans, fontSize: 11, color: T.muted, lineHeight: 1.6 }}>
-              Apple Health sync activity and step metrics will appear in the health stream below when available.
-            </p>
+            <div style={{ display: 'grid', gap: 12, marginBottom: 18 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Sessions tracked</span><strong>{workouts.length}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly workout mins</span><strong>{workoutMinutesWeek} min</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Calories burned</span><strong>{workoutKcalWeek} kcal</strong></div>
+            </div>
+            {workoutState === 'loading' && <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted }}>Loading workouts…</p>}
+            {workoutState === 'error' && <p style={{ fontFamily: T.sans, fontSize: 12, color: T.rose }}>Unable to load workouts.</p>}
+            {workoutState === 'empty' && <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted }}>No workouts synced yet.</p>}
+            {workoutState === 'ready' && recentWorkouts.length > 0 && (
+              <div style={{ display: 'grid', gap: 10 }}>
+                {recentWorkouts.map((w) => (
+                  <div key={w.id} style={{ borderTop: `1px solid ${T.line}`, paddingTop: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
+                      <span style={{ fontFamily: T.sans, fontSize: 12, color: T.ink, fontWeight: 700 }}>{w.type ?? 'Workout'}</span>
+                      <span style={{ fontFamily: T.sans, fontSize: 11, color: T.muted }}>{new Date(w.startedAt).toLocaleDateString('en-GB')}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 6 }}>
+                      <span style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>{w.durationMin ? `${Math.round(w.durationMin)} min` : 'No duration'}</span>
+                      <strong style={{ fontFamily: T.sans, fontSize: 12, color: T.ink }}>{w.energyKcal ? `${Math.round(w.energyKcal)} kcal` : 'No kcal'}</strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
-            <Kicker style={{ marginBottom: 10 }}>Protein & nutrition</Kicker>
-            <div style={{ display: 'grid', gap: 10 }}>
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Nutrition status</div>
+              <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Protein and calories for recovery and fat loss.</div>
+            </div>
+            <div style={{ display: 'grid', gap: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Protein target</span><strong>{nutrition.protein} g</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Based on body weight</span><strong>{Math.round(latest.weight * 1.8)} g</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Daily calorie target</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Target per kg</span><strong>{Math.round(latest.weight * 1.8)} g</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Daily calories</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Nutrition note</span><strong>{proteinNote}</strong></div>
             </div>
           </div>
@@ -4502,6 +4551,7 @@ export default function OperatorDashboardClient() {
           rollingAverage={rollingAverage}
           cadence={cadence}
           syncSummary={syncSummary}
+          opPw={opPw}
         />
 
         <div id="operator-health-stream">
