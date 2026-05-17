@@ -1816,3 +1816,113 @@
   color: var(--ink-mute);
   margin-top: 4px;
 }
+
+/* ── Nutrition card ──────────────────────────────────────────────────── */
+
+.fitness-reference-shell .op-nutri-numbers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 0.5px solid var(--rule);
+  background: var(--paper-deep);
+}
+
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-nutri-numbers {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.fitness-reference-shell .op-nutri-cell {
+  padding: 14px 16px;
+  border-right: 0.5px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fitness-reference-shell .op-nutri-cell:last-child {
+  border-right: none;
+}
+
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-nutri-cell:nth-child(2n) {
+    border-right: none;
+  }
+  .fitness-reference-shell .op-nutri-cell:nth-child(-n+2) {
+    border-bottom: 0.5px solid var(--rule);
+  }
+}
+
+.fitness-reference-shell .op-nutri-lbl {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+
+.fitness-reference-shell .op-nutri-num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 26px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.fitness-reference-shell .op-nutri-num.good { color: var(--good); }
+.fitness-reference-shell .op-nutri-num.warn { color: var(--warn); }
+.fitness-reference-shell .op-nutri-num.neutral { color: var(--ink); }
+
+.fitness-reference-shell .op-nutri-sub {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.fitness-reference-shell .op-nutri-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fitness-reference-shell .op-nutri-bar-lbl {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.fitness-reference-shell .op-nutri-bar {
+  height: 6px;
+  background: var(--rule-soft);
+  position: relative;
+}
+
+.fitness-reference-shell .op-nutri-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+}
+
+.fitness-reference-shell .op-nutri-bar > span.good { background: var(--good); }
+.fitness-reference-shell .op-nutri-bar > span.warn { background: var(--warn); }
+
+.fitness-reference-shell .op-nutri-empty {
+  padding: 16px 18px;
+  background: var(--paper-deep);
+  border: 0.5px solid var(--rule);
+}
+
+.fitness-reference-shell .op-nutri-empty p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.fitness-reference-shell .op-nutri-empty em {
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 500;
+}

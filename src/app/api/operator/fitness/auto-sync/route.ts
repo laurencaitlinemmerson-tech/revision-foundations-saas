@@ -253,6 +253,13 @@ type DailyMetricRow = {
   sleep_deep_min: number | null;
   sleep_core_min: number | null;
   sleep_awake_min: number | null;
+  dietary_energy_kcal: number | null;
+  protein_g: number | null;
+  carbs_g: number | null;
+  fat_g: number | null;
+  fiber_g: number | null;
+  sugar_g: number | null;
+  water_ml: number | null;
 };
 
 function emptyDaily(date: string): DailyMetricRow {
@@ -273,6 +280,13 @@ function emptyDaily(date: string): DailyMetricRow {
     sleep_deep_min: null,
     sleep_core_min: null,
     sleep_awake_min: null,
+    dietary_energy_kcal: null,
+    protein_g: null,
+    carbs_g: null,
+    fat_g: null,
+    fiber_g: null,
+    sugar_g: null,
+    water_ml: null,
   };
 }
 
@@ -486,6 +500,33 @@ function parseDailyMetrics(payload: Record<string, unknown>): DailyMetricRow[] {
 
   // Sleep
   applySleep(target, get('sleep_analysis'));
+
+  // Nutrition (MyFitnessPal → Apple Health → Auto Export)
+  const dietary = get('dietary_energy', 'dietary_energy_consumed');
+  if (dietary?.data) setSum(target, 'dietary_energy_kcal', dietary.data, (q) => convertEnergyToKcal(q, dietary.units));
+
+  const protein = get('protein');
+  if (protein?.data) setSum(target, 'protein_g', protein.data);
+
+  const carbs = get('carbohydrates', 'carbs');
+  if (carbs?.data) setSum(target, 'carbs_g', carbs.data);
+
+  const fat = get('total_fat', 'fat', 'fat_total');
+  if (fat?.data) setSum(target, 'fat_g', fat.data);
+
+  const fiber = get('fiber', 'dietary_fiber');
+  if (fiber?.data) setSum(target, 'fiber_g', fiber.data);
+
+  const sugar = get('dietary_sugar', 'sugar');
+  if (sugar?.data) setSum(target, 'sugar_g', sugar.data);
+
+  const water = get('dietary_water', 'water');
+  if (water?.data) setSum(target, 'water_ml', water.data, (q) => {
+    const unit = (water.units ?? '').toLowerCase();
+    if (unit === 'l' || unit === 'litre' || unit === 'liter') return q * 1000;
+    if (unit === 'fl_oz' || unit === 'fl oz' || unit === 'oz') return q * 29.5735;
+    return q; // assume ml
+  });
 
   return Array.from(target.values()).sort((a, b) => a.date.localeCompare(b.date));
 }

@@ -36,6 +36,15 @@ function fromRow(row: Record<string, unknown>) {
       coreMin: num(row.sleep_core_min),
       awakeMin: num(row.sleep_awake_min),
     },
+    nutrition: {
+      dietaryEnergyKcal: num(row.dietary_energy_kcal),
+      proteinG: num(row.protein_g),
+      carbsG: num(row.carbs_g),
+      fatG: num(row.fat_g),
+      fiberG: num(row.fiber_g),
+      sugarG: num(row.sugar_g),
+      waterMl: num(row.water_ml),
+    },
   };
 }
 

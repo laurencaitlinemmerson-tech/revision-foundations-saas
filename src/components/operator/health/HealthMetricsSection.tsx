@@ -28,11 +28,22 @@ interface SleepMetrics {
   awakeMin: number | null;
 }
 
+interface NutritionMetrics {
+  dietaryEnergyKcal: number | null;
+  proteinG: number | null;
+  carbsG: number | null;
+  fatG: number | null;
+  fiberG: number | null;
+  sugarG: number | null;
+  waterMl: number | null;
+}
+
 interface DailyMetrics {
   date: string;
   activity: ActivityMetrics;
   heart: HeartMetrics;
   sleep: SleepMetrics;
+  nutrition?: NutritionMetrics;
 }
 
 interface Workout {
@@ -66,7 +77,17 @@ const GOALS = {
   standHours: 12,
   sleepMinutes: 480,
   restingHrTarget: 60,
+  calorieIntake: 1600,
+  deficit: 800,
+  bmrHeightM: 1.57,
+  bmrAgeYears: 30,
 } as const;
+
+// Mifflin-St Jeor for women (matches existing dashboard defaults)
+function estimateBMR(weightKg: number): number {
+  const heightCm = GOALS.bmrHeightM * 100;
+  return 10 * weightKg + 6.25 * heightCm - 5 * GOALS.bmrAgeYears - 161;
+}
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -372,6 +393,30 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
   const stepBars = last14.map((d) => d.activity.steps);
   const stepLabels = last14.map((d) => shortDate(d.date).charAt(0));
 
+  // ── Nutrition: calories in / out / net ──────────────────────────────────
+  const latestWeight = readings.length > 0 ? readings[readings.length - 1].weight : null;
+  const bmr = latestWeight !== null ? estimateBMR(latestWeight) : null;
+
+  function netForDay(d: DailyMetrics | null): number | null {
+    if (!d || bmr === null) return null;
+    const kIn = d.nutrition?.dietaryEnergyKcal ?? null;
+    const kActive = d.activity.activeEnergyKcal ?? 0;
+    if (kIn === null) return null;
+    return kIn - (bmr + kActive);
+  }
+
+  const caloriesIn = latest?.nutrition?.dietaryEnergyKcal ?? null;
+  const activeKcalToday = latest?.activity.activeEnergyKcal ?? null;
+  const caloriesOut = bmr !== null ? bmr + (activeKcalToday ?? 0) : null;
+  const netToday = netForDay(latest);
+  const targetNet = -GOALS.deficit;
+  const nets7 = last7.map(netForDay);
+  const avgNet7 = avg(nets7);
+  const proteinToday = latest?.nutrition?.proteinG ?? null;
+  const carbsToday = latest?.nutrition?.carbsG ?? null;
+  const fatToday = latest?.nutrition?.fatG ?? null;
+  const hasNutritionData = days.some((d) => (d.nutrition?.dietaryEnergyKcal ?? null) !== null);
+
   // Correlations (30 days)
   const correlations = useMemo(() => {
     const sleepNights: number[] = [];
@@ -562,6 +607,85 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
             <li><span className="op-sleep-dot" style={{ background: '#a8b3c5' }} />Core</li>
             <li><span className="op-sleep-dot" style={{ background: '#d4c8b8' }} />Awake</li>
           </ul>
+        </article>
+
+        {/* Nutrition (wide) */}
+        <article className="op-health-card op-card-wide">
+          <header className="op-health-card-head">
+            <span className="op-health-card-label">Nutrition · calories</span>
+            <span className="muted">In vs out · target deficit {GOALS.deficit} kcal</span>
+          </header>
+
+          {!hasNutritionData ? (
+            <div className="op-nutri-empty">
+              <p>
+                Nothing from MyFitnessPal yet. In MFP, turn on{' '}
+                <em>Settings → Apps &amp; Devices → Apple Health</em> for at least <em>Calories</em>,{' '}
+                <em>Protein</em>, <em>Carbs</em>, <em>Fat</em>. Then in Health Auto Export, enable
+                Dietary Energy + macros on the same automation. Next sync fills this in.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="op-nutri-numbers">
+                <div className="op-nutri-cell">
+                  <div className="op-nutri-lbl">In</div>
+                  <div className="op-nutri-num">{fmtInt(caloriesIn)}</div>
+                  <div className="op-nutri-sub muted">
+                    {caloriesIn !== null ? `${(caloriesIn - GOALS.calorieIntake) >= 0 ? '+' : ''}${Math.round(caloriesIn - GOALS.calorieIntake)} vs ${GOALS.calorieIntake} target` : `Target ${GOALS.calorieIntake}`}
+                  </div>
+                </div>
+                <div className="op-nutri-cell">
+                  <div className="op-nutri-lbl">Out</div>
+                  <div className="op-nutri-num">{fmtInt(caloriesOut)}</div>
+                  <div className="op-nutri-sub muted">
+                    BMR {fmtInt(bmr)} + active {fmtInt(activeKcalToday)}
+                  </div>
+                </div>
+                <div className="op-nutri-cell">
+                  <div className="op-nutri-lbl">Net</div>
+                  <div className={`op-nutri-num ${netToday !== null && netToday <= targetNet ? 'good' : netToday !== null && netToday < 0 ? 'neutral' : 'warn'}`}>
+                    {netToday !== null ? `${netToday >= 0 ? '+' : ''}${Math.round(netToday)}` : '—'}
+                  </div>
+                  <div className="op-nutri-sub muted">
+                    Target {targetNet} kcal
+                  </div>
+                </div>
+                <div className="op-nutri-cell">
+                  <div className="op-nutri-lbl">7-day avg net</div>
+                  <div className={`op-nutri-num ${avgNet7 !== null && avgNet7 <= targetNet ? 'good' : avgNet7 !== null && avgNet7 < 0 ? 'neutral' : 'warn'}`}>
+                    {avgNet7 !== null ? `${avgNet7 >= 0 ? '+' : ''}${Math.round(avgNet7)}` : '—'}
+                  </div>
+                  <div className="op-nutri-sub muted">
+                    {avgNet7 !== null
+                      ? `${Math.round((avgNet7 / targetNet) * 100)}% of deficit target`
+                      : '—'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="op-nutri-bar-wrap">
+                <div className="op-nutri-bar-lbl muted">Deficit progress (today)</div>
+                <div className="op-nutri-bar">
+                  <span
+                    className={netToday !== null && netToday <= 0 ? 'good' : 'warn'}
+                    style={{
+                      width: netToday !== null
+                        ? `${Math.min(100, Math.max(0, (Math.min(0, netToday) / targetNet) * 100))}%`
+                        : '0%',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <dl className="op-health-stats">
+                <div><dt>Protein</dt><dd>{fmtNum(proteinToday, 0, ' g')}</dd></div>
+                <div><dt>Carbs</dt><dd>{fmtNum(carbsToday, 0, ' g')}</dd></div>
+                <div><dt>Fat</dt><dd>{fmtNum(fatToday, 0, ' g')}</dd></div>
+                <div><dt>BMR (Mifflin)</dt><dd>{fmtInt(bmr)} kcal</dd></div>
+              </dl>
+            </>
+          )}
         </article>
 
         {/* Heart */}
