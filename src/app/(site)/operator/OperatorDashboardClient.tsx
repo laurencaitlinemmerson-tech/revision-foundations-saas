@@ -4767,6 +4767,11 @@ export default function OperatorDashboardClient() {
   const syncSummary = cloudOk === null ? 'Local-first mode' : cloudOk ? (syncing ? 'Cloud syncing now' : 'Cloud sync active') : 'Local backup only';
   const sectionGuide = [
     {
+      id: 'operator-today',
+      label: 'Today',
+      note: 'Start with the current body state, target gap and logging quality.',
+    },
+    {
       id: 'operator-story',
       label: 'Story',
       note: 'See the full weight line, phase changes and visual evidence first.',
@@ -4775,11 +4780,6 @@ export default function OperatorDashboardClient() {
       id: 'operator-health-stream',
       label: 'Trends',
       note: 'Check what is moving across nutrition, sleep and recovery.',
-    },
-    {
-      id: 'operator-today',
-      label: 'Today',
-      note: 'Read the current body state, target gap and logging quality.',
     },
     {
       id: 'operator-action',
@@ -4857,11 +4857,80 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
 
+        <section className="fit-anchor-section" id="operator-today">
+          {/* ───────────────────────── TODAY ─────────────────────────── */}
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." />
+
+          <section className="fit-today">
+            <div className="fit-today-head">
+              <div>
+                <span className="fit-today-label">Today at a glance</span>
+                <div className="fit-today-copy">Fast read: weight, target gap, body state, logging consistency and sync health.</div>
+              </div>
+              <span className="muted">{formatReferenceDate(latest.date)}</span>
+            </div>
+
+            <div className="fit-glance-row">
+              <div className="glance-card glance-cal-balance">
+                <div className="gcb-row">
+                  <div className="gcb-col">
+                    <div className="gcb-num">{latest.weight.toFixed(1)}</div>
+                    <div className="gcb-lbl">kg logged</div>
+                    <div className="gcb-sub muted">BMI {latest.bmi.toFixed(1)} · body fat {latest.bodyFat.toFixed(1)}%</div>
+                  </div>
+                  <div className="gcb-divider" />
+                  <div className="gcb-col">
+                    <div className={`gcb-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{Math.abs(targetDelta).toFixed(1)}</div>
+                    <div className="gcb-lbl">{targetDelta <= 0 ? 'kg under goal' : 'kg to target'}</div>
+                    <div className="gcb-sub muted">Goal line {goal.toFixed(1)}kg</div>
+                  </div>
+                  <div className="gcb-divider" />
+                  <div className="gcb-col">
+                    <div className={`gcb-num ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>{formatWeightDelta(latest.weight - monthAgo.weight).replace('kg', '')}</div>
+                    <div className="gcb-lbl">30-day move</div>
+                    <div className={`gcb-sub ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>
+                      {latest.weight - monthAgo.weight <= 0 ? 'Trend is quieter' : 'Drift needs tightening'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">Body fat</div>
+                <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
+                <div className="gc-lbl">current composition</div>
+                <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">BMI</div>
+                <div className="gc-num">{latest.bmi.toFixed(1)}</div>
+                <div className="gc-lbl">body mass index</div>
+                <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">Logging</div>
+                <div className="gc-num">{cadence.count}</div>
+                <div className="gc-lbl">days logged</div>
+                <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">Sync</div>
+                <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
+                <div className="gc-lbl">data mode</div>
+                <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
+              </div>
+            </div>
+          </section>
+        </section>
+
         <section className="fit-anchor-section fit-reading-guide" aria-label="Dashboard guide">
           <div className="fit-reading-guide-head">
             <span className="fit-reading-guide-kicker">Read order</span>
             <p className="fit-reading-guide-copy">
-              Keep the visual story, but make the scan path obvious: signals first, then the long line, then trends, today and action.
+              The live summary now sits at the top. From here, move through the longer story, the wider trends, then today&apos;s actions.
             </p>
           </div>
           <div className="fit-reading-guide-grid">
@@ -4993,75 +5062,6 @@ export default function OperatorDashboardClient() {
           />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
-        </section>
-
-        <section className="fit-anchor-section" id="operator-today">
-          {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." />
-
-          <section className="fit-today">
-            <div className="fit-today-head">
-              <div>
-                <span className="fit-today-label">Today at a glance</span>
-                <div className="fit-today-copy">Fast read: weight, target gap, body state, logging consistency and sync health.</div>
-              </div>
-              <span className="muted">{formatReferenceDate(latest.date)}</span>
-            </div>
-
-            <div className="fit-glance-row">
-              <div className="glance-card glance-cal-balance">
-                <div className="gcb-row">
-                  <div className="gcb-col">
-                    <div className="gcb-num">{latest.weight.toFixed(1)}</div>
-                    <div className="gcb-lbl">kg logged</div>
-                    <div className="gcb-sub muted">BMI {latest.bmi.toFixed(1)} · body fat {latest.bodyFat.toFixed(1)}%</div>
-                  </div>
-                  <div className="gcb-divider" />
-                  <div className="gcb-col">
-                    <div className={`gcb-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{Math.abs(targetDelta).toFixed(1)}</div>
-                    <div className="gcb-lbl">{targetDelta <= 0 ? 'kg under goal' : 'kg to target'}</div>
-                    <div className="gcb-sub muted">Goal line {goal.toFixed(1)}kg</div>
-                  </div>
-                  <div className="gcb-divider" />
-                  <div className="gcb-col">
-                    <div className={`gcb-num ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>{formatWeightDelta(latest.weight - monthAgo.weight).replace('kg', '')}</div>
-                    <div className="gcb-lbl">30-day move</div>
-                    <div className={`gcb-sub ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>
-                      {latest.weight - monthAgo.weight <= 0 ? 'Trend is quieter' : 'Drift needs tightening'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Body fat</div>
-                <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
-                <div className="gc-lbl">current composition</div>
-                <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">BMI</div>
-                <div className="gc-num">{latest.bmi.toFixed(1)}</div>
-                <div className="gc-lbl">body mass index</div>
-                <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Logging</div>
-                <div className="gc-num">{cadence.count}</div>
-                <div className="gc-lbl">days logged</div>
-                <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Sync</div>
-                <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
-                <div className="gc-lbl">data mode</div>
-                <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
-              </div>
-            </div>
-          </section>
         </section>
 
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
