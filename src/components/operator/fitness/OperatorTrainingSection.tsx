@@ -342,9 +342,23 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
     ? `${recommendedSession.title} is on the calendar today. ${guidance.training}`
     : `${recommendedSession.title} is your next programmed lift in ${nextKey.daysAway} day${nextKey.daysAway === 1 ? '' : 's'}. ${guidance.training}`;
 
-  const previewNote = previewKey === recommendedKey
-    ? ''
-    : `Viewing ${previewSession.title}. The recommendation still points to ${recommendedSession.title}.`;
+  const weekLoadLabel = weeklyExerciseMin > 0
+    ? `${Math.round(weeklyExerciseMin)} min · ${Math.round(weeklySteps).toLocaleString('en-GB')} steps`
+    : 'Awaiting movement history';
+  const bodySignalSummary = signals.length > 0
+    ? signals.map((signal) => SIGNAL_LABELS[signal]).join(' / ')
+    : 'No extra signals logged';
+  const latestWorkoutLabel = latestWorkout
+    ? `${latestWorkout.type ?? 'Workout'} · ${formatDate(latestWorkout.startedAt)}`
+    : 'No workout export yet';
+  const detailRows = [
+    { label: 'Focus', value: previewSession.focus },
+    { label: 'Warm-up', value: `${previewSession.warmup} · ${previewSession.warmupNote}` },
+    { label: 'Main lifts', value: previewSession.compounds.join(' · ') },
+    { label: 'Accessory', value: previewSession.accessories.join(' · ') },
+    { label: 'Recovery', value: previewSession.recovery },
+    { label: 'Coaching', value: previewSession.coaching },
+  ];
 
   function toggleSignal(signal: BodySignal) {
     setSignals((current) => (current.includes(signal)
@@ -362,8 +376,8 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
     <section className="fit-panel op-training-section">
       <div className="fit-panel-head op-training-head">
         <div>
-          <h3>Training <em>rhythm</em></h3>
-          <div className="meta">Next lift, weekly split, and body-context guidance in one place.</div>
+          <h3>Training <em>plan</em></h3>
+          <div className="meta">One recommendation, your weekly split, and the context that changes how it should feel.</div>
         </div>
         <div className="op-training-head-side">
           <span className={`op-training-mode-pill is-${mode}`}>{modeLabel(mode)}</span>
@@ -374,119 +388,94 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
       </div>
 
       <div className="op-training-layout">
-        <article className="op-training-feature">
-          <div className="op-training-feature-top">
-            <div>
+        <div className="op-training-main">
+          <article className="op-training-call">
+            <div className="op-training-call-top">
               <div className="op-training-feature-label">{todayKey ? "Today's recommendation" : 'Next programmed lift'}</div>
-              <h4>{headline}</h4>
-              <p>{subcopy}</p>
+              <div className="op-training-live">
+                <span className="op-training-live-dot" aria-hidden="true" />
+                <span>{liveLabel}</span>
+              </div>
             </div>
-            <div className="op-training-live">
-              <span className="op-training-live-dot" aria-hidden="true" />
-              <span>{liveLabel}</span>
-            </div>
-          </div>
+            <h4>{headline}</h4>
+            <p>{subcopy}</p>
 
-          {previewNote ? <div className="op-training-preview-note">{previewNote}</div> : null}
+            <dl className="op-training-inline-stats">
+              <div>
+                <dt>Readiness</dt>
+                <dd>{readinessLabel(readinessScore)}</dd>
+              </div>
+              <div>
+                <dt>Week load</dt>
+                <dd>{weekLoadLabel}</dd>
+              </div>
+              <div>
+                <dt>Last workout</dt>
+                <dd>{latestWorkoutLabel}</dd>
+              </div>
+              <div>
+                <dt>Body context</dt>
+                <dd>{PHASE_LABELS[phase]}{bodySignalSummary !== 'No extra signals logged' ? ` · ${bodySignalSummary}` : ''}</dd>
+              </div>
+            </dl>
+          </article>
 
-          <div className="op-training-stat-row">
-            <div className="op-training-stat">
-              <span className="op-training-stat-label">Readiness</span>
-              <strong>{readinessLabel(readinessScore)}</strong>
-              <span>{sleepToday !== null || hrvToday !== null || rhrToday !== null ? 'From sleep, HRV and resting HR' : 'Will sharpen once Apple Health fills in'}</span>
+          <section className="op-training-week">
+            <div className="op-training-week-head">
+              <span className="op-training-feature-label">This week</span>
+              <span className="op-training-week-note">
+                {todayKey ? `${recommendedSession.title} is scheduled today.` : `${recommendedSession.title} is the next planned lift.`}
+              </span>
             </div>
-            <div className="op-training-stat">
-              <span className="op-training-stat-label">Week load</span>
-              <strong>{weeklyExerciseMin > 0 ? `${Math.round(weeklyExerciseMin)} min` : '-'}</strong>
-              <span>{weeklySteps > 0 ? `${Math.round(weeklySteps).toLocaleString('en-GB')} steps in 7d` : 'Awaiting movement history'}</span>
-            </div>
-            <div className="op-training-stat">
-              <span className="op-training-stat-label">Body context</span>
-              <strong>{PHASE_LABELS[phase]}</strong>
-              <span>{signals.length > 0 ? signals.map((signal) => SIGNAL_LABELS[signal]).join(' / ') : 'Add a signal when the day feels different'}</span>
-            </div>
-            <div className="op-training-stat">
-              <span className="op-training-stat-label">Last workout</span>
-              <strong>{latestWorkout ? formatDate(latestWorkout.startedAt) : 'No export yet'}</strong>
-              <span>{latestWorkout ? `${latestWorkout.type ?? 'Workout'} / ${statValue(latestWorkout.durationMin, ' min')}` : 'Plan still works even while export is empty'}</span>
-            </div>
-          </div>
 
-          <div className="op-training-plan-grid">
-            <div className="op-training-plan-card">
-              <span className="op-training-plan-label">Warm-up</span>
-              <strong>{previewSession.warmup}</strong>
-              <span>{previewSession.warmupNote}</span>
-            </div>
-            <div className="op-training-plan-card">
-              <span className="op-training-plan-label">Focus</span>
-              <strong>{previewSession.duration}</strong>
-              <span>{previewSession.focus}</span>
-            </div>
-            <div className="op-training-plan-card">
-              <span className="op-training-plan-label">Recovery</span>
-              <strong>{modeLabel(mode)}</strong>
-              <span>{previewSession.recovery}</span>
-            </div>
-            <div className="op-training-plan-card">
-              <span className="op-training-plan-label">Coaching note</span>
-              <strong>{previewSession.schedule}</strong>
-              <span>{previewSession.coaching}</span>
-            </div>
-          </div>
+            <div className="op-training-session-grid">
+              {(Object.keys(TRAINING_PLAN) as SessionKey[]).map((key) => {
+                const session = TRAINING_PLAN[key];
+                const isActive = key === previewKey;
+                const isRecommended = key === recommendedKey;
 
-          <div className="op-training-exercise-grid">
-            <div className="op-training-exercise-card">
-              <span className="op-training-exercise-label">Main lifts</span>
-              <ul>
-                {previewSession.compounds.map((exercise) => (
-                  <li key={exercise}>{exercise}</li>
-                ))}
-              </ul>
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`op-training-session-card${isActive ? ' is-active' : ''}${isRecommended ? ' is-recommended' : ''}`}
+                    onClick={() => setSelectedSession(key)}
+                  >
+                    <div className="op-training-session-top">
+                      <span className="op-training-session-name">{session.title}</span>
+                      <span className="op-training-session-status">{sessionStatus(key)}</span>
+                    </div>
+                    <div className="op-training-session-sub">{session.schedule} · {session.duration}</div>
+                    <p>{session.focus}</p>
+                  </button>
+                );
+              })}
             </div>
-            <div className="op-training-exercise-card">
-              <span className="op-training-exercise-label">Accessory finishers</span>
-              <ul>
-                {previewSession.accessories.map((exercise) => (
-                  <li key={exercise}>{exercise}</li>
-                ))}
-              </ul>
+          </section>
+
+          <section className="op-training-detail">
+            <div className="op-training-week-head">
+              <span className="op-training-feature-label">{previewSession.title} details</span>
+              <span className="op-training-week-note">
+                {previewKey === recommendedKey ? 'Current recommendation' : 'Previewing another day'}
+              </span>
             </div>
-          </div>
 
-          <div className="op-training-session-grid">
-            {(Object.keys(TRAINING_PLAN) as SessionKey[]).map((key) => {
-              const session = TRAINING_PLAN[key];
-              const isActive = key === previewKey;
-              const isRecommended = key === recommendedKey;
-
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  className={`op-training-session-card${isActive ? ' is-active' : ''}${isRecommended ? ' is-recommended' : ''}`}
-                  onClick={() => setSelectedSession(key)}
-                >
-                  <div className="op-training-session-top">
-                    <span className="op-training-session-name">{session.title}</span>
-                    <span className="op-training-session-status">{sessionStatus(key)}</span>
-                  </div>
-                  <p>{session.focus}</p>
-                  <div className="op-training-session-meta">
-                    <span>{session.compounds.length} main lifts</span>
-                    <span>{session.accessories.length} accessories</span>
-                    <span>{session.duration}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </article>
+            <div className="op-training-detail-rows">
+              {detailRows.map((row) => (
+                <div className="op-training-detail-row" key={row.label}>
+                  <div className="op-training-detail-label">{row.label}</div>
+                  <div className="op-training-detail-value">{row.value}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
 
         <aside className="op-training-side">
           <div className="op-context-panel">
             <div className="op-context-head">
-              <span className="op-training-kicker">Body context</span>
+              <span className="op-training-feature-label">Body context</span>
             </div>
             <p className="op-context-copy">
               Track the things that change how the same session actually feels, so the plan stays realistic instead of generic.
@@ -528,14 +517,11 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
           <div className="op-context-notes">
             <div className="op-context-note">
               <span className="op-context-note-label">{guidance.label}</span>
+              <p>{guidance.training}</p>
             </div>
             <div className="op-context-note">
               <span className="op-context-note-label">Scale note</span>
               <p>{guidance.scale}</p>
-            </div>
-            <div className="op-context-note">
-              <span className="op-context-note-label">Training note</span>
-              <p>{guidance.training}</p>
             </div>
             <div className="op-context-note">
               <span className="op-context-note-label">Fuel note</span>
