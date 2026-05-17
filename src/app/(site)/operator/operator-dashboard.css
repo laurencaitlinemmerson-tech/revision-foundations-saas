@@ -2612,3 +2612,10 @@
   .fitness-reference-shell .op-pr-cell { border-left: none; padding-left: 0; padding-right: 0; }
   .fitness-reference-shell .op-pr-cell:nth-child(n+4) { padding-top: 14px; border-top: 0.5px solid var(--rule); }
 }
+
+/* When HealthMetricsSection is rendered as a single slot, the wrapping
+   <section>'s default 32px vertical margin is dropped — the parent owns
+   spacing through its editorial dividers and inner content gap. */
+.fitness-reference-shell .op-health-section--slot {
+  margin: 0;
+}

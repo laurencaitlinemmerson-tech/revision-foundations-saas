@@ -64,9 +64,79 @@ interface FitnessReadingLite {
   weight: number;
 }
 
+export type HealthStreamStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error';
+
+export interface HealthStreamFetch {
+  status: HealthStreamStatus;
+  errorMsg: string | null;
+  days: DailyMetrics[];
+  workouts: Workout[];
+}
+
+export type HealthSlot =
+  | 'header'
+  | 'readiness'
+  | 'accountability'
+  | 'promise'
+  | 'todayStrip'
+  | 'weekCompare'
+  | 'mainGrid'
+  | 'lifestyle'
+  | 'compare'
+  | 'prs'
+  | 'correlations'
+  | 'all';
+
+// Hook that fetches the Apple Health stream once and exposes raw data.
+// Parents can pass the returned object back into HealthMetricsSection so
+// multiple slot-scoped renders share a single fetch.
+export function useHealthStream(opPw: string): HealthStreamFetch {
+  const [days, setDays] = useState<DailyMetrics[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [status, setStatus] = useState<HealthStreamStatus>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!opPw) return;
+    let cancelled = false;
+    setStatus('loading');
+    setErrorMsg(null);
+
+    Promise.all([
+      fetch('/api/operator/health?limit=180', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
+      fetch('/api/operator/workouts?limit=100', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
+    ])
+      .then(([healthRes, workoutRes]) => {
+        if (cancelled) return;
+        if (healthRes?.setup_required) {
+          setStatus('empty');
+          return;
+        }
+        const fetchedDays: DailyMetrics[] = healthRes?.days ?? [];
+        const fetchedWorkouts: Workout[] = workoutRes?.workouts ?? [];
+        setDays(fetchedDays);
+        setWorkouts(fetchedWorkouts);
+        setStatus(fetchedDays.length === 0 && fetchedWorkouts.length === 0 ? 'empty' : 'ready');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load health data');
+        setStatus('error');
+      });
+
+    return () => { cancelled = true; };
+  }, [opPw]);
+
+  return { status, errorMsg, days, workouts };
+}
+
 interface Props {
   opPw: string;
   readings: FitnessReadingLite[];
+  /** Pre-fetched data — if provided, skip the internal fetch (so multiple slot renders share one fetch). */
+  injected?: HealthStreamFetch;
+  /** Render only this slot. 'all' (default) renders the legacy full section. */
+  slot?: HealthSlot;
 }
 
 // ─── goal targets (sensible defaults) ───────────────────────────────────────
@@ -353,42 +423,9 @@ function describeCorrelation(r: number | null, positiveCopy: string, inverseCopy
 
 // ─── component ──────────────────────────────────────────────────────────────
 
-export default function HealthMetricsSection({ opPw, readings }: Props) {
-  const [days, setDays] = useState<DailyMetrics[]>([]);
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!opPw) return;
-    let cancelled = false;
-    setStatus('loading');
-    setErrorMsg(null);
-
-    Promise.all([
-      fetch('/api/operator/health?limit=180', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
-      fetch('/api/operator/workouts?limit=100', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
-    ])
-      .then(([healthRes, workoutRes]) => {
-        if (cancelled) return;
-        if (healthRes?.setup_required) {
-          setStatus('empty');
-          return;
-        }
-        const fetchedDays: DailyMetrics[] = healthRes?.days ?? [];
-        const fetchedWorkouts: Workout[] = workoutRes?.workouts ?? [];
-        setDays(fetchedDays);
-        setWorkouts(fetchedWorkouts);
-        setStatus(fetchedDays.length === 0 && fetchedWorkouts.length === 0 ? 'empty' : 'ready');
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setErrorMsg(err instanceof Error ? err.message : 'Failed to load health data');
-        setStatus('error');
-      });
-
-    return () => { cancelled = true; };
-  }, [opPw]);
+export default function HealthMetricsSection({ opPw, readings, injected, slot = 'all' }: Props) {
+  const internal = useHealthStream(injected ? '' : opPw);
+  const { status, errorMsg, days, workouts } = injected ?? internal;
 
   const last7 = useMemo(() => days.slice(-7), [days]);
   const last14 = useMemo(() => days.slice(-14), [days]);
@@ -887,8 +924,13 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
   }, [last30, readings]);
 
   // ── render guards ────────────────────────────────────────────────────────
+  // For non-'all'/'header' slots, swallow the loading/empty/error chrome —
+  // the parent will only show one header somewhere, not 12.
+
+  const showChrome = slot === 'all' || slot === 'header';
 
   if (status === 'idle' || status === 'loading') {
+    if (!showChrome) return null;
     return (
       <section className="op-health-section">
         <header className="op-health-head">
@@ -900,6 +942,7 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
   }
 
   if (status === 'empty') {
+    if (!showChrome) return null;
     return (
       <section className="op-health-section">
         <header className="op-health-head">
@@ -918,6 +961,7 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
   }
 
   if (status === 'error') {
+    if (!showChrome) return null;
     return (
       <section className="op-health-section">
         <header className="op-health-head">
@@ -933,21 +977,26 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
 
   // ── main render ──────────────────────────────────────────────────────────
 
+  const sectionClass = slot === 'all' ? 'op-health-section' : 'op-health-section op-health-section--slot';
+
   return (
-    <section className="op-health-section">
-      <header className="op-health-head">
-        <div>
-          <div className="op-health-kicker">Apple Health stream</div>
-          <h2 className="op-health-title">Today, in body and motion</h2>
-        </div>
-        <div className="op-health-head-meta">
-          <span className="op-date-stamp">{latest?.date ? new Date(latest.date).toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase().replace(/[ ,]+/g, ' · ') : '—'}</span>
-          <span className="op-health-head-dot">·</span>
-          <span className="muted">{days.length} days on file</span>
-        </div>
-      </header>
+    <section className={sectionClass}>
+      {(slot === 'all' || slot === 'header') && (
+        <header className="op-health-head">
+          <div>
+            <div className="op-health-kicker">Apple Health stream</div>
+            <h2 className="op-health-title">Today, in body and motion</h2>
+          </div>
+          <div className="op-health-head-meta">
+            <span className="op-date-stamp">{latest?.date ? new Date(latest.date).toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase().replace(/[ ,]+/g, ' · ') : '—'}</span>
+            <span className="op-health-head-dot">·</span>
+            <span className="muted">{days.length} days on file</span>
+          </div>
+        </header>
+      )}
 
       {/* ── Readiness band ──────────────────────────────────────────────── */}
+      {(slot === 'all' || slot === 'readiness') && (
       <div className={`op-readiness op-readiness-${readinessTone}`}>
         <div className="op-readiness-score">
           <div className="op-readiness-num">{readinessScore !== null ? readinessScore : '—'}</div>
@@ -969,8 +1018,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           <div className="op-readiness-verdict-txt">{readinessVerdict}</div>
         </div>
       </div>
+      )}
 
       {/* ── Accountability: today's one move + drift detector ───────── */}
+      {(slot === 'all' || slot === 'accountability') && (
       <div className="op-accountability">
         <div className="op-onemove">
           <span className="kicker">Today, one move</span>
@@ -996,8 +1047,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           </dl>
         </div>
       </div>
+      )}
 
       {/* ── Promise ledger ──────────────────────────────────────────── */}
+      {(slot === 'all' || slot === 'promise') && (
       <div className="op-promise">
         <div className="op-promise-head">
           <span className="op-health-card-label">Promise → kept · last 7 days</span>
@@ -1055,8 +1108,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           )}
         </div>
       </div>
+      )}
 
       {/* ── Today snapshot strip ────────────────────────────────────────── */}
+      {(slot === 'all' || slot === 'todayStrip') && (
       <div className="op-today-strip">
         <SnapshotCell
           label="Steps"
@@ -1095,8 +1150,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           delta={hrvDelta}
         />
       </div>
+      )}
 
       {/* ── This week vs last week ──────────────────────────────────── */}
+      {(slot === 'all' || slot === 'weekCompare') && (
       <div className="op-week-compare">
         <div className="op-week-compare-head">
           <span className="op-health-card-label">This week vs last</span>
@@ -1123,8 +1180,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           })}
         </div>
       </div>
+      )}
 
       {/* ── Main grid ────────────────────────────────────────────────── */}
+      {(slot === 'all' || slot === 'mainGrid') && (
       <div className="op-health-grid-v2">
 
         {/* Activity (wide) */}
@@ -1311,55 +1370,30 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           </dl>
         </article>
 
-        {/* Workouts */}
+        {/* Workouts — recent sessions only (the column chart lives in Analysis). */}
         <article className="op-health-card">
           <header className="op-health-card-head">
-            <span className="op-health-card-label">Workouts</span>
-            <span className="muted">This week</span>
+            <span className="op-health-card-label">Recent sessions</span>
+            <span className="muted">Last 4 logged</span>
           </header>
-          <div className="op-health-primary">
-            <div className="op-health-num">{workoutsThisWeek.length}</div>
-            <div className="op-health-unit">sessions · {Math.round(workoutMinutesWeek)} min · {Math.round(workoutKcalWeek)} kcal</div>
-          </div>
-
-          {byType.length > 0 && (
-            <div className="op-workout-types">
-              {byType.slice(0, 4).map((row) => {
-                const max = byType[0].minutes || 1;
-                const pct = (row.minutes / max) * 100;
-                return (
-                  <div key={row.type} className="op-workout-type-row">
-                    <span className="op-workout-type-name">{row.type}</span>
-                    <span className="op-workout-type-bar">
-                      <span style={{ width: `${pct}%` }} />
-                    </span>
-                    <span className="op-workout-type-val">{Math.round(row.minutes)}m · {row.count}×</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
 
           {recentWorkouts.length > 0 && (
-            <>
-              <div className="op-workout-recent-head">Recent</div>
-              <ul className="op-workout-list">
-                {recentWorkouts.map((w) => (
-                  <li key={w.id}>
-                    <div className="op-workout-head">
-                      <span className="op-workout-type">{w.type ?? 'Workout'}</span>
-                      <span className="muted">{new Date(w.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
-                    </div>
-                    <div className="op-workout-meta">
-                      {w.durationMin !== null && <span>{Math.round(w.durationMin)} min</span>}
-                      {w.energyKcal !== null && <span>· {Math.round(w.energyKcal)} kcal</span>}
-                      {w.avgHr !== null && <span>· {Math.round(w.avgHr)} bpm</span>}
-                      {w.distanceKm !== null && <span>· {w.distanceKm.toFixed(2)} km</span>}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </>
+            <ul className="op-workout-list">
+              {recentWorkouts.map((w) => (
+                <li key={w.id}>
+                  <div className="op-workout-head">
+                    <span className="op-workout-type">{w.type ?? 'Workout'}</span>
+                    <span className="muted">{new Date(w.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                  </div>
+                  <div className="op-workout-meta">
+                    {w.durationMin !== null && <span>{Math.round(w.durationMin)} min</span>}
+                    {w.energyKcal !== null && <span>· {Math.round(w.energyKcal)} kcal</span>}
+                    {w.avgHr !== null && <span>· {Math.round(w.avgHr)} bpm</span>}
+                    {w.distanceKm !== null && <span>· {w.distanceKm.toFixed(2)} km</span>}
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
 
           {workouts.length === 0 && (
@@ -1367,7 +1401,26 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           )}
         </article>
 
-        {/* Lifestyle inputs — water, caffeine, alcohol (local + Apple Health water) */}
+        {/* Consistency — 28-day heatmap + streaks */}
+        <article className="op-health-card op-card-wide">
+          <header className="op-health-card-head">
+            <span className="op-health-card-label">Consistency · last 28 days</span>
+            <span className="muted">Step intensity per day — darker = closer to goal</span>
+          </header>
+          <Heatmap days={heatmapDays} goal={GOALS.steps} />
+          <dl className="op-health-stats">
+            <div><dt>Steps streak (≥7k)</dt><dd>{stepsStreak} day{stepsStreak === 1 ? '' : 's'}</dd></div>
+            <div><dt>Best in 30d</dt><dd>{stepsStreakBest} day{stepsStreakBest === 1 ? '' : 's'}</dd></div>
+            <div><dt>Exercise streak (≥{GOALS.exerciseMinutes}m)</dt><dd>{exerciseStreak} day{exerciseStreak === 1 ? '' : 's'}</dd></div>
+            <div><dt>Sleep consistency</dt><dd>{sleepConsistencyLabel}{sleepStdMin !== null ? ` (±${Math.round(sleepStdMin)}m)` : ''}</dd></div>
+          </dl>
+        </article>
+
+      </div>
+      )}
+
+      {/* ── Lifestyle inputs — water, caffeine, alcohol ──────────────── */}
+      {(slot === 'all' || slot === 'lifestyle') && (
         <article className="op-health-card op-card-wide op-lifestyle-card">
           <header className="op-health-card-head">
             <span className="op-health-card-label">Lifestyle · today</span>
@@ -1403,25 +1456,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
             />
           </div>
         </article>
-
-        {/* Consistency — 28-day heatmap + streaks */}
-        <article className="op-health-card op-card-wide">
-          <header className="op-health-card-head">
-            <span className="op-health-card-label">Consistency · last 28 days</span>
-            <span className="muted">Step intensity per day — darker = closer to goal</span>
-          </header>
-          <Heatmap days={heatmapDays} goal={GOALS.steps} />
-          <dl className="op-health-stats">
-            <div><dt>Steps streak (≥7k)</dt><dd>{stepsStreak} day{stepsStreak === 1 ? '' : 's'}</dd></div>
-            <div><dt>Best in 30d</dt><dd>{stepsStreakBest} day{stepsStreakBest === 1 ? '' : 's'}</dd></div>
-            <div><dt>Exercise streak (≥{GOALS.exerciseMinutes}m)</dt><dd>{exerciseStreak} day{exerciseStreak === 1 ? '' : 's'}</dd></div>
-            <div><dt>Sleep consistency</dt><dd>{sleepConsistencyLabel}{sleepStdMin !== null ? ` (±${Math.round(sleepStdMin)}m)` : ''}</dd></div>
-          </dl>
-        </article>
-
-      </div>
+      )}
 
       {/* ── Compare: now vs 30 / 90 / 180 days back ──────────────────── */}
+      {(slot === 'all' || slot === 'compare') && (
       <div className="op-compare">
         <header className="op-compare-head">
           <span className="op-health-card-label">You, then and now</span>
@@ -1469,8 +1507,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           />
         </div>
       </div>
+      )}
 
       {/* ── Personal records ─────────────────────────────────────────── */}
+      {(slot === 'all' || slot === 'prs') && (
       <div className="op-pr-strip">
         <header className="op-pr-head">
           <span className="op-health-card-label">Personal records</span>
@@ -1485,8 +1525,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           <PRCell label="Leanest weight" value={records.weight ? `${records.weight.weight.toFixed(1)} kg` : '—'} date={records.weight?.date ?? null} />
         </div>
       </div>
+      )}
 
       {/* ── Correlations ─────────────────────────────────────────────── */}
+      {(slot === 'all' || slot === 'correlations') && (
       <div className="op-health-correlations">
         <header className="op-health-card-head">
           <span className="op-health-card-label">Patterns · last 30 days</span>
@@ -1516,6 +1558,7 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           r close to 0 = no relationship · |r| above 0.4 starts to mean something real · needs 4+ overlapping days.
         </p>
       </div>
+      )}
     </section>
   );
 }
