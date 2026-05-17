@@ -206,7 +206,7 @@ function modeLabel(mode: 'push' | 'steady' | 'lighter' | 'recover'): string {
     case 'steady':
       return 'Steady day';
     case 'lighter':
-      return 'Lighter day';
+      return 'Lighter';
     case 'recover':
     default:
       return 'Recovery day';
