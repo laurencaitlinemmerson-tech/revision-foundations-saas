@@ -2644,9 +2644,27 @@
 /* -- Training focus ------------------------------------------------ */
 .fitness-reference-shell .op-training-section {
   margin: 0 0 22px;
+  background: rgba(255,255,255,0.94);
+  border: 1px solid rgba(26,24,21,0.08);
+  border-radius: 26px;
+  box-shadow: 0 24px 60px rgba(26,24,21,0.06);
+  overflow: hidden;
 }
 .fitness-reference-shell .op-training-head {
   align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 24px 0;
+}
+.fitness-reference-shell .op-training-head h3 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+.fitness-reference-shell .op-training-head h3 em {
+  font-style: normal;
+  color: var(--ink-soft);
+  font-weight: 400;
 }
 .fitness-reference-shell .op-training-head-side {
   display: flex;
@@ -2658,10 +2676,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 10px;
+  padding: 7px 14px;
   border-radius: 999px;
-  border: 1px solid var(--rule);
-  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(26,24,21,0.1);
+  background: rgba(255,255,255,0.85);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -2688,11 +2706,11 @@
   grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.9fr);
   gap: 18px;
   align-items: start;
-  padding: 18px;
+  padding: 18px 24px 24px;
 }
 .fitness-reference-shell .op-training-main {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 .fitness-reference-shell .op-training-call,
 .fitness-reference-shell .op-training-week,
@@ -2701,8 +2719,10 @@
 .fitness-reference-shell .op-context-panel,
 .fitness-reference-shell .op-context-notes,
 .fitness-reference-shell .op-context-footer {
-  background: rgba(255,255,255,0.56);
-  border: 0.5px solid var(--rule);
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(26,24,21,0.08);
+  border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(26,24,21,0.04);
 }
 .fitness-reference-shell .op-training-call,
 .fitness-reference-shell .op-training-week,
@@ -2729,26 +2749,27 @@
 .fitness-reference-shell .op-training-call h4 {
   margin: 8px 0 0;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 400;
-  line-height: 1.04;
+  line-height: 1.05;
   letter-spacing: -0.015em;
   color: var(--ink);
 }
 .fitness-reference-shell .op-training-call p {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   max-width: 60ch;
-  font-size: 12.5px;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.75;
   color: var(--ink-soft);
 }
 .fitness-reference-shell .op-training-live {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 9px;
-  border: 0.5px solid var(--rule-soft);
-  background: rgba(255,255,255,0.68);
+  padding: 7px 11px;
+  border: 1px solid rgba(26,24,21,0.08);
+  background: rgba(245,241,235,0.9);
+  border-radius: 999px;
   font-size: 9.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2756,10 +2777,11 @@
   white-space: nowrap;
 }
 .fitness-reference-shell .op-training-live-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--ink-mute);
+  box-shadow: 0 0 0 3px rgba(26,24,21,0.06);
 }
 .fitness-reference-shell .op-training-inline-stats {
   display: grid;
@@ -2797,26 +2819,32 @@
 .fitness-reference-shell .op-training-session-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 14px;
   margin-top: 14px;
 }
 .fitness-reference-shell .op-training-session-card {
   display: grid;
-  gap: 6px;
-  padding: 16px;
-  border: 0.5px solid var(--rule-soft);
-  background: rgba(255,255,255,0.42);
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid rgba(26,24,21,0.08);
+  border-radius: 22px;
+  background: rgba(255,255,255,0.98);
+  box-shadow: 0 14px 32px rgba(26,24,21,0.04);
   text-align: left;
   cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 .fitness-reference-shell .op-training-session-card:hover {
   transform: translateY(-1px);
-  border-color: rgba(26,24,21,0.22);
+  border-color: rgba(26,24,21,0.16);
+  box-shadow: 0 18px 38px rgba(26,24,21,0.06);
 }
 .fitness-reference-shell .op-training-session-card.is-active {
-  background: var(--bone);
-  border-color: var(--rule);
+  background: rgba(247,244,238,0.95);
+  border-color: rgba(26,24,21,0.12);
+}
+.fitness-reference-shell .op-training-session-card.is-recommended {
+  border-color: rgba(28,122,103,0.25);
 }
 .fitness-reference-shell .op-training-session-card.is-recommended .op-training-session-status {
   color: var(--ink);
@@ -2848,7 +2876,7 @@
 .fitness-reference-shell .op-training-session-card p {
   margin: 0;
   font-size: 11px;
-  line-height: 1.55;
+  line-height: 1.65;
   color: var(--ink-soft);
 }
 .fitness-reference-shell .op-training-detail-rows {
@@ -2878,7 +2906,7 @@
 }
 .fitness-reference-shell .op-context-panel,
 .fitness-reference-shell .op-context-notes {
-  padding: 18px 18px 16px;
+  padding: 20px 20px 18px;
 }
 .fitness-reference-shell .op-context-copy {
   margin: 0;
@@ -2897,13 +2925,13 @@
   gap: 8px;
 }
 .fitness-reference-shell .op-context-chip {
-  padding: 7px 10px;
+  padding: 8px 14px;
   border-radius: 999px;
-  border: 0.5px solid var(--rule);
-  background: rgba(255,255,255,0.86);
+  border: 1px solid rgba(26,24,21,0.08);
+  background: rgba(255,255,255,0.92);
   color: var(--ink-soft);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -2911,24 +2939,24 @@
 }
 .fitness-reference-shell .op-context-chip:hover {
   transform: translateY(-1px);
-  border-color: rgba(26,24,21,0.22);
+  border-color: rgba(26,24,21,0.16);
 }
 .fitness-reference-shell .op-context-chip.is-active {
   background: var(--bone);
-  border-color: var(--rule);
+  border-color: rgba(26,24,21,0.12);
   color: var(--ink);
 }
 .fitness-reference-shell .op-context-chip.is-soft.is-active {
   background: var(--bone);
-  border-color: var(--rule);
+  border-color: rgba(26,24,21,0.12);
 }
 .fitness-reference-shell .op-context-notes {
   display: grid;
   gap: 0;
 }
 .fitness-reference-shell .op-context-note {
-  padding: 12px 0;
-  border-top: 0.5px solid var(--rule-soft);
+  padding: 16px 0;
+  border-top: 0.5px solid rgba(26,24,21,0.06);
 }
 .fitness-reference-shell .op-context-note:first-child {
   border-top: none;
@@ -2941,11 +2969,13 @@
   color: var(--ink-soft);
 }
 .fitness-reference-shell .op-context-footer {
-  padding: 14px 18px;
+  padding: 16px 20px;
   font-size: 11px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--ink-soft);
-  background: rgba(255,255,255,0.56);
+  background: rgba(255,255,255,0.94);
+  border-top: 0.5px solid rgba(26,24,21,0.06);
+  border-radius: 0 0 22px 22px;
 }
 @media (max-width: 980px) {
   .fitness-reference-shell .op-training-layout {
