@@ -2361,3 +2361,254 @@
   color: var(--ink-mute);
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Macros donut + legend ───────────────────────────────────────── */
+.fitness-reference-shell .op-macros-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 22px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--rule-soft);
+}
+.fitness-reference-shell .op-macros-legend {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.fitness-reference-shell .op-macros-legend-row {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 12px;
+}
+.fitness-reference-shell .op-macros-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.fitness-reference-shell .op-macros-legend-row dt {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.fitness-reference-shell .op-macros-legend-row dd {
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Lifestyle card ──────────────────────────────────────────────── */
+.fitness-reference-shell .op-lifestyle-rows {
+  display: grid;
+  gap: 14px;
+}
+.fitness-reference-shell .op-lifestyle-row {
+  display: grid;
+  grid-template-columns: 1.4fr auto 1.2fr;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 0;
+  border-top: 0.5px solid var(--rule-soft);
+}
+.fitness-reference-shell .op-lifestyle-row:first-child { border-top: none; padding-top: 4px; }
+.fitness-reference-shell .op-lifestyle-row-label {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+.fitness-reference-shell .op-lifestyle-row-hint {
+  font-size: 11px;
+  line-height: 1.45;
+  max-width: 32ch;
+  margin-top: 2px;
+}
+.fitness-reference-shell .op-lifestyle-row-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fitness-reference-shell .op-lifestyle-btn {
+  width: 26px;
+  height: 26px;
+  border: 0.5px solid var(--rule);
+  background: var(--paper);
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+}
+.fitness-reference-shell .op-lifestyle-btn:hover { background: var(--paper-deep); }
+.fitness-reference-shell .op-lifestyle-num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  min-width: 64px;
+  text-align: center;
+}
+.fitness-reference-shell .op-lifestyle-num strong { font-weight: 400; }
+.fitness-reference-shell .op-lifestyle-num .muted {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.fitness-reference-shell .op-lifestyle-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 36px;
+}
+.fitness-reference-shell .op-lifestyle-bar {
+  flex: 1;
+  background: var(--rule-soft);
+  min-height: 2px;
+  opacity: 0.65;
+}
+.fitness-reference-shell .op-lifestyle-bar.is-today { opacity: 1; }
+.fitness-reference-shell .op-lifestyle-bar.is-empty {
+  background: transparent;
+  border-bottom: 0.5px dashed var(--rule);
+}
+
+/* ── Compare panel ───────────────────────────────────────────────── */
+.fitness-reference-shell .op-compare {
+  margin: 28px 0 12px;
+  padding: 18px 22px 20px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+}
+.fitness-reference-shell .op-compare-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.fitness-reference-shell .op-compare-grid {
+  display: grid;
+  gap: 2px;
+}
+.fitness-reference-shell .op-compare-rowhead {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 6px 0 10px;
+  border-bottom: 0.5px solid var(--rule);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.fitness-reference-shell .op-compare-rowhead span:not(:first-child) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  letter-spacing: 0.12em;
+}
+.fitness-reference-shell .op-compare-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+.fitness-reference-shell .op-compare-row:last-child { border-bottom: none; }
+.fitness-reference-shell .op-compare-lbl {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+.fitness-reference-shell .op-compare-now {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 18px;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums;
+}
+.fitness-reference-shell .op-compare-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fitness-reference-shell .op-compare-val {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.fitness-reference-shell .op-compare-delta {
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.fitness-reference-shell .op-compare-cell.good .op-compare-delta { color: var(--good); }
+.fitness-reference-shell .op-compare-cell.warn .op-compare-delta { color: var(--warn); }
+.fitness-reference-shell .op-compare-cell.neutral .op-compare-delta { color: var(--ink-mute); }
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-compare-rowhead,
+  .fitness-reference-shell .op-compare-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+  }
+}
+
+/* ── Personal records strip ──────────────────────────────────────── */
+.fitness-reference-shell .op-pr-strip {
+  margin: 12px 0 24px;
+  padding: 18px 22px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+}
+.fitness-reference-shell .op-pr-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.fitness-reference-shell .op-pr-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+}
+.fitness-reference-shell .op-pr-cell {
+  padding: 6px 14px;
+  border-left: 0.5px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fitness-reference-shell .op-pr-cell:first-child { border-left: none; padding-left: 0; }
+.fitness-reference-shell .op-pr-label {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+.fitness-reference-shell .op-pr-value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 19px;
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums;
+}
+.fitness-reference-shell .op-pr-date {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+}
+@media (max-width: 880px) {
+  .fitness-reference-shell .op-pr-grid { grid-template-columns: repeat(3, 1fr); gap: 14px 0; }
+  .fitness-reference-shell .op-pr-cell { border-left: none; padding-left: 0; padding-right: 0; }
+  .fitness-reference-shell .op-pr-cell:nth-child(n+4) { padding-top: 14px; border-top: 0.5px solid var(--rule); }
+}

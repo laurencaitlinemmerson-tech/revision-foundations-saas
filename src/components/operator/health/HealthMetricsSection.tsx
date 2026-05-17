@@ -366,8 +366,8 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
     setErrorMsg(null);
 
     Promise.all([
-      fetch('/api/operator/health?limit=90', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
-      fetch('/api/operator/workouts?limit=50', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
+      fetch('/api/operator/health?limit=180', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
+      fetch('/api/operator/workouts?limit=100', { headers: { 'x-operator-pw': opPw } }).then((r) => r.json()),
     ])
       .then(([healthRes, workoutRes]) => {
         if (cancelled) return;
@@ -538,6 +538,126 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
 
   // ── 28-day step heatmap ─────────────────────────────────────────────────
   const heatmapDays = useMemo(() => days.slice(-28), [days]);
+
+  // ── Personal records (all-time, from current data window) ───────────────
+  const records = useMemo(() => {
+    function findMax(pick: (d: DailyMetrics) => number | null): { value: number | null; date: string | null } {
+      let best: number | null = null;
+      let bestDate: string | null = null;
+      for (const d of days) {
+        const v = pick(d);
+        if (v !== null && Number.isFinite(v) && (best === null || v > best)) { best = v; bestDate = d.date; }
+      }
+      return { value: best, date: bestDate };
+    }
+    function findMin(pick: (d: DailyMetrics) => number | null): { value: number | null; date: string | null } {
+      let best: number | null = null;
+      let bestDate: string | null = null;
+      for (const d of days) {
+        const v = pick(d);
+        if (v !== null && Number.isFinite(v) && (best === null || v < best)) { best = v; bestDate = d.date; }
+      }
+      return { value: best, date: bestDate };
+    }
+    const lightestWeight = readings.reduce<{ weight: number; date: string } | null>((acc, r) => {
+      if (!acc || r.weight < acc.weight) return { weight: r.weight, date: r.date };
+      return acc;
+    }, null);
+    return {
+      steps: findMax((d) => d.activity.steps),
+      exercise: findMax((d) => d.activity.exerciseMinutes),
+      sleep: findMax((d) => d.sleep.totalMin),
+      hrv: findMax((d) => d.heart.hrvMs),
+      rhr: findMin((d) => d.heart.restingHr),
+      weight: lightestWeight,
+    };
+  }, [days, readings]);
+
+  // ── Compare panel (now vs 30/90/180 days back) ─────────────────────────
+  const compareWindows = useMemo(() => {
+    function findClosest(targetDays: number): DailyMetrics | null {
+      if (days.length === 0) return null;
+      const latestDate = new Date(days[days.length - 1].date).getTime();
+      const targetDate = latestDate - targetDays * 86400000;
+      let best: DailyMetrics | null = null;
+      let bestDiff = Infinity;
+      for (const d of days) {
+        const diff = Math.abs(new Date(d.date).getTime() - targetDate);
+        if (diff < bestDiff) { bestDiff = diff; best = d; }
+      }
+      // Only return if within ±5 days of the target.
+      return bestDiff <= 5 * 86400000 ? best : null;
+    }
+    function findWeightClosest(targetDays: number): { weight: number; date: string } | null {
+      if (readings.length === 0) return null;
+      const latestDate = new Date(readings[readings.length - 1].date).getTime();
+      const targetDate = latestDate - targetDays * 86400000;
+      let best: { weight: number; date: string } | null = null;
+      let bestDiff = Infinity;
+      for (const r of readings) {
+        const diff = Math.abs(new Date(r.date).getTime() - targetDate);
+        if (diff < bestDiff) { bestDiff = diff; best = r; }
+      }
+      return bestDiff <= 14 * 86400000 ? best : null;
+    }
+    return [30, 90, 180].map((n) => ({
+      days: n,
+      health: findClosest(n),
+      weight: findWeightClosest(n),
+    }));
+  }, [days, readings]);
+
+  // ── Lifestyle inputs (water from health stream + caffeine/alcohol local) ─
+  const LIFESTYLE_KEY = 'op-fitness-lifestyle-v1';
+  interface LifestyleEntry { date: string; caffeine?: number; alcohol?: number; water?: number }
+  const [lifestyle, setLifestyle] = useState<Record<string, { caffeine?: number; alcohol?: number; water?: number }>>({});
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LIFESTYLE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as LifestyleEntry[];
+        const map: Record<string, { caffeine?: number; alcohol?: number; water?: number }> = {};
+        for (const p of parsed) map[p.date] = { caffeine: p.caffeine, alcohol: p.alcohol, water: p.water };
+        setLifestyle(map);
+      }
+    } catch { /* ignore */ }
+  }, []);
+  function bumpLifestyle(date: string, field: 'caffeine' | 'alcohol' | 'water', delta: number) {
+    setLifestyle((prev) => {
+      const cur = prev[date] ?? {};
+      const nextVal = Math.max(0, (cur[field] ?? 0) + delta);
+      const next = { ...prev, [date]: { ...cur, [field]: nextVal } };
+      try {
+        const list: LifestyleEntry[] = Object.entries(next).map(([d, v]) => ({ date: d, ...v }));
+        localStorage.setItem(LIFESTYLE_KEY, JSON.stringify(list));
+      } catch { /* ignore */ }
+      return next;
+    });
+  }
+  function lifestyleStrip(field: 'caffeine' | 'alcohol' | 'water'): (number | null)[] {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const out: (number | null)[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      if (field === 'water') {
+        // Water can also come from health.nutrition.waterMl (cups ≈ 250ml).
+        const local = lifestyle[iso]?.water;
+        const fromHealth = days.find((row) => row.date.slice(0, 10) === iso)?.nutrition?.waterMl;
+        const cups = local ?? (fromHealth ? Math.round(fromHealth / 250) : null);
+        out.push(cups);
+      } else {
+        out.push(lifestyle[iso]?.[field] ?? null);
+      }
+    }
+    return out;
+  }
+  const todayLifestyleIso = new Date().toISOString().slice(0, 10);
+  const todayWater = lifestyle[todayLifestyleIso]?.water ?? (latest?.nutrition?.waterMl ? Math.round(latest.nutrition.waterMl / 250) : 0);
+  const todayCaffeine = lifestyle[todayLifestyleIso]?.caffeine ?? 0;
+  const todayAlcohol = lifestyle[todayLifestyleIso]?.alcohol ?? 0;
+
 
   // ── Today's one move (single named action) ──────────────────────────────
   const todayHour = new Date().getHours();
@@ -1132,12 +1252,35 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
                 </div>
               </div>
 
-              <dl className="op-health-stats">
-                <div><dt>Protein</dt><dd>{fmtNum(proteinToday, 0, ' g')}</dd></div>
-                <div><dt>Carbs</dt><dd>{fmtNum(carbsToday, 0, ' g')}</dd></div>
-                <div><dt>Fat</dt><dd>{fmtNum(fatToday, 0, ' g')}</dd></div>
-                <div><dt>BMR (Mifflin)</dt><dd>{fmtInt(bmr)} kcal</dd></div>
-              </dl>
+              <div className="op-macros-row">
+                <MacroDonut
+                  protein={proteinToday}
+                  carbs={carbsToday}
+                  fat={fatToday}
+                />
+                <dl className="op-macros-legend">
+                  <div className="op-macros-legend-row">
+                    <span className="op-macros-swatch" style={{ background: 'var(--good)' }} />
+                    <dt>Protein</dt>
+                    <dd>{fmtNum(proteinToday, 0, ' g')}</dd>
+                  </div>
+                  <div className="op-macros-legend-row">
+                    <span className="op-macros-swatch" style={{ background: 'var(--brass)' }} />
+                    <dt>Carbs</dt>
+                    <dd>{fmtNum(carbsToday, 0, ' g')}</dd>
+                  </div>
+                  <div className="op-macros-legend-row">
+                    <span className="op-macros-swatch" style={{ background: 'var(--warn)' }} />
+                    <dt>Fat</dt>
+                    <dd>{fmtNum(fatToday, 0, ' g')}</dd>
+                  </div>
+                  <div className="op-macros-legend-row">
+                    <span className="op-macros-swatch" style={{ background: 'transparent', border: '0.5px solid var(--rule)' }} />
+                    <dt>BMR</dt>
+                    <dd>{fmtInt(bmr)} kcal</dd>
+                  </div>
+                </dl>
+              </div>
             </>
           )}
         </article>
@@ -1224,6 +1367,43 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           )}
         </article>
 
+        {/* Lifestyle inputs — water, caffeine, alcohol (local + Apple Health water) */}
+        <article className="op-health-card op-card-wide op-lifestyle-card">
+          <header className="op-health-card-head">
+            <span className="op-health-card-label">Lifestyle · today</span>
+            <span className="muted">Water · caffeine · alcohol — tap to log, 14-day strip below</span>
+          </header>
+          <div className="op-lifestyle-rows">
+            <LifestyleRow
+              label="Water"
+              suffix="cups"
+              value={todayWater}
+              series={lifestyleStrip('water')}
+              accent="brass"
+              onBump={(delta) => bumpLifestyle(todayLifestyleIso, 'water', delta)}
+              hint="Apple Health water (if logged) shows automatically; tap + to top up."
+            />
+            <LifestyleRow
+              label="Caffeine"
+              suffix="cups"
+              value={todayCaffeine}
+              series={lifestyleStrip('caffeine')}
+              accent="brass-deep"
+              onBump={(delta) => bumpLifestyle(todayLifestyleIso, 'caffeine', delta)}
+              hint="Coffees / strong teas / energy drinks. >3 starts to bite HRV."
+            />
+            <LifestyleRow
+              label="Alcohol"
+              suffix="units"
+              value={todayAlcohol}
+              series={lifestyleStrip('alcohol')}
+              accent="warn"
+              onBump={(delta) => bumpLifestyle(todayLifestyleIso, 'alcohol', delta)}
+              hint="Units, not drinks. A glass of wine ≈ 1.5 units. Cleanest signal in the dashboard."
+            />
+          </div>
+        </article>
+
         {/* Consistency — 28-day heatmap + streaks */}
         <article className="op-health-card op-card-wide">
           <header className="op-health-card-head">
@@ -1239,6 +1419,71 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           </dl>
         </article>
 
+      </div>
+
+      {/* ── Compare: now vs 30 / 90 / 180 days back ──────────────────── */}
+      <div className="op-compare">
+        <header className="op-compare-head">
+          <span className="op-health-card-label">You, then and now</span>
+          <span className="muted">Same body, three time windows back</span>
+        </header>
+        <div className="op-compare-grid">
+          <div className="op-compare-rowhead">
+            <span>Metric</span>
+            <span>Now</span>
+            {compareWindows.map((w) => (
+              <span key={w.days}>{w.days}d ago</span>
+            ))}
+          </div>
+          <CompareRow
+            label="Weight"
+            now={readings.length > 0 ? readings[readings.length - 1].weight : null}
+            cols={compareWindows.map((w) => w.weight?.weight ?? null)}
+            fmt={(v) => v !== null ? `${v.toFixed(1)} kg` : '—'}
+            invertDelta
+          />
+          <CompareRow
+            label="Resting HR"
+            now={latest?.heart.restingHr ?? null}
+            cols={compareWindows.map((w) => w.health?.heart.restingHr ?? null)}
+            fmt={(v) => v !== null ? `${Math.round(v)} bpm` : '—'}
+            invertDelta
+          />
+          <CompareRow
+            label="HRV"
+            now={latest?.heart.hrvMs ?? null}
+            cols={compareWindows.map((w) => w.health?.heart.hrvMs ?? null)}
+            fmt={(v) => v !== null ? `${Math.round(v)} ms` : '—'}
+          />
+          <CompareRow
+            label="Sleep (last night)"
+            now={latest?.sleep.totalMin ?? null}
+            cols={compareWindows.map((w) => w.health?.sleep.totalMin ?? null)}
+            fmt={(v) => v !== null ? formatMinutes(v) : '—'}
+          />
+          <CompareRow
+            label="VO₂ max"
+            now={latest?.heart.vo2Max ?? null}
+            cols={compareWindows.map((w) => w.health?.heart.vo2Max ?? null)}
+            fmt={(v) => v !== null ? v.toFixed(1) : '—'}
+          />
+        </div>
+      </div>
+
+      {/* ── Personal records ─────────────────────────────────────────── */}
+      <div className="op-pr-strip">
+        <header className="op-pr-head">
+          <span className="op-health-card-label">Personal records</span>
+          <span className="muted">Earned, not chased</span>
+        </header>
+        <div className="op-pr-grid">
+          <PRCell label="Most steps" value={records.steps.value !== null ? fmtInt(records.steps.value) : '—'} date={records.steps.date} />
+          <PRCell label="Longest exercise" value={records.exercise.value !== null ? `${Math.round(records.exercise.value)} min` : '—'} date={records.exercise.date} />
+          <PRCell label="Biggest sleep" value={records.sleep.value !== null ? formatMinutes(records.sleep.value) : '—'} date={records.sleep.date} />
+          <PRCell label="Highest HRV" value={records.hrv.value !== null ? `${Math.round(records.hrv.value)} ms` : '—'} date={records.hrv.date} />
+          <PRCell label="Lowest RHR" value={records.rhr.value !== null ? `${Math.round(records.rhr.value)} bpm` : '—'} date={records.rhr.date} />
+          <PRCell label="Leanest weight" value={records.weight ? `${records.weight.weight.toFixed(1)} kg` : '—'} date={records.weight?.date ?? null} />
+        </div>
       </div>
 
       {/* ── Correlations ─────────────────────────────────────────────── */}
@@ -1321,6 +1566,145 @@ function Heatmap({ days, goal }: { days: DailyMetrics[]; goal: number }) {
           {dayLabels.map((l) => <span key={l}>{l}</span>)}
         </span>
       </div>
+    </div>
+  );
+}
+
+function MacroDonut({ protein, carbs, fat }: { protein: number | null; carbs: number | null; fat: number | null }) {
+  const p = protein ?? 0;
+  const c = carbs ?? 0;
+  const f = fat ?? 0;
+  const kcalP = p * 4;
+  const kcalC = c * 4;
+  const kcalF = f * 9;
+  const total = kcalP + kcalC + kcalF;
+  const size = 124;
+  const r = 50;
+  const stroke = 14;
+  const c2pi = 2 * Math.PI * r;
+  if (total === 0) {
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-label="Macro split unavailable">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--rule)" strokeWidth={stroke} />
+      </svg>
+    );
+  }
+  const slices = [
+    { k: 'p', value: kcalP, color: 'var(--good)' },
+    { k: 'c', value: kcalC, color: 'var(--brass)' },
+    { k: 'f', value: kcalF, color: 'var(--warn)' },
+  ];
+  let offset = 0;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-label="Macro split">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--rule-soft)" strokeWidth={stroke} />
+      {slices.map((s) => {
+        const pct = s.value / total;
+        const dash = c2pi * pct;
+        const el = (
+          <circle
+            key={s.k}
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            fill="none"
+            stroke={s.color}
+            strokeWidth={stroke}
+            strokeDasharray={`${dash} ${c2pi - dash}`}
+            strokeDashoffset={-offset}
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+            opacity={0.85}
+          />
+        );
+        offset += dash;
+        return el;
+      })}
+      <text x={size / 2} y={size / 2 - 4} textAnchor="middle" fontSize={9} fill="var(--ink-mute)" letterSpacing="0.16em">KCAL</text>
+      <text x={size / 2} y={size / 2 + 14} textAnchor="middle" fontFamily="'Playfair Display', Georgia, serif" fontSize={20} fill="var(--ink)">{Math.round(total).toLocaleString('en-GB')}</text>
+    </svg>
+  );
+}
+
+function LifestyleRow({ label, suffix, value, series, accent, onBump, hint }: {
+  label: string;
+  suffix: string;
+  value: number;
+  series: (number | null)[];
+  accent: 'brass' | 'brass-deep' | 'warn';
+  onBump: (delta: number) => void;
+  hint: string;
+}) {
+  const color = accent === 'brass' ? 'var(--brass)' : accent === 'brass-deep' ? 'var(--brass-deep)' : 'var(--warn)';
+  const max = Math.max(...series.map((v) => v ?? 0), 1);
+  return (
+    <div className="op-lifestyle-row">
+      <div className="op-lifestyle-row-meta">
+        <div className="op-lifestyle-row-label">{label}</div>
+        <div className="op-lifestyle-row-hint muted">{hint}</div>
+      </div>
+      <div className="op-lifestyle-row-value">
+        <button type="button" className="op-lifestyle-btn" onClick={() => onBump(-1)} aria-label={`Decrement ${label}`}>−</button>
+        <div className="op-lifestyle-num"><strong>{value}</strong> <span className="muted">{suffix}</span></div>
+        <button type="button" className="op-lifestyle-btn" onClick={() => onBump(1)} aria-label={`Increment ${label}`}>+</button>
+      </div>
+      <div className="op-lifestyle-strip" style={{ color }}>
+        {series.map((v, i) => {
+          const h = v !== null && v > 0 ? Math.max(8, (v / max) * 100) : 0;
+          const isToday = i === series.length - 1;
+          return (
+            <span
+              key={i}
+              className={`op-lifestyle-bar ${isToday ? 'is-today' : ''} ${v === null ? 'is-empty' : ''}`}
+              style={{ height: `${h}%`, background: v && v > 0 ? color : undefined }}
+              title={`${v ?? 'no data'} ${suffix}`}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CompareRow({ label, now, cols, fmt, invertDelta }: {
+  label: string;
+  now: number | null;
+  cols: (number | null)[];
+  fmt: (v: number | null) => string;
+  invertDelta?: boolean;
+}) {
+  return (
+    <div className="op-compare-row">
+      <span className="op-compare-lbl">{label}</span>
+      <span className="op-compare-now">{fmt(now)}</span>
+      {cols.map((v, i) => {
+        let deltaTone: 'good' | 'warn' | 'neutral' = 'neutral';
+        let deltaTxt = '—';
+        if (now !== null && v !== null && v !== 0) {
+          const diff = now - v;
+          const pct = (diff / v) * 100;
+          const positive = invertDelta ? diff < 0 : diff > 0;
+          deltaTone = Math.abs(pct) < 2 ? 'neutral' : positive ? 'good' : 'warn';
+          deltaTxt = `${diff >= 0 ? '+' : ''}${pct.toFixed(0)}%`;
+        }
+        return (
+          <span key={i} className={`op-compare-cell ${deltaTone}`}>
+            <span className="op-compare-val">{fmt(v)}</span>
+            <span className="op-compare-delta">{deltaTxt}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function PRCell({ label, value, date }: { label: string; value: string; date: string | null }) {
+  return (
+    <div className="op-pr-cell">
+      <span className="op-pr-label">{label}</span>
+      <span className="op-pr-value">{value}</span>
+      <span className="op-pr-date">
+        {date ? new Date(date).toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase().replace(/[ ,]+/g, ' · ') : '—'}
+      </span>
     </div>
   );
 }
