@@ -217,7 +217,7 @@ function DateStamp({ iso, style }: { iso: string; style?: CSSProperties }) {
 }
 
 // Full-width editorial section divider with an eyebrow.
-function EditorialDivider({ eyebrow, note }: { eyebrow: string; note?: string }) {
+function EditorialDivider({ eyebrow, note, style }: { eyebrow: string; note?: string; style?: CSSProperties }) {
   return (
     <div style={{
       display: 'grid',
@@ -225,6 +225,7 @@ function EditorialDivider({ eyebrow, note }: { eyebrow: string; note?: string })
       alignItems: 'center',
       gap: 18,
       margin: '40px 0 22px',
+      ...style,
     }}>
       <span style={{
         fontFamily: T.sans,
@@ -3682,21 +3683,21 @@ function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number
     { label:'Bone',   pct:goalBonePct,   kg:goalBoneKg,   color:T.gold  },
   ];
 
-  const W = 200, H = 200;
+  const W = 244, H = 244;
   const cx = W/2, cy = H/2;
-  const rO = 80, rI = 46;
+  const rO = 96, rI = 54;
 
   const renderPie = (slices: Slice[], heading: string, totalKg: number, sub: string) => {
     const wedges = donutSlices(slices, cx, cy, rO, rI);
     return (
-      <div style={{ padding:'18px 24px', textAlign:'center' }}>
+      <div style={{ padding:'20px 28px', textAlign:'center' }}>
         <Kicker style={{ marginBottom:10 }}>{heading}</Kicker>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', maxWidth:200, height:'auto' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', maxWidth:244, height:'auto' }}>
           {wedges.map(w => <path key={w.key} d={w.d} fill={w.color} opacity="0.85" />)}
-          <text x={cx} y={cy-4} textAnchor="middle" fontFamily={T.display} fontSize="22" fill={T.ink} letterSpacing="-0.02em">
+          <text x={cx} y={cy-6} textAnchor="middle" fontFamily={T.display} fontSize="28" fill={T.ink} letterSpacing="-0.02em">
             {totalKg.toFixed(1)}
           </text>
-          <text x={cx} y={cy+14} textAnchor="middle" fontFamily={T.sans} fontSize="9" fill={T.muted} letterSpacing="0.18em">KG TOTAL</text>
+          <text x={cx} y={cy+17} textAnchor="middle" fontFamily={T.sans} fontSize="10" fill={T.muted} letterSpacing="0.18em">KG TOTAL</text>
         </svg>
         <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'8px 0 0' }}>{sub}</p>
       </div>
@@ -3705,7 +3706,7 @@ function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number
 
   return (
     <div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, gap:0 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, gap:0 }}>
         <div style={{ borderRight:`0.5px solid ${T.line}` }}>
           {renderPie(currentSlices, 'Today · the current composition', latest.weight, `at ${latest.weight} kg`)}
         </div>
@@ -4756,7 +4757,6 @@ export default function OperatorDashboardClient() {
 
   if (!latest) return <div style={{ background:T.paper, minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted }}>The page is waiting for the first reading.</p></div>;
   const previousWeek = nearestReadingByDays(dashboardSource, latest, 7);
-  const monthAgo = nearestReadingByDays(dashboardSource, latest, 30);
   const cadence = loggingCadence(dashboardSource);
   const nutrition = nutritionTargets(latest);
   const targetDelta = latest.weight - goal;
@@ -4765,16 +4765,49 @@ export default function OperatorDashboardClient() {
   const peakWeight = Math.max(...dashboardSource.map((row) => row.weight));
   const progress = peakWeight <= goal ? 100 : Math.max(0, Math.min(100, ((peakWeight - latest.weight) / (peakWeight - goal)) * 100));
   const syncSummary = cloudOk === null ? 'Local-first mode' : cloudOk ? (syncing ? 'Cloud syncing now' : 'Cloud sync active') : 'Local backup only';
+  const healthDays = healthStream.days;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const latestHealthDay = healthDays[healthDays.length - 1] ?? null;
+  const todayHealth = healthDays.find((d) => d.date.slice(0, 10) === todayIso) ?? latestHealthDay;
+  const caloriesInToday = todayHealth?.nutrition?.dietaryEnergyKcal ?? null;
+  const activeKcalToday = todayHealth?.activity.activeEnergyKcal ?? null;
+  const caloriesOutToday = todayHealth ? Math.round(nutrition.bmr + (activeKcalToday ?? 0)) : null;
+  const actualDeficitToday = caloriesInToday !== null && caloriesOutToday !== null
+    ? Math.round(caloriesOutToday - caloriesInToday)
+    : null;
+  const targetDeficit = Math.max(0, nutrition.activeTdee - nutrition.intake);
+  const deficitLabel = actualDeficitToday !== null && actualDeficitToday < 0 ? 'kcal surplus' : 'kcal deficit';
+  const deficitTone = actualDeficitToday === null
+    ? 'neutral'
+    : actualDeficitToday >= targetDeficit
+      ? 'good'
+      : actualDeficitToday >= 0
+        ? 'neutral'
+        : 'warn';
+  const deficitSub = actualDeficitToday === null
+    ? `Target ${targetDeficit.toLocaleString('en-GB')} kcal`
+    : actualDeficitToday >= targetDeficit
+      ? `Above ${targetDeficit.toLocaleString('en-GB')} kcal target`
+      : actualDeficitToday >= 0
+        ? `${(targetDeficit - actualDeficitToday).toLocaleString('en-GB')} kcal short of target`
+        : `${Math.abs(actualDeficitToday).toLocaleString('en-GB')} kcal over burn`;
+  const caloriesInSub = caloriesInToday !== null
+    ? `${(caloriesInToday - nutrition.intake) >= 0 ? '+' : ''}${Math.round(caloriesInToday - nutrition.intake)} vs ${nutrition.intake.toLocaleString('en-GB')} target`
+    : 'Awaiting food log sync';
+  const caloriesOutSub = todayHealth
+    ? `BMR ${nutrition.bmr.toLocaleString('en-GB')} + active ${(activeKcalToday ?? 0).toLocaleString('en-GB')} kcal`
+    : 'Awaiting Apple Health sync';
+  const weightTodaySub = `${targetDelta <= 0 ? `${Math.abs(targetDelta).toFixed(1)} kg under` : `${targetDelta.toFixed(1)} kg to go`} · goal ${goal.toFixed(1)} kg`;
   const sectionGuide = [
     {
       id: 'operator-today',
       label: 'Today',
-      note: 'Start with the current body state, target gap and logging quality.',
+      note: 'Start with calories, deficit, weight and tracking quality.',
     },
     {
-      id: 'operator-story',
-      label: 'Story',
-      note: 'See the full weight line, phase changes and visual evidence first.',
+      id: 'operator-action',
+      label: 'Action',
+      note: 'Decide the next move while the day is still easy to influence.',
     },
     {
       id: 'operator-health-stream',
@@ -4782,9 +4815,9 @@ export default function OperatorDashboardClient() {
       note: 'Check what is moving across nutrition, sleep and recovery.',
     },
     {
-      id: 'operator-action',
-      label: 'Action',
-      note: 'Finish with the one decision or habit that matters next.',
+      id: 'operator-story',
+      label: 'Story',
+      note: 'Zoom out into the full weight line, phase changes and visual evidence.',
     },
   ] as const;
 
@@ -4809,6 +4842,81 @@ export default function OperatorDashboardClient() {
             Lock
           </button>
         </div>
+
+        <section className="fit-anchor-section" id="operator-today">
+          {/* ───────────────────────── TODAY ─────────────────────────── */}
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '10px 0 18px' }} />
+
+          <section className="fit-today">
+            <div className="fit-today-head">
+              <div>
+                <span className="fit-today-label">Today at a glance</span>
+                <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
+              </div>
+              <span className="muted">{formatReferenceDate(latest.date)}</span>
+            </div>
+
+            <div className="fit-glance-row">
+              <div className="glance-card glance-cal-balance">
+                <div className="gcb-row">
+                  <div className="gcb-col">
+                    <div className="gcb-num">{caloriesInToday !== null ? Math.round(caloriesInToday).toLocaleString('en-GB') : '—'}</div>
+                    <div className="gcb-lbl">kcal in</div>
+                    <div className="gcb-sub muted">{caloriesInSub}</div>
+                  </div>
+                  <div className="gcb-divider" />
+                  <div className="gcb-col">
+                    <div className="gcb-num">{caloriesOutToday !== null ? Math.round(caloriesOutToday).toLocaleString('en-GB') : '—'}</div>
+                    <div className="gcb-lbl">kcal out</div>
+                    <div className="gcb-sub muted">{caloriesOutSub}</div>
+                  </div>
+                  <div className="gcb-divider" />
+                  <div className="gcb-col">
+                    <div className={`gcb-num ${deficitTone === 'good' ? 'good' : deficitTone === 'warn' ? 'warn' : ''}`}>
+                      {actualDeficitToday !== null ? Math.abs(actualDeficitToday).toLocaleString('en-GB') : '—'}
+                    </div>
+                    <div className="gcb-lbl">{deficitLabel}</div>
+                    <div className={`gcb-sub ${deficitTone === 'good' ? 'good' : deficitTone === 'warn' ? 'warn' : 'neutral'}`}>{deficitSub}</div>
+                  </div>
+                  <div className="gcb-divider" />
+                  <div className="gcb-col">
+                    <div className={`gcb-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{latest.weight.toFixed(1)}</div>
+                    <div className="gcb-lbl">kg logged</div>
+                    <div className="gcb-sub muted">{weightTodaySub}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">Body fat</div>
+                <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
+                <div className="gc-lbl">current composition</div>
+                <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">BMI</div>
+                <div className="gc-num">{latest.bmi.toFixed(1)}</div>
+                <div className="gc-lbl">body mass index</div>
+                <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">Logging</div>
+                <div className="gc-num">{cadence.count}</div>
+                <div className="gc-lbl">days logged</div>
+                <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
+              </div>
+
+              <div className="glance-card">
+                <div className="gc-kicker">Sync</div>
+                <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
+                <div className="gc-lbl">data mode</div>
+                <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
+              </div>
+            </div>
+          </section>
+        </section>
 
         <section className="fit-hero">
           <div className="fit-hero-top">
@@ -4857,80 +4965,13 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
 
-        <section className="fit-anchor-section" id="operator-today">
-          {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." />
-
-          <section className="fit-today">
-            <div className="fit-today-head">
-              <div>
-                <span className="fit-today-label">Today at a glance</span>
-                <div className="fit-today-copy">Fast read: weight, target gap, body state, logging consistency and sync health.</div>
-              </div>
-              <span className="muted">{formatReferenceDate(latest.date)}</span>
-            </div>
-
-            <div className="fit-glance-row">
-              <div className="glance-card glance-cal-balance">
-                <div className="gcb-row">
-                  <div className="gcb-col">
-                    <div className="gcb-num">{latest.weight.toFixed(1)}</div>
-                    <div className="gcb-lbl">kg logged</div>
-                    <div className="gcb-sub muted">BMI {latest.bmi.toFixed(1)} · body fat {latest.bodyFat.toFixed(1)}%</div>
-                  </div>
-                  <div className="gcb-divider" />
-                  <div className="gcb-col">
-                    <div className={`gcb-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{Math.abs(targetDelta).toFixed(1)}</div>
-                    <div className="gcb-lbl">{targetDelta <= 0 ? 'kg under goal' : 'kg to target'}</div>
-                    <div className="gcb-sub muted">Goal line {goal.toFixed(1)}kg</div>
-                  </div>
-                  <div className="gcb-divider" />
-                  <div className="gcb-col">
-                    <div className={`gcb-num ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>{formatWeightDelta(latest.weight - monthAgo.weight).replace('kg', '')}</div>
-                    <div className="gcb-lbl">30-day move</div>
-                    <div className={`gcb-sub ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>
-                      {latest.weight - monthAgo.weight <= 0 ? 'Trend is quieter' : 'Drift needs tightening'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Body fat</div>
-                <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
-                <div className="gc-lbl">current composition</div>
-                <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">BMI</div>
-                <div className="gc-num">{latest.bmi.toFixed(1)}</div>
-                <div className="gc-lbl">body mass index</div>
-                <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Logging</div>
-                <div className="gc-num">{cadence.count}</div>
-                <div className="gc-lbl">days logged</div>
-                <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Sync</div>
-                <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
-                <div className="gc-lbl">data mode</div>
-                <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
-              </div>
-            </div>
-          </section>
-        </section>
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
 
         <section className="fit-anchor-section fit-reading-guide" aria-label="Dashboard guide">
           <div className="fit-reading-guide-head">
             <span className="fit-reading-guide-kicker">Read order</span>
             <p className="fit-reading-guide-copy">
-              The live summary now sits at the top. From here, move through the longer story, the wider trends, then today&apos;s actions.
+              Start with where the day stands, move straight into what to do next, then zoom out into the trends and the long body-composition story.
             </p>
           </div>
           <div className="fit-reading-guide-grid">
@@ -4947,6 +4988,57 @@ export default function OperatorDashboardClient() {
               </button>
             ))}
           </div>
+        </section>
+
+        <section className="fit-anchor-section" id="operator-action">
+          {/* ───────────────────────── ACTION ────────────────────────── */}
+          <EditorialDivider eyebrow="Action" note="Today, one move." />
+
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="weekCompare" />
+
+          <div className="fit-panel">
+            <div className="fit-panel-head">
+              <div>
+                <h3>This <em>week</em></h3>
+                <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+              </div>
+            </div>
+            <div className="week-grid">
+              {weekRows.map((row) => (
+                <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                  <div className="dow">{row.day}</div>
+                  <div className="date">{row.date}</div>
+                  <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                  <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                  <div className="icons"><span>{row.detail}</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="fit-anchor-section" id="operator-health-stream">
+          {/* ───────────────────────── TRENDS ────────────────────────── */}
+          <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
+          <AnalyticsSection
+            latest={latest}
+            sorted={dashboardSource}
+            goal={goal}
+            nutrition={nutrition}
+            state={state}
+            rollingAverage={rollingAverage}
+            cadence={cadence}
+            syncSummary={syncSummary}
+            opPw={opPw}
+            healthStream={healthStream}
+          />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
         </section>
 
         <section className="fit-anchor-section" id="operator-story">
@@ -5040,60 +5132,6 @@ export default function OperatorDashboardClient() {
               </div>
             </aside>
           </section>
-        </section>
-
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
-
-        <section className="fit-anchor-section" id="operator-health-stream">
-          {/* ───────────────────────── TRENDS ────────────────────────── */}
-          <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
-          <AnalyticsSection
-            latest={latest}
-            sorted={dashboardSource}
-            goal={goal}
-            nutrition={nutrition}
-            state={state}
-            rollingAverage={rollingAverage}
-            cadence={cadence}
-            syncSummary={syncSummary}
-            opPw={opPw}
-            healthStream={healthStream}
-          />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
-        </section>
-
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
-
-        <section className="fit-anchor-section" id="operator-action">
-          {/* ───────────────────────── ACTION ────────────────────────── */}
-          <EditorialDivider eyebrow="Action" note="Today, one move." />
-
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="weekCompare" />
-
-          <div className="fit-panel">
-            <div className="fit-panel-head">
-              <div>
-                <h3>This <em>week</em></h3>
-                <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
-              </div>
-            </div>
-            <div className="week-grid">
-              {weekRows.map((row) => (
-                <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
-                  <div className="dow">{row.day}</div>
-                  <div className="date">{row.date}</div>
-                  <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
-                  <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
-                  <div className="icons"><span>{row.detail}</span></div>
-                </div>
-              ))}
-            </div>
-          </div>
         </section>
 
       </main>
