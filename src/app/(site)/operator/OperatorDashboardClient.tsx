@@ -4,6 +4,7 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties,
 } from 'react';
 import FitnessLineChart from '@/components/operator/fitness/FitnessLineChart';
+import OperatorTrainingSection from '@/components/operator/fitness/OperatorTrainingSection';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
@@ -5046,6 +5047,7 @@ export default function OperatorDashboardClient() {
           {/* ───────────────────────── ACTION ────────────────────────── */}
           <EditorialDivider eyebrow="Action" note="Today, one move." />
 
+          <OperatorTrainingSection healthStream={healthStream} />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
