@@ -4109,6 +4109,7 @@ function buildSideMetrics(sorted: FitnessReading[], goal: number, reg: Reg | nul
 export default function OperatorDashboardClient() {
   const [authed, setAuthed]   = useState(false);
   const [opPw, setOpPw]       = useState('');
+  const [tab, setActiveTab]   = useState<'overview' | 'health' | 'body' | 'import'>('overview');
   const [readings, setReadings] = useState<FitnessReading[]>([]);
   const [goal, setGoal]       = useState(60.0);
   const [compose, setCompose] = useState(false);
@@ -4242,6 +4243,26 @@ export default function OperatorDashboardClient() {
           </button>
         </div>
 
+        <nav className="op-tabs" aria-label="Operator sections">
+          {([
+            { id: 'overview', label: 'Overview' },
+            { id: 'health',   label: 'Apple Health' },
+            { id: 'body',     label: 'Body' },
+            { id: 'import',   label: 'Import' },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`op-tab ${tab === t.id ? 'is-active' : ''}`}
+              onClick={() => setActiveTab(t.id)}
+              aria-current={tab === t.id ? 'page' : undefined}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+
+        {tab === 'overview' && (<>
         <section className="fit-today">
           <div className="fit-today-head">
             <span className="fit-today-label">Today at a glance</span>
@@ -4340,9 +4361,13 @@ export default function OperatorDashboardClient() {
             ))}
           </div>
         </section>
+        </>)}
 
+        {tab === 'health' && (
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} />
+        )}
 
+        {tab === 'body' && (
         <section className="fit-grid">
           <div className="fit-main">
             <FitnessLineChart
@@ -4459,6 +4484,13 @@ export default function OperatorDashboardClient() {
               </div>
             </div>
 
+          </aside>
+        </section>
+        )}
+
+        {tab === 'import' && (
+        <section className="fit-grid">
+          <div className="fit-main">
             <div className="fit-panel side-panel">
               <div className="fit-panel-head"><h3>Command <em>notes</em></h3></div>
               <div className="command-notes">
@@ -4522,8 +4554,9 @@ export default function OperatorDashboardClient() {
                 </p>
               </div>
             </div>
-          </aside>
+          </div>
         </section>
+        )}
       </main>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />
