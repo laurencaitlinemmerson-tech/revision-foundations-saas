@@ -36,6 +36,9 @@ const AUTH_KEY    = 'operator-log-auth-v3';
 const GOAL_KEY    = 'operator-log-goal-v3';
 const AUTH_TTL    = 30 * 24 * 60 * 60 * 1000;
 const HEIGHT_M    = 1.57;
+const DEFAULT_AGE = 30;
+const TRAINING_WEEK_ACTIVITY = 1.4;
+const MODERATE_DEFICIT_KCAL = 500;
 
 // 110 weekly readings from Aug 2023 → May 2026 (imported from scale CSV)
 const SEED: FitnessReading[] = [
@@ -228,12 +231,24 @@ function boneStatus(b: number): [string, string] {
   return ['LOW', T.gold];
 }
 
+function nutritionTargets(reading: FitnessReading) {
+  const bmr = Math.round(10 * reading.weight + 6.25 * HEIGHT_M * 100 - 5 * DEFAULT_AGE - 161);
+  const activeTdee = Math.round(bmr * TRAINING_WEEK_ACTIVITY);
+  const intake = Math.round((activeTdee - MODERATE_DEFICIT_KCAL) / 20) * 20;
+  const maintenance = Math.round(activeTdee / 20) * 20;
+  const protein = Math.round(reading.weight * 1.8);
+
+  return { bmr, activeTdee, intake, maintenance, protein };
+}
+
 // ─── Primitives ───────────────────────────────────────────────────────────────
 
 const kStyle: CSSProperties = {
   fontFamily: T.sans, fontSize: 10, fontWeight: 500,
   letterSpacing: '0.24em', textTransform: 'uppercase', color: T.muted,
 };
+const CARD_SHADOW = '0 24px 60px rgba(26,24,21,0.05)';
+
 function Kicker({ children, color, style }: { children: React.ReactNode; color?: string; style?: CSSProperties }) {
   return <div style={{ ...kStyle, color: color ?? T.muted, ...style }}>{children}</div>;
 }
@@ -245,8 +260,24 @@ function ThickRule({ style }: { style?: CSSProperties }) {
 }
 function Wrap({ children, style }: { children: React.ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ maxWidth:1080, margin:'0 auto', padding:'56px 40px 120px', ...style }}>
+    <div style={{ maxWidth:1120, margin:'0 auto', padding:'clamp(28px, 4vw, 56px) clamp(16px, 4vw, 40px) 120px', ...style }}>
       {children}
+    </div>
+  );
+}
+function ScrollRail({
+  children, minWidth, style, innerStyle,
+}: {
+  children: React.ReactNode;
+  minWidth?: number | string;
+  style?: CSSProperties;
+  innerStyle?: CSSProperties;
+}) {
+  return (
+    <div style={{ overflowX:'auto', paddingBottom:6, scrollbarWidth:'thin', ...style }}>
+      <div style={{ minWidth, ...innerStyle }}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -377,25 +408,176 @@ function StatusStrip({ state, latest, goal, setTab }: {
 
   return (
     <div style={{
-      position: 'sticky', top: 0, zIndex: 30, background: T.paper,
-      borderTop: `0.5px solid ${T.line}`, borderBottom: `2px solid ${T.ink}`,
-      margin: '0 -40px 32px', padding: '0 40px',
+      position: 'sticky', top: 0, zIndex: 30, background: 'rgba(250,250,248,0.94)',
+      backdropFilter: 'blur(12px)',
+      borderTop: `0.5px solid ${T.line}`, borderBottom: `0.5px solid ${T.ink}`,
+      boxShadow: '0 10px 30px rgba(26,24,21,0.04)',
+      margin: '0 calc(clamp(16px, 4vw, 40px) * -1) 24px',
+      padding: '0 clamp(16px, 4vw, 40px)',
     }}>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', maxWidth:1000, margin:'0 auto' }}>
-        {cells.map((c, i) => (
-          <button key={i} onClick={c.onClick} style={{
-            padding:'16px 18px',
-            borderRight: i < 3 ? `0.5px solid ${T.line}` : 'none',
-            background:'none', border:'none', cursor:'pointer',
-            textAlign:'left', fontFamily:T.sans,
-          }}>
-            <Kicker style={{ marginBottom:6, fontSize:9 }}>{c.kicker}</Kicker>
-            <div style={{ display:'flex', alignItems:'baseline', gap:5, marginBottom:4 }}>
-              <span style={{ fontFamily:T.display, fontSize:28, color:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{c.value}</span>
-              <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted, letterSpacing:'0.1em' }}>{c.unit}</span>
+      <ScrollRail minWidth={760}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4, minmax(170px, 1fr))', maxWidth:1000, margin:'0 auto' }}>
+          {cells.map((c, i) => (
+            <button key={i} onClick={c.onClick} style={{
+              padding:'10px 14px',
+              borderRight: i < 3 ? `0.5px solid ${T.line}` : 'none',
+              background:'none', border:'none', cursor:'pointer',
+              textAlign:'left', fontFamily:T.sans,
+            }}>
+              <Kicker style={{ marginBottom:4, fontSize:9 }}>{c.kicker}</Kicker>
+              <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:2 }}>
+                <span style={{ fontFamily:T.display, fontSize:20, color:T.ink, letterSpacing:'-0.01em', lineHeight:1 }}>{c.value}</span>
+                <span style={{ fontFamily:T.sans, fontSize:9, color:T.muted, letterSpacing:'0.1em' }}>{c.unit}</span>
+              </div>
+              <span style={{ fontFamily:T.sans, fontSize:8, fontWeight:600, letterSpacing:'0.14em', color:c.subColor }}>{c.sub}</span>
+            </button>
+          ))}
+        </div>
+      </ScrollRail>
+    </div>
+  );
+}
+
+function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, setTab }: {
+  state: State;
+  latest: FitnessReading;
+  goal: number;
+  reg: Reg | null;
+  cloudOk: boolean | null;
+  syncing: boolean;
+  setCompose: (open: boolean) => void;
+  setTab: (tab: string) => void;
+}) {
+  const remaining = Math.max(0, latest.weight - goal);
+  const moderateEta = new Date(new Date(latest.date).getTime() + (remaining / 0.45) * 7 * 86400000);
+  const syncLabel = cloudOk === null ? 'Local-first mode' : cloudOk ? syncing ? 'Cloud syncing now' : 'Cloud sync active' : 'Local backup only';
+  const syncColor = cloudOk ? T.green : cloudOk === false ? T.gold : T.muted;
+  const focus = state.weighInStatus === 'overdue'
+    ? {
+        label: 'Reading overdue',
+        copy: `${state.daysSinceWeighIn} days since the last weigh-in. File the number before interpreting anything else.`,
+        color: T.rose,
+        soft: T.roseSoft,
+      }
+    : state.direction === 'gaining'
+    ? {
+        label: 'Trend is rising',
+        copy: `The last four readings are up ${state.trendKgPerWeek.toFixed(2)} kg per week. Tighten the plan before drift becomes the new baseline.`,
+        color: T.rose,
+        soft: T.roseSoft,
+      }
+    : state.direction === 'stable'
+    ? {
+        label: 'Plateau window',
+        copy: 'The line is flat enough to intervene cleanly. Use the plan tab and restart the moderate deficit this week.',
+        color: T.gold,
+        soft: T.goldSoft,
+      }
+    : {
+        label: 'Momentum recovered',
+        copy: 'The line is finally moving in the right direction. Protect consistency and keep the weekly rhythm boring.',
+        color: T.green,
+        soft: T.greenSoft,
+      };
+
+  const callouts = [
+    {
+      kicker: 'To goal',
+      value: `${remaining.toFixed(1)} kg`,
+      sub: `${latest.weight.toFixed(1)} now → ${goal.toFixed(1)} target`,
+      color: T.ink,
+    },
+    {
+      kicker: 'Moderate-cut ETA',
+      value: moderateEta.toLocaleDateString('en-GB', { month:'short', year:'numeric' }),
+      sub: 'Assumes 0.45 kg per week',
+      color: T.gold,
+    },
+    {
+      kicker: 'Regression confidence',
+      value: reg ? `${Math.round(reg.r2 * 100)}% R²` : 'Need more data',
+      sub: reg ? `${(reg.slope * 7).toFixed(2)} kg per week slope` : 'Add more readings',
+      color: reg && reg.slope < 0 ? T.green : T.body,
+    },
+  ];
+
+  return (
+    <div style={{
+      position:'relative',
+      overflow:'hidden',
+      background:`linear-gradient(145deg, rgba(250,238,218,0.85) 0%, rgba(251,248,243,0.97) 42%, rgba(234,241,250,0.78) 100%)`,
+      border:`1px solid ${T.line}`,
+      boxShadow:CARD_SHADOW,
+      padding:'clamp(20px, 4vw, 32px)',
+      marginBottom:28,
+    }}>
+      <div style={{ position:'absolute', inset:'auto -40px -70px auto', width:180, height:180, borderRadius:'50%', background:'rgba(24,95,165,0.08)', filter:'blur(6px)' }} />
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap:20, position:'relative' }}>
+        <div>
+          <Kicker style={{ marginBottom:10 }}>Command Deck</Kicker>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'7px 12px', background:focus.soft, color:focus.color, marginBottom:14 }}>
+            <span style={{ width:8, height:8, borderRadius:'50%', background:focus.color }} />
+            <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase' }}>{focus.label}</span>
+          </div>
+          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:23, color:T.ink, lineHeight:1.35, margin:'0 0 12px', maxWidth:'18ch' }}>
+            Call the next move <em>clearly</em>.
+          </p>
+          <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:0, maxWidth:'58ch' }}>
+            {focus.copy}
+          </p>
+        </div>
+        <div style={{
+          border:`1px solid ${T.line}`,
+          background:'rgba(255,255,255,0.62)',
+          padding:'18px 18px 16px',
+          backdropFilter:'blur(6px)',
+        }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:12, marginBottom:14, flexWrap:'wrap' }}>
+            <Kicker>Actions</Kicker>
+            <Kicker color={syncColor}>{syncLabel}</Kicker>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(140px, 1fr))', gap:10, marginBottom:14 }}>
+            {[
+              { label:'File reading', sub:'Open composer', action:() => setCompose(true) },
+              { label:'Open plan', sub:'Weekly rules', action:() => setTab('Plan') },
+              { label:'Review ledger', sub:'See every entry', action:() => setTab('Ledger') },
+            ].map((action) => (
+              <button key={action.label} onClick={action.action} style={{
+                background:'rgba(250,250,248,0.9)',
+                border:`1px solid ${T.line}`,
+                padding:'14px 14px 12px',
+                textAlign:'left',
+                cursor:'pointer',
+              }}>
+                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:17, color:T.ink, marginBottom:4 }}>{action.label}</div>
+                <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:500, color:T.muted, letterSpacing:'0.1em', textTransform:'uppercase' }}>{action.sub}</span>
+              </button>
+            ))}
+          </div>
+          <Rule />
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))', gap:10, marginTop:14 }}>
+            <div>
+              <Kicker style={{ marginBottom:5 }}>Latest</Kicker>
+              <div style={{ fontFamily:T.display, fontSize:22, color:T.ink, lineHeight:1 }}>{latest.weight.toFixed(1)} kg</div>
             </div>
-            <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.18em', color:c.subColor }}>{c.sub}</span>
-          </button>
+            <div>
+              <Kicker style={{ marginBottom:5 }}>Phase</Kicker>
+              <div style={{ fontFamily:T.display, fontSize:22, color:state.phaseColor, lineHeight:1 }}>{state.phaseNum}</div>
+            </div>
+            <div>
+              <Kicker style={{ marginBottom:5 }}>Next target</Kicker>
+              <div style={{ fontFamily:T.display, fontSize:22, color:T.gold, lineHeight:1 }}>{state.thisWeekTarget.toFixed(1)} kg</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:12, marginTop:18, position:'relative' }}>
+        {callouts.map((item) => (
+          <div key={item.kicker} style={{ border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.72)', padding:'14px 16px' }}>
+            <Kicker style={{ marginBottom:8 }}>{item.kicker}</Kicker>
+            <div style={{ fontFamily:T.display, fontSize:22, color:item.color, letterSpacing:'-0.02em', lineHeight:1.05, marginBottom:4 }}>{item.value}</div>
+            <span style={{ fontFamily:T.sans, fontSize:11, color:T.body }}>{item.sub}</span>
+          </div>
         ))}
       </div>
     </div>
@@ -412,66 +594,66 @@ function ThisWeek({ state, latest, setCompose, setTab }: {
   const targetDelta = state.thisWeekTarget - latest.weight;
 
   const verdict = state.direction === 'gaining'
-    ? { title: 'Stop the gain first.', sub: 'Before the cut plan can work, the upward trend must break.', color: T.rose }
+    ? { title: 'Stop the gain', sub: 'Break the upward trend.', color: T.rose }
     : state.direction === 'stable'
-    ? { title: 'Hold steady — then begin the cut.', sub: 'You are at a stable plateau. Initiate the moderate deficit this week.', color: T.gold }
+    ? { title: 'Hold steady', sub: 'Initiate moderate deficit.', color: T.gold }
     : state.direction === 'losing-slow'
-    ? { title: 'On track. Stay the course.', sub: 'A slow, sustainable loss is exactly what the plan calls for.', color: T.green }
-    : { title: 'Slow down — protect the muscle.', sub: 'Loss rate is high. Add a refeed day or ease the deficit by 100 kcal.', color: T.blue };
+    ? { title: 'On track', sub: 'Stay the course.', color: T.green }
+    : { title: 'Slow down', sub: 'Protect muscle mass.', color: T.blue };
 
   return (
     <div style={{
       background: T.surface, border: `0.5px solid ${T.line}`,
-      padding: '28px 32px', marginBottom: 48,
+      padding: '20px 24px', marginBottom: 32,
     }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:24, flexWrap:'wrap', marginBottom:18 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:24, flexWrap:'wrap', marginBottom:16 }}>
         <div>
-          <Kicker style={{ marginBottom:8 }}>This Week · {new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' })}</Kicker>
-          <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, color: verdict.color, letterSpacing:'-0.02em', lineHeight:1.06, margin:'0 0 4px' }}>
+          <Kicker style={{ marginBottom:6 }}>This Week · {new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' })}</Kicker>
+          <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:22, color: verdict.color, letterSpacing:'-0.01em', lineHeight:1.1, margin:'0 0 4px' }}>
             <em>{verdict.title}</em>
           </h2>
-          <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, margin:0, lineHeight:1.6, maxWidth:'56ch' }}>{verdict.sub}</p>
+          <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, margin:0, lineHeight:1.5, maxWidth:'40ch' }}>{verdict.sub}</p>
         </div>
         <button onClick={() => setCompose(true)} style={{
           background: overdue ? T.rose : T.ink, color: T.paper, border: 0, cursor:'pointer',
-          padding:'14px 28px', fontFamily:T.sans, fontSize:11, fontWeight:500,
-          letterSpacing:'0.22em', textTransform:'uppercase', whiteSpace:'nowrap',
+          padding:'10px 20px', fontFamily:T.sans, fontSize:10, fontWeight:500,
+          letterSpacing:'0.15em', textTransform:'uppercase', whiteSpace:'nowrap',
         }}>
           {overdue ? 'File overdue reading →' : 'File this week →'}
         </button>
       </div>
 
-      <Rule style={{ margin:'0 0 18px' }} />
+      <Rule style={{ margin:'0 0 16px' }} />
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:0 }}>
-        <div style={{ paddingRight:24, borderRight:`0.5px solid ${T.line}` }}>
-          <Kicker style={{ marginBottom:8 }}>Aim for by next Monday</Kicker>
-          <div style={{ display:'flex', alignItems:'baseline', gap:5 }}>
-            <span style={{ fontFamily:T.display, fontSize:36, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>{state.thisWeekTarget}</span>
-            <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))', gap:12 }}>
+        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:'rgba(255,255,255,0.58)' }}>
+          <Kicker style={{ marginBottom:6 }}>Next Monday Goal</Kicker>
+          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
+            <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, letterSpacing:'-0.01em', lineHeight:1 }}>{state.thisWeekTarget}</span>
+            <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kg</span>
           </div>
-          <span style={{ fontFamily:T.sans, fontSize:11, color:T.green, fontWeight:500 }}>
-            {targetDelta.toFixed(2)} kg from today
+          <span style={{ fontFamily:T.sans, fontSize:10, color:T.green, fontWeight:500 }}>
+            {targetDelta.toFixed(2)} kg
           </span>
         </div>
-        <div style={{ padding:'0 24px', borderRight:`0.5px solid ${T.line}` }}>
-          <Kicker style={{ marginBottom:8 }}>Last weigh-in</Kicker>
-          <div style={{ display:'flex', alignItems:'baseline', gap:5 }}>
-            <span style={{ fontFamily:T.display, fontSize:36, color:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{state.daysSinceWeighIn}</span>
-            <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>{state.daysSinceWeighIn === 1 ? 'day' : 'days'} ago</span>
+        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:'rgba(255,255,255,0.58)' }}>
+          <Kicker style={{ marginBottom:6 }}>Last weigh-in</Kicker>
+          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
+            <span style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.01em', lineHeight:1 }}>{state.daysSinceWeighIn}</span>
+            <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>{state.daysSinceWeighIn === 1 ? 'day' : 'days'} ago</span>
           </div>
-          <span style={{ fontFamily:T.sans, fontSize:11, fontWeight:500, color: overdue ? T.rose : T.green }}>
-            {overdue ? 'OVERDUE — log it now' : 'On schedule'}
+          <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:500, color: overdue ? T.rose : T.green }}>
+            {overdue ? 'OVERDUE' : 'On schedule'}
           </span>
         </div>
-        <div style={{ paddingLeft:24 }}>
-          <Kicker style={{ marginBottom:8 }}>Today&apos;s priority</Kicker>
+        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:'rgba(255,255,255,0.58)' }}>
+          <Kicker style={{ marginBottom:6 }}>Today&apos;s priority</Kicker>
           <button onClick={() => setTab('Plan')} style={{ background:'none', border:'none', cursor:'pointer', padding:0, textAlign:'left' }}>
-            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, lineHeight:1.3, marginBottom:4 }}>
+            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.ink, lineHeight:1.3, marginBottom:2 }}>
               See the plan →
             </div>
-            <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted, fontWeight:500, letterSpacing:'0.05em' }}>
-              Five non-negotiables for this week
+            <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted, fontWeight:500, letterSpacing:'0.05em' }}>
+              Five non-negotiables
             </span>
           </button>
         </div>
@@ -494,48 +676,48 @@ function JourneyStory({ sorted, state }: { sorted: FitnessReading[]; state: Stat
     {
       kicker: `${fmtDate(first.date)}`,
       title: `${first.weight} kg`,
-      copy: `The first reading. BMI ${first.bmi}, body fat ${first.bodyFat}%. The starting line.`,
+      copy: `Starting line. BMI ${first.bmi}, Fat ${first.bodyFat}%.`,
     },
     {
       kicker: `${fmtDate(state.best.date)}`,
-      title: `${state.best.weight} kg · the lowest point`,
-      copy: `Roughly ${Math.round((new Date(state.best.date).getTime() - new Date(first.date).getTime()) / 86400000 / 7)} weeks in. Proof that loss was possible.`,
+      title: `${state.best.weight} kg · Low`,
+      copy: `Achieved lowest weight.`,
     },
     {
       kicker: `${fmtDate(state.peak.date)}`,
-      title: `${state.peak.weight} kg · the peak`,
-      copy: `${(state.peak.weight - state.best.weight).toFixed(1)} kg above the low. The drift that needs reversing.`,
+      title: `${state.peak.weight} kg · Peak`,
+      copy: `${(state.peak.weight - state.best.weight).toFixed(1)} kg above low.`,
     },
     {
-      kicker: `${fmtDate(latest.date)} · today`,
+      kicker: `${fmtDate(latest.date)} · Today`,
       title: `${latest.weight} kg`,
-      copy: `${fromBest > 0 ? `+${fromBest.toFixed(1)}` : fromBest.toFixed(1)} kg from your best, ${fromPeak > 0 ? `−${fromPeak.toFixed(1)}` : `+${(-fromPeak).toFixed(1)}`} kg from peak. The journey resets here.`,
+      copy: `${fromBest > 0 ? `+${fromBest.toFixed(1)}` : fromBest.toFixed(1)} kg from low, ${fromPeak > 0 ? `−${fromPeak.toFixed(1)}` : `+${(-fromPeak).toFixed(1)}`} kg from peak.`,
     },
   ];
 
   return (
-    <div style={{ marginBottom: 64 }}>
-      <Kicker style={{ marginBottom: 10 }}>Section · The Arc</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
-        {totalWeeks} weeks observed. <em>Three turning points.</em>
+    <div style={{ marginBottom: 48 }}>
+      <Kicker style={{ marginBottom: 8 }}>The Arc</Kicker>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:22, letterSpacing:'-0.01em', lineHeight:1.1, color:T.ink, margin:'0 0 4px' }}>
+        {totalWeeks} weeks observed.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
-        the story this data tells, in four moments.
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'0 0 0' }}>
+        Four key moments.
       </p>
-      <ThickRule style={{ margin: '18px 0 0' }} />
+      <Rule style={{ margin: '14px 0 0' }} />
       <div style={{ borderBottom: `0.5px solid ${T.line}` }}>
         {events.map((e, i) => (
           <div key={i} style={{
-            display:'grid', gridTemplateColumns:'180px 1fr', gap:32,
-            padding:'22px 0', borderBottom: i < events.length - 1 ? `0.5px solid ${T.softLine}` : 'none',
+            display:'grid', gridTemplateColumns:'120px 1fr', gap:24,
+            padding:'14px 0', borderBottom: i < events.length - 1 ? `0.5px solid ${T.softLine}` : 'none',
             alignItems:'baseline',
           }}>
             <Kicker color={i === events.length - 1 ? T.gold : T.muted}>{e.kicker}</Kicker>
             <div>
-              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color: i === events.length - 1 ? T.gold : T.ink, marginBottom:6 }}>
+              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: i === events.length - 1 ? T.gold : T.ink, marginBottom:4 }}>
                 {e.title}
               </div>
-              <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.6, margin:0, maxWidth:'62ch' }}>{e.copy}</p>
+              <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, lineHeight:1.5, margin:0, maxWidth:'50ch' }}>{e.copy}</p>
             </div>
           </div>
         ))}
@@ -551,31 +733,31 @@ function PlanOpener({ state, sorted, setTab }: { state: State; sorted: FitnessRe
 
   const briefs = {
     'gaining': {
-      label: 'PRIORITY · BREAK THE TREND',
-      title: 'Before the plan, stop the gain.',
-      copy: `You are gaining ${state.trendKgPerWeek.toFixed(2)} kg per week. A calorie deficit cannot work if the diet is currently in surplus. Phase zero: identify the surplus. Track every bite for the next 7 days at your current intake. The data will show where the gap is.`,
-      action: 'Track current intake for 7 days, no changes yet',
+      label: 'PRIORITY · BREAK TREND',
+      title: 'Stop the gain.',
+      copy: `Trend: +${state.trendKgPerWeek.toFixed(2)} kg/wk. Track intake for 7 days.`,
+      action: 'Track current intake. No deficit yet.',
       color: T.rose, bg: T.roseSoft,
     },
     'stable': {
-      label: 'PRIORITY · BEGIN THE CUT',
-      title: 'You are stable. Now move.',
-      copy: `Last 4 weeks: ${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/week — effectively flat. This is the easiest state to convert into loss: drop intake by 500 kcal, hold training, watch the trend.`,
-      action: 'Begin moderate deficit this week. Hit the five non-negotiables.',
+      label: 'PRIORITY · BEGIN CUT',
+      title: 'Initiate cut.',
+      copy: `Trend: ${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk. Drop intake by 500 kcal.`,
+      action: 'Hit five non-negotiables.',
       color: T.gold, bg: T.goldSoft,
     },
     'losing-slow': {
-      label: 'PRIORITY · STAY THE COURSE',
-      title: 'Already on the right line.',
-      copy: `Losing ${Math.abs(state.trendKgPerWeek).toFixed(2)} kg/week — within the sustainable zone. Do not change anything. Keep logging. The plan below codifies what is already working.`,
-      action: 'Continue current approach. Re-evaluate in 4 weeks.',
+      label: 'PRIORITY · STAY COURSE',
+      title: 'Maintain line.',
+      copy: `Trend: −${Math.abs(state.trendKgPerWeek).toFixed(2)} kg/wk. Sustainable zone.`,
+      action: 'Continue current approach.',
       color: T.green, bg: T.greenSoft,
     },
     'losing-fast': {
-      label: 'PRIORITY · SLOW IT DOWN',
-      title: 'Loss rate too high to sustain.',
-      copy: `Losing ${Math.abs(state.trendKgPerWeek).toFixed(2)} kg/week is unsustainable beyond ~6 weeks. Risk of muscle loss and adherence collapse. Add 200 kcal back to daily intake. Aim for −0.5 kg/week instead.`,
-      action: 'Raise intake by 200 kcal/day. Add one carb-rich refeed day per week.',
+      label: 'PRIORITY · SLOW DOWN',
+      title: 'Ease deficit.',
+      copy: `Trend: −${Math.abs(state.trendKgPerWeek).toFixed(2)} kg/wk. High risk of muscle loss.`,
+      action: 'Raise intake by 200 kcal/day.',
       color: T.blue, bg: T.blueSoft,
     },
   } as const;
@@ -583,30 +765,30 @@ function PlanOpener({ state, sorted, setTab }: { state: State; sorted: FitnessRe
   const b = briefs[state.direction];
 
   return (
-    <div style={{ marginBottom: 48 }}>
-      <div style={{ background: b.bg, borderLeft: `3px solid ${b.color}`, padding: '28px 32px' }}>
-        <Kicker color={b.color} style={{ marginBottom: 12 }}>{b.label}</Kicker>
-        <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:36, letterSpacing:'-0.02em', lineHeight:1.05, color:T.ink, margin:'0 0 14px' }}>
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ background: b.bg, borderLeft: `2px solid ${b.color}`, padding: '20px 24px' }}>
+        <Kicker color={b.color} style={{ marginBottom: 8 }}>{b.label}</Kicker>
+        <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:22, letterSpacing:'-0.01em', lineHeight:1.1, color:T.ink, margin:'0 0 8px' }}>
           {b.title}
         </h2>
-        <p style={{ fontFamily:T.sans, fontSize:15, color:T.body, fontWeight:300, lineHeight:1.7, margin:'0 0 18px', maxWidth:'58ch' }}>
+        <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.5, margin:'0 0 14px', maxWidth:'50ch' }}>
           {b.copy}
         </p>
-        <div style={{ display:'flex', alignItems:'center', gap:14, paddingTop:14, borderTop:`0.5px solid ${b.color}33` }}>
-          <Kicker color={b.color}>This week, do this:</Kicker>
-          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.ink }}>{b.action}</span>
+        <div style={{ display:'flex', alignItems:'center', gap:10, paddingTop:10, borderTop:`0.5px solid ${b.color}33` }}>
+          <Kicker color={b.color}>Action:</Kicker>
+          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.ink }}>{b.action}</span>
         </div>
       </div>
 
-      <div style={{ display:'flex', gap:18, marginTop:16, flexWrap:'wrap' }}>
-        <button onClick={() => setTab('Projections')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:3 }}>
-            See your phase plan →
+      <div style={{ display:'flex', gap:16, marginTop:12, flexWrap:'wrap' }}>
+        <button onClick={() => setTab('Projections')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:9, fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:2 }}>
+            Phase plan →
         </button>
-        <button onClick={() => setTab('Health')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:3 }}>
-            See the health panel →
+        <button onClick={() => setTab('Health')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:9, fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:2 }}>
+            Health panel →
         </button>
-        <button onClick={() => setTab('Overview')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:3 }}>
-            Back to overview →
+        <button onClick={() => setTab('Overview')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:9, fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:2 }}>
+            Overview →
         </button>
       </div>
     </div>
@@ -821,9 +1003,7 @@ function TopStatStrip({ sorted, state }: { sorted: FitnessReading[]; state: Stat
   const dMuscle = latest.muscleMass - monthAgo.muscleMass;
   const dWater = latest.water - monthAgo.water;
 
-  // BMR (Mifflin-St Jeor estimate, age 30)
-  const bmr = Math.round(10 * latest.weight + 6.25 * HEIGHT_M * 100 - 5 * 30 - 161);
-  const tdee = Math.round(bmr * 1.2);
+  const { bmr, activeTdee } = nutritionTargets(latest);
 
   // Discipline score: how many of last 14 days had a reading?
   const last14ms = new Date(latest.date).getTime() - 14 * 86400000;
@@ -834,21 +1014,23 @@ function TopStatStrip({ sorted, state }: { sorted: FitnessReading[]; state: Stat
     { kicker:'BODY FAT',    value:`${latest.bodyFat.toFixed(1)}%`, sub:`${dFat>=0?'+':''}${dFat.toFixed(1)} in 30 days`, color: dFat<0?T.green:T.rose },
     { kicker:'MUSCLE MASS', value:`${latest.muscleMass.toFixed(1)}%`, sub:`${dMuscle>=0?'+':''}${dMuscle.toFixed(1)} since last month`, color: dMuscle>0?T.green:T.rose },
     { kicker:'VISCERAL FAT',value:`${latest.visceralFat ?? '—'}`,   sub:'target ≤ 9', color: (latest.visceralFat||0) > 9 ? T.gold : T.green },
-    { kicker:'BMR',         value:`${bmr.toLocaleString()}`,        sub:`TDEE est ${tdee.toLocaleString()}`, color: T.body },
+    { kicker:'BMR',         value:`${bmr.toLocaleString()}`,        sub:`Active TDEE ${activeTdee.toLocaleString()}`, color: T.body },
     { kicker:'WATER',       value:`${latest.water.toFixed(1)}%`,    sub: latest.water < 45 ? 'Low · drink up' : 'On range', color: latest.water < 45 ? T.gold : T.green },
     { kicker:'DISCIPLINE',  value:`${discipline}/100`,              sub:`${last14}/14 days logged`, color: discipline >= 80 ? T.green : discipline >= 50 ? T.gold : T.rose },
   ];
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:32 }}>
-      {cells.map((c,i) => (
-        <div key={i} style={{ padding:'14px 16px', borderRight: i<5 ? `0.5px solid ${T.softLine}` : 'none' }}>
-          <Kicker style={{ marginBottom:7, fontSize:8.5 }}>{c.kicker}</Kicker>
-          <div style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.015em', lineHeight:1, marginBottom:5 }}>{c.value}</div>
-          <span style={{ fontFamily:T.sans, fontSize:10, color:c.color, fontWeight:500 }}>{c.sub}</span>
-        </div>
-      ))}
-    </div>
+    <ScrollRail minWidth={980} style={{ marginBottom:32 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(6, minmax(150px, 1fr))', borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
+        {cells.map((c,i) => (
+          <div key={i} style={{ padding:'14px 16px', borderRight: i<5 ? `0.5px solid ${T.softLine}` : 'none' }}>
+            <Kicker style={{ marginBottom:7, fontSize:8.5 }}>{c.kicker}</Kicker>
+            <div style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.015em', lineHeight:1, marginBottom:5 }}>{c.value}</div>
+            <span style={{ fontFamily:T.sans, fontSize:10, color:c.color, fontWeight:500 }}>{c.sub}</span>
+          </div>
+        ))}
+      </div>
+    </ScrollRail>
   );
 }
 
@@ -857,38 +1039,51 @@ function TopStatStrip({ sorted, state }: { sorted: FitnessReading[]; state: Stat
 function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReading; goal: number }) {
   // Project goal date assuming 0.45 kg/wk
   const weeks = Math.max(0, (latest.weight - goal) / 0.45);
-  const goalDate = new Date(new Date(latest.date).getTime() + weeks * 7 * 86400000);
-  const intake = 1860 - 500;
+  const projectedGoalDate = new Date(new Date(latest.date).getTime() + weeks * 7 * 86400000);
+  const { intake } = nutritionTargets(latest);
+  const cards = [
+    {
+      kicker: 'Current Goal',
+      accent: `${goal.toFixed(1)}kg`,
+      meta: 'healthy weight',
+      note: `Target reached by ${projectedGoalDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'})} at the moderate-cut pace.`,
+      badge: state.direction === 'gaining' ? { label:'OFF TRACK', color:T.rose, bg:T.roseSoft } : { label:'ON TRACK', color:T.green, bg:T.greenSoft },
+    },
+    {
+      kicker: 'To Goal',
+      accent: `${(latest.weight - goal).toFixed(1)} kg`,
+      meta: 'remaining',
+      note: `${Math.ceil(weeks / 4.33)} months at the current moderate pace.`,
+    },
+    {
+      kicker: 'Intake Plan',
+      accent: `${intake.toLocaleString()} kcal`,
+      meta: 'daily target',
+      note: 'Built around a training-week TDEE with a 500 kcal deficit.',
+    },
+  ];
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr', gap:0, marginBottom:48, borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
-      <div style={{ padding:'20px 24px', borderRight:`0.5px solid ${T.line}` }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
-          <Kicker>Current Goal</Kicker>
-          <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.2em', padding:'2px 8px', background: state.direction === 'gaining' ? T.roseSoft : T.greenSoft, color: state.direction === 'gaining' ? T.rose : T.green }}>
-            {state.direction === 'gaining' ? 'OFF TRACK' : 'ON TRACK'}
-          </span>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(210px, 1fr))', gap:14, marginBottom:48 }}>
+      {cards.map((card) => (
+        <div key={card.kicker} style={{ padding:'20px 22px', border:`1px solid ${T.line}`, background:'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(251,248,243,0.95) 100%)' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, marginBottom:12, flexWrap:'wrap' }}>
+            <Kicker>{card.kicker}</Kicker>
+            {card.badge && (
+              <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.2em', padding:'2px 8px', background:card.badge.bg, color:card.badge.color }}>
+                {card.badge.label}
+              </span>
+            )}
+          </div>
+          <div style={{ marginBottom:8 }}>
+            <span style={{ fontFamily:T.display, fontSize:26, color:card.kicker === 'Current Goal' ? T.gold : T.ink, letterSpacing:'-0.02em' }}>{card.accent}</span>
+            <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.muted, marginLeft:10 }}>{card.meta}</span>
+          </div>
+          <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, margin:0, lineHeight:1.6 }}>
+            {card.note}
+          </p>
         </div>
-        <div style={{ marginBottom:6 }}>
-          <span style={{ fontFamily:T.display, fontSize:36, color:T.gold, letterSpacing:'-0.02em' }}>{goal}kg</span>
-          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.muted, marginLeft:10 }}>healthy weight</span>
-        </div>
-        <p style={{ fontFamily:T.sans, fontSize:11, color:T.body, margin:0, lineHeight:1.5 }}>
-          Target reached by <strong style={{ color:T.ink }}>{goalDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</strong> at the moderate-cut pace.
-        </p>
-      </div>
-      <div style={{ padding:'20px 24px', borderRight:`0.5px solid ${T.line}` }}>
-        <Kicker style={{ marginBottom:6 }}>To Goal</Kicker>
-        <div style={{ fontFamily:T.display, fontSize:28, color:T.ink }}>{(latest.weight - goal).toFixed(1)}<span style={{ fontFamily:T.sans, fontSize:11, color:T.muted, marginLeft:5 }}>kg</span></div>
-        <Kicker style={{ marginTop:14, marginBottom:6 }}>Projection</Kicker>
-        <div style={{ fontFamily:T.display, fontSize:18, color:T.muted, fontStyle:'italic' }}>{Math.ceil(weeks/4.33)} months</div>
-      </div>
-      <div style={{ padding:'20px 24px' }}>
-        <Kicker style={{ marginBottom:6 }}>Intake Plan</Kicker>
-        <div style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>{intake.toLocaleString()} <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kcal</span></div>
-        <Kicker style={{ marginTop:14, marginBottom:6 }}>Burn Plan</Kicker>
-        <div style={{ fontFamily:T.display, fontSize:18, color:T.muted, fontStyle:'italic' }}>{(1860).toLocaleString()} kcal/day</div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -935,37 +1130,39 @@ function ThisWeekGrid({ sorted, state }: { sorted: FitnessReading[]; state: Stat
         <Kicker color={T.muted}>Mon {monday.toLocaleDateString('en-GB',{day:'numeric'})} – Sun {days[6].iso}</Kicker>
       </div>
       <ThickRule style={{ marginBottom:0 }} />
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', borderBottom:`0.5px solid ${T.line}` }}>
-        {days.map((d, i) => (
-          <div key={i} style={{
-            padding:'18px 14px',
-            borderRight: i<6 ? `0.5px solid ${T.softLine}` : 'none',
-            background: d.isToday ? T.goldSoft : 'transparent',
-            opacity: d.isFuture ? 0.4 : 1,
-          }}>
-            <Kicker style={{ marginBottom:4, fontSize:9 }}>{d.label}</Kicker>
-            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.muted, marginBottom:14 }}>{d.iso}</div>
-            {d.reading ? (
-              <>
-                <div style={{ display:'flex', alignItems:'baseline', gap:3 }}>
-                  <span style={{ fontFamily:T.display, fontSize:22, color: d.isToday ? T.gold : T.ink, letterSpacing:'-0.015em', lineHeight:1 }}>{d.reading.weight.toFixed(1)}</span>
-                  <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kg</span>
-                </div>
-                {d.delta !== null && (
-                  <div style={{ marginTop:6, fontFamily:T.sans, fontSize:10, color: d.delta > 0 ? T.rose : d.delta < 0 ? T.green : T.muted, fontWeight:500 }}>
-                    {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(1)}
+      <ScrollRail minWidth={840}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(7, minmax(110px, 1fr))', borderBottom:`0.5px solid ${T.line}` }}>
+          {days.map((d, i) => (
+            <div key={i} style={{
+              padding:'18px 14px',
+              borderRight: i<6 ? `0.5px solid ${T.softLine}` : 'none',
+              background: d.isToday ? T.goldSoft : 'transparent',
+              opacity: d.isFuture ? 0.4 : 1,
+            }}>
+              <Kicker style={{ marginBottom:4, fontSize:9 }}>{d.label}</Kicker>
+              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.muted, marginBottom:14 }}>{d.iso}</div>
+              {d.reading ? (
+                <>
+                  <div style={{ display:'flex', alignItems:'baseline', gap:3 }}>
+                    <span style={{ fontFamily:T.display, fontSize:22, color: d.isToday ? T.gold : T.ink, letterSpacing:'-0.015em', lineHeight:1 }}>{d.reading.weight.toFixed(1)}</span>
+                    <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kg</span>
                   </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.muted }}>—</div>
-                <div style={{ fontFamily:T.sans, fontSize:9, color:T.muted, letterSpacing:'0.12em', marginTop:8 }}>{d.isFuture ? 'TO COME' : 'NO LOG'}</div>
-              </>
-            )}
-          </div>
-        ))}
-      </div>
+                  {d.delta !== null && (
+                    <div style={{ marginTop:6, fontFamily:T.sans, fontSize:10, color: d.delta > 0 ? T.rose : d.delta < 0 ? T.green : T.muted, fontWeight:500 }}>
+                      {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(1)}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.muted }}>—</div>
+                  <div style={{ fontFamily:T.sans, fontSize:9, color:T.muted, letterSpacing:'0.12em', marginTop:8 }}>{d.isFuture ? 'TO COME' : 'NO LOG'}</div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </ScrollRail>
     </div>
   );
 }
@@ -1127,10 +1324,10 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
   };
 
   return (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:T.paper, padding:40 }}>
-      <form onSubmit={submit} style={{ width:'100%', maxWidth:360, textAlign:'center' }}>
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(145deg, ${T.paper} 0%, ${T.surface} 60%, ${T.goldSoft} 100%)`, padding:24 }}>
+      <form onSubmit={submit} style={{ width:'100%', maxWidth:400, textAlign:'center', padding:'32px 28px 36px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.82)', boxShadow:CARD_SHADOW, backdropFilter:'blur(8px)' }}>
         <Kicker style={{ marginBottom:20 }}>Vol. 01 · Restricted Access</Kicker>
-        <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:48, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
+        <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize: 24, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
           Operator.
         </h1>
         <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.muted, margin:'0 0 40px' }}>a private weighing log.</p>
@@ -1175,11 +1372,11 @@ function HeroReading({ latest, previous, sorted }: { latest:FitnessReading; prev
   const sPath = sXs.map((x,i)=>(i===0?'M':'L')+x.toFixed(1)+','+sYp[i].toFixed(1)).join(' ');
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'1.4fr 1fr', gap:48, alignItems:'end', paddingBottom:48, borderBottom:`2px solid ${T.ink}`, marginBottom:48 }}>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap:28, alignItems:'end', paddingBottom:48, borderBottom:`2px solid ${T.ink}`, marginBottom:48 }}>
       <div>
         <Kicker style={{ marginBottom:14 }}>This Week&apos;s Figure · {fmtDate(latest.date, { long:true })}</Kicker>
         <div style={{ display:'flex', alignItems:'baseline', gap:16, marginBottom:12 }}>
-          <span style={{ fontFamily:T.display, fontWeight:400, fontSize:120, letterSpacing:'-0.04em', lineHeight:0.85, color:T.ink }}>
+          <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 32, letterSpacing:'-0.04em', lineHeight:0.85, color:T.ink }}>
             {latest.weight.toFixed(1)}
           </span>
           <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:28, color:T.muted }}>kg</span>
@@ -1214,6 +1411,42 @@ function HeroReading({ latest, previous, sorted }: { latest:FitnessReading; prev
   );
 }
 
+function DetailLaunchpad({ setCompose, setTab }: { setCompose: (open: boolean) => void; setTab: (tab: string) => void }) {
+  const actions = [
+    { label:'Open plan', sub:'Weekly rules and nutrition targets', action:() => setTab('Plan') },
+    { label:'Health panel', sub:'Body composition and health markers', action:() => setTab('Health') },
+    { label:'Projections', sub:'Where the current line is heading', action:() => setTab('Projections') },
+    { label:'Open ledger', sub:'Every weigh-in in one place', action:() => setTab('Ledger') },
+    { label:'File reading', sub:'Add the next weigh-in now', action:() => setCompose(true) },
+  ];
+
+  return (
+    <div style={{ marginTop:48 }}>
+      <Kicker style={{ marginBottom:10 }}>Need detail, not noise</Kicker>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 8px' }}>
+        Use the right tab for the <em>next question</em>.
+      </h2>
+      <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:'0 0 18px', maxWidth:'48ch' }}>
+        The overview should stay short. When you want detail, jump directly into the specific view instead of scrolling through everything.
+      </p>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:12 }}>
+        {actions.map((item) => (
+          <button key={item.label} onClick={item.action} style={{
+            border:`1px solid ${T.line}`,
+            background:'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(251,248,243,0.96) 100%)',
+            padding:'16px 16px 14px',
+            textAlign:'left',
+            cursor:'pointer',
+          }}>
+            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, marginBottom:6 }}>{item.label}</div>
+            <span style={{ fontFamily:T.sans, fontSize:11, color:T.body, lineHeight:1.5 }}>{item.sub}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Stat panel ───────────────────────────────────────────────────────────────
 
 function StatItem({ label, value, unit, status, statusColor, last }: {
@@ -1223,7 +1456,7 @@ function StatItem({ label, value, unit, status, statusColor, last }: {
     <div style={{ flex:1, padding:'22px 22px', borderRight: last ? 'none' : `0.5px solid ${T.line}` }}>
       <Kicker style={{ marginBottom:12 }}>{label}</Kicker>
       <div style={{ display:'flex', alignItems:'baseline', gap:5, marginBottom:10 }}>
-        <span style={{ fontFamily:T.display, fontWeight:400, fontSize:40, lineHeight:1, color:T.ink, letterSpacing:'-0.015em' }}>{value}</span>
+        <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, lineHeight:1, color:T.ink, letterSpacing:'-0.015em' }}>{value}</span>
         {unit && <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>{unit}</span>}
       </div>
       <span style={{
@@ -1320,36 +1553,38 @@ function CompositionChart({ sorted }: { sorted:FitnessReading[] }) {
   ] as const;
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginTop:16 }}>
-      {metrics.map((m, idx) => {
-        const ys = sorted.map(r => r[m.key as keyof FitnessReading] as number);
-        const yMin=Math.min(...ys)-0.5, yMax=Math.max(...ys)+0.5;
-        const xs = sorted.map((_,i)=>PAD+(i/(sorted.length-1))*iW);
-        const yPos = sorted.map(r => PAD+(1-((r[m.key as keyof FitnessReading] as number)-yMin)/(yMax-yMin))*iH);
-        const path = xs.map((x,i)=>(i===0?'M':'L')+x.toFixed(1)+','+yPos[i].toFixed(1)).join(' ');
-        const last=ys[ys.length-1], delta=last-ys[0];
-        return (
-          <div key={m.key} style={{ padding:'20px 22px', borderRight: idx<2 ? `0.5px solid ${T.line}` : 'none' }}>
-            <Kicker style={{ marginBottom:10 }}>{m.label}</Kicker>
-            <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:56, display:'block', marginBottom:10 }}>
-              <path d={path+` L ${xs[xs.length-1].toFixed(1)},${H-PAD} L ${xs[0].toFixed(1)},${H-PAD} Z`} fill={m.color} opacity="0.07" />
-              <path d={path} fill="none" stroke={m.color} strokeWidth="1.2" />
-              {xs.map((x,i)=><circle key={i} cx={x} cy={yPos[i]} r="2.5" fill={m.color} />)}
-            </svg>
-            <div style={{ display:'flex', alignItems:'baseline', gap:5 }}>
-              <span style={{ fontFamily:T.display, fontSize:34, color:T.ink, letterSpacing:'-0.01em' }}>{last.toFixed(1)}</span>
-              <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>{m.unit}</span>
+    <ScrollRail minWidth={760} style={{ marginTop:16 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3, minmax(220px, 1fr))', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+        {metrics.map((m, idx) => {
+          const ys = sorted.map(r => r[m.key as keyof FitnessReading] as number);
+          const yMin=Math.min(...ys)-0.5, yMax=Math.max(...ys)+0.5;
+          const xs = sorted.map((_,i)=>PAD+(i/(sorted.length-1))*iW);
+          const yPos = sorted.map(r => PAD+(1-((r[m.key as keyof FitnessReading] as number)-yMin)/(yMax-yMin))*iH);
+          const path = xs.map((x,i)=>(i===0?'M':'L')+x.toFixed(1)+','+yPos[i].toFixed(1)).join(' ');
+          const last=ys[ys.length-1], delta=last-ys[0];
+          return (
+            <div key={m.key} style={{ padding:'20px 22px', borderRight: idx<2 ? `0.5px solid ${T.line}` : 'none' }}>
+              <Kicker style={{ marginBottom:10 }}>{m.label}</Kicker>
+              <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:56, display:'block', marginBottom:10 }}>
+                <path d={path+` L ${xs[xs.length-1].toFixed(1)},${H-PAD} L ${xs[0].toFixed(1)},${H-PAD} Z`} fill={m.color} opacity="0.07" />
+                <path d={path} fill="none" stroke={m.color} strokeWidth="1.2" />
+                {xs.map((x,i)=><circle key={i} cx={x} cy={yPos[i]} r="2.5" fill={m.color} />)}
+              </svg>
+              <div style={{ display:'flex', alignItems:'baseline', gap:5 }}>
+                <span style={{ fontFamily:T.display, fontSize: 20, color:T.ink, letterSpacing:'-0.01em' }}>{last.toFixed(1)}</span>
+                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>{m.unit}</span>
+              </div>
+              <span style={{
+                fontFamily:T.sans, fontSize:9.5, fontWeight:500, letterSpacing:'0.2em',
+                color: delta>0 ? T.rose : T.green,
+              }}>
+                {delta>0?'▲':'▼'} {Math.abs(delta).toFixed(1)} since Nov
+              </span>
             </div>
-            <span style={{
-              fontFamily:T.sans, fontSize:9.5, fontWeight:500, letterSpacing:'0.2em',
-              color: delta>0 ? T.rose : T.green,
-            }}>
-              {delta>0?'▲':'▼'} {Math.abs(delta).toFixed(1)} since Nov
-            </span>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </ScrollRail>
   );
 }
 
@@ -1406,51 +1641,53 @@ function Milestones({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|nu
   return (
     <div style={{ marginTop:64 }}>
       <Kicker style={{ marginBottom:10 }}>Section III · Milestones</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         Waypoints <em>on the route home</em>.
       </h2>
       <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         {reg && reg.slope < 0 ? 'Estimated at your current rate of loss.' : 'Requires a trend reversal — current direction is away from goal.'}
       </p>
       <ThickRule style={{ margin:'18px 0 0' }} />
-      <div style={{ borderBottom:`0.5px solid ${T.line}` }}>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
-          <Kicker>Milestone</Kicker>
-          <Kicker style={{ textAlign:'right' }}>Weight</Kicker>
-          <Kicker style={{ textAlign:'right' }}>Estimated date</Kicker>
+      <ScrollRail minWidth={640}>
+        <div style={{ borderBottom:`0.5px solid ${T.line}` }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
+            <Kicker>Milestone</Kicker>
+            <Kicker style={{ textAlign:'right' }}>Weight</Kicker>
+            <Kicker style={{ textAlign:'right' }}>Estimated date</Kicker>
+          </div>
+          {steps.map((kg,i) => {
+            const isGoal = kg === goal;
+            const d = reg && reg.slope < 0 ? goalDate({ ...reg, intercept: reg.intercept, slope: reg.slope } as Reg, kg) : null;
+            // project goal for this milestone weight
+            let projDate: Date | null = null;
+            if (reg && reg.slope < 0) {
+              const days = (kg - reg.intercept) / reg.slope;
+              projDate = new Date(reg.t0 + days * 86400000);
+            }
+            return (
+              <div key={kg} style={{
+                display:'grid', gridTemplateColumns:'1fr 1fr 1fr',
+                padding:'18px 0', borderBottom: i < steps.length-1 ? `0.5px solid ${T.softLine}` : 'none',
+                alignItems:'baseline',
+              }}>
+                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color: isGoal ? T.gold : T.ink }}>
+                  {isGoal ? 'Goal ★' : `−${(latest.weight-kg).toFixed(1)} kg waypoint`}
+                </div>
+                <div style={{ fontFamily:T.display, fontSize:26, color: isGoal ? T.gold : T.ink, textAlign:'right', letterSpacing:'-0.01em' }}>
+                  {kg.toFixed(1)} <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  {projDate ? (
+                    <span style={{ fontFamily:T.sans, fontSize:12, color: isGoal ? T.gold : T.body }}>{fmtDateObj(projDate)}</span>
+                  ) : (
+                    <span style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.15em', color:T.muted }}>REVERSE TREND FIRST</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
-        {steps.map((kg,i) => {
-          const isGoal = kg === goal;
-          const d = reg && reg.slope < 0 ? goalDate({ ...reg, intercept: reg.intercept, slope: reg.slope } as Reg, kg) : null;
-          // project goal for this milestone weight
-          let projDate: Date | null = null;
-          if (reg && reg.slope < 0) {
-            const days = (kg - reg.intercept) / reg.slope;
-            projDate = new Date(reg.t0 + days * 86400000);
-          }
-          return (
-            <div key={kg} style={{
-              display:'grid', gridTemplateColumns:'1fr 1fr 1fr',
-              padding:'18px 0', borderBottom: i < steps.length-1 ? `0.5px solid ${T.softLine}` : 'none',
-              alignItems:'baseline',
-            }}>
-              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color: isGoal ? T.gold : T.ink }}>
-                {isGoal ? 'Goal ★' : `−${(latest.weight-kg).toFixed(1)} kg waypoint`}
-              </div>
-              <div style={{ fontFamily:T.display, fontSize:26, color: isGoal ? T.gold : T.ink, textAlign:'right', letterSpacing:'-0.01em' }}>
-                {kg.toFixed(1)} <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
-              </div>
-              <div style={{ textAlign:'right' }}>
-                {projDate ? (
-                  <span style={{ fontFamily:T.sans, fontSize:12, color: isGoal ? T.gold : T.body }}>{fmtDateObj(projDate)}</span>
-                ) : (
-                  <span style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.15em', color:T.muted }}>REVERSE TREND FIRST</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      </ScrollRail>
     </div>
   );
 }
@@ -1461,8 +1698,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
   const latest = sorted[sorted.length-1];
   const toGo   = latest.weight - goal;
 
-  // Mifflin-St Jeor BMR (female, age 30 — reasonable default)
-  const bmr  = Math.round(10*latest.weight + 6.25*HEIGHT_M*100 - 5*30 - 161);
+  const { bmr, activeTdee } = nutritionTargets(latest);
   const tdee = { sedentary: Math.round(bmr*1.2), light: Math.round(bmr*1.375), moderate: Math.round(bmr*1.55) };
 
   const KcalPerKg = 7700;
@@ -1516,7 +1752,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
   return (
     <div style={{ marginTop:80 }}>
       <Kicker style={{ marginBottom:10 }}>Section VI · The Cut</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         Should you cut? <em>Yes. Here is how.</em>
       </h2>
       <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
@@ -1528,7 +1764,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
       <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:32, padding:'28px 0', borderBottom:`0.5px solid ${T.line}`, alignItems:'start' }}>
         <div>
           <Kicker style={{ marginBottom:10 }}>The Verdict</Kicker>
-          <span style={{ fontFamily:T.display, fontWeight:400, fontSize:56, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>Cut.</span>
+          <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 28, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>Cut.</span>
         </div>
         <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:'28px 0 0', maxWidth:'52ch' }}>
           {verdictText}
@@ -1538,7 +1774,10 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
       {/* TDEE estimate */}
       <div style={{ padding:'24px 0', borderBottom:`0.5px solid ${T.line}` }}>
         <Kicker style={{ marginBottom:14 }}>Estimated Daily Energy Expenditure · Mifflin-St Jeor (female, 30)</Kicker>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:0 }}>
+        <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.6, margin:'0 0 14px', maxWidth:'50ch' }}>
+          The dashboard now assumes an exercising week by default, so the working maintenance baseline is <strong style={{ color:T.ink, fontWeight:500 }}>{activeTdee.toLocaleString()} kcal/day</strong>.
+        </p>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:0 }}>
           {[
             { label:'Sedentary', mult:'×1.2', kcal:tdee.sedentary, note:'Desk job, little exercise' },
             { label:'Lightly Active', mult:'×1.375', kcal:tdee.light, note:'Light exercise 1–3 days/wk' },
@@ -1547,7 +1786,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
             <div key={i} style={{ padding:'16px 20px', borderRight: i<2?`0.5px solid ${T.line}`:'none' }}>
               <Kicker style={{ marginBottom:8 }}>{row.label} {row.mult}</Kicker>
               <div style={{ display:'flex', alignItems:'baseline', gap:5, marginBottom:5 }}>
-                <span style={{ fontFamily:T.display, fontSize:36, color:T.ink, letterSpacing:'-0.02em' }}>{row.kcal.toLocaleString()}</span>
+                <span style={{ fontFamily:T.display, fontSize: 20, color:T.ink, letterSpacing:'-0.02em' }}>{row.kcal.toLocaleString()}</span>
                 <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kcal/day</span>
               </div>
               <Kicker color={T.muted}>{row.note}</Kicker>
@@ -1561,55 +1800,57 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
 
       {/* Strategy comparison */}
       <div style={{ marginTop:0 }}>
-        <div style={{ display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr 1.2fr 1.2fr', padding:'12px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
-          {['Strategy','Deficit','Intake (sedentary)','Loss rate','Goal date'].map((h,i)=>(
-            <Kicker key={i} style={{ textAlign:i>0?'right':'left' }}>{h}</Kicker>
-          ))}
-        </div>
-        {strategies.map((s, i) => {
-          const kgPerWeek = (s.deficit/KcalPerKg*7);
-          const intake = tdee.sedentary - s.deficit;
-          const gDate = goalDateForDeficit(s.deficit);
-          const isRec = s.recommended;
-          return (
-            <div key={i} style={{
-              display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr 1.2fr 1.2fr',
-              padding:'20px 0', borderBottom:`0.5px solid ${T.softLine}`,
-              alignItems:'baseline',
-              background: isRec ? T.goldSoft : 'transparent',
-              margin: isRec ? '0 -20px' : 0,
-            }}>
-              <div>
-                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                  <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color: isRec?T.gold:T.ink }}>{s.name}</span>
-                  {isRec && <span style={{ fontFamily:T.sans, fontSize:8, fontWeight:600, letterSpacing:'0.2em', color:T.gold, padding:'2px 7px', border:`0.5px solid ${T.gold}` }}>RECOMMENDED</span>}
+        <ScrollRail minWidth={900}>
+          <div style={{ display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr 1.2fr 1.2fr', padding:'12px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
+            {['Strategy','Deficit','Intake (training week)','Loss rate','Goal date'].map((h,i)=>(
+              <Kicker key={i} style={{ textAlign:i>0?'right':'left' }}>{h}</Kicker>
+            ))}
+          </div>
+          {strategies.map((s, i) => {
+            const kgPerWeek = (s.deficit/KcalPerKg*7);
+            const intake = activeTdee - s.deficit;
+            const gDate = goalDateForDeficit(s.deficit);
+            const isRec = s.recommended;
+            return (
+              <div key={i} style={{
+                display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr 1.2fr 1.2fr',
+                padding:'20px 0', borderBottom:`0.5px solid ${T.softLine}`,
+                alignItems:'baseline',
+                background: isRec ? T.goldSoft : 'transparent',
+                margin: isRec ? '0 -20px' : 0,
+              }}>
+                <div>
+                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color: isRec?T.gold:T.ink }}>{s.name}</span>
+                    {isRec && <span style={{ fontFamily:T.sans, fontSize:8, fontWeight:600, letterSpacing:'0.2em', color:T.gold, padding:'2px 7px', border:`0.5px solid ${T.gold}` }}>RECOMMENDED</span>}
+                  </div>
+                  <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, margin:'6px 0 0', lineHeight:1.5, maxWidth:'28ch' }}>{s.note}</p>
                 </div>
-                <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, margin:'6px 0 0', lineHeight:1.5, maxWidth:'28ch' }}>{s.note}</p>
+                <div style={{ textAlign:'right' }}>
+                  <span style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>−{s.deficit}</span>
+                  <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kcal</span>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  <span style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>{intake.toLocaleString()}</span>
+                  <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kcal</span>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  <span style={{ fontFamily:T.display, fontSize:22, color:T.green }}>−{kgPerWeek.toFixed(2)}</span>
+                  <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kg/wk</span>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: isRec?T.gold:T.body }}>
+                    {fmtDateObj(gDate)}
+                  </span>
+                </div>
               </div>
-              <div style={{ textAlign:'right' }}>
-                <span style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>−{s.deficit}</span>
-                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kcal</span>
-              </div>
-              <div style={{ textAlign:'right' }}>
-                <span style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>{intake.toLocaleString()}</span>
-                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kcal</span>
-              </div>
-              <div style={{ textAlign:'right' }}>
-                <span style={{ fontFamily:T.display, fontSize:22, color:T.green }}>−{kgPerWeek.toFixed(2)}</span>
-                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kg/wk</span>
-              </div>
-              <div style={{ textAlign:'right' }}>
-                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: isRec?T.gold:T.body }}>
-                  {fmtDateObj(gDate)}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </ScrollRail>
       </div>
 
       {/* Pro/Con detail */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginTop:48 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginTop:48 }}>
         {strategies.map((s,i) => (
           <div key={i} style={{ padding:'22px 24px', borderRight: i%2===0?`0.5px solid ${T.line}`:'none', borderBottom: i<2?`0.5px solid ${T.line}`:'none' }}>
             <Kicker style={{ marginBottom:8 }}>{s.name} · −{s.deficit} kcal/day</Kicker>
@@ -1630,28 +1871,30 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
           Starting from <em>{latest.weight.toFixed(1)} kg</em>, where should you be in 7 days?
         </h3>
         <ThickRule style={{ margin:'16px 0 0' }} />
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', borderBottom:`0.5px solid ${T.line}` }}>
-          {strategies.map((s,i) => {
-            const target = parseFloat(thisWeekTarget(s.deficit));
-            const change = target - latest.weight;
-            const isRec = s.recommended;
-            return (
-              <div key={i} style={{ padding:'20px 18px', borderRight: i<3?`0.5px solid ${T.line}`:'none', background: isRec?T.goldSoft:'transparent' }}>
-                <Kicker style={{ marginBottom:10 }} color={isRec?T.gold:undefined}>{s.name}</Kicker>
-                <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:6 }}>
-                  <span style={{ fontFamily:T.display, fontSize:38, color:isRec?T.gold:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{target.toFixed(1)}</span>
-                  <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
+        <ScrollRail minWidth={760}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4, minmax(180px, 1fr))', borderBottom:`0.5px solid ${T.line}` }}>
+            {strategies.map((s,i) => {
+              const target = parseFloat(thisWeekTarget(s.deficit));
+              const change = target - latest.weight;
+              const isRec = s.recommended;
+              return (
+                <div key={i} style={{ padding:'20px 18px', borderRight: i<3?`0.5px solid ${T.line}`:'none', background: isRec?T.goldSoft:'transparent' }}>
+                  <Kicker style={{ marginBottom:10 }} color={isRec?T.gold:undefined}>{s.name}</Kicker>
+                  <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:6 }}>
+                    <span style={{ fontFamily:T.display, fontSize: 20, color:isRec?T.gold:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{target.toFixed(1)}</span>
+                    <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
+                  </div>
+                  <div style={{ fontFamily:T.sans, fontSize:11, color:T.green, fontWeight:500 }}>
+                    {change.toFixed(2)} kg this week
+                  </div>
+                  <div style={{ fontFamily:T.sans, fontSize:10, color:T.muted, marginTop:4, letterSpacing:'0.05em' }}>
+                    {(activeTdee - s.deficit).toLocaleString()} kcal/day
+                  </div>
                 </div>
-                <div style={{ fontFamily:T.sans, fontSize:11, color:T.green, fontWeight:500 }}>
-                  {change.toFixed(2)} kg this week
-                </div>
-                <div style={{ fontFamily:T.sans, fontSize:10, color:T.muted, marginTop:4, letterSpacing:'0.05em' }}>
-                  {(tdee.sedentary - s.deficit).toLocaleString()} kcal/day
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </ScrollRail>
       </div>
 
       {/* Muscle preservation note */}
@@ -1706,7 +1949,12 @@ interface Phase {
 
 function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number; reg: Reg | null }) {
   const latest  = sorted[sorted.length - 1];
-  const deficit = 500; // recommended moderate cut
+  const deficit = MODERATE_DEFICIT_KCAL;
+  const currentNutrition = nutritionTargets(latest);
+  const phase78Nutrition = nutritionTargets({ ...latest, weight: 78 });
+  const phase70Nutrition = nutritionTargets({ ...latest, weight: 70 });
+  const phase65Nutrition = nutritionTargets({ ...latest, weight: 65 });
+  const goalNutrition = nutritionTargets({ ...latest, weight: goal });
 
   // Project body fat at key weight checkpoints
   const bf78 = projectedBF(78, latest);
@@ -1738,8 +1986,8 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       durationWeeks: Math.round(w1),
       deficit: 500,
       actions: [
-        `Eat at ${Math.round(1860 - 500).toLocaleString()} kcal/day (sedentary TDEE − 500)`,
-        `Protein: ${Math.round(latest.weight * 1.8)} g/day minimum to protect muscle`,
+        `Eat at about ${currentNutrition.intake.toLocaleString()} kcal/day on average (training-week maintenance − 500)`,
+        `Protein: ${currentNutrition.protein} g/day minimum to protect muscle`,
         'Resistance training 3× per week — this is non-negotiable',
         'Weigh in weekly at the same time. Log every reading.',
         'Target: −0.5 kg per week. Slower is fine; faster is risky.',
@@ -1755,7 +2003,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       durationWeeks: 3,
       deficit: null,
       actions: [
-        'Eat at maintenance (~1,860 kcal/day sedentary)',
+        `Eat at maintenance (~${phase78Nutrition.maintenance.toLocaleString()} kcal/day with training)`,
         'Continue resistance training — do not stop lifting',
         'This is intentional, not falling off the plan',
         'Restores leptin, cortisol, and training performance',
@@ -1773,7 +2021,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       deficit: 500,
       actions: [
         'Resume −500 kcal/day deficit',
-        `Protein: ${Math.round(78 * 1.8)} g/day (recalculated for new weight)`,
+        `Protein: ${phase78Nutrition.protein} g/day (recalculated for new weight)`,
         'Increase training intensity if energy allows',
         'Body fat is dropping — muscle definition will start to appear',
         'Consider a DEXA scan here to get accurate BF reading',
@@ -1789,7 +2037,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       durationWeeks: 3,
       deficit: null,
       actions: [
-        'Eat at maintenance again (~1,720 kcal/day at 70 kg)',
+        `Eat at maintenance again (~${phase70Nutrition.maintenance.toLocaleString()} kcal/day at 70 kg)`,
         'Focus on progressive overload in the gym',
         'Reassess goal weight here — at this body composition, 60 kg may feel different',
         'Blood markers worth checking: iron, B12, thyroid',
@@ -1805,7 +2053,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       durationWeeks: Math.round(w3 - w2),
       deficit: null,
       actions: [
-        'Maintenance calories (~1,720/day) — not a deficit',
+        `Maintenance calories (~${phase70Nutrition.maintenance.toLocaleString()}/day) — not a deficit`,
         'Heavy compound lifts: squat, deadlift, press',
         'Body recomposition is slow — 0.25–0.5 kg fat lost per month, muscle gained simultaneously',
         'Scale weight may barely move — this is intentional',
@@ -1822,7 +2070,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       durationWeeks: Math.round(w4 - w3),
       deficit: 400,
       actions: [
-        `Mild deficit: −400 kcal/day (easier at lower body fat)`,
+        `Mild deficit: about ${(phase65Nutrition.maintenance - 400).toLocaleString()} kcal/day (roughly 400 below maintenance)`,
         'Protein stays high — muscle is hard-earned now',
         `Goal weight: ${goal} kg at roughly ${bfGoal.toFixed(0)}% body fat`,
         'Cardio can be added here for the final push',
@@ -1838,7 +2086,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       durationWeeks: 0,
       deficit: null,
       actions: [
-        'Eat at maintenance for your new weight',
+        `Eat at maintenance for your new weight (~${goalNutrition.maintenance.toLocaleString()} kcal/day if training stays in place)`,
         'Weigh weekly — intervene early if trending up',
         'Continue resistance training for general health',
         `At ~${bfGoal.toFixed(0)}% body fat you can now consider a lean bulk if you want more muscle`,
@@ -1863,7 +2111,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
   return (
     <div style={{ marginTop: 80 }}>
       <Kicker style={{ marginBottom:10 }}>Section VII · Periodisation</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         When to cut, when to rest, <em>when to build</em>.
       </h2>
       <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
@@ -1874,7 +2122,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:24, alignItems:'start', padding:'24px 0', margin:'18px 0 0', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
         <div>
           <Kicker style={{ marginBottom:8 }}>The Rule</Kicker>
-          <span style={{ fontFamily:T.display, fontWeight:400, fontSize:48, letterSpacing:'-0.02em', lineHeight:1, color:T.rose }}>
+          <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.rose }}>
             No bulk
           </span>
         </div>
@@ -2034,7 +2282,7 @@ function Insights({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|null
   return (
     <div style={{ marginTop:64 }}>
       <Kicker style={{ marginBottom:10 }}>Section VIII · Insights</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         What the numbers <em>are saying</em>.
       </h2>
       <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
@@ -2051,7 +2299,7 @@ function Insights({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|null
             <div>
               <Kicker style={{ marginBottom:12 }}>{item.kicker}</Kicker>
               <div style={{ display:'flex', alignItems:'baseline', gap:6 }}>
-                <span style={{ fontFamily:T.display, fontWeight:400, fontSize:48, color:item.color, letterSpacing:'-0.02em', lineHeight:1 }}>{item.value}</span>
+                <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, color:item.color, letterSpacing:'-0.02em', lineHeight:1 }}>{item.value}</span>
                 <span style={{ fontFamily:T.sans, fontSize:12, color:T.muted }}>{item.unit}</span>
               </div>
             </div>
@@ -2114,7 +2362,7 @@ function MonthlyBarChart({ sorted }: { sorted: FitnessReading[] }) {
 
   return (
     <div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:14 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:14 }}>
         {[
           { l:'Total Lost',   v:`${totalLost.toFixed(1)} kg`,    c:T.green },
           { l:'Total Gained', v:`+${totalGained.toFixed(1)} kg`, c:T.rose  },
@@ -2122,7 +2370,7 @@ function MonthlyBarChart({ sorted }: { sorted: FitnessReading[] }) {
         ].map((m,i)=>(
           <div key={i} style={{ padding:'18px 20px', borderRight: i<2 ? `0.5px solid ${T.line}` : 'none' }}>
             <Kicker style={{ marginBottom:8 }}>{m.l}</Kicker>
-            <span style={{ fontFamily:T.display, fontSize:32, color:m.c, letterSpacing:'-0.02em' }}>{m.v}</span>
+            <span style={{ fontFamily:T.display, fontSize: 20, color:m.c, letterSpacing:'-0.02em' }}>{m.v}</span>
           </div>
         ))}
       </div>
@@ -2250,7 +2498,7 @@ function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number
 
   return (
     <div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, gap:0 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, gap:0 }}>
         <div style={{ borderRight:`0.5px solid ${T.line}` }}>
           {renderPie(currentSlices, 'Today · the current composition', latest.weight, `at ${latest.weight} kg`)}
         </div>
@@ -2260,7 +2508,7 @@ function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number
       </div>
 
       {/* Legend with kg/% breakdown */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', marginTop:24, borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(190px, 1fr))', marginTop:24, borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
         {currentSlices.map((s, i) => {
           const gs = goalSlices[i];
           const delta = gs.kg - s.kg;
@@ -2342,7 +2590,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
   return (
     <div>
       <Kicker style={{ marginBottom:10 }}>Section · Health Panel</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(36px,5vw,56px)', letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 8px' }}>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 8px' }}>
         Beyond the scale, <em>the full picture</em>.
       </h2>
       <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 36px' }}>
@@ -2351,14 +2599,14 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
 
       {/* Health flags grid */}
       <Kicker style={{ marginBottom:10 }}>The Four Health Markers</Kicker>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
-        {healthFlags.map((f, i) => {
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:14 }}>
+        {healthFlags.map((f) => {
           const [stTxt, stCol] = f.status;
           return (
-            <div key={f.label} style={{ padding:'22px 24px', borderRight: i%2===0 ? `0.5px solid ${T.line}` : 'none', borderBottom: i<2 ? `0.5px solid ${T.line}` : 'none' }}>
+            <div key={f.label} style={{ padding:'22px 24px', border:`1px solid ${T.line}`, background:'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(251,248,243,0.95) 100%)' }}>
               <Kicker style={{ marginBottom:10 }}>{f.label}</Kicker>
               <div style={{ display:'flex', alignItems:'baseline', gap:14, marginBottom:8 }}>
-                <span style={{ fontFamily:T.display, fontWeight:400, fontSize:44, letterSpacing:'-0.02em', lineHeight:1, color:T.ink }}>{f.value}</span>
+                <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink }}>{f.value}</span>
                 <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.22em', padding:'3px 8px', background:stCol+'18', color:stCol }}>{stTxt}</span>
               </div>
               <div style={{ fontFamily:T.sans, fontSize:11, color: f.change > 0 ? T.rose : f.change < 0 ? T.green : T.muted, fontWeight:500, marginBottom:8 }}>
@@ -2373,7 +2621,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
       {/* Monthly bar chart */}
       <div style={{ marginTop:72 }}>
         <Kicker style={{ marginBottom:10 }}>Monthly Weight Change · {sorted.length} weekly readings aggregated</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:32, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
           The good months, the <em>bad months</em>.
         </h3>
         <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'62ch', margin:'0 0 18px' }}>
@@ -2385,7 +2633,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
       {/* Composition pie comparison */}
       <div style={{ marginTop:80 }}>
         <Kicker style={{ marginBottom:10 }}>Body Composition · Now vs Target</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:32, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
           Where the kilograms <em>live</em>.
         </h3>
         <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'62ch', margin:'0 0 18px' }}>
@@ -2397,10 +2645,10 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
       {/* Journey landmarks */}
       <div style={{ marginTop:72 }}>
         <Kicker style={{ marginBottom:10 }}>The Journey · Three Years of Data</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:32, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 18px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 18px' }}>
           From low to high, <em>and back to low</em>.
         </h3>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
           {[
             { l:'Lightest', v:`${minWeight} kg`, d:fmtDate(minDate), c:T.green },
             { l:'Heaviest', v:`${maxWeight} kg`, d:fmtDate(maxDate), c:T.rose },
@@ -2409,7 +2657,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
           ].map((m,i)=>(
             <div key={i} style={{ padding:'22px 22px', borderRight: i<3?`0.5px solid ${T.line}`:'none' }}>
               <Kicker style={{ marginBottom:10 }}>{m.l}</Kicker>
-              <div style={{ fontFamily:T.display, fontSize:30, color:m.c, letterSpacing:'-0.015em', lineHeight:1 }}>{m.v}</div>
+              <div style={{ fontFamily:T.display, fontSize: 20, color:m.c, letterSpacing:'-0.015em', lineHeight:1 }}>{m.v}</div>
               <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:12, color:T.muted, margin:'8px 0 0' }}>{m.d}</p>
             </div>
           ))}
@@ -2423,10 +2671,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
 
 function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; goal: number; state: State; setTab: (t: string) => void }) {
   const latest = sorted[sorted.length - 1];
-  const bmr  = Math.round(10*latest.weight + 6.25*HEIGHT_M*100 - 5*30 - 161);
-  const tdee = Math.round(bmr * 1.2);
-  const intake = tdee - 500;
-  const protein = Math.round(latest.weight * 1.8);
+  const { activeTdee, intake, protein } = nutritionTargets(latest);
   const goalDate = new Date(new Date(latest.date).getTime() + ((latest.weight - goal) / 0.45 * 7) * 86400000);
 
   const sectionGap = { marginTop: 64 };
@@ -2436,7 +2681,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
       <PlanOpener state={state} sorted={sorted} setTab={setTab} />
 
       <Kicker style={{ marginBottom:10 }}>Section · The Solid Plan</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(40px,6vw,68px)', letterSpacing:'-0.025em', lineHeight:0.98, color:T.ink, margin:'0 0 12px' }}>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.025em', lineHeight:0.98, color:T.ink, margin:'0 0 12px' }}>
         A plan you can <em>actually follow</em>.
       </h2>
       <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.muted, margin:'0 0 36px', maxWidth:'52ch', lineHeight:1.5 }}>
@@ -2446,14 +2691,14 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
       {/* The Mission */}
       <div style={{ background:T.surface, border:`0.5px solid ${T.line}`, padding:'32px 36px', marginBottom:48 }}>
         <Kicker style={{ marginBottom:14 }}>The Mission</Kicker>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:24, alignItems:'baseline' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))', gap:24, alignItems:'baseline' }}>
           <div>
-            <div style={{ fontFamily:T.display, fontSize:48, color:T.rose, letterSpacing:'-0.02em', lineHeight:1 }}>{latest.weight}</div>
+            <div style={{ fontFamily:T.display, fontSize: 24, color:T.rose, letterSpacing:'-0.02em', lineHeight:1 }}>{latest.weight}</div>
             <Kicker color={T.muted} style={{ marginTop:6 }}>FROM (kg)</Kicker>
           </div>
           <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted, textAlign:'center' }}>→</div>
           <div style={{ textAlign:'right' }}>
-            <div style={{ fontFamily:T.display, fontSize:48, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>{goal.toFixed(0)}</div>
+            <div style={{ fontFamily:T.display, fontSize: 24, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>{goal.toFixed(0)}</div>
             <Kicker color={T.muted} style={{ marginTop:6 }}>TO (kg)</Kicker>
           </div>
         </div>
@@ -2468,19 +2713,19 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
       {/* Non-negotiables */}
       <div>
         <Kicker style={{ marginBottom:10 }}>I · The Five Non-Negotiables</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 24px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 24px' }}>
           Rules that don&apos;t bend, <em>ever</em>.
         </h3>
         <ThickRule />
         {[
           {n:'01', r:'Weigh in every Monday morning',                                        d:'Same time, same clothing (or none). One number per week — that is the data point. Ignore daily fluctuation.'},
-          {n:'02', r:`Eat at most ${intake.toLocaleString()} kcal per day on average`,       d:`This is your sedentary TDEE (${tdee.toLocaleString()}) minus a 500-kcal moderate deficit. Track it for the first 8 weeks at minimum.`},
+          {n:'02', r:`Eat around ${intake.toLocaleString()} kcal per day on average`,        d:`This assumes you are training. It uses an exercising-week TDEE of about ${activeTdee.toLocaleString()} kcal and applies a 500-kcal moderate deficit.`},
           {n:'03', r:`Hit ${protein}g of protein every day`,                                 d:'1.8g per kg of bodyweight. This protects muscle during the deficit. Non-negotiable on training days especially.'},
           {n:'04', r:'Lift three times per week, minimum',                                   d:'45-60 minute sessions. Compound movements. Progressive overload. Walks do not count as resistance training.'},
           {n:'05', r:'Log every reading, every meal, every session',                         d:'Even the bad weeks. Especially the bad weeks. Data with gaps cannot be analysed.'},
         ].map(rule => (
           <div key={rule.n} style={{ display:'grid', gridTemplateColumns:'56px 1fr', padding:'22px 0', borderBottom:`0.5px solid ${T.softLine}`, alignItems:'baseline', gap:16 }}>
-            <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:34, color:T.gold, lineHeight:1 }}>{rule.n}</span>
+            <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize: 20, color:T.gold, lineHeight:1 }}>{rule.n}</span>
             <div>
               <p style={{ fontFamily:T.display, fontSize:19, color:T.ink, margin:'0 0 4px', fontWeight:400, lineHeight:1.4 }}>{rule.r}</p>
               <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }}>{rule.d}</p>
@@ -2492,45 +2737,47 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
       {/* Day of eating */}
       <div style={sectionGap}>
         <Kicker style={{ marginBottom:10 }}>II · A Day of Eating</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 8px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 8px' }}>
           What <em>{intake.toLocaleString()}</em> kcal &amp; <em>{protein}g</em> of protein actually looks like.
         </h3>
         <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, margin:'0 0 18px' }}>
           one possible day — adjust for your preferences, but match the totals.
         </p>
-        <div style={{ borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
-          {[
-            { t:'07:30', m:'Breakfast', f:'3 eggs scrambled + 80g smoked salmon + 1 slice rye + black coffee', kcal:420, p:34 },
-            { t:'12:30', m:'Lunch',     f:'150g chicken breast, 60g (dry) basmati rice, large mixed salad, 1 tbsp olive oil', kcal:540, p:45 },
-            { t:'15:30', m:'Snack',     f:'200g 0% Greek yoghurt + 30g blueberries + 10g almonds', kcal:180, p:22 },
-            { t:'18:30', m:'Dinner',    f:'150g cod or salmon, 200g roasted vegetables, 150g sweet potato', kcal:420, p:38 },
-            { t:'20:30', m:'Evening',   f:'1 scoop whey protein in water (optional) + herbal tea', kcal:120, p:25 },
-          ].map((meal,i,arr)=>(
-            <div key={i} style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', padding:'18px 0', borderBottom: i<arr.length-1?`0.5px solid ${T.softLine}`:'none', alignItems:'baseline', gap:16 }}>
-              <Kicker color={T.gold}>{meal.t}</Kicker>
-              <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:17, color:T.ink }}>{meal.m}</span>
-              <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.5, margin:0 }}>{meal.f}</p>
-              <span style={{ fontFamily:T.display, fontSize:18, color:T.ink, textAlign:'right' }}>{meal.kcal} <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
-              <span style={{ fontFamily:T.display, fontSize:18, color:T.green, textAlign:'right' }}>{meal.p}g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
+        <ScrollRail minWidth={760}>
+          <div style={{ borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+            {[
+              { t:'07:30', m:'Breakfast', f:'3 eggs scrambled + 80g smoked salmon + 1 slice rye + black coffee', kcal:420, p:34 },
+              { t:'12:30', m:'Lunch',     f:'150g chicken breast, 60g (dry) basmati rice, large mixed salad, 1 tbsp olive oil', kcal:540, p:45 },
+              { t:'15:30', m:'Snack',     f:'200g 0% Greek yoghurt + 30g blueberries + 10g almonds', kcal:180, p:22 },
+              { t:'18:30', m:'Dinner',    f:'150g cod or salmon, 200g roasted vegetables, 150g sweet potato', kcal:420, p:38 },
+              { t:'20:30', m:'Evening',   f:'1 scoop whey protein in water (optional) + herbal tea', kcal:120, p:25 },
+            ].map((meal,i,arr)=>(
+              <div key={i} style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', padding:'18px 0', borderBottom: i<arr.length-1?`0.5px solid ${T.softLine}`:'none', alignItems:'baseline', gap:16 }}>
+                <Kicker color={T.gold}>{meal.t}</Kicker>
+                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:17, color:T.ink }}>{meal.m}</span>
+                <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.5, margin:0 }}>{meal.f}</p>
+                <span style={{ fontFamily:T.display, fontSize:18, color:T.ink, textAlign:'right' }}>{meal.kcal} <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
+                <span style={{ fontFamily:T.display, fontSize:18, color:T.green, textAlign:'right' }}>{meal.p}g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
+              </div>
+            ))}
+            <div style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', alignItems:'baseline', gap:16, background:T.goldSoft, margin:'0 -16px', padding:'20px 16px' }}>
+              <Kicker color={T.gold}>TOTAL</Kicker>
+              <span />
+              <span />
+              <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, textAlign:'right' }}>1,680 <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
+              <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, textAlign:'right' }}>164g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
             </div>
-          ))}
-          <div style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', alignItems:'baseline', gap:16, background:T.goldSoft, margin:'0 -16px', padding:'20px 16px' }}>
-            <Kicker color={T.gold}>TOTAL</Kicker>
-            <span />
-            <span />
-            <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, textAlign:'right' }}>1,680 <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
-            <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, textAlign:'right' }}>164g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
           </div>
-        </div>
+        </ScrollRail>
       </div>
 
       {/* Training split */}
       <div style={sectionGap}>
         <Kicker style={{ marginBottom:10 }}>III · The Training Split</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
           Three sessions a week. <em>Forty-five minutes each.</em>
         </h3>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
           {[
             { day:'Monday',    focus:'Lower body',      exs:['Goblet squat 3×10','Romanian deadlift 3×10','Glute bridge 3×12','Leg press 3×12','Plank 3×30s'] },
             { day:'Wednesday', focus:'Upper push',      exs:['DB bench press 3×10','Shoulder press 3×10','Tricep dips 3×8','Lateral raises 3×12','Press-ups 3×AMRAP'] },
@@ -2555,7 +2802,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
       {/* Weekly check-in */}
       <div style={sectionGap}>
         <Kicker style={{ marginBottom:10 }}>IV · Weekly Check-in Protocol</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
           Every Monday morning. <em>Seven minutes, no skipping.</em>
         </h3>
         <ol style={{ counterReset:'step', listStyle:'none', padding:0, margin:0, borderTop:`2px solid ${T.ink}` }}>
@@ -2578,10 +2825,10 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
       {/* Troubleshooting */}
       <div style={sectionGap}>
         <Kicker style={{ marginBottom:10 }}>V · Troubleshooting</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
           When the plan <em>stalls</em>.
         </h3>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
           {[
             { p:'Weight hasn&apos;t moved in 2 weeks',                d:`Check calories actually consumed (use a fresh 3-day log). Likely intake has crept up ${100}-${200} kcal/day. Tighten the count, do not cut further.` },
             { p:'Lost control on a single day — ate 3,000+ kcal', d:'It is one day. One day cannot undo a week of deficit. Resume normal eating tomorrow. Do not try to compensate by under-eating.' },
@@ -2652,9 +2899,9 @@ function Compose({ open, onClose, onSubmit }: {
   );
 
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(26,24,21,0.6)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:24 }}
+    <div style={{ position:'fixed', inset:0, background:'rgba(26,24,21,0.56)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:16 }}
       onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
-      <div style={{ background:T.paper, maxWidth:480, width:'100%', padding:'40px 40px 48px', maxHeight:'90vh', overflowY:'auto' }}>
+      <div style={{ background:T.paper, maxWidth:520, width:'100%', padding:'32px clamp(20px, 4vw, 40px) 40px', maxHeight:'90vh', overflowY:'auto', border:`1px solid ${T.line}`, boxShadow:CARD_SHADOW }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:28 }}>
           <div>
             <Kicker style={{ marginBottom:8 }}>Compose new reading</Kicker>
@@ -2784,7 +3031,6 @@ export default function OperatorDashboardClient() {
   if (!latest) return <div style={{ background:T.paper, minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted }}>No readings yet.</p></div>;
 
   const slopePerWeek = reg ? reg.slope*7 : 0;
-  const startKg = sorted[0].weight;
   const remaining = latest.weight - goal;
   const reqRate6m = remaining/26;
   const reqRate1y = remaining/52;
@@ -2796,13 +3042,6 @@ export default function OperatorDashboardClient() {
     { label:'6 months', kg:projAt(180), delta:projAt(180)-latest.weight },
     { label:'1 year',   kg:projAt(365), delta:projAt(365)-latest.weight },
   ] : [];
-
-  const [wsTxt,wsCol] = weightStatus(latest.weight, goal);
-  const [bsTxt,bsCol] = bmiStatus(latest.bmi);
-  const [fsTxt,fsCol] = fatStatus(latest.bodyFat);
-  const [waTxt,waCol] = waterStatus(latest.water);
-  const [msTxt,msCol] = muscleStatus(latest.muscleMass);
-  const [bonTxt,bonCol] = boneStatus(latest.boneMass);
 
   const TABS = ['Overview','Health','Projections','Plan','Charts','Ledger'];
 
@@ -2818,24 +3057,25 @@ export default function OperatorDashboardClient() {
           <Kicker color={T.ink}>{fmtDate(latest.date, { long:true })}</Kicker>
         </div>
 
-        <h1 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(48px,7vw,88px)', letterSpacing:'-0.025em', lineHeight:0.96, color:T.ink, margin:'0 0 24px', maxWidth:'16ch' }}>
+        <h1 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.025em', lineHeight:0.96, color:T.ink, margin:'0 0 24px', maxWidth:'16ch' }}>
           Weight, composition &amp; the <em>line headed home</em>.
         </h1>
 
-        <div style={{ display:'grid', gridTemplateColumns:'2.2fr 1fr', gap:60, alignItems:'start', marginBottom:32 }}>
-          <p style={{ fontFamily:T.sans, fontSize:18, fontWeight:300, lineHeight:1.6, color:T.body, margin:0, maxWidth:'52ch' }}>
-            {sorted.length === 7 ? 'Seventh' : `${sorted.length}th`} recorded weigh-in since November. A private operator log charting the slow march of the body, the slope of the trend, and what the regression projects forward against the{' '}
-            <em style={{ fontFamily:T.display, color:T.gold }}>{goal.toFixed(1)} kg</em> goal.
-          </p>
-          <div style={{ borderLeft:`0.5px solid ${T.line}`, paddingLeft:24 }}>
-            <Kicker style={{ marginBottom:6 }}>By the Numbers</Kicker>
-            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.body, lineHeight:1.8 }}>
-              {sorted.length} readings · {reg ? Math.round(reg.r2*100) : 0}% R² · slope{' '}
-              <span style={{ color: slopePerWeek>=0 ? T.rose : T.green }}>{slopePerWeek>=0?'+':''}{slopePerWeek.toFixed(2)} kg/wk</span>
-              {syncing && <span style={{ color:T.muted }}> · syncing…</span>}
-            </div>
-          </div>
-        </div>
+        <p style={{ fontFamily:T.sans, fontSize:18, fontWeight:300, lineHeight:1.7, color:T.body, margin:'0 0 24px', maxWidth:'58ch' }}>
+          {sorted.length === 7 ? 'Seventh' : `${sorted.length}th`} recorded weigh-in since November. A private operator log charting the slow march of the body, the slope of the trend, and what the regression projects forward against the{' '}
+          <em style={{ fontFamily:T.display, color:T.gold }}>{goal.toFixed(1)} kg</em> goal.
+        </p>
+
+        <CommandDeck
+          state={state}
+          latest={latest}
+          goal={goal}
+          reg={reg}
+          cloudOk={cloudOk}
+          syncing={syncing}
+          setCompose={setCompose}
+          setTab={setTab}
+        />
 
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0', borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}`, gap:24, flexWrap:'wrap', marginBottom:6 }}>
           <div style={{ display:'flex', gap:32, flexWrap:'wrap', alignItems:'baseline' }}>
@@ -2851,26 +3091,32 @@ export default function OperatorDashboardClient() {
         </div>
 
         {/* ── TABS ─────────────────────────────────── */}
-        <nav style={{ display:'flex', gap:48, padding:'16px 0 16px', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:56 }}>
-          {TABS.map(label => {
-            const active = tab===label;
-            return (
-              <button key={label} onClick={()=>setTab(label)} style={{
-                background:'transparent', border:0, cursor:'pointer', padding:'4px 0',
-                fontFamily: active ? T.display : T.sans,
-                fontStyle: active ? 'italic' : 'normal',
-                fontSize: active ? 16 : 10, fontWeight: active ? 400 : 500,
-                letterSpacing: active ? '-0.01em' : '0.24em',
-                textTransform: active ? 'none' : 'uppercase',
-                color: active ? T.ink : T.muted,
-                borderBottom: active ? `1px solid ${T.ink}` : 'none',
-                marginBottom:-1, transition:'color 200ms',
-              }}>
-                {active ? label.toLowerCase() : label}
-              </button>
-            );
-          })}
-        </nav>
+        <ScrollRail style={{ marginBottom:56 }}>
+          <nav style={{ display:'flex', gap:12, padding:'16px 0', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, minWidth:'max-content' }}>
+            {TABS.map(label => {
+              const active = tab===label;
+              return (
+                <button key={label} onClick={()=>setTab(label)} style={{
+                  background: active ? T.ink : 'transparent',
+                  border:`1px solid ${active ? T.ink : T.line}`,
+                  cursor:'pointer',
+                  padding:'10px 16px',
+                  fontFamily: active ? T.display : T.sans,
+                  fontStyle: active ? 'italic' : 'normal',
+                  fontSize: active ? 16 : 10,
+                  fontWeight: active ? 400 : 600,
+                  letterSpacing: active ? '-0.01em' : '0.18em',
+                  textTransform: active ? 'none' : 'uppercase',
+                  color: active ? T.paper : T.muted,
+                  transition:'all 180ms ease',
+                  whiteSpace:'nowrap',
+                }}>
+                  {active ? label.toLowerCase() : label}
+                </button>
+              );
+            })}
+          </nav>
+        </ScrollRail>
 
         {/* Sticky context strip — always visible across every tab */}
         <StatusStrip state={state} latest={latest} goal={goal} setTab={setTab} />
@@ -2880,111 +3126,23 @@ export default function OperatorDashboardClient() {
           <div>
             <ThisWeek state={state} latest={latest} setCompose={setCompose} setTab={setTab} />
 
-            {/* The compact 6-cell stat strip */}
-            <TopStatStrip sorted={sorted} state={state} />
-
-            {/* Goal banner */}
             <GoalCard state={state} latest={latest} goal={goal} />
 
-            {/* Centrepiece phase-banded chart */}
-            <div style={{ marginBottom:18 }}>
+            <div style={{ marginBottom:28 }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:8 }}>
                 <div>
-                  <Kicker style={{ marginBottom:4 }}>Weight, phases and <em>evidence</em></Kicker>
+                  <Kicker style={{ marginBottom:4 }}>The useful chart</Kicker>
                   <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, margin:0 }}>
-                    raw readings · smoothed trend · phase bands · pinned events
+                    raw readings, smoothed trend, and the phase context that matters.
                   </p>
                 </div>
               </div>
               <PhaseChart sorted={sorted} goal={goal} range="all" />
             </div>
 
-            {/* This week's 7-day rhythm */}
-            <ThisWeekGrid sorted={sorted} state={state} />
-
-            {/* Hero reading + journey arc */}
             <HeroReading latest={latest} previous={previous} sorted={sorted} />
-            <JourneyStory sorted={sorted} state={state} />
-
-            {/* Phase log timeline */}
-            <PhaseLog sorted={sorted} />
-
-            {/* Command notes */}
-            <CommandNotes sorted={sorted} state={state} latest={latest} />
-
-
-            <Kicker style={{ marginBottom:10 }}>Section I · The Full Panel</Kicker>
-            <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>Six readings, <em>one body</em>.</h2>
-            <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 20px' }}>
-              filed {fmtDate(latest.date,{long:true})} — all metrics from the latest weigh-in.
-            </p>
-            <div style={{ display:'flex', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:64 }}>
-              <StatItem label="Weight"    value={latest.weight.toFixed(1)}     unit="kg" status={wsTxt}  statusColor={wsCol} />
-              <StatItem label="BMI"       value={latest.bmi.toFixed(1)}        unit=""   status={bsTxt}  statusColor={bsCol} />
-              <StatItem label="Body Fat"  value={latest.bodyFat.toFixed(1)}    unit="%"  status={fsTxt}  statusColor={fsCol} />
-              <StatItem label="Water"     value={latest.water.toFixed(1)}      unit="%"  status={waTxt}  statusColor={waCol} />
-              <StatItem label="Muscle"    value={latest.muscleMass.toFixed(1)} unit="%"  status={msTxt}  statusColor={msCol} />
-              <StatItem label="Bone"      value={latest.boneMass.toFixed(1)}   unit="%"  status={bonTxt} statusColor={bonCol} last />
-            </div>
-
-            <Kicker style={{ marginBottom:10 }}>Section II · The Goal</Kicker>
-            <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:40, alignItems:'baseline', marginBottom:16 }}>
-              <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:96, letterSpacing:'-0.025em', lineHeight:0.9, color:T.gold, margin:0 }}>
-                {goal.toFixed(0)}<span style={{ fontStyle:'italic', fontSize:42, opacity:0.6 }}>.0</span>
-                <span style={{ fontFamily:T.sans, fontSize:14, color:T.muted, letterSpacing:0, marginLeft:10 }}>kg</span>
-              </h2>
-              <div>
-                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.ink, marginBottom:8 }}>
-                  <em>{remaining.toFixed(1)} kilograms</em> still to lose.
-                </div>
-                <div style={{ fontFamily:T.sans, fontSize:13, color:T.body, lineHeight:1.6, maxWidth:'48ch' }}>
-                  Began at <strong style={{ color:T.ink }}>{startKg.toFixed(1)} kg</strong>; sitting at{' '}
-                  <strong style={{ color:T.rose }}>{latest.weight.toFixed(1)} kg</strong> today. Direction of travel currently away from goal — see <button onClick={()=>setTab('Projections')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.gold, padding:0, textDecoration:'underline' }}>Projections</button> for corrective rate required.
-                </div>
-              </div>
-            </div>
-
-            {/* Progress track */}
-            {(() => {
-              const range = Math.max(startKg, latest.weight) - goal;
-              const currentPct = (1-(latest.weight-goal)/range)*100;
-              const startPct   = (1-(startKg-goal)/range)*100;
-              return (
-                <div style={{ marginTop:16, marginBottom:8 }}>
-                  <div style={{ position:'relative', height:28, marginBottom:8 }}>
-                    <div style={{ position:'absolute', left:0, right:0, top:'50%', height:1, background:T.line, transform:'translateY(-50%)' }} />
-                    <div style={{ position:'absolute', top:'50%', height:3, transform:'translateY(-50%)', left:`${Math.min(currentPct,startPct)}%`, width:`${Math.abs(startPct-currentPct)}%`, background:T.rose, opacity:0.2 }} />
-                    <div style={{ position:'absolute', left:0, top:'25%', bottom:'25%', width:2, background:T.gold }} />
-                    <div style={{ position:'absolute', left:`${startPct}%`, top:'25%', bottom:'25%', width:1, background:T.muted }} />
-                    <div style={{ position:'absolute', left:`${currentPct}%`, top:0, bottom:0, width:2, background:T.rose }} />
-                    <div style={{ position:'absolute', left:`${currentPct}%`, top:-20, transform:'translateX(-50%)', fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.rose, whiteSpace:'nowrap' }}>
-                      {latest.weight.toFixed(1)} kg
-                    </div>
-                  </div>
-                  <div style={{ display:'flex', justifyContent:'space-between', borderTop:`0.5px solid ${T.line}`, paddingTop:8 }}>
-                    <Kicker color={T.gold}>← Goal {goal.toFixed(1)}</Kicker>
-                    <Kicker color={T.muted}>Start {startKg.toFixed(1)}</Kicker>
-                    <Kicker color={T.rose}>Today {latest.weight.toFixed(1)} →</Kicker>
-                  </div>
-                </div>
-              );
-            })()}
-
-            <div style={{ marginTop:64 }}>
-              <Kicker style={{ marginBottom:10 }}>Section III · Composition</Kicker>
-              <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>Where the body has <em>shifted</em>.</h2>
-              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:0 }}>a seven-month span — three slow-moving metrics, side by side.</p>
-              <CompositionChart sorted={sorted} />
-            </div>
-
-            <Milestones sorted={sorted} reg={reg} goal={goal} />
-            <Insights sorted={sorted} reg={reg} goal={goal} />
-
-            <div style={{ marginTop:56 }}>
-              <button onClick={()=>setCompose(true)} style={{ background:T.ink, color:T.paper, border:0, cursor:'pointer', padding:'16px 36px', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase' }}>
-                Compose new reading →
-              </button>
-            </div>
+            <ThisWeekGrid sorted={sorted} state={state} />
+            <DetailLaunchpad setCompose={setCompose} setTab={setTab} />
           </div>
         )}
 
@@ -2998,14 +3156,14 @@ export default function OperatorDashboardClient() {
         {tab==='Projections' && reg && (
           <div>
             <Kicker style={{ marginBottom:10 }}>Section IV · Projections</Kicker>
-            <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(36px,5vw,56px)', letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 32px', maxWidth:'18ch' }}>
+            <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 32px', maxWidth:'18ch' }}>
               At the current rate, here is where the line <em>leads</em>.
             </h2>
 
-            <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:36, alignItems:'baseline', padding:'28px 0', borderTop:`2px solid ${T.ink}`, borderBottom:`2px solid ${T.ink}`, marginBottom:48 }}>
-              <span style={{ fontFamily:T.display, fontWeight:400, fontSize:96, color: slopePerWeek>=0 ? T.rose : T.green, letterSpacing:'-0.03em', lineHeight:0.9 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:24, alignItems:'baseline', padding:'28px 0', borderTop:`2px solid ${T.ink}`, borderBottom:`2px solid ${T.ink}`, marginBottom:48 }}>
+              <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 32, color: slopePerWeek>=0 ? T.rose : T.green, letterSpacing:'-0.03em', lineHeight:0.9 }}>
                 {slopePerWeek>=0?'+':''}{slopePerWeek.toFixed(2)}
-                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:32, opacity:0.7 }}> kg/wk</span>
+                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize: 20, opacity:0.7 }}> kg/wk</span>
               </span>
               <div>
                 <Kicker color={slopePerWeek>=0?T.rose:T.green} style={{ marginBottom:8 }}>Current Trend Rate</Kicker>
@@ -3026,27 +3184,29 @@ export default function OperatorDashboardClient() {
                 </p>
               </div>
             )}
-            <div style={{ borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
-                <Kicker>Horizon</Kicker><Kicker style={{ textAlign:'right' }}>Projected weight</Kicker><Kicker style={{ textAlign:'right' }}>Δ from today</Kicker>
-              </div>
-              {projections.map((p,i) => (
-                <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'22px 0', borderBottom: i<projections.length-1 ? `0.5px solid ${T.softLine}` : 'none', alignItems:'baseline' }}>
-                  <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.ink }}>{p.label}</div>
-                  <div style={{ fontFamily:T.display, fontSize:30, color:T.ink, textAlign:'right', letterSpacing:'-0.01em' }}>
-                    {p.kg.toFixed(1)} <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
-                  </div>
-                  <div style={{ textAlign:'right' }}>
-                    <span style={{ fontFamily:T.sans, fontSize:11, fontWeight:500, padding:'4px 10px', background: p.delta>=0?T.roseSoft:T.greenSoft, color: p.delta>=0?T.rose:T.green, letterSpacing:'0.2em', textTransform:'uppercase' }}>
-                      {p.delta>=0?'↑':'↓'} {Math.abs(p.delta).toFixed(1)} kg
-                    </span>
-                  </div>
+            <ScrollRail minWidth={620}>
+              <div style={{ borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
+                  <Kicker>Horizon</Kicker><Kicker style={{ textAlign:'right' }}>Projected weight</Kicker><Kicker style={{ textAlign:'right' }}>Δ from today</Kicker>
                 </div>
-              ))}
-            </div>
+                {projections.map((p,i) => (
+                  <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'22px 0', borderBottom: i<projections.length-1 ? `0.5px solid ${T.softLine}` : 'none', alignItems:'baseline' }}>
+                    <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.ink }}>{p.label}</div>
+                    <div style={{ fontFamily:T.display, fontSize: 20, color:T.ink, textAlign:'right', letterSpacing:'-0.01em' }}>
+                      {p.kg.toFixed(1)} <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
+                    </div>
+                    <div style={{ textAlign:'right' }}>
+                      <span style={{ fontFamily:T.sans, fontSize:11, fontWeight:500, padding:'4px 10px', background: p.delta>=0?T.roseSoft:T.greenSoft, color: p.delta>=0?T.rose:T.green, letterSpacing:'0.2em', textTransform:'uppercase' }}>
+                        {p.delta>=0?'↑':'↓'} {Math.abs(p.delta).toFixed(1)} kg
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollRail>
 
             <Kicker style={{ marginTop:56, marginBottom:14 }}>Required Pace · To Close the Gap</Kicker>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:56 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:56 }}>
               {[
                 { label:'To hit goal in 6 months', value:-reqRate6m, unit:'kg / week', accent:T.gold },
                 { label:'To hit goal in 1 year',   value:-reqRate1y, unit:'kg / week', accent:T.gold },
@@ -3055,7 +3215,7 @@ export default function OperatorDashboardClient() {
                 <div key={i} style={{ padding:'26px 26px', borderRight: i<2?`0.5px solid ${T.line}`:'none' }}>
                   <Kicker style={{ marginBottom:12 }}>{m.label}</Kicker>
                   <div style={{ display:'flex', alignItems:'baseline', gap:6 }}>
-                    <span style={{ fontFamily:T.display, fontSize:40, color:m.accent, letterSpacing:'-0.02em', lineHeight:1 }}>
+                    <span style={{ fontFamily:T.display, fontSize: 24, color:m.accent, letterSpacing:'-0.02em', lineHeight:1 }}>
                       {(m.value>=0?'+':'')+m.value.toFixed(2)}
                     </span>
                   </div>
@@ -3065,7 +3225,7 @@ export default function OperatorDashboardClient() {
             </div>
 
             <Kicker style={{ marginBottom:10 }}>Section V · The Line</Kicker>
-            <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:32, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 6px' }}>Observed &amp; <em>projected</em>.</h3>
+            <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 6px' }}>Observed &amp; <em>projected</em>.</h3>
             <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'60ch', margin:0 }}>
               solid hairline for observed weigh-ins, dashed gold for the goal line, dashed blue extending the linear regression ninety days forward.
             </p>
@@ -3081,7 +3241,7 @@ export default function OperatorDashboardClient() {
         {tab==='Charts' && (
           <div>
             <Kicker style={{ marginBottom:10 }}>Section VI · The Visual Ledger</Kicker>
-            <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(36px,5vw,56px)', letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 36px' }}>All charts, <em>in order</em>.</h2>
+            <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 36px' }}>All charts, <em>in order</em>.</h2>
             <Kicker style={{ marginBottom:8 }}>Weight · {sorted.length} readings · with 90-day projection</Kicker>
             <ThickRule />
             <TrendChart sorted={sorted} reg={reg} goal={goal} />
@@ -3103,34 +3263,36 @@ export default function OperatorDashboardClient() {
             <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', flexWrap:'wrap', gap:18, marginBottom:28 }}>
               <div>
                 <Kicker style={{ marginBottom:10 }}>Section VII · The Ledger</Kicker>
-                <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(36px,5vw,56px)', letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:0 }}>Every <em>weigh-in</em>, in order.</h2>
+                <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:0 }}>Every <em>weigh-in</em>, in order.</h2>
               </div>
               <button onClick={()=>setCompose(true)} style={{ background:T.ink, color:T.paper, border:0, cursor:'pointer', padding:'14px 30px', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase' }}>
                 Compose new →
               </button>
             </div>
             <ThickRule />
-            <div style={{ display:'grid', gridTemplateColumns:'1.6fr repeat(6,1fr) 0.5fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
-              {['Date','Weight','BMI','Body Fat','Water','Muscle','Bone',''].map((h,i) => (
-                <Kicker key={i} style={{ textAlign: i>0?'right':'left' }}>{h}</Kicker>
-              ))}
-            </div>
-            {[...sorted].reverse().map((r,i) => (
-              <div key={r.id} style={{ display:'grid', gridTemplateColumns:'1.6fr repeat(6,1fr) 0.5fr', padding:'18px 0', borderBottom:`0.5px solid ${T.softLine}`, alignItems:'baseline' }}>
-                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.ink }}>{fmtDate(r.date)}</div>
-                {[
-                  r.weight.toFixed(1)+'kg', r.bmi.toFixed(1), r.bodyFat.toFixed(1)+'%',
-                  r.water.toFixed(1)+'%', r.muscleMass.toFixed(1)+'%', r.boneMass.toFixed(2)+'%',
-                ].map((v,j)=>(
-                  <div key={j} style={{ fontFamily:T.sans, fontSize:14, color:T.body, textAlign:'right' }}>{v}</div>
+            <ScrollRail minWidth={920}>
+              <div style={{ display:'grid', gridTemplateColumns:'1.6fr repeat(6,1fr) 0.5fr', padding:'10px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
+                {['Date','Weight','BMI','Body Fat','Water','Muscle','Bone',''].map((h,i) => (
+                  <Kicker key={i} style={{ textAlign: i>0?'right':'left' }}>{h}</Kicker>
                 ))}
-                <div style={{ textAlign:'right' }}>
-                  {!r.id.startsWith('s') && (
-                    <button onClick={()=>handleDelete(r.id)} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:9, letterSpacing:'0.16em', color:T.muted, textTransform:'uppercase' }}>del</button>
-                  )}
-                </div>
               </div>
-            ))}
+              {[...sorted].reverse().map((r) => (
+                <div key={r.id} style={{ display:'grid', gridTemplateColumns:'1.6fr repeat(6,1fr) 0.5fr', padding:'18px 0', borderBottom:`0.5px solid ${T.softLine}`, alignItems:'baseline' }}>
+                  <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.ink }}>{fmtDate(r.date)}</div>
+                  {[
+                    r.weight.toFixed(1)+'kg', r.bmi.toFixed(1), r.bodyFat.toFixed(1)+'%',
+                    r.water.toFixed(1)+'%', r.muscleMass.toFixed(1)+'%', r.boneMass.toFixed(2)+'%',
+                  ].map((v,j)=>(
+                    <div key={j} style={{ fontFamily:T.sans, fontSize:14, color:T.body, textAlign:'right' }}>{v}</div>
+                  ))}
+                  <div style={{ textAlign:'right' }}>
+                    {!r.id.startsWith('s') && (
+                      <button onClick={()=>handleDelete(r.id)} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:9, letterSpacing:'0.16em', color:T.muted, textTransform:'uppercase' }}>del</button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </ScrollRail>
 
             <ImportNote setTab={setTab} />
           </div>

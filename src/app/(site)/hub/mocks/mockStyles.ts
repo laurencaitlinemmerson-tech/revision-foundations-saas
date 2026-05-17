@@ -3,11 +3,11 @@ export const MOCK_PAGE_CSS = `
 .mk *, .mk *::before, .mk *::after { box-sizing: border-box; box-shadow: none !important; }
 
 .mk {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-weight: 300;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 400;
   background: #FAFAF8;
   color: #2C2A27;
-  line-height: 1.6;
+  line-height: 1.72;
   min-height: 100vh;
 }
 
@@ -51,11 +51,11 @@ export const MOCK_PAGE_CSS = `
 }
 
 .mk-standfirst {
-  font-size: 16px;
-  font-weight: 300;
+  font-size: 18px;
+  font-weight: 400;
   color: #5A5750;
-  line-height: 1.72;
-  max-width: 640px;
+  line-height: 1.78;
+  max-width: 700px;
   margin-bottom: 0;
 }
 
@@ -287,10 +287,10 @@ export const MOCK_PAGE_CSS = `
 }
 
 .mk-guidance-list li {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.6;
+  line-height: 1.68;
   padding-left: 16px;
   position: relative;
 }
@@ -336,10 +336,10 @@ export const MOCK_PAGE_CSS = `
 }
 
 .mk-scenario-complaint {
-  font-size: 14px;
+  font-size: 15px;
   color: #2C2A27;
-  font-weight: 300;
-  line-height: 1.65;
+  font-weight: 400;
+  line-height: 1.72;
   margin-bottom: 20px;
   padding-bottom: 20px;
   border-bottom: 0.5px solid rgba(0,0,0,0.08);
@@ -391,10 +391,10 @@ export const MOCK_PAGE_CSS = `
   gap: 5px;
 }
 .mk-scenario-signs li {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.55;
+  line-height: 1.68;
   padding-left: 14px;
   position: relative;
 }
@@ -416,10 +416,10 @@ export const MOCK_PAGE_CSS = `
 }
 
 .mk-scenario-family {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #5A5750;
-  line-height: 1.65;
+  line-height: 1.72;
   padding-top: 16px;
   border-top: 0.5px solid rgba(0,0,0,0.08);
 }
@@ -465,10 +465,10 @@ export const MOCK_PAGE_CSS = `
 
 .mk-q-title {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 400;
   color: #1A1815;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .mk-q-word-guide {
@@ -477,13 +477,52 @@ export const MOCK_PAGE_CSS = `
   font-weight: 300;
 }
 
+.mk-q-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.mk-mark-badge,
+.mk-word-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mk-mark-badge {
+  background: #8B5A3C;
+  color: #FFF8F2;
+}
+
+.mk-word-badge {
+  background: #3A2E4F;
+  color: #F6E6F0;
+}
+
+.mk-q-focus {
+  font-size: 13px;
+  color: #8A7A6A;
+  font-style: italic;
+  line-height: 1.55;
+}
+
 .mk-q-prompt {
-  font-size: 14px;
-  font-weight: 300;
+  font-size: 16px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.72;
+  line-height: 1.78;
   margin-bottom: 24px;
-  max-width: 720px;
+  max-width: 760px;
 }
 
 /* Expandable guidance panels */
@@ -541,10 +580,10 @@ export const MOCK_PAGE_CSS = `
 }
 
 .mk-expand-list li {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.55;
+  line-height: 1.68;
   padding-left: 14px;
   position: relative;
 }
@@ -594,46 +633,82 @@ export const MOCK_PAGE_CSS = `
   border-color: rgba(24,95,165,0.35);
 }
 
-/* Answer structure reveal */
-.mk-reveal-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+/* Framework + exemplar blocks */
+.mk-framework-card {
+  background: rgba(216, 200, 228, 0.2);
+  border: 0.5px solid rgba(58,46,79,0.12);
+  padding: 18px 22px;
+  margin: 18px 0 16px;
+}
+
+.mk-framework-label,
+.mk-exemplar-label,
+.mk-topband-label {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: 10px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #5A5750;
-  background: none;
-  border: 0.5px solid rgba(0,0,0,0.1);
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-top: 12px;
-  margin-bottom: 20px;
-}
-.mk-reveal-btn:hover { background: #F5F3F0; }
-
-.mk-reveal-body {
-  padding: 16px;
-  background: #E4F2EC;
-  border: 0.5px solid rgba(28,122,103,0.12);
-  margin-top: 10px;
-  margin-bottom: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-.mk-reveal-body ol {
+.mk-framework-label {
+  color: #6B4F7C;
+}
+
+.mk-framework-list {
   margin: 0;
-  padding: 0 0 0 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  padding-left: 22px;
 }
-.mk-reveal-body li {
-  font-size: 13px;
-  font-weight: 300;
-  color: #2C2A27;
-  line-height: 1.55;
+
+.mk-framework-list li {
+  font-size: 15px;
+  line-height: 1.68;
+  margin-bottom: 6px;
+}
+
+.mk-exemplar-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(250,247,242,0.98) 100%);
+  border: 0.5px solid rgba(139,90,60,0.18);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+.mk-exemplar-label {
+  color: #8B5A3C;
+}
+
+.mk-exemplar-paragraph {
+  font-size: 16px;
+  line-height: 1.82;
+  color: #2D2824;
+  margin: 0 0 12px;
+}
+
+.mk-exemplar-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.mk-topband-box {
+  background: #F5EDE0;
+  border-left: 3px solid #8B5A3C;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.mk-topband-label {
+  color: #8B5A3C;
+}
+
+.mk-topband-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.mk-topband-list li {
+  font-size: 14px;
+  line-height: 1.65;
+  margin-bottom: 4px;
 }
 
 /* Answer input area */
@@ -651,14 +726,14 @@ export const MOCK_PAGE_CSS = `
 
 .mk-answer-textarea {
   width: 100%;
-  min-height: 160px;
-  padding: 16px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px;
-  font-weight: 300;
+  min-height: 200px;
+  padding: 18px 20px;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 16px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.72;
-  background: #fff;
+  line-height: 1.82;
+  background: #FFFCF8;
   border: 0.5px solid rgba(0,0,0,0.12);
   border-radius: 0;
   outline: none;
@@ -715,10 +790,10 @@ export const MOCK_PAGE_CSS = `
 .mk-sentence-item:last-child { border-bottom: none; }
 
 .mk-sentence-text {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.6;
+  line-height: 1.68;
   flex: 1;
 }
 
@@ -770,10 +845,10 @@ export const MOCK_PAGE_CSS = `
 }
 
 .mk-post-list li {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.6;
+  line-height: 1.68;
   padding-left: 16px;
   position: relative;
 }
@@ -924,10 +999,10 @@ export const MOCK_PAGE_CSS = `
 }
 .mk-approach-label::before { content: '🧠'; font-size: 12px; }
 .mk-approach p {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.6;
+  line-height: 1.72;
   margin: 0 0 10px;
 }
 .mk-approach p:last-child { margin-bottom: 0; }
@@ -973,10 +1048,10 @@ export const MOCK_PAGE_CSS = `
   margin-bottom: 4px;
 }
 .mk-examiner p {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.6;
+  line-height: 1.72;
   margin: 0 0 14px;
 }
 .mk-examiner p:last-child { margin-bottom: 0; }
@@ -1027,10 +1102,10 @@ export const MOCK_PAGE_CSS = `
 }
 .mk-lowmark-label::before { content: '🚫'; font-size: 12px; }
 .mk-lowmark p {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #5A5750;
-  line-height: 1.6;
+  line-height: 1.7;
   margin: 0;
   font-style: italic;
 }
@@ -1065,10 +1140,10 @@ export const MOCK_PAGE_CSS = `
   margin-bottom: 3px;
 }
 .mk-deterioration p {
-  font-size: 13px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   color: #2C2A27;
-  line-height: 1.6;
+  line-height: 1.7;
   margin: 0;
 }
 
@@ -1164,7 +1239,7 @@ export const MOCK_INTERACTIVE_CSS = `
 .mk-flow { padding: 20px; background: #E4F2EC; border: 0.5px solid rgba(28,122,103,0.12); margin-bottom: 16px; }
 .mk-flow-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #1C7A67; margin-bottom: 16px; }
 .mk-flow-chain { display: flex; flex-direction: column; align-items: center; gap: 0; }
-.mk-flow-step { width: 100%; max-width: 480px; padding: 10px 16px; background: white; border: 0.5px solid rgba(28,122,103,0.15); border-left: 3px solid #1C7A67; font-size: 13px; font-weight: 300; color: #2C2A27; line-height: 1.5; }
+.mk-flow-step { width: 100%; max-width: 480px; padding: 10px 16px; background: white; border: 0.5px solid rgba(28,122,103,0.15); border-left: 3px solid #1C7A67; font-size: 15px; font-weight: 400; color: #2C2A27; line-height: 1.65; }
 .mk-flow-arrow { color: #1C7A67; font-size: 16px; line-height: 1; padding: 4px 0; user-select: none; }
 
 /* Self-mark checklist */
@@ -1203,12 +1278,12 @@ export const MOCK_INTERACTIVE_CSS = `
 /* Part B transition */
 .mk-transition { padding: 32px; background: linear-gradient(135deg, rgba(234,241,250,0.4) 0%, rgba(250,250,248,0.6) 100%); border: 0.5px solid rgba(24,95,165,0.12); margin-bottom: 24px; text-align: center; }
 .mk-transition-label { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #185FA5; margin-bottom: 12px; }
-.mk-transition-text { font-size: 14px; font-weight: 300; color: #2C2A27; line-height: 1.7; max-width: 560px; margin: 0 auto; font-style: italic; }
+.mk-transition-text { font-size: 15px; font-weight: 400; color: #2C2A27; line-height: 1.75; max-width: 560px; margin: 0 auto; font-style: italic; }
 
 /* Parent perspective callout */
 .mk-perspective { padding: 20px 24px; background: #FAEEDA; border: 0.5px solid rgba(99,56,6,0.12); border-left: 3px solid #633806; margin-bottom: 16px; font-style: italic; }
 .mk-perspective-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #633806; margin-bottom: 6px; font-style: normal; }
-.mk-perspective p { font-size: 13px; font-weight: 300; color: #2C2A27; line-height: 1.65; margin: 0; }
+.mk-perspective p { font-size: 15px; font-weight: 400; color: #2C2A27; line-height: 1.72; margin: 0; }
 
 /* Timer */
 .mk-timer { font-size: 11px; color: #bbb; font-weight: 300; font-style: italic; }
@@ -1226,7 +1301,7 @@ export const MOCK_INTERACTIVE_CSS = `
 .mk-summary-stat-label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #999; }
 
 /* Scenario read note */
-.mk-read-note { font-size: 13px; font-weight: 300; color: #5A5750; line-height: 1.65; font-style: italic; margin-top: 20px; padding-top: 16px; border-top: 0.5px solid rgba(0,0,0,0.06); }
+.mk-read-note { font-size: 15px; font-weight: 400; color: #5A5750; line-height: 1.72; font-style: italic; margin-top: 20px; padding-top: 16px; border-top: 0.5px solid rgba(0,0,0,0.06); }
 
 /* Mark my answer button */
 .mk-mark-btn { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #5A5750; background: none; border: 0.5px solid rgba(0,0,0,0.1); padding: 8px 14px; cursor: pointer; font-family: 'Inter', -apple-system, sans-serif; transition: background 0.15s; margin-top: 16px; }

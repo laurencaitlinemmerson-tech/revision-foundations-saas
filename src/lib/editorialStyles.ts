@@ -19,11 +19,11 @@ export const EDITORIAL_CSS = `
   --ed-gold-soft: #FAEEDA;
   --ed-rose: #A14A57;
   --ed-rose-soft: #F9E8EB;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-weight: 300;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 400;
   background: var(--ed-paper);
   color: var(--ed-ink);
-  line-height: 1.6;
+  line-height: 1.72;
   min-height: 100vh;
 }
 
@@ -91,10 +91,10 @@ export const EDITORIAL_CSS = `
 }
 
 .ed-standfirst {
-  font-size: 18px;
-  font-weight: 300;
+  font-size: 19px;
+  font-weight: 400;
   color: var(--ed-body);
-  line-height: 1.72;
+  line-height: 1.8;
   max-width: 720px;
   margin-bottom: 0;
 }
@@ -166,10 +166,10 @@ export const EDITORIAL_CSS = `
 .ed-grid-4-cell:last-child { border-right: none; }
 .ed-grid-4-cell p {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ed-body);
-  line-height: 1.68;
-  font-weight: 300;
+  line-height: 1.74;
+  font-weight: 400;
 }
 
 .ed-grid-4-title {
@@ -206,10 +206,10 @@ export const EDITORIAL_CSS = `
 }
 
 .ed-cell p {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ed-body);
-  line-height: 1.68;
-  font-weight: 300;
+  line-height: 1.74;
+  font-weight: 400;
   margin: 0;
 }
 
