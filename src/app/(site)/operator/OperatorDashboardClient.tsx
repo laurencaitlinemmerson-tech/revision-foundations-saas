@@ -4732,15 +4732,17 @@ export default function OperatorDashboardClient() {
   const scrollToDashboardSection = useCallback((target: string) => {
     if (typeof document === 'undefined') return;
 
-    const sectionId = target === 'Health'
-      ? 'operator-health-stream'
-      : target === 'Plan'
-      ? 'operator-plan'
-      : target === 'Projections'
-      ? 'operator-projections'
-      : target === 'Ledger'
-      ? 'operator-projections'
-      : 'operator-overview';
+    const sectionMap: Record<string, string> = {
+      Story: 'operator-story',
+      Trends: 'operator-health-stream',
+      Health: 'operator-health-stream',
+      Today: 'operator-today',
+      Action: 'operator-action',
+      Plan: 'operator-plan',
+      Projections: 'operator-projections',
+      Ledger: 'operator-projections',
+    };
+    const sectionId = sectionMap[target] ?? 'operator-overview';
 
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
@@ -4763,6 +4765,28 @@ export default function OperatorDashboardClient() {
   const peakWeight = Math.max(...dashboardSource.map((row) => row.weight));
   const progress = peakWeight <= goal ? 100 : Math.max(0, Math.min(100, ((peakWeight - latest.weight) / (peakWeight - goal)) * 100));
   const syncSummary = cloudOk === null ? 'Local-first mode' : cloudOk ? (syncing ? 'Cloud syncing now' : 'Cloud sync active') : 'Local backup only';
+  const sectionGuide = [
+    {
+      id: 'operator-story',
+      label: 'Story',
+      note: 'See the full weight line, phase changes and visual evidence first.',
+    },
+    {
+      id: 'operator-health-stream',
+      label: 'Trends',
+      note: 'Check what is moving across nutrition, sleep and recovery.',
+    },
+    {
+      id: 'operator-today',
+      label: 'Today',
+      note: 'Read the current body state, target gap and logging quality.',
+    },
+    {
+      id: 'operator-action',
+      label: 'Action',
+      note: 'Finish with the one decision or habit that matters next.',
+    },
+  ] as const;
 
   return (
     <div className="fitness-reference-shell">
@@ -4833,103 +4857,128 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
 
-        {/* ───────────────────────── STORY ─────────────────────────── */}
-        <EditorialDivider eyebrow="Story" note="The long line — every reading, every phase." />
-
-        {/* Long-form weight chart — promoted to a full-width editorial moment. */}
-        <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
-          <FitnessLineChart
-            title={<>Weight, phases and <em>evidence</em></>}
-            subtitle="Raw readings · smoothed trend · phase bands · pinned events"
-            points={buildWeightSeries(dashboardSource)}
-            color="oklch(0.70 0.012 70 / 0.48)"
-            minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
-            maxY={Math.ceil(Math.max(...dashboardSource.map((row) => row.weight)) + 2)}
-            annotations={[
-              {
-                date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
-                value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
-                title: 'Leanest point',
-              },
-              {
-                date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
-                value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
-                title: 'Peak weight',
-              },
-              { date: latest.date, value: latest.weight, title: 'Today' },
-            ]}
-            secondaryPoints={rollingAverage}
-            secondaryColor="oklch(0.70 0.12 76)"
-            secondaryLabel="45-day trend"
-            phases={phaseMarkers}
-            targetWeight={goal}
-            showRangeToggle
-          />
+        <section className="fit-anchor-section fit-reading-guide" aria-label="Dashboard guide">
+          <div className="fit-reading-guide-head">
+            <span className="fit-reading-guide-kicker">Read order</span>
+            <p className="fit-reading-guide-copy">
+              Keep the visual story, but make the scan path obvious: signals first, then the long line, then trends, today and action.
+            </p>
+          </div>
+          <div className="fit-reading-guide-grid">
+            {sectionGuide.map((section, index) => (
+              <button
+                key={section.id}
+                type="button"
+                className="fit-reading-stop"
+                onClick={() => scrollToDashboardSection(section.label)}
+              >
+                <span className="fit-reading-step">{String(index + 1).padStart(2, '0')}</span>
+                <span className="fit-reading-label">{section.label}</span>
+                <span className="fit-reading-note">{section.note}</span>
+              </button>
+            ))}
+          </div>
         </section>
 
-        <section className="fit-grid">
-          <div className="fit-main">
-            <div className="fit-panel">
-              <div className="fit-panel-head">
-                <div>
-                  <h3>Phase <em>log</em></h3>
-                  <div className="meta">The story rendered in the same cadence as the reference dashboard</div>
-                </div>
-              </div>
-              <div className="phase-log">
-                {phaseRows.map((row) => (
-                  <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
-                    <div className={`swatch ${row.swatch}`} />
-                    <div className="name">{row.name} <em>{row.emphasis}</em><span className="when">{row.when}</span></div>
-                    <div className="duration">{row.duration}</div>
-                    <div className="start">{row.start}</div>
-                    <div className="end">{row.end}</div>
-                    <div className={`delta ${row.deltaClass}`}>{row.delta}</div>
+        <section className="fit-anchor-section" id="operator-story">
+          {/* ───────────────────────── STORY ─────────────────────────── */}
+          <EditorialDivider eyebrow="Story" note="The long line — every reading, every phase." />
+
+          {/* Long-form weight chart — promoted to a full-width editorial moment. */}
+          <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
+            <FitnessLineChart
+              title={<>Weight, phases and <em>evidence</em></>}
+              subtitle="Raw readings · smoothed trend · phase bands · pinned events"
+              points={buildWeightSeries(dashboardSource)}
+              color="oklch(0.70 0.012 70 / 0.48)"
+              minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
+              maxY={Math.ceil(Math.max(...dashboardSource.map((row) => row.weight)) + 2)}
+              annotations={[
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Leanest point',
+                },
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Peak weight',
+                },
+                { date: latest.date, value: latest.weight, title: 'Today' },
+              ]}
+              secondaryPoints={rollingAverage}
+              secondaryColor="oklch(0.70 0.12 76)"
+              secondaryLabel="45-day trend"
+              phases={phaseMarkers}
+              targetWeight={goal}
+              showRangeToggle
+            />
+          </section>
+
+          <section className="fit-grid">
+            <div className="fit-main">
+              <div className="fit-panel">
+                <div className="fit-panel-head">
+                  <div>
+                    <h3>Phase <em>log</em></h3>
+                    <div className="meta">The story rendered in the same cadence as the reference dashboard</div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="fit-panel fit-photo-panel">
-              <div className="fit-panel-head">
-                <div>
-                  <h3>Visual <em>evidence</em></h3>
-                  <div className="meta">Date-stamped progress slots wired to this same timeline</div>
+                </div>
+                <div className="phase-log">
+                  {phaseRows.map((row) => (
+                    <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
+                      <div className={`swatch ${row.swatch}`} />
+                      <div className="name">{row.name} <em>{row.emphasis}</em><span className="when">{row.when}</span></div>
+                      <div className="duration">{row.duration}</div>
+                      <div className="start">{row.start}</div>
+                      <div className="end">{row.end}</div>
+                      <div className={`delta ${row.deltaClass}`}>{row.delta}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <PhotoTimeline items={photoMilestones} />
-            </div>
-          </div>
 
-          <aside className="fit-side">
-            <div className="goal-card">
-              <div className="head"><span>Current goal</span><span className="pill brass">{targetDelta <= 0 ? 'On target' : 'Active cut'}</span></div>
-              <div className="target">{goal.toFixed(1)}kg <em>working line</em></div>
-              <div className="by">
-                {projectedGoal
-                  ? `Projected from current slope - ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                  : 'Projection appears once the trend line starts moving down'}
-              </div>
-              <div className="bar">
-                <span className="fill" style={{ width: `${progress}%` }} />
-                <span className="marker" style={{ left: '100%' }} />
-              </div>
-              <div className="stats">
-                <div><div className="lbl">To goal</div><div className="v">{targetDelta.toFixed(1)}kg</div></div>
-                <div><div className="lbl">7-day move</div><div className="v">{formatWeightDelta(sevenDayDelta)}</div></div>
-                <div><div className="lbl">Intake plan</div><div className="v">{nutrition.intake.toLocaleString()} kcal</div></div>
-                <div><div className="lbl">BMR estimate</div><div className="v">{nutrition.bmr.toLocaleString()} kcal</div></div>
+              <div className="fit-panel fit-photo-panel">
+                <div className="fit-panel-head">
+                  <div>
+                    <h3>Visual <em>evidence</em></h3>
+                    <div className="meta">Date-stamped progress slots wired to this same timeline</div>
+                  </div>
+                </div>
+                <PhotoTimeline items={photoMilestones} />
               </div>
             </div>
-          </aside>
+
+            <aside className="fit-side">
+              <div className="goal-card">
+                <div className="head"><span>Current goal</span><span className="pill brass">{targetDelta <= 0 ? 'On target' : 'Active cut'}</span></div>
+                <div className="target">{goal.toFixed(1)}kg <em>working line</em></div>
+                <div className="by">
+                  {projectedGoal
+                    ? `Projected from current slope - ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                    : 'Projection appears once the trend line starts moving down'}
+                </div>
+                <div className="bar">
+                  <span className="fill" style={{ width: `${progress}%` }} />
+                  <span className="marker" style={{ left: '100%' }} />
+                </div>
+                <div className="stats">
+                  <div><div className="lbl">To goal</div><div className="v">{targetDelta.toFixed(1)}kg</div></div>
+                  <div><div className="lbl">7-day move</div><div className="v">{formatWeightDelta(sevenDayDelta)}</div></div>
+                  <div><div className="lbl">Intake plan</div><div className="v">{nutrition.intake.toLocaleString()} kcal</div></div>
+                  <div><div className="lbl">BMR estimate</div><div className="v">{nutrition.bmr.toLocaleString()} kcal</div></div>
+                </div>
+              </div>
+            </aside>
+          </section>
         </section>
 
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
 
-        {/* ───────────────────────── TRENDS ────────────────────────── */}
-        <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
-        <div id="operator-health-stream">
+        <section className="fit-anchor-section" id="operator-health-stream">
+          {/* ───────────────────────── TRENDS ────────────────────────── */}
+          <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
           <AnalyticsSection
             latest={latest}
             sorted={dashboardSource}
@@ -4944,101 +4993,108 @@ export default function OperatorDashboardClient() {
           />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
-        </div>
+        </section>
 
-        {/* ───────────────────────── TODAY ─────────────────────────── */}
-        <EditorialDivider eyebrow="Today" note="Where the body is right now." />
+        <section className="fit-anchor-section" id="operator-today">
+          {/* ───────────────────────── TODAY ─────────────────────────── */}
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." />
 
-        <section className="fit-today">
-          <div className="fit-today-head">
-            <span className="fit-today-label">Today at a glance</span>
-            <span className="muted">{formatReferenceDate(latest.date)}</span>
-          </div>
+          <section className="fit-today">
+            <div className="fit-today-head">
+              <div>
+                <span className="fit-today-label">Today at a glance</span>
+                <div className="fit-today-copy">Fast read: weight, target gap, body state, logging consistency and sync health.</div>
+              </div>
+              <span className="muted">{formatReferenceDate(latest.date)}</span>
+            </div>
 
-          <div className="fit-glance-row">
-            <div className="glance-card glance-cal-balance">
-              <div className="gcb-row">
-                <div className="gcb-col">
-                  <div className="gcb-num">{latest.weight.toFixed(1)}</div>
-                  <div className="gcb-lbl">kg logged</div>
-                  <div className="gcb-sub muted">BMI {latest.bmi.toFixed(1)} · body fat {latest.bodyFat.toFixed(1)}%</div>
-                </div>
-                <div className="gcb-divider" />
-                <div className="gcb-col">
-                  <div className={`gcb-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{Math.abs(targetDelta).toFixed(1)}</div>
-                  <div className="gcb-lbl">{targetDelta <= 0 ? 'kg under goal' : 'kg to target'}</div>
-                  <div className="gcb-sub muted">Goal line {goal.toFixed(1)}kg</div>
-                </div>
-                <div className="gcb-divider" />
-                <div className="gcb-col">
-                  <div className={`gcb-num ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>{formatWeightDelta(latest.weight - monthAgo.weight).replace('kg', '')}</div>
-                  <div className="gcb-lbl">30-day move</div>
-                  <div className={`gcb-sub ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>
-                    {latest.weight - monthAgo.weight <= 0 ? 'Trend is quieter' : 'Drift needs tightening'}
+            <div className="fit-glance-row">
+              <div className="glance-card glance-cal-balance">
+                <div className="gcb-row">
+                  <div className="gcb-col">
+                    <div className="gcb-num">{latest.weight.toFixed(1)}</div>
+                    <div className="gcb-lbl">kg logged</div>
+                    <div className="gcb-sub muted">BMI {latest.bmi.toFixed(1)} · body fat {latest.bodyFat.toFixed(1)}%</div>
+                  </div>
+                  <div className="gcb-divider" />
+                  <div className="gcb-col">
+                    <div className={`gcb-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{Math.abs(targetDelta).toFixed(1)}</div>
+                    <div className="gcb-lbl">{targetDelta <= 0 ? 'kg under goal' : 'kg to target'}</div>
+                    <div className="gcb-sub muted">Goal line {goal.toFixed(1)}kg</div>
+                  </div>
+                  <div className="gcb-divider" />
+                  <div className="gcb-col">
+                    <div className={`gcb-num ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>{formatWeightDelta(latest.weight - monthAgo.weight).replace('kg', '')}</div>
+                    <div className="gcb-lbl">30-day move</div>
+                    <div className={`gcb-sub ${latest.weight - monthAgo.weight <= 0 ? 'good' : 'warn'}`}>
+                      {latest.weight - monthAgo.weight <= 0 ? 'Trend is quieter' : 'Drift needs tightening'}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="glance-card">
-              <div className="gc-icon">%</div>
-              <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
-              <div className="gc-lbl">body fat</div>
-              <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
-            </div>
+              <div className="glance-card">
+                <div className="gc-kicker">Body fat</div>
+                <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
+                <div className="gc-lbl">current composition</div>
+                <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
+              </div>
 
-            <div className="glance-card">
-              <div className="gc-icon">B</div>
-              <div className="gc-num">{latest.bmi.toFixed(1)}</div>
-              <div className="gc-lbl">BMI</div>
-              <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
-            </div>
+              <div className="glance-card">
+                <div className="gc-kicker">BMI</div>
+                <div className="gc-num">{latest.bmi.toFixed(1)}</div>
+                <div className="gc-lbl">body mass index</div>
+                <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
+              </div>
 
-            <div className="glance-card">
-              <div className="gc-icon">14</div>
-              <div className="gc-num">{cadence.count}</div>
-              <div className="gc-lbl">days logged</div>
-              <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
-            </div>
+              <div className="glance-card">
+                <div className="gc-kicker">Logging</div>
+                <div className="gc-num">{cadence.count}</div>
+                <div className="gc-lbl">days logged</div>
+                <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
+              </div>
 
-            <div className="glance-card">
-              <div className="gc-icon">A</div>
-              <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
-              <div className="gc-lbl">sync mode</div>
-              <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
+              <div className="glance-card">
+                <div className="gc-kicker">Sync</div>
+                <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
+                <div className="gc-lbl">data mode</div>
+                <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
+              </div>
             </div>
-          </div>
+          </section>
         </section>
 
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
 
-        {/* ───────────────────────── ACTION ────────────────────────── */}
-        <EditorialDivider eyebrow="Action" note="Today, one move." />
+        <section className="fit-anchor-section" id="operator-action">
+          {/* ───────────────────────── ACTION ────────────────────────── */}
+          <EditorialDivider eyebrow="Action" note="Today, one move." />
 
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="weekCompare" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="weekCompare" />
 
-        <div className="fit-panel">
-          <div className="fit-panel-head">
-            <div>
-              <h3>This <em>week</em></h3>
-              <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+          <div className="fit-panel">
+            <div className="fit-panel-head">
+              <div>
+                <h3>This <em>week</em></h3>
+                <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+              </div>
+            </div>
+            <div className="week-grid">
+              {weekRows.map((row) => (
+                <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                  <div className="dow">{row.day}</div>
+                  <div className="date">{row.date}</div>
+                  <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                  <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                  <div className="icons"><span>{row.detail}</span></div>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="week-grid">
-            {weekRows.map((row) => (
-              <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
-                <div className="dow">{row.day}</div>
-                <div className="date">{row.date}</div>
-                <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
-                <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
-                <div className="icons"><span>{row.detail}</span></div>
-              </div>
-            ))}
-          </div>
-        </div>
+        </section>
 
       </main>
 
