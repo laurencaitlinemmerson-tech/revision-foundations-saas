@@ -199,12 +199,6 @@ function appendSignalGuidance(guidance: BodyGuidance, signals: BodySignal[]): Bo
   return { ...guidance, scale, training, fuel };
 }
 
-function toneForMode(mode: 'push' | 'steady' | 'lighter' | 'recover'): 'good' | 'neutral' | 'warn' {
-  if (mode === 'push') return 'good';
-  if (mode === 'steady') return 'neutral';
-  return 'warn';
-}
-
 function modeLabel(mode: 'push' | 'steady' | 'lighter' | 'recover'): string {
   switch (mode) {
     case 'push':
@@ -327,10 +321,10 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
   const recommendedSession = TRAINING_PLAN[recommendedKey];
   const guidance = appendSignalGuidance(baseGuidance(phase), signals);
   const liveLabel = completedMoveToday
-    ? 'Movement already logged'
+    ? 'Movement logged'
     : todayKey
-    ? 'Listening to today'
-    : 'Watching the runway';
+    ? 'Programmed today'
+    : `${nextKey.daysAway} day runway`;
 
   useEffect(() => {
     if (selectedSession === null) setSelectedSession(recommendedKey);
@@ -350,7 +344,7 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
 
   const previewNote = previewKey === recommendedKey
     ? ''
-    : `Previewing ${previewSession.title}. Today's live recommendation still points to ${recommendedSession.title}.`;
+    : `Viewing ${previewSession.title}. The recommendation still points to ${recommendedSession.title}.`;
 
   function toggleSignal(signal: BodySignal) {
     setSignals((current) => (current.includes(signal)
@@ -365,18 +359,17 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
   }
 
   return (
-    <section className="op-training-section">
-      <div className="op-training-head">
+    <section className="fit-panel op-training-section">
+      <div className="fit-panel-head op-training-head">
         <div>
-          <span className="op-training-kicker">Training focus</span>
-          <h3>Your gym split, made <em>live</em></h3>
-          <p className="op-training-copy">
-            Imported from your workout tracker HTML, then layered with body context and Apple Health so the page can tell you how hard to press today.
-          </p>
+          <h3>Training <em>rhythm</em></h3>
+          <div className="meta">Next lift, weekly split, and body-context guidance in one place.</div>
         </div>
         <div className="op-training-head-side">
-          <span className={`op-training-mode-pill is-${mode} is-${toneForMode(mode)}`}>{modeLabel(mode)}</span>
-          <span className="op-training-source">Source: workout-tracker.html</span>
+          <span className={`op-training-mode-pill is-${mode}`}>{modeLabel(mode)}</span>
+          <span className="op-training-inline-meta">
+            {todayKey ? `${recommendedSession.title} planned today` : `${recommendedSession.title} next`}
+          </span>
         </div>
       </div>
 
@@ -384,7 +377,7 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
         <article className="op-training-feature">
           <div className="op-training-feature-top">
             <div>
-              <div className="op-training-feature-label">{todayKey ? "Today's call" : 'Next planned lift'}</div>
+              <div className="op-training-feature-label">{todayKey ? "Today's recommendation" : 'Next programmed lift'}</div>
               <h4>{headline}</h4>
               <p>{subcopy}</p>
             </div>
@@ -494,10 +487,9 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
           <div className="op-context-panel">
             <div className="op-context-head">
               <span className="op-training-kicker">Body context</span>
-              <span className="op-context-hint">Saved locally in this dashboard</span>
             </div>
             <p className="op-context-copy">
-              Keep this honest. It gives the dashboard permission to read the day like a real body instead of assuming every lift should feel the same.
+              Track the things that change how the same session actually feels, so the plan stays realistic instead of generic.
             </p>
 
             <div className="op-context-group">
@@ -553,8 +545,8 @@ export default function OperatorTrainingSection({ healthStream }: { healthStream
 
           <div className="op-context-footer">
             {healthStream.workouts.length === 0
-              ? 'Live workouts are still empty from Apple Health export, but your programmed split is now embedded here so the dashboard stays useful anyway.'
-              : `Apple Health has ${workoutsThisWeek.length} workout${workoutsThisWeek.length === 1 ? '' : 's'} in the last 7 days, so this section can sit beside the live feed rather than replacing it.`}
+              ? 'Workout export is still empty, so this section is using your planned week as the anchor.'
+              : `Apple Health has ${workoutsThisWeek.length} workout${workoutsThisWeek.length === 1 ? '' : 's'} in the last 7 days, so plan and live session data can now read together.`}
           </div>
         </aside>
       </div>

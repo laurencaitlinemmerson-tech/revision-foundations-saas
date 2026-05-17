@@ -13,11 +13,6 @@
   --brass: #c4872f;
   --brass-deep: #7d4c0d;
   --brass-haze: rgba(196, 135, 47, 0.08);
-  --sky-haze: rgba(124, 198, 255, 0.12);
-  --sky-soft: rgba(232, 242, 251, 0.88);
-  --coral-haze: rgba(255, 154, 122, 0.11);
-  --coral-soft: rgba(252, 236, 229, 0.92);
-  --sage-soft: rgba(228, 242, 236, 0.9);
   min-height: 100vh;
   background:
     radial-gradient(circle at 12% 8%, rgba(124, 198, 255, 0.12), transparent 34%),
@@ -191,53 +186,14 @@
   flex: 1 1 180px;
   border: 1px solid var(--rule);
   border-radius: 4px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(250,248,243,0.98)),
-    var(--paper);
+  background: var(--paper);
   padding: 16px 18px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 18px 34px rgba(26, 24, 21, 0.035);
-}
-
-.glance-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(196,135,47,0.85), rgba(124,198,255,0.65), rgba(255,154,122,0.72));
 }
 
 .glance-card.glance-cal-balance {
   flex: 1 1 360px;
   min-width: 320px;
   padding: 18px 20px;
-  background:
-    radial-gradient(circle at 0 0, rgba(255,154,122,0.16), transparent 38%),
-    radial-gradient(circle at 100% 100%, rgba(124,198,255,0.12), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,248,243,0.98)),
-    var(--paper);
-}
-
-.fit-glance-row .glance-card:nth-child(2) {
-  background:
-    radial-gradient(circle at 100% 0, rgba(255,154,122,0.12), transparent 32%),
-    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(252,236,229,0.62)),
-    var(--paper);
-}
-
-.fit-glance-row .glance-card:nth-child(3) {
-  background:
-    radial-gradient(circle at 100% 0, rgba(124,198,255,0.12), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(232,242,251,0.62)),
-    var(--paper);
-}
-
-.fit-glance-row .glance-card:nth-child(4) {
-  background:
-    radial-gradient(circle at 100% 0, rgba(28,122,103,0.10), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(228,242,236,0.62)),
-    var(--paper);
 }
 
 .gcb-row {
@@ -354,25 +310,11 @@
 }
 
 .fit-hero {
-  background:
-    radial-gradient(circle at 10% 0, rgba(255,154,122,0.16), transparent 34%),
-    radial-gradient(circle at 100% 8%, rgba(124,198,255,0.13), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(250,248,243,0.98)),
-    var(--paper);
+  background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: 4px;
   margin: 34px 0 28px;
   overflow: hidden;
-  position: relative;
-  box-shadow: 0 24px 46px rgba(26, 24, 21, 0.05);
-}
-
-.fit-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(90deg, rgba(196,135,47,0.92), rgba(124,198,255,0.72), rgba(255,154,122,0.82));
 }
 
 .fit-hero-top {
@@ -498,7 +440,7 @@
 .fit-stat-strip {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  background: linear-gradient(180deg, rgba(245,243,239,0.92), rgba(255,255,255,0.72));
+  background: var(--bone);
   border-top: 1px solid var(--rule-soft);
 }
 
@@ -506,13 +448,6 @@
   padding: 14px 16px;
   border-right: 1px solid var(--rule-soft);
 }
-
-.fit-stat-strip .cell:nth-child(1) { background: rgba(250,238,218,0.52); }
-.fit-stat-strip .cell:nth-child(2) { background: rgba(228,242,236,0.46); }
-.fit-stat-strip .cell:nth-child(3) { background: rgba(232,242,251,0.54); }
-.fit-stat-strip .cell:nth-child(4) { background: rgba(252,236,229,0.48); }
-.fit-stat-strip .cell:nth-child(5) { background: rgba(250,248,243,0.82); }
-.fit-stat-strip .cell:nth-child(6) { background: rgba(250,238,218,0.4); }
 
 .fit-hero-signals {
   margin: 0 0 6px;
@@ -681,13 +616,10 @@
 }
 
 .fit-panel {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(250,248,243,0.98)),
-    var(--paper);
+  background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 18px 34px rgba(26, 24, 21, 0.03);
 }
 
 .fit-panel-head {
@@ -698,8 +630,6 @@
   padding: 14px 18px;
   border-bottom: 1px solid var(--rule-soft);
   flex-wrap: wrap;
-  background:
-    linear-gradient(90deg, rgba(250,238,218,0.24), rgba(232,242,251,0.10) 52%, rgba(255,255,255,0));
 }
 
 .fit-panel-head h3 {
@@ -1062,14 +992,10 @@
 }
 
 .goal-card {
-  background:
-    radial-gradient(circle at 100% 0, rgba(255,154,122,0.12), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(250,248,243,0.98)),
-    var(--paper);
+  background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: 4px;
   padding: 16px 18px;
-  box-shadow: 0 18px 34px rgba(26, 24, 21, 0.03);
 }
 
 .goal-card .head {
@@ -1458,26 +1384,13 @@
 }
 
 .fitness-reference-shell .op-health-card {
-  background:
-    radial-gradient(circle at 100% 0, rgba(124,198,255,0.08), transparent 30%),
-    linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,255,255,0.72));
+  background: rgba(255, 255, 255, 0.72);
   border: 0.5px solid var(--rule);
   padding: 22px 22px 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   min-height: 280px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 14px 28px rgba(26, 24, 21, 0.025);
-}
-
-.fitness-reference-shell .op-health-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(196,135,47,0.7), rgba(124,198,255,0.55), rgba(28,122,103,0.55));
 }
 
 .fitness-reference-shell .op-health-card-head {
@@ -2571,14 +2484,11 @@
 /* ── Editorial chart promotion ───────────────────────────────────── */
 .fitness-reference-shell .fit-editorial-chart {
   background:
-    radial-gradient(circle at 0 0, rgba(255,154,122,0.10), transparent 32%),
-    radial-gradient(circle at 100% 0, rgba(124,198,255,0.10), transparent 36%),
-    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0)) ,
+    linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0)) ,
     var(--paper);
   border: 0.5px solid var(--rule);
   padding: 6px 6px 4px;
   position: relative;
-  box-shadow: 0 22px 38px rgba(26, 24, 21, 0.04);
 }
 .fitness-reference-shell .fit-editorial-chart::before {
   content: "";
@@ -2734,21 +2644,10 @@
 /* -- Training focus ------------------------------------------------ */
 .fitness-reference-shell .op-training-section {
   margin: 0 0 22px;
-  padding: 22px;
-  background:
-    radial-gradient(circle at 0 0, rgba(255,154,122,0.14), transparent 32%),
-    radial-gradient(circle at 100% 0, rgba(124,198,255,0.12), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.62)),
-    var(--paper);
-  border: 0.5px solid var(--rule);
-  box-shadow: 0 22px 40px rgba(26, 24, 21, 0.04);
+  background: var(--paper);
 }
 .fitness-reference-shell .op-training-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-  margin-bottom: 18px;
+  align-items: center;
 }
 .fitness-reference-shell .op-training-kicker {
   display: inline-block;
@@ -2758,63 +2657,39 @@
   text-transform: uppercase;
   color: var(--ink-mute);
 }
-.fitness-reference-shell .op-training-head h3 {
-  margin: 8px 0 0;
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 30px;
-  font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-.fitness-reference-shell .op-training-head h3 em {
-  color: var(--brass-deep);
-  font-style: italic;
-}
-.fitness-reference-shell .op-training-copy {
-  margin: 8px 0 0;
-  max-width: 56ch;
-  font-size: 12.5px;
-  line-height: 1.65;
-  color: var(--ink-soft);
-}
 .fitness-reference-shell .op-training-head-side {
-  display: grid;
-  justify-items: end;
-  gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .fitness-reference-shell .op-training-mode-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 7px 11px;
+  padding: 5px 10px;
   border-radius: 999px;
-  border: 0.5px solid var(--rule);
-  font-size: 9.5px;
+  border: 1px solid var(--rule);
+  background: rgba(255,255,255,0.72);
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  background: rgba(255,255,255,0.8);
 }
 .fitness-reference-shell .op-training-mode-pill.is-push {
   color: var(--good);
-  border-color: rgba(28,122,103,0.25);
-  background: rgba(228,242,236,0.88);
 }
 .fitness-reference-shell .op-training-mode-pill.is-steady {
   color: var(--ink-soft);
-  border-color: rgba(26,24,21,0.16);
 }
 .fitness-reference-shell .op-training-mode-pill.is-lighter,
 .fitness-reference-shell .op-training-mode-pill.is-recover {
   color: var(--warn);
-  border-color: rgba(161,74,87,0.22);
-  background: rgba(249,232,235,0.88);
 }
-.fitness-reference-shell .op-training-source {
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.fitness-reference-shell .op-training-inline-meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
   color: var(--ink-mute);
 }
 .fitness-reference-shell .op-training-layout {
@@ -2822,13 +2697,13 @@
   grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.9fr);
   gap: 18px;
   align-items: start;
+  padding: 18px;
 }
 .fitness-reference-shell .op-training-feature,
 .fitness-reference-shell .op-context-panel,
 .fitness-reference-shell .op-context-notes,
 .fitness-reference-shell .op-context-footer {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.66));
+  background: rgba(255,255,255,0.56);
   border: 0.5px solid var(--rule);
 }
 .fitness-reference-shell .op-training-feature {
@@ -2850,7 +2725,7 @@
 .fitness-reference-shell .op-training-feature h4 {
   margin: 8px 0 0;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: -0.015em;
@@ -2867,33 +2742,26 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 6px 9px;
   border: 0.5px solid var(--rule-soft);
-  background: rgba(250,238,218,0.5);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  background: rgba(255,255,255,0.68);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
   white-space: nowrap;
 }
 .fitness-reference-shell .op-training-live-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--brass);
-  box-shadow: 0 0 0 0 rgba(196, 135, 47, 0.35);
-  animation: op-training-pulse 2.4s ease-out infinite;
-}
-@keyframes op-training-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(196, 135, 47, 0.35); }
-  70% { box-shadow: 0 0 0 12px rgba(196, 135, 47, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(196, 135, 47, 0); }
+  background: var(--ink-mute);
 }
 .fitness-reference-shell .op-training-preview-note {
   margin-top: 14px;
   padding: 10px 12px;
-  background: rgba(250,238,218,0.42);
-  border: 0.5px solid rgba(125, 76, 13, 0.16);
+  background: rgba(255,255,255,0.46);
+  border: 0.5px solid var(--rule-soft);
   font-size: 11px;
   line-height: 1.55;
   color: var(--ink-soft);
@@ -2909,13 +2777,8 @@
   gap: 4px;
   padding: 14px 14px 12px;
   border: 0.5px solid var(--rule-soft);
-  background: rgba(255,255,255,0.76);
+  background: rgba(255,255,255,0.52);
 }
-
-.fitness-reference-shell .op-training-stat:nth-child(1) { background: rgba(250,238,218,0.54); }
-.fitness-reference-shell .op-training-stat:nth-child(2) { background: rgba(232,242,251,0.52); }
-.fitness-reference-shell .op-training-stat:nth-child(3) { background: rgba(252,236,229,0.48); }
-.fitness-reference-shell .op-training-stat:nth-child(4) { background: rgba(228,242,236,0.48); }
 .fitness-reference-shell .op-training-stat-label {
   font-size: 9.5px;
   letter-spacing: 0.18em;
@@ -2947,8 +2810,7 @@
   gap: 4px;
   padding: 14px 14px 12px;
   border: 0.5px solid var(--rule-soft);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.78), rgba(250,250,248,0.86));
+  background: rgba(255,255,255,0.48);
 }
 .fitness-reference-shell .op-training-plan-label,
 .fitness-reference-shell .op-training-exercise-label,
@@ -2980,8 +2842,7 @@
 .fitness-reference-shell .op-training-exercise-card {
   padding: 16px 16px 14px;
   border: 0.5px solid var(--rule-soft);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(250,248,243,0.64));
+  background: rgba(255,255,255,0.44);
 }
 .fitness-reference-shell .op-training-exercise-card ul {
   margin: 10px 0 0;
@@ -3018,8 +2879,7 @@
   gap: 8px;
   padding: 14px;
   border: 0.5px solid var(--rule-soft);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.74), rgba(250,248,243,0.64));
+  background: rgba(255,255,255,0.42);
   text-align: left;
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
@@ -3029,13 +2889,11 @@
   border-color: rgba(26,24,21,0.22);
 }
 .fitness-reference-shell .op-training-session-card.is-active {
-  background:
-    radial-gradient(circle at 100% 0, rgba(255,154,122,0.14), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(250,238,218,0.62));
-  border-color: rgba(125, 76, 13, 0.24);
+  background: var(--bone);
+  border-color: var(--rule);
 }
 .fitness-reference-shell .op-training-session-card.is-recommended .op-training-session-status {
-  color: var(--good);
+  color: var(--ink);
 }
 .fitness-reference-shell .op-training-session-top {
   display: flex;
@@ -3080,16 +2938,7 @@
   padding: 18px 18px 16px;
 }
 .fitness-reference-shell .op-context-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-}
-.fitness-reference-shell .op-context-hint {
-  font-size: 10px;
-  color: var(--ink-mute);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin-bottom: 2px;
 }
 .fitness-reference-shell .op-context-copy {
   margin: 8px 0 0;
@@ -3125,13 +2974,13 @@
   border-color: rgba(26,24,21,0.22);
 }
 .fitness-reference-shell .op-context-chip.is-active {
-  background: rgba(250,238,218,0.94);
-  border-color: rgba(125, 76, 13, 0.24);
+  background: var(--bone);
+  border-color: var(--rule);
   color: var(--ink);
 }
 .fitness-reference-shell .op-context-chip.is-soft.is-active {
-  background: rgba(228,242,236,0.92);
-  border-color: rgba(28,122,103,0.24);
+  background: var(--bone);
+  border-color: var(--rule);
 }
 .fitness-reference-shell .op-context-notes {
   display: grid;
@@ -3148,8 +2997,7 @@
   font-size: 11px;
   line-height: 1.6;
   color: var(--ink-soft);
-  background:
-    linear-gradient(90deg, rgba(250,238,218,0.6), rgba(232,242,251,0.36));
+  background: rgba(255,255,255,0.56);
 }
 @media (max-width: 980px) {
   .fitness-reference-shell .op-training-layout {
@@ -3161,17 +3009,12 @@
   }
 }
 @media (max-width: 720px) {
-  .fitness-reference-shell .op-training-section {
-    padding: 18px;
-  }
   .fitness-reference-shell .op-training-head,
   .fitness-reference-shell .op-training-feature-top,
-  .fitness-reference-shell .op-context-head {
+  .fitness-reference-shell .op-context-head,
+  .fitness-reference-shell .op-training-head-side {
     grid-template-columns: 1fr;
     display: grid;
-  }
-  .fitness-reference-shell .op-training-head-side {
-    justify-items: start;
   }
   .fitness-reference-shell .op-training-feature,
   .fitness-reference-shell .op-context-panel,
@@ -3193,12 +3036,8 @@
 .fitness-reference-shell .op-compare {
   margin: 28px 0 12px;
   padding: 18px 22px 20px;
-  background:
-    radial-gradient(circle at 100% 0, rgba(124,198,255,0.10), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.88), rgba(250,248,243,0.98)),
-    var(--paper);
+  background: var(--paper);
   border: 0.5px solid var(--rule);
-  box-shadow: 0 16px 30px rgba(26, 24, 21, 0.025);
 }
 .fitness-reference-shell .op-compare-head {
   display: flex;
@@ -3278,12 +3117,8 @@
 .fitness-reference-shell .op-pr-strip {
   margin: 12px 0 24px;
   padding: 18px 22px;
-  background:
-    radial-gradient(circle at 0 0, rgba(255,154,122,0.10), transparent 32%),
-    linear-gradient(180deg, rgba(255,255,255,0.88), rgba(250,248,243,0.98)),
-    var(--paper);
+  background: var(--paper);
   border: 0.5px solid var(--rule);
-  box-shadow: 0 16px 30px rgba(26, 24, 21, 0.025);
 }
 .fitness-reference-shell .op-pr-head {
   display: flex;
