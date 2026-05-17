@@ -251,6 +251,368 @@ function Wrap({ children, style }: { children: React.ReactNode; style?: CSSPrope
   );
 }
 
+// ─── State assessment (drives adaptive content across tabs) ────────────────
+
+interface State {
+  daysSinceWeighIn: number;
+  weighInStatus: 'today' | 'on-time' | 'due-soon' | 'overdue';
+  trendKgPerWeek: number;           // last 4 readings
+  trendKgPerWeek8: number;          // last 8 readings
+  direction: 'gaining' | 'stable' | 'losing-slow' | 'losing-fast';
+  thisWeekTarget: number;           // recommended weight 7 days from latest
+  phaseNum: number;
+  phaseName: string;
+  phaseColor: string;
+  weeksAtCurrent: number;           // weeks since last significant change
+  best: { weight: number; date: string };
+  peak: { weight: number; date: string };
+}
+
+function assessState(sorted: FitnessReading[], goal: number, today: Date = new Date('2026-05-17')): State {
+  const latest = sorted[sorted.length - 1];
+  const daysSince = Math.floor((today.getTime() - new Date(latest.date).getTime()) / 86400000);
+  const status: State['weighInStatus'] =
+    daysSince === 0 ? 'today' : daysSince <= 5 ? 'on-time' : daysSince <= 7 ? 'due-soon' : 'overdue';
+
+  const last4 = sorted.slice(-4);
+  const last8 = sorted.slice(-8);
+  const trend4 = last4.length >= 2
+    ? (last4[last4.length - 1].weight - last4[0].weight) / Math.max(1, last4.length - 1)
+    : 0;
+  const trend8 = last8.length >= 2
+    ? (last8[last8.length - 1].weight - last8[0].weight) / Math.max(1, last8.length - 1)
+    : 0;
+
+  let direction: State['direction'];
+  if (trend4 > 0.2)      direction = 'gaining';
+  else if (trend4 > -0.1) direction = 'stable';
+  else if (trend4 > -0.6) direction = 'losing-slow';
+  else                    direction = 'losing-fast';
+
+  // Recommended this-week target: −0.45 kg (moderate cut)
+  const thisWeekTarget = Math.round((latest.weight - 0.45) * 10) / 10;
+
+  // Phase derivation by weight band
+  let phaseNum: number, phaseName: string, phaseColor: string;
+  if (latest.weight > 80)      { phaseNum = 1; phaseName = 'The Cut';                phaseColor = T.rose; }
+  else if (latest.weight > 78) { phaseNum = 2; phaseName = 'Diet Break';             phaseColor = T.gold; }
+  else if (latest.weight > 70) { phaseNum = 3; phaseName = 'Cut Continued';          phaseColor = T.rose; }
+  else if (latest.weight > 68) { phaseNum = 4; phaseName = 'Diet Break #2';          phaseColor = T.gold; }
+  else if (latest.weight > 65) { phaseNum = 5; phaseName = 'Recomposition';          phaseColor = T.blue; }
+  else if (latest.weight > goal) { phaseNum = 6; phaseName = 'Final Cut';            phaseColor = T.rose; }
+  else                          { phaseNum = 7; phaseName = 'Maintenance';           phaseColor = T.green; }
+
+  // Weeks at "current" level — within 1 kg of latest reading
+  let weeksAtCurrent = 0;
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    if (Math.abs(sorted[i].weight - latest.weight) <= 1.0) weeksAtCurrent++;
+    else break;
+  }
+
+  // Best (lowest) and peak (highest)
+  const sortedByWeight = [...sorted].sort((a, b) => a.weight - b.weight);
+  const best = sortedByWeight[0];
+  const peak = sortedByWeight[sortedByWeight.length - 1];
+
+  return {
+    daysSinceWeighIn: daysSince,
+    weighInStatus: status,
+    trendKgPerWeek: trend4,
+    trendKgPerWeek8: trend8,
+    direction,
+    thisWeekTarget,
+    phaseNum,
+    phaseName,
+    phaseColor,
+    weeksAtCurrent,
+    best: { weight: best.weight, date: best.date },
+    peak: { weight: peak.weight, date: peak.date },
+  };
+}
+
+// ─── Status Strip (always-visible context bar) ────────────────────────────────
+
+function StatusStrip({ state, latest, goal, setTab }: {
+  state: State; latest: FitnessReading; goal: number; setTab: (t: string) => void;
+}) {
+  const wiColor = state.weighInStatus === 'overdue' ? T.rose
+                : state.weighInStatus === 'due-soon' ? T.gold
+                : T.green;
+  const wiText  = state.weighInStatus === 'today' ? 'TODAY'
+                : state.weighInStatus === 'on-time' ? `${state.daysSinceWeighIn}D AGO`
+                : state.weighInStatus === 'due-soon' ? `DUE SOON · ${state.daysSinceWeighIn}D`
+                : `OVERDUE · ${state.daysSinceWeighIn}D`;
+
+  const trendColor = state.trendKgPerWeek > 0.1 ? T.rose
+                  : state.trendKgPerWeek < -0.1 ? T.green
+                  : T.gold;
+  const trendLabel = state.trendKgPerWeek > 0.1 ? 'GAINING'
+                  : state.trendKgPerWeek < -0.1 ? 'LOSING'
+                  : 'STABLE';
+
+  const cells = [
+    {
+      kicker: 'Latest weigh-in',
+      value: `${latest.weight}`, unit: 'kg', sub: wiText, subColor: wiColor,
+      onClick: () => setTab('Overview'),
+    },
+    {
+      kicker: 'This week → target',
+      value: `${state.thisWeekTarget}`, unit: 'kg', sub: '−0.45 kg pace', subColor: T.gold,
+      onClick: () => setTab('Plan'),
+    },
+    {
+      kicker: 'Current phase',
+      value: `${state.phaseNum}`, unit: state.phaseName.toUpperCase(),
+      sub: state.phaseName, subColor: state.phaseColor,
+      onClick: () => setTab('Projections'),
+    },
+    {
+      kicker: 'Last 4 weeks',
+      value: `${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)}`,
+      unit: 'kg/wk', sub: trendLabel, subColor: trendColor,
+      onClick: () => setTab('Health'),
+    },
+  ];
+
+  return (
+    <div style={{
+      position: 'sticky', top: 0, zIndex: 30, background: T.paper,
+      borderTop: `0.5px solid ${T.line}`, borderBottom: `2px solid ${T.ink}`,
+      margin: '0 -40px 32px', padding: '0 40px',
+    }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', maxWidth:1000, margin:'0 auto' }}>
+        {cells.map((c, i) => (
+          <button key={i} onClick={c.onClick} style={{
+            padding:'16px 18px',
+            borderRight: i < 3 ? `0.5px solid ${T.line}` : 'none',
+            background:'none', border:'none', cursor:'pointer',
+            textAlign:'left', fontFamily:T.sans,
+          }}>
+            <Kicker style={{ marginBottom:6, fontSize:9 }}>{c.kicker}</Kicker>
+            <div style={{ display:'flex', alignItems:'baseline', gap:5, marginBottom:4 }}>
+              <span style={{ fontFamily:T.display, fontSize:28, color:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{c.value}</span>
+              <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted, letterSpacing:'0.1em' }}>{c.unit}</span>
+            </div>
+            <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.18em', color:c.subColor }}>{c.sub}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── This Week (top of Overview - actionable) ────────────────────────────────
+
+function ThisWeek({ state, latest, setCompose, setTab }: {
+  state: State; latest: FitnessReading;
+  setCompose: (b: boolean) => void; setTab: (t: string) => void;
+}) {
+  const overdue = state.weighInStatus === 'overdue';
+  const targetDelta = state.thisWeekTarget - latest.weight;
+
+  const verdict = state.direction === 'gaining'
+    ? { title: 'Stop the gain first.', sub: 'Before the cut plan can work, the upward trend must break.', color: T.rose }
+    : state.direction === 'stable'
+    ? { title: 'Hold steady — then begin the cut.', sub: 'You are at a stable plateau. Initiate the moderate deficit this week.', color: T.gold }
+    : state.direction === 'losing-slow'
+    ? { title: 'On track. Stay the course.', sub: 'A slow, sustainable loss is exactly what the plan calls for.', color: T.green }
+    : { title: 'Slow down — protect the muscle.', sub: 'Loss rate is high. Add a refeed day or ease the deficit by 100 kcal.', color: T.blue };
+
+  return (
+    <div style={{
+      background: T.surface, border: `0.5px solid ${T.line}`,
+      padding: '28px 32px', marginBottom: 48,
+    }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:24, flexWrap:'wrap', marginBottom:18 }}>
+        <div>
+          <Kicker style={{ marginBottom:8 }}>This Week · {new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' })}</Kicker>
+          <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, color: verdict.color, letterSpacing:'-0.02em', lineHeight:1.06, margin:'0 0 4px' }}>
+            <em>{verdict.title}</em>
+          </h2>
+          <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, margin:0, lineHeight:1.6, maxWidth:'56ch' }}>{verdict.sub}</p>
+        </div>
+        <button onClick={() => setCompose(true)} style={{
+          background: overdue ? T.rose : T.ink, color: T.paper, border: 0, cursor:'pointer',
+          padding:'14px 28px', fontFamily:T.sans, fontSize:11, fontWeight:500,
+          letterSpacing:'0.22em', textTransform:'uppercase', whiteSpace:'nowrap',
+        }}>
+          {overdue ? 'File overdue reading →' : 'File this week →'}
+        </button>
+      </div>
+
+      <Rule style={{ margin:'0 0 18px' }} />
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:0 }}>
+        <div style={{ paddingRight:24, borderRight:`0.5px solid ${T.line}` }}>
+          <Kicker style={{ marginBottom:8 }}>Aim for by next Monday</Kicker>
+          <div style={{ display:'flex', alignItems:'baseline', gap:5 }}>
+            <span style={{ fontFamily:T.display, fontSize:36, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>{state.thisWeekTarget}</span>
+            <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
+          </div>
+          <span style={{ fontFamily:T.sans, fontSize:11, color:T.green, fontWeight:500 }}>
+            {targetDelta.toFixed(2)} kg from today
+          </span>
+        </div>
+        <div style={{ padding:'0 24px', borderRight:`0.5px solid ${T.line}` }}>
+          <Kicker style={{ marginBottom:8 }}>Last weigh-in</Kicker>
+          <div style={{ display:'flex', alignItems:'baseline', gap:5 }}>
+            <span style={{ fontFamily:T.display, fontSize:36, color:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{state.daysSinceWeighIn}</span>
+            <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>{state.daysSinceWeighIn === 1 ? 'day' : 'days'} ago</span>
+          </div>
+          <span style={{ fontFamily:T.sans, fontSize:11, fontWeight:500, color: overdue ? T.rose : T.green }}>
+            {overdue ? 'OVERDUE — log it now' : 'On schedule'}
+          </span>
+        </div>
+        <div style={{ paddingLeft:24 }}>
+          <Kicker style={{ marginBottom:8 }}>Today&apos;s priority</Kicker>
+          <button onClick={() => setTab('Plan')} style={{ background:'none', border:'none', cursor:'pointer', padding:0, textAlign:'left' }}>
+            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, lineHeight:1.3, marginBottom:4 }}>
+              See the plan →
+            </div>
+            <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted, fontWeight:500, letterSpacing:'0.05em' }}>
+              Five non-negotiables for this week
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Journey Story (auto-generated narrative) ────────────────────────────────
+
+function JourneyStory({ sorted, state }: { sorted: FitnessReading[]; state: State }) {
+  const first = sorted[0];
+  const latest = sorted[sorted.length - 1];
+  const daysObserved = Math.round((new Date(latest.date).getTime() - new Date(first.date).getTime()) / 86400000);
+  const totalWeeks = Math.round(daysObserved / 7);
+  const fromBest = latest.weight - state.best.weight;
+  const fromPeak = state.peak.weight - latest.weight;
+
+  const events = [
+    {
+      kicker: `${fmtDate(first.date)}`,
+      title: `${first.weight} kg`,
+      copy: `The first reading. BMI ${first.bmi}, body fat ${first.bodyFat}%. The starting line.`,
+    },
+    {
+      kicker: `${fmtDate(state.best.date)}`,
+      title: `${state.best.weight} kg · the lowest point`,
+      copy: `Roughly ${Math.round((new Date(state.best.date).getTime() - new Date(first.date).getTime()) / 86400000 / 7)} weeks in. Proof that loss was possible.`,
+    },
+    {
+      kicker: `${fmtDate(state.peak.date)}`,
+      title: `${state.peak.weight} kg · the peak`,
+      copy: `${(state.peak.weight - state.best.weight).toFixed(1)} kg above the low. The drift that needs reversing.`,
+    },
+    {
+      kicker: `${fmtDate(latest.date)} · today`,
+      title: `${latest.weight} kg`,
+      copy: `${fromBest > 0 ? `+${fromBest.toFixed(1)}` : fromBest.toFixed(1)} kg from your best, ${fromPeak > 0 ? `−${fromPeak.toFixed(1)}` : `+${(-fromPeak).toFixed(1)}`} kg from peak. The journey resets here.`,
+    },
+  ];
+
+  return (
+    <div style={{ marginBottom: 64 }}>
+      <Kicker style={{ marginBottom: 10 }}>Section · The Arc</Kicker>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
+        {totalWeeks} weeks observed. <em>Three turning points.</em>
+      </h2>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+        the story this data tells, in four moments.
+      </p>
+      <ThickRule style={{ margin: '18px 0 0' }} />
+      <div style={{ borderBottom: `0.5px solid ${T.line}` }}>
+        {events.map((e, i) => (
+          <div key={i} style={{
+            display:'grid', gridTemplateColumns:'180px 1fr', gap:32,
+            padding:'22px 0', borderBottom: i < events.length - 1 ? `0.5px solid ${T.softLine}` : 'none',
+            alignItems:'baseline',
+          }}>
+            <Kicker color={i === events.length - 1 ? T.gold : T.muted}>{e.kicker}</Kicker>
+            <div>
+              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color: i === events.length - 1 ? T.gold : T.ink, marginBottom:6 }}>
+                {e.title}
+              </div>
+              <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.6, margin:0, maxWidth:'62ch' }}>{e.copy}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Adaptive Plan Opener ────────────────────────────────────────────────────
+
+function PlanOpener({ state, sorted, setTab }: { state: State; sorted: FitnessReading[]; setTab: (t: string) => void }) {
+  const latest = sorted[sorted.length - 1];
+
+  const briefs = {
+    'gaining': {
+      label: 'PRIORITY · BREAK THE TREND',
+      title: 'Before the plan, stop the gain.',
+      copy: `You are gaining ${state.trendKgPerWeek.toFixed(2)} kg per week. A calorie deficit cannot work if the diet is currently in surplus. Phase zero: identify the surplus. Track every bite for the next 7 days at your current intake. The data will show where the gap is.`,
+      action: 'Track current intake for 7 days, no changes yet',
+      color: T.rose, bg: T.roseSoft,
+    },
+    'stable': {
+      label: 'PRIORITY · BEGIN THE CUT',
+      title: 'You are stable. Now move.',
+      copy: `Last 4 weeks: ${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/week — effectively flat. This is the easiest state to convert into loss: drop intake by 500 kcal, hold training, watch the trend.`,
+      action: 'Begin moderate deficit this week. Hit the five non-negotiables.',
+      color: T.gold, bg: T.goldSoft,
+    },
+    'losing-slow': {
+      label: 'PRIORITY · STAY THE COURSE',
+      title: 'Already on the right line.',
+      copy: `Losing ${Math.abs(state.trendKgPerWeek).toFixed(2)} kg/week — within the sustainable zone. Do not change anything. Keep logging. The plan below codifies what is already working.`,
+      action: 'Continue current approach. Re-evaluate in 4 weeks.',
+      color: T.green, bg: T.greenSoft,
+    },
+    'losing-fast': {
+      label: 'PRIORITY · SLOW IT DOWN',
+      title: 'Loss rate too high to sustain.',
+      copy: `Losing ${Math.abs(state.trendKgPerWeek).toFixed(2)} kg/week is unsustainable beyond ~6 weeks. Risk of muscle loss and adherence collapse. Add 200 kcal back to daily intake. Aim for −0.5 kg/week instead.`,
+      action: 'Raise intake by 200 kcal/day. Add one carb-rich refeed day per week.',
+      color: T.blue, bg: T.blueSoft,
+    },
+  } as const;
+
+  const b = briefs[state.direction];
+
+  return (
+    <div style={{ marginBottom: 48 }}>
+      <div style={{ background: b.bg, borderLeft: `3px solid ${b.color}`, padding: '28px 32px' }}>
+        <Kicker color={b.color} style={{ marginBottom: 12 }}>{b.label}</Kicker>
+        <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:36, letterSpacing:'-0.02em', lineHeight:1.05, color:T.ink, margin:'0 0 14px' }}>
+          {b.title}
+        </h2>
+        <p style={{ fontFamily:T.sans, fontSize:15, color:T.body, fontWeight:300, lineHeight:1.7, margin:'0 0 18px', maxWidth:'58ch' }}>
+          {b.copy}
+        </p>
+        <div style={{ display:'flex', alignItems:'center', gap:14, paddingTop:14, borderTop:`0.5px solid ${b.color}33` }}>
+          <Kicker color={b.color}>This week, do this:</Kicker>
+          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.ink }}>{b.action}</span>
+        </div>
+      </div>
+
+      <div style={{ display:'flex', gap:18, marginTop:16, flexWrap:'wrap' }}>
+        <button onClick={() => setTab('Projections')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:3 }}>
+            See your phase plan →
+        </button>
+        <button onClick={() => setTab('Health')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:3 }}>
+            See the health panel →
+        </button>
+        <button onClick={() => setTab('Overview')} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:3 }}>
+            Back to overview →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Lock screen ──────────────────────────────────────────────────────────────
 
 function Lock({ onUnlock }: { onUnlock: () => void }) {
@@ -1578,7 +1940,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
 
 // ─── The Plan ────────────────────────────────────────────────────────────────
 
-function PlanTab({ sorted, goal }: { sorted: FitnessReading[]; goal: number }) {
+function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; goal: number; state: State; setTab: (t: string) => void }) {
   const latest = sorted[sorted.length - 1];
   const bmr  = Math.round(10*latest.weight + 6.25*HEIGHT_M*100 - 5*30 - 161);
   const tdee = Math.round(bmr * 1.2);
@@ -1590,6 +1952,8 @@ function PlanTab({ sorted, goal }: { sorted: FitnessReading[]; goal: number }) {
 
   return (
     <div>
+      <PlanOpener state={state} sorted={sorted} setTab={setTab} />
+
       <Kicker style={{ marginBottom:10 }}>Section · The Solid Plan</Kicker>
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(40px,6vw,68px)', letterSpacing:'-0.025em', lineHeight:0.98, color:T.ink, margin:'0 0 12px' }}>
         A plan you can <em>actually follow</em>.
@@ -1927,6 +2291,7 @@ export default function OperatorDashboardClient() {
   const reg      = useMemo(() => regress(sorted), [sorted]);
   const latest   = sorted[sorted.length-1];
   const previous = sorted.length>=2 ? sorted[sorted.length-2] : latest;
+  const state    = useMemo(() => assessState(sorted.length > 0 ? sorted : SEED, goal), [sorted, goal]);
 
   if (!authed) {
     return <Lock onUnlock={() => {
@@ -2026,10 +2391,15 @@ export default function OperatorDashboardClient() {
           })}
         </nav>
 
+        {/* Sticky context strip — always visible across every tab */}
+        <StatusStrip state={state} latest={latest} goal={goal} setTab={setTab} />
+
         {/* ── OVERVIEW ─────────────────────────────── */}
         {tab==='Overview' && (
           <div>
+            <ThisWeek state={state} latest={latest} setCompose={setCompose} setTab={setTab} />
             <HeroReading latest={latest} previous={previous} sorted={sorted} />
+            <JourneyStory sorted={sorted} state={state} />
 
             <Kicker style={{ marginBottom:10 }}>Section I · The Full Panel</Kicker>
             <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>Six readings, <em>one body</em>.</h2>
@@ -2110,7 +2480,7 @@ export default function OperatorDashboardClient() {
         {tab==='Health' && <HealthTab sorted={sorted} goal={goal} reg={reg} />}
 
         {/* ── PLAN ─────────────────────────────────── */}
-        {tab==='Plan' && <PlanTab sorted={sorted} goal={goal} />}
+        {tab==='Plan' && <PlanTab sorted={sorted} goal={goal} state={state} setTab={setTab} />}
 
         {/* ── PROJECTIONS ──────────────────────────── */}
         {tab==='Projections' && reg && (
