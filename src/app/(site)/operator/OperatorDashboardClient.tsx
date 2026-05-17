@@ -631,6 +631,25 @@ function detectPhases(sorted: FitnessReading[]): PhaseBand[] {
   return bands.filter(b => new Date(b.start) <= new Date(sorted[sorted.length-1].date));
 }
 
+// ─── SVG smooth-path helper (Catmull-Rom → Bezier) ────────────────────────────
+
+function smoothPath(pts: [number, number][]): string {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0][0]},${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++) {
+    const p0 = pts[Math.max(0, i - 2)];
+    const p1 = pts[i - 1];
+    const p2 = pts[i];
+    const p3 = pts[Math.min(pts.length - 1, i + 1)];
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+
 // ─── Phase-Banded Chart (the centrepiece) ────────────────────────────────────
 
 function PhaseChart({ sorted, goal, range = 'all' }: {
