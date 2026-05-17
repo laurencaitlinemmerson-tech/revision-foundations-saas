@@ -708,7 +708,7 @@ function ThisWeek({ state, latest, setCompose, setTab }: {
 
 // ─── Journey Story (auto-generated narrative) ────────────────────────────────
 
-function JourneyStory({ sorted, state }: { sorted: FitnessReading[]; state: State }) {
+function JourneyStory({ sorted, state, showHeader = true }: { sorted: FitnessReading[]; state: State; showHeader?: boolean }) {
   const first = sorted[0];
   const latest = sorted[sorted.length - 1];
   const daysObserved = Math.round((new Date(latest.date).getTime() - new Date(first.date).getTime()) / 86400000);
@@ -740,15 +740,19 @@ function JourneyStory({ sorted, state }: { sorted: FitnessReading[]; state: Stat
   ];
 
   return (
-    <div style={{ marginBottom: 48 }}>
-      <Kicker style={{ marginBottom: 8 }}>The Arc</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:22, letterSpacing:'-0.01em', lineHeight:1.1, color:T.ink, margin:'0 0 4px' }}>
-        {totalWeeks} weeks observed.
-      </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'0 0 0' }}>
-        Four key moments.
-      </p>
-      <Rule style={{ margin: '14px 0 0' }} />
+    <div>
+      {showHeader && (
+        <>
+          <Kicker style={{ marginBottom: 8 }}>The Arc</Kicker>
+          <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:22, letterSpacing:'-0.01em', lineHeight:1.1, color:T.ink, margin:'0 0 4px' }}>
+            {totalWeeks} weeks observed.
+          </h2>
+          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'0 0 0' }}>
+            Four key moments.
+          </p>
+          <Rule style={{ margin: '14px 0 0' }} />
+        </>
+      )}
       <div style={{ borderBottom: `0.5px solid ${T.line}` }}>
         {events.map((e, i) => (
           <div key={i} style={{
@@ -1081,60 +1085,65 @@ function TopStatStrip({ sorted, state }: { sorted: FitnessReading[]; state: Stat
 // ─── Current Goal Card ───────────────────────────────────────────────────────
 
 function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReading; goal: number }) {
-  // Project goal date assuming 0.45 kg/wk
   const weeks = Math.max(0, (latest.weight - goal) / 0.45);
   const projectedGoalDate = new Date(new Date(latest.date).getTime() + weeks * 7 * 86400000);
   const { intake } = nutritionTargets(latest);
-  const cards = [
-    {
-      kicker: 'Current Goal',
-      accent: `${goal.toFixed(1)}kg`,
-      meta: 'healthy weight',
-      note: `Target reached by ${projectedGoalDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'})} at the moderate-cut pace.`,
-      badge: state.direction === 'gaining' ? { label:'OFF TRACK', color:T.rose, bg:T.roseSoft } : { label:'ON TRACK', color:T.green, bg:T.greenSoft },
-    },
-    {
-      kicker: 'To Goal',
-      accent: `${(latest.weight - goal).toFixed(1)} kg`,
-      meta: 'remaining',
-      note: `${Math.ceil(weeks / 4.33)} months at the current moderate pace.`,
-    },
-    {
-      kicker: 'Intake Plan',
-      accent: `${intake.toLocaleString()} kcal`,
-      meta: 'daily target',
-      note: 'Built around a training-week TDEE with a 500 kcal deficit.',
-    },
-  ];
+  const progressBase = Math.max(state.peak.weight, latest.weight);
+  const progress = progressBase <= goal ? 100 : Math.max(0, Math.min(100, ((progressBase - latest.weight) / (progressBase - goal)) * 100));
+  const onTrack = state.direction !== 'gaining' && state.weighInStatus !== 'overdue';
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(210px, 1fr))', gap:14, marginBottom:48 }}>
-      {cards.map((card) => (
-        <div key={card.kicker} style={{ padding:'20px 22px', border:`1px solid ${T.line}`, background:'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(251,248,243,0.95) 100%)' }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, marginBottom:12, flexWrap:'wrap' }}>
-            <Kicker>{card.kicker}</Kicker>
-            {card.badge && (
-              <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.2em', padding:'2px 8px', background:card.badge.bg, color:card.badge.color }}>
-                {card.badge.label}
-              </span>
-            )}
+    <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.96)', boxShadow:CARD_SHADOW }}>
+      <div style={{ marginBottom:10, display:'flex', justifyContent:'space-between', gap:10, alignItems:'center', flexWrap:'wrap' }}>
+        <span style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:T.muted, fontWeight:600 }}>
+          Current goal
+        </span>
+        <FitPill color={onTrack ? T.green : T.rose} background={onTrack ? T.greenSoft : T.roseSoft}>
+          {onTrack ? 'On track' : 'Needs reset'}
+        </FitPill>
+      </div>
+
+      <div style={{ fontFamily:T.display, fontSize:30, color:T.ink, letterSpacing:'-0.02em', lineHeight:1, marginBottom:4 }}>
+        {goal.toFixed(1)}kg <em style={{ color:T.gold, fontStyle:'italic', fontSize:24 }}>working line</em>
+      </div>
+      <div style={{ fontFamily:T.sans, fontSize:11.5, color:T.muted, letterSpacing:'0.02em', marginBottom:14 }}>
+        Moderate-cut ETA · {projectedGoalDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
+      </div>
+
+      <div style={{ height:6, background:T.surface, borderRadius:999, overflow:'hidden', marginBottom:8, position:'relative' }}>
+        <span style={{
+          display:'block',
+          width:`${progress}%`,
+          height:'100%',
+          background:`linear-gradient(90deg, ${T.gold} 0%, ${T.green} 100%)`,
+        }} />
+        <span style={{ position:'absolute', right:0, top:-2, width:2, height:10, background:T.ink }} />
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginTop:10 }}>
+        {[
+          { label:'To goal', value:`${(latest.weight - goal).toFixed(1)}kg` },
+          { label:'This week', value:`${state.thisWeekTarget.toFixed(1)}kg` },
+          { label:'Intake plan', value:`${intake.toLocaleString()} kcal` },
+          { label:'Best low', value:`${state.best.weight.toFixed(1)}kg` },
+        ].map((item) => (
+          <div key={item.label}>
+            <div style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.20em', textTransform:'uppercase', color:T.muted, fontWeight:600, marginBottom:4 }}>
+              {item.label}
+            </div>
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:12, color:T.ink }}>
+              {item.value}
+            </div>
           </div>
-          <div style={{ marginBottom:8 }}>
-            <span style={{ fontFamily:T.display, fontSize:26, color:card.kicker === 'Current Goal' ? T.gold : T.ink, letterSpacing:'-0.02em' }}>{card.accent}</span>
-            <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.muted, marginLeft:10 }}>{card.meta}</span>
-          </div>
-          <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, margin:0, lineHeight:1.6 }}>
-            {card.note}
-          </p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
 
 // ─── This Week 7-day Grid ───────────────────────────────────────────────────
 
-function ThisWeekGrid({ sorted, state }: { sorted: FitnessReading[]; state: State }) {
+function ThisWeekGrid({ sorted, state, showHeader = true }: { sorted: FitnessReading[]; state: State; showHeader?: boolean }) {
   const latest = sorted[sorted.length-1];
   const todayDate = new Date(latest.date);
   // Monday of this week
@@ -1168,39 +1177,48 @@ function ThisWeekGrid({ sorted, state }: { sorted: FitnessReading[]; state: Stat
   }
 
   return (
-    <div style={{ marginBottom: 48 }}>
-      <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', marginBottom:10 }}>
-        <Kicker>This week · scale rhythm, deltas and training context</Kicker>
-        <Kicker color={T.muted}>Mon {monday.toLocaleDateString('en-GB',{day:'numeric'})} – Sun {days[6].iso}</Kicker>
-      </div>
-      <ThickRule style={{ marginBottom:0 }} />
+    <div>
+      {showHeader && (
+        <>
+          <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', marginBottom:10 }}>
+            <Kicker>This week · scale rhythm, deltas and training context</Kicker>
+            <Kicker color={T.muted}>Mon {monday.toLocaleDateString('en-GB',{day:'numeric'})} – Sun {days[6].iso}</Kicker>
+          </div>
+          <ThickRule style={{ marginBottom:0 }} />
+        </>
+      )}
       <ScrollRail minWidth={840}>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(7, minmax(110px, 1fr))', borderBottom:`0.5px solid ${T.line}` }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(7, minmax(110px, 1fr))', borderTop:showHeader ? 'none' : `1px solid ${T.softLine}`, borderBottom:`0.5px solid ${T.line}` }}>
           {days.map((d, i) => (
             <div key={i} style={{
-              padding:'18px 14px',
-              borderRight: i<6 ? `0.5px solid ${T.softLine}` : 'none',
-              background: d.isToday ? T.goldSoft : 'transparent',
-              opacity: d.isFuture ? 0.4 : 1,
+              padding:'13px 12px',
+              borderRight: i<6 ? `1px solid ${T.softLine}` : 'none',
+              background: d.isToday ? T.goldSoft : d.reading ? 'transparent' : T.surface,
+              opacity: d.isFuture ? 0.45 : d.reading ? 1 : 0.72,
+              minHeight:118,
             }}>
-              <Kicker style={{ marginBottom:4, fontSize:9 }}>{d.label}</Kicker>
-              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.muted, marginBottom:14 }}>{d.iso}</div>
+              <div style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, fontWeight:700, marginBottom:4 }}>
+                {d.label}
+              </div>
+              <div style={{ fontFamily:T.sans, fontSize:11, color:T.body, marginBottom:12 }}>{d.iso}</div>
               {d.reading ? (
                 <>
-                  <div style={{ display:'flex', alignItems:'baseline', gap:3 }}>
-                    <span style={{ fontFamily:T.display, fontSize:22, color: d.isToday ? T.gold : T.ink, letterSpacing:'-0.015em', lineHeight:1 }}>{d.reading.weight.toFixed(1)}</span>
-                    <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kg</span>
+                  <div style={{ fontFamily:T.display, fontSize:24, color:d.isToday ? T.gold : T.ink, lineHeight:1, marginBottom:6 }}>
+                    {d.reading.weight.toFixed(1)}<small style={{ fontFamily:T.sans, fontSize:11, color:T.muted, marginLeft:3 }}>kg</small>
                   </div>
                   {d.delta !== null && (
-                    <div style={{ marginTop:6, fontFamily:T.sans, fontSize:10, color: d.delta > 0 ? T.rose : d.delta < 0 ? T.green : T.muted, fontWeight:500 }}>
+                    <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:10, color: d.delta > 0 ? T.rose : d.delta < 0 ? T.green : T.muted }}>
                       {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(1)}
                     </div>
                   )}
+                  <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:10, color:T.muted, marginTop:6 }}>
+                    {d.isToday ? 'today' : 'logged'}
+                  </div>
                 </>
               ) : (
                 <>
                   <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.muted }}>—</div>
-                  <div style={{ fontFamily:T.sans, fontSize:9, color:T.muted, letterSpacing:'0.12em', marginTop:8 }}>{d.isFuture ? 'TO COME' : 'NO LOG'}</div>
+                  <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:10, color:T.muted, marginTop:8 }}>{d.isFuture ? 'to come' : 'no log'}</div>
                 </>
               )}
             </div>
@@ -1213,7 +1231,7 @@ function ThisWeekGrid({ sorted, state }: { sorted: FitnessReading[]; state: Stat
 
 // ─── Phase Log (timeline) ───────────────────────────────────────────────────
 
-function PhaseLog({ sorted }: { sorted: FitnessReading[] }) {
+function PhaseLog({ sorted, showHeader = true }: { sorted: FitnessReading[]; showHeader?: boolean }) {
   const entries = [
     {
       title: 'The drift',
@@ -1248,33 +1266,38 @@ function PhaseLog({ sorted }: { sorted: FitnessReading[] }) {
   ];
 
   return (
-    <div style={{ marginTop: 56 }}>
-      <Kicker style={{ marginBottom:10 }}>Phase log</Kicker>
-      <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:24, fontStyle:'italic', color:T.ink, margin:'0 0 6px' }}>
-        The story: rise, collapse, rebuild, discipline.
-      </h3>
-      <ThickRule style={{ margin:'18px 0 0' }} />
-      <div style={{ borderBottom:`0.5px solid ${T.line}` }}>
+    <div>
+      {showHeader && (
+        <>
+          <Kicker style={{ marginBottom:10 }}>Phase log</Kicker>
+          <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:24, fontStyle:'italic', color:T.ink, margin:'0 0 6px' }}>
+            The story: rise, collapse, rebuild, discipline.
+          </h3>
+          <ThickRule style={{ margin:'18px 0 0' }} />
+        </>
+      )}
+      <div style={{ borderTop:showHeader ? 'none' : `1px solid ${T.softLine}`, borderBottom:`0.5px solid ${T.line}` }}>
         {entries.map((e, i) => (
           <div key={i} style={{
-            display:'grid', gridTemplateColumns:'4px 1.6fr 1fr 1fr 1fr 1fr',
-            borderBottom: i<entries.length-1 ? `0.5px solid ${T.softLine}` : 'none',
-            gap:20, alignItems:'baseline',
+            display:'grid', gridTemplateColumns:'8px minmax(190px, 1.4fr) repeat(4, minmax(78px, 0.6fr))',
+            borderBottom: i<entries.length-1 ? `1px solid ${T.softLine}` : 'none',
+            gap:12, alignItems:'center',
             background: e.current ? T.goldSoft : 'transparent',
-            margin: e.current ? '0 -16px' : 0,
-            padding: e.current ? '22px 16px' : '22px 0',
+            padding:'14px 18px',
+            fontSize:12,
+            color:T.body,
           }}>
-            <div style={{ background:e.color, height:'100%', minHeight:48 }} />
+            <div style={{ background:e.color, width:8, height:28, borderRadius:2 }} />
             <div>
-              <div style={{ fontFamily:T.display, fontSize:18, color:T.ink, marginBottom:3 }}>
-                {e.title}{e.current && <em style={{ color:e.color, fontSize:14, marginLeft:8 }}>— current</em>}
+              <div style={{ fontFamily:T.display, fontSize:16, color:T.ink, marginBottom:3 }}>
+                {e.title}{e.current && <em style={{ color:e.color, fontSize:14, marginLeft:6 }}>— current</em>}
               </div>
-              <Kicker color={T.muted}>{e.sub}</Kicker>
+              <div style={{ fontFamily:T.sans, color:T.muted, fontSize:11, marginTop:3 }}>{e.sub}</div>
             </div>
-            <div style={{ fontFamily:T.sans, fontSize:12, color:T.muted }}>{e.months} months</div>
-            <div style={{ fontFamily:T.sans, fontSize:12, color:T.body }}>{e.startKg.toFixed(1)}kg start</div>
-            <div style={{ fontFamily:T.sans, fontSize:12, color:T.body }}>{e.endKg.toFixed(1)}kg {e.current ? 'now' : 'end'}</div>
-            <div style={{ fontFamily:T.display, fontSize:18, color: e.delta > 0 ? T.rose : T.green, textAlign:'right' }}>
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:12, color:T.body }}>{e.months} months</div>
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:12, color:T.body }}>{e.startKg.toFixed(1)}kg start</div>
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:12, color:T.body }}>{e.endKg.toFixed(1)}kg {e.current ? 'now' : 'end'}</div>
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:12, color: e.delta > 0 ? T.rose : T.green, textAlign:'right' }}>
               {e.delta > 0 ? '+' : ''}{e.delta.toFixed(1)}kg
             </div>
           </div>
@@ -1456,11 +1479,13 @@ function FitPill({
 function FitPanel({
   title,
   subtitle,
+  actions,
   children,
   style,
 }: {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
+  actions?: React.ReactNode;
   children: React.ReactNode;
   style?: CSSProperties;
 }) {
@@ -1473,17 +1498,176 @@ function FitPanel({
       ...style,
     }}>
       <div style={{ padding:'16px 18px 14px', borderBottom:`1px solid ${T.softLine}` }}>
-        <h3 style={{ fontFamily:T.display, fontSize:22, fontWeight:400, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.05, margin:'0 0 6px' }}>
-          {title}
-        </h3>
-        {subtitle && (
-          <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'62ch' }}>
-            {subtitle}
-          </p>
-        )}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:12, flexWrap:'wrap' }}>
+          <div>
+            <h3 style={{ fontFamily:T.display, fontSize:22, fontWeight:400, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.05, margin:'0 0 6px' }}>
+              {title}
+            </h3>
+            {subtitle && (
+              <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'62ch' }}>
+                {subtitle}
+              </p>
+            )}
+          </div>
+          {actions}
+        </div>
       </div>
       <div style={{ padding:'18px' }}>
         {children}
+      </div>
+    </section>
+  );
+}
+
+function TodayGlanceStrip({
+  latest,
+  goal,
+  state,
+  reg,
+  cloudOk,
+  syncing,
+  setCompose,
+  setTab,
+}: {
+  latest: FitnessReading;
+  goal: number;
+  state: State;
+  reg: Reg | null;
+  cloudOk: boolean | null;
+  syncing: boolean;
+  setCompose: (open: boolean) => void;
+  setTab: (tab: string) => void;
+}) {
+  const remaining = Math.max(0, latest.weight - goal);
+  const focus = state.weighInStatus === 'overdue'
+    ? {
+        title:'Reading overdue',
+        copy:`${state.daysSinceWeighIn} days since the last weigh-in. File the number before you interpret anything else.`,
+        tone:T.rose,
+        bg:T.roseSoft,
+      }
+    : state.direction === 'gaining'
+    ? {
+        title:'Break the climb',
+        copy:`The last four readings are up ${state.trendKgPerWeek.toFixed(2)} kg per week. Your job this week is to stop the rise.`,
+        tone:T.rose,
+        bg:T.roseSoft,
+      }
+    : state.direction === 'stable'
+    ? {
+        title:'Plateau window',
+        copy:'The line is flat enough to intervene cleanly. Use the plan and restart the moderate deficit this week.',
+        tone:T.gold,
+        bg:T.goldSoft,
+      }
+    : {
+        title:'Momentum back',
+        copy:'The line is finally moving the right way. Protect consistency and keep the week boring.',
+        tone:T.green,
+        bg:T.greenSoft,
+      };
+
+  const syncLabel = cloudOk === null ? 'Local first' : cloudOk ? syncing ? 'Syncing now' : 'Cloud active' : 'Local backup';
+  const cards = [
+    { label:'Next target', value:`${state.thisWeekTarget.toFixed(1)} kg`, sub:'this week', color:T.gold },
+    { label:'To goal', value:`${remaining.toFixed(1)} kg`, sub:'remaining', color:remaining === 0 ? T.green : T.ink },
+    { label:'Body fat', value:`${latest.bodyFat.toFixed(1)}%`, sub:latest.bodyFat < 33 ? 'healthy' : latest.bodyFat < 39 ? 'high' : 'very high', color:latest.bodyFat < 33 ? T.green : latest.bodyFat < 39 ? T.gold : T.rose },
+    { label:'BMI', value:latest.bmi.toFixed(1), sub:latest.bmi < 25 ? 'healthy' : latest.bmi < 30 ? 'high' : 'obese', color:latest.bmi < 25 ? T.green : latest.bmi < 30 ? T.gold : T.rose },
+    { label:'Trend', value:`${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk`, sub:'4-week line', color:state.trendKgPerWeek < -0.1 ? T.green : state.trendKgPerWeek > 0.1 ? T.rose : T.gold },
+    { label:'Sync', value:syncLabel, sub:reg ? `R² ${Math.round(reg.r2 * 100)}%` : 'need data', color:cloudOk ? T.green : cloudOk === false ? T.gold : T.muted },
+  ];
+
+  return (
+    <section style={{ marginBottom:24 }}>
+      <div style={{ display:'flex', alignItems:'baseline', gap:12, marginBottom:12, flexWrap:'wrap' }}>
+        <span style={{ fontFamily:T.sans, fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:T.body }}>
+          Today at a glance
+        </span>
+        <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>
+          {fmtDate(latest.date, { long:true })}
+        </span>
+      </div>
+
+      <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'stretch' }}>
+        <div style={{
+          flex:'1 1 360px',
+          minWidth:320,
+          background:'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,248,243,0.98) 100%)',
+          border:`1px solid ${T.line}`,
+          borderRadius:8,
+          padding:'18px 20px',
+          boxShadow:CARD_SHADOW,
+        }}>
+          <div style={{ display:'flex', gap:0, alignItems:'stretch', flexWrap:'wrap' }}>
+            <div style={{ flex:'1 1 190px', paddingRight:16 }}>
+              <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:T.muted, marginBottom:4 }}>
+                Current focus
+              </div>
+              <div style={{ fontFamily:T.display, fontSize:28, color:focus.tone, letterSpacing:'-0.02em', lineHeight:1, marginBottom:6 }}>
+                {focus.title}
+              </div>
+              <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.6, margin:'0 0 12px', maxWidth:'32ch' }}>
+                {focus.copy}
+              </p>
+              <button onClick={() => state.weighInStatus === 'overdue' ? setCompose(true) : setTab('Plan')} style={{
+                background:T.ink,
+                color:T.paper,
+                border:0,
+                cursor:'pointer',
+                padding:'10px 14px',
+                fontFamily:T.sans,
+                fontSize:10,
+                fontWeight:600,
+                letterSpacing:'0.14em',
+                textTransform:'uppercase',
+              }}>
+                {state.weighInStatus === 'overdue' ? 'File reading' : 'Open plan'}
+              </button>
+            </div>
+            <div style={{ width:1, background:T.softLine, marginRight:16, alignSelf:'stretch' }} />
+            <div style={{ flex:'1 1 120px', minWidth:120 }}>
+              <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:T.muted, marginBottom:6 }}>
+                Today
+              </div>
+              <div style={{ fontFamily:T.display, fontSize:34, color:T.ink, lineHeight:0.95, letterSpacing:'-0.03em', marginBottom:4 }}>
+                {latest.weight.toFixed(1)}
+              </div>
+              <div style={{ fontFamily:T.sans, fontSize:10, color:T.muted, textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:6 }}>
+                kg on scale
+              </div>
+              <div style={{ fontFamily:T.sans, fontSize:10, color:focus.tone, fontWeight:600, letterSpacing:'0.08em', marginBottom:4 }}>
+                {state.daysSinceWeighIn === 0 ? 'Logged today' : `${state.daysSinceWeighIn}d since last log`}
+              </div>
+              <div style={{ fontFamily:T.sans, fontSize:10, color:T.body }}>
+                Goal {goal.toFixed(1)} kg
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {cards.map((card) => (
+          <div key={card.label} style={{
+            flex:'1 1 110px',
+            minWidth:110,
+            background:T.surface,
+            border:`1px solid ${T.softLine}`,
+            borderRadius:8,
+            padding:'14px 16px',
+            display:'flex',
+            flexDirection:'column',
+            gap:4,
+          }}>
+            <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:T.muted }}>
+              {card.label}
+            </div>
+            <div style={{ fontFamily:T.display, fontSize:22, color:card.color, lineHeight:1, letterSpacing:'-0.02em' }}>
+              {card.value}
+            </div>
+            <div style={{ fontFamily:T.sans, fontSize:10, color:T.body }}>
+              {card.sub}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -1495,173 +1679,126 @@ function DashboardHero({
   sorted,
   state,
   goal,
-  reg,
   cloudOk,
   syncing,
-  setCompose,
-  setTab,
 }: {
   latest: FitnessReading;
   previous: FitnessReading;
   sorted: FitnessReading[];
   state: State;
   goal: number;
-  reg: Reg | null;
   cloudOk: boolean | null;
   syncing: boolean;
-  setCompose: (open: boolean) => void;
-  setTab: (tab: string) => void;
 }) {
   const delta = latest.weight - previous.weight;
   const remaining = Math.max(0, latest.weight - goal);
   const syncLabel = cloudOk === null ? 'Local first' : cloudOk ? syncing ? 'Cloud syncing' : 'Cloud active' : 'Local backup';
   const syncColor = cloudOk ? T.green : cloudOk === false ? T.gold : T.muted;
-  const trendColor = state.trendKgPerWeek < -0.1 ? T.green : state.trendKgPerWeek > 0.1 ? T.rose : T.gold;
-  const progressBase = Math.max(...sorted.map((reading) => reading.weight));
-  const progress = progressBase <= goal ? 100 : Math.max(0, Math.min(100, ((progressBase - latest.weight) / (progressBase - goal)) * 100));
-
+  const phaseCount = detectPhases(sorted).length;
+  const sevenDayTarget = new Date(new Date(latest.date).getTime() - 7 * 86400000).getTime();
+  const weekAnchor = sorted.length > 1
+    ? sorted.reduce((best, reading) => {
+        if (reading.id === latest.id) return best;
+        const diff = Math.abs(new Date(reading.date).getTime() - sevenDayTarget);
+        const bestDiff = Math.abs(new Date(best.date).getTime() - sevenDayTarget);
+        return diff < bestDiff ? reading : best;
+      }, sorted[0])
+    : latest;
+  const sevenDayDelta = latest.weight - weekAnchor.weight;
   const statCells = [
+    {
+      label:'Weight',
+      value:`${latest.weight.toFixed(1)} kg`,
+      meta:`today`,
+      color:T.ink,
+    },
     {
       label:'To goal',
       value:`${remaining.toFixed(1)} kg`,
-      meta: remaining === 0 ? 'At target' : `${Math.ceil(remaining / 0.45)} weeks at moderate pace`,
-      color: remaining === 0 ? T.green : T.gold,
+      meta:'remaining',
+      color:remaining === 0 ? T.green : T.gold,
     },
     {
-      label:'4-week trend',
-      value:`${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk`,
-      meta: state.direction === 'gaining' ? 'Rising' : state.direction === 'stable' ? 'Flat' : 'Dropping',
-      color: trendColor,
+      label:'Body fat',
+      value:`${latest.bodyFat.toFixed(1)}%`,
+      meta:latest.bodyFat < 33 ? 'healthy lane' : latest.bodyFat < 39 ? 'high' : 'very high',
+      color:latest.bodyFat < 33 ? T.green : latest.bodyFat < 39 ? T.gold : T.rose,
     },
     {
-      label:'Current phase',
-      value:`${state.phaseNum}`,
-      meta: state.phaseName,
-      color: state.phaseColor,
+      label:'BMI',
+      value:latest.bmi.toFixed(1),
+      meta:latest.bmi < 25 ? 'healthy' : latest.bmi < 30 ? 'overweight' : 'obese',
+      color:latest.bmi < 25 ? T.green : latest.bmi < 30 ? T.gold : T.rose,
     },
     {
-      label:'Next target',
-      value:`${state.thisWeekTarget.toFixed(1)} kg`,
-      meta:'This week',
-      color: T.gold,
+      label:'Water',
+      value:`${latest.water.toFixed(1)}%`,
+      meta:latest.water >= 45 ? 'healthy' : 'low',
+      color:latest.water >= 45 ? T.green : T.gold,
     },
     {
-      label:'Last log',
-      value:`${state.daysSinceWeighIn}d`,
-      meta: state.weighInStatus === 'overdue' ? 'Overdue' : state.weighInStatus === 'due-soon' ? 'Due soon' : 'On rhythm',
-      color: state.weighInStatus === 'overdue' ? T.rose : state.weighInStatus === 'due-soon' ? T.gold : T.green,
-    },
-    {
-      label:'Data flow',
-      value: syncLabel,
-      meta: reg ? `R² ${Math.round(reg.r2 * 100)}% confidence` : 'Need more readings',
-      color: syncColor,
+      label:'Sync',
+      value:syncLabel,
+      meta:state.daysSinceWeighIn === 0 ? 'logged today' : `${state.daysSinceWeighIn}d since log`,
+      color:syncColor,
     },
   ];
 
-  const focusCopy = state.weighInStatus === 'overdue'
-    ? `The dashboard should stay quiet until you log a fresh weigh-in. ${state.daysSinceWeighIn} days is long enough for the story to drift.`
-    : state.direction === 'gaining'
-    ? `The trend is still rising, so the next win is not a perfect week. It is one boring, consistent week that breaks the climb.`
-    : state.direction === 'stable'
-    ? 'You are in a plateau window. Good: that makes the next adjustment easier to spot and easier to trust.'
-    : 'Momentum is pointed the right way again. The goal now is to protect the routine instead of chasing drama.';
-
   return (
     <section style={{
-      background:'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,248,243,0.98) 100%)',
+      background:'rgba(255,255,255,0.96)',
       border:`1px solid ${T.line}`,
       boxShadow:CARD_SHADOW,
       overflow:'hidden',
-      marginBottom:22,
+      marginBottom:20,
     }}>
       <div style={{ padding:'24px clamp(18px, 4vw, 28px) 18px' }}>
         <div style={{ display:'flex', gap:24, alignItems:'flex-end', flexWrap:'wrap' }}>
           <div style={{ flex:'1 1 560px', minWidth:0 }}>
             <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', marginBottom:12 }}>
-              <FitPill color={T.body}>Fitness</FitPill>
-              <FitPill color={state.phaseColor} background={`${state.phaseColor}14`}>{state.phaseName}</FitPill>
-              <FitPill color={syncColor} background={`${syncColor}12`}>{syncLabel}</FitPill>
+              <span style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:T.muted, fontWeight:600 }}>Fitness</span>
+              <span style={{ color:T.muted, opacity:0.45 }}>/</span>
+              <FitPill color={T.gold} background={`${T.gold}12`}>{state.phaseName} live</FitPill>
+              <FitPill color={syncColor} background={`${syncColor}12`}>{state.daysSinceWeighIn === 0 ? 'Logged today' : `Logged ${state.daysSinceWeighIn}d ago`}</FitPill>
             </div>
-            <h1 style={{ fontFamily:T.display, fontSize:'clamp(34px, 5vw, 54px)', fontWeight:400, letterSpacing:'-0.03em', lineHeight:0.94, color:T.ink, margin:'0 0 10px', maxWidth:'11ch' }}>
-              Fitness command <em style={{ color:T.gold, fontStyle:'italic' }}>centre</em>.
+            <h1 style={{ fontFamily:T.display, fontSize:'clamp(34px, 4.8vw, 52px)', fontWeight:400, letterSpacing:'-0.02em', lineHeight:0.96, color:T.ink, margin:'0 0 10px', maxWidth:'11ch' }}>
+              Body composition <em style={{ color:T.gold, fontStyle:'italic' }}>timeline</em>
             </h1>
-            <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.75, margin:'0 0 14px', maxWidth:'62ch' }}>
-              One cleaner place to decide what happens next. Overview is now decision-first, and every chart lives in Health so you are not bouncing between sections to read the same story.
-            </p>
-            <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', fontFamily:T.sans, fontSize:11, color:T.muted }}>
+            <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', fontFamily:T.sans, fontSize:13, color:T.body }}>
               <span>{fmtDate(sorted[0].date, { long:true })} start</span>
               <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
               <span>{sorted.length} readings logged</span>
               <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
-              <span>Goal {goal.toFixed(1)} kg</span>
+              <span>{phaseCount} phases logged</span>
+              <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
+              <span style={{ color:T.muted }}>{cloudOk ? 'Cloud sync active' : cloudOk === false ? 'Local fallback only' : 'Local first mode'}</span>
             </div>
           </div>
 
           <div style={{
             flex:'1 1 280px',
-            padding:'18px 18px 16px',
-            border:`1px solid ${T.line}`,
-            background:'rgba(255,255,255,0.78)',
+            textAlign:'right',
+            minWidth:200,
           }}>
             <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:8 }}>
-              Today · {fmtDate(latest.date, { long:true })}
+              Today · {fmtDate(latest.date)}
             </div>
             <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:8 }}>
-              <span style={{ fontFamily:T.display, fontSize:56, color:T.ink, letterSpacing:'-0.05em', lineHeight:0.92 }}>{latest.weight.toFixed(1)}</span>
-              <span style={{ fontFamily:T.sans, fontSize:16, color:T.muted }}>kg</span>
+              <span style={{ fontFamily:T.display, fontSize:56, color:T.ink, letterSpacing:'-0.03em', lineHeight:0.92 }}>{latest.weight.toFixed(1)}</span>
+              <span style={{ fontFamily:T.sans, fontSize:22, color:T.muted }}>kg</span>
             </div>
-            <div style={{ fontFamily:T.sans, fontSize:11, fontWeight:600, letterSpacing:'0.08em', color:delta <= 0 ? T.green : T.rose, marginBottom:12 }}>
-              {delta <= 0 ? 'Down' : 'Up'} {Math.abs(delta).toFixed(1)} kg since last reading
-            </div>
-            <div style={{ height:7, background:T.surface, borderRadius:999, overflow:'hidden', marginBottom:8, position:'relative' }}>
-              <span style={{
-                display:'block',
-                width:`${progress}%`,
-                height:'100%',
-                background:`linear-gradient(90deg, ${T.gold} 0%, ${T.green} 100%)`,
-              }} />
-            </div>
-            <div style={{ fontFamily:T.sans, fontSize:11, color:T.body, fontWeight:300, lineHeight:1.6 }}>
-              {progress.toFixed(0)}% of the way back from your recorded peak to the target line.
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:11, letterSpacing:'0.04em', color:sevenDayDelta <= 0 ? T.green : T.rose, marginTop:6 }}>
+              {sevenDayDelta > 0 ? '+' : ''}{sevenDayDelta.toFixed(1)} · 7-day marker
             </div>
           </div>
         </div>
-
-        <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginTop:18 }}>
-          {[
-            { label:'File reading', action:() => setCompose(true), solid:true },
-            { label:'Open health', action:() => setTab('Health') },
-            { label:'Open plan', action:() => setTab('Plan') },
-            { label:'Open ledger', action:() => setTab('Ledger') },
-          ].map((action) => (
-            <button key={action.label} onClick={action.action} style={{
-              background: action.solid ? T.ink : 'transparent',
-              color: action.solid ? T.paper : T.ink,
-              border:`1px solid ${action.solid ? T.ink : T.line}`,
-              cursor:'pointer',
-              padding:'11px 14px',
-              fontFamily:T.sans,
-              fontSize:10,
-              fontWeight:600,
-              letterSpacing:'0.16em',
-              textTransform:'uppercase',
-            }}>
-              {action.label}
-            </button>
-          ))}
-        </div>
-
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, lineHeight:1.45, margin:'18px 0 0', maxWidth:'48ch' }}>
-          {focusCopy}
-        </p>
       </div>
 
       <div style={{
         display:'grid',
-        gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))',
+        gridTemplateColumns:'repeat(6, minmax(0, 1fr))',
         gap:0,
-        background:'rgba(250,248,243,0.92)',
+        background:T.surface,
         borderTop:`1px solid ${T.softLine}`,
       }}>
         {statCells.map((cell, index) => (
@@ -1669,13 +1806,13 @@ function DashboardHero({
             padding:'14px 16px',
             borderRight:index < statCells.length - 1 ? `1px solid ${T.softLine}` : 'none',
           }}>
-            <div style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:7 }}>
+            <div style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.20em', textTransform:'uppercase', color:T.muted, marginBottom:6 }}>
               {cell.label}
             </div>
-            <div style={{ fontFamily:T.display, fontSize:22, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.02, marginBottom:5 }}>
+            <div style={{ fontFamily:T.display, fontSize:20, color:T.ink, letterSpacing:'-0.01em', lineHeight:1.02 }}>
               {cell.value}
             </div>
-            <div style={{ fontFamily:T.sans, fontSize:11, color:cell.color, fontWeight:500, lineHeight:1.45 }}>
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:11, color:cell.color, marginTop:6, letterSpacing:'0.04em' }}>
               {cell.meta}
             </div>
           </div>
@@ -1690,8 +1827,6 @@ function OverviewTabView({
   sorted,
   goal,
   state,
-  cloudOk,
-  syncing,
   setCompose,
   setTab,
 }: {
@@ -1699,8 +1834,6 @@ function OverviewTabView({
   sorted: FitnessReading[];
   goal: number;
   state: State;
-  cloudOk: boolean | null;
-  syncing: boolean;
   setCompose: (open: boolean) => void;
   setTab: (tab: string) => void;
 }) {
@@ -1732,44 +1865,58 @@ function OverviewTabView({
     { label:'Bone', value:`${latest.boneMass.toFixed(2)}%`, status:boneLabel, color:boneColor },
   ];
 
-  const syncLabel = cloudOk === null ? 'Local first' : cloudOk ? syncing ? 'Syncing now' : 'Cloud active' : 'Local backup only';
-  const syncColor = cloudOk ? T.green : cloudOk === false ? T.gold : T.muted;
-
   return (
     <div style={{ display:'flex', gap:20, alignItems:'flex-start', flexWrap:'wrap' }}>
       <div style={{ flex:'1 1 680px', display:'flex', flexDirection:'column', gap:20, minWidth:0 }}>
-        <ThisWeek state={state} latest={latest} setCompose={setCompose} setTab={setTab} />
-
         <FitPanel
-          title={<>This week&apos;s <em style={{ color:T.gold }}>rhythm</em></>}
-          subtitle="The latest seven-day run in one quieter panel, so you can check the pattern without jumping straight into charts."
+          title={<>This <em style={{ color:T.gold }}>week</em></>}
+          subtitle="Scale rhythm, weekly deltas and the immediate pattern without sending you into the full chart view."
         >
-          <ThisWeekGrid sorted={sorted} state={state} />
+          <ThisWeekGrid sorted={sorted} state={state} showHeader={false} />
         </FitPanel>
 
-        <div>
-          <div style={{ marginBottom:12 }}>
-            <Kicker style={{ marginBottom:4 }}>Goal snapshot</Kicker>
-            <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'44ch' }}>
-              The target, the distance left, and the intake anchor in one glance.
-            </p>
-          </div>
-          <GoalCard state={state} latest={latest} goal={goal} />
-        </div>
+        <FitPanel
+          title={<>Phase <em style={{ color:T.gold }}>log</em></>}
+          subtitle="The story: rise, collapse, rebuild, discipline."
+        >
+          <PhaseLog sorted={sorted} showHeader={false} />
+        </FitPanel>
 
         <FitPanel
-          title={<>The journey <em style={{ color:T.gold }}>story</em></>}
-          subtitle="Anchor the current number against the bigger arc so one awkward week does not become the whole narrative."
+          title={<>The <em style={{ color:T.gold }}>arc</em></>}
+          subtitle="Four anchor moments so one awkward week never becomes the whole story."
         >
-          <JourneyStory sorted={sorted} state={state} />
+          <JourneyStory sorted={sorted} state={state} showHeader={false} />
+          <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginTop:16 }}>
+            {[
+              { label:'Open health', action:() => setTab('Health') },
+              { label:'Open plan', action:() => setTab('Plan') },
+              { label:'Open ledger', action:() => setTab('Ledger') },
+              { label:'File reading', action:() => setCompose(true) },
+            ].map((item) => (
+              <button key={item.label} onClick={item.action} style={{
+                background:'transparent',
+                border:`1px solid ${T.line}`,
+                color:T.ink,
+                cursor:'pointer',
+                padding:'10px 12px',
+                fontFamily:T.sans,
+                fontSize:10,
+                fontWeight:600,
+                letterSpacing:'0.14em',
+                textTransform:'uppercase',
+              }}>
+                {item.label}
+              </button>
+            ))}
+          </div>
         </FitPanel>
       </div>
 
       <aside style={{ flex:'1 1 300px', display:'flex', flexDirection:'column', gap:20, minWidth:'min(100%, 300px)' }}>
-        <FitPanel
-          title={<>Today <em style={{ color:T.gold }}>scan</em></>}
-          subtitle="Current markers without opening the analytics section."
-        >
+        <GoalCard state={state} latest={latest} goal={goal} />
+
+        <FitPanel title={<>Today <em style={{ color:T.gold }}>scan</em></>}>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(2, minmax(0, 1fr))', gap:10 }}>
             {scanCards.map((card) => (
               <div key={card.label} style={{
@@ -1792,60 +1939,13 @@ function OverviewTabView({
           </div>
         </FitPanel>
 
-        <FitPanel
-          title={<>Next <em style={{ color:T.gold }}>actions</em></>}
-          subtitle="Open the right section instead of scrolling through everything."
-        >
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-            {[
-              { label:'Health section', sub:'All charts and body-composition visuals now live here.', action:() => setTab('Health') },
-              { label:'Plan', sub:'Weekly targets, deficit guidance, and the detailed structure.', action:() => setTab('Plan') },
-              { label:'Ledger', sub:'Every weigh-in plus Apple Health import and auto-sync details.', action:() => setTab('Ledger') },
-              { label:'Add reading', sub:'File the next weigh-in immediately.', action:() => setCompose(true) },
-            ].map((item) => (
-              <button key={item.label} onClick={item.action} style={{
-                border:`1px solid ${T.line}`,
-                background:'rgba(255,255,255,0.72)',
-                padding:'12px 14px',
-                textAlign:'left',
-                cursor:'pointer',
-              }}>
-                <div style={{ fontFamily:T.display, fontSize:18, fontStyle:'italic', color:T.ink, marginBottom:4 }}>
-                  {item.label}
-                </div>
-                <div style={{ fontFamily:T.sans, fontSize:11, color:T.body, fontWeight:300, lineHeight:1.5 }}>
-                  {item.sub}
-                </div>
-              </button>
-            ))}
-          </div>
-        </FitPanel>
-
-        <FitPanel
-          title={<>Command <em style={{ color:T.gold }}>notes</em></>}
-          subtitle="Short prompts to keep the interpretation calm and useful."
-        >
+        <FitPanel title={<>Command <em style={{ color:T.gold }}>notes</em></>}>
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
             {notes.map((note, index) => (
               <p key={index} style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.65, margin:0 }}>
                 {note}
               </p>
             ))}
-          </div>
-        </FitPanel>
-
-        <FitPanel
-          title={<>Data <em style={{ color:T.gold }}>flow</em></>}
-          subtitle="Where today&apos;s reading state comes from."
-        >
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-            <div>
-              <Kicker style={{ marginBottom:4 }}>Sync state</Kicker>
-              <div style={{ fontFamily:T.display, fontSize:22, color:syncColor, letterSpacing:'-0.02em' }}>{syncLabel}</div>
-            </div>
-            <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.65, margin:0 }}>
-              Manual entries, Apple Health imports, and the auto-sync endpoint all feed the same fitness ledger, so the dashboard stays consistent whichever route you use.
-            </p>
           </div>
         </FitPanel>
       </aside>
@@ -3095,6 +3195,7 @@ function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number
 // ─── Health Tab ───────────────────────────────────────────────────────────────
 
 function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number; reg: Reg | null }) {
+  const [range, setRange] = useState<'all' | '2y' | '1y' | '6m'>('all');
   const latest = sorted[sorted.length - 1];
   const first  = sorted[0];
   const startMs = new Date(first.date).getTime();
@@ -3274,8 +3375,39 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
           <FitPanel
             title={<>Weight <em style={{ color:T.gold }}>timeline</em></>}
             subtitle="Raw readings, a smoothed line, and phase bands in the calmer reference layout."
+            actions={
+              <div style={{ display:'inline-flex', border:`1px solid ${T.line}`, borderRadius:999, overflow:'hidden', background:'rgba(255,255,255,0.88)' }}>
+                {([
+                  { key:'all', label:'All' },
+                  { key:'2y', label:'2Y' },
+                  { key:'1y', label:'1Y' },
+                  { key:'6m', label:'6M' },
+                ] as const).map((option, index, arr) => {
+                  const active = range === option.key;
+                  return (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setRange(option.key)}
+                      style={{
+                        padding:'5px 10px',
+                        border:0,
+                        borderRight:index < arr.length - 1 ? `1px solid ${T.softLine}` : 'none',
+                        background:active ? T.ink : 'transparent',
+                        color:active ? T.paper : T.muted,
+                        fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace',
+                        fontSize:10,
+                        cursor:'pointer',
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            }
           >
-            <PhaseChart sorted={sorted} goal={goal} range="all" />
+            <PhaseChart sorted={sorted} goal={goal} range={range} />
           </FitPanel>
 
           {reg && (
@@ -3826,17 +3958,25 @@ export default function OperatorDashboardClient() {
           </button>
         </div>
 
+        <TodayGlanceStrip
+          latest={latest}
+          goal={goal}
+          state={state}
+          reg={reg}
+          cloudOk={cloudOk}
+          syncing={syncing}
+          setCompose={setCompose}
+          setTab={setTab}
+        />
+
         <DashboardHero
           latest={latest}
           previous={previous}
           sorted={sorted}
           state={state}
           goal={goal}
-          reg={reg}
           cloudOk={cloudOk}
           syncing={syncing}
-          setCompose={setCompose}
-          setTab={setTab}
         />
 
         {/* ── TABS ─────────────────────────────────── */}
@@ -3884,8 +4024,6 @@ export default function OperatorDashboardClient() {
             sorted={sorted}
             goal={goal}
             state={state}
-            cloudOk={cloudOk}
-            syncing={syncing}
             setCompose={setCompose}
             setTab={setTab}
           />
