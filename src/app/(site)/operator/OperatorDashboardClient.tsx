@@ -719,6 +719,329 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
   );
 }
 
+// ─── Periodisation Phases ─────────────────────────────────────────────────────
+
+function projectedBF(targetWeight: number, r: FitnessReading): number {
+  // 80% of weight lost = fat, 20% = lean mass (realistic for a calorie deficit + resistance training)
+  const fatKg  = r.weight * (r.bodyFat / 100);
+  const leanKg = r.weight - fatKg;
+  const lost   = r.weight - targetWeight;
+  const newFat = Math.max(0, fatKg - lost * 0.8);
+  const newLean = leanKg - lost * 0.2;
+  return (newFat / targetWeight) * 100;
+}
+
+function weeksToWeight(latest: FitnessReading, target: number, deficitKcal: number): number {
+  const kgPerWeek = deficitKcal / 7700 * 7;
+  return Math.max(0, (latest.weight - target) / kgPerWeek);
+}
+
+function addWeeks(fromDate: string, weeks: number): Date {
+  return new Date(new Date(fromDate).getTime() + weeks * 7 * 86400000);
+}
+
+interface Phase {
+  id: number;
+  type: 'cut' | 'break' | 'recomp' | 'maintain' | 'bulk';
+  name: string;
+  tagline: string;
+  startWeight: number;
+  endWeight: number;
+  startBF: number;
+  endBF: number;
+  durationWeeks: number;
+  deficit: number | null;   // kcal/day — null = maintenance
+  actions: string[];
+  trigger: string;          // what unlocks the next phase
+  current?: boolean;
+}
+
+function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number; reg: Reg | null }) {
+  const latest  = sorted[sorted.length - 1];
+  const deficit = 500; // recommended moderate cut
+
+  // Project body fat at key weight checkpoints
+  const bf78 = projectedBF(78, latest);
+  const bf70 = projectedBF(70, latest);
+  const bf65 = projectedBF(65, latest);
+  const bfGoal = projectedBF(goal, latest);
+
+  const w1 = weeksToWeight(latest, 78, deficit);
+  const w2 = weeksToWeight(latest, 70, deficit);
+  const w3 = weeksToWeight(latest, 65, deficit);
+  const w4 = weeksToWeight(latest, goal, deficit);
+
+  // Running calendar date for each phase
+  const date0 = latest.date;
+  const date1end = addWeeks(date0, w1);
+  const date2end = new Date(date1end.getTime() + 3 * 7 * 86400000); // 3-week break
+  const date3end = addWeeks(date2end.toISOString().slice(0, 10), w2 - w1);
+  const date4end = new Date(date3end.getTime() + 3 * 7 * 86400000);
+  const date5end = addWeeks(date4end.toISOString().slice(0, 10), w3 - w2);
+  const date6end = addWeeks(date5end.toISOString().slice(0, 10), w4 - w3);
+
+  const phases: Phase[] = [
+    {
+      id: 1, type: 'cut', current: true,
+      name: 'Phase 1 — The Cut',
+      tagline: 'Primary fat loss. No bulk until body fat is below 33%.',
+      startWeight: latest.weight, endWeight: 78,
+      startBF: latest.bodyFat, endBF: bf78,
+      durationWeeks: Math.round(w1),
+      deficit: 500,
+      actions: [
+        `Eat at ${Math.round(1860 - 500).toLocaleString()} kcal/day (sedentary TDEE − 500)`,
+        `Protein: ${Math.round(latest.weight * 1.8)} g/day minimum to protect muscle`,
+        'Resistance training 3× per week — this is non-negotiable',
+        'Weigh in weekly at the same time. Log every reading.',
+        'Target: −0.5 kg per week. Slower is fine; faster is risky.',
+      ],
+      trigger: `Scale reads 78 kg and body fat estimated below ${bf78.toFixed(0)}%`,
+    },
+    {
+      id: 2, type: 'break',
+      name: 'Phase 2 — Diet Break',
+      tagline: 'Metabolic reset. Eat at maintenance for 3 weeks.',
+      startWeight: 78, endWeight: 78,
+      startBF: bf78, endBF: bf78,
+      durationWeeks: 3,
+      deficit: null,
+      actions: [
+        'Eat at maintenance (~1,860 kcal/day sedentary)',
+        'Continue resistance training — do not stop lifting',
+        'This is intentional, not falling off the plan',
+        'Restores leptin, cortisol, and training performance',
+        'Weight may fluctuate 0.5–1.5 kg — expect this, ignore it',
+      ],
+      trigger: '3 weeks completed at maintenance',
+    },
+    {
+      id: 3, type: 'cut',
+      name: 'Phase 3 — Cut (Continued)',
+      tagline: 'Second extended cut. Body fat should now be trending below 40%.',
+      startWeight: 78, endWeight: 70,
+      startBF: bf78, endBF: bf70,
+      durationWeeks: Math.round(w2 - w1),
+      deficit: 500,
+      actions: [
+        'Resume −500 kcal/day deficit',
+        `Protein: ${Math.round(78 * 1.8)} g/day (recalculated for new weight)`,
+        'Increase training intensity if energy allows',
+        'Body fat is dropping — muscle definition will start to appear',
+        'Consider a DEXA scan here to get accurate BF reading',
+      ],
+      trigger: 'Scale reads 70 kg or 8 weeks completed — whichever comes first',
+    },
+    {
+      id: 4, type: 'break',
+      name: 'Phase 4 — Diet Break #2',
+      tagline: 'Second metabolic reset before the final push.',
+      startWeight: 70, endWeight: 70,
+      startBF: bf70, endBF: bf70,
+      durationWeeks: 3,
+      deficit: null,
+      actions: [
+        'Eat at maintenance again (~1,720 kcal/day at 70 kg)',
+        'Focus on progressive overload in the gym',
+        'Reassess goal weight here — at this body composition, 60 kg may feel different',
+        'Blood markers worth checking: iron, B12, thyroid',
+      ],
+      trigger: '3 weeks completed',
+    },
+    {
+      id: 5, type: 'recomp',
+      name: 'Phase 5 — Recomposition',
+      tagline: 'Eat at maintenance. Let training shift the last fat to muscle.',
+      startWeight: 70, endWeight: 65,
+      startBF: bf70, endBF: bf65,
+      durationWeeks: Math.round(w3 - w2),
+      deficit: null,
+      actions: [
+        'Maintenance calories (~1,720/day) — not a deficit',
+        'Heavy compound lifts: squat, deadlift, press',
+        'Body recomposition is slow — 0.25–0.5 kg fat lost per month, muscle gained simultaneously',
+        'Scale weight may barely move — this is intentional',
+        'Progress measured in mirror and performance, not scale',
+      ],
+      trigger: `Body fat below ${bf65.toFixed(0)}% or scale below 65 kg`,
+    },
+    {
+      id: 6, type: 'cut',
+      name: 'Phase 6 — Final Cut to Goal',
+      tagline: 'One last deficit to cross the finish line.',
+      startWeight: 65, endWeight: goal,
+      startBF: bf65, endBF: bfGoal,
+      durationWeeks: Math.round(w4 - w3),
+      deficit: 400,
+      actions: [
+        `Mild deficit: −400 kcal/day (easier at lower body fat)`,
+        'Protein stays high — muscle is hard-earned now',
+        `Goal weight: ${goal} kg at roughly ${bfGoal.toFixed(0)}% body fat`,
+        'Cardio can be added here for the final push',
+      ],
+      trigger: `Scale reads ${goal} kg for two consecutive weeks`,
+    },
+    {
+      id: 7, type: 'maintain',
+      name: 'Phase 7 — Maintenance',
+      tagline: 'Hold the goal. Build the habit of staying here.',
+      startWeight: goal, endWeight: goal,
+      startBF: bfGoal, endBF: bfGoal,
+      durationWeeks: 0,
+      deficit: null,
+      actions: [
+        'Eat at maintenance for your new weight',
+        'Weigh weekly — intervene early if trending up',
+        'Continue resistance training for general health',
+        `At ~${bfGoal.toFixed(0)}% body fat you can now consider a lean bulk if you want more muscle`,
+        'A lean bulk at this body fat: +200 kcal/day surplus for slow muscle gain',
+      ],
+      trigger: '12 weeks at stable goal weight',
+    },
+  ];
+
+  const typeStyles: Record<Phase['type'], { color: string; bg: string; label: string }> = {
+    cut:      { color: T.rose,  bg: T.roseSoft,  label: 'CUT'    },
+    break:    { color: T.gold,  bg: T.goldSoft,  label: 'BREAK'  },
+    recomp:   { color: T.blue,  bg: T.blueSoft,  label: 'RECOMP' },
+    maintain: { color: T.green, bg: T.greenSoft, label: 'MAINTAIN'},
+    bulk:     { color: T.green, bg: T.greenSoft, label: 'BULK'   },
+  };
+
+  const phaseDates = [
+    date1end, date2end, date3end, date4end, date5end, date6end,
+  ];
+
+  return (
+    <div style={{ marginTop: 80 }}>
+      <Kicker style={{ marginBottom:10 }}>Section VII · Periodisation</Kicker>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
+        When to cut, when to rest, <em>when to build</em>.
+      </h2>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+        Seven phases from today to goal and beyond — triggered by body fat, not just scale weight.
+      </p>
+
+      {/* Key rule */}
+      <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:24, alignItems:'start', padding:'24px 0', margin:'18px 0 0', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+        <div>
+          <Kicker style={{ marginBottom:8 }}>The Rule</Kicker>
+          <span style={{ fontFamily:T.display, fontWeight:400, fontSize:48, letterSpacing:'-0.02em', lineHeight:1, color:T.rose }}>
+            No bulk
+          </span>
+        </div>
+        <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:'20px 0 0' }}>
+          At <strong style={{ color:T.ink }}>{latest.bodyFat.toFixed(1)}% body fat</strong>, a calorie surplus would primarily add fat, not muscle — your body fat stores are already high and insulin sensitivity is reduced. The rule is simple: <em style={{ fontFamily:T.display }}>cut first, build later.</em> A lean bulk only makes sense once body fat is below ~25%. That comes in Phase 7 at the earliest.
+        </p>
+      </div>
+
+      {/* Phase list */}
+      <div style={{ marginTop:40 }}>
+        {phases.map((ph, i) => {
+          const ts = typeStyles[ph.type];
+          const endDate = phaseDates[i];
+          return (
+            <div key={ph.id} style={{
+              display:'grid', gridTemplateColumns:'160px 1fr',
+              gap:0, borderBottom:`0.5px solid ${ph.current ? T.ink : T.softLine}`,
+              background: ph.current ? T.goldSoft : 'transparent',
+              margin: ph.current ? '0 -20px' : 0,
+              padding: ph.current ? '0 20px' : 0,
+            }}>
+              {/* Left: phase marker */}
+              <div style={{ padding:'28px 24px 28px 0', borderRight:`0.5px solid ${ph.current ? T.gold : T.line}`, display:'flex', flexDirection:'column', gap:10 }}>
+                <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.22em', padding:'3px 8px', background:ts.bg, color:ts.color, display:'inline-block', width:'fit-content' }}>
+                  {ts.label}
+                </span>
+                <div style={{ fontFamily:T.display, fontWeight:400, fontSize:13, color:T.muted, lineHeight:1.4 }}>
+                  {ph.startWeight.toFixed(0)}→{ph.endWeight.toFixed(0)} kg
+                </div>
+                {ph.durationWeeks > 0 && (
+                  <Kicker color={T.muted}>{ph.durationWeeks} weeks</Kicker>
+                )}
+                {endDate && ph.durationWeeks > 0 && (
+                  <Kicker color={ph.current ? T.gold : T.muted} style={{ fontSize:9 }}>
+                    ~{endDate.toLocaleDateString('en-GB', { month:'short', year:'numeric' })}
+                  </Kicker>
+                )}
+                {ph.current && (
+                  <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:700, letterSpacing:'0.2em', color:T.gold }}>← YOU ARE HERE</span>
+                )}
+              </div>
+
+              {/* Right: phase detail */}
+              <div style={{ padding:'28px 0 28px 28px' }}>
+                <div style={{ marginBottom:8 }}>
+                  <span style={{ fontFamily:T.display, fontWeight:400, fontSize:20, color: ph.current ? T.gold : T.ink }}>
+                    {ph.name}
+                  </span>
+                </div>
+                <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.body, margin:'0 0 16px', lineHeight:1.5 }}>
+                  {ph.tagline}
+                </p>
+
+                {/* BF projection */}
+                <div style={{ display:'inline-flex', gap:24, marginBottom:16, padding:'10px 14px', background: ph.current ? 'rgba(255,255,255,0.5)' : T.surface }}>
+                  <div>
+                    <Kicker style={{ marginBottom:3 }}>Start BF</Kicker>
+                    <span style={{ fontFamily:T.display, fontSize:20, color:T.rose }}>{ph.startBF.toFixed(1)}%</span>
+                  </div>
+                  <div style={{ borderLeft:`0.5px solid ${T.line}`, paddingLeft:24 }}>
+                    <Kicker style={{ marginBottom:3 }}>End BF (est.)</Kicker>
+                    <span style={{ fontFamily:T.display, fontSize:20, color:T.green }}>{ph.endBF.toFixed(1)}%</span>
+                  </div>
+                  {ph.deficit !== null && (
+                    <div style={{ borderLeft:`0.5px solid ${T.line}`, paddingLeft:24 }}>
+                      <Kicker style={{ marginBottom:3 }}>Daily deficit</Kicker>
+                      <span style={{ fontFamily:T.display, fontSize:20, color:T.ink }}>−{ph.deficit} kcal</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <ul style={{ listStyle:'none', padding:0, margin:'0 0 14px', display:'flex', flexDirection:'column', gap:5 }}>
+                  {ph.actions.map((a,j) => (
+                    <li key={j} style={{ fontFamily:T.sans, fontSize:13, fontWeight:300, color:T.body, lineHeight:1.5, paddingLeft:16, position:'relative' }}>
+                      <span style={{ position:'absolute', left:0, color:T.muted }}>—</span>
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Trigger */}
+                <div style={{ padding:'8px 12px', borderLeft:`2px solid ${ts.color}`, background:ts.bg }}>
+                  <Kicker color={ts.color} style={{ marginBottom:3 }}>Next phase unlocks when</Kicker>
+                  <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, margin:0, fontWeight:300 }}>{ph.trigger}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Summary timeline strip */}
+      <div style={{ marginTop:48 }}>
+        <Kicker style={{ marginBottom:14 }}>Full Timeline at −500 kcal/day Moderate Cut</Kicker>
+        <div style={{ display:'flex', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+          {phases.filter(ph => ph.durationWeeks > 0 || ph.id === 7).map((ph,i) => {
+            const ts  = typeStyles[ph.type];
+            const flex = Math.max(ph.durationWeeks, 3);
+            return (
+              <div key={ph.id} style={{ flex, padding:'14px 10px', borderRight:`0.5px solid ${T.line}`, background: ph.current ? T.goldSoft : 'transparent', minWidth:0 }}>
+                <span style={{ display:'block', fontFamily:T.sans, fontSize:8, fontWeight:700, letterSpacing:'0.2em', color:ts.color, marginBottom:5 }}>{ts.label}</span>
+                <span style={{ display:'block', fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.ink, lineHeight:1.2, marginBottom:4 }}>
+                  {ph.endWeight === ph.startWeight ? `${ph.startWeight.toFixed(0)} kg` : `${ph.startWeight.toFixed(0)}→${ph.endWeight.toFixed(0)} kg`}
+                </span>
+                {ph.durationWeeks > 0 && <Kicker style={{ fontSize:8 }}>{ph.durationWeeks}wk</Kicker>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Practical Insights ───────────────────────────────────────────────────────
 
 function Insights({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|null; goal:number }) {
@@ -1212,6 +1535,7 @@ export default function OperatorDashboardClient() {
 
             <Milestones sorted={sorted} reg={reg} goal={goal} />
             <CutStrategies sorted={sorted} goal={goal} />
+            <Phases sorted={sorted} goal={goal} reg={reg} />
           </div>
         )}
 
