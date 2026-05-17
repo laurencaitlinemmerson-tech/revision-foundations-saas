@@ -261,9 +261,9 @@ function shortDate(iso: string): string {
 
 // ─── progress ring ───────────────────────────────────────────────────────────
 
-function Ring({ value, goal, label, suffix = '', size = 76 }: { value: number | null; goal: number; label: string; suffix?: string; size?: number }) {
+function Ring({ value, goal, label, suffix = '', size = 92 }: { value: number | null; goal: number; label: string; suffix?: string; size?: number }) {
   const pct = value === null ? 0 : Math.min(1, value / goal);
-  const stroke = 4;
+  const stroke = 5;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const dash = c * pct;
@@ -301,7 +301,7 @@ function Ring({ value, goal, label, suffix = '', size = 76 }: { value: number | 
 
 // ─── mini bar chart ─────────────────────────────────────────────────────────
 
-function BarChart({ values, labels, height = 56, format }: { values: (number | null)[]; labels: string[]; height?: number; format?: (v: number) => string }) {
+function BarChart({ values, labels, height = 72, format }: { values: (number | null)[]; labels: string[]; height?: number; format?: (v: number) => string }) {
   const nums = values.map((v) => (v === null || !Number.isFinite(v) ? 0 : v));
   const max = Math.max(...nums, 1);
   return (
@@ -326,7 +326,7 @@ function BarChart({ values, labels, height = 56, format }: { values: (number | n
 
 // ─── line chart (mini) ──────────────────────────────────────────────────────
 
-function LineMini({ values, height = 56, width = 240 }: { values: (number | null)[]; height?: number; width?: number }) {
+function LineMini({ values, height = 68, width = 280 }: { values: (number | null)[]; height?: number; width?: number }) {
   const nums = values.map((v) => (v === null || !Number.isFinite(v) ? null : v));
   const valid = nums.filter((v): v is number => v !== null);
   if (valid.length < 2) return <svg width={width} height={height} aria-hidden="true" />;
@@ -347,9 +347,9 @@ function LineMini({ values, height = 56, width = 240 }: { values: (number | null
   const lastY = lastVal !== null ? height - ((lastVal - min) / range) * (height - 4) - 2 : null;
   return (
     <svg width={width} height={height} aria-hidden="true" className="op-line-mini">
-      <path d={path} fill="none" stroke="currentColor" strokeWidth={1} />
+      <path d={path} fill="none" stroke="currentColor" strokeWidth={1.25} />
       {lastY !== null && (
-        <circle cx={lastX} cy={lastY} r={2} fill="currentColor" />
+        <circle cx={lastX} cy={lastY} r={2.5} fill="currentColor" />
       )}
     </svg>
   );
@@ -1200,6 +1200,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
 
       {/* ── Main grid ────────────────────────────────────────────────── */}
       {(slot === 'all' || slot === 'mainGrid') && (
+      <div className="op-health-grid-v2-frame">
       <div className="op-health-grid-v2">
 
         {/* Activity (wide) */}
@@ -1440,6 +1441,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
         </article>
 
       </div>
+      </div>
       )}
 
       {/* ── Lifestyle inputs — water, caffeine, alcohol ──────────────── */}
@@ -1644,9 +1646,9 @@ function MacroDonut({ protein, carbs, fat }: { protein: number | null; carbs: nu
   const kcalC = c * 4;
   const kcalF = f * 9;
   const total = kcalP + kcalC + kcalF;
-  const size = 124;
-  const r = 50;
-  const stroke = 14;
+  const size = 148;
+  const r = 60;
+  const stroke = 16;
   const c2pi = 2 * Math.PI * r;
   if (total === 0) {
     return (
@@ -1685,8 +1687,8 @@ function MacroDonut({ protein, carbs, fat }: { protein: number | null; carbs: nu
         offset += dash;
         return el;
       })}
-      <text x={size / 2} y={size / 2 - 4} textAnchor="middle" fontSize={9} fill="var(--ink-mute)" letterSpacing="0.16em">KCAL</text>
-      <text x={size / 2} y={size / 2 + 14} textAnchor="middle" fontFamily="'Playfair Display', Georgia, serif" fontSize={20} fill="var(--ink)">{Math.round(total).toLocaleString('en-GB')}</text>
+      <text x={size / 2} y={size / 2 - 6} textAnchor="middle" fontSize={10} fill="var(--ink-mute)" letterSpacing="0.16em">KCAL</text>
+      <text x={size / 2} y={size / 2 + 18} textAnchor="middle" fontFamily="'Playfair Display', Georgia, serif" fontSize={24} fill="var(--ink)">{Math.round(total).toLocaleString('en-GB')}</text>
     </svg>
   );
 }

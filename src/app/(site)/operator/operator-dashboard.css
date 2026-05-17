@@ -1384,24 +1384,25 @@
 }
 
 .fitness-reference-shell .op-health-card {
-  background: var(--paper);
+  background: rgba(255, 255, 255, 0.72);
   border: 0.5px solid var(--rule);
-  padding: 18px 18px 14px;
+  padding: 22px 22px 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-height: 220px;
+  gap: 14px;
+  min-height: 280px;
 }
 
 .fitness-reference-shell .op-health-card-head {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  gap: 12px;
 }
 
 .fitness-reference-shell .op-health-card-label {
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   font-weight: 500;
   color: var(--ink-soft);
@@ -1410,12 +1411,12 @@
 .fitness-reference-shell .op-health-primary {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
 }
 
 .fitness-reference-shell .op-health-num {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 32px;
+  font-size: 40px;
   line-height: 1;
   color: var(--ink);
   font-weight: 400;
@@ -1423,7 +1424,7 @@
 }
 
 .fitness-reference-shell .op-health-unit {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -1439,9 +1440,9 @@
 .fitness-reference-shell .op-health-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
+  gap: 8px 14px;
   margin: 0;
-  padding-top: 8px;
+  padding-top: 12px;
   border-top: 0.5px solid var(--rule-soft);
 }
 
@@ -1452,7 +1453,7 @@
 }
 
 .fitness-reference-shell .op-health-stats dt {
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -1460,7 +1461,7 @@
 
 .fitness-reference-shell .op-health-stats dd {
   margin: 0;
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
@@ -1535,12 +1536,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .fitness-reference-shell .op-workout-list li {
   border-top: 0.5px solid var(--rule-soft);
-  padding-top: 8px;
+  padding-top: 10px;
 }
 
 .fitness-reference-shell .op-workout-list li:first-child {
@@ -1573,15 +1574,15 @@
 }
 
 .fitness-reference-shell .op-workout-type {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink);
   font-weight: 500;
 }
 
 .fitness-reference-shell .op-workout-meta {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--ink-mute);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .fitness-reference-shell .op-health-correlations {
@@ -1775,9 +1776,15 @@
 
 .fitness-reference-shell .op-health-grid-v2 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr) 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.fitness-reference-shell .op-health-grid-v2-frame {
+  margin-bottom: 24px;
+  padding: 22px;
+  border: 0.5px solid var(--rule);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 243, 239, 0.94) 100%);
 }
 
 .fitness-reference-shell .op-card-wide {
@@ -1794,6 +1801,10 @@
 }
 
 @media (max-width: 720px) {
+  .fitness-reference-shell .op-health-grid-v2-frame {
+    padding: 18px;
+  }
+
   .fitness-reference-shell .op-health-grid-v2 {
     grid-template-columns: 1fr;
   }
@@ -1806,7 +1817,7 @@
 
 .fitness-reference-shell .op-rings-row {
   display: flex;
-  gap: 28px;
+  gap: 34px;
   justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
@@ -1815,8 +1826,8 @@
 
 .fitness-reference-shell .op-ring {
   position: relative;
-  width: 76px;
-  height: 76px;
+  width: 92px;
+  height: 92px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1834,14 +1845,14 @@
 
 .fitness-reference-shell .op-ring-num {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 15px;
+  font-size: 18px;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 .fitness-reference-shell .op-ring-lbl {
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -1853,8 +1864,8 @@
 .fitness-reference-shell .op-bars {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
-  padding-top: 8px;
+  gap: 6px;
+  padding-top: 12px;
 }
 
 .fitness-reference-shell .op-bar-col {
@@ -1878,7 +1889,7 @@
 }
 
 .fitness-reference-shell .op-bar-lbl {
-  font-size: 8px;
+  font-size: 9px;
   text-align: center;
   color: var(--ink-mute);
   letter-spacing: 0.06em;
@@ -1889,16 +1900,16 @@
 .fitness-reference-shell .op-line-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: var(--ink-soft);
 }
 
 .fitness-reference-shell .op-line-label {
-  font-size: 9px;
+  font-size: 9.5px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-mute);
-  width: 28px;
+  width: 32px;
   flex-shrink: 0;
 }
 
@@ -1911,9 +1922,9 @@
 .fitness-reference-shell .op-sleep-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 8px;
   align-items: end;
-  height: 120px;
+  height: 148px;
   padding-top: 4px;
 }
 
@@ -1940,7 +1951,7 @@
 }
 
 .fitness-reference-shell .op-sleep-night-lbl {
-  font-size: 9px;
+  font-size: 9.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -1952,7 +1963,7 @@
 }
 
 .fitness-reference-shell .op-sleep-night-val {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
 }
@@ -2028,11 +2039,11 @@
 }
 
 .fitness-reference-shell .op-nutri-cell {
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-right: 0.5px solid var(--rule);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .fitness-reference-shell .op-nutri-cell:last-child {
@@ -2049,7 +2060,7 @@
 }
 
 .fitness-reference-shell .op-nutri-lbl {
-  font-size: 9px;
+  font-size: 9.5px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -2058,7 +2069,7 @@
 
 .fitness-reference-shell .op-nutri-num {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 26px;
+  font-size: 30px;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
@@ -2070,7 +2081,7 @@
 .fitness-reference-shell .op-nutri-num.neutral { color: var(--ink); }
 
 .fitness-reference-shell .op-nutri-sub {
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
 }
@@ -2088,7 +2099,7 @@
 }
 
 .fitness-reference-shell .op-nutri-bar {
-  height: 6px;
+  height: 8px;
   background: var(--rule-soft);
   position: relative;
 }
@@ -2103,7 +2114,7 @@
 .fitness-reference-shell .op-nutri-bar > span.warn { background: var(--warn); }
 
 .fitness-reference-shell .op-nutri-empty {
-  padding: 16px 18px;
+  padding: 20px 22px;
   background: var(--paper-deep);
   border: 0.5px solid var(--rule);
 }
@@ -2282,12 +2293,12 @@
 .fitness-reference-shell .op-heatmap {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .fitness-reference-shell .op-heatmap-grid {
   display: grid;
   grid-template-columns: repeat(28, 1fr);
-  gap: 3px;
+  gap: 4px;
 }
 .fitness-reference-shell .op-heatmap-cell {
   aspect-ratio: 1 / 1;
@@ -2304,20 +2315,20 @@
 .fitness-reference-shell .op-heatmap-legend {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 10.5px;
   color: var(--ink-mute);
   letter-spacing: 0.08em;
 }
 .fitness-reference-shell .op-heatmap-swatch {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
 }
 .fitness-reference-shell .op-heatmap-spacer { flex: 1; }
 .fitness-reference-shell .op-heatmap-days {
   display: inline-flex;
-  gap: 6px;
-  font-size: 9.5px;
+  gap: 7px;
+  font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-mute);
