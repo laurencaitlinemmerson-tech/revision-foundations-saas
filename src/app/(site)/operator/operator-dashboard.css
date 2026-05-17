@@ -2318,3 +2318,46 @@
   color: var(--ink-soft);
   line-height: 1.5;
 }
+
+/* ── Editorial chart promotion ───────────────────────────────────── */
+.fitness-reference-shell .fit-editorial-chart {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0)) ,
+    var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 6px 6px 4px;
+  position: relative;
+}
+.fitness-reference-shell .fit-editorial-chart::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 0.5px solid rgba(255,255,255,0.7);
+  pointer-events: none;
+}
+
+/* ── Empty-state Playfair tone overrides ──────────────────────────── */
+.fitness-reference-shell .op-health-empty,
+.fitness-reference-shell .op-health-empty-box p,
+.fitness-reference-shell .op-nutri-empty p {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.fitness-reference-shell .op-health-empty-box p code,
+.fitness-reference-shell .op-nutri-empty p code {
+  font-style: normal;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}
+
+/* Monospace date stamp — used in editorial headers. */
+.fitness-reference-shell .op-date-stamp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}

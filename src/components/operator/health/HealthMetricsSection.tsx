@@ -773,7 +773,7 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
       <section className="op-health-section">
         <header className="op-health-head">
           <span className="op-health-kicker">Apple Health stream</span>
-          <span className="muted">Loading…</span>
+          <span className="muted">Reading the day…</span>
         </header>
       </section>
     );
@@ -784,13 +784,13 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
       <section className="op-health-section">
         <header className="op-health-head">
           <span className="op-health-kicker">Apple Health stream</span>
-          <span className="muted">No data yet</span>
+          <span className="muted">Waiting on first sync</span>
         </header>
         <div className="op-health-empty-box">
           <p>
-            Nothing has synced from Health Auto Export yet. Once a payload arrives at{' '}
-            <code>/api/operator/fitness/auto-sync</code> with metrics enabled (steps, active energy,
-            exercise minutes, resting HR, HRV, sleep analysis, workouts) this section fills in.
+            The week is still being written. Once Health Auto Export posts to{' '}
+            <code>/api/operator/fitness/auto-sync</code> — with steps, energy, exercise, heart, sleep
+            and workouts enabled — the page fills in.
           </p>
         </div>
       </section>
@@ -802,10 +802,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
       <section className="op-health-section">
         <header className="op-health-head">
           <span className="op-health-kicker">Apple Health stream</span>
-          <span className="muted">Error</span>
+          <span className="muted">Something interrupted the read</span>
         </header>
         <div className="op-health-empty-box">
-          <p>Could not load health data: {errorMsg ?? 'unknown error'}</p>
+          <p>The stream stalled: {errorMsg ?? 'unknown error'}. Try again in a moment.</p>
         </div>
       </section>
     );
@@ -821,7 +821,7 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           <h2 className="op-health-title">Today, in body and motion</h2>
         </div>
         <div className="op-health-head-meta">
-          <span className="muted">Latest {latest?.date}</span>
+          <span className="op-date-stamp">{latest?.date ? new Date(latest.date).toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase().replace(/[ ,]+/g, ' · ') : '—'}</span>
           <span className="op-health-head-dot">·</span>
           <span className="muted">{days.length} days on file</span>
         </div>
@@ -1073,10 +1073,10 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           {!hasNutritionData ? (
             <div className="op-nutri-empty">
               <p>
-                Nothing from MyFitnessPal yet. In MFP, turn on{' '}
+                Nothing from MyFitnessPal yet. In MFP, switch on{' '}
                 <em>Settings → Apps &amp; Devices → Apple Health</em> for at least <em>Calories</em>,{' '}
-                <em>Protein</em>, <em>Carbs</em>, <em>Fat</em>. Then in Health Auto Export, enable
-                Dietary Energy + macros on the same automation. Next sync fills this in.
+                <em>Protein</em>, <em>Carbs</em> and <em>Fat</em> — then enable Dietary Energy + macros
+                on the same Health Auto Export automation. The numbers arrive on the next sync.
               </p>
             </div>
           ) : (
@@ -1220,7 +1220,7 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           )}
 
           {workouts.length === 0 && (
-            <p className="op-health-empty">No workouts synced yet.</p>
+            <p className="op-health-empty">No sessions yet — the page waits patiently.</p>
           )}
         </article>
 
@@ -1281,7 +1281,7 @@ function Heatmap({ days, goal }: { days: DailyMetrics[]; goal: number }) {
   // Build a 4-week × 7-day grid ending today. Today is the last (rightmost,
   // bottom) cell. Earlier weeks fill in above. Missing days render as empty.
   if (days.length === 0) {
-    return <p className="op-health-empty">No step data yet.</p>;
+    return <p className="op-health-empty">The grid fills in once steps start syncing.</p>;
   }
   const today = days[days.length - 1] ? new Date(days[days.length - 1].date) : new Date();
   today.setHours(0, 0, 0, 0);

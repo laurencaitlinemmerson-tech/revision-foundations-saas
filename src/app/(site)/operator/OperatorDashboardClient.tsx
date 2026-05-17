@@ -191,6 +191,110 @@ function goalDate(reg: Reg, goal: number): Date | null {
   return new Date(reg.t0 + days * 86400000);
 }
 
+// ─── Editorial helpers ────────────────────────────────────────────────────────
+
+// Monospace date stamp — "MAY · 17 · 2026".
+function dateStamp(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' })
+    .toUpperCase()
+    .replace(/[ ,]+/g, ' · ');
+}
+
+function DateStamp({ iso, style }: { iso: string; style?: CSSProperties }) {
+  return (
+    <span style={{
+      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+      fontSize: 10.5,
+      letterSpacing: '0.18em',
+      color: T.muted,
+      fontVariantNumeric: 'tabular-nums',
+      ...style,
+    }}>{dateStamp(iso)}</span>
+  );
+}
+
+// Full-width editorial section divider with an eyebrow.
+function EditorialDivider({ eyebrow, note }: { eyebrow: string; note?: string }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'auto 1fr auto',
+      alignItems: 'center',
+      gap: 18,
+      margin: '40px 0 22px',
+    }}>
+      <span style={{
+        fontFamily: T.sans,
+        fontSize: 9.5,
+        letterSpacing: '0.32em',
+        textTransform: 'uppercase',
+        fontWeight: 600,
+        color: T.ink,
+      }}>{eyebrow}</span>
+      <span style={{ height: 0.5, background: T.line, display: 'block' }} />
+      {note ? (
+        <span style={{
+          fontFamily: T.display,
+          fontStyle: 'italic',
+          fontSize: 13,
+          color: T.muted,
+        }}>{note}</span>
+      ) : <span />}
+    </div>
+  );
+}
+
+// Auto-generated italic intention line — reads current state aloud.
+function intentionLine(state: State, latest: FitnessReading, goal: number): string {
+  const delta = latest.weight - goal;
+  const weeks = state.weeksAtCurrent;
+  const trend = state.trendKgPerWeek;
+
+  if (delta <= 0) {
+    return weeks >= 4
+      ? 'At goal. Holding the line.'
+      : 'At goal. The work was the steady part.';
+  }
+  if (state.direction === 'losing-fast') {
+    return trend < -0.7
+      ? 'Moving — but watch the pace. Patience compounds.'
+      : 'Quietly moving. Trust the line, not the morning.';
+  }
+  if (state.direction === 'losing-slow') {
+    return weeks >= 3
+      ? `Patient. Steady. ${weeks} weeks of slow, useful work.`
+      : 'Patient. The slow line is the honest one.';
+  }
+  if (state.direction === 'stable') {
+    return weeks >= 4
+      ? `Held for ${weeks} weeks. The plateau is information.`
+      : 'Steady. Sometimes that is the day\'s job.';
+  }
+  if (state.direction === 'gaining') {
+    return trend > 0.5
+      ? 'Drifted up. Not a failure — a signal.'
+      : 'A small drift. Two clean days settles it.';
+  }
+  return 'Reading the line, not the scale.';
+}
+
+function HeroIntention({ state, latest, goal }: { state: State; latest: FitnessReading; goal: number }) {
+  return (
+    <p style={{
+      fontFamily: T.display,
+      fontStyle: 'italic',
+      fontSize: 17,
+      lineHeight: 1.45,
+      color: T.ink,
+      margin: '14px 0 0',
+      maxWidth: '42ch',
+      opacity: 0.85,
+    }}>{intentionLine(state, latest, goal)}</p>
+  );
+}
+
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string, opts: { long?: boolean } = {}) {
@@ -692,7 +796,7 @@ function AnalyticsSection({
             <MiniColumnChart
               values={workoutWeekBuckets.map((b) => b.minutes)}
               labels={workoutWeekBuckets.map((b) => b.day)}
-              color={T.blue}
+              color={T.gold}
               height={120}
               formatValue={(v) => `${Math.round(v)} min`}
             />
@@ -835,7 +939,7 @@ function BalanceBars({ maintenance, intake, deficit, height }: { maintenance: nu
   const max = Math.max(maintenance, intake, 1);
   const rows: [string, number, string][] = [
     ['Maintenance', maintenance, T.muted],
-    ['Intake', intake, T.blue],
+    ['Intake', intake, T.gold],
     ['Deficit', deficit, deficit > 0 ? T.green : T.rose],
   ];
   return (
@@ -4598,7 +4702,7 @@ export default function OperatorDashboardClient() {
     }} />;
   }
 
-  if (!latest) return <div style={{ background:T.paper, minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted }}>No readings yet.</p></div>;
+  if (!latest) return <div style={{ background:T.paper, minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted }}>The page is waiting for the first reading.</p></div>;
   const previousWeek = nearestReadingByDays(dashboardSource, latest, 7);
   const monthAgo = nearestReadingByDays(dashboardSource, latest, 30);
   const cadence = loggingCadence(dashboardSource);
@@ -4703,8 +4807,9 @@ export default function OperatorDashboardClient() {
                 <span className="pill neutral">Last log {formatReferenceDate(latest.date)}</span>
               </div>
               <h1>Body composition <em>timeline</em></h1>
-              <div className="sub">
-                <span>{formatReferenceDate(dashboardSource[0].date)} start</span>
+              <HeroIntention state={state} latest={latest} goal={goal} />
+              <div className="sub" style={{ marginTop: 18 }}>
+                <DateStamp iso={dashboardSource[0].date} />
                 <span className="dot" />
                 <span>{dashboardSource.length.toLocaleString('en-GB')} readings</span>
                 <span className="dot" />
@@ -4714,7 +4819,11 @@ export default function OperatorDashboardClient() {
               </div>
             </div>
             <div className="fit-headline-stat">
-              <div className="lbl">Today - {formatReferenceDate(latest.date)}</div>
+              <div className="lbl" style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
+                <span>Today</span>
+                <span style={{ opacity: 0.45 }}>·</span>
+                <DateStamp iso={latest.date} />
+              </div>
               <div className="num">{latest.weight.toFixed(1)}<small>kg</small></div>
               <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} - 7-day marker</div>
             </div>
@@ -4731,6 +4840,7 @@ export default function OperatorDashboardClient() {
           </div>
         </section>
 
+        <EditorialDivider eyebrow="Analysis" note="Trend, balance, load, support — four reads." />
         <AnalyticsSection
           latest={latest}
           sorted={dashboardSource}
@@ -4743,39 +4853,46 @@ export default function OperatorDashboardClient() {
           opPw={opPw}
         />
 
+        <EditorialDivider eyebrow="Motion" note="Today's body, drawn from Apple Health." />
         <div id="operator-health-stream">
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} />
         </div>
 
+        <EditorialDivider eyebrow="Evidence" note="The long line — every reading, every phase." />
+
+        {/* Long-form weight chart — promoted to a full-width editorial moment. */}
+        <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
+          <FitnessLineChart
+            title={<>Weight, phases and <em>evidence</em></>}
+            subtitle="Raw readings · smoothed trend · phase bands · pinned events"
+            points={buildWeightSeries(dashboardSource)}
+            color="oklch(0.70 0.012 70 / 0.48)"
+            minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
+            maxY={Math.ceil(Math.max(...dashboardSource.map((row) => row.weight)) + 2)}
+            annotations={[
+              {
+                date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
+                value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
+                title: 'Leanest point',
+              },
+              {
+                date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
+                value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
+                title: 'Peak weight',
+              },
+              { date: latest.date, value: latest.weight, title: 'Today' },
+            ]}
+            secondaryPoints={rollingAverage}
+            secondaryColor="oklch(0.70 0.12 76)"
+            secondaryLabel="45-day trend"
+            phases={phaseMarkers}
+            targetWeight={goal}
+            showRangeToggle
+          />
+        </section>
+
         <section className="fit-grid">
           <div className="fit-main">
-            <FitnessLineChart
-              title={<>Weight, phases and <em>evidence</em></>}
-              subtitle="Raw readings - smoothed trend - phase bands - pinned events"
-              points={buildWeightSeries(dashboardSource)}
-              color="oklch(0.70 0.012 70 / 0.48)"
-              minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
-              maxY={Math.ceil(Math.max(...dashboardSource.map((row) => row.weight)) + 2)}
-              annotations={[
-                {
-                  date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
-                  value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
-                  title: 'Leanest point',
-                },
-                {
-                  date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
-                  value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
-                  title: 'Peak weight',
-                },
-                { date: latest.date, value: latest.weight, title: 'Today' },
-              ]}
-              secondaryPoints={rollingAverage}
-              secondaryColor="oklch(0.70 0.12 76)"
-              secondaryLabel="45-day trend"
-              phases={phaseMarkers}
-              targetWeight={goal}
-              showRangeToggle
-            />
 
             <div className="fit-panel">
               <div className="fit-panel-head">
