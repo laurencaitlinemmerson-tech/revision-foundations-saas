@@ -507,6 +507,218 @@ function Milestones({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|nu
   );
 }
 
+// ─── Cut Strategies ───────────────────────────────────────────────────────────
+
+function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number }) {
+  const latest = sorted[sorted.length-1];
+  const toGo   = latest.weight - goal;
+
+  // Mifflin-St Jeor BMR (female, age 30 — reasonable default)
+  const bmr  = Math.round(10*latest.weight + 6.25*HEIGHT_M*100 - 5*30 - 161);
+  const tdee = { sedentary: Math.round(bmr*1.2), light: Math.round(bmr*1.375), moderate: Math.round(bmr*1.55) };
+
+  const KcalPerKg = 7700;
+
+  const strategies = [
+    {
+      name:'Slow & Steady', deficit:300,
+      note:'Easiest to maintain for months. Minimal hunger. Best for preserving the muscle mass you have.',
+      pro:'High adherence, near-zero muscle loss, no food obsession',
+      con:'Longest timeline — requires patience',
+    },
+    {
+      name:'Moderate Cut', deficit:500, recommended:true,
+      note:'The evidence-backed sweet spot. Clinically recommended as the primary approach for sustainable fat loss.',
+      pro:'Sustainable for 6–12 months, protects muscle when paired with resistance training',
+      con:'Requires consistent tracking of intake',
+    },
+    {
+      name:'Aggressive Cut', deficit:750,
+      note:'Faster results, but harder to sustain beyond 3 months without diet breaks.',
+      pro:'Meaningful progress within 2–3 months',
+      con:'Elevated hunger, fatigue, some muscle loss risk',
+    },
+    {
+      name:'Maximum Safe', deficit:1000,
+      note:'Upper clinical limit. Appropriate only short-term or under medical supervision.',
+      pro:'Fastest route to the goal',
+      con:'Nutrient deficiency risk, energy crash, significant muscle loss without careful protein intake',
+    },
+  ];
+
+  const nowMs = new Date(latest.date).getTime();
+
+  const goalDateForDeficit = (deficit:number) => {
+    const kgPerWeek = deficit / KcalPerKg * 7;
+    const weeksNeeded = toGo / kgPerWeek;
+    return new Date(nowMs + weeksNeeded * 7 * 86400000);
+  };
+
+  const thisWeekTarget = (deficit:number) => {
+    const kgPerDay = deficit / KcalPerKg;
+    return Math.max(0, latest.weight - kgPerDay * 7).toFixed(1);
+  };
+
+  // Verdict logic
+  const verdict = latest.bmi >= 30 && latest.bodyFat > 33;
+  const verdictText = verdict
+    ? `Yes — cut. BMI ${latest.bmi.toFixed(1)} (obese class ${latest.bmi >= 35 ? 'II' : 'I'}) and body fat ${latest.bodyFat.toFixed(1)}% both indicate a calorie deficit is clinically appropriate. The moderate cut is the recommended starting point.`
+    : `Moderate deficit recommended. Your metrics suggest fat loss would improve health markers significantly.`;
+
+  return (
+    <div style={{ marginTop:80 }}>
+      <Kicker style={{ marginBottom:10 }}>Section VI · The Cut</Kicker>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
+        Should you cut? <em>Yes. Here is how.</em>
+      </h2>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+        Four strategies, their trade-offs, and what each means for your goal date.
+      </p>
+      <ThickRule style={{ margin:'18px 0 0' }} />
+
+      {/* Verdict */}
+      <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:32, padding:'28px 0', borderBottom:`0.5px solid ${T.line}`, alignItems:'start' }}>
+        <div>
+          <Kicker style={{ marginBottom:10 }}>The Verdict</Kicker>
+          <span style={{ fontFamily:T.display, fontWeight:400, fontSize:56, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>Cut.</span>
+        </div>
+        <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:'28px 0 0', maxWidth:'52ch' }}>
+          {verdictText}
+        </p>
+      </div>
+
+      {/* TDEE estimate */}
+      <div style={{ padding:'24px 0', borderBottom:`0.5px solid ${T.line}` }}>
+        <Kicker style={{ marginBottom:14 }}>Estimated Daily Energy Expenditure · Mifflin-St Jeor (female, 30)</Kicker>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:0 }}>
+          {[
+            { label:'Sedentary', mult:'×1.2', kcal:tdee.sedentary, note:'Desk job, little exercise' },
+            { label:'Lightly Active', mult:'×1.375', kcal:tdee.light, note:'Light exercise 1–3 days/wk' },
+            { label:'Moderately Active', mult:'×1.55', kcal:tdee.moderate, note:'Exercise 3–5 days/wk' },
+          ].map((row,i) => (
+            <div key={i} style={{ padding:'16px 20px', borderRight: i<2?`0.5px solid ${T.line}`:'none' }}>
+              <Kicker style={{ marginBottom:8 }}>{row.label} {row.mult}</Kicker>
+              <div style={{ display:'flex', alignItems:'baseline', gap:5, marginBottom:5 }}>
+                <span style={{ fontFamily:T.display, fontSize:36, color:T.ink, letterSpacing:'-0.02em' }}>{row.kcal.toLocaleString()}</span>
+                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kcal/day</span>
+              </div>
+              <Kicker color={T.muted}>{row.note}</Kicker>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontFamily:T.sans, fontSize:11, color:T.muted, fontWeight:300, margin:'12px 20px 0', fontStyle:'italic' }}>
+          Estimate only. Verify with a full TDEE calculator using your actual age and activity level.
+        </p>
+      </div>
+
+      {/* Strategy comparison */}
+      <div style={{ marginTop:0 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr 1.2fr 1.2fr', padding:'12px 0', borderBottom:`0.5px solid ${T.softLine}` }}>
+          {['Strategy','Deficit','Intake (sedentary)','Loss rate','Goal date'].map((h,i)=>(
+            <Kicker key={i} style={{ textAlign:i>0?'right':'left' }}>{h}</Kicker>
+          ))}
+        </div>
+        {strategies.map((s, i) => {
+          const kgPerWeek = (s.deficit/KcalPerKg*7);
+          const intake = tdee.sedentary - s.deficit;
+          const gDate = goalDateForDeficit(s.deficit);
+          const isRec = s.recommended;
+          return (
+            <div key={i} style={{
+              display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr 1.2fr 1.2fr',
+              padding:'20px 0', borderBottom:`0.5px solid ${T.softLine}`,
+              alignItems:'baseline',
+              background: isRec ? T.goldSoft : 'transparent',
+              margin: isRec ? '0 -20px' : 0,
+            }}>
+              <div>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color: isRec?T.gold:T.ink }}>{s.name}</span>
+                  {isRec && <span style={{ fontFamily:T.sans, fontSize:8, fontWeight:600, letterSpacing:'0.2em', color:T.gold, padding:'2px 7px', border:`0.5px solid ${T.gold}` }}>RECOMMENDED</span>}
+                </div>
+                <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, margin:'6px 0 0', lineHeight:1.5, maxWidth:'28ch' }}>{s.note}</p>
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <span style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>−{s.deficit}</span>
+                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kcal</span>
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <span style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>{intake.toLocaleString()}</span>
+                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kcal</span>
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <span style={{ fontFamily:T.display, fontSize:22, color:T.green }}>−{kgPerWeek.toFixed(2)}</span>
+                <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kg/wk</span>
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: isRec?T.gold:T.body }}>
+                  {fmtDateObj(gDate)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Pro/Con detail */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginTop:48 }}>
+        {strategies.map((s,i) => (
+          <div key={i} style={{ padding:'22px 24px', borderRight: i%2===0?`0.5px solid ${T.line}`:'none', borderBottom: i<2?`0.5px solid ${T.line}`:'none' }}>
+            <Kicker style={{ marginBottom:8 }}>{s.name} · −{s.deficit} kcal/day</Kicker>
+            <div style={{ fontFamily:T.sans, fontSize:12, color:T.green, marginBottom:5, fontWeight:300 }}>
+              <strong style={{ fontWeight:600 }}>↑ </strong>{s.pro}
+            </div>
+            <div style={{ fontFamily:T.sans, fontSize:12, color:T.rose, fontWeight:300 }}>
+              <strong style={{ fontWeight:600 }}>↓ </strong>{s.con}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* This week's targets */}
+      <div style={{ marginTop:56 }}>
+        <Kicker style={{ marginBottom:10 }}>This Week · Specific Targets</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:28, letterSpacing:'-0.01em', lineHeight:1.05, color:T.ink, margin:'0 0 4px' }}>
+          Starting from <em>{latest.weight.toFixed(1)} kg</em>, where should you be in 7 days?
+        </h3>
+        <ThickRule style={{ margin:'16px 0 0' }} />
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', borderBottom:`0.5px solid ${T.line}` }}>
+          {strategies.map((s,i) => {
+            const target = parseFloat(thisWeekTarget(s.deficit));
+            const change = target - latest.weight;
+            const isRec = s.recommended;
+            return (
+              <div key={i} style={{ padding:'20px 18px', borderRight: i<3?`0.5px solid ${T.line}`:'none', background: isRec?T.goldSoft:'transparent' }}>
+                <Kicker style={{ marginBottom:10 }} color={isRec?T.gold:undefined}>{s.name}</Kicker>
+                <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:6 }}>
+                  <span style={{ fontFamily:T.display, fontSize:38, color:isRec?T.gold:T.ink, letterSpacing:'-0.02em', lineHeight:1 }}>{target.toFixed(1)}</span>
+                  <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kg</span>
+                </div>
+                <div style={{ fontFamily:T.sans, fontSize:11, color:T.green, fontWeight:500 }}>
+                  {change.toFixed(2)} kg this week
+                </div>
+                <div style={{ fontFamily:T.sans, fontSize:10, color:T.muted, marginTop:4, letterSpacing:'0.05em' }}>
+                  {(tdee.sedentary - s.deficit).toLocaleString()} kcal/day
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Muscle preservation note */}
+      <div style={{ marginTop:40, padding:'24px', background:T.greenSoft, borderLeft:`2px solid ${T.green}` }}>
+        <Kicker color={T.green} style={{ marginBottom:10 }}>Muscle Mass · {latest.muscleMass.toFixed(1)}% · Your strongest metric</Kicker>
+        <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:0 }}>
+          Muscle at {latest.muscleMass.toFixed(1)}% is your best number. Aggressive cuts risk eroding it.{' '}
+          <strong style={{ color:T.ink, fontWeight:500 }}>Recommendation:</strong> start with the moderate cut (−500 kcal/day) and pair it with 2–3 resistance sessions per week.
+          Ensure protein intake is at least <strong style={{ color:T.ink, fontWeight:500 }}>{Math.round(latest.weight * 1.6)}–{Math.round(latest.weight * 2.0)} g/day</strong> ({(latest.weight*1.6).toFixed(0)}–{(latest.weight*2.0).toFixed(0)} g at current weight) to protect lean mass during the cut.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Practical Insights ───────────────────────────────────────────────────────
 
 function Insights({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|null; goal:number }) {
@@ -999,6 +1211,7 @@ export default function OperatorDashboardClient() {
             <TrendChart sorted={sorted} reg={reg} goal={goal} />
 
             <Milestones sorted={sorted} reg={reg} goal={goal} />
+            <CutStrategies sorted={sorted} goal={goal} />
           </div>
         )}
 
