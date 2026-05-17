@@ -761,116 +761,124 @@ function AnalyticsSection({
       : `Latest log ${formatReferenceDate(todayHealth.date)}`;
 
   return (
-    <section style={{ marginBottom: 28 }}>
-      <div className="fit-panel-head" style={{ marginBottom: 14 }}>
-        <div>
-          <h3>Performance <em>analysis</em></h3>
-          <div className="meta">Deficit, weight trend, workout load and protein support — at a glance.</div>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
-
-        {/* ── Card 1: Weight trend vs goal ── */}
-        <AnalysisCard
-          label="Weight trend"
-          headline={`${latest.weight.toFixed(1)} kg`}
-          sub={`${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk · target ${etaLabel}`}
-          tone={latest.weight <= goal ? 'good' : state.trendKgPerWeek < -0.05 ? 'good' : 'warn'}
-        >
-          <MiniLineChart
-            points={weightTrendPoints.map((p) => p.w)}
-            goal={goal}
-            color={T.gold}
-            height={120}
-          />
-          <AnalysisStats
-            rows={[
-              ['To goal', `${remainingWeight.toFixed(1)} kg`],
-              ['Direction', trendDirection],
-              ['vs target rate', trendComparison],
-            ]}
-          />
-        </AnalysisCard>
-
-        {/* ── Card 2: Energy balance ── */}
-        <AnalysisCard
-          label="Energy balance"
-          headline={dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Setup'}
-          sub={`${deficitStatus} · expected ${expectedLoss.toFixed(2)} kg/wk loss`}
-          tone={dailyDeficit > 0 && dailyDeficit < 900 && dailyDeficit >= 200 ? 'good' : 'warn'}
-        >
-          <BalanceBars
-            maintenance={nutrition.activeTdee}
-            intake={nutrition.intake}
-            deficit={Math.max(0, dailyDeficit)}
-            height={120}
-          />
-          <AnalysisStats
-            rows={[
-              ['Maintenance', `${nutrition.activeTdee.toLocaleString()} kcal`],
-              ['Target intake', `${nutrition.intake.toLocaleString()} kcal`],
-              ['Weekly deficit', weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : '—'],
-            ]}
-          />
-        </AnalysisCard>
-
-        {/* ── Card 3: Workout load (this week) ── */}
-        <AnalysisCard
-          label="Workout load"
-          headline={`${Math.round(workoutMinutesWeek)} min`}
-          sub={`${workouts.length} sessions · ${Math.round(workoutKcalWeek)} kcal · ${activitySupport.toLowerCase()}`}
-          tone={cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}
-        >
-          {workoutState === 'loading' ? (
-            <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, margin: '24px 0' }}>Loading workouts…</p>
-          ) : workoutState === 'error' ? (
-            <p style={{ fontFamily: T.sans, fontSize: 12, color: T.rose, margin: '24px 0' }}>Unable to load workouts.</p>
-          ) : workoutState === 'empty' ? (
-            <div style={{ display: 'grid', gap: 8, margin: '16px 0' }}>
-              <p style={{ fontFamily: T.display, fontStyle: 'italic', fontSize: 15, color: T.body, lineHeight: 1.5, margin: 0 }}>
-                The API is returning <code style={{ fontStyle: 'normal', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: 12 }}>{'{"workouts":[]}'}</code>.
-              </p>
-              <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, lineHeight: 1.65, margin: 0 }}>
-                Most likely Health Auto Export has workouts disabled. Turn workout export back on in the HAE automation so session writes start hitting the operator workouts endpoint.
-              </p>
+    <section style={{ marginBottom: 36 }}>
+      <div style={{
+        background: `linear-gradient(180deg, ${T.paper} 0%, rgba(251,248,243,0.94) 100%)`,
+        border: `0.5px solid ${T.line}`,
+        padding: '22px 22px 24px',
+      }}>
+        <div className="fit-panel-head" style={{ marginBottom: 18, padding: 0, borderBottom: 'none' }}>
+          <div>
+            <h3 style={{ fontSize: 24 }}>Performance <em>analysis</em></h3>
+            <div className="meta" style={{ fontSize: 12 }}>
+              Deficit, weight trend, workout load and protein support — at a glance.
             </div>
-          ) : (
-            <MiniColumnChart
-              values={workoutWeekBuckets.map((b) => b.minutes)}
-              labels={workoutWeekBuckets.map((b) => b.day)}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
+
+          {/* ── Card 1: Weight trend vs goal ── */}
+          <AnalysisCard
+            label="Weight trend"
+            headline={`${latest.weight.toFixed(1)} kg`}
+            sub={`${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk · target ${etaLabel}`}
+            tone={latest.weight <= goal ? 'good' : state.trendKgPerWeek < -0.05 ? 'good' : 'warn'}
+          >
+            <MiniLineChart
+              points={weightTrendPoints.map((p) => p.w)}
+              goal={goal}
               color={T.gold}
-              height={120}
-              formatValue={(v) => `${Math.round(v)} min`}
+              height={148}
             />
-          )}
-          <AnalysisStats
-            rows={[
-              ['Cadence score', `${cadence.score}/100`],
-              ['Days logged (14d)', `${cadence.count}`],
-              ['Recent', recentWorkouts.length > 0 ? `${recentWorkouts[0].type ?? 'Workout'} · ${new Date(recentWorkouts[0].startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'None yet'],
-            ]}
-          />
-        </AnalysisCard>
+            <AnalysisStats
+              rows={[
+                ['To goal', `${remainingWeight.toFixed(1)} kg`],
+                ['Direction', trendDirection],
+                ['vs target rate', trendComparison],
+              ]}
+            />
+          </AnalysisCard>
 
-        {/* ── Card 4: Protein vs target ── */}
-        <AnalysisCard
-          label="Protein support"
-          headline={proteinIntake !== null ? `${Math.round(proteinIntake)} g` : '—'}
-          sub={`${proteinNote} · ${proteinTarget} g target (1.8 g/kg)`}
-          tone={proteinIntake === null ? 'neutral' : proteinPct >= 1 ? 'good' : proteinPct >= 0.85 ? 'neutral' : 'warn'}
-        >
-          <ProteinGauge current={proteinIntake} target={proteinTarget} />
-          <AnalysisStats
-            rows={[
-              [proteinSourceLabel, proteinIntake !== null ? `${Math.round(proteinIntake)} g` : '—'],
-              ['Target', `${proteinTarget} g`],
-              ['Daily kcal', `${nutrition.intake.toLocaleString()} kcal`],
-              ['Coverage', proteinIntake !== null ? `${Math.round(proteinPct * 100)}% of target` : 'Awaiting macro sync'],
-            ]}
-          />
-        </AnalysisCard>
+          {/* ── Card 2: Energy balance ── */}
+          <AnalysisCard
+            label="Energy balance"
+            headline={dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Setup'}
+            sub={`${deficitStatus} · expected ${expectedLoss.toFixed(2)} kg/wk loss`}
+            tone={dailyDeficit > 0 && dailyDeficit < 900 && dailyDeficit >= 200 ? 'good' : 'warn'}
+          >
+            <BalanceBars
+              maintenance={nutrition.activeTdee}
+              intake={nutrition.intake}
+              deficit={Math.max(0, dailyDeficit)}
+              height={148}
+            />
+            <AnalysisStats
+              rows={[
+                ['Maintenance', `${nutrition.activeTdee.toLocaleString()} kcal`],
+                ['Target intake', `${nutrition.intake.toLocaleString()} kcal`],
+                ['Weekly deficit', weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : '—'],
+              ]}
+            />
+          </AnalysisCard>
 
+          {/* ── Card 3: Workout load (this week) ── */}
+          <AnalysisCard
+            label="Workout load"
+            headline={`${Math.round(workoutMinutesWeek)} min`}
+            sub={`${workouts.length} sessions · ${Math.round(workoutKcalWeek)} kcal · ${activitySupport.toLowerCase()}`}
+            tone={cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}
+          >
+            {workoutState === 'loading' ? (
+              <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, margin: '24px 0' }}>Loading workouts…</p>
+            ) : workoutState === 'error' ? (
+              <p style={{ fontFamily: T.sans, fontSize: 12, color: T.rose, margin: '24px 0' }}>Unable to load workouts.</p>
+            ) : workoutState === 'empty' ? (
+              <div style={{ display: 'grid', gap: 8, margin: '16px 0' }}>
+                <p style={{ fontFamily: T.display, fontStyle: 'italic', fontSize: 15, color: T.body, lineHeight: 1.5, margin: 0 }}>
+                  The API is returning <code style={{ fontStyle: 'normal', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: 12 }}>{'{"workouts":[]}'}</code>.
+                </p>
+                <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, lineHeight: 1.65, margin: 0 }}>
+                  Most likely Health Auto Export has workouts disabled. Turn workout export back on in the HAE automation so session writes start hitting the operator workouts endpoint.
+                </p>
+              </div>
+            ) : (
+              <MiniColumnChart
+                values={workoutWeekBuckets.map((b) => b.minutes)}
+                labels={workoutWeekBuckets.map((b) => b.day)}
+                color={T.gold}
+                height={148}
+                formatValue={(v) => `${Math.round(v)} min`}
+              />
+            )}
+            <AnalysisStats
+              rows={[
+                ['Cadence score', `${cadence.score}/100`],
+                ['Days logged (14d)', `${cadence.count}`],
+                ['Recent', recentWorkouts.length > 0 ? `${recentWorkouts[0].type ?? 'Workout'} · ${new Date(recentWorkouts[0].startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'None yet'],
+              ]}
+            />
+          </AnalysisCard>
+
+          {/* ── Card 4: Protein vs target ── */}
+          <AnalysisCard
+            label="Protein support"
+            headline={proteinIntake !== null ? `${Math.round(proteinIntake)} g` : '—'}
+            sub={`${proteinNote} · ${proteinTarget} g target (1.8 g/kg)`}
+            tone={proteinIntake === null ? 'neutral' : proteinPct >= 1 ? 'good' : proteinPct >= 0.85 ? 'neutral' : 'warn'}
+          >
+            <ProteinGauge current={proteinIntake} target={proteinTarget} />
+            <AnalysisStats
+              rows={[
+                [proteinSourceLabel, proteinIntake !== null ? `${Math.round(proteinIntake)} g` : '—'],
+                ['Target', `${proteinTarget} g`],
+                ['Daily kcal', `${nutrition.intake.toLocaleString()} kcal`],
+                ['Coverage', proteinIntake !== null ? `${Math.round(proteinPct * 100)}% of target` : 'Awaiting macro sync'],
+              ]}
+            />
+          </AnalysisCard>
+
+        </div>
       </div>
     </section>
   );
@@ -887,18 +895,18 @@ function AnalysisCard({
   const toneColor = tone === 'good' ? T.green : tone === 'warn' ? T.rose : T.muted;
   return (
     <article style={{
-      background: T.paper, border: `0.5px solid ${T.line}`, padding: '18px 18px 16px',
-      display: 'flex', flexDirection: 'column', gap: 12, minHeight: 260,
+      background: 'rgba(255,255,255,0.72)', border: `0.5px solid ${T.line}`, padding: '22px 22px 18px',
+      display: 'flex', flexDirection: 'column', gap: 14, minHeight: 320,
     }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <span style={{ fontFamily: T.sans, fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 500, color: T.muted }}>{label}</span>
-        <span style={{ fontFamily: T.sans, fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: toneColor, fontWeight: 600 }}>
+        <span style={{ fontFamily: T.sans, fontSize: 10.5, letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 500, color: T.muted }}>{label}</span>
+        <span style={{ fontFamily: T.sans, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: toneColor, fontWeight: 600 }}>
           {tone === 'good' ? 'On track' : tone === 'warn' ? 'Needs review' : 'Steady'}
         </span>
       </header>
       <div>
-        <div style={{ fontFamily: T.display, fontSize: 28, color: T.ink, lineHeight: 1, letterSpacing: '-0.01em' }}>{headline}</div>
-        <div style={{ fontFamily: T.sans, fontSize: 11.5, color: T.body, marginTop: 6, lineHeight: 1.5 }}>{sub}</div>
+        <div style={{ fontFamily: T.display, fontSize: 34, color: T.ink, lineHeight: 0.98, letterSpacing: '-0.015em' }}>{headline}</div>
+        <div style={{ fontFamily: T.sans, fontSize: 12.5, color: T.body, marginTop: 7, lineHeight: 1.6 }}>{sub}</div>
       </div>
       {children}
     </article>
@@ -909,12 +917,12 @@ function AnalysisStats({ rows }: { rows: [string, string][] }) {
   return (
     <dl style={{
       display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px',
-      margin: 0, paddingTop: 10, borderTop: `0.5px solid ${T.softLine}`,
+      margin: 0, paddingTop: 12, borderTop: `0.5px solid ${T.softLine}`,
     }}>
       {rows.map(([k, v]) => (
         <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gridColumn: rows.length === 3 && k === rows[2][0] ? '1 / -1' : undefined }}>
-          <dt style={{ fontFamily: T.sans, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>{k}</dt>
-          <dd style={{ margin: 0, fontFamily: T.sans, fontSize: 12, color: T.ink, fontVariantNumeric: 'tabular-nums', textAlign: 'right' }}>{v}</dd>
+          <dt style={{ fontFamily: T.sans, fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>{k}</dt>
+          <dd style={{ margin: 0, fontFamily: T.sans, fontSize: 12.5, color: T.ink, fontVariantNumeric: 'tabular-nums', textAlign: 'right' }}>{v}</dd>
         </div>
       ))}
     </dl>
@@ -1011,7 +1019,7 @@ function ProteinGauge({ current, target }: { current: number | null; target: num
   const overTarget = pct > 1;
   const color = pct >= 1 ? T.green : pct >= 0.85 ? T.gold : T.rose;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center', height: 120 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'center', height: 148 }}>
       <div style={{ position: 'relative', height: 14, background: T.softLine }}>
         <div style={{ position: 'absolute', inset: 0, width: `${fillPct}%`, background: color, opacity: 0.9 }} />
         <div style={{ position: 'absolute', top: -3, bottom: -3, left: '100%', width: 1.5, background: T.ink, opacity: 0.5 }}
@@ -4865,13 +4873,6 @@ export default function OperatorDashboardClient() {
                 <div className="gc-num">{cadence.count}</div>
                 <div className="gc-lbl">days logged</div>
                 <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Sync</div>
-                <div className="gc-num">{cloudOk ? 'Live' : 'Local'}</div>
-                <div className="gc-lbl">data mode</div>
-                <div className={`gc-sub ${cloudOk ? 'good' : 'warn'}`}>{syncSummary}</div>
               </div>
             </div>
           </section>
