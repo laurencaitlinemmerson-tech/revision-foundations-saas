@@ -9,6 +9,7 @@ import React, {
 interface FitnessReading {
   id: string; date: string; weight: number; bmi: number;
   bodyFat: number; water: number; muscleMass: number; boneMass: number;
+  visceralFat?: number;
 }
 interface Reg {
   slope: number; intercept: number; r2: number; t0: number;
@@ -30,20 +31,124 @@ const T = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'operator-log-v3';
+const STORAGE_KEY = 'operator-log-v4';
 const AUTH_KEY    = 'operator-log-auth-v3';
 const GOAL_KEY    = 'operator-log-goal-v3';
 const AUTH_TTL    = 30 * 24 * 60 * 60 * 1000;
 const HEIGHT_M    = 1.57;
 
+// 110 weekly readings from Aug 2023 → May 2026 (imported from scale CSV)
 const SEED: FitnessReading[] = [
-  { id:'s1', date:'2025-11-15', weight:82.0, bmi:33.3, bodyFat:44.5, water:38.8, muscleMass:50.5, boneMass:3.3 },
-  { id:'s2', date:'2025-12-10', weight:82.5, bmi:33.5, bodyFat:44.8, water:38.6, muscleMass:50.4, boneMass:3.3 },
-  { id:'s3', date:'2026-01-12', weight:83.0, bmi:33.7, bodyFat:45.0, water:38.4, muscleMass:50.2, boneMass:3.2 },
-  { id:'s4', date:'2026-02-08', weight:83.5, bmi:33.9, bodyFat:45.5, water:38.2, muscleMass:50.1, boneMass:3.2 },
-  { id:'s5', date:'2026-03-14', weight:85.0, bmi:34.5, bodyFat:46.0, water:38.0, muscleMass:50.0, boneMass:3.2 },
-  { id:'s6', date:'2026-04-09', weight:86.5, bmi:35.1, bodyFat:46.5, water:37.9, muscleMass:49.9, boneMass:3.2 },
-  { id:'s7', date:'2026-05-17', weight:88.2, bmi:35.8, bodyFat:47.0, water:37.9, muscleMass:49.8, boneMass:3.2 },
+  { id:'s1', date:'2023-08-13', weight:77.5, bmi:31.4, bodyFat:43.9, water:40.0, muscleMass:52.6, boneMass:3.4, visceralFat:8.0 },
+  { id:'s2', date:'2023-08-20', weight:76.2, bmi:30.9, bodyFat:43.0, water:40.7, muscleMass:53.5, boneMass:3.5, visceralFat:8.0 },
+  { id:'s3', date:'2023-08-27', weight:76.5, bmi:31.0, bodyFat:43.0, water:40.7, muscleMass:53.5, boneMass:3.5, visceralFat:8.0 },
+  { id:'s4', date:'2023-09-03', weight:75.0, bmi:30.4, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s5', date:'2023-09-09', weight:74.8, bmi:30.3, bodyFat:42.5, water:41.0, muscleMass:54.0, boneMass:3.5, visceralFat:8.0 },
+  { id:'s6', date:'2023-09-17', weight:75.1, bmi:30.5, bodyFat:40.3, water:42.6, muscleMass:56.0, boneMass:3.6, visceralFat:8.0 },
+  { id:'s7', date:'2023-09-23', weight:73.5, bmi:29.8, bodyFat:42.6, water:41.0, muscleMass:53.9, boneMass:3.5, visceralFat:8.0 },
+  { id:'s8', date:'2023-09-30', weight:73.2, bmi:29.7, bodyFat:42.4, water:41.1, muscleMass:54.1, boneMass:3.5, visceralFat:7.0 },
+  { id:'s9', date:'2023-10-08', weight:74.3, bmi:30.1, bodyFat:42.4, water:41.1, muscleMass:54.1, boneMass:3.5, visceralFat:8.0 },
+  { id:'s10', date:'2023-10-11', weight:72.1, bmi:29.3, bodyFat:42.2, water:41.3, muscleMass:54.2, boneMass:3.6, visceralFat:7.0 },
+  { id:'s11', date:'2023-10-22', weight:72.9, bmi:28.8, bodyFat:41.4, water:41.8, muscleMass:55.0, boneMass:3.6, visceralFat:7.0 },
+  { id:'s12', date:'2023-10-29', weight:71.3, bmi:28.2, bodyFat:40.9, water:42.2, muscleMass:55.4, boneMass:3.6, visceralFat:7.0 },
+  { id:'s13', date:'2023-11-03', weight:73.1, bmi:28.9, bodyFat:41.5, water:41.8, muscleMass:54.9, boneMass:3.6, visceralFat:7.0 },
+  { id:'s14', date:'2023-11-12', weight:72.6, bmi:28.7, bodyFat:41.2, water:42.0, muscleMass:55.2, boneMass:3.6, visceralFat:7.0 },
+  { id:'s15', date:'2023-11-18', weight:71.7, bmi:28.4, bodyFat:40.8, water:42.3, muscleMass:55.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s16', date:'2023-11-26', weight:72.9, bmi:28.8, bodyFat:40.7, water:42.3, muscleMass:55.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s17', date:'2023-12-01', weight:70.8, bmi:28.0, bodyFat:40.8, water:42.3, muscleMass:55.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s18', date:'2023-12-07', weight:71.5, bmi:28.3, bodyFat:40.9, water:42.2, muscleMass:55.4, boneMass:3.6, visceralFat:7.0 },
+  { id:'s19', date:'2023-12-17', weight:72.6, bmi:28.7, bodyFat:41.3, water:41.9, muscleMass:55.1, boneMass:3.6, visceralFat:7.0 },
+  { id:'s20', date:'2023-12-24', weight:72.7, bmi:28.8, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s21', date:'2023-12-29', weight:72.1, bmi:28.5, bodyFat:41.0, water:42.1, muscleMass:55.4, boneMass:3.6, visceralFat:7.0 },
+  { id:'s22', date:'2024-01-13', weight:72.7, bmi:28.8, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s23', date:'2024-01-18', weight:70.1, bmi:27.7, bodyFat:40.8, water:42.2, muscleMass:55.5, boneMass:3.7, visceralFat:7.0 },
+  { id:'s24', date:'2024-01-25', weight:70.7, bmi:28.0, bodyFat:40.7, water:42.3, muscleMass:55.6, boneMass:3.7, visceralFat:7.0 },
+  { id:'s25', date:'2024-02-01', weight:72.2, bmi:28.6, bodyFat:41.7, water:41.6, muscleMass:54.7, boneMass:3.6, visceralFat:7.0 },
+  { id:'s26', date:'2024-02-14', weight:71.7, bmi:28.4, bodyFat:41.2, water:42.0, muscleMass:55.2, boneMass:3.6, visceralFat:7.0 },
+  { id:'s27', date:'2024-03-10', weight:73.4, bmi:29.0, bodyFat:41.8, water:41.6, muscleMass:54.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s28', date:'2024-03-16', weight:72.8, bmi:28.8, bodyFat:41.2, water:42.0, muscleMass:55.2, boneMass:3.6, visceralFat:7.0 },
+  { id:'s29', date:'2024-03-24', weight:73.1, bmi:28.9, bodyFat:41.5, water:41.7, muscleMass:54.9, boneMass:3.6, visceralFat:7.0 },
+  { id:'s30', date:'2024-03-30', weight:73.4, bmi:29.0, bodyFat:41.8, water:41.5, muscleMass:54.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s31', date:'2024-04-07', weight:75.3, bmi:30.5, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s32', date:'2024-04-11', weight:74.2, bmi:30.1, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s33', date:'2024-04-20', weight:74.0, bmi:30.0, bodyFat:42.4, water:41.1, muscleMass:54.0, boneMass:3.5, visceralFat:8.0 },
+  { id:'s34', date:'2024-04-28', weight:71.9, bmi:29.2, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s35', date:'2024-05-05', weight:72.6, bmi:29.5, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s36', date:'2024-05-08', weight:72.1, bmi:29.3, bodyFat:40.3, water:42.6, muscleMass:56.0, boneMass:3.7, visceralFat:7.0 },
+  { id:'s37', date:'2024-05-19', weight:71.8, bmi:29.1, bodyFat:41.8, water:41.6, muscleMass:54.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s38', date:'2024-05-26', weight:73.1, bmi:29.7, bodyFat:43.0, water:40.7, muscleMass:53.5, boneMass:3.5, visceralFat:8.0 },
+  { id:'s39', date:'2024-06-02', weight:73.2, bmi:29.7, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s40', date:'2024-06-07', weight:71.5, bmi:29.0, bodyFat:41.7, water:41.7, muscleMass:54.7, boneMass:3.6, visceralFat:7.0 },
+  { id:'s41', date:'2024-06-23', weight:71.5, bmi:29.0, bodyFat:42.0, water:41.4, muscleMass:54.5, boneMass:3.6, visceralFat:7.0 },
+  { id:'s42', date:'2024-06-30', weight:71.2, bmi:28.9, bodyFat:41.7, water:41.6, muscleMass:54.7, boneMass:3.6, visceralFat:7.0 },
+  { id:'s43', date:'2024-07-07', weight:71.9, bmi:29.2, bodyFat:42.0, water:41.4, muscleMass:54.4, boneMass:3.6, visceralFat:7.0 },
+  { id:'s44', date:'2024-07-14', weight:72.3, bmi:29.3, bodyFat:42.2, water:41.3, muscleMass:54.2, boneMass:3.6, visceralFat:7.0 },
+  { id:'s45', date:'2024-07-19', weight:71.9, bmi:29.2, bodyFat:41.8, water:41.5, muscleMass:54.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s46', date:'2024-07-25', weight:73.7, bmi:29.9, bodyFat:42.7, water:40.9, muscleMass:53.8, boneMass:3.5, visceralFat:8.0 },
+  { id:'s47', date:'2024-08-03', weight:73.4, bmi:29.8, bodyFat:40.0, water:42.8, muscleMass:56.3, boneMass:3.7, visceralFat:8.0 },
+  { id:'s48', date:'2024-08-11', weight:74.0, bmi:30.0, bodyFat:42.7, water:40.9, muscleMass:53.8, boneMass:3.5, visceralFat:8.0 },
+  { id:'s49', date:'2024-08-16', weight:71.9, bmi:29.2, bodyFat:41.9, water:41.5, muscleMass:54.6, boneMass:3.6, visceralFat:7.0 },
+  { id:'s50', date:'2024-08-23', weight:73.4, bmi:29.8, bodyFat:42.1, water:41.3, muscleMass:54.3, boneMass:3.6, visceralFat:8.0 },
+  { id:'s51', date:'2024-09-01', weight:74.8, bmi:30.3, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s52', date:'2024-09-08', weight:74.6, bmi:30.3, bodyFat:42.6, water:41.0, muscleMass:53.9, boneMass:3.5, visceralFat:8.0 },
+  { id:'s53', date:'2024-09-14', weight:74.2, bmi:30.1, bodyFat:42.8, water:40.8, muscleMass:53.7, boneMass:3.5, visceralFat:8.0 },
+  { id:'s54', date:'2024-09-22', weight:75.5, bmi:30.6, bodyFat:43.1, water:40.6, muscleMass:53.4, boneMass:3.5, visceralFat:8.0 },
+  { id:'s55', date:'2024-09-27', weight:74.2, bmi:30.1, bodyFat:42.8, water:40.8, muscleMass:53.7, boneMass:3.5, visceralFat:8.0 },
+  { id:'s56', date:'2024-10-06', weight:74.7, bmi:30.3, bodyFat:43.0, water:40.7, muscleMass:53.5, boneMass:3.5, visceralFat:8.0 },
+  { id:'s57', date:'2024-10-13', weight:75.1, bmi:30.5, bodyFat:43.4, water:40.4, muscleMass:53.1, boneMass:3.5, visceralFat:8.0 },
+  { id:'s58', date:'2024-10-14', weight:75.9, bmi:30.8, bodyFat:42.8, water:40.9, muscleMass:53.7, boneMass:3.5, visceralFat:8.0 },
+  { id:'s59', date:'2024-10-23', weight:74.4, bmi:30.2, bodyFat:42.9, water:40.8, muscleMass:53.6, boneMass:3.5, visceralFat:8.0 },
+  { id:'s60', date:'2025-03-30', weight:78.0, bmi:31.6, bodyFat:43.8, water:40.1, muscleMass:52.8, boneMass:3.4, visceralFat:8.0 },
+  { id:'s61', date:'2025-04-06', weight:76.0, bmi:30.8, bodyFat:43.4, water:40.4, muscleMass:53.1, boneMass:3.5, visceralFat:8.0 },
+  { id:'s62', date:'2025-04-12', weight:77.2, bmi:31.3, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s63', date:'2025-04-17', weight:77.2, bmi:31.3, bodyFat:43.9, water:40.1, muscleMass:52.7, boneMass:3.4, visceralFat:8.0 },
+  { id:'s64', date:'2025-04-22', weight:78.6, bmi:31.9, bodyFat:43.8, water:40.1, muscleMass:52.7, boneMass:3.4, visceralFat:9.0 },
+  { id:'s65', date:'2025-06-22', weight:79.8, bmi:32.4, bodyFat:44.4, water:39.7, muscleMass:52.2, boneMass:3.4, visceralFat:9.0 },
+  { id:'s66', date:'2025-06-29', weight:79.6, bmi:32.3, bodyFat:44.4, water:39.7, muscleMass:52.2, boneMass:3.4, visceralFat:9.0 },
+  { id:'s67', date:'2025-07-06', weight:80.0, bmi:32.5, bodyFat:44.4, water:39.7, muscleMass:52.2, boneMass:3.4, visceralFat:9.0 },
+  { id:'s68', date:'2025-07-13', weight:79.2, bmi:32.1, bodyFat:43.9, water:40.0, muscleMass:52.6, boneMass:3.4, visceralFat:9.0 },
+  { id:'s69', date:'2025-07-20', weight:77.8, bmi:31.6, bodyFat:43.8, water:40.1, muscleMass:52.7, boneMass:3.4, visceralFat:8.0 },
+  { id:'s70', date:'2025-07-27', weight:81.0, bmi:32.9, bodyFat:44.7, water:39.4, muscleMass:51.9, boneMass:3.4, visceralFat:9.0 },
+  { id:'s71', date:'2025-08-03', weight:79.8, bmi:32.4, bodyFat:44.6, water:39.6, muscleMass:52.1, boneMass:3.4, visceralFat:9.0 },
+  { id:'s72', date:'2025-08-10', weight:78.8, bmi:32.0, bodyFat:44.2, water:39.8, muscleMass:52.4, boneMass:3.4, visceralFat:9.0 },
+  { id:'s73', date:'2025-08-17', weight:79.0, bmi:32.0, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s74', date:'2025-08-24', weight:81.2, bmi:32.9, bodyFat:44.7, water:39.5, muscleMass:51.9, boneMass:3.4, visceralFat:9.0 },
+  { id:'s75', date:'2025-08-25', weight:81.8, bmi:33.2, bodyFat:44.9, water:39.3, muscleMass:51.7, boneMass:3.4, visceralFat:9.0 },
+  { id:'s76', date:'2025-09-07', weight:82.0, bmi:33.3, bodyFat:44.6, water:39.5, muscleMass:52.0, boneMass:3.4, visceralFat:9.0 },
+  { id:'s77', date:'2025-09-14', weight:79.8, bmi:32.4, bodyFat:44.8, water:39.4, muscleMass:51.8, boneMass:3.4, visceralFat:9.0 },
+  { id:'s78', date:'2025-09-21', weight:80.4, bmi:32.6, bodyFat:44.4, water:39.7, muscleMass:52.2, boneMass:3.4, visceralFat:9.0 },
+  { id:'s79', date:'2025-09-28', weight:81.6, bmi:33.1, bodyFat:44.4, water:39.7, muscleMass:52.2, boneMass:3.4, visceralFat:9.0 },
+  { id:'s80', date:'2025-10-05', weight:83.2, bmi:33.8, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s81', date:'2025-10-12', weight:83.6, bmi:33.9, bodyFat:45.7, water:38.7, muscleMass:51.0, boneMass:3.3, visceralFat:9.0 },
+  { id:'s82', date:'2025-10-18', weight:82.2, bmi:33.3, bodyFat:45.2, water:39.1, muscleMass:51.4, boneMass:3.3, visceralFat:9.0 },
+  { id:'s83', date:'2025-10-22', weight:82.4, bmi:33.4, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s84', date:'2025-11-08', weight:83.0, bmi:33.7, bodyFat:45.5, water:38.9, muscleMass:51.2, boneMass:3.3, visceralFat:9.0 },
+  { id:'s85', date:'2025-11-16', weight:82.0, bmi:33.3, bodyFat:45.5, water:38.9, muscleMass:51.2, boneMass:3.3, visceralFat:9.0 },
+  { id:'s86', date:'2025-11-23', weight:84.2, bmi:34.2, bodyFat:46.1, water:38.5, muscleMass:50.6, boneMass:3.3, visceralFat:9.0 },
+  { id:'s87', date:'2025-11-30', weight:82.4, bmi:33.4, bodyFat:45.6, water:38.9, muscleMass:51.1, boneMass:3.3, visceralFat:9.0 },
+  { id:'s88', date:'2025-12-07', weight:83.2, bmi:33.8, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s89', date:'2025-12-14', weight:82.8, bmi:33.6, bodyFat:45.5, water:38.9, muscleMass:51.1, boneMass:3.3, visceralFat:9.0 },
+  { id:'s90', date:'2025-12-21', weight:85.0, bmi:34.5, bodyFat:44.0, water:40.0, muscleMass:52.6, boneMass:3.4, visceralFat:10.0 },
+  { id:'s91', date:'2025-12-28', weight:85.4, bmi:34.6, bodyFat:46.2, water:38.4, muscleMass:50.5, boneMass:3.3, visceralFat:10.0 },
+  { id:'s92', date:'2026-01-04', weight:84.6, bmi:34.3, bodyFat:46.1, water:38.5, muscleMass:50.6, boneMass:3.3, visceralFat:10.0 },
+  { id:'s93', date:'2026-01-11', weight:84.6, bmi:34.3, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s94', date:'2026-01-18', weight:84.2, bmi:34.2, bodyFat:45.6, water:38.8, muscleMass:51.1, boneMass:3.3, visceralFat:10.0 },
+  { id:'s95', date:'2026-01-25', weight:82.8, bmi:33.6, bodyFat:45.3, water:39.1, muscleMass:51.4, boneMass:3.3, visceralFat:9.0 },
+  { id:'s96', date:'2026-02-01', weight:83.0, bmi:33.7, bodyFat:45.7, water:38.7, muscleMass:51.0, boneMass:3.3, visceralFat:9.0 },
+  { id:'s97', date:'2026-02-08', weight:83.0, bmi:33.7, bodyFat:45.7, water:38.7, muscleMass:51.0, boneMass:3.3, visceralFat:9.0 },
+  { id:'s98', date:'2026-02-13', weight:83.8, bmi:34.0, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s99', date:'2026-03-01', weight:84.4, bmi:34.2, bodyFat:45.8, water:38.7, muscleMass:50.9, boneMass:3.3, visceralFat:10.0 },
+  { id:'s100', date:'2026-03-04', weight:83.8, bmi:34.0, bodyFat:45.9, water:38.6, muscleMass:50.8, boneMass:3.3, visceralFat:9.0 },
+  { id:'s101', date:'2026-03-15', weight:85.6, bmi:34.7, bodyFat:46.3, water:38.3, muscleMass:50.4, boneMass:3.3, visceralFat:10.0 },
+  { id:'s102', date:'2026-03-22', weight:85.4, bmi:34.6, bodyFat:46.4, water:38.3, muscleMass:50.4, boneMass:3.3, visceralFat:10.0 },
+  { id:'s103', date:'2026-03-29', weight:87.0, bmi:35.3, bodyFat:46.7, water:38.1, muscleMass:50.1, boneMass:3.2, visceralFat:10.0 },
+  { id:'s104', date:'2026-04-05', weight:86.0, bmi:34.9, bodyFat:46.6, water:38.2, muscleMass:50.2, boneMass:3.3, visceralFat:10.0 },
+  { id:'s105', date:'2026-04-12', weight:85.6, bmi:34.7, bodyFat:46.3, water:38.3, muscleMass:50.4, boneMass:3.3, visceralFat:10.0 },
+  { id:'s106', date:'2026-04-19', weight:87.6, bmi:35.5, bodyFat:47.0, water:37.9, muscleMass:49.8, boneMass:3.2, visceralFat:10.0 },
+  { id:'s107', date:'2026-04-26', weight:87.6, bmi:35.5, bodyFat:0.0, water:0.0, muscleMass:0.0, boneMass:0.0, visceralFat:0.0 },
+  { id:'s108', date:'2026-05-03', weight:87.4, bmi:35.5, bodyFat:46.9, water:37.9, muscleMass:49.9, boneMass:3.2, visceralFat:10.0 },
+  { id:'s109', date:'2026-05-10', weight:87.2, bmi:35.4, bodyFat:46.7, water:38.0, muscleMass:50.0, boneMass:3.2, visceralFat:10.0 },
+  { id:'s110', date:'2026-05-17', weight:88.2, bmi:35.8, bodyFat:47.0, water:37.9, muscleMass:49.8, boneMass:3.2, visceralFat:10.0 },
 ];
 
 // ─── Math ─────────────────────────────────────────────────────────────────────
@@ -1117,6 +1222,551 @@ function Insights({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|null
   );
 }
 
+// ─── Monthly Bar Chart ────────────────────────────────────────────────────────
+
+interface MonthBar { ym: string; label: string; change: number; weight: number; readings: number; }
+
+function monthlyDeltas(sorted: FitnessReading[]): MonthBar[] {
+  const buckets: Record<string, FitnessReading[]> = {};
+  for (const r of sorted) {
+    const ym = r.date.slice(0, 7);
+    (buckets[ym] = buckets[ym] || []).push(r);
+  }
+  const keys = Object.keys(buckets).sort();
+  const out: MonthBar[] = [];
+  let prev: number | null = null;
+  for (const k of keys) {
+    const rs = buckets[k];
+    const last = rs[rs.length - 1];
+    const change = prev === null ? 0 : last.weight - prev;
+    const [y, m] = k.split('-');
+    const dt = new Date(parseInt(y), parseInt(m) - 1, 1);
+    out.push({
+      ym: k,
+      label: dt.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }),
+      change,
+      weight: last.weight,
+      readings: rs.length,
+    });
+    prev = last.weight;
+  }
+  return out.slice(1); // drop first (no delta)
+}
+
+function MonthlyBarChart({ sorted }: { sorted: FitnessReading[] }) {
+  const data = monthlyDeltas(sorted);
+  if (data.length === 0) return null;
+  const W = 1000, H = 280;
+  const PAD = { top: 24, right: 24, bottom: 60, left: 50 };
+  const iW = W - PAD.left - PAD.right, iH = H - PAD.top - PAD.bottom;
+  const maxAbs = Math.max(...data.map(d => Math.abs(d.change)), 1);
+  const yMid = PAD.top + iH / 2;
+  const yS = (v: number) => yMid - (v / maxAbs) * (iH / 2);
+  const barW = iW / data.length * 0.78;
+  const barGap = iW / data.length;
+
+  const totalLost = data.filter(d => d.change < 0).reduce((a, d) => a + d.change, 0);
+  const totalGained = data.filter(d => d.change > 0).reduce((a, d) => a + d.change, 0);
+  const netChange = data.reduce((a, d) => a + d.change, 0);
+
+  return (
+    <div>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:14 }}>
+        {[
+          { l:'Total Lost',   v:`${totalLost.toFixed(1)} kg`,    c:T.green },
+          { l:'Total Gained', v:`+${totalGained.toFixed(1)} kg`, c:T.rose  },
+          { l:'Net Change',   v:`${netChange>0?'+':''}${netChange.toFixed(1)} kg`, c: netChange > 0 ? T.rose : T.green },
+        ].map((m,i)=>(
+          <div key={i} style={{ padding:'18px 20px', borderRight: i<2 ? `0.5px solid ${T.line}` : 'none' }}>
+            <Kicker style={{ marginBottom:8 }}>{m.l}</Kicker>
+            <span style={{ fontFamily:T.display, fontSize:32, color:m.c, letterSpacing:'-0.02em' }}>{m.v}</span>
+          </div>
+        ))}
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', display:'block' }}>
+        {/* zero line */}
+        <line x1={PAD.left} y1={yMid} x2={PAD.left+iW} y2={yMid} stroke={T.ink} strokeWidth="1" />
+        {/* y ticks */}
+        {[-maxAbs, -maxAbs/2, 0, maxAbs/2, maxAbs].map((v,i)=>(
+          <g key={i}>
+            <line x1={PAD.left} y1={yS(v)} x2={PAD.left+iW} y2={yS(v)} stroke={T.softLine} strokeWidth="0.5" />
+            <text x={PAD.left-6} y={yS(v)+3} textAnchor="end" fontFamily={T.sans} fontSize="10" fill={T.muted}>{v.toFixed(1)}</text>
+          </g>
+        ))}
+        {/* bars */}
+        {data.map((d,i) => {
+          const x = PAD.left + i*barGap + (barGap-barW)/2;
+          const y = d.change >= 0 ? yS(d.change) : yMid;
+          const h = Math.abs(yS(d.change) - yMid);
+          const color = d.change > 0 ? T.rose : d.change < 0 ? T.green : T.muted;
+          return (
+            <g key={i}>
+              <rect x={x} y={y} width={barW} height={h} fill={color} opacity="0.9" />
+              {Math.abs(d.change) >= 0.5 && (
+                <text
+                  x={x + barW/2}
+                  y={d.change >= 0 ? y - 4 : y + h + 12}
+                  textAnchor="middle"
+                  fontFamily={T.display} fontSize="10" fontStyle="italic"
+                  fill={color}
+                >
+                  {d.change > 0 ? '+' : ''}{d.change.toFixed(1)}
+                </text>
+              )}
+            </g>
+          );
+        })}
+        {/* x labels - every 3rd */}
+        {data.map((d,i) => (
+          (i % 3 === 0 || i === data.length-1) && (
+            <text key={i} x={PAD.left + i*barGap + barGap/2} y={H-22} textAnchor="middle" fontFamily={T.sans} fontSize="10" fill={T.muted}>
+              {d.label}
+            </text>
+          )
+        ))}
+        {/* axis labels */}
+        <text x={PAD.left} y={H-4} fontFamily={T.sans} fontSize="9" fill={T.muted} letterSpacing="0.18em">LOSS ↓ / GAIN ↑ PER MONTH</text>
+      </svg>
+    </div>
+  );
+}
+
+// ─── Composition Pie Chart ────────────────────────────────────────────────────
+
+interface Slice { label: string; pct: number; kg: number; color: string }
+
+function donutSlices(slices: Slice[], cx: number, cy: number, rOuter: number, rInner: number) {
+  let cum = 0;
+  return slices.map((s, i) => {
+    const start = (cum / 100) * 2 * Math.PI - Math.PI / 2;
+    cum += s.pct;
+    const end = (cum / 100) * 2 * Math.PI - Math.PI / 2;
+    const large = s.pct > 50 ? 1 : 0;
+    const x1o = cx + rOuter * Math.cos(start), y1o = cy + rOuter * Math.sin(start);
+    const x2o = cx + rOuter * Math.cos(end),   y2o = cy + rOuter * Math.sin(end);
+    const x1i = cx + rInner * Math.cos(end),   y1i = cy + rInner * Math.sin(end);
+    const x2i = cx + rInner * Math.cos(start), y2i = cy + rInner * Math.sin(start);
+    const d = [
+      `M ${x1o.toFixed(2)} ${y1o.toFixed(2)}`,
+      `A ${rOuter} ${rOuter} 0 ${large} 1 ${x2o.toFixed(2)} ${y2o.toFixed(2)}`,
+      `L ${x1i.toFixed(2)} ${y1i.toFixed(2)}`,
+      `A ${rInner} ${rInner} 0 ${large} 0 ${x2i.toFixed(2)} ${y2i.toFixed(2)}`,
+      'Z',
+    ].join(' ');
+    const midAngle = (start + end) / 2;
+    const labelR = (rOuter + rInner) / 2;
+    const lx = cx + labelR * Math.cos(midAngle);
+    const ly = cy + labelR * Math.sin(midAngle);
+    return { ...s, d, lx, ly, key: i };
+  });
+}
+
+function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number }) {
+  // Current
+  const fatKg     = +(latest.weight * latest.bodyFat / 100).toFixed(1);
+  const muscleKg  = +(latest.weight * latest.muscleMass / 100).toFixed(1);
+  const boneKg    = +(latest.weight * latest.boneMass / 100).toFixed(1);
+  const currentSlices: Slice[] = [
+    { label:'Fat',    pct:latest.bodyFat,    kg:fatKg,    color:T.rose  },
+    { label:'Muscle', pct:latest.muscleMass, kg:muscleKg, color:T.green },
+    { label:'Bone',   pct:latest.boneMass,   kg:boneKg,   color:T.gold  },
+  ];
+  // Goal composition (target 25% body fat, preserve muscle mass kg)
+  const goalFatPct = 25;
+  const goalFatKg  = +(goal * goalFatPct / 100).toFixed(1);
+  const goalMuscleKg = muscleKg; // assume preserved
+  const goalMusclePct = +(goalMuscleKg / goal * 100).toFixed(1);
+  const goalBoneKg = boneKg;
+  const goalBonePct = +(goalBoneKg / goal * 100).toFixed(1);
+  const goalSlices: Slice[] = [
+    { label:'Fat',    pct:goalFatPct,    kg:goalFatKg,    color:T.rose  },
+    { label:'Muscle', pct:goalMusclePct, kg:goalMuscleKg, color:T.green },
+    { label:'Bone',   pct:goalBonePct,   kg:goalBoneKg,   color:T.gold  },
+  ];
+
+  const W = 200, H = 200;
+  const cx = W/2, cy = H/2;
+  const rO = 80, rI = 46;
+
+  const renderPie = (slices: Slice[], heading: string, totalKg: number, sub: string) => {
+    const wedges = donutSlices(slices, cx, cy, rO, rI);
+    return (
+      <div style={{ padding:'18px 24px', textAlign:'center' }}>
+        <Kicker style={{ marginBottom:10 }}>{heading}</Kicker>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', maxWidth:200, height:'auto' }}>
+          {wedges.map(w => <path key={w.key} d={w.d} fill={w.color} opacity="0.85" />)}
+          <text x={cx} y={cy-4} textAnchor="middle" fontFamily={T.display} fontSize="22" fill={T.ink} letterSpacing="-0.02em">
+            {totalKg.toFixed(1)}
+          </text>
+          <text x={cx} y={cy+14} textAnchor="middle" fontFamily={T.sans} fontSize="9" fill={T.muted} letterSpacing="0.18em">KG TOTAL</text>
+        </svg>
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'8px 0 0' }}>{sub}</p>
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, gap:0 }}>
+        <div style={{ borderRight:`0.5px solid ${T.line}` }}>
+          {renderPie(currentSlices, 'Today · the current composition', latest.weight, `at ${latest.weight} kg`)}
+        </div>
+        <div>
+          {renderPie(goalSlices, `At ${goal} kg · the target composition`, goal, 'estimated at 25% body fat')}
+        </div>
+      </div>
+
+      {/* Legend with kg/% breakdown */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', marginTop:24, borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
+        {currentSlices.map((s, i) => {
+          const gs = goalSlices[i];
+          const delta = gs.kg - s.kg;
+          return (
+            <div key={s.label} style={{ padding:'18px 22px', borderRight: i<2 ? `0.5px solid ${T.line}` : 'none' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+                <span style={{ display:'inline-block', width:10, height:10, background:s.color }} />
+                <Kicker>{s.label}</Kicker>
+              </div>
+              <div style={{ fontFamily:T.display, fontSize:24, color:T.ink, marginBottom:4 }}>{s.kg} → {gs.kg} kg</div>
+              <div style={{ fontFamily:T.sans, fontSize:12, color: delta < 0 ? T.green : T.gold, fontWeight:500 }}>
+                {delta > 0 ? '+' : ''}{delta.toFixed(1)} kg shift
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Health Tab ───────────────────────────────────────────────────────────────
+
+function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number; reg: Reg | null }) {
+  const latest = sorted[sorted.length - 1];
+  const first  = sorted[0];
+  const startMs = new Date(first.date).getTime();
+  const lastMs  = new Date(latest.date).getTime();
+  const daysObserved = Math.round((lastMs - startMs) / 86400000);
+
+  // Visceral fat trend (filter readings with VF > 0)
+  const vfReadings = sorted.filter(r => r.visceralFat && r.visceralFat > 0);
+  const latestVF = vfReadings[vfReadings.length - 1]?.visceralFat ?? 0;
+  const firstVF  = vfReadings[0]?.visceralFat ?? 0;
+
+  // Weight extremes
+  const minWeight = Math.min(...sorted.map(r => r.weight));
+  const maxWeight = Math.max(...sorted.map(r => r.weight));
+  const minDate = sorted.find(r => r.weight === minWeight)!.date;
+  const maxDate = sorted.find(r => r.weight === maxWeight)!.date;
+
+  // Slope last 8 weeks
+  const last8 = sorted.slice(-8);
+  const r8 = regress(last8);
+  const recentSlope = r8 ? r8.slope * 7 : 0;
+
+  // Health flag heuristics
+  const healthFlags = [
+    {
+      label: 'Visceral Fat',
+      value: `${latestVF}`,
+      status: latestVF <= 9 ? ['HEALTHY', T.green] : latestVF <= 14 ? ['HIGH', T.gold] : ['VERY HIGH', T.rose],
+      note: 'Visceral fat over 9 is associated with elevated cardiovascular risk. Aim for ≤9.',
+      change: latestVF - firstVF,
+    },
+    {
+      label: 'BMI',
+      value: latest.bmi.toFixed(1),
+      status: latest.bmi < 25 ? ['HEALTHY', T.green] : latest.bmi < 30 ? ['HIGH', T.gold] : ['OBESE', T.rose],
+      note: 'Healthy BMI range is 18.5–24.9. You crossed into obesity (≥30) around late 2024.',
+      change: latest.bmi - first.bmi,
+    },
+    {
+      label: 'Body Fat %',
+      value: `${latest.bodyFat.toFixed(1)}%`,
+      status: latest.bodyFat < 33 ? ['HEALTHY', T.green] : latest.bodyFat < 39 ? ['HIGH', T.gold] : ['VERY HIGH', T.rose],
+      note: 'Healthy body fat for women is 21–33%. Reducing this is the primary goal.',
+      change: latest.bodyFat - first.bodyFat,
+    },
+    {
+      label: 'Body Water %',
+      value: `${latest.water.toFixed(1)}%`,
+      status: latest.water >= 45 ? ['HEALTHY', T.green] : ['LOW', T.gold],
+      note: 'Water % naturally drops as body fat % rises. Stays low until fat decreases.',
+      change: latest.water - first.water,
+    },
+  ];
+
+  return (
+    <div>
+      <Kicker style={{ marginBottom:10 }}>Section · Health Panel</Kicker>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(36px,5vw,56px)', letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 8px' }}>
+        Beyond the scale, <em>the full picture</em>.
+      </h2>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 36px' }}>
+        {sorted.length} readings over {daysObserved} days · journey from {first.weight} kg to {latest.weight} kg
+      </p>
+
+      {/* Health flags grid */}
+      <Kicker style={{ marginBottom:10 }}>The Four Health Markers</Kicker>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+        {healthFlags.map((f, i) => {
+          const [stTxt, stCol] = f.status;
+          return (
+            <div key={f.label} style={{ padding:'22px 24px', borderRight: i%2===0 ? `0.5px solid ${T.line}` : 'none', borderBottom: i<2 ? `0.5px solid ${T.line}` : 'none' }}>
+              <Kicker style={{ marginBottom:10 }}>{f.label}</Kicker>
+              <div style={{ display:'flex', alignItems:'baseline', gap:14, marginBottom:8 }}>
+                <span style={{ fontFamily:T.display, fontWeight:400, fontSize:44, letterSpacing:'-0.02em', lineHeight:1, color:T.ink }}>{f.value}</span>
+                <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.22em', padding:'3px 8px', background:stCol+'18', color:stCol }}>{stTxt}</span>
+              </div>
+              <div style={{ fontFamily:T.sans, fontSize:11, color: f.change > 0 ? T.rose : f.change < 0 ? T.green : T.muted, fontWeight:500, marginBottom:8 }}>
+                {f.change > 0 ? '▲' : f.change < 0 ? '▼' : '—'} {Math.abs(f.change).toFixed(1)} since first reading
+              </div>
+              <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.5, margin:0 }}>{f.note}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Monthly bar chart */}
+      <div style={{ marginTop:72 }}>
+        <Kicker style={{ marginBottom:10 }}>Monthly Weight Change · {sorted.length} weekly readings aggregated</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:32, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
+          The good months, the <em>bad months</em>.
+        </h3>
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'62ch', margin:'0 0 18px' }}>
+          green bars mark months you lost weight; rose bars mark months you gained. The pattern is the truth — short loss streaks followed by sustained gain.
+        </p>
+        <MonthlyBarChart sorted={sorted} />
+      </div>
+
+      {/* Composition pie comparison */}
+      <div style={{ marginTop:80 }}>
+        <Kicker style={{ marginBottom:10 }}>Body Composition · Now vs Target</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:32, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
+          Where the kilograms <em>live</em>.
+        </h3>
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'62ch', margin:'0 0 18px' }}>
+          target composition assumes muscle mass is preserved through resistance training while body fat drops to a healthy 25%.
+        </p>
+        <PieComposition latest={latest} goal={goal} />
+      </div>
+
+      {/* Journey landmarks */}
+      <div style={{ marginTop:72 }}>
+        <Kicker style={{ marginBottom:10 }}>The Journey · Three Years of Data</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:32, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 18px' }}>
+          From low to high, <em>and back to low</em>.
+        </h3>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+          {[
+            { l:'Lightest', v:`${minWeight} kg`, d:fmtDate(minDate), c:T.green },
+            { l:'Heaviest', v:`${maxWeight} kg`, d:fmtDate(maxDate), c:T.rose },
+            { l:'Range',    v:`${(maxWeight-minWeight).toFixed(1)} kg`, d:`peak to trough`, c:T.gold },
+            { l:'Last 8 weeks', v:`${recentSlope>=0?'+':''}${recentSlope.toFixed(2)} kg/wk`, d:`recent trend`, c: recentSlope>=0 ? T.rose : T.green },
+          ].map((m,i)=>(
+            <div key={i} style={{ padding:'22px 22px', borderRight: i<3?`0.5px solid ${T.line}`:'none' }}>
+              <Kicker style={{ marginBottom:10 }}>{m.l}</Kicker>
+              <div style={{ fontFamily:T.display, fontSize:30, color:m.c, letterSpacing:'-0.015em', lineHeight:1 }}>{m.v}</div>
+              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:12, color:T.muted, margin:'8px 0 0' }}>{m.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── The Plan ────────────────────────────────────────────────────────────────
+
+function PlanTab({ sorted, goal }: { sorted: FitnessReading[]; goal: number }) {
+  const latest = sorted[sorted.length - 1];
+  const bmr  = Math.round(10*latest.weight + 6.25*HEIGHT_M*100 - 5*30 - 161);
+  const tdee = Math.round(bmr * 1.2);
+  const intake = tdee - 500;
+  const protein = Math.round(latest.weight * 1.8);
+  const goalDate = new Date(new Date(latest.date).getTime() + ((latest.weight - goal) / 0.45 * 7) * 86400000);
+
+  const sectionGap = { marginTop: 64 };
+
+  return (
+    <div>
+      <Kicker style={{ marginBottom:10 }}>Section · The Solid Plan</Kicker>
+      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:'clamp(40px,6vw,68px)', letterSpacing:'-0.025em', lineHeight:0.98, color:T.ink, margin:'0 0 12px' }}>
+        A plan you can <em>actually follow</em>.
+      </h2>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.muted, margin:'0 0 36px', maxWidth:'52ch', lineHeight:1.5 }}>
+        Specific numbers, specific actions, no vague advice. Built from {sorted.length} of your own readings.
+      </p>
+
+      {/* The Mission */}
+      <div style={{ background:T.surface, border:`0.5px solid ${T.line}`, padding:'32px 36px', marginBottom:48 }}>
+        <Kicker style={{ marginBottom:14 }}>The Mission</Kicker>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:24, alignItems:'baseline' }}>
+          <div>
+            <div style={{ fontFamily:T.display, fontSize:48, color:T.rose, letterSpacing:'-0.02em', lineHeight:1 }}>{latest.weight}</div>
+            <Kicker color={T.muted} style={{ marginTop:6 }}>FROM (kg)</Kicker>
+          </div>
+          <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted, textAlign:'center' }}>→</div>
+          <div style={{ textAlign:'right' }}>
+            <div style={{ fontFamily:T.display, fontSize:48, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>{goal.toFixed(0)}</div>
+            <Kicker color={T.muted} style={{ marginTop:6 }}>TO (kg)</Kicker>
+          </div>
+        </div>
+        <Rule style={{ margin:'24px 0' }} />
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, margin:0, lineHeight:1.5 }}>
+          {(latest.weight-goal).toFixed(1)} kilograms in roughly{' '}
+          <em style={{ color:T.gold }}>{goalDate.toLocaleDateString('en-GB',{month:'long', year:'numeric'})}</em>.
+          Sustainable rate. No crash diets.
+        </p>
+      </div>
+
+      {/* Non-negotiables */}
+      <div>
+        <Kicker style={{ marginBottom:10 }}>I · The Five Non-Negotiables</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 24px' }}>
+          Rules that don&apos;t bend, <em>ever</em>.
+        </h3>
+        <ThickRule />
+        {[
+          {n:'01', r:'Weigh in every Monday morning',                                        d:'Same time, same clothing (or none). One number per week — that is the data point. Ignore daily fluctuation.'},
+          {n:'02', r:`Eat at most ${intake.toLocaleString()} kcal per day on average`,       d:`This is your sedentary TDEE (${tdee.toLocaleString()}) minus a 500-kcal moderate deficit. Track it for the first 8 weeks at minimum.`},
+          {n:'03', r:`Hit ${protein}g of protein every day`,                                 d:'1.8g per kg of bodyweight. This protects muscle during the deficit. Non-negotiable on training days especially.'},
+          {n:'04', r:'Lift three times per week, minimum',                                   d:'45-60 minute sessions. Compound movements. Progressive overload. Walks do not count as resistance training.'},
+          {n:'05', r:'Log every reading, every meal, every session',                         d:'Even the bad weeks. Especially the bad weeks. Data with gaps cannot be analysed.'},
+        ].map(rule => (
+          <div key={rule.n} style={{ display:'grid', gridTemplateColumns:'56px 1fr', padding:'22px 0', borderBottom:`0.5px solid ${T.softLine}`, alignItems:'baseline', gap:16 }}>
+            <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:34, color:T.gold, lineHeight:1 }}>{rule.n}</span>
+            <div>
+              <p style={{ fontFamily:T.display, fontSize:19, color:T.ink, margin:'0 0 4px', fontWeight:400, lineHeight:1.4 }}>{rule.r}</p>
+              <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }}>{rule.d}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Day of eating */}
+      <div style={sectionGap}>
+        <Kicker style={{ marginBottom:10 }}>II · A Day of Eating</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 8px' }}>
+          What <em>{intake.toLocaleString()}</em> kcal &amp; <em>{protein}g</em> of protein actually looks like.
+        </h3>
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, margin:'0 0 18px' }}>
+          one possible day — adjust for your preferences, but match the totals.
+        </p>
+        <div style={{ borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+          {[
+            { t:'07:30', m:'Breakfast', f:'3 eggs scrambled + 80g smoked salmon + 1 slice rye + black coffee', kcal:420, p:34 },
+            { t:'12:30', m:'Lunch',     f:'150g chicken breast, 60g (dry) basmati rice, large mixed salad, 1 tbsp olive oil', kcal:540, p:45 },
+            { t:'15:30', m:'Snack',     f:'200g 0% Greek yoghurt + 30g blueberries + 10g almonds', kcal:180, p:22 },
+            { t:'18:30', m:'Dinner',    f:'150g cod or salmon, 200g roasted vegetables, 150g sweet potato', kcal:420, p:38 },
+            { t:'20:30', m:'Evening',   f:'1 scoop whey protein in water (optional) + herbal tea', kcal:120, p:25 },
+          ].map((meal,i,arr)=>(
+            <div key={i} style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', padding:'18px 0', borderBottom: i<arr.length-1?`0.5px solid ${T.softLine}`:'none', alignItems:'baseline', gap:16 }}>
+              <Kicker color={T.gold}>{meal.t}</Kicker>
+              <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:17, color:T.ink }}>{meal.m}</span>
+              <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.5, margin:0 }}>{meal.f}</p>
+              <span style={{ fontFamily:T.display, fontSize:18, color:T.ink, textAlign:'right' }}>{meal.kcal} <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
+              <span style={{ fontFamily:T.display, fontSize:18, color:T.green, textAlign:'right' }}>{meal.p}g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
+            </div>
+          ))}
+          <div style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', alignItems:'baseline', gap:16, background:T.goldSoft, margin:'0 -16px', padding:'20px 16px' }}>
+            <Kicker color={T.gold}>TOTAL</Kicker>
+            <span />
+            <span />
+            <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, textAlign:'right' }}>1,680 <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
+            <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, textAlign:'right' }}>164g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Training split */}
+      <div style={sectionGap}>
+        <Kicker style={{ marginBottom:10 }}>III · The Training Split</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
+          Three sessions a week. <em>Forty-five minutes each.</em>
+        </h3>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+          {[
+            { day:'Monday',    focus:'Lower body',      exs:['Goblet squat 3×10','Romanian deadlift 3×10','Glute bridge 3×12','Leg press 3×12','Plank 3×30s'] },
+            { day:'Wednesday', focus:'Upper push',      exs:['DB bench press 3×10','Shoulder press 3×10','Tricep dips 3×8','Lateral raises 3×12','Press-ups 3×AMRAP'] },
+            { day:'Friday',    focus:'Upper pull + abs',exs:['Lat pulldown 3×10','Seated row 3×10','Bicep curl 3×12','Face pulls 3×15','Hanging knee raise 3×10'] },
+          ].map((d,i)=>(
+            <div key={i} style={{ padding:'22px 22px', borderRight: i<2?`0.5px solid ${T.line}`:'none' }}>
+              <Kicker color={T.gold} style={{ marginBottom:8 }}>{d.day}</Kicker>
+              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 14px' }}>{d.focus}</p>
+              <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:6 }}>
+                {d.exs.map((e,j)=>(
+                  <li key={j} style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, padding:'6px 0', borderBottom:`0.5px solid ${T.softLine}` }}>{e}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'14px 0 0', fontStyle:'italic' }}>
+          Add a 30-minute walk on rest days. Aim for 8,000 steps daily. Movement is the multiplier.
+        </p>
+      </div>
+
+      {/* Weekly check-in */}
+      <div style={sectionGap}>
+        <Kicker style={{ marginBottom:10 }}>IV · Weekly Check-in Protocol</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
+          Every Monday morning. <em>Seven minutes, no skipping.</em>
+        </h3>
+        <ol style={{ counterReset:'step', listStyle:'none', padding:0, margin:0, borderTop:`2px solid ${T.ink}` }}>
+          {[
+            'Step on the scale at the same time, in the same state (fasted, after bathroom, before clothes).',
+            'Log the reading in this dashboard. Always. Even if it&apos;s ugly.',
+            'Calculate this week&apos;s average vs last week&apos;s average. The single reading is noise; the trend is signal.',
+            'Look at this week&apos;s training log. Did you hit three sessions? Did you progress load?',
+            'Look at your food log. Did you hit calories within ±100 kcal? Did you hit protein?',
+            'Write one sentence answering: what worked, what didn&apos;t, what to change.',
+          ].map((s,i)=>(
+            <li key={i} style={{ display:'grid', gridTemplateColumns:'40px 1fr', padding:'16px 0', borderBottom:`0.5px solid ${T.softLine}`, gap:12 }}>
+              <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.gold }}>{(i+1).toString().padStart(2,'0')}</span>
+              <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }} dangerouslySetInnerHTML={{ __html: s }} />
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      {/* Troubleshooting */}
+      <div style={sectionGap}>
+        <Kicker style={{ marginBottom:10 }}>V · Troubleshooting</Kicker>
+        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:30, letterSpacing:'-0.015em', lineHeight:1.06, color:T.ink, margin:'0 0 18px' }}>
+          When the plan <em>stalls</em>.
+        </h3>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
+          {[
+            { p:'Weight hasn&apos;t moved in 2 weeks',                d:`Check calories actually consumed (use a fresh 3-day log). Likely intake has crept up ${100}-${200} kcal/day. Tighten the count, do not cut further.` },
+            { p:'Lost control on a single day — ate 3,000+ kcal', d:'It is one day. One day cannot undo a week of deficit. Resume normal eating tomorrow. Do not try to compensate by under-eating.' },
+            { p:'Constant hunger making it impossible to comply',  d:'Increase protein and fibrous vegetables. Both increase satiety significantly. Consider switching to a 300-kcal deficit instead — slower but sustainable beats faster but failed.' },
+            { p:'Scale up significantly week-on-week',             d:'It is almost certainly water from sodium, training soreness, or hormonal cycle. Trust the 4-week moving average, not the weekly number. Do nothing for one more week and look again.' },
+            { p:'Lost the streak — skipped 2 weeks',               d:'Resume on the next Monday. Do not "make up" anything. The plan starts again from this week&apos;s weight. Continuity matters less than restarting cleanly.' },
+            { p:'Friends/family ask why you&apos;re being strange about food', d:'Brief answer: "I&apos;m working on something." You owe nobody a long explanation. Track quietly.' },
+          ].map((t, i) => (
+            <div key={i} style={{ padding:'20px 22px', borderRight: i%2===0?`0.5px solid ${T.line}`:'none', borderBottom: i<4?`0.5px solid ${T.line}`:'none' }}>
+              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.rose, margin:'0 0 8px', lineHeight:1.4 }} dangerouslySetInnerHTML={{ __html: t.p }} />
+              <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }} dangerouslySetInnerHTML={{ __html: t.d }} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* The closing piece */}
+      <div style={{ ...sectionGap, padding:'40px 36px', background:T.goldSoft, borderLeft:`3px solid ${T.gold}` }}>
+        <Kicker color={T.gold} style={{ marginBottom:12 }}>The Closing Thought</Kicker>
+        <p style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:24, color:T.ink, lineHeight:1.45, margin:'0 0 12px' }}>
+          {sorted.length} readings show that you can lose weight; you have done it before, from {Math.max(...sorted.map(r=>r.weight))} kg down to {Math.min(...sorted.map(r=>r.weight))} kg.
+        </p>
+        <p style={{ fontFamily:T.sans, fontSize:15, color:T.body, fontWeight:300, lineHeight:1.7, margin:0, maxWidth:'62ch' }}>
+          The work this time is different. It is not about losing — it is about <strong style={{ color:T.ink, fontWeight:500 }}>staying lost</strong>. Follow the five rules. File the weekly reading. Add it to the ledger. Trust the line.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Compose modal ────────────────────────────────────────────────────────────
 
 function Compose({ open, onClose, onSubmit }: {
@@ -1308,7 +1958,7 @@ export default function OperatorDashboardClient() {
   const [msTxt,msCol] = muscleStatus(latest.muscleMass);
   const [bonTxt,bonCol] = boneStatus(latest.boneMass);
 
-  const TABS = ['Overview','Projections','Charts','Ledger'];
+  const TABS = ['Overview','Health','Projections','Plan','Charts','Ledger'];
 
   return (
     <div style={{ background:T.paper, minHeight:'100vh' }}>
@@ -1455,6 +2105,12 @@ export default function OperatorDashboardClient() {
             </div>
           </div>
         )}
+
+        {/* ── HEALTH ───────────────────────────────── */}
+        {tab==='Health' && <HealthTab sorted={sorted} goal={goal} reg={reg} />}
+
+        {/* ── PLAN ─────────────────────────────────── */}
+        {tab==='Plan' && <PlanTab sorted={sorted} goal={goal} />}
 
         {/* ── PROJECTIONS ──────────────────────────── */}
         {tab==='Projections' && reg && (
