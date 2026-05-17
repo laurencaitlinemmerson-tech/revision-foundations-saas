@@ -120,6 +120,41 @@ function sum(values: (number | null)[]): number | null {
   return ns.reduce((a, b) => a + b, 0);
 }
 
+function stddev(values: (number | null)[]): number | null {
+  const ns = values.filter((v): v is number => v !== null && Number.isFinite(v));
+  if (ns.length < 2) return null;
+  const mean = ns.reduce((a, b) => a + b, 0) / ns.length;
+  const variance = ns.reduce((a, b) => a + (b - mean) ** 2, 0) / ns.length;
+  return Math.sqrt(variance);
+}
+
+// Streak of consecutive most-recent days where `pick(day) >= threshold`.
+// Days are assumed chronological oldest → newest.
+function trailingStreak(days: DailyMetrics[], pick: (d: DailyMetrics) => number | null, threshold: number): number {
+  let n = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    const v = pick(days[i]);
+    if (v === null || !Number.isFinite(v) || v < threshold) break;
+    n++;
+  }
+  return n;
+}
+
+function longestStreak(days: DailyMetrics[], pick: (d: DailyMetrics) => number | null, threshold: number): number {
+  let best = 0;
+  let cur = 0;
+  for (const d of days) {
+    const v = pick(d);
+    if (v !== null && Number.isFinite(v) && v >= threshold) {
+      cur++;
+      if (cur > best) best = cur;
+    } else {
+      cur = 0;
+    }
+  }
+  return best;
+}
+
 function pearson(a: number[], b: number[]): number | null {
   const n = Math.min(a.length, b.length);
   if (n < 4) return null;
@@ -417,6 +452,285 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
   const fatToday = latest?.nutrition?.fatG ?? null;
   const hasNutritionData = days.some((d) => (d.nutrition?.dietaryEnergyKcal ?? null) !== null);
 
+  // ── Readiness score (composite, 0–100) ───────────────────────────────────
+  // Compares last-night sleep, last HRV and last RHR against 14-day baselines.
+  // Each axis can earn up to ~33 points. Missing axes are skipped, score rescaled.
+  const baselineWindow = useMemo(() => days.slice(-15, -1), [days]); // exclude today
+  const sleepBaseline = avg(baselineWindow.map((d) => d.sleep.totalMin));
+  const hrvBaseline = avg(baselineWindow.map((d) => d.heart.hrvMs));
+  const rhrBaseline = avg(baselineWindow.map((d) => d.heart.restingHr));
+
+  function readinessAxis(current: number | null, baseline: number | null, invert = false): number | null {
+    if (current === null || baseline === null || baseline === 0) return null;
+    const ratio = invert ? baseline / current : current / baseline;
+    // 1.0 = on baseline → ~85 points. 1.15 = strongly above → ~100. 0.7 = poor → ~0.
+    const score = (ratio - 0.7) / 0.45;
+    return Math.max(0, Math.min(1, score)) * 100;
+  }
+
+  const readinessAxes = [
+    { key: 'sleep', label: 'Sleep', score: readinessAxis(latest?.sleep.totalMin ?? null, sleepBaseline) },
+    { key: 'hrv', label: 'HRV', score: readinessAxis(latest?.heart.hrvMs ?? null, hrvBaseline) },
+    { key: 'rhr', label: 'RHR', score: readinessAxis(latest?.heart.restingHr ?? null, rhrBaseline, true) },
+  ];
+  const readinessScores = readinessAxes.map((a) => a.score).filter((s): s is number => s !== null);
+  const readinessScore = readinessScores.length > 0
+    ? Math.round(readinessScores.reduce((a, b) => a + b, 0) / readinessScores.length)
+    : null;
+  const readinessTone: 'good' | 'warn' | 'neutral' =
+    readinessScore === null ? 'neutral'
+    : readinessScore >= 70 ? 'good'
+    : readinessScore >= 45 ? 'neutral'
+    : 'warn';
+  const readinessVerdict =
+    readinessScore === null ? 'Awaiting more baseline data'
+    : readinessScore >= 75 ? 'Green — push day available'
+    : readinessScore >= 55 ? 'Amber — steady aerobic only'
+    : readinessScore >= 35 ? 'Amber — recover before pushing'
+    : 'Red — rest, light movement, hydrate';
+
+  // ── This week vs last week ───────────────────────────────────────────────
+  const thisWeek = useMemo(() => days.slice(-7), [days]);
+  const lastWeek = useMemo(() => days.slice(-14, -7), [days]);
+  function weeklySum(window: DailyMetrics[], pick: (d: DailyMetrics) => number | null): number | null {
+    return sum(window.map(pick));
+  }
+  const weeklyDeltas = [
+    {
+      label: 'Steps',
+      now: weeklySum(thisWeek, (d) => d.activity.steps),
+      prev: weeklySum(lastWeek, (d) => d.activity.steps),
+      fmt: (v: number | null) => fmtInt(v),
+    },
+    {
+      label: 'Exercise',
+      now: weeklySum(thisWeek, (d) => d.activity.exerciseMinutes),
+      prev: weeklySum(lastWeek, (d) => d.activity.exerciseMinutes),
+      fmt: (v: number | null) => fmtNum(v, 0, ' min'),
+    },
+    {
+      label: 'Active kcal',
+      now: weeklySum(thisWeek, (d) => d.activity.activeEnergyKcal),
+      prev: weeklySum(lastWeek, (d) => d.activity.activeEnergyKcal),
+      fmt: (v: number | null) => fmtInt(v),
+    },
+    {
+      label: 'Sleep avg',
+      now: avg(thisWeek.map((d) => d.sleep.totalMin)),
+      prev: avg(lastWeek.map((d) => d.sleep.totalMin)),
+      fmt: (v: number | null) => formatMinutes(v),
+    },
+  ];
+
+  // ── Streaks ─────────────────────────────────────────────────────────────
+  const stepsStreak = trailingStreak(days, (d) => d.activity.steps, 7000);
+  const exerciseStreak = trailingStreak(days, (d) => d.activity.exerciseMinutes, GOALS.exerciseMinutes);
+  const stepsStreakBest = longestStreak(last30, (d) => d.activity.steps, 7000);
+
+  // ── Sleep consistency (last 14 nights) ──────────────────────────────────
+  const sleepStdMin = stddev(last14.map((d) => d.sleep.totalMin));
+  const sleepConsistencyLabel =
+    sleepStdMin === null ? '—'
+    : sleepStdMin < 30 ? 'Tight'
+    : sleepStdMin < 60 ? 'Steady'
+    : sleepStdMin < 90 ? 'Variable'
+    : 'Erratic';
+
+  // ── 28-day step heatmap ─────────────────────────────────────────────────
+  const heatmapDays = useMemo(() => days.slice(-28), [days]);
+
+  // ── Today's one move (single named action) ──────────────────────────────
+  const todayHour = new Date().getHours();
+  const stepsToday = latest?.activity.steps ?? null;
+  const exerciseToday = latest?.activity.exerciseMinutes ?? null;
+  const sleepShortfall =
+    latest?.sleep.totalMin && sleepBaseline ? sleepBaseline - latest.sleep.totalMin : null;
+  const oneMove = (() => {
+    if (readinessScore !== null && readinessScore < 40) {
+      return {
+        action: <>Rest day. <em>15-min walk and 8h sleep target.</em></>,
+        reason: 'Readiness is low — pushing today costs more than it earns. Light movement keeps the streak alive without taxing recovery.',
+        meta: [['Aim', '15 min walk'], ['Then', 'Wind down by 22:00']],
+      };
+    }
+    if (sleepShortfall !== null && sleepShortfall > 60) {
+      return {
+        action: <>Short walk now, <em>early wind-down tonight.</em></>,
+        reason: `Last night was ${Math.round(sleepShortfall)} min below your 14-day average. Tonight's sleep matters more than today's workout.`,
+        meta: [['Aim', '20 min walk'], ['Sleep target', '8h']],
+      };
+    }
+    if (netToday !== null && netToday > 200 && hasNutritionData) {
+      return {
+        action: <>Walk after dinner. <em>Aim to close on a small deficit.</em></>,
+        reason: `Net energy is +${Math.round(netToday)} kcal so far today. A 30-minute walk plus protein-led dinner gets you back to a clean deficit.`,
+        meta: [['Walk', '30 min'], ['Dinner', 'Protein-led']],
+      };
+    }
+    if (exerciseStreak >= 4 && readinessScore !== null && readinessScore >= 70) {
+      return {
+        action: <>Push day available — <em>pick the session you've been avoiding.</em></>,
+        reason: `Readiness is green (${readinessScore}) and you're ${exerciseStreak} days into an exercise streak. This is the day to bank a harder session.`,
+        meta: [['Aim', '45–60 min'], ['Intensity', 'Zone 3–4']],
+      };
+    }
+    if (stepsToday !== null && stepsToday < 5000 && todayHour >= 17) {
+      return {
+        action: <>20-minute walk after dinner. <em>Closes the Exercise ring.</em></>,
+        reason: `You're at ${fmtInt(stepsToday)} steps with an hour or two of light left. A short loop now lifts your 7-day cadence without taxing tomorrow.`,
+        meta: [['Walk', '20 min'], ['Steps target', '7k+']],
+      };
+    }
+    if (exerciseToday !== null && exerciseToday >= GOALS.exerciseMinutes) {
+      return {
+        action: <>Exercise ring closed — <em>protect tonight's sleep.</em></>,
+        reason: `Movement is done for the day. Lights low by 21:30, screens off 30 min before bed protects HRV gains.`,
+        meta: [['Sleep target', '8h'], ['Wind-down', '21:30']],
+      };
+    }
+    return {
+      action: <>20-minute brisk walk <em>after dinner.</em></>,
+      reason: 'A daily walk is the highest-leverage move on your current data — it lifts steps, exercise minutes and active kcal in one go, and protects sleep.',
+      meta: [['Walk', '20 min'], ['Steps target', '7k+']],
+    };
+  })();
+
+  // ── Drift detector (3-day off-target signal) ────────────────────────────
+  const last3Nets = nets7.slice(-3);
+  const driftNet = avg(last3Nets);
+  const last3Steps = avg(last7.slice(-3).map((d) => d.activity.steps));
+  const prior7Steps = avg(last7.slice(0, 4).map((d) => d.activity.steps));
+  const stepsDriftPct =
+    last3Steps !== null && prior7Steps !== null && prior7Steps !== 0
+      ? ((last3Steps - prior7Steps) / prior7Steps) * 100
+      : null;
+
+  const driftCard = (() => {
+    if (driftNet !== null && driftNet > 200 && hasNutritionData) {
+      return {
+        tone: 'warn' as const,
+        headline: `Nutrition net has drifted +${Math.round(driftNet)} kcal for 3 days.`,
+        body: 'No drama — but if this continues another week the trend line flattens. One reset day usually settles it.',
+        signals: [
+          ['3-day avg net', `+${Math.round(driftNet)} kcal`, 'warn' as const],
+          ['Target net', `${targetNet} kcal`, 'neutral' as const],
+        ],
+      };
+    }
+    if (stepsDriftPct !== null && stepsDriftPct < -20) {
+      return {
+        tone: 'warn' as const,
+        headline: `Steps are down ${Math.abs(Math.round(stepsDriftPct))}% on the last 3 days.`,
+        body: 'Often a busy-week signal more than a motivation one. A single 30-min walk tomorrow usually corrects it.',
+        signals: [
+          ['Last 3 days avg', `${fmtInt(last3Steps)} steps`, 'warn' as const],
+          ['Earlier this week', `${fmtInt(prior7Steps)} steps`, 'neutral' as const],
+        ],
+      };
+    }
+    if (exerciseStreak === 0 && days.length >= 3) {
+      return {
+        tone: 'neutral' as const,
+        headline: 'Exercise streak paused.',
+        body: 'No streak this week — that\'s fine. The data shows you start streaks within 1–2 days of a walk. Today\'s a good day for that walk.',
+        signals: [
+          ['Steps today', fmtInt(stepsToday), 'neutral' as const],
+          ['Exercise mins today', fmtInt(exerciseToday), 'neutral' as const],
+        ],
+      };
+    }
+    return {
+      tone: 'good' as const,
+      headline: 'No drift signals.',
+      body: 'Nutrition, steps and exercise are tracking with your recent baseline. Keep the cadence light.',
+      signals: [
+        ['3-day avg net', driftNet !== null ? `${driftNet >= 0 ? '+' : ''}${Math.round(driftNet)} kcal` : '—', 'good' as const],
+        ['Steps trend (3d)', stepsDriftPct !== null ? `${stepsDriftPct >= 0 ? '+' : ''}${stepsDriftPct.toFixed(0)}%` : '—', 'good' as const],
+      ],
+    };
+  })();
+
+  // ── Promise ledger (localStorage) ───────────────────────────────────────
+  const PROMISE_KEY = 'op-fitness-promises-v1';
+  type PromiseKind = 'walk' | 'workout' | 'rest' | 'stretch';
+  interface PromiseEntry { date: string; promise: PromiseKind }
+  const [promises, setPromises] = useState<Record<string, PromiseKind>>({});
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PROMISE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as PromiseEntry[];
+        const map: Record<string, PromiseKind> = {};
+        for (const p of parsed) map[p.date] = p.promise;
+        setPromises(map);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function setPromiseFor(date: string, kind: PromiseKind | null) {
+    setPromises((prev) => {
+      const next = { ...prev };
+      if (kind === null) delete next[date]; else next[date] = kind;
+      try {
+        const list: PromiseEntry[] = Object.entries(next).map(([d, p]) => ({ date: d, promise: p }));
+        localStorage.setItem(PROMISE_KEY, JSON.stringify(list));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
+
+  function evaluatePromise(date: string, kind: PromiseKind): 'kept' | 'missed' | 'pending' {
+    if (date === new Date().toISOString().slice(0, 10)) return 'pending';
+    const d = days.find((row) => row.date.slice(0, 10) === date);
+    if (!d) return 'pending';
+    if (kind === 'rest') return 'kept';
+    if (kind === 'stretch') return 'kept'; // honour-system
+    if (kind === 'walk') {
+      const ok = (d.activity.steps ?? 0) >= 7000 || (d.activity.exerciseMinutes ?? 0) >= 15;
+      return ok ? 'kept' : 'missed';
+    }
+    if (kind === 'workout') {
+      const hasWorkout = workouts.some((w) => w.startedAt.slice(0, 10) === date);
+      return hasWorkout ? 'kept' : 'missed';
+    }
+    return 'pending';
+  }
+
+  const promiseLedger = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const rows: Array<{
+      date: string; dow: string; promise: PromiseKind | null; status: 'kept' | 'missed' | 'pending' | 'empty';
+      stepsVal: number | null;
+    }> = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      const promise = promises[iso] ?? null;
+      const dayData = days.find((row) => row.date.slice(0, 10) === iso) ?? null;
+      const status: 'kept' | 'missed' | 'pending' | 'empty' = promise ? evaluatePromise(iso, promise) : 'empty';
+      rows.push({
+        date: iso,
+        dow: d.toLocaleDateString('en-GB', { weekday: 'short' }),
+        promise,
+        status,
+        stepsVal: dayData?.activity.steps ?? null,
+      });
+    }
+    return rows;
+  }, [promises, days, workouts]);
+
+  const keptCount = promiseLedger.filter((r) => r.status === 'kept').length;
+  const setCount = promiseLedger.filter((r) => r.promise !== null).length;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayPromise = promises[todayIso] ?? null;
+
+
   // Correlations (30 days)
   const correlations = useMemo(() => {
     const sleepNights: number[] = [];
@@ -513,6 +827,115 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
         </div>
       </header>
 
+      {/* ── Readiness band ──────────────────────────────────────────────── */}
+      <div className={`op-readiness op-readiness-${readinessTone}`}>
+        <div className="op-readiness-score">
+          <div className="op-readiness-num">{readinessScore !== null ? readinessScore : '—'}</div>
+          <div className="op-readiness-lbl">Readiness</div>
+        </div>
+        <div className="op-readiness-axes">
+          {readinessAxes.map((a) => (
+            <div key={a.key} className="op-readiness-axis">
+              <div className="op-readiness-axis-lbl">{a.label}</div>
+              <div className="op-readiness-axis-bar">
+                <span style={{ width: `${a.score ?? 0}%` }} />
+              </div>
+              <div className="op-readiness-axis-val">{a.score !== null ? Math.round(a.score) : '—'}</div>
+            </div>
+          ))}
+        </div>
+        <div className="op-readiness-verdict">
+          <div className="op-readiness-verdict-lbl">Today reads as</div>
+          <div className="op-readiness-verdict-txt">{readinessVerdict}</div>
+        </div>
+      </div>
+
+      {/* ── Accountability: today's one move + drift detector ───────── */}
+      <div className="op-accountability">
+        <div className="op-onemove">
+          <span className="kicker">Today, one move</span>
+          <div className="action">{oneMove.action}</div>
+          <p className="reason">{oneMove.reason}</p>
+          <div className="meta-row">
+            {oneMove.meta.map(([k, v]) => (
+              <span key={k}>{k} <strong>{v}</strong></span>
+            ))}
+          </div>
+        </div>
+        <div className="op-drift">
+          <span className="kicker">Drift check · 3 days</span>
+          <div className={`headline ${driftCard.tone}`}>{driftCard.headline}</div>
+          <p className="body">{driftCard.body}</p>
+          <dl className="signals">
+            {driftCard.signals.map(([k, v, tone]) => (
+              <div className="signal-row" key={k}>
+                <dt>{k}</dt>
+                <dd className={tone}>{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+
+      {/* ── Promise ledger ──────────────────────────────────────────── */}
+      <div className="op-promise">
+        <div className="op-promise-head">
+          <span className="op-health-card-label">Promise → kept · last 7 days</span>
+          <span className="muted">{setCount === 0 ? 'Set a tiny intention below — evaluated against tomorrow\'s data.' : `${keptCount}/${setCount} kept`}</span>
+        </div>
+        <div className="op-promise-grid">
+          {promiseLedger.map((row) => {
+            const stateClass = row.status === 'empty' ? '' : row.status;
+            const mark = row.status === 'kept' ? '✓' : row.status === 'missed' ? '·' : row.status === 'pending' ? '…' : '—';
+            const valLabel = row.status === 'empty' ? 'no promise'
+              : row.promise === 'rest' ? 'rest'
+              : row.promise === 'stretch' ? 'stretch'
+              : row.promise === 'workout' ? 'workout'
+              : row.stepsVal !== null ? `${fmtInt(row.stepsVal)} st`
+              : 'walk';
+            return (
+              <div key={row.date} className={`op-promise-day ${stateClass}`} title={`${row.date}: ${row.promise ?? 'no promise'} · ${row.status}`}>
+                <span className="op-promise-dow">{row.dow}</span>
+                <span className="op-promise-mark">{mark}</span>
+                <span className="op-promise-val">{valLabel}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="op-promise-summary">
+          <span className="muted" style={{ marginRight: 10 }}>Today&apos;s intention:</span>
+          {(['walk', 'workout', 'stretch', 'rest'] as PromiseKind[]).map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => setPromiseFor(todayIso, todayPromise === kind ? null : kind)}
+              style={{
+                marginRight: 8,
+                padding: '4px 10px',
+                border: `0.5px solid ${todayPromise === kind ? 'var(--ink)' : 'var(--rule)'}`,
+                background: todayPromise === kind ? 'rgba(196,135,47,0.12)' : 'transparent',
+                fontFamily: 'inherit',
+                fontSize: 11,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'var(--ink)',
+                cursor: 'pointer',
+              }}
+            >
+              {kind}
+            </button>
+          ))}
+          {todayPromise && (
+            <span className="muted" style={{ marginLeft: 6 }}>
+              {todayPromise === 'walk' && '— evaluated tomorrow against 7k steps or 15 exercise min.'}
+              {todayPromise === 'workout' && '— evaluated tomorrow against a logged workout.'}
+              {todayPromise === 'stretch' && '— honour-system, marked kept.'}
+              {todayPromise === 'rest' && '— marked kept tomorrow.'}
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* ── Today snapshot strip ────────────────────────────────────────── */}
       <div className="op-today-strip">
         <SnapshotCell
@@ -553,6 +976,34 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
         />
       </div>
 
+      {/* ── This week vs last week ──────────────────────────────────── */}
+      <div className="op-week-compare">
+        <div className="op-week-compare-head">
+          <span className="op-health-card-label">This week vs last</span>
+          <span className="muted">7-day totals (sleep = nightly avg)</span>
+        </div>
+        <div className="op-week-compare-grid">
+          {weeklyDeltas.map((row) => {
+            let tone: 'good' | 'warn' | 'neutral' = 'neutral';
+            let pctText = '—';
+            if (row.now !== null && row.prev !== null && row.prev !== 0) {
+              const diff = row.now - row.prev;
+              const pct = (diff / row.prev) * 100;
+              tone = Math.abs(pct) < 3 ? 'neutral' : pct > 0 ? 'good' : 'warn';
+              pctText = `${pct >= 0 ? '+' : ''}${pct.toFixed(0)}%`;
+            }
+            return (
+              <div key={row.label} className="op-week-compare-cell">
+                <div className="op-week-compare-lbl">{row.label}</div>
+                <div className="op-week-compare-val">{row.fmt(row.now)}</div>
+                <div className="op-week-compare-sub muted">prev {row.fmt(row.prev)}</div>
+                <div className={`op-week-compare-delta ${tone}`}>{pctText}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* ── Main grid ────────────────────────────────────────────────── */}
       <div className="op-health-grid-v2">
 
@@ -576,6 +1027,8 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
             <div><dt>Best day</dt><dd>{fmtInt(Math.max(...stepBars.map((v) => v ?? 0)))}</dd></div>
             <div><dt>Distance (7d)</dt><dd>{fmtNum(sum(last7.map((d) => d.activity.distanceKm)), 1, ' km')}</dd></div>
             <div><dt>Active kcal (7d)</dt><dd>{fmtInt(sum(last7.map((d) => d.activity.activeEnergyKcal)))}</dd></div>
+            <div><dt>Steps streak (≥7k)</dt><dd>{stepsStreak} day{stepsStreak === 1 ? '' : 's'}</dd></div>
+            <div><dt>Exercise streak</dt><dd>{exerciseStreak} day{exerciseStreak === 1 ? '' : 's'}</dd></div>
           </dl>
         </article>
 
@@ -599,6 +1052,7 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
             <div><dt>Avg deep</dt><dd>{formatMinutes(avg(last7.map((d) => d.sleep.deepMin)))}</dd></div>
             <div><dt>Avg REM</dt><dd>{formatMinutes(avg(last7.map((d) => d.sleep.remMin)))}</dd></div>
             <div><dt>Avg awake</dt><dd>{formatMinutes(avg(last7.map((d) => d.sleep.awakeMin)))}</dd></div>
+            <div><dt>14-night consistency</dt><dd>{sleepStdMin !== null ? `${sleepConsistencyLabel} · ±${Math.round(sleepStdMin)}m` : '—'}</dd></div>
           </dl>
 
           <ul className="op-sleep-legend">
@@ -770,6 +1224,21 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
           )}
         </article>
 
+        {/* Consistency — 28-day heatmap + streaks */}
+        <article className="op-health-card op-card-wide">
+          <header className="op-health-card-head">
+            <span className="op-health-card-label">Consistency · last 28 days</span>
+            <span className="muted">Step intensity per day — darker = closer to goal</span>
+          </header>
+          <Heatmap days={heatmapDays} goal={GOALS.steps} />
+          <dl className="op-health-stats">
+            <div><dt>Steps streak (≥7k)</dt><dd>{stepsStreak} day{stepsStreak === 1 ? '' : 's'}</dd></div>
+            <div><dt>Best in 30d</dt><dd>{stepsStreakBest} day{stepsStreakBest === 1 ? '' : 's'}</dd></div>
+            <div><dt>Exercise streak (≥{GOALS.exerciseMinutes}m)</dt><dd>{exerciseStreak} day{exerciseStreak === 1 ? '' : 's'}</dd></div>
+            <div><dt>Sleep consistency</dt><dd>{sleepConsistencyLabel}{sleepStdMin !== null ? ` (±${Math.round(sleepStdMin)}m)` : ''}</dd></div>
+          </dl>
+        </article>
+
       </div>
 
       {/* ── Correlations ─────────────────────────────────────────────── */}
@@ -807,6 +1276,54 @@ export default function HealthMetricsSection({ opPw, readings }: Props) {
 }
 
 // ─── presentational sub-components ──────────────────────────────────────────
+
+function Heatmap({ days, goal }: { days: DailyMetrics[]; goal: number }) {
+  // Build a 4-week × 7-day grid ending today. Today is the last (rightmost,
+  // bottom) cell. Earlier weeks fill in above. Missing days render as empty.
+  if (days.length === 0) {
+    return <p className="op-health-empty">No step data yet.</p>;
+  }
+  const today = days[days.length - 1] ? new Date(days[days.length - 1].date) : new Date();
+  today.setHours(0, 0, 0, 0);
+  const cells: Array<DailyMetrics | null> = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const iso = d.toISOString().slice(0, 10);
+    cells.push(days.find((row) => row.date.slice(0, 10) === iso) ?? null);
+  }
+  const dayLabels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  return (
+    <div className="op-heatmap">
+      <div className="op-heatmap-grid">
+        {cells.map((d, idx) => {
+          const steps = d?.activity.steps ?? null;
+          const pct = steps !== null ? Math.min(1, steps / goal) : null;
+          const isToday = idx === cells.length - 1;
+          return (
+            <div
+              key={idx}
+              className={`op-heatmap-cell ${isToday ? 'is-today' : ''} ${steps === null ? 'is-missing' : ''}`}
+              style={pct !== null ? { background: `rgba(196,135,47,${0.12 + pct * 0.68})` } : undefined}
+              title={d ? `${d.date}: ${steps !== null ? Math.round(steps).toLocaleString('en-GB') + ' steps' : 'no data'}` : 'missing'}
+            />
+          );
+        })}
+      </div>
+      <div className="op-heatmap-legend">
+        <span className="muted">Less</span>
+        {[0.15, 0.35, 0.55, 0.75, 0.95].map((s) => (
+          <span key={s} className="op-heatmap-swatch" style={{ background: `rgba(196,135,47,${0.12 + s * 0.68})` }} />
+        ))}
+        <span className="muted">Goal {goal.toLocaleString('en-GB')}</span>
+        <span className="op-heatmap-spacer" />
+        <span className="op-heatmap-days">
+          {dayLabels.map((l) => <span key={l}>{l}</span>)}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function SnapshotCell({ label, value, baseline, delta }: {
   label: string;

@@ -1969,3 +1969,352 @@
   font-style: normal;
   font-weight: 500;
 }
+
+/* ── Readiness band ───────────────────────────────────────────────── */
+.fitness-reference-shell .op-readiness {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 28px;
+  padding: 18px 22px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  border-left-width: 3px;
+  margin-bottom: 18px;
+}
+.fitness-reference-shell .op-readiness-good { border-left-color: var(--good); }
+.fitness-reference-shell .op-readiness-warn { border-left-color: var(--warn); }
+.fitness-reference-shell .op-readiness-neutral { border-left-color: var(--ink-soft); }
+.fitness-reference-shell .op-readiness-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 90px;
+}
+.fitness-reference-shell .op-readiness-num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 44px;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.fitness-reference-shell .op-readiness-lbl {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+.fitness-reference-shell .op-readiness-axes {
+  display: grid;
+  gap: 8px;
+}
+.fitness-reference-shell .op-readiness-axis {
+  display: grid;
+  grid-template-columns: 56px 1fr 36px;
+  align-items: center;
+  gap: 12px;
+}
+.fitness-reference-shell .op-readiness-axis-lbl {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.fitness-reference-shell .op-readiness-axis-bar {
+  height: 6px;
+  background: var(--rule-soft);
+  position: relative;
+  overflow: hidden;
+}
+.fitness-reference-shell .op-readiness-axis-bar > span {
+  position: absolute;
+  inset: 0;
+  background: var(--brass);
+  opacity: 0.7;
+}
+.fitness-reference-shell .op-readiness-axis-val {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-align: right;
+}
+.fitness-reference-shell .op-readiness-verdict {
+  text-align: right;
+  max-width: 220px;
+}
+.fitness-reference-shell .op-readiness-verdict-lbl {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 4px;
+}
+.fitness-reference-shell .op-readiness-verdict-txt {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--ink);
+  font-style: italic;
+}
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-readiness {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+  .fitness-reference-shell .op-readiness-verdict { text-align: left; max-width: none; }
+}
+
+/* ── Week comparison strip ───────────────────────────────────────── */
+.fitness-reference-shell .op-week-compare {
+  margin: 18px 0 22px;
+  padding: 14px 16px 16px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+}
+.fitness-reference-shell .op-week-compare-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+.fitness-reference-shell .op-week-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.fitness-reference-shell .op-week-compare-cell {
+  padding: 6px 14px;
+  border-left: 0.5px solid var(--rule);
+}
+.fitness-reference-shell .op-week-compare-cell:first-child { border-left: none; padding-left: 0; }
+.fitness-reference-shell .op-week-compare-lbl {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.fitness-reference-shell .op-week-compare-val {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.fitness-reference-shell .op-week-compare-sub {
+  font-size: 11px;
+  margin-top: 6px;
+}
+.fitness-reference-shell .op-week-compare-delta {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.fitness-reference-shell .op-week-compare-delta.good { color: var(--good); }
+.fitness-reference-shell .op-week-compare-delta.warn { color: var(--warn); }
+.fitness-reference-shell .op-week-compare-delta.neutral { color: var(--ink-mute); }
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-week-compare-grid { grid-template-columns: repeat(2, 1fr); }
+  .fitness-reference-shell .op-week-compare-cell:nth-child(odd) { border-left: none; padding-left: 0; }
+  .fitness-reference-shell .op-week-compare-cell:nth-child(n+3) { padding-top: 12px; border-top: 0.5px solid var(--rule); }
+}
+
+/* ── 28-day heatmap ───────────────────────────────────────────────── */
+.fitness-reference-shell .op-heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fitness-reference-shell .op-heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(28, 1fr);
+  gap: 3px;
+}
+.fitness-reference-shell .op-heatmap-cell {
+  aspect-ratio: 1 / 1;
+  background: var(--rule-soft);
+  border: 0.5px solid transparent;
+}
+.fitness-reference-shell .op-heatmap-cell.is-today {
+  border-color: var(--ink);
+}
+.fitness-reference-shell .op-heatmap-cell.is-missing {
+  background: transparent;
+  border: 0.5px dashed var(--rule);
+}
+.fitness-reference-shell .op-heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+}
+.fitness-reference-shell .op-heatmap-swatch {
+  width: 10px;
+  height: 10px;
+}
+.fitness-reference-shell .op-heatmap-spacer { flex: 1; }
+.fitness-reference-shell .op-heatmap-days {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* ── Accountability layer ────────────────────────────────────────── */
+.fitness-reference-shell .op-accountability {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  margin: 0 0 22px;
+}
+@media (max-width: 880px) {
+  .fitness-reference-shell .op-accountability { grid-template-columns: 1fr; }
+}
+.fitness-reference-shell .op-onemove,
+.fitness-reference-shell .op-drift {
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 18px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fitness-reference-shell .op-onemove .kicker,
+.fitness-reference-shell .op-drift .kicker {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+.fitness-reference-shell .op-onemove .action {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.fitness-reference-shell .op-onemove .action em { color: var(--brass-deep); font-style: italic; }
+.fitness-reference-shell .op-onemove .reason {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  max-width: 52ch;
+}
+.fitness-reference-shell .op-onemove .meta-row {
+  display: flex;
+  gap: 14px;
+  font-size: 10.5px;
+  color: var(--ink-mute);
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.fitness-reference-shell .op-onemove .meta-row strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.fitness-reference-shell .op-drift .headline {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.fitness-reference-shell .op-drift .headline.good { color: var(--good); }
+.fitness-reference-shell .op-drift .headline.warn { color: var(--warn); }
+.fitness-reference-shell .op-drift .body {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.fitness-reference-shell .op-drift .signals {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--rule-soft);
+}
+.fitness-reference-shell .op-drift .signal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+}
+.fitness-reference-shell .op-drift .signal-row dt {
+  color: var(--ink-mute);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 9.5px;
+}
+.fitness-reference-shell .op-drift .signal-row dd {
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.fitness-reference-shell .op-drift .signal-row dd.good { color: var(--good); }
+.fitness-reference-shell .op-drift .signal-row dd.warn { color: var(--warn); }
+
+.fitness-reference-shell .op-promise {
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 18px 20px 16px;
+  margin: 0 0 22px;
+}
+.fitness-reference-shell .op-promise-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.fitness-reference-shell .op-promise-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.fitness-reference-shell .op-promise-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: 0.5px solid var(--rule-soft);
+  background: rgba(255,255,255,0.5);
+}
+.fitness-reference-shell .op-promise-day.kept { background: rgba(28,122,103,0.08); border-color: rgba(28,122,103,0.35); }
+.fitness-reference-shell .op-promise-day.missed { background: rgba(161,74,87,0.05); border-color: rgba(161,74,87,0.25); }
+.fitness-reference-shell .op-promise-day.pending { opacity: 0.55; }
+.fitness-reference-shell .op-promise-dow {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.fitness-reference-shell .op-promise-mark {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1;
+}
+.fitness-reference-shell .op-promise-day.kept .op-promise-mark { color: var(--good); }
+.fitness-reference-shell .op-promise-day.missed .op-promise-mark { color: var(--warn); }
+.fitness-reference-shell .op-promise-val {
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.fitness-reference-shell .op-promise-summary {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}

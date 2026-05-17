@@ -592,100 +592,289 @@ function AnalyticsSection({
   const workoutKcalWeek = workouts.reduce((sum, w) => sum + (w.energyKcal ?? 0), 0);
   const recentWorkouts = workouts.slice(0, 3);
 
+  // ── Chart data: last ~12 weeks of weekly-binned weights ──────────────────
+  const weightTrendPoints = useMemo(() => {
+    const recent = sorted.slice(-84); // ~12 weeks of daily-ish readings
+    return recent.map((r, i) => ({ x: i, w: r.weight, date: r.date }));
+  }, [sorted]);
+
+  // ── Chart data: last 7 day-buckets of workouts (minutes) ─────────────────
+  const workoutWeekBuckets = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const buckets: { day: string; date: string; minutes: number; kcal: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      const dayLabel = d.toLocaleDateString('en-GB', { weekday: 'short' }).charAt(0);
+      const matched = workouts.filter((w) => w.startedAt.slice(0, 10) === iso);
+      buckets.push({
+        day: dayLabel,
+        date: iso,
+        minutes: matched.reduce((s, w) => s + (w.durationMin ?? 0), 0),
+        kcal: matched.reduce((s, w) => s + (w.energyKcal ?? 0), 0),
+      });
+    }
+    return buckets;
+  }, [workouts]);
+
+  const proteinTarget = Math.round(latest.weight * 1.8);
+  const proteinPct = proteinTarget > 0 ? Math.min(1.2, nutrition.protein / proteinTarget) : 0;
+
   return (
-    <section className="fit-panel" style={{ marginBottom: 28 }}>
-      <div className="fit-panel-head">
+    <section style={{ marginBottom: 28 }}>
+      <div className="fit-panel-head" style={{ marginBottom: 14 }}>
         <div>
-          <h3>Performance summary</h3>
-          <div className="meta">Deficit, weight trend and support signals for the current operator fitness cycle.</div>
+          <h3>Performance <em>analysis</em></h3>
+          <div className="meta">Deficit, weight trend, workout load and protein support — at a glance.</div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gap: 18, marginTop: 18 }}>
-        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 18 }}>
-              <div>
-                <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Calorie plan</div>
-                <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Target and deficit from the current menu.</div>
-              </div>
-              <span style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 700, color: deficitTone, textTransform: 'uppercase' }}>{deficitStatus}</span>
-            </div>
-            <div style={{ display: 'grid', gap: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Maintenance</span><strong>{nutrition.activeTdee.toLocaleString()} kcal</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Target intake</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Daily deficit</span><strong>{dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly deficit</span><strong>{weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Expected loss</span><strong>{weeklyDeficit > 0 ? `${expectedLoss.toFixed(2)} kg/wk` : '0.00 kg/wk'}</strong></div>
-            </div>
-          </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
 
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
-            <div style={{ marginBottom: 18 }}>
-              <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Weight progress</div>
-              <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Trend, goal distance and current momentum.</div>
-            </div>
-            <div style={{ display: 'grid', gap: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Current weight</span><strong>{latest.weight.toFixed(1)} kg</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Goal weight</span><strong>{goal.toFixed(1)} kg</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Change since start</span><strong>{formatWeightDelta(totalChange)}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Remaining to goal</span><strong>{remainingWeight.toFixed(1)} kg</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly trend</span><strong>{state.trendKgPerWeek >= 0 ? '+' : ''}{state.trendKgPerWeek.toFixed(2)} kg/wk</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Trend gap</span><strong>{trendComparison}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Rolling avg</span><strong>{rollingValue !== undefined ? `${rollingValue.toFixed(1)} kg` : 'Not enough data yet'}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Momentum</span><strong>{trendDirection}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Target date</span><strong>{etaLabel}</strong></div>
-            </div>
-          </div>
-        </div>
+        {/* ── Card 1: Weight trend vs goal ── */}
+        <AnalysisCard
+          label="Weight trend"
+          headline={`${latest.weight.toFixed(1)} kg`}
+          sub={`${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk · target ${etaLabel}`}
+          tone={latest.weight <= goal ? 'good' : state.trendKgPerWeek < -0.05 ? 'good' : 'warn'}
+        >
+          <MiniLineChart
+            points={weightTrendPoints.map((p) => p.w)}
+            goal={goal}
+            color={T.gold}
+            height={120}
+          />
+          <AnalysisStats
+            rows={[
+              ['To goal', `${remainingWeight.toFixed(1)} kg`],
+              ['Direction', trendDirection],
+              ['vs target rate', trendComparison],
+            ]}
+          />
+        </AnalysisCard>
 
-        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
-            <div style={{ marginBottom: 18 }}>
-              <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Workout details</div>
-              <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Recent sessions and calories burned from synced workouts.</div>
-            </div>
-            <div style={{ display: 'grid', gap: 12, marginBottom: 18 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Sessions tracked</span><strong>{workouts.length}</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly workout mins</span><strong>{workoutMinutesWeek} min</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Calories burned</span><strong>{workoutKcalWeek} kcal</strong></div>
-            </div>
-            {workoutState === 'loading' && <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted }}>Loading workouts…</p>}
-            {workoutState === 'error' && <p style={{ fontFamily: T.sans, fontSize: 12, color: T.rose }}>Unable to load workouts.</p>}
-            {workoutState === 'empty' && <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted }}>No workouts synced yet.</p>}
-            {workoutState === 'ready' && recentWorkouts.length > 0 && (
-              <div style={{ display: 'grid', gap: 10 }}>
-                {recentWorkouts.map((w) => (
-                  <div key={w.id} style={{ borderTop: `1px solid ${T.line}`, paddingTop: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
-                      <span style={{ fontFamily: T.sans, fontSize: 12, color: T.ink, fontWeight: 700 }}>{w.type ?? 'Workout'}</span>
-                      <span style={{ fontFamily: T.sans, fontSize: 11, color: T.muted }}>{new Date(w.startedAt).toLocaleDateString('en-GB')}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 6 }}>
-                      <span style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>{w.durationMin ? `${Math.round(w.durationMin)} min` : 'No duration'}</span>
-                      <strong style={{ fontFamily: T.sans, fontSize: 12, color: T.ink }}>{w.energyKcal ? `${Math.round(w.energyKcal)} kcal` : 'No kcal'}</strong>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        {/* ── Card 2: Energy balance ── */}
+        <AnalysisCard
+          label="Energy balance"
+          headline={dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Setup'}
+          sub={`${deficitStatus} · expected ${expectedLoss.toFixed(2)} kg/wk loss`}
+          tone={dailyDeficit > 0 && dailyDeficit < 900 && dailyDeficit >= 200 ? 'good' : 'warn'}
+        >
+          <BalanceBars
+            maintenance={nutrition.activeTdee}
+            intake={nutrition.intake}
+            deficit={Math.max(0, dailyDeficit)}
+            height={120}
+          />
+          <AnalysisStats
+            rows={[
+              ['Maintenance', `${nutrition.activeTdee.toLocaleString()} kcal`],
+              ['Target intake', `${nutrition.intake.toLocaleString()} kcal`],
+              ['Weekly deficit', weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : '—'],
+            ]}
+          />
+        </AnalysisCard>
 
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 20 }}>
-            <div style={{ marginBottom: 18 }}>
-              <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, marginBottom: 6 }}>Nutrition status</div>
-              <div style={{ fontFamily: T.sans, fontSize: 12, color: T.body }}>Protein and calories for recovery and fat loss.</div>
-            </div>
-            <div style={{ display: 'grid', gap: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Protein target</span><strong>{nutrition.protein} g</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Target per kg</span><strong>{Math.round(latest.weight * 1.8)} g</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Daily calories</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Nutrition note</span><strong>{proteinNote}</strong></div>
-            </div>
-          </div>
-        </div>
+        {/* ── Card 3: Workout load (this week) ── */}
+        <AnalysisCard
+          label="Workout load"
+          headline={`${Math.round(workoutMinutesWeek)} min`}
+          sub={`${workouts.length} sessions · ${Math.round(workoutKcalWeek)} kcal · ${activitySupport.toLowerCase()}`}
+          tone={cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}
+        >
+          {workoutState === 'loading' ? (
+            <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, margin: '24px 0' }}>Loading workouts…</p>
+          ) : workoutState === 'error' ? (
+            <p style={{ fontFamily: T.sans, fontSize: 12, color: T.rose, margin: '24px 0' }}>Unable to load workouts.</p>
+          ) : (
+            <MiniColumnChart
+              values={workoutWeekBuckets.map((b) => b.minutes)}
+              labels={workoutWeekBuckets.map((b) => b.day)}
+              color={T.blue}
+              height={120}
+              formatValue={(v) => `${Math.round(v)} min`}
+            />
+          )}
+          <AnalysisStats
+            rows={[
+              ['Cadence score', `${cadence.score}/100`],
+              ['Days logged (14d)', `${cadence.count}`],
+              ['Recent', recentWorkouts.length > 0 ? `${recentWorkouts[0].type ?? 'Workout'} · ${new Date(recentWorkouts[0].startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'None yet'],
+            ]}
+          />
+        </AnalysisCard>
+
+        {/* ── Card 4: Protein vs target ── */}
+        <AnalysisCard
+          label="Protein support"
+          headline={`${nutrition.protein} g`}
+          sub={`${proteinNote} · ${proteinTarget} g target (1.8 g/kg)`}
+          tone={proteinPct >= 1 ? 'good' : proteinPct >= 0.85 ? 'neutral' : 'warn'}
+        >
+          <ProteinGauge current={nutrition.protein} target={proteinTarget} />
+          <AnalysisStats
+            rows={[
+              ['Target', `${proteinTarget} g`],
+              ['Daily kcal', `${nutrition.intake.toLocaleString()} kcal`],
+              ['Coverage', `${Math.round(proteinPct * 100)}% of target`],
+            ]}
+          />
+        </AnalysisCard>
+
       </div>
     </section>
+  );
+}
+
+// ─── Analysis card helpers ────────────────────────────────────────────────────
+
+function AnalysisCard({
+  label, headline, sub, tone, children,
+}: {
+  label: string; headline: string; sub: string; tone: 'good' | 'warn' | 'neutral';
+  children: React.ReactNode;
+}) {
+  const toneColor = tone === 'good' ? T.green : tone === 'warn' ? T.rose : T.muted;
+  return (
+    <article style={{
+      background: T.paper, border: `0.5px solid ${T.line}`, padding: '18px 18px 16px',
+      display: 'flex', flexDirection: 'column', gap: 12, minHeight: 260,
+    }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <span style={{ fontFamily: T.sans, fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 500, color: T.muted }}>{label}</span>
+        <span style={{ fontFamily: T.sans, fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: toneColor, fontWeight: 600 }}>
+          {tone === 'good' ? 'On track' : tone === 'warn' ? 'Needs review' : 'Steady'}
+        </span>
+      </header>
+      <div>
+        <div style={{ fontFamily: T.display, fontSize: 28, color: T.ink, lineHeight: 1, letterSpacing: '-0.01em' }}>{headline}</div>
+        <div style={{ fontFamily: T.sans, fontSize: 11.5, color: T.body, marginTop: 6, lineHeight: 1.5 }}>{sub}</div>
+      </div>
+      {children}
+    </article>
+  );
+}
+
+function AnalysisStats({ rows }: { rows: [string, string][] }) {
+  return (
+    <dl style={{
+      display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px',
+      margin: 0, paddingTop: 10, borderTop: `0.5px solid ${T.softLine}`,
+    }}>
+      {rows.map(([k, v]) => (
+        <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gridColumn: rows.length === 3 && k === rows[2][0] ? '1 / -1' : undefined }}>
+          <dt style={{ fontFamily: T.sans, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>{k}</dt>
+          <dd style={{ margin: 0, fontFamily: T.sans, fontSize: 12, color: T.ink, fontVariantNumeric: 'tabular-nums', textAlign: 'right' }}>{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function MiniLineChart({ points, goal, color, height }: { points: number[]; goal?: number; color: string; height: number }) {
+  const width = 320;
+  if (points.length < 2) {
+    return <div style={{ height, fontFamily: T.sans, fontSize: 11, color: T.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Not enough data yet</div>;
+  }
+  const min = Math.min(...points, goal ?? Infinity);
+  const max = Math.max(...points, goal ?? -Infinity);
+  const range = max - min || 1;
+  const step = width / (points.length - 1);
+  const yFor = (v: number) => height - ((v - min) / range) * (height - 10) - 5;
+  const path = points.map((v, i) => `${i === 0 ? 'M' : 'L'}${(i * step).toFixed(1)},${yFor(v).toFixed(1)}`).join(' ');
+  const goalY = goal !== undefined ? yFor(goal) : null;
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+      {goalY !== null && (
+        <>
+          <line x1={0} x2={width} y1={goalY} y2={goalY} stroke={T.green} strokeWidth={0.5} strokeDasharray="3 3" />
+          <text x={width - 2} y={goalY - 4} textAnchor="end" fontSize={9} fill={T.green} fontFamily={T.sans} letterSpacing="0.08em">GOAL {goal?.toFixed(1)}</text>
+        </>
+      )}
+      <path d={path} fill="none" stroke={color} strokeWidth={1.25} strokeLinejoin="round" />
+      <circle cx={(points.length - 1) * step} cy={yFor(points[points.length - 1])} r={2.5} fill={color} />
+    </svg>
+  );
+}
+
+function MiniColumnChart({ values, labels, color, height, formatValue }: {
+  values: number[]; labels: string[]; color: string; height: number;
+  formatValue?: (v: number) => string;
+}) {
+  const max = Math.max(...values, 1);
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height, padding: '4px 0' }}>
+      {values.map((v, i) => {
+        const pct = (v / max) * 100;
+        const isToday = i === values.length - 1;
+        return (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%' }}>
+            <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'flex-end' }}>
+              <div
+                title={`${labels[i]}: ${formatValue ? formatValue(v) : v}`}
+                style={{
+                  width: '100%',
+                  height: `${Math.max(pct, v > 0 ? 4 : 0)}%`,
+                  background: v > 0 ? color : T.softLine,
+                  opacity: isToday ? 1 : v > 0 ? 0.55 : 1,
+                  borderTop: isToday && v > 0 ? `1.5px solid ${T.gold}` : undefined,
+                }}
+              />
+            </div>
+            <span style={{ fontFamily: T.sans, fontSize: 9, letterSpacing: '0.1em', color: isToday ? T.ink : T.muted, fontWeight: isToday ? 600 : 400 }}>{labels[i]}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BalanceBars({ maintenance, intake, deficit, height }: { maintenance: number; intake: number; deficit: number; height: number }) {
+  const max = Math.max(maintenance, intake, 1);
+  const rows: [string, number, string][] = [
+    ['Maintenance', maintenance, T.muted],
+    ['Intake', intake, T.blue],
+    ['Deficit', deficit, deficit > 0 ? T.green : T.rose],
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height, justifyContent: 'center' }}>
+      {rows.map(([label, value, color]) => {
+        const pct = label === 'Deficit' ? (value / max) * 100 : (value / max) * 100;
+        return (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: T.sans, fontSize: 11 }}>
+            <span style={{ width: 76, color: T.muted, letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: 9.5 }}>{label}</span>
+            <div style={{ flex: 1, height: 10, background: T.softLine, position: 'relative' }}>
+              <div style={{ position: 'absolute', inset: 0, width: `${Math.min(100, pct)}%`, background: color, opacity: 0.85 }} />
+            </div>
+            <span style={{ width: 70, textAlign: 'right', color: T.ink, fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{Math.round(value).toLocaleString()}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ProteinGauge({ current, target }: { current: number; target: number }) {
+  const pct = target > 0 ? Math.min(1.2, current / target) : 0;
+  const fillPct = Math.min(100, pct * 100);
+  const overTarget = pct > 1;
+  const color = pct >= 1 ? T.green : pct >= 0.85 ? T.gold : T.rose;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center', height: 120 }}>
+      <div style={{ position: 'relative', height: 14, background: T.softLine }}>
+        <div style={{ position: 'absolute', inset: 0, width: `${fillPct}%`, background: color, opacity: 0.9 }} />
+        <div style={{ position: 'absolute', top: -3, bottom: -3, left: '100%', width: 1.5, background: T.ink, opacity: 0.5 }}
+          title={`Target ${target} g`} />
+        <div style={{ position: 'absolute', top: -14, left: '100%', transform: 'translateX(-50%)', fontFamily: T.sans, fontSize: 9, letterSpacing: '0.12em', color: T.muted, textTransform: 'uppercase' }}>Target</div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: T.sans, fontSize: 10.5, color: T.body }}>
+        <span>0 g</span>
+        <span style={{ color: overTarget ? T.green : T.ink, fontWeight: 600 }}>{current} g logged</span>
+        <span>{Math.max(target, current).toFixed(0)} g</span>
+      </div>
+    </div>
   );
 }
 
