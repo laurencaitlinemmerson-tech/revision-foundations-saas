@@ -23,7 +23,7 @@
 .fitness-reference-shell .wrap {
   max-width: 1220px;
   margin: 0 auto;
-  padding: 56px 20px 88px;
+  padding: 24px 20px 88px;
 }
 
 .fitness-reference-shell button,
@@ -1925,39 +1925,4 @@
   color: var(--ink);
   font-style: normal;
   font-weight: 500;
-}
-
-/* ── Tabs ────────────────────────────────────────────────────────────── */
-
-.fitness-reference-shell .op-tabs {
-  display: flex;
-  gap: 36px;
-  margin: 28px 0 36px;
-  border-bottom: 0.5px solid var(--rule);
-}
-
-.fitness-reference-shell .op-tab {
-  appearance: none;
-  background: none;
-  border: none;
-  padding: 14px 0;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: var(--ink-mute);
-  cursor: pointer;
-  border-bottom: 1px solid transparent;
-  margin-bottom: -0.5px;
-  transition: color 120ms ease;
-  font-family: inherit;
-}
-
-.fitness-reference-shell .op-tab:hover {
-  color: var(--ink-soft);
-}
-
-.fitness-reference-shell .op-tab.is-active {
-  color: var(--ink);
-  border-bottom-color: var(--ink);
 }
