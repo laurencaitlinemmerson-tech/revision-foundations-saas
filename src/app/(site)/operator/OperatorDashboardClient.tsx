@@ -1307,30 +1307,548 @@ function CommandNotes({ sorted, state, latest }: { sorted: FitnessReading[]; sta
 
 // ─── Apple Health / Import note ───────────────────────────────────────────────
 
-function ImportNote({ setTab: _setTab }: { setTab: (t:string)=>void }) {
+function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Promise<void> }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [state, setState] = useState<'idle' | 'uploading' | 'ok' | 'err'>('idle')
+  const [message, setMessage] = useState('')
+
+  const handleImport = async () => {
+    if (!file || state === 'uploading') return
+    setState('uploading')
+    setMessage('Reading Apple Health export…')
+
+    const result = await apiImportAppleHealth(opPw, file)
+    if (!result.ok) {
+      setState('err')
+      setMessage(result.message)
+      return
+    }
+
+    await onImported()
+    setState('ok')
+    setMessage(result.message)
+  }
+
   return (
     <div style={{ marginTop:48, padding:'24px 28px', background:T.surface, border:`0.5px solid ${T.line}` }}>
       <Kicker style={{ marginBottom:12 }}>Data sources · Apple Health</Kicker>
       <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 12px' }}>
-        Direct Apple Health sync isn&apos;t possible from a browser.
+        Apple Health now has a working import path here.
       </p>
       <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.7, margin:'0 0 12px' }}>
-        Apple only exposes HealthKit to native iOS apps. The practical paths:
+        Safari can&apos;t read HealthKit directly, so the browser-safe route is to export your Apple Health data and import the body measurements into this ledger.
       </p>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:14, margin:'18px 0 22px' }}>
+        <label style={{ display:'block', padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.78)' }}>
+          <Kicker style={{ marginBottom:8 }}>Upload export.xml</Kicker>
+          <input
+            type="file"
+            accept=".xml,text/xml"
+            onChange={(e) => {
+              setFile(e.target.files?.[0] ?? null)
+              setState('idle')
+              setMessage('')
+            }}
+            style={{ display:'block', width:'100%', fontFamily:T.sans, fontSize:12, color:T.body }}
+          />
+          <p style={{ fontFamily:T.sans, fontSize:11, color:T.muted, lineHeight:1.6, margin:'10px 0 0' }}>
+            Use the extracted <code>export.xml</code> file from Apple Health. Zip upload isn&apos;t supported yet.
+          </p>
+        </label>
+
+        <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.78)' }}>
+          <Kicker style={{ marginBottom:8 }}>Import status</Kicker>
+          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 8px' }}>
+            {file ? file.name : 'No file selected yet.'}
+          </p>
+          <button
+            type="button"
+            onClick={handleImport}
+            disabled={!file || state === 'uploading'}
+            style={{
+              background: !file || state === 'uploading' ? T.muted : T.ink,
+              color: T.paper,
+              border: 0,
+              cursor: !file || state === 'uploading' ? 'not-allowed' : 'pointer',
+              padding:'12px 16px',
+              fontFamily:T.sans,
+              fontSize:10,
+              fontWeight:600,
+              letterSpacing:'0.16em',
+              textTransform:'uppercase',
+              opacity: !file || state === 'uploading' ? 0.7 : 1,
+            }}
+          >
+            {state === 'uploading' ? 'Importing…' : 'Import Apple Health'}
+          </button>
+          {message && (
+            <p style={{ fontFamily:T.sans, fontSize:11, color: state === 'err' ? T.rose : state === 'ok' ? T.green : T.body, lineHeight:1.6, margin:'10px 0 0' }}>
+              {message}
+            </p>
+          )}
+        </div>
+      </div>
+
       <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:10 }}>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
           <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>i.</span>
-          <strong style={{ color:T.ink, fontWeight:500 }}>Apple Health Export.</strong> iPhone → Health app → profile photo → Export All Health Data. Upload the resulting <code>export.xml</code> here (importer coming next iteration).
+          <strong style={{ color:T.ink, fontWeight:500 }}>Apple Health export.</strong> In the Health app, open your profile and choose <em>Export All Health Data</em>. This importer reads body weight, BMI, body fat, lean mass, body water mass, and bone mass when those samples exist, then derives the dashboard-friendly fields it can.
         </li>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
           <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>ii.</span>
-          <strong style={{ color:T.ink, fontWeight:500 }}>Health Auto Export.</strong> £4 App Store app that pushes selected metrics to a webhook. Your existing POST <code>/api/operator/fitness</code> already accepts this format.
+          <strong style={{ color:T.ink, fontWeight:500 }}>Automatic sync is now ready.</strong> Your site can now accept push updates at <code>/api/operator/fitness/auto-sync</code>. It supports both the simple JSON payload I showed earlier and Health Auto Export&apos;s native REST API JSON structure.
         </li>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
           <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>iii.</span>
-          <strong style={{ color:T.ink, fontWeight:500 }}>Smart-scale cloud.</strong> Withings / Renpho / Eufy all have webhook APIs that mirror their Apple Health output — often more reliable than HealthKit re-exports.
+          <strong style={{ color:T.ink, fontWeight:500 }}>What to send.</strong> Send JSON with <code>date</code>, <code>weight</code>, and any of <code>bmi</code>, <code>bodyFat</code>, <code>water</code>, <code>waterMassKg</code>, <code>leanMassKg</code>, or <code>boneMassKg</code>. The route updates the existing day if it already exists, so repeated syncs don&apos;t create duplicate rows.
         </li>
       </ul>
+      <div style={{ marginTop:18, padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.72)' }}>
+        <Kicker style={{ marginBottom:8 }}>Shortcut payload example</Kicker>
+        <pre style={{ margin:0, whiteSpace:'pre-wrap', fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:11, lineHeight:1.7, color:T.ink }}>
+{`POST /api/operator/fitness/auto-sync
+x-operator-pw: your operator password
+
+{
+  "date": "2026-05-17",
+  "weight": 88.2,
+  "bodyFat": 0.47,
+  "leanMassKg": 49.8,
+  "waterMassKg": 33.4,
+  "boneMassKg": 3.2
+}`}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+function FitPill({
+  children,
+  color = T.muted,
+  background = 'rgba(255,255,255,0.72)',
+}: {
+  children: React.ReactNode;
+  color?: string;
+  background?: string;
+}) {
+  return (
+    <span style={{
+      display:'inline-flex',
+      alignItems:'center',
+      gap:6,
+      padding:'5px 10px',
+      border:`1px solid ${color}28`,
+      background,
+      color,
+      fontFamily:T.sans,
+      fontSize:9,
+      fontWeight:600,
+      letterSpacing:'0.16em',
+      textTransform:'uppercase',
+      whiteSpace:'nowrap',
+    }}>
+      {children}
+    </span>
+  );
+}
+
+function FitPanel({
+  title,
+  subtitle,
+  children,
+  style,
+}: {
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  children: React.ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <section style={{
+      background:'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(251,248,243,0.98) 100%)',
+      border:`1px solid ${T.line}`,
+      boxShadow:CARD_SHADOW,
+      overflow:'hidden',
+      ...style,
+    }}>
+      <div style={{ padding:'16px 18px 14px', borderBottom:`1px solid ${T.softLine}` }}>
+        <h3 style={{ fontFamily:T.display, fontSize:22, fontWeight:400, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.05, margin:'0 0 6px' }}>
+          {title}
+        </h3>
+        {subtitle && (
+          <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'62ch' }}>
+            {subtitle}
+          </p>
+        )}
+      </div>
+      <div style={{ padding:'18px' }}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function DashboardHero({
+  latest,
+  previous,
+  sorted,
+  state,
+  goal,
+  reg,
+  cloudOk,
+  syncing,
+  setCompose,
+  setTab,
+}: {
+  latest: FitnessReading;
+  previous: FitnessReading;
+  sorted: FitnessReading[];
+  state: State;
+  goal: number;
+  reg: Reg | null;
+  cloudOk: boolean | null;
+  syncing: boolean;
+  setCompose: (open: boolean) => void;
+  setTab: (tab: string) => void;
+}) {
+  const delta = latest.weight - previous.weight;
+  const remaining = Math.max(0, latest.weight - goal);
+  const syncLabel = cloudOk === null ? 'Local first' : cloudOk ? syncing ? 'Cloud syncing' : 'Cloud active' : 'Local backup';
+  const syncColor = cloudOk ? T.green : cloudOk === false ? T.gold : T.muted;
+  const trendColor = state.trendKgPerWeek < -0.1 ? T.green : state.trendKgPerWeek > 0.1 ? T.rose : T.gold;
+  const progressBase = Math.max(...sorted.map((reading) => reading.weight));
+  const progress = progressBase <= goal ? 100 : Math.max(0, Math.min(100, ((progressBase - latest.weight) / (progressBase - goal)) * 100));
+
+  const statCells = [
+    {
+      label:'To goal',
+      value:`${remaining.toFixed(1)} kg`,
+      meta: remaining === 0 ? 'At target' : `${Math.ceil(remaining / 0.45)} weeks at moderate pace`,
+      color: remaining === 0 ? T.green : T.gold,
+    },
+    {
+      label:'4-week trend',
+      value:`${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk`,
+      meta: state.direction === 'gaining' ? 'Rising' : state.direction === 'stable' ? 'Flat' : 'Dropping',
+      color: trendColor,
+    },
+    {
+      label:'Current phase',
+      value:`${state.phaseNum}`,
+      meta: state.phaseName,
+      color: state.phaseColor,
+    },
+    {
+      label:'Next target',
+      value:`${state.thisWeekTarget.toFixed(1)} kg`,
+      meta:'This week',
+      color: T.gold,
+    },
+    {
+      label:'Last log',
+      value:`${state.daysSinceWeighIn}d`,
+      meta: state.weighInStatus === 'overdue' ? 'Overdue' : state.weighInStatus === 'due-soon' ? 'Due soon' : 'On rhythm',
+      color: state.weighInStatus === 'overdue' ? T.rose : state.weighInStatus === 'due-soon' ? T.gold : T.green,
+    },
+    {
+      label:'Data flow',
+      value: syncLabel,
+      meta: reg ? `R² ${Math.round(reg.r2 * 100)}% confidence` : 'Need more readings',
+      color: syncColor,
+    },
+  ];
+
+  const focusCopy = state.weighInStatus === 'overdue'
+    ? `The dashboard should stay quiet until you log a fresh weigh-in. ${state.daysSinceWeighIn} days is long enough for the story to drift.`
+    : state.direction === 'gaining'
+    ? `The trend is still rising, so the next win is not a perfect week. It is one boring, consistent week that breaks the climb.`
+    : state.direction === 'stable'
+    ? 'You are in a plateau window. Good: that makes the next adjustment easier to spot and easier to trust.'
+    : 'Momentum is pointed the right way again. The goal now is to protect the routine instead of chasing drama.';
+
+  return (
+    <section style={{
+      background:'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,248,243,0.98) 100%)',
+      border:`1px solid ${T.line}`,
+      boxShadow:CARD_SHADOW,
+      overflow:'hidden',
+      marginBottom:22,
+    }}>
+      <div style={{ padding:'24px clamp(18px, 4vw, 28px) 18px' }}>
+        <div style={{ display:'flex', gap:24, alignItems:'flex-end', flexWrap:'wrap' }}>
+          <div style={{ flex:'1 1 560px', minWidth:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', marginBottom:12 }}>
+              <FitPill color={T.body}>Fitness</FitPill>
+              <FitPill color={state.phaseColor} background={`${state.phaseColor}14`}>{state.phaseName}</FitPill>
+              <FitPill color={syncColor} background={`${syncColor}12`}>{syncLabel}</FitPill>
+            </div>
+            <h1 style={{ fontFamily:T.display, fontSize:'clamp(34px, 5vw, 54px)', fontWeight:400, letterSpacing:'-0.03em', lineHeight:0.94, color:T.ink, margin:'0 0 10px', maxWidth:'11ch' }}>
+              Fitness command <em style={{ color:T.gold, fontStyle:'italic' }}>centre</em>.
+            </h1>
+            <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.75, margin:'0 0 14px', maxWidth:'62ch' }}>
+              One cleaner place to decide what happens next. Overview is now decision-first, and every chart lives in Health so you are not bouncing between sections to read the same story.
+            </p>
+            <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', fontFamily:T.sans, fontSize:11, color:T.muted }}>
+              <span>{fmtDate(sorted[0].date, { long:true })} start</span>
+              <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
+              <span>{sorted.length} readings logged</span>
+              <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
+              <span>Goal {goal.toFixed(1)} kg</span>
+            </div>
+          </div>
+
+          <div style={{
+            flex:'1 1 280px',
+            padding:'18px 18px 16px',
+            border:`1px solid ${T.line}`,
+            background:'rgba(255,255,255,0.78)',
+          }}>
+            <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:8 }}>
+              Today · {fmtDate(latest.date, { long:true })}
+            </div>
+            <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:8 }}>
+              <span style={{ fontFamily:T.display, fontSize:56, color:T.ink, letterSpacing:'-0.05em', lineHeight:0.92 }}>{latest.weight.toFixed(1)}</span>
+              <span style={{ fontFamily:T.sans, fontSize:16, color:T.muted }}>kg</span>
+            </div>
+            <div style={{ fontFamily:T.sans, fontSize:11, fontWeight:600, letterSpacing:'0.08em', color:delta <= 0 ? T.green : T.rose, marginBottom:12 }}>
+              {delta <= 0 ? 'Down' : 'Up'} {Math.abs(delta).toFixed(1)} kg since last reading
+            </div>
+            <div style={{ height:7, background:T.surface, borderRadius:999, overflow:'hidden', marginBottom:8, position:'relative' }}>
+              <span style={{
+                display:'block',
+                width:`${progress}%`,
+                height:'100%',
+                background:`linear-gradient(90deg, ${T.gold} 0%, ${T.green} 100%)`,
+              }} />
+            </div>
+            <div style={{ fontFamily:T.sans, fontSize:11, color:T.body, fontWeight:300, lineHeight:1.6 }}>
+              {progress.toFixed(0)}% of the way back from your recorded peak to the target line.
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginTop:18 }}>
+          {[
+            { label:'File reading', action:() => setCompose(true), solid:true },
+            { label:'Open health', action:() => setTab('Health') },
+            { label:'Open plan', action:() => setTab('Plan') },
+            { label:'Open ledger', action:() => setTab('Ledger') },
+          ].map((action) => (
+            <button key={action.label} onClick={action.action} style={{
+              background: action.solid ? T.ink : 'transparent',
+              color: action.solid ? T.paper : T.ink,
+              border:`1px solid ${action.solid ? T.ink : T.line}`,
+              cursor:'pointer',
+              padding:'11px 14px',
+              fontFamily:T.sans,
+              fontSize:10,
+              fontWeight:600,
+              letterSpacing:'0.16em',
+              textTransform:'uppercase',
+            }}>
+              {action.label}
+            </button>
+          ))}
+        </div>
+
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, lineHeight:1.45, margin:'18px 0 0', maxWidth:'48ch' }}>
+          {focusCopy}
+        </p>
+      </div>
+
+      <div style={{
+        display:'grid',
+        gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))',
+        gap:0,
+        background:'rgba(250,248,243,0.92)',
+        borderTop:`1px solid ${T.softLine}`,
+      }}>
+        {statCells.map((cell, index) => (
+          <div key={cell.label} style={{
+            padding:'14px 16px',
+            borderRight:index < statCells.length - 1 ? `1px solid ${T.softLine}` : 'none',
+          }}>
+            <div style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:7 }}>
+              {cell.label}
+            </div>
+            <div style={{ fontFamily:T.display, fontSize:22, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.02, marginBottom:5 }}>
+              {cell.value}
+            </div>
+            <div style={{ fontFamily:T.sans, fontSize:11, color:cell.color, fontWeight:500, lineHeight:1.45 }}>
+              {cell.meta}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function OverviewTabView({
+  latest,
+  sorted,
+  goal,
+  state,
+  cloudOk,
+  syncing,
+  setCompose,
+  setTab,
+}: {
+  latest: FitnessReading;
+  sorted: FitnessReading[];
+  goal: number;
+  state: State;
+  cloudOk: boolean | null;
+  syncing: boolean;
+  setCompose: (open: boolean) => void;
+  setTab: (tab: string) => void;
+}) {
+  const [weightLabel, weightColor] = weightStatus(latest.weight, goal);
+  const [bmiLabel, bmiColor] = bmiStatus(latest.bmi);
+  const [fatLabel, fatColor] = fatStatus(latest.bodyFat);
+  const [waterLabel, waterColor] = waterStatus(latest.water);
+  const [muscleLabel, muscleColor] = muscleStatus(latest.muscleMass);
+  const [boneLabel, boneColor] = boneStatus(latest.boneMass);
+
+  const notes = [
+    state.weighInStatus === 'overdue'
+      ? `Log the next weigh-in before trusting the story. ${state.daysSinceWeighIn} days is too long for a clean read.`
+      : `The weigh-in rhythm is intact. That makes the next adjustment easier to evaluate.`,
+    state.direction === 'gaining'
+      ? `The trend is still up, so the next win is breaking the rise, not chasing a perfect month in one go.`
+      : state.direction === 'stable'
+      ? 'You are in a flat patch. That is useful because small changes should show up cleanly.'
+      : 'The line is moving the right way again. Protect consistency more than intensity.',
+    `Health now holds the charts. Overview stays lighter so you can answer “what next?” without opening six visual panels.`,
+  ];
+
+  const scanCards = [
+    { label:'Weight', value:`${latest.weight.toFixed(1)} kg`, status:weightLabel, color:weightColor },
+    { label:'BMI', value:latest.bmi.toFixed(1), status:bmiLabel, color:bmiColor },
+    { label:'Body fat', value:`${latest.bodyFat.toFixed(1)}%`, status:fatLabel, color:fatColor },
+    { label:'Water', value:`${latest.water.toFixed(1)}%`, status:waterLabel, color:waterColor },
+    { label:'Muscle', value:`${latest.muscleMass.toFixed(1)}%`, status:muscleLabel, color:muscleColor },
+    { label:'Bone', value:`${latest.boneMass.toFixed(2)}%`, status:boneLabel, color:boneColor },
+  ];
+
+  const syncLabel = cloudOk === null ? 'Local first' : cloudOk ? syncing ? 'Syncing now' : 'Cloud active' : 'Local backup only';
+  const syncColor = cloudOk ? T.green : cloudOk === false ? T.gold : T.muted;
+
+  return (
+    <div style={{ display:'flex', gap:20, alignItems:'flex-start', flexWrap:'wrap' }}>
+      <div style={{ flex:'1 1 680px', display:'flex', flexDirection:'column', gap:20, minWidth:0 }}>
+        <ThisWeek state={state} latest={latest} setCompose={setCompose} setTab={setTab} />
+
+        <FitPanel
+          title={<>This week&apos;s <em style={{ color:T.gold }}>rhythm</em></>}
+          subtitle="The latest seven-day run in one quieter panel, so you can check the pattern without jumping straight into charts."
+        >
+          <ThisWeekGrid sorted={sorted} state={state} />
+        </FitPanel>
+
+        <div>
+          <div style={{ marginBottom:12 }}>
+            <Kicker style={{ marginBottom:4 }}>Goal snapshot</Kicker>
+            <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'44ch' }}>
+              The target, the distance left, and the intake anchor in one glance.
+            </p>
+          </div>
+          <GoalCard state={state} latest={latest} goal={goal} />
+        </div>
+
+        <FitPanel
+          title={<>The journey <em style={{ color:T.gold }}>story</em></>}
+          subtitle="Anchor the current number against the bigger arc so one awkward week does not become the whole narrative."
+        >
+          <JourneyStory sorted={sorted} state={state} />
+        </FitPanel>
+      </div>
+
+      <aside style={{ flex:'1 1 300px', display:'flex', flexDirection:'column', gap:20, minWidth:'min(100%, 300px)' }}>
+        <FitPanel
+          title={<>Today <em style={{ color:T.gold }}>scan</em></>}
+          subtitle="Current markers without opening the analytics section."
+        >
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(2, minmax(0, 1fr))', gap:10 }}>
+            {scanCards.map((card) => (
+              <div key={card.label} style={{
+                border:`1px solid ${T.softLine}`,
+                background:T.surface,
+                padding:'12px 12px 10px',
+                minHeight:92,
+              }}>
+                <div style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:10 }}>
+                  {card.label}
+                </div>
+                <div style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.02em', lineHeight:1, marginBottom:6 }}>
+                  {card.value}
+                </div>
+                <div style={{ fontFamily:T.sans, fontSize:10, color:card.color, fontWeight:600, letterSpacing:'0.12em', textTransform:'uppercase' }}>
+                  {card.status}
+                </div>
+              </div>
+            ))}
+          </div>
+        </FitPanel>
+
+        <FitPanel
+          title={<>Next <em style={{ color:T.gold }}>actions</em></>}
+          subtitle="Open the right section instead of scrolling through everything."
+        >
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {[
+              { label:'Health section', sub:'All charts and body-composition visuals now live here.', action:() => setTab('Health') },
+              { label:'Plan', sub:'Weekly targets, deficit guidance, and the detailed structure.', action:() => setTab('Plan') },
+              { label:'Ledger', sub:'Every weigh-in plus Apple Health import and auto-sync details.', action:() => setTab('Ledger') },
+              { label:'Add reading', sub:'File the next weigh-in immediately.', action:() => setCompose(true) },
+            ].map((item) => (
+              <button key={item.label} onClick={item.action} style={{
+                border:`1px solid ${T.line}`,
+                background:'rgba(255,255,255,0.72)',
+                padding:'12px 14px',
+                textAlign:'left',
+                cursor:'pointer',
+              }}>
+                <div style={{ fontFamily:T.display, fontSize:18, fontStyle:'italic', color:T.ink, marginBottom:4 }}>
+                  {item.label}
+                </div>
+                <div style={{ fontFamily:T.sans, fontSize:11, color:T.body, fontWeight:300, lineHeight:1.5 }}>
+                  {item.sub}
+                </div>
+              </button>
+            ))}
+          </div>
+        </FitPanel>
+
+        <FitPanel
+          title={<>Command <em style={{ color:T.gold }}>notes</em></>}
+          subtitle="Short prompts to keep the interpretation calm and useful."
+        >
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {notes.map((note, index) => (
+              <p key={index} style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.65, margin:0 }}>
+                {note}
+              </p>
+            ))}
+          </div>
+        </FitPanel>
+
+        <FitPanel
+          title={<>Data <em style={{ color:T.gold }}>flow</em></>}
+          subtitle="Where today&apos;s reading state comes from."
+        >
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            <div>
+              <Kicker style={{ marginBottom:4 }}>Sync state</Kicker>
+              <div style={{ fontFamily:T.display, fontSize:22, color:syncColor, letterSpacing:'-0.02em' }}>{syncLabel}</div>
+            </div>
+            <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.65, margin:0 }}>
+              Manual entries, Apple Health imports, and the auto-sync endpoint all feed the same fitness ledger, so the dashboard stays consistent whichever route you use.
+            </p>
+          </div>
+        </FitPanel>
+      </aside>
     </div>
   );
 }
@@ -2631,81 +3149,247 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
     },
   ];
 
+  const strip = [
+    {
+      label:'Weight',
+      value:`${latest.weight.toFixed(1)} kg`,
+      meta:`${(latest.weight - first.weight) >= 0 ? '+' : ''}${(latest.weight - first.weight).toFixed(1)} since start`,
+      color:latest.weight <= goal ? T.green : T.gold,
+    },
+    {
+      label:'Body fat',
+      value:`${latest.bodyFat.toFixed(1)}%`,
+      meta:`${(latest.bodyFat - first.bodyFat) >= 0 ? '+' : ''}${(latest.bodyFat - first.bodyFat).toFixed(1)} pts`,
+      color:latest.bodyFat < 33 ? T.green : latest.bodyFat < 39 ? T.gold : T.rose,
+    },
+    {
+      label:'BMI',
+      value:latest.bmi.toFixed(1),
+      meta:latest.bmi < 25 ? 'Healthy band' : latest.bmi < 30 ? 'Above range' : 'Obese band',
+      color:latest.bmi < 25 ? T.green : latest.bmi < 30 ? T.gold : T.rose,
+    },
+    {
+      label:'Water',
+      value:`${latest.water.toFixed(1)}%`,
+      meta:latest.water >= 45 ? 'In range' : 'Low reading',
+      color:latest.water >= 45 ? T.green : T.gold,
+    },
+    {
+      label:'Muscle',
+      value:`${latest.muscleMass.toFixed(1)}%`,
+      meta:`${latest.muscleMass >= 45 ? 'Strong' : latest.muscleMass >= 38 ? 'Average' : 'Low'} signal`,
+      color:latest.muscleMass >= 45 ? T.green : latest.muscleMass >= 38 ? T.gold : T.rose,
+    },
+    {
+      label:'Bone',
+      value:`${latest.boneMass.toFixed(2)}%`,
+      meta:latest.boneMass >= 3 ? 'Healthy floor' : 'Watch trend',
+      color:latest.boneMass >= 3 ? T.green : T.gold,
+    },
+  ];
+
+  const notes = [
+    'All graphs now live here, so Overview can stay focused on the next decision instead of repeating the same visuals.',
+    'Read the long-term line before reacting to a single morning. The monthly change bars and the phase-banded chart matter more than one awkward weigh-in.',
+    latest.water < 45
+      ? 'Water is still reading low, which often tracks with higher body fat on these scale models. Use it as context, not panic.'
+      : 'Water is holding up better here, which makes the body-composition readout a bit easier to trust.',
+  ];
+
   return (
     <div>
-      <Kicker style={{ marginBottom:10 }}>Section · Health Panel</Kicker>
-      <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 8px' }}>
-        Beyond the scale, <em>the full picture</em>.
-      </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 36px' }}>
-        {sorted.length} readings over {daysObserved} days · journey from {first.weight} kg to {latest.weight} kg
-      </p>
-
-      {/* Health flags grid */}
-      <Kicker style={{ marginBottom:10 }}>The Four Health Markers</Kicker>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:14 }}>
-        {healthFlags.map((f) => {
-          const [stTxt, stCol] = f.status;
-          return (
-            <div key={f.label} style={{ padding:'22px 24px', border:`1px solid ${T.line}`, background:'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(251,248,243,0.95) 100%)' }}>
-              <Kicker style={{ marginBottom:10 }}>{f.label}</Kicker>
-              <div style={{ display:'flex', alignItems:'baseline', gap:14, marginBottom:8 }}>
-                <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink }}>{f.value}</span>
-                <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.22em', padding:'3px 8px', background:stCol+'18', color:stCol }}>{stTxt}</span>
+      <section style={{
+        background:'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,248,243,0.98) 100%)',
+        border:`1px solid ${T.line}`,
+        boxShadow:CARD_SHADOW,
+        overflow:'hidden',
+        marginBottom:24,
+      }}>
+        <div style={{ padding:'22px 24px 18px' }}>
+          <div style={{ display:'flex', gap:24, alignItems:'flex-end', flexWrap:'wrap' }}>
+            <div style={{ flex:'1 1 560px', minWidth:0 }}>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:12 }}>
+                <FitPill color={T.body}>Health section</FitPill>
+                <FitPill color={T.gold} background={`${T.gold}12`}>All graphs live here</FitPill>
               </div>
-              <div style={{ fontFamily:T.sans, fontSize:11, color: f.change > 0 ? T.rose : f.change < 0 ? T.green : T.muted, fontWeight:500, marginBottom:8 }}>
-                {f.change > 0 ? '▲' : f.change < 0 ? '▼' : '—'} {Math.abs(f.change).toFixed(1)} since first reading
+              <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:36, letterSpacing:'-0.03em', lineHeight:0.94, color:T.ink, margin:'0 0 10px', maxWidth:'12ch' }}>
+                Health, trend and <em style={{ color:T.gold, fontStyle:'italic' }}>composition</em>.
+              </h2>
+              <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.75, margin:'0 0 12px', maxWidth:'60ch' }}>
+                This section now keeps the visual story in one place: the weight timeline, the longer-term line, the monthly pattern, and the composition changes that explain what the scale is doing.
+              </p>
+              <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', fontFamily:T.sans, fontSize:11, color:T.muted }}>
+                <span>{sorted.length} readings</span>
+                <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
+                <span>{daysObserved} days observed</span>
+                <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
+                <span>{fmtDate(first.date)} → {fmtDate(latest.date)}</span>
               </div>
-              <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.5, margin:0 }}>{f.note}</p>
             </div>
-          );
-        })}
-      </div>
 
-      {/* Monthly bar chart */}
-      <div style={{ marginTop:72 }}>
-        <Kicker style={{ marginBottom:10 }}>Monthly Weight Change · {sorted.length} weekly readings aggregated</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
-          The good months, the <em>bad months</em>.
-        </h3>
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'62ch', margin:'0 0 18px' }}>
-          green bars mark months you lost weight; rose bars mark months you gained. The pattern is the truth — short loss streaks followed by sustained gain.
-        </p>
-        <MonthlyBarChart sorted={sorted} />
-      </div>
+            <div style={{ flex:'1 1 260px', padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.76)' }}>
+              <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:8 }}>
+                Current body fat
+              </div>
+              <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:8 }}>
+                <span style={{ fontFamily:T.display, fontSize:52, color:T.ink, letterSpacing:'-0.04em', lineHeight:0.92 }}>
+                  {latest.bodyFat.toFixed(1)}
+                </span>
+                <span style={{ fontFamily:T.sans, fontSize:16, color:T.muted }}>%</span>
+              </div>
+              <div style={{ fontFamily:T.sans, fontSize:11, fontWeight:600, color:(latest.bodyFat - first.bodyFat) <= 0 ? T.green : T.rose, marginBottom:8 }}>
+                {(latest.bodyFat - first.bodyFat) <= 0 ? 'Down' : 'Up'} {Math.abs(latest.bodyFat - first.bodyFat).toFixed(1)} points since the first reading
+              </div>
+              <p style={{ fontFamily:T.sans, fontSize:11, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }}>
+                Body fat is the clearest partner metric for interpreting the scale alongside water, muscle and visceral fat.
+              </p>
+            </div>
+          </div>
+        </div>
 
-      {/* Composition pie comparison */}
-      <div style={{ marginTop:80 }}>
-        <Kicker style={{ marginBottom:10 }}>Body Composition · Now vs Target</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 8px' }}>
-          Where the kilograms <em>live</em>.
-        </h3>
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'62ch', margin:'0 0 18px' }}>
-          target composition assumes muscle mass is preserved through resistance training while body fat drops to a healthy 25%.
-        </p>
-        <PieComposition latest={latest} goal={goal} />
-      </div>
-
-      {/* Journey landmarks */}
-      <div style={{ marginTop:72 }}>
-        <Kicker style={{ marginBottom:10 }}>The Journey · Three Years of Data</Kicker>
-        <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 18px' }}>
-          From low to high, <em>and back to low</em>.
-        </h3>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
-          {[
-            { l:'Lightest', v:`${minWeight} kg`, d:fmtDate(minDate), c:T.green },
-            { l:'Heaviest', v:`${maxWeight} kg`, d:fmtDate(maxDate), c:T.rose },
-            { l:'Range',    v:`${(maxWeight-minWeight).toFixed(1)} kg`, d:`peak to trough`, c:T.gold },
-            { l:'Last 8 weeks', v:`${recentSlope>=0?'+':''}${recentSlope.toFixed(2)} kg/wk`, d:`recent trend`, c: recentSlope>=0 ? T.rose : T.green },
-          ].map((m,i)=>(
-            <div key={i} style={{ padding:'22px 22px', borderRight: i<3?`0.5px solid ${T.line}`:'none' }}>
-              <Kicker style={{ marginBottom:10 }}>{m.l}</Kicker>
-              <div style={{ fontFamily:T.display, fontSize: 20, color:m.c, letterSpacing:'-0.015em', lineHeight:1 }}>{m.v}</div>
-              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:12, color:T.muted, margin:'8px 0 0' }}>{m.d}</p>
+        <div style={{
+          display:'grid',
+          gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))',
+          background:'rgba(250,248,243,0.92)',
+          borderTop:`1px solid ${T.softLine}`,
+        }}>
+          {strip.map((item, index) => (
+            <div key={item.label} style={{ padding:'14px 16px', borderRight:index < strip.length - 1 ? `1px solid ${T.softLine}` : 'none' }}>
+              <div style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:7 }}>
+                {item.label}
+              </div>
+              <div style={{ fontFamily:T.display, fontSize:22, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.02, marginBottom:5 }}>
+                {item.value}
+              </div>
+              <div style={{ fontFamily:T.sans, fontSize:11, color:item.color, fontWeight:500, lineHeight:1.45 }}>
+                {item.meta}
+              </div>
             </div>
           ))}
         </div>
+      </section>
+
+      <div style={{ display:'flex', gap:20, alignItems:'flex-start', flexWrap:'wrap' }}>
+        <div style={{ flex:'1 1 680px', display:'flex', flexDirection:'column', gap:20, minWidth:0 }}>
+          <FitPanel
+            title={<>Weight <em style={{ color:T.gold }}>timeline</em></>}
+            subtitle="Raw readings, a smoothed line, and phase bands in the calmer reference layout."
+          >
+            <PhaseChart sorted={sorted} goal={goal} range="all" />
+          </FitPanel>
+
+          {reg && (
+            <FitPanel
+              title={<>Current <em style={{ color:T.gold }}>trajectory</em></>}
+              subtitle="Observed weight plus the ninety-day projection, kept here so forecasts stay beside the rest of the visual story."
+            >
+              <div style={{ marginTop:-12 }}>
+                <TrendChart sorted={sorted} reg={reg} goal={goal} />
+              </div>
+            </FitPanel>
+          )}
+
+          <FitPanel
+            title={<>Monthly change <em style={{ color:T.gold }}>pattern</em></>}
+            subtitle="The short loss streaks and the longer gain streaks are much easier to read month by month."
+          >
+            <MonthlyBarChart sorted={sorted} />
+          </FitPanel>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:20 }}>
+            <FitPanel
+              title={<>Composition <em style={{ color:T.gold }}>trend</em></>}
+              subtitle="Body fat, muscle and water moving together."
+            >
+              <CompositionChart sorted={sorted} />
+            </FitPanel>
+
+            <FitPanel
+              title={<>BMI <em style={{ color:T.gold }}>zones</em></>}
+              subtitle="The long view of where the weight line has sat relative to healthy bands."
+            >
+              <div style={{ marginTop:-12 }}>
+                <BMIChart sorted={sorted} />
+              </div>
+            </FitPanel>
+          </div>
+
+          <FitPanel
+            title={<>Current vs goal <em style={{ color:T.gold }}>composition</em></>}
+            subtitle="Where the kilograms sit now, and what has to move if muscle is preserved on the way to goal."
+          >
+            <PieComposition latest={latest} goal={goal} />
+          </FitPanel>
+        </div>
+
+        <aside style={{ flex:'1 1 300px', display:'flex', flexDirection:'column', gap:20, minWidth:'min(100%, 300px)' }}>
+          <FitPanel
+            title={<>Marker <em style={{ color:T.gold }}>guide</em></>}
+            subtitle="The numbers worth checking alongside weight."
+          >
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              {healthFlags.map((flag) => {
+                const [statusText, statusColor] = flag.status;
+                return (
+                  <div key={flag.label} style={{ border:`1px solid ${T.softLine}`, background:T.surface, padding:'12px 12px 10px' }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, marginBottom:8 }}>
+                      <Kicker>{flag.label}</Kicker>
+                      <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:statusColor }}>
+                        {statusText}
+                      </span>
+                    </div>
+                    <div style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.02em', lineHeight:1, marginBottom:6 }}>
+                      {flag.value}
+                    </div>
+                    <div style={{ fontFamily:T.sans, fontSize:10, color:flag.change > 0 ? T.rose : flag.change < 0 ? T.green : T.muted, fontWeight:600, letterSpacing:'0.08em', marginBottom:8 }}>
+                      {flag.change > 0 ? 'Up' : flag.change < 0 ? 'Down' : 'Flat'} {Math.abs(flag.change).toFixed(1)} since start
+                    </div>
+                    <p style={{ fontFamily:T.sans, fontSize:11, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }}>
+                      {flag.note}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </FitPanel>
+
+          <FitPanel
+            title={<>Journey <em style={{ color:T.gold }}>landmarks</em></>}
+            subtitle="The outer limits and the recent line in one glance."
+          >
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+              {[
+                { label:'Lightest', value:`${minWeight} kg`, meta:fmtDate(minDate), color:T.green },
+                { label:'Heaviest', value:`${maxWeight} kg`, meta:fmtDate(maxDate), color:T.rose },
+                { label:'Range', value:`${(maxWeight - minWeight).toFixed(1)} kg`, meta:'peak to trough', color:T.gold },
+                { label:'Last 8 weeks', value:`${recentSlope >= 0 ? '+' : ''}${recentSlope.toFixed(2)} kg/wk`, meta:'recent slope', color:recentSlope >= 0 ? T.rose : T.green },
+              ].map((item) => (
+                <div key={item.label} style={{ border:`1px solid ${T.softLine}`, background:T.surface, padding:'12px 12px 10px' }}>
+                  <Kicker style={{ marginBottom:8 }}>{item.label}</Kicker>
+                  <div style={{ fontFamily:T.display, fontSize:22, color:item.color, letterSpacing:'-0.02em', lineHeight:1, marginBottom:6 }}>
+                    {item.value}
+                  </div>
+                  <div style={{ fontFamily:T.sans, fontSize:11, color:T.body, fontWeight:300, lineHeight:1.5 }}>
+                    {item.meta}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </FitPanel>
+
+          <FitPanel
+            title={<>Read it <em style={{ color:T.gold }}>calmly</em></>}
+            subtitle="What matters most when the charts feel loud."
+          >
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {notes.map((note, index) => (
+                <p key={index} style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.65, margin:0 }}>
+                  {note}
+                </p>
+              ))}
+            </div>
+          </FitPanel>
+        </aside>
       </div>
     </div>
   );
@@ -2971,6 +3655,7 @@ function Compose({ open, onClose, onSubmit }: {
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
+function apiAuthH(pw:string) { return { 'x-operator-pw':pw }; }
 function apiH(pw:string) { return { 'Content-Type':'application/json', 'x-operator-pw':pw }; }
 async function apiLoad(pw:string) {
   try {
@@ -2989,6 +3674,30 @@ async function apiSave(pw:string, r:FitnessReading) {
 }
 async function apiDel(pw:string, id:string) {
   try { await fetch(`/api/operator/fitness?id=${encodeURIComponent(id)}`, { method:'DELETE', headers:apiH(pw) }); } catch {}
+}
+async function apiImportAppleHealth(pw:string, file: File) {
+  try {
+    const form = new FormData();
+    form.set('file', file);
+    const res = await fetch('/api/operator/fitness/import', {
+      method:'POST',
+      headers:apiAuthH(pw),
+      body:form,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      return {
+        ok:false,
+        message:(data?.error as string | undefined) ?? 'Apple Health import failed.',
+      };
+    }
+    return {
+      ok:true,
+      message:`Imported ${data.importedCount ?? 0} readings. Added ${data.insertedCount ?? 0}, updated ${data.updatedCount ?? 0}.`,
+    };
+  } catch {
+    return { ok:false, message:'Apple Health import failed.' };
+  }
 }
 
 // ─── Main app ─────────────────────────────────────────────────────────────────
@@ -3020,6 +3729,11 @@ export default function OperatorDashboardClient() {
       setReadings([...local]); saveLocal(local);
     } else { setReadings(cloud); saveLocal(cloud); }
   }, [saveLocal]);
+
+  const refreshCloudReadings = useCallback(async () => {
+    if (!opPw) return;
+    await loadData(opPw);
+  }, [loadData, opPw]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -3084,46 +3798,39 @@ export default function OperatorDashboardClient() {
   ] : [];
 
   const TABS = [
-    { label:'Overview', helper:'Start here for the signal, the latest reading, and the one chart that matters first.' },
+    { label:'Overview', helper:'Start here for the next decision, the weekly rhythm, and the current state without all the graphs.' },
     { label:'Plan', helper:'What to do this week, with the detailed plan tucked behind sections you can open on demand.' },
-    { label:'Health', helper:'Body composition, weight-change patterns, and longer-term markers.' },
-    { label:'Projections', helper:'Trend direction, likely outcomes, and the pace needed to close the gap.' },
-    { label:'Charts', helper:'All core visuals together when you want the full picture.' },
+    { label:'Health', helper:'Every visual lives here now: timeline, projections, composition, BMI and monthly pattern.' },
+    { label:'Projections', helper:'Likely outcomes, required pace, milestones and the phased route back to goal.' },
     { label:'Ledger', helper:'Every recorded weigh-in, newest first.' },
   ];
   const activeTabMeta = TABS.find((item) => item.label === tab) ?? TABS[0];
 
   return (
-    <div style={{ background:T.paper, minHeight:'100vh' }}>
+    <div style={{
+      background:`radial-gradient(circle at 10% 0%, rgba(24,95,165,0.08), transparent 34%), radial-gradient(circle at 90% 10%, rgba(99,56,6,0.08), transparent 30%), ${T.paper}`,
+      minHeight:'100vh',
+    }}>
       <Wrap>
 
         {/* ── MASTHEAD ─────────────────────────────── */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:16, flexWrap:'wrap', marginBottom:22 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:16, flexWrap:'wrap', marginBottom:18 }}>
           <div>
             <Kicker>Operator dashboard</Kicker>
             <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'8px 0 0' }}>
               Private fitness log · {sorted.length} recorded readings
             </p>
           </div>
-          <div style={{ textAlign:'right' }}>
-            <Kicker color={T.ink}>{fmtDate(latest.date, { long:true })}</Kicker>
-            <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'8px 0 0' }}>
-              Goal · {goal.toFixed(1)} kg
-            </p>
-          </div>
+          <button onClick={() => { localStorage.removeItem(AUTH_KEY); setAuthed(false); }} style={{ background:'transparent', border:0, cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, padding:'0 0 3px' }}>
+            Lock
+          </button>
         </div>
 
-        <h1 style={{ fontFamily:T.display, fontWeight:400, fontSize: 30, letterSpacing:'-0.03em', lineHeight:0.98, color:T.ink, margin:'0 0 14px', maxWidth:'14ch' }}>
-          A calmer view of the trend.
-        </h1>
-
-        <p style={{ fontFamily:T.sans, fontSize:16, fontWeight:300, lineHeight:1.7, color:T.body, margin:'0 0 24px', maxWidth:'58ch' }}>
-          The dashboard now leads with the next decision instead of every possible metric. Start with the overview, then open the deeper tabs only when you need the detail.
-        </p>
-
-        <CommandDeck
-          state={state}
+        <DashboardHero
           latest={latest}
+          previous={previous}
+          sorted={sorted}
+          state={state}
           goal={goal}
           reg={reg}
           cloudOk={cloudOk}
@@ -3132,19 +3839,6 @@ export default function OperatorDashboardClient() {
           setTab={setTab}
         />
 
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0', borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}`, gap:24, flexWrap:'wrap', marginBottom:20 }}>
-          <div style={{ display:'flex', gap:32, flexWrap:'wrap', alignItems:'baseline' }}>
-            <Kicker>
-              <span style={{ display:'inline-block', width:6, height:6, background: cloudOk?T.green:T.muted, marginRight:7, verticalAlign:'middle' }} />
-              {cloudOk===null ? 'Local' : cloudOk ? 'Cloud sync · active' : 'Local only'} · {readings.length} entries
-            </Kicker>
-            {reg && <Kicker>R² {Math.round(reg.r2*100)}% confidence</Kicker>}
-          </div>
-          <button onClick={() => { localStorage.removeItem(AUTH_KEY); setAuthed(false); }} style={{ background:'transparent', border:0, cursor:'pointer', fontFamily:T.sans, fontSize:10, fontWeight:500, letterSpacing:'0.24em', textTransform:'uppercase', color:T.muted, borderBottom:`0.5px solid ${T.line}`, paddingBottom:3 }}>
-            Lock ⌃
-          </button>
-        </div>
-
         {/* ── TABS ─────────────────────────────────── */}
         <div style={{ marginBottom:28 }}>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:12 }}>
@@ -3152,8 +3846,9 @@ export default function OperatorDashboardClient() {
               const active = tab===label;
               return (
                 <button key={label} onClick={()=>setTab(label)} style={{
-                  background: active ? T.ink : 'rgba(255,255,255,0.78)',
+                  background: active ? T.ink : 'rgba(255,255,255,0.82)',
                   border:`1px solid ${active ? T.ink : T.line}`,
+                  boxShadow: active ? 'none' : '0 12px 30px rgba(26,24,21,0.03)',
                   cursor:'pointer',
                   padding:'14px 16px 13px',
                   fontFamily: active ? T.display : T.sans,
@@ -3171,7 +3866,7 @@ export default function OperatorDashboardClient() {
               );
             })}
           </div>
-          <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.68)' }}>
+          <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.74)' }}>
             <Kicker style={{ marginBottom:6 }}>Current tab</Kicker>
             <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, marginBottom:6 }}>
               {activeTabMeta.label}
@@ -3182,48 +3877,18 @@ export default function OperatorDashboardClient() {
           </div>
         </div>
 
-        <StatusStrip state={state} latest={latest} goal={goal} setTab={setTab} />
-
         {/* ── OVERVIEW ─────────────────────────────── */}
         {tab==='Overview' && (
-          <div>
-            <ThisWeek state={state} latest={latest} setCompose={setCompose} setTab={setTab} />
-
-            <div style={{ marginBottom:28 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:16, flexWrap:'wrap', marginBottom:10 }}>
-                <div>
-                  <Kicker style={{ marginBottom:4 }}>The chart to check first</Kicker>
-                  <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0, maxWidth:'42ch' }}>
-                    Raw readings, the smoothed trend, and the phase bands in one place.
-                  </p>
-                </div>
-              </div>
-              <PhaseChart sorted={sorted} goal={goal} range="all" />
-            </div>
-
-            <GoalCard state={state} latest={latest} goal={goal} />
-
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:16 }}>
-              <AccordionPanel
-                kicker="Recent detail"
-                title="Open the latest pattern."
-                summary="Week-on-week movement, the latest figure, and this week’s weigh-in rhythm live here."
-              >
-                <HeroReading latest={latest} previous={previous} sorted={sorted} />
-                <ThisWeekGrid sorted={sorted} state={state} />
-              </AccordionPanel>
-
-              <AccordionPanel
-                kicker="Context"
-                title="Open the bigger story."
-                summary="Use this when you want the key moments in the journey and the short notes that put the current number into context."
-              >
-                <JourneyStory sorted={sorted} state={state} />
-                <CommandNotes sorted={sorted} state={state} latest={latest} />
-                <DetailLaunchpad setCompose={setCompose} setTab={setTab} />
-              </AccordionPanel>
-            </div>
-          </div>
+          <OverviewTabView
+            latest={latest}
+            sorted={sorted}
+            goal={goal}
+            state={state}
+            cloudOk={cloudOk}
+            syncing={syncing}
+            setCompose={setCompose}
+            setTab={setTab}
+          />
         )}
 
         {/* ── HEALTH ───────────────────────────────── */}
@@ -3304,36 +3969,16 @@ export default function OperatorDashboardClient() {
               ))}
             </div>
 
-            <Kicker style={{ marginBottom:10 }}>Section V · The Line</Kicker>
-            <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.015em', lineHeight:1.05, color:T.ink, margin:'0 0 6px' }}>Observed &amp; <em>projected</em>.</h3>
-            <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, lineHeight:1.6, maxWidth:'60ch', margin:0 }}>
-              solid hairline for observed weigh-ins, dashed gold for the goal line, dashed blue extending the linear regression ninety days forward.
-            </p>
-            <TrendChart sorted={sorted} reg={reg} goal={goal} />
+            <div style={{ padding:'18px 20px', background:'rgba(255,255,255,0.72)', border:`1px solid ${T.line}`, marginBottom:56 }}>
+              <Kicker style={{ marginBottom:8 }}>Visual note</Kicker>
+              <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.65, margin:0, maxWidth:'56ch' }}>
+                The projection chart now lives in <strong style={{ color:T.ink, fontWeight:500 }}>Health</strong> with the rest of the visuals, so this tab can stay focused on pacing, milestones and the route back to goal.
+              </p>
+            </div>
 
             <Milestones sorted={sorted} reg={reg} goal={goal} />
             <CutStrategies sorted={sorted} goal={goal} />
             <Phases sorted={sorted} goal={goal} reg={reg} />
-          </div>
-        )}
-
-        {/* ── CHARTS ───────────────────────────────── */}
-        {tab==='Charts' && (
-          <div>
-            <Kicker style={{ marginBottom:10 }}>Section VI · The Visual Ledger</Kicker>
-            <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 24, letterSpacing:'-0.02em', lineHeight:1, color:T.ink, margin:'0 0 36px' }}>All charts, <em>in order</em>.</h2>
-            <Kicker style={{ marginBottom:8 }}>Weight · {sorted.length} readings · with 90-day projection</Kicker>
-            <ThickRule />
-            <TrendChart sorted={sorted} reg={reg} goal={goal} />
-            <div style={{ marginTop:72 }}>
-              <Kicker style={{ marginBottom:8 }}>Body Composition · The Slow Movers</Kicker>
-              <CompositionChart sorted={sorted} />
-            </div>
-            <div style={{ marginTop:72 }}>
-              <Kicker style={{ marginBottom:8 }}>BMI · {sorted.length} readings · with zone bands</Kicker>
-              <ThickRule />
-              <BMIChart sorted={sorted} />
-            </div>
           </div>
         )}
 
@@ -3374,7 +4019,7 @@ export default function OperatorDashboardClient() {
               ))}
             </ScrollRail>
 
-            <ImportNote setTab={setTab} />
+            <ImportNote opPw={opPw} onImported={refreshCloudReadings} />
           </div>
         )}
 
