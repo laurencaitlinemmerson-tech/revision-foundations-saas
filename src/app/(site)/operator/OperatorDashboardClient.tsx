@@ -487,6 +487,159 @@ function StatusStrip({ state, latest, goal, setTab }: {
   );
 }
 
+function AnalyticsSection({
+  latest,
+  sorted,
+  goal,
+  nutrition,
+  state,
+  rollingAverage,
+  cadence,
+  syncSummary,
+}: {
+  latest: FitnessReading;
+  sorted: FitnessReading[];
+  goal: number;
+  nutrition: { bmr: number; activeTdee: number; intake: number; maintenance: number; protein: number };
+  state: State;
+  rollingAverage: { date: string; value: number }[];
+  cadence: { count: number; score: number };
+  syncSummary: string;
+}) {
+  const startingWeight = sorted[0]?.weight ?? latest.weight;
+  const totalChange = latest.weight - startingWeight;
+  const remainingWeight = Math.max(0, latest.weight - goal);
+  const dailyDeficit = nutrition.activeTdee - nutrition.intake;
+  const weeklyDeficit = dailyDeficit * 7;
+  const expectedLoss = weeklyDeficit / 7700;
+  const expectedTrend = -0.45;
+  const trendDifference = Number.isFinite(state.trendKgPerWeek)
+    ? state.trendKgPerWeek - expectedTrend
+    : NaN;
+  const trendComparison = !Number.isFinite(state.trendKgPerWeek)
+    ? 'Not enough trend data yet'
+    : trendDifference >= 0
+    ? `${trendDifference.toFixed(2)} kg/wk slower than target`
+    : `${Math.abs(trendDifference).toFixed(2)} kg/wk faster than target`;
+  const trendDirection = latest.weight <= goal
+    ? 'Goal line reached or below'
+    : state.trendKgPerWeek < 0
+    ? 'Moving toward goal'
+    : state.trendKgPerWeek > 0
+    ? 'Moving away from goal'
+    : 'Trend is flat';
+  const eta = state.trendKgPerWeek < -0.05 && remainingWeight > 0
+    ? new Date(new Date(latest.date).getTime() + (remainingWeight / Math.abs(state.trendKgPerWeek)) * 7 * 86400000)
+    : null;
+  const etaLabel = remainingWeight <= 0
+    ? 'Goal reached'
+    : eta
+    ? fmtDateObj(eta)
+    : 'Not enough trend data yet';
+  const deficitStatus = !Number.isFinite(dailyDeficit)
+    ? 'Not enough data yet'
+    : dailyDeficit <= 0
+    ? 'Maintenance likely'
+    : dailyDeficit < 200
+    ? 'Deficit too small'
+    : dailyDeficit > 900
+    ? 'Deficit too aggressive'
+    : 'On track';
+  const deficitTone = dailyDeficit <= 0
+    ? T.gold
+    : dailyDeficit < 200
+    ? T.rose
+    : dailyDeficit > 900
+    ? T.rose
+    : T.green;
+  const proteinNote = nutrition.protein >= latest.weight * 1.7
+    ? 'Protein priority'
+    : 'Calories need review';
+  const activitySupport = cadence.score >= 80
+    ? 'Consistency is strong'
+    : cadence.score >= 60
+    ? 'Consistency is moderate'
+    : 'Needs steadier logs';
+  const rollingValue = rollingAverage[rollingAverage.length - 1]?.value;
+
+  return (
+    <section className="fit-panel" style={{ marginBottom: 28 }}>
+      <div className="fit-panel-head">
+        <div>
+          <h3>Analytics <em>dashboard</em></h3>
+          <div className="meta">Calorie deficit, weight trend, activity and nutrition signals from the operator ledger.</div>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gap: 18, marginTop: 18 }}>
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
+            <Kicker style={{ marginBottom: 10 }}>Calorie deficit</Kicker>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 14 }}>
+              <div>
+                <div style={{ fontFamily: T.display, fontSize: 24, color: T.ink }}>{nutrition.activeTdee.toLocaleString()} kcal</div>
+                <div style={{ fontFamily: T.sans, fontSize: 11, color: T.muted }}>Estimated maintenance (TDEE)</div>
+              </div>
+              <span style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 700, color: deficitTone, textTransform: 'uppercase' }}>{deficitStatus}</span>
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Current target</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Estimated daily deficit</span><strong>{dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Estimated weekly deficit</span><strong>{weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : 'Needs setup'}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Expected weight loss</span><strong>{weeklyDeficit > 0 ? `${expectedLoss.toFixed(2)} kg/wk` : '0.00 kg/wk'}</strong></div>
+            </div>
+          </div>
+
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
+            <Kicker style={{ marginBottom: 10 }}>Weight trend</Kicker>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontFamily: T.display, fontSize: 24, color: T.ink }}>{latest.weight.toFixed(1)} kg</div>
+              <div style={{ fontFamily: T.sans, fontSize: 11, color: T.muted }}>Current weight</div>
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Starting weight</span><strong>{startingWeight.toFixed(1)} kg</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Goal weight</span><strong>{goal.toFixed(1)} kg</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Change so far</span><strong>{formatWeightDelta(totalChange)}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Remaining to goal</span><strong>{remainingWeight.toFixed(1)} kg</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly trend</span><strong>{state.trendKgPerWeek >= 0 ? '+' : ''}{state.trendKgPerWeek.toFixed(2)} kg/wk</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Trend vs target</span><strong>{trendComparison}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>45-day rolling avg</span><strong>{rollingValue !== undefined ? `${rollingValue.toFixed(1)} kg` : 'Not enough data yet'}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Moving status</span><strong>{trendDirection}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Projected target date</span><strong>{etaLabel}</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
+            <Kicker style={{ marginBottom: 10 }}>Fitness / activity</Kicker>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Training sessions</span><strong>{cadence.count} logs in 14d</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Weekly training target</span><strong>3 sessions</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Steps summary</span><strong>Not available</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Active energy / exercise</span><strong>Not available</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Latest log date</span><strong>{formatReferenceDate(latest.date)}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Activity support</span><strong>{activitySupport}</strong></div>
+            </div>
+            <p style={{ marginTop: 14, fontFamily: T.sans, fontSize: 11, color: T.muted, lineHeight: 1.6 }}>
+              Apple Health sync activity and step metrics will appear in the health stream below when available.
+            </p>
+          </div>
+
+          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 8, padding: 18 }}>
+            <Kicker style={{ marginBottom: 10 }}>Protein & nutrition</Kicker>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Protein target</span><strong>{nutrition.protein} g</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Based on body weight</span><strong>{Math.round(latest.weight * 1.8)} g</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Daily calorie target</span><strong>{nutrition.intake.toLocaleString()} kcal</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: T.body }}>Nutrition note</span><strong>{proteinNote}</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, setTab }: {
   state: State;
   latest: FitnessReading;
@@ -4114,9 +4267,6 @@ export default function OperatorDashboardClient() {
   const [compose, setCompose] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
-  const [appleHealthFile, setAppleHealthFile] = useState<File | null>(null);
-  const [appleHealthStatus, setAppleHealthStatus] = useState<{ tone: 'ok' | 'err' | 'neutral'; message: string } | null>(null);
-  const [importingAppleHealth, setImportingAppleHealth] = useState(false);
 
   const saveLocal = useCallback((rs:FitnessReading[]) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(rs)); }, []);
 
@@ -4140,19 +4290,6 @@ export default function OperatorDashboardClient() {
     if (!opPw) return;
     await loadData(opPw);
   }, [loadData, opPw]);
-
-  const handleAppleHealthImport = useCallback(async () => {
-    if (!opPw || !appleHealthFile) return;
-    setImportingAppleHealth(true);
-    setAppleHealthStatus({ tone: 'neutral', message: 'Reading Apple Health export...' });
-    const result = await apiImportAppleHealth(opPw, appleHealthFile);
-    if (result.ok) {
-      await refreshCloudReadings();
-      setAppleHealthFile(null);
-    }
-    setAppleHealthStatus({ tone: result.ok ? 'ok' : 'err', message: result.message });
-    setImportingAppleHealth(false);
-  }, [appleHealthFile, opPw, refreshCloudReadings]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -4356,6 +4493,17 @@ export default function OperatorDashboardClient() {
           </div>
         </section>
 
+        <AnalyticsSection
+          latest={latest}
+          sorted={dashboardSource}
+          goal={goal}
+          nutrition={nutrition}
+          state={state}
+          rollingAverage={rollingAverage}
+          cadence={cadence}
+          syncSummary={syncSummary}
+        />
+
         <div id="operator-health-stream">
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} />
         </div>
@@ -4476,94 +4624,9 @@ export default function OperatorDashboardClient() {
               </div>
             </div>
 
-            <div className="fit-panel side-panel">
-              <div className="fit-panel-head"><h3>Command <em>notes</em></h3></div>
-              <div className="command-notes">
-                <p>
-                  The layout now mirrors your reference dashboard directly, while still reading from the same operator fitness ledger and Apple Health sync path.
-                </p>
-                <p>
-                  Your iPhone auto-export app should keep posting into <code>/api/operator/fitness/auto-sync</code>. If that ever misses a day, you can use the XML fallback here without breaking the daily timeline.
-                </p>
-
-                <div className="fitness-command-row">
-                  <button type="button" className="fitness-action-btn primary" onClick={() => setCompose(true)}>
-                    File weigh-in
-                  </button>
-                  <button type="button" className="fitness-action-btn secondary" onClick={() => { void refreshCloudReadings(); }}>
-                    Refresh cloud
-                  </button>
-                </div>
-
-                <label className="fitness-file-input">
-                  <span>Apple Health XML fallback</span>
-                  <input
-                    type="file"
-                    accept=".xml,text/xml,application/xml"
-                    onChange={(event) => {
-                      setAppleHealthFile(event.target.files?.[0] ?? null);
-                      setAppleHealthStatus(null);
-                    }}
-                  />
-                </label>
-
-                <div className="fitness-command-row">
-                  <button
-                    type="button"
-                    className="fitness-action-btn secondary"
-                    disabled={!appleHealthFile || importingAppleHealth}
-                    onClick={() => { void handleAppleHealthImport(); }}
-                  >
-                    {importingAppleHealth ? 'Importing...' : 'Import Apple Health'}
-                  </button>
-                  <button
-                    type="button"
-                    className="fitness-action-btn subtle"
-                    onClick={() => {
-                      setAppleHealthFile(null);
-                      setAppleHealthStatus(null);
-                    }}
-                  >
-                    Clear file
-                  </button>
-                </div>
-
-                {appleHealthStatus && (
-                  <p className={`fitness-inline-note ${appleHealthStatus.tone}`}>
-                    {appleHealthStatus.message}
-                  </p>
-                )}
-
-                <p className="fitness-inline-note">
-                  Current mode: <code>{syncSummary}</code>
-                </p>
-              </div>
-            </div>
           </aside>
         </section>
 
-        <section className="fit-inline-intro" id="operator-plan">
-          <div className="fit-inline-intro__kicker">One continuous dashboard</div>
-          <h2>Plan and projection sections now live in the same scroll.</h2>
-          <p>
-            Instead of switching context, the longer-cut strategy, phase roadmap, and practical notes
-            sit directly underneath the live dashboard so you can read the whole operator view as one page.
-          </p>
-        </section>
-
-        <PlanTab
-          sorted={dashboardSource}
-          goal={goal}
-          state={state}
-          setTab={scrollToDashboardSection}
-        />
-
-        <div id="operator-projections">
-          <Milestones sorted={dashboardSource} reg={reg} goal={goal} />
-          <CutStrategies sorted={dashboardSource} goal={goal} />
-          <Phases sorted={dashboardSource} goal={goal} reg={reg} />
-          <Insights sorted={dashboardSource} reg={reg} goal={goal} />
-        </div>
       </main>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />
