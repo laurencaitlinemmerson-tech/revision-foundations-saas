@@ -613,6 +613,468 @@ function PlanOpener({ state, sorted, setTab }: { state: State; sorted: FitnessRe
   );
 }
 
+// ─── Auto-detected phases from the data ─────────────────────────────────────
+
+interface PhaseBand {
+  start: string; end: string; name: string; color: string; soft: string;
+}
+
+function detectPhases(sorted: FitnessReading[]): PhaseBand[] {
+  if (sorted.length < 4) return [];
+  // Manual but data-anchored phases for the imported history
+  const bands: PhaseBand[] = [
+    { start: '2023-08-13', end: '2023-12-01', name: 'LEAN PHASE',     color: T.green, soft: T.greenSoft },
+    { start: '2023-12-02', end: '2024-10-31', name: 'MAINTENANCE',     color: T.blue,  soft: T.blueSoft  },
+    { start: '2025-03-30', end: sorted[sorted.length-1].date,
+      name: 'DRIFT',          color: T.gold,  soft: T.goldSoft },
+  ];
+  return bands.filter(b => new Date(b.start) <= new Date(sorted[sorted.length-1].date));
+}
+
+// ─── Phase-Banded Chart (the centrepiece) ────────────────────────────────────
+
+function PhaseChart({ sorted, goal, range = 'all' }: {
+  sorted: FitnessReading[]; goal: number; range?: 'all' | '5y' | '2y' | '1y' | '6m';
+}) {
+  if (sorted.length < 2) return null;
+
+  const lastMs = new Date(sorted[sorted.length-1].date).getTime();
+  const cutoffMap: Record<string, number> = {
+    '5y':  5 * 365, '2y': 2 * 365, '1y': 365, '6m': 180,
+  };
+  const cutoffDays = cutoffMap[range];
+  const filtered = cutoffDays
+    ? sorted.filter(r => (lastMs - new Date(r.date).getTime()) / 86400000 <= cutoffDays)
+    : sorted;
+  if (filtered.length < 2) return null;
+
+  const W = 980, H = 380;
+  const PAD = { top: 50, right: 80, bottom: 56, left: 56 };
+  const iW = W - PAD.left - PAD.right;
+  const iH = H - PAD.top - PAD.bottom;
+
+  const t0 = new Date(filtered[0].date).getTime();
+  const tEnd = lastMs;
+  const span = tEnd - t0 || 1;
+
+  const xS = (ms: number) => PAD.left + ((ms - t0) / span) * iW;
+  const ys = filtered.map(r => r.weight);
+  const yMin = Math.floor(Math.min(...ys, goal) - 2);
+  const yMax = Math.ceil(Math.max(...ys) + 3);
+  const yS = (v: number) => PAD.top + (1 - (v - yMin) / (yMax - yMin)) * iH;
+
+  // Smoothed trend (45-day rolling avg)
+  const smoothed = filtered.map((r, i) => {
+    const targetMs = new Date(r.date).getTime();
+    const windowMs = 22.5 * 86400000;
+    const inWin = filtered.filter(x => {
+      const xm = new Date(x.date).getTime();
+      return xm >= targetMs - windowMs && xm <= targetMs + windowMs;
+    });
+    const avg = inWin.reduce((s, x) => s + x.weight, 0) / inWin.length;
+    return { date: r.date, weight: avg };
+  });
+
+  const pts = filtered.map(r => [xS(new Date(r.date).getTime()), yS(r.weight)] as [number,number]);
+  const smoothPts = smoothed.map(r => [xS(new Date(r.date).getTime()), yS(r.weight)] as [number,number]);
+  const rawPath = pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const smoothD = smoothPath(smoothPts);
+
+  // Phase bands
+  const phases = detectPhases(filtered).filter(p => {
+    const startMs = new Date(p.start).getTime();
+    const endMs = new Date(p.end).getTime();
+    return endMs >= t0 && startMs <= tEnd;
+  });
+
+  // Pinned events
+  const minR = [...filtered].sort((a,b)=>a.weight-b.weight)[0];
+  const maxR = [...filtered].sort((a,b)=>b.weight-a.weight)[0];
+  const today = filtered[filtered.length-1];
+  const pins = [
+    { r: maxR,   label: 'Peak weight',  show: maxR !== today },
+    { r: minR,   label: 'Leanest point', show: minR !== today },
+    { r: today,  label: 'Today',        show: true },
+  ].filter(p => p.show);
+
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', display:'block' }}>
+        {/* Phase bands */}
+        {phases.map((p, i) => {
+          const sx = Math.max(PAD.left, xS(Math.max(new Date(p.start).getTime(), t0)));
+          const ex = Math.min(PAD.left+iW, xS(Math.min(new Date(p.end).getTime(), tEnd)));
+          if (ex - sx < 4) return null;
+          return (
+            <g key={i}>
+              <rect x={sx} y={PAD.top} width={ex-sx} height={iH} fill={p.soft} opacity="0.5" />
+              <text x={sx+8} y={PAD.top+16} fontFamily={T.sans} fontSize="9" fontWeight="600" letterSpacing="0.22em" fill={p.color}>
+                {p.name}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Goal zone */}
+        <rect x={PAD.left} y={yS(goal)} width={iW} height={PAD.top+iH-yS(goal)} fill={T.goldSoft} opacity="0.35" />
+
+        {/* Y-axis ticks */}
+        {[yMin, Math.round((yMin+yMax)/2), yMax].map((v,i)=>(
+          <g key={i}>
+            <line x1={PAD.left} y1={yS(v)} x2={PAD.left+iW} y2={yS(v)} stroke={T.softLine} strokeWidth="0.5" strokeDasharray="2,3" />
+            <text x={PAD.left-6} y={yS(v)+4} textAnchor="end" fontFamily={T.sans} fontSize="10" fill={T.muted}>{v.toFixed(1)}</text>
+          </g>
+        ))}
+
+        {/* Goal line */}
+        <line x1={PAD.left} y1={yS(goal)} x2={PAD.left+iW} y2={yS(goal)} stroke={T.gold} strokeWidth="1" strokeDasharray="6,4" />
+        <text x={PAD.left+iW+4} y={yS(goal)+4} fontFamily={T.sans} fontSize="10" fill={T.gold} fontWeight="500">GOAL {goal}</text>
+
+        {/* Raw readings (faint) */}
+        <path d={rawPath} fill="none" stroke={T.ink} strokeWidth="0.5" opacity="0.25" strokeDasharray="2,2" />
+
+        {/* Smoothed trend (the main line) */}
+        <path d={smoothD} fill="none" stroke={T.gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+        {/* Pinned events */}
+        {pins.map((p, i) => {
+          const x = xS(new Date(p.r.date).getTime());
+          const y = yS(p.r.weight);
+          const isToday = p.label === 'Today';
+          const color = isToday ? T.gold : T.muted;
+          return (
+            <g key={i}>
+              <line x1={x} y1={PAD.top} x2={x} y2={PAD.top+iH} stroke={color} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.6" />
+              <circle cx={x} cy={y} r="4" fill={color} stroke={T.paper} strokeWidth="1.5" />
+              <text x={x} y={PAD.top-22} textAnchor={x > W-150 ? 'end' : 'middle'} fontFamily={T.display} fontStyle="italic" fontSize="12" fill={T.ink}>
+                {p.label}
+              </text>
+              <text x={x} y={PAD.top-8} textAnchor={x > W-150 ? 'end' : 'middle'} fontFamily={T.sans} fontSize="9.5" fill={T.muted} letterSpacing="0.05em">
+                {p.r.weight.toFixed(1)}kg
+              </text>
+            </g>
+          );
+        })}
+
+        {/* X-axis label (range) */}
+        <text x={PAD.left} y={H-12} fontFamily={T.sans} fontSize="10" fill={T.muted}>
+          {new Date(filtered[0].date).toLocaleDateString('en-GB', { month:'short', year:'numeric' })}
+        </text>
+        <text x={PAD.left+iW} y={H-12} textAnchor="end" fontFamily={T.sans} fontSize="10" fill={T.muted}>
+          {new Date(filtered[filtered.length-1].date).toLocaleDateString('en-GB', { month:'short', year:'numeric' })}
+        </text>
+      </svg>
+
+      {/* Legend */}
+      <div style={{ display:'flex', gap:24, fontFamily:T.sans, fontSize:10, color:T.muted, letterSpacing:'0.04em', marginTop:8, flexWrap:'wrap' }}>
+        <span style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
+          <span style={{ display:'inline-block', width:18, borderTop:`1px dashed ${T.ink}`, opacity:0.4 }} />
+          Daily readings
+        </span>
+        <span style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
+          <span style={{ display:'inline-block', width:18, borderTop:`2px solid ${T.gold}` }} />
+          45-day trend
+        </span>
+        {detectPhases(sorted).map(p => (
+          <span key={p.name} style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
+            <span style={{ display:'inline-block', width:14, height:10, background:p.soft }} />
+            {p.name.toLowerCase()}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Top Stat Strip (6 cells with deltas) ────────────────────────────────────
+
+function TopStatStrip({ sorted, state }: { sorted: FitnessReading[]; state: State }) {
+  const latest = sorted[sorted.length-1];
+  // 30 days ago for delta calc
+  const targetMs = new Date(latest.date).getTime() - 30 * 86400000;
+  const monthAgo = sorted.reduce((best, r) => {
+    const diff = Math.abs(new Date(r.date).getTime() - targetMs);
+    const bestDiff = Math.abs(new Date(best.date).getTime() - targetMs);
+    return diff < bestDiff ? r : best;
+  }, sorted[0]);
+
+  const dFat = latest.bodyFat - monthAgo.bodyFat;
+  const dMuscle = latest.muscleMass - monthAgo.muscleMass;
+  const dWater = latest.water - monthAgo.water;
+
+  // BMR (Mifflin-St Jeor estimate, age 30)
+  const bmr = Math.round(10 * latest.weight + 6.25 * HEIGHT_M * 100 - 5 * 30 - 161);
+  const tdee = Math.round(bmr * 1.2);
+
+  // Discipline score: how many of last 14 days had a reading?
+  const last14ms = new Date(latest.date).getTime() - 14 * 86400000;
+  const last14 = sorted.filter(r => new Date(r.date).getTime() >= last14ms).length;
+  const discipline = Math.min(100, Math.round((last14 / 14) * 100));
+
+  const cells = [
+    { kicker:'BODY FAT',    value:`${latest.bodyFat.toFixed(1)}%`, sub:`${dFat>=0?'+':''}${dFat.toFixed(1)} in 30 days`, color: dFat<0?T.green:T.rose },
+    { kicker:'MUSCLE MASS', value:`${latest.muscleMass.toFixed(1)}%`, sub:`${dMuscle>=0?'+':''}${dMuscle.toFixed(1)} since last month`, color: dMuscle>0?T.green:T.rose },
+    { kicker:'VISCERAL FAT',value:`${latest.visceralFat ?? '—'}`,   sub:'target ≤ 9', color: (latest.visceralFat||0) > 9 ? T.gold : T.green },
+    { kicker:'BMR',         value:`${bmr.toLocaleString()}`,        sub:`TDEE est ${tdee.toLocaleString()}`, color: T.body },
+    { kicker:'WATER',       value:`${latest.water.toFixed(1)}%`,    sub: latest.water < 45 ? 'Low · drink up' : 'On range', color: latest.water < 45 ? T.gold : T.green },
+    { kicker:'DISCIPLINE',  value:`${discipline}/100`,              sub:`${last14}/14 days logged`, color: discipline >= 80 ? T.green : discipline >= 50 ? T.gold : T.rose },
+  ];
+
+  return (
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}`, marginBottom:32 }}>
+      {cells.map((c,i) => (
+        <div key={i} style={{ padding:'14px 16px', borderRight: i<5 ? `0.5px solid ${T.softLine}` : 'none' }}>
+          <Kicker style={{ marginBottom:7, fontSize:8.5 }}>{c.kicker}</Kicker>
+          <div style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.015em', lineHeight:1, marginBottom:5 }}>{c.value}</div>
+          <span style={{ fontFamily:T.sans, fontSize:10, color:c.color, fontWeight:500 }}>{c.sub}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Current Goal Card ───────────────────────────────────────────────────────
+
+function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReading; goal: number }) {
+  // Project goal date assuming 0.45 kg/wk
+  const weeks = Math.max(0, (latest.weight - goal) / 0.45);
+  const goalDate = new Date(new Date(latest.date).getTime() + weeks * 7 * 86400000);
+  const intake = 1860 - 500;
+
+  return (
+    <div style={{ display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr', gap:0, marginBottom:48, borderTop:`0.5px solid ${T.line}`, borderBottom:`0.5px solid ${T.line}` }}>
+      <div style={{ padding:'20px 24px', borderRight:`0.5px solid ${T.line}` }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+          <Kicker>Current Goal</Kicker>
+          <span style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.2em', padding:'2px 8px', background: state.direction === 'gaining' ? T.roseSoft : T.greenSoft, color: state.direction === 'gaining' ? T.rose : T.green }}>
+            {state.direction === 'gaining' ? 'OFF TRACK' : 'ON TRACK'}
+          </span>
+        </div>
+        <div style={{ marginBottom:6 }}>
+          <span style={{ fontFamily:T.display, fontSize:36, color:T.gold, letterSpacing:'-0.02em' }}>{goal}kg</span>
+          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.muted, marginLeft:10 }}>healthy weight</span>
+        </div>
+        <p style={{ fontFamily:T.sans, fontSize:11, color:T.body, margin:0, lineHeight:1.5 }}>
+          Target reached by <strong style={{ color:T.ink }}>{goalDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</strong> at the moderate-cut pace.
+        </p>
+      </div>
+      <div style={{ padding:'20px 24px', borderRight:`0.5px solid ${T.line}` }}>
+        <Kicker style={{ marginBottom:6 }}>To Goal</Kicker>
+        <div style={{ fontFamily:T.display, fontSize:28, color:T.ink }}>{(latest.weight - goal).toFixed(1)}<span style={{ fontFamily:T.sans, fontSize:11, color:T.muted, marginLeft:5 }}>kg</span></div>
+        <Kicker style={{ marginTop:14, marginBottom:6 }}>Projection</Kicker>
+        <div style={{ fontFamily:T.display, fontSize:18, color:T.muted, fontStyle:'italic' }}>{Math.ceil(weeks/4.33)} months</div>
+      </div>
+      <div style={{ padding:'20px 24px' }}>
+        <Kicker style={{ marginBottom:6 }}>Intake Plan</Kicker>
+        <div style={{ fontFamily:T.display, fontSize:24, color:T.ink }}>{intake.toLocaleString()} <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}>kcal</span></div>
+        <Kicker style={{ marginTop:14, marginBottom:6 }}>Burn Plan</Kicker>
+        <div style={{ fontFamily:T.display, fontSize:18, color:T.muted, fontStyle:'italic' }}>{(1860).toLocaleString()} kcal/day</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── This Week 7-day Grid ───────────────────────────────────────────────────
+
+function ThisWeekGrid({ sorted, state }: { sorted: FitnessReading[]; state: State }) {
+  const latest = sorted[sorted.length-1];
+  const todayDate = new Date(latest.date);
+  // Monday of this week
+  const dow = todayDate.getDay();
+  const monday = new Date(todayDate);
+  monday.setDate(todayDate.getDate() - (dow === 0 ? 6 : dow - 1));
+
+  const days: Array<{ label:string; iso:string; reading: FitnessReading | undefined; delta:number|null; isToday:boolean; isFuture:boolean }> = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const iso = d.toISOString().slice(0,10);
+    const reading = sorted.find(r => r.date.slice(0,10) === iso);
+    const dayLabel = d.toLocaleDateString('en-GB', { weekday:'short' }).toUpperCase();
+    const dayNum = d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    days.push({
+      label: dayLabel,
+      iso: dayNum,
+      reading,
+      delta: null, // we calc below
+      isToday: iso === latest.date.slice(0,10),
+      isFuture: d > todayDate,
+    });
+  }
+  // Compute deltas vs previous day's reading (using sorted array)
+  for (let i = 0; i < days.length; i++) {
+    if (days[i].reading) {
+      const prev = i > 0 ? days[i-1].reading : sorted[sorted.indexOf(days[i].reading!) - 1];
+      if (prev) days[i].delta = days[i].reading!.weight - prev.weight;
+    }
+  }
+
+  return (
+    <div style={{ marginBottom: 48 }}>
+      <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', marginBottom:10 }}>
+        <Kicker>This week · scale rhythm, deltas and training context</Kicker>
+        <Kicker color={T.muted}>Mon {monday.toLocaleDateString('en-GB',{day:'numeric'})} – Sun {days[6].iso}</Kicker>
+      </div>
+      <ThickRule style={{ marginBottom:0 }} />
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', borderBottom:`0.5px solid ${T.line}` }}>
+        {days.map((d, i) => (
+          <div key={i} style={{
+            padding:'18px 14px',
+            borderRight: i<6 ? `0.5px solid ${T.softLine}` : 'none',
+            background: d.isToday ? T.goldSoft : 'transparent',
+            opacity: d.isFuture ? 0.4 : 1,
+          }}>
+            <Kicker style={{ marginBottom:4, fontSize:9 }}>{d.label}</Kicker>
+            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.muted, marginBottom:14 }}>{d.iso}</div>
+            {d.reading ? (
+              <>
+                <div style={{ display:'flex', alignItems:'baseline', gap:3 }}>
+                  <span style={{ fontFamily:T.display, fontSize:22, color: d.isToday ? T.gold : T.ink, letterSpacing:'-0.015em', lineHeight:1 }}>{d.reading.weight.toFixed(1)}</span>
+                  <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kg</span>
+                </div>
+                {d.delta !== null && (
+                  <div style={{ marginTop:6, fontFamily:T.sans, fontSize:10, color: d.delta > 0 ? T.rose : d.delta < 0 ? T.green : T.muted, fontWeight:500 }}>
+                    {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(1)}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.muted }}>—</div>
+                <div style={{ fontFamily:T.sans, fontSize:9, color:T.muted, letterSpacing:'0.12em', marginTop:8 }}>{d.isFuture ? 'TO COME' : 'NO LOG'}</div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Phase Log (timeline) ───────────────────────────────────────────────────
+
+function PhaseLog({ sorted }: { sorted: FitnessReading[] }) {
+  const entries = [
+    {
+      title: 'The drift',
+      sub: 'Mar 2025 – present',
+      months: 14,
+      startKg: 76.0,
+      endKg: sorted[sorted.length-1].weight,
+      delta: sorted[sorted.length-1].weight - 76.0,
+      color: T.gold,
+      current: true,
+    },
+    {
+      title: 'Long maintenance',
+      sub: 'Dec 2023 – Oct 2024',
+      months: 11,
+      startKg: 72.1,
+      endKg: 74.4,
+      delta: 2.3,
+      color: T.blue,
+      current: false,
+    },
+    {
+      title: 'The first lean phase',
+      sub: 'Aug – Nov 2023',
+      months: 4,
+      startKg: 77.5,
+      endKg: 70.8,
+      delta: -6.7,
+      color: T.green,
+      current: false,
+    },
+  ];
+
+  return (
+    <div style={{ marginTop: 56 }}>
+      <Kicker style={{ marginBottom:10 }}>Phase log</Kicker>
+      <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:24, fontStyle:'italic', color:T.ink, margin:'0 0 6px' }}>
+        The story: rise, collapse, rebuild, discipline.
+      </h3>
+      <ThickRule style={{ margin:'18px 0 0' }} />
+      <div style={{ borderBottom:`0.5px solid ${T.line}` }}>
+        {entries.map((e, i) => (
+          <div key={i} style={{
+            display:'grid', gridTemplateColumns:'4px 1.6fr 1fr 1fr 1fr 1fr',
+            borderBottom: i<entries.length-1 ? `0.5px solid ${T.softLine}` : 'none',
+            gap:20, alignItems:'baseline',
+            background: e.current ? T.goldSoft : 'transparent',
+            margin: e.current ? '0 -16px' : 0,
+            padding: e.current ? '22px 16px' : '22px 0',
+          }}>
+            <div style={{ background:e.color, height:'100%', minHeight:48 }} />
+            <div>
+              <div style={{ fontFamily:T.display, fontSize:18, color:T.ink, marginBottom:3 }}>
+                {e.title}{e.current && <em style={{ color:e.color, fontSize:14, marginLeft:8 }}>— current</em>}
+              </div>
+              <Kicker color={T.muted}>{e.sub}</Kicker>
+            </div>
+            <div style={{ fontFamily:T.sans, fontSize:12, color:T.muted }}>{e.months} months</div>
+            <div style={{ fontFamily:T.sans, fontSize:12, color:T.body }}>{e.startKg.toFixed(1)}kg start</div>
+            <div style={{ fontFamily:T.sans, fontSize:12, color:T.body }}>{e.endKg.toFixed(1)}kg {e.current ? 'now' : 'end'}</div>
+            <div style={{ fontFamily:T.display, fontSize:18, color: e.delta > 0 ? T.rose : T.green, textAlign:'right' }}>
+              {e.delta > 0 ? '+' : ''}{e.delta.toFixed(1)}kg
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Command Notes (auto-generated observations) ─────────────────────────────
+
+function CommandNotes({ sorted, state, latest }: { sorted: FitnessReading[]; state: State; latest: FitnessReading }) {
+  const notes: string[] = [];
+  if (latest.water < 45) notes.push(`Water is the obvious lever today: ${latest.water.toFixed(1)}% reads low against the muscle-mass signal.`);
+  if (state.direction === 'gaining') notes.push(`Weight is up over the past month. The drift period is still active — recomposition or a deliberate cut is the next move.`);
+  if (state.weighInStatus === 'overdue') notes.push(`Last weigh-in was ${state.daysSinceWeighIn} days ago. The data goes stale fast — file today's reading.`);
+  notes.push(`The graph should be read as trend plus context, not emotion from a single morning.`);
+
+  return (
+    <div style={{ marginTop:32, padding:'22px 26px', background:T.surface, border:`0.5px solid ${T.line}` }}>
+      <Kicker style={{ marginBottom:14 }}>Command notes</Kicker>
+      {notes.map((n,i)=>(
+        <p key={i} style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin: i<notes.length-1 ? '0 0 12px' : 0 }}>
+          {n}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+// ─── Apple Health / Import note ───────────────────────────────────────────────
+
+function ImportNote({ setTab: _setTab }: { setTab: (t:string)=>void }) {
+  return (
+    <div style={{ marginTop:48, padding:'24px 28px', background:T.surface, border:`0.5px solid ${T.line}` }}>
+      <Kicker style={{ marginBottom:12 }}>Data sources · Apple Health</Kicker>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 12px' }}>
+        Direct Apple Health sync isn&apos;t possible from a browser.
+      </p>
+      <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.7, margin:'0 0 12px' }}>
+        Apple only exposes HealthKit to native iOS apps. The practical paths:
+      </p>
+      <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:10 }}>
+        <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>i.</span>
+          <strong style={{ color:T.ink, fontWeight:500 }}>Apple Health Export.</strong> iPhone → Health app → profile photo → Export All Health Data. Upload the resulting <code>export.xml</code> here (importer coming next iteration).
+        </li>
+        <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>ii.</span>
+          <strong style={{ color:T.ink, fontWeight:500 }}>Health Auto Export.</strong> £4 App Store app that pushes selected metrics to a webhook. Your existing POST <code>/api/operator/fitness</code> already accepts this format.
+        </li>
+        <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>iii.</span>
+          <strong style={{ color:T.ink, fontWeight:500 }}>Smart-scale cloud.</strong> Withings / Renpho / Eufy all have webhook APIs that mirror their Apple Health output — often more reliable than HealthKit re-exports.
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 // ─── Lock screen ──────────────────────────────────────────────────────────────
 
 function Lock({ onUnlock }: { onUnlock: () => void }) {
@@ -2398,8 +2860,39 @@ export default function OperatorDashboardClient() {
         {tab==='Overview' && (
           <div>
             <ThisWeek state={state} latest={latest} setCompose={setCompose} setTab={setTab} />
+
+            {/* The compact 6-cell stat strip */}
+            <TopStatStrip sorted={sorted} state={state} />
+
+            {/* Goal banner */}
+            <GoalCard state={state} latest={latest} goal={goal} />
+
+            {/* Centrepiece phase-banded chart */}
+            <div style={{ marginBottom:18 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:8 }}>
+                <div>
+                  <Kicker style={{ marginBottom:4 }}>Weight, phases and <em>evidence</em></Kicker>
+                  <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.muted, margin:0 }}>
+                    raw readings · smoothed trend · phase bands · pinned events
+                  </p>
+                </div>
+              </div>
+              <PhaseChart sorted={sorted} goal={goal} range="all" />
+            </div>
+
+            {/* This week's 7-day rhythm */}
+            <ThisWeekGrid sorted={sorted} state={state} />
+
+            {/* Hero reading + journey arc */}
             <HeroReading latest={latest} previous={previous} sorted={sorted} />
             <JourneyStory sorted={sorted} state={state} />
+
+            {/* Phase log timeline */}
+            <PhaseLog sorted={sorted} />
+
+            {/* Command notes */}
+            <CommandNotes sorted={sorted} state={state} latest={latest} />
+
 
             <Kicker style={{ marginBottom:10 }}>Section I · The Full Panel</Kicker>
             <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:34, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>Six readings, <em>one body</em>.</h2>
@@ -2619,6 +3112,8 @@ export default function OperatorDashboardClient() {
                 </div>
               </div>
             ))}
+
+            <ImportNote setTab={setTab} />
           </div>
         )}
 
