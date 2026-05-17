@@ -4200,6 +4200,21 @@ export default function OperatorDashboardClient() {
   const rollingAverage = useMemo(() => buildRollingAverage(dashboardSource), [dashboardSource]);
   const sideMetrics = useMemo(() => buildSideMetrics(dashboardSource, goal, reg), [dashboardSource, goal, reg]);
   const weekRows = useMemo(() => buildWeekRows(dashboardSource), [dashboardSource]);
+  const scrollToDashboardSection = useCallback((target: string) => {
+    if (typeof document === 'undefined') return;
+
+    const sectionId = target === 'Health'
+      ? 'operator-health-stream'
+      : target === 'Plan'
+      ? 'operator-plan'
+      : target === 'Projections'
+      ? 'operator-projections'
+      : target === 'Ledger'
+      ? 'operator-projections'
+      : 'operator-overview';
+
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   if (!authed) {
     return <Lock onUnlock={() => {
@@ -4222,7 +4237,7 @@ export default function OperatorDashboardClient() {
 
   return (
     <div className="fitness-reference-shell">
-      <main className="wrap fitness-redesign">
+      <main className="wrap fitness-redesign" id="operator-overview">
         <div className="fitness-utility-bar">
           <div>
             <div className="fitness-utility-kicker">Operator fitness</div>
@@ -4341,7 +4356,9 @@ export default function OperatorDashboardClient() {
           </div>
         </section>
 
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} />
+        <div id="operator-health-stream">
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} />
+        </div>
 
         <section className="fit-grid">
           <div className="fit-main">
@@ -4524,6 +4541,29 @@ export default function OperatorDashboardClient() {
             </div>
           </aside>
         </section>
+
+        <section className="fit-inline-intro" id="operator-plan">
+          <div className="fit-inline-intro__kicker">One continuous dashboard</div>
+          <h2>Plan and projection sections now live in the same scroll.</h2>
+          <p>
+            Instead of switching context, the longer-cut strategy, phase roadmap, and practical notes
+            sit directly underneath the live dashboard so you can read the whole operator view as one page.
+          </p>
+        </section>
+
+        <PlanTab
+          sorted={dashboardSource}
+          goal={goal}
+          state={state}
+          setTab={scrollToDashboardSection}
+        />
+
+        <div id="operator-projections">
+          <Milestones sorted={dashboardSource} reg={reg} goal={goal} />
+          <CutStrategies sorted={dashboardSource} goal={goal} />
+          <Phases sorted={dashboardSource} goal={goal} reg={reg} />
+          <Insights sorted={dashboardSource} reg={reg} goal={goal} />
+        </div>
       </main>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />
