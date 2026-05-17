@@ -435,7 +435,6 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
 
   // 7-day averages
   const stepsAvg7 = avg(last7.map((d) => d.activity.steps));
-  const energyAvg7 = avg(last7.map((d) => d.activity.activeEnergyKcal));
   const exerciseAvg7 = avg(last7.map((d) => d.activity.exerciseMinutes));
   const restingHrAvg7 = avg(last7.map((d) => d.heart.restingHr));
   const hrvAvg7 = avg(last7.map((d) => d.heart.hrvMs));
@@ -443,7 +442,6 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
 
   // Today vs baseline
   const stepsDelta = deltaPill(latest?.activity.steps ?? null, stepsAvg7);
-  const energyDelta = deltaPill(latest?.activity.activeEnergyKcal ?? null, energyAvg7, { suffix: ' kcal' });
   const exerciseDelta = deltaPill(latest?.activity.exerciseMinutes ?? null, exerciseAvg7, { suffix: ' min' });
   const rhrDelta = deltaPill(latest?.heart.restingHr ?? null, restingHrAvg7, { invert: true, suffix: ' bpm' });
   const hrvDelta = deltaPill(latest?.heart.hrvMs ?? null, hrvAvg7, { suffix: ' ms' });
@@ -484,10 +482,28 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
   const targetNet = -GOALS.deficit;
   const nets7 = last7.map(netForDay);
   const avgNet7 = avg(nets7);
+  const deficitToday = netToday !== null ? Math.max(0, -netToday) : null;
+  const deficitAvg7 = avgNet7 !== null ? Math.max(0, -avgNet7) : null;
   const proteinToday = latest?.nutrition?.proteinG ?? null;
   const carbsToday = latest?.nutrition?.carbsG ?? null;
   const fatToday = latest?.nutrition?.fatG ?? null;
   const hasNutritionData = days.some((d) => (d.nutrition?.dietaryEnergyKcal ?? null) !== null);
+  const deficitDelta = (() => {
+    if (netToday === null) {
+      return { text: 'Food log not synced yet', tone: 'neutral' as const };
+    }
+    if (netToday > 0) {
+      return { text: `In surplus by ${Math.round(netToday)} kcal`, tone: 'warn' as const };
+    }
+    if (deficitToday !== null && deficitToday >= GOALS.deficit) {
+      const extra = Math.round(deficitToday - GOALS.deficit);
+      return { text: extra > 0 ? `${extra} kcal past target` : 'Target met', tone: 'good' as const };
+    }
+    return {
+      text: `${Math.round(GOALS.deficit - (deficitToday ?? 0))} kcal short of target`,
+      tone: 'warn' as const,
+    };
+  })();
 
   // ── Readiness score (composite, 0–100) ───────────────────────────────────
   // Compares last-night sleep, last HRV and last RHR against 14-day baselines.
@@ -1120,22 +1136,22 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
           delta={stepsDelta}
         />
         <SnapshotCell
-          label="Active kcal"
-          value={fmtInt(latest?.activity.activeEnergyKcal ?? null)}
-          baseline={`7d avg ${fmtInt(energyAvg7)}`}
-          delta={energyDelta}
-        />
-        <SnapshotCell
-          label="Exercise"
-          value={`${fmtInt(latest?.activity.exerciseMinutes ?? null)} min`}
-          baseline={`Goal ${GOALS.exerciseMinutes}`}
-          delta={exerciseDelta}
+          label="Deficit"
+          value={deficitToday !== null ? `${Math.round(deficitToday)} kcal` : '—'}
+          baseline={deficitAvg7 !== null ? `7d avg ${Math.round(deficitAvg7)} kcal` : `Target ${GOALS.deficit} kcal`}
+          delta={deficitDelta}
         />
         <SnapshotCell
           label="Sleep"
           value={formatMinutes(latest?.sleep.totalMin ?? null)}
           baseline={`7d avg ${formatMinutes(sleepAvg7)}`}
           delta={sleepDelta}
+        />
+        <SnapshotCell
+          label="Exercise"
+          value={`${fmtInt(latest?.activity.exerciseMinutes ?? null)} min`}
+          baseline={`Goal ${GOALS.exerciseMinutes}`}
+          delta={exerciseDelta}
         />
         <SnapshotCell
           label="Resting HR"
@@ -1397,7 +1413,14 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
           )}
 
           {workouts.length === 0 && (
-            <p className="op-health-empty">No sessions yet — the page waits patiently.</p>
+            <div className="op-workout-empty-state">
+              <p className="op-health-empty">
+                The workouts API is returning <code>{'{"workouts":[]}'}</code>.
+              </p>
+              <p>
+                Health Auto Export probably has workouts disabled. Re-enable workout export in the HAE automation so completed sessions start writing into the operator feed.
+              </p>
+            </div>
           )}
         </article>
 

@@ -6,6 +6,7 @@ import React, {
 import FitnessLineChart from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
+import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -601,6 +602,7 @@ function AnalyticsSection({
   cadence,
   syncSummary,
   opPw,
+  healthStream,
 }: {
   latest: FitnessReading;
   sorted: FitnessReading[];
@@ -611,6 +613,7 @@ function AnalyticsSection({
   cadence: { count: number; score: number };
   syncSummary: string;
   opPw: string;
+  healthStream?: HealthStreamFetch;
 }) {
   interface WorkoutSummary {
     id: string;
@@ -621,21 +624,38 @@ function AnalyticsSection({
     source: string | null;
   }
 
-  const [workouts, setWorkouts] = useState<WorkoutSummary[]>([]);
-  const [workoutState, setWorkoutState] = useState<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
+  const [fetchedWorkouts, setFetchedWorkouts] = useState<WorkoutSummary[]>([]);
+  const [fetchedWorkoutState, setFetchedWorkoutState] = useState<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
 
   useEffect(() => {
+    if (healthStream) return;
     if (!opPw) return;
-    setWorkoutState('loading');
+    setFetchedWorkoutState('loading');
     fetch('/api/operator/workouts?limit=7', { headers: { 'x-operator-pw': opPw } })
       .then((res) => res.json())
       .then((data) => {
         const fetched = (data?.workouts ?? []) as WorkoutSummary[];
-        setWorkouts(fetched);
-        setWorkoutState(fetched.length === 0 ? 'empty' : 'ready');
+        setFetchedWorkouts(fetched);
+        setFetchedWorkoutState(fetched.length === 0 ? 'empty' : 'ready');
       })
-      .catch(() => setWorkoutState('error'));
-  }, [opPw]);
+      .catch(() => setFetchedWorkoutState('error'));
+  }, [healthStream, opPw]);
+
+  const workouts = healthStream
+    ? (healthStream.workouts as WorkoutSummary[])
+    : fetchedWorkouts;
+  const workoutState: 'idle' | 'loading' | 'ready' | 'empty' | 'error' = healthStream
+    ? (
+      healthStream.status === 'idle' || healthStream.status === 'loading'
+        ? 'loading'
+        : healthStream.status === 'error'
+          ? 'error'
+          : healthStream.workouts.length === 0
+            ? 'empty'
+            : 'ready'
+    )
+    : fetchedWorkoutState;
+  const healthDays = healthStream?.days;
 
   const startingWeight = sorted[0]?.weight ?? latest.weight;
   const totalChange = latest.weight - startingWeight;
@@ -683,9 +703,6 @@ function AnalyticsSection({
     : dailyDeficit > 900
     ? T.rose
     : T.green;
-  const proteinNote = nutrition.protein >= latest.weight * 1.7
-    ? 'Protein priority'
-    : 'Calories need review';
   const activitySupport = cadence.score >= 80
     ? 'Consistent training'
     : cadence.score >= 60
@@ -724,7 +741,23 @@ function AnalyticsSection({
   }, [workouts]);
 
   const proteinTarget = Math.round(latest.weight * 1.8);
-  const proteinPct = proteinTarget > 0 ? Math.min(1.2, nutrition.protein / proteinTarget) : 0;
+  // Actual protein intake comes from Apple Health (MFP-fed), not the target.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayHealth = healthDays?.find((d) => d.date.slice(0, 10) === todayIso) ?? healthDays?.[healthDays.length - 1];
+  const proteinIntake = todayHealth?.nutrition?.proteinG ?? null;
+  const proteinPct = proteinTarget > 0 && proteinIntake !== null ? Math.min(1.2, proteinIntake / proteinTarget) : 0;
+  const proteinNote = proteinIntake === null
+    ? 'Awaiting Apple Health / MyFitnessPal protein log'
+    : proteinPct >= 1
+      ? 'Target met today'
+      : proteinPct >= 0.85
+        ? 'Close to target'
+        : 'Needs another protein feed';
+  const proteinSourceLabel = !todayHealth
+    ? 'Awaiting sync'
+    : todayHealth.date.slice(0, 10) === todayIso
+      ? 'Logged today'
+      : `Latest log ${formatReferenceDate(todayHealth.date)}`;
 
   return (
     <section style={{ marginBottom: 28 }}>
@@ -792,6 +825,15 @@ function AnalyticsSection({
             <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, margin: '24px 0' }}>Loading workouts…</p>
           ) : workoutState === 'error' ? (
             <p style={{ fontFamily: T.sans, fontSize: 12, color: T.rose, margin: '24px 0' }}>Unable to load workouts.</p>
+          ) : workoutState === 'empty' ? (
+            <div style={{ display: 'grid', gap: 8, margin: '16px 0' }}>
+              <p style={{ fontFamily: T.display, fontStyle: 'italic', fontSize: 15, color: T.body, lineHeight: 1.5, margin: 0 }}>
+                The API is returning <code style={{ fontStyle: 'normal', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: 12 }}>{'{"workouts":[]}'}</code>.
+              </p>
+              <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, lineHeight: 1.65, margin: 0 }}>
+                Most likely Health Auto Export has workouts disabled. Turn workout export back on in the HAE automation so session writes start hitting the operator workouts endpoint.
+              </p>
+            </div>
           ) : (
             <MiniColumnChart
               values={workoutWeekBuckets.map((b) => b.minutes)}
@@ -813,16 +855,17 @@ function AnalyticsSection({
         {/* ── Card 4: Protein vs target ── */}
         <AnalysisCard
           label="Protein support"
-          headline={`${nutrition.protein} g`}
+          headline={proteinIntake !== null ? `${Math.round(proteinIntake)} g` : '—'}
           sub={`${proteinNote} · ${proteinTarget} g target (1.8 g/kg)`}
-          tone={proteinPct >= 1 ? 'good' : proteinPct >= 0.85 ? 'neutral' : 'warn'}
+          tone={proteinIntake === null ? 'neutral' : proteinPct >= 1 ? 'good' : proteinPct >= 0.85 ? 'neutral' : 'warn'}
         >
-          <ProteinGauge current={nutrition.protein} target={proteinTarget} />
+          <ProteinGauge current={proteinIntake} target={proteinTarget} />
           <AnalysisStats
             rows={[
+              [proteinSourceLabel, proteinIntake !== null ? `${Math.round(proteinIntake)} g` : '—'],
               ['Target', `${proteinTarget} g`],
               ['Daily kcal', `${nutrition.intake.toLocaleString()} kcal`],
-              ['Coverage', `${Math.round(proteinPct * 100)}% of target`],
+              ['Coverage', proteinIntake !== null ? `${Math.round(proteinPct * 100)}% of target` : 'Awaiting macro sync'],
             ]}
           />
         </AnalysisCard>
@@ -960,8 +1003,9 @@ function BalanceBars({ maintenance, intake, deficit, height }: { maintenance: nu
   );
 }
 
-function ProteinGauge({ current, target }: { current: number; target: number }) {
-  const pct = target > 0 ? Math.min(1.2, current / target) : 0;
+function ProteinGauge({ current, target }: { current: number | null; target: number }) {
+  const logged = current ?? 0;
+  const pct = current !== null && target > 0 ? Math.min(1.2, logged / target) : 0;
   const fillPct = Math.min(100, pct * 100);
   const overTarget = pct > 1;
   const color = pct >= 1 ? T.green : pct >= 0.85 ? T.gold : T.rose;
@@ -975,8 +1019,10 @@ function ProteinGauge({ current, target }: { current: number; target: number }) 
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: T.sans, fontSize: 10.5, color: T.body }}>
         <span>0 g</span>
-        <span style={{ color: overTarget ? T.green : T.ink, fontWeight: 600 }}>{current} g logged</span>
-        <span>{Math.max(target, current).toFixed(0)} g</span>
+        <span style={{ color: overTarget ? T.green : T.ink, fontWeight: 600 }}>
+          {current !== null ? `${Math.round(current)} g logged` : 'Awaiting sync'}
+        </span>
+        <span>{Math.max(target, logged).toFixed(0)} g</span>
       </div>
     </div>
   );
@@ -4783,6 +4829,10 @@ export default function OperatorDashboardClient() {
           </div>
         </section>
 
+        <div className="fit-hero-signals">
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
+        </div>
+
         {/* ───────────────────────── STORY ─────────────────────────── */}
         <EditorialDivider eyebrow="Story" note="The long line — every reading, every phase." />
 
@@ -4890,6 +4940,7 @@ export default function OperatorDashboardClient() {
             cadence={cadence}
             syncSummary={syncSummary}
             opPw={opPw}
+            healthStream={healthStream}
           />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
@@ -4959,7 +5010,6 @@ export default function OperatorDashboardClient() {
           </div>
         </section>
 
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
 
         {/* ───────────────────────── ACTION ────────────────────────── */}

@@ -430,6 +430,14 @@
   border-right: 1px solid var(--rule-soft);
 }
 
+.fit-hero-signals {
+  margin: 0 0 6px;
+}
+
+.fit-hero-signals .op-today-strip {
+  margin-bottom: 0;
+}
+
 .fit-inline-intro {
   margin: 56px 0 12px;
   padding: 28px 30px 30px;
@@ -1413,6 +1421,24 @@
 .fitness-reference-shell .op-workout-list li:first-child {
   border-top: none;
   padding-top: 0;
+}
+
+.fitness-reference-shell .op-workout-empty-state {
+  display: grid;
+  gap: 8px;
+}
+
+.fitness-reference-shell .op-workout-empty-state p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-workout-empty-state code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--ink);
 }
 
 .fitness-reference-shell .op-workout-head {
