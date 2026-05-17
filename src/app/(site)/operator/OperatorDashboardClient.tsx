@@ -5,6 +5,7 @@ import React, {
 } from 'react';
 import FitnessLineChart from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
+import HealthMetricsSection from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -4339,6 +4340,8 @@ export default function OperatorDashboardClient() {
             ))}
           </div>
         </section>
+
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} />
 
         <section className="fit-grid">
           <div className="fit-main">
