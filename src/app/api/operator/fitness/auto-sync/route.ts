@@ -89,6 +89,10 @@ function convertMassToKg(value: number, unit: string | undefined) {
       return value * 0.45359237;
     case 'oz':
       return value * 0.0283495231;
+    case 'st':
+    case 'stone':
+    case 'stones':
+      return value * 6.35029318;
     default:
       return value;
   }

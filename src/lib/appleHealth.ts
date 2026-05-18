@@ -78,15 +78,20 @@ function clampPercent(value: number) {
 }
 
 function convertMassToKg(value: number, unit: string) {
-  switch (unit) {
+  switch ((unit ?? '').toLowerCase()) {
     case 'kg':
       return value
     case 'g':
       return value / 1000
     case 'lb':
+    case 'lbs':
       return value * 0.45359237
     case 'oz':
       return value * 0.0283495231
+    case 'st':
+    case 'stone':
+    case 'stones':
+      return value * 6.35029318
     default:
       return value
   }
