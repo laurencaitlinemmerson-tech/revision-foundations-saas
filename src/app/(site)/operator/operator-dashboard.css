@@ -425,6 +425,28 @@
   letter-spacing: 0.04em;
 }
 
+.fit-hero-spark {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+}
+
+.fit-hero-spark-axis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0;
+}
+
+.fit-hero-spark-axis .is-latest {
+  color: var(--ink);
+}
+
 .delta.down,
 .meta.good,
 .side-metric em.good,
@@ -450,7 +472,7 @@
 
 .fit-stat-strip {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   background: transparent;
   border-top: 0;
 }

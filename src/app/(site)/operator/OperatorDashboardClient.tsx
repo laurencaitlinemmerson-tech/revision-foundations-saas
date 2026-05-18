@@ -226,6 +226,40 @@ function DateStamp({ iso, style }: { iso: string; style?: CSSProperties }) {
 }
 
 // Full-width editorial section divider with an eyebrow.
+function HeadlineSparkline({ readings }: { readings: FitnessReading[] }) {
+  if (readings.length < 2) return null;
+  const w = 220;
+  const h = 48;
+  const pad = 4;
+  const ys = readings.map(r => r.weight);
+  const yMin = Math.min(...ys) - 0.4;
+  const yMax = Math.max(...ys) + 0.4;
+  const span = Math.max(yMax - yMin, 0.1);
+  const xs = readings.map((_, i) => pad + (i / (readings.length - 1)) * (w - pad * 2));
+  const ypts = readings.map(r => pad + (1 - (r.weight - yMin) / span) * (h - pad * 2));
+  const path = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ypts[i].toFixed(1)}`).join(' ');
+  return (
+    <div className="fit-hero-spark">
+      <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+        <path d={path} fill="none" stroke={T.ink} strokeWidth="1.1" strokeLinejoin="round" strokeLinecap="round" />
+        {xs.map((x, i) => (
+          <g key={i}>
+            <circle cx={x} cy={ypts[i]} r={i === readings.length - 1 ? 3 : 2.2} fill={T.paper} stroke={T.ink} strokeWidth="0.8" />
+            {i === readings.length - 1 && <circle cx={x} cy={ypts[i]} r="1.3" fill={T.ink} />}
+          </g>
+        ))}
+      </svg>
+      <div className="fit-hero-spark-axis">
+        {readings.map((r, i) => (
+          <span key={i} className={i === readings.length - 1 ? 'is-latest' : ''}>
+            {r.weight.toFixed(1)}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function EditorialDivider({ eyebrow, note, style }: { eyebrow: string; note?: string; style?: CSSProperties }) {
   return (
     <div style={{
@@ -4637,12 +4671,14 @@ function buildHeroMetrics(sorted: FitnessReading[]) {
   const bmiLabel = bmiStatus(latest.bmi)[0];
   const waterLabel = waterStatus(latest.water)[0];
 
+  // Surface the four metrics worth scanning at a glance — body fat / muscle
+  // get the 30-day delta, BMI shows status, discipline rolls up logging.
+  // Water + bone live in the deeper Health section.
+  void waterLabel; void boneDelta;
   return [
     referenceMetric('Body fat', `${latest.bodyFat.toFixed(1)}%`, `${bodyFatDelta > 0 ? '+' : ''}${bodyFatDelta.toFixed(1)} in 30d`, bodyFatDelta <= 0 ? 'good' : 'warn'),
     referenceMetric('Muscle mass', `${latest.muscleMass.toFixed(1)}%`, `${muscleDelta > 0 ? '+' : ''}${muscleDelta.toFixed(1)} in 30d`, muscleDelta >= 0 ? 'good' : 'warn'),
     referenceMetric('BMI', latest.bmi.toFixed(1), bmiLabel, latest.bmi < 30 ? 'good' : 'warn'),
-    referenceMetric('Bone mass', `${latest.boneMass.toFixed(2)}kg`, boneDelta >= 0 ? 'Stable or up' : 'Watch trend', boneDelta >= 0 ? 'good' : 'neutral'),
-    referenceMetric('Water', `${latest.water.toFixed(1)}%`, waterLabel, latest.water >= 40 ? 'good' : 'warn'),
     referenceMetric('Discipline', `${discipline.score}/100`, `${discipline.count}/14 days logged`, discipline.score >= 80 ? 'brass' : discipline.score >= 60 ? 'neutral' : 'warn'),
   ];
 }
@@ -4678,18 +4714,23 @@ export default function OperatorDashboardClient() {
 
   const loadData = useCallback(async (pw:string) => {
     const localRaw = localStorage.getItem(STORAGE_KEY);
-    const local: FitnessReading[] = localRaw ? JSON.parse(localRaw) : SEED;
+    const local: FitnessReading[] = localRaw ? JSON.parse(localRaw) : [];
     setReadings(local);
-    if (!localRaw) saveLocal(local);
     setSyncing(true);
     const cloud = await apiLoad(pw);
     setSyncing(false);
     if (cloud === null) { setCloudOk(false); return; }
     setCloudOk(true);
-    if (cloud.length === 0) {
-      for (const r of local) { const nid = await apiSave(pw, r); if (nid) r.id = nid; }
-      setReadings([...local]); saveLocal(local);
-    } else { setReadings(cloud); saveLocal(cloud); }
+    // Merge cloud + any local entries cloud doesn't yet have. Protects
+    // freshly-logged readings from being wiped if apiSave failed earlier.
+    const cloudIds = new Set(cloud.map(r => r.id));
+    const localOnly = local.filter(r => !cloudIds.has(r.id));
+    const merged = [...cloud, ...localOnly].sort((a, b) => a.date.localeCompare(b.date));
+    setReadings(merged); saveLocal(merged);
+    for (const r of localOnly) {
+      const nid = await apiSave(pw, r);
+      if (nid && nid !== r.id) r.id = nid;
+    }
   }, [saveLocal]);
 
   const refreshCloudReadings = useCallback(async () => {
@@ -4916,6 +4957,7 @@ export default function OperatorDashboardClient() {
               </div>
               <div className="num">{latest.weight.toFixed(1)}<small>kg</small></div>
               <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} - 7-day marker</div>
+              <HeadlineSparkline readings={dashboardSource.slice(-4)} />
             </div>
           </div>
 
@@ -5052,13 +5094,10 @@ export default function OperatorDashboardClient() {
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
 
         <section className="fit-anchor-section" id="operator-action">
-          {/* ───────────────────────── ACTION ────────────────────────── */}
-          <EditorialDivider eyebrow="Action" note="Today, one move." />
-
+          {/* Action block — promise + readiness folded into trends scroll. */}
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="weekCompare" />
 
           <div className="fit-panel">
             <div className="fit-panel-head">
