@@ -752,6 +752,8 @@
 .bc-chart-wrap {
   padding: 18px 18px 0;
   position: relative;
+  background:
+    linear-gradient(180deg, oklch(0.985 0.01 85) 0%, oklch(0.995 0.005 85) 100%);
 }
 
 .bc-chart-wrap svg {
@@ -804,10 +806,16 @@
   stroke-width: 0.5;
 }
 
+.bc-plot-bg {
+  fill: oklch(0.992 0.004 85);
+  stroke: var(--rule-soft);
+  stroke-width: 0.6;
+}
+
 .bc-axis-text,
 .bc-x-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 9.5px;
+  font-size: 10px;
   fill: var(--ink-mute);
   letter-spacing: 0.05em;
 }
@@ -860,11 +868,70 @@
   filter: drop-shadow(0 5px 12px oklch(0.72 0.08 78 / 0.12));
 }
 
+.bc-target-line {
+  stroke: var(--good);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+  opacity: 0.78;
+}
+
+.bc-target-label {
+  fill: var(--good);
+  font-weight: 700;
+}
+
 .bc-current-line,
 .bc-pin-line {
   stroke: var(--ink-mute);
   stroke-width: 0.5;
   stroke-dasharray: 2 3;
+}
+
+.bc-current-connector {
+  stroke: oklch(0.72 0.08 78 / 0.55);
+  stroke-width: 1.2;
+}
+
+.bc-current-card {
+  fill: var(--paper);
+  stroke: oklch(0.72 0.08 78 / 0.28);
+  stroke-width: 1;
+  filter: drop-shadow(0 8px 18px oklch(0.42 0.02 80 / 0.08));
+}
+
+.bc-current-kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  fill: var(--ink-mute);
+}
+
+.bc-current-value {
+  font-family: var(--font-display);
+  font-size: 21px;
+  letter-spacing: -0.03em;
+  fill: var(--ink);
+}
+
+.bc-current-meta {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  fill: var(--ink);
+}
+
+.bc-current-meta-soft {
+  fill: var(--ink-mute);
+}
+
+.bc-latest-halo {
+  fill: oklch(0.72 0.08 78 / 0.16);
+}
+
+.bc-latest-dot {
+  fill: var(--brass-deep);
+  stroke: var(--paper);
+  stroke-width: 1.5;
 }
 
 .bc-pin-dot {
@@ -891,6 +958,7 @@
 .fitness-tip-box {
   fill: var(--paper);
   stroke: var(--rule);
+  filter: drop-shadow(0 6px 18px oklch(0.4 0.02 80 / 0.08));
 }
 
 .fitness-tip,
@@ -903,6 +971,11 @@
 .fitness-tip-strong {
   font-size: 12px;
   font-weight: 600;
+}
+
+.fitness-tip-meta {
+  fill: var(--ink-mute);
+  font-size: 9.5px;
 }
 
 .bc-key {
@@ -948,6 +1021,13 @@
 .bc-key .sw.raw {
   height: 2px;
   align-self: center;
+}
+
+.bc-key .sw.target {
+  height: 0;
+  align-self: center;
+  border-top: 2px dashed var(--good);
+  border-radius: 0;
 }
 
 .bc-key .sw.raw {

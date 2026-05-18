@@ -39,8 +39,21 @@ interface ChartProps {
   minDisplayValue?: number
 }
 
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })
+function fmtHoverDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function fmtTickTime(time: number, spanDays: number): string {
+  return new Date(time).toLocaleDateString(
+    'en-GB',
+    spanDays > 365
+      ? { month: 'short', year: '2-digit' }
+      : { day: 'numeric', month: 'short' },
+  )
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
 }
 
 function smoothPath(points: Array<{ x: number; y: number }>) {
@@ -85,7 +98,7 @@ export default function FitnessLineChart({
   const [range, setRange] = useState<'all' | '5y' | '2y' | '1y' | '6m'>('all')
   const w = 1100
   const h = 380
-  const pad = { l: 44, r: 16, t: 30, b: 32 }
+  const pad = { l: 44, r: 164, t: 30, b: 32 }
   const innerW = w - pad.l - pad.r
   const innerH = h - pad.t - pad.b
 
@@ -123,10 +136,8 @@ export default function FitnessLineChart({
   const low = Math.max(minY ?? dataLow, minDisplayValue)
   const high = maxY ?? dataHigh
 
-  const x = (date: string) => {
-    const time = new Date(date).getTime()
-    return pad.l + ((time - xMin) / Math.max(1, xMax - xMin)) * innerW
-  }
+  const xForTime = (time: number) => pad.l + ((time - xMin) / Math.max(1, xMax - xMin)) * innerW
+  const x = (date: string) => xForTime(new Date(date).getTime())
 
   const y = (value: number) => pad.t + (1 - (value - low) / Math.max(1, high - low)) * innerH
 
@@ -145,16 +156,19 @@ export default function FitnessLineChart({
     : spanDays > 365 * 3 ? 6
     : spanDays > 365 ? 5
     : 4
-  const xTickDates = filteredPoints.length === 0 ? []
+  const xTickTimes = filteredPoints.length === 0 ? []
     : Array.from({ length: xTickCount }, (_, i) => {
         const ratio = i / Math.max(1, xTickCount - 1)
-        const idx = Math.round(ratio * (filteredPoints.length - 1))
-        return filteredPoints[idx]
-      }).filter(Boolean)
+        return xMin + ratio * (xMax - xMin)
+      })
   const hover = hoverIndex !== null ? filteredPoints[hoverIndex] : null
+  const latestPoint = filteredPoints[filteredPoints.length - 1] ?? null
   const visibleAnnotations = annotations.filter((annotation) => {
     const time = new Date(annotation.date).getTime()
-    return time >= xMin && time <= xMax
+    const isLatestEcho = latestPoint
+      && annotation.date === latestPoint.date
+      && Math.abs(annotation.value - latestPoint.value) < 0.05
+    return time >= xMin && time <= xMax && !isLatestEcho
   })
   const ranges = ['all', '5y', '2y', '1y', '6m'] as const
   const ariaLabel = typeof title === 'string' ? title : 'Fitness timeline chart'
@@ -165,6 +179,47 @@ export default function FitnessLineChart({
     if (normalized.includes('fat') || normalized.includes('cut')) return 'cut'
     return 'recomp'
   }
+  const phaseForTime = (time: number | null) => {
+    if (time === null) return null
+    return phases.find((phase) => {
+      const start = new Date(phase.start).getTime()
+      const end = new Date(phase.end).getTime()
+      return time >= start && time <= end
+    }) ?? null
+  }
+  const hoverTime = hover ? new Date(hover.date).getTime() : null
+  const hoverPhase = phaseForTime(hoverTime)
+  const latestTime = latestPoint ? new Date(latestPoint.date).getTime() : null
+  const latestPhase = phaseForTime(latestTime)
+  const hoverTargetGap = hover && targetWeight !== undefined
+    ? hover.value - targetWeight
+    : null
+  const tipLines = [
+    hoverPhase?.label ?? null,
+    hoverTargetGap === null
+      ? null
+      : hoverTargetGap <= 0
+        ? `${Math.abs(hoverTargetGap).toFixed(1)}kg under target`
+        : `${hoverTargetGap.toFixed(1)}kg above target`,
+  ].filter(Boolean)
+  const tipWidth = 208
+  const tipHeight = 50 + tipLines.length * 14
+  const currentCalloutWidth = 128
+  const currentCalloutHeight = 74
+  const currentCalloutX = w - currentCalloutWidth - 18
+  const currentPointX = latestPoint ? x(latestPoint.date) : null
+  const currentPointY = latestPoint ? y(latestPoint.value) : null
+  const currentCalloutY = currentPointY === null
+    ? null
+    : clamp(currentPointY - currentCalloutHeight / 2, pad.t + 8, pad.t + innerH - currentCalloutHeight - 8)
+  const currentGoalLine = latestPoint && targetWeight !== undefined
+    ? latestPoint.value - targetWeight
+    : null
+  const currentGoalLabel = currentGoalLine === null
+    ? null
+    : currentGoalLine <= 0
+      ? `${Math.abs(currentGoalLine).toFixed(1)}kg under goal`
+      : `${currentGoalLine.toFixed(1)}kg to goal`
 
   return (
     <div className="fit-panel fitness-chart-panel">
@@ -186,6 +241,7 @@ export default function FitnessLineChart({
       <div className="bc-chart-wrap">
         <svg viewBox={`0 0 ${w} ${h}`} className="fitness-chart" role="img" aria-label={ariaLabel} preserveAspectRatio="none">
           <rect x="0" y="0" width={w} height={h} fill="transparent" />
+          <rect x={pad.l} y={pad.t} width={innerW} height={innerH} rx="10" className="bc-plot-bg" />
           {Array.from({ length: yTicks }).map((_, index) => {
             const ratio = index / (yTicks - 1)
             const value = high - (high - low) * ratio
@@ -220,17 +276,13 @@ export default function FitnessLineChart({
                 y1={y(targetWeight)}
                 x2={w - pad.r}
                 y2={y(targetWeight)}
-                stroke="var(--good)"
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
-                opacity="0.7"
+                className="bc-target-line"
               />
               <text
                 x={w - pad.r - 4}
                 y={y(targetWeight) - 5}
                 textAnchor="end"
-                className="bc-axis-text"
-                style={{ fill: 'var(--good)', fontWeight: 600 }}
+                className="bc-axis-text bc-target-label"
               >
                 TARGET {targetWeight}kg
               </text>
@@ -240,6 +292,13 @@ export default function FitnessLineChart({
               dropping the smoothed Bezier path keeps daily noise from
               creating fake undulations through the 45-day trend. */}
           {secondaryPath && <path d={secondaryPath} className="bc-line-avg" style={{ stroke: secondaryColor }} />}
+
+          {latestPoint && (
+            <g>
+              <circle cx={x(latestPoint.date)} cy={y(latestPoint.value)} r="8" className="bc-latest-halo" />
+              <circle cx={x(latestPoint.date)} cy={y(latestPoint.value)} r="4.5" className="bc-latest-dot" />
+            </g>
+          )}
 
           {visibleAnnotations.map((annotation, index) => {
             const cx = x(annotation.date)
@@ -269,17 +328,55 @@ export default function FitnessLineChart({
             )
           })}
 
-          {xTickDates.map((point, index) => (
-            <text key={`${point.date}-${index}`} x={x(point.date)} y={h - 12} className="bc-x-label">{fmtDate(point.date)}</text>
+          {xTickTimes.map((time, index) => (
+            <text key={`${time}-${index}`} x={xForTime(time)} y={h - 12} className="bc-x-label">{fmtTickTime(time, spanDays)}</text>
           ))}
+
+          {latestPoint && currentPointX !== null && currentPointY !== null && currentCalloutY !== null && (
+            <g className="bc-current-callout">
+              <line
+                x1={currentPointX + 8}
+                y1={currentPointY}
+                x2={currentCalloutX - 8}
+                y2={currentCalloutY + currentCalloutHeight / 2}
+                className="bc-current-connector"
+              />
+              <rect
+                x={currentCalloutX}
+                y={currentCalloutY}
+                width={currentCalloutWidth}
+                height={currentCalloutHeight}
+                rx="8"
+                className="bc-current-card"
+              />
+              <text x={currentCalloutX + 14} y={currentCalloutY + 18} className="bc-current-kicker">Current</text>
+              <text x={currentCalloutX + 14} y={currentCalloutY + 40} className="bc-current-value">{latestPoint.value.toFixed(1)}kg</text>
+              <text x={currentCalloutX + 14} y={currentCalloutY + 56} className="bc-current-meta">
+                {latestPhase?.label ?? fmtHoverDate(latestPoint.date)}
+              </text>
+              <text x={currentCalloutX + 14} y={currentCalloutY + 69} className="bc-current-meta bc-current-meta-soft">
+                {currentGoalLabel ?? fmtHoverDate(latestPoint.date)}
+              </text>
+            </g>
+          )}
 
           {hover && (
             <g>
               <line x1={x(hover.date)} y1={pad.t} x2={x(hover.date)} y2={h - pad.b} className="bc-current-line" />
               <circle cx={x(hover.date)} cy={y(hover.value)} r="5" className="bc-pin-dot" />
-              <rect x={Math.min(w - 192, x(hover.date) + 10)} y={pad.t + 8} width="182" height="52" rx="4" className="fitness-tip-box" />
-              <text x={Math.min(w - 182, x(hover.date) + 18)} y={pad.t + 28} className="fitness-tip">{new Date(hover.date).toLocaleString('en-GB')}</text>
-              <text x={Math.min(w - 182, x(hover.date) + 18)} y={pad.t + 46} className="fitness-tip fitness-tip-strong">{hover.value.toFixed(1)}kg</text>
+              <rect x={Math.min(w - (tipWidth + 10), x(hover.date) + 10)} y={pad.t + 8} width={tipWidth} height={tipHeight} rx="6" className="fitness-tip-box" />
+              <text x={Math.min(w - tipWidth, x(hover.date) + 18)} y={pad.t + 28} className="fitness-tip">{fmtHoverDate(hover.date)}</text>
+              <text x={Math.min(w - tipWidth, x(hover.date) + 18)} y={pad.t + 46} className="fitness-tip fitness-tip-strong">{hover.value.toFixed(1)}kg</text>
+              {tipLines.map((line, index) => (
+                <text
+                  key={line}
+                  x={Math.min(w - tipWidth, x(hover.date) + 18)}
+                  y={pad.t + 62 + index * 14}
+                  className="fitness-tip fitness-tip-meta"
+                >
+                  {line}
+                </text>
+              ))}
             </g>
           )}
 
@@ -356,6 +453,7 @@ export default function FitnessLineChart({
       <div className="bc-key">
         <span className="item"><i className="sw raw" />Daily reading</span>
         {secondaryPath && <span className="item"><i className="sw avg" style={{ background: secondaryColor }} />{secondaryLabel}</span>}
+        {targetWeight !== undefined && <span className="item"><i className="sw target" />Target line</span>}
         <span className="item"><i className="sw lean" />Lean phase</span>
         <span className="item"><i className="sw bulk" />Bulk</span>
         <span className="item"><i className="sw cut" />Fat loss push</span>
