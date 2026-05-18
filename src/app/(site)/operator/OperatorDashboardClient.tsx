@@ -4818,6 +4818,21 @@ export default function OperatorDashboardClient() {
   const rollingAverage = useMemo(() => buildRollingAverage(derivedSource), [derivedSource]);
   const sideMetrics = useMemo(() => buildSideMetrics(derivedSource, goal, reg), [derivedSource, goal, reg]);
   const weekRows = useMemo(() => buildWeekRows(derivedSource, todayIso), [derivedSource, todayIso]);
+  const chartBounds = useMemo(() => {
+    const chartSource = dashboardSource.length > 0 ? dashboardSource : derivedSource;
+    const weights = chartSource.map((row) => row.weight);
+    const observedMin = Math.min(...weights);
+    const observedMax = Math.max(...weights);
+    const observedSpan = Math.max(2.5, observedMax - observedMin);
+    const lowerPad = Math.max(1.2, observedSpan * 0.45);
+    const upperPad = Math.max(1.6, observedSpan * 0.55);
+    const goalIsCloseEnoughToPlot = goal >= observedMin - Math.max(6, observedSpan * 1.5);
+    const min = goalIsCloseEnoughToPlot
+      ? Math.floor(Math.min(observedMin - lowerPad, goal - 1.5) * 2) / 2
+      : Math.floor((observedMin - lowerPad) * 2) / 2;
+    const max = Math.ceil((observedMax + upperPad) * 2) / 2;
+    return { min, max };
+  }, [dashboardSource, derivedSource, goal]);
 
   // Lift the Apple Health fetch so multiple slot renders share one network call.
   const healthStream = useHealthStream(authed ? opPw : '');
@@ -5150,9 +5165,9 @@ export default function OperatorDashboardClient() {
               title={<>Weight <em>trajectory</em></>}
               subtitle="Daily measurements, the live 45-day trend, and phase context across the selected window."
               points={buildWeightSeries(dashboardSource)}
-              color="oklch(0.34 0.05 248)"
-              minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
-              maxY={Math.ceil(Math.max(...dashboardSource.map((row) => row.weight)) + 2)}
+              color="oklch(0.70 0.12 76)"
+              minY={chartBounds.min}
+              maxY={chartBounds.max}
               annotations={[
                 {
                   date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
@@ -5167,7 +5182,7 @@ export default function OperatorDashboardClient() {
                 { date: latest.date, value: latest.weight, title: weightLabel },
               ]}
               secondaryPoints={rollingAverage}
-              secondaryColor="oklch(0.34 0.05 248)"
+              secondaryColor="oklch(0.70 0.12 76)"
               secondaryLabel="45-day trend"
               phases={phaseMarkers}
               targetWeight={goal}

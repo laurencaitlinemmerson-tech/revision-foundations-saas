@@ -554,32 +554,17 @@ export default function FitnessLineChart({
           )}
 
           {/* Faint data dots so the user sees the underlying readings. */}
-          {filteredPoints.map((point, index) => {
-            const pointX = x(point.date)
-            const pointY = y(point.value)
-            const isHovered = hoverIndex === index
-            return (
-              <g key={`dot-${point.date}-${index}`} pointerEvents="none">
-                <line
-                  x1={pointX}
-                  y1={pointY - 2}
-                  x2={pointX}
-                  y2={pointY + 2}
-                  className="bc-data-mark"
-                  style={{ opacity: isHovered ? 0 : 0.26 }}
-                />
-                {isHovered && (
-                  <circle
-                    cx={pointX}
-                    cy={pointY}
-                    r={4}
-                    className="bc-data-dot-active"
-                    style={{ fill: color }}
-                  />
-                )}
-              </g>
-            )
-          })}
+          {filteredPoints.map((point, index) => (
+            <circle
+              key={`dot-${point.date}-${index}`}
+              cx={x(point.date)}
+              cy={y(point.value)}
+              r={hoverIndex === index ? 4.2 : 2.35}
+              className="bc-data-dot"
+              style={{ fill: hoverIndex === index ? color : 'oklch(0.34 0.03 248)', opacity: hoverIndex === index ? 0.92 : 0.18 }}
+              pointerEvents="none"
+            />
+          ))}
           {/* Single overlay captures hover anywhere across the plot, then
               snaps to the nearest point by x. Much smoother than per-dot
               hit targets. */}

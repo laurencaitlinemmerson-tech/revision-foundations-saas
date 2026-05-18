@@ -845,20 +845,8 @@
   color: oklch(0.47 0.08 20);
 }
 
-.fitness-chart .bc-data-mark,
-.fitness-chart .bc-data-dot-active {
+.fitness-chart .bc-data-dot {
   transition: opacity 0.12s ease, r 0.12s ease;
-}
-
-.fitness-chart .bc-data-mark {
-  stroke: rgba(44, 52, 68, 0.28);
-  stroke-width: 1.15;
-  stroke-linecap: round;
-}
-
-.fitness-chart .bc-data-dot-active {
-  stroke: rgba(255, 255, 255, 0.92);
-  stroke-width: 1.5;
 }
 
 .fitness-chart {
@@ -948,11 +936,11 @@
 
 .bc-line-avg {
   fill: none;
-  stroke: oklch(0.34 0.05 248);
+  stroke: oklch(0.70 0.12 76);
   stroke-width: 2.9;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 4px 14px oklch(0.34 0.05 248 / 0.09));
+  filter: drop-shadow(0 4px 14px oklch(0.70 0.12 76 / 0.12));
 }
 
 .bc-target-line {
@@ -979,13 +967,13 @@
 }
 
 .bc-current-connector {
-  stroke: oklch(0.34 0.05 248 / 0.5);
+  stroke: oklch(0.70 0.12 76 / 0.46);
   stroke-width: 1.2;
 }
 
 .bc-current-card {
   fill: rgba(255, 255, 255, 0.94);
-  stroke: oklch(0.34 0.05 248 / 0.18);
+  stroke: oklch(0.70 0.12 76 / 0.22);
   stroke-width: 1;
   filter: drop-shadow(0 12px 26px oklch(0.28 0.015 255 / 0.08));
 }
@@ -1016,17 +1004,17 @@
 }
 
 .bc-latest-halo {
-  fill: oklch(0.34 0.05 248 / 0.14);
+  fill: oklch(0.70 0.12 76 / 0.18);
 }
 
 .bc-latest-dot {
-  fill: oklch(0.34 0.05 248);
+  fill: oklch(0.70 0.12 76);
   stroke: var(--paper);
   stroke-width: 1.5;
 }
 
 .bc-pin-dot {
-  fill: oklch(0.34 0.05 248);
+  fill: oklch(0.70 0.12 76);
   stroke: var(--paper);
   stroke-width: 1.5;
 }
