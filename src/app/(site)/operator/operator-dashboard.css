@@ -530,6 +530,11 @@
   scroll-margin-top: 28px;
 }
 
+.fit-story-shell {
+  max-width: 1240px;
+  margin-inline: auto;
+}
+
 .fit-reading-guide {
   margin: 18px 0 12px;
   padding: 18px 20px 20px;
@@ -750,15 +755,15 @@
 }
 
 .bc-chart-wrap {
-  padding: 18px 18px 0;
+  padding: 10px 12px 0;
   position: relative;
-  background:
-    linear-gradient(180deg, oklch(0.998 0.003 255) 0%, oklch(0.985 0.004 245) 100%);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
 }
 
 .bc-chart-wrap svg {
   width: 100%;
-  height: 430px;
+  height: 500px;
   overflow: visible;
 }
 
@@ -795,13 +800,15 @@
 .bc-clinical-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid rgba(26, 24, 21, 0.08);
-  border-bottom: 1px solid rgba(26, 24, 21, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(247, 250, 253, 0.92));
+  gap: 0;
+  border: 1px solid rgba(26, 24, 21, 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  overflow: hidden;
 }
 
 .bc-clinical-cell {
-  padding: 12px 18px 13px;
+  padding: 10px 16px 11px;
   border-right: 1px solid rgba(26, 24, 21, 0.08);
 }
 
@@ -818,18 +825,18 @@
 }
 
 .bc-clinical-value {
-  margin-top: 7px;
+  margin-top: 5px;
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
   letter-spacing: -0.03em;
   color: oklch(0.29 0.035 255);
 }
 
 .bc-clinical-note {
-  margin-top: 6px;
-  font-size: 11px;
-  line-height: 1.4;
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.35;
   color: var(--ink-soft);
 }
 
@@ -855,13 +862,13 @@
 }
 
 .bc-grid {
-  stroke: rgba(44, 52, 68, 0.08);
+  stroke: rgba(44, 52, 68, 0.06);
   stroke-width: 0.5;
 }
 
 .bc-plot-bg {
   fill: rgba(255, 255, 255, 0.88);
-  stroke: rgba(44, 52, 68, 0.08);
+  stroke: rgba(44, 52, 68, 0.06);
   stroke-width: 0.6;
 }
 
@@ -878,7 +885,7 @@
 }
 
 .bc-phase-band {
-  opacity: 0.2;
+  opacity: 0.13;
 }
 
 .bc-phase-band.lean {
@@ -898,10 +905,10 @@
 }
 
 .bc-phase-divider {
-  stroke: rgba(44, 52, 68, 0.14);
+  stroke: rgba(44, 52, 68, 0.1);
   stroke-width: 0.5;
   stroke-dasharray: 3 3;
-  opacity: 0.4;
+  opacity: 0.28;
 }
 
 .bc-phase-pill {
@@ -927,7 +934,7 @@
 
 .bc-phase-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -937,7 +944,7 @@
 .bc-line-avg {
   fill: none;
   stroke: oklch(0.70 0.12 76);
-  stroke-width: 2.9;
+  stroke-width: 3.1;
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(0 4px 14px oklch(0.70 0.12 76 / 0.12));
@@ -975,7 +982,7 @@
   fill: rgba(255, 255, 255, 0.94);
   stroke: oklch(0.70 0.12 76 / 0.22);
   stroke-width: 1;
-  filter: drop-shadow(0 12px 26px oklch(0.28 0.015 255 / 0.08));
+  filter: drop-shadow(0 8px 18px oklch(0.28 0.015 255 / 0.07));
 }
 
 .bc-current-kicker {
@@ -988,14 +995,14 @@
 
 .bc-current-value {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 20px;
   letter-spacing: -0.03em;
   fill: oklch(0.27 0.05 250);
 }
 
 .bc-current-meta {
   font-family: var(--font-body);
-  font-size: 9.5px;
+  font-size: 9px;
   fill: var(--ink);
 }
 
@@ -1037,7 +1044,7 @@
 .fitness-tip-box {
   fill: rgba(255, 255, 255, 0.96);
   stroke: rgba(44, 52, 68, 0.12);
-  filter: drop-shadow(0 10px 24px oklch(0.28 0.015 255 / 0.08));
+  filter: drop-shadow(0 8px 18px oklch(0.28 0.015 255 / 0.07));
 }
 
 .fitness-tip,
@@ -1060,10 +1067,9 @@
 .bc-key {
   display: flex;
   gap: 18px;
-  padding: 12px 18px;
-  border-top: 1px solid var(--rule-soft);
+  padding: 10px 6px 0;
   flex-wrap: wrap;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--ink-soft);
 }
 
@@ -2893,10 +2899,10 @@
 .fitness-reference-shell .fit-editorial-chart {
   background: transparent;
   border: none;
-  padding: 2px 0 10px;
+  padding: 2px 0 8px;
   position: relative;
-  max-width: 1360px;
-  margin-inline: auto;
+  max-width: none;
+  margin-inline: 0;
 }
 .fitness-reference-shell .fit-editorial-chart::before {
   content: "";
@@ -2917,38 +2923,39 @@
 }
 
 .fitness-reference-shell .fitness-chart-panel .fit-panel-head,
+.fitness-reference-shell .fitness-chart-panel .bc-clinical-strip,
 .fitness-reference-shell .fitness-chart-panel .bc-chart-wrap,
 .fitness-reference-shell .fitness-chart-panel .bc-key {
-  max-width: 1280px;
-  margin-inline: auto;
+  max-width: none;
+  margin-inline: 0;
 }
 
 .fitness-reference-shell .fitness-chart-panel .fit-panel-head {
-  padding: 24px 0 18px;
+  padding: 14px 0 12px;
   border-bottom: 1px solid rgba(26, 24, 21, 0.08);
-  align-items: flex-start;
+  align-items: end;
 }
 
 .fitness-reference-shell .fitness-chart-panel .fit-panel-head h3 {
-  font-size: clamp(32px, 3.7vw, 46px);
-  line-height: 0.95;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 0.92;
   letter-spacing: -0.04em;
-  max-width: 9ch;
+  max-width: none;
 }
 
 .fitness-reference-shell .fitness-chart-panel .fit-panel-head .meta {
-  margin-top: 10px;
-  max-width: 56ch;
+  margin-top: 6px;
+  max-width: 44ch;
   font-family: 'Playfair Display', Georgia, serif;
   font-style: italic;
-  font-size: 17px;
-  line-height: 1.45;
+  font-size: 15px;
+  line-height: 1.4;
   letter-spacing: 0;
   color: color-mix(in srgb, var(--ink-soft) 82%, white);
 }
 
 .fitness-reference-shell .fitness-chart-panel .bc-range-toggle {
-  margin-top: 6px;
+  margin-top: 2px;
   background: rgba(255, 255, 255, 0.68);
   border-color: rgba(26, 24, 21, 0.08);
   backdrop-filter: blur(8px);
@@ -2959,10 +2966,26 @@
     max-width: none;
   }
 
+  .fit-story-shell,
   .fitness-reference-shell .fitness-chart-panel .fit-panel-head,
+  .fitness-reference-shell .fitness-chart-panel .bc-clinical-strip,
   .fitness-reference-shell .fitness-chart-panel .bc-chart-wrap,
   .fitness-reference-shell .fitness-chart-panel .bc-key {
     max-width: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .bc-clinical-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bc-clinical-cell:nth-child(2n) {
+    border-right: none;
+  }
+
+  .bc-clinical-cell:nth-child(-n + 2) {
+    border-bottom: 1px solid rgba(26, 24, 21, 0.08);
   }
 }
 

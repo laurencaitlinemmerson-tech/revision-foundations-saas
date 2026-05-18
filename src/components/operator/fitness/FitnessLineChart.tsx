@@ -160,9 +160,9 @@ export default function FitnessLineChart({
 }: ChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
   const [range, setRange] = useState<'all' | '5y' | '2y' | '1y' | '6m'>('all')
-  const w = 1180
-  const h = 430
-  const pad = { l: 44, r: 164, t: 30, b: 32 }
+  const w = 1120
+  const h = 500
+  const pad = { l: 42, r: 152, t: 18, b: 30 }
   const innerW = w - pad.l - pad.r
   const innerH = h - pad.t - pad.b
 
@@ -214,7 +214,7 @@ export default function FitnessLineChart({
       .map((segment) => monotonePath(segment.map((point) => ({ x: x(point.date), y: y(point.value) }))))
       .join(' ')
     : null
-  const yTicks = 5
+  const yTicks = 4
   // Evenly-spaced date ticks, scaled to the time window so labels don't
   // bunch up at narrower ranges.
   const dayMs = 24 * 60 * 60 * 1000
@@ -279,8 +279,8 @@ export default function FitnessLineChart({
   ].filter(Boolean)
   const tipWidth = 208
   const tipHeight = 50 + tipLines.length * 14
-  const currentCalloutWidth = 134
-  const currentCalloutHeight = 74
+  const currentCalloutWidth = 126
+  const currentCalloutHeight = 70
   const currentCalloutX = w - currentCalloutWidth - 18
   const currentPointX = latestPoint ? x(latestPoint.date) : null
   const currentPointY = latestPoint ? y(latestPoint.value) : null
@@ -305,13 +305,13 @@ export default function FitnessLineChart({
     {
       label: '7d average',
       value: weekAverage === null ? '—' : `${weekAverage.toFixed(1)}kg`,
-      note: recentWeekPoints.length > 0 ? `${recentWeekPoints.length} readings in view` : 'Need more recent data',
+      note: recentWeekPoints.length > 0 ? `${recentWeekPoints.length} readings` : 'Need more recent data',
       tone: 'neutral',
     },
     {
       label: '30d change',
       value: formatSignedKg(thirtyDayDelta) ?? '—',
-      note: thirtyDayDelta === null ? 'Need at least one month of history' : 'Against the nearest reading 30 days earlier',
+      note: thirtyDayDelta === null ? 'Need at least one month of history' : 'vs 30 days earlier',
       tone: thirtyDayDelta === null ? 'neutral' : thirtyDayDelta < 0 ? 'down' : thirtyDayDelta > 0 ? 'up' : 'neutral',
     },
     {

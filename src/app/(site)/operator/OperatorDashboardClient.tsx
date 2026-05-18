@@ -4824,11 +4824,11 @@ export default function OperatorDashboardClient() {
     const observedMin = Math.min(...weights);
     const observedMax = Math.max(...weights);
     const observedSpan = Math.max(2.5, observedMax - observedMin);
-    const lowerPad = Math.max(1.2, observedSpan * 0.45);
-    const upperPad = Math.max(1.6, observedSpan * 0.55);
-    const goalIsCloseEnoughToPlot = goal >= observedMin - Math.max(6, observedSpan * 1.5);
+    const lowerPad = Math.max(0.9, observedSpan * 0.22);
+    const upperPad = Math.max(1.2, observedSpan * 0.3);
+    const goalIsCloseEnoughToPlot = goal >= observedMin - Math.max(3.5, observedSpan * 0.38);
     const min = goalIsCloseEnoughToPlot
-      ? Math.floor(Math.min(observedMin - lowerPad, goal - 1.5) * 2) / 2
+      ? Math.floor(Math.min(observedMin - lowerPad, goal - 1) * 2) / 2
       : Math.floor((observedMin - lowerPad) * 2) / 2;
     const max = Math.ceil((observedMax + upperPad) * 2) / 2;
     return { min, max };
@@ -5156,96 +5156,98 @@ export default function OperatorDashboardClient() {
 
         <Reveal>
         <section className="fit-anchor-section" id="operator-story">
-          {/* ───────────────────────── STORY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Story" note="A clearer read on bodyweight, trend, and phase context." />
+          <div className="fit-story-shell">
+            {/* ───────────────────────── STORY ─────────────────────────── */}
+            <EditorialDivider eyebrow="Story" note="A clearer read on bodyweight, trend, and phase context." />
 
-          {/* Long-form weight chart — promoted to a full-width editorial moment. */}
-          <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
-            <FitnessLineChart
-              title={<>Weight <em>trajectory</em></>}
-              subtitle="Daily measurements, the live 45-day trend, and phase context across the selected window."
-              points={buildWeightSeries(dashboardSource)}
-              color="oklch(0.70 0.12 76)"
-              minY={chartBounds.min}
-              maxY={chartBounds.max}
-              annotations={[
-                {
-                  date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
-                  value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
-                  title: 'Leanest point',
-                },
-                {
-                  date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
-                  value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
-                  title: 'Peak weight',
-                },
-                { date: latest.date, value: latest.weight, title: weightLabel },
-              ]}
-              secondaryPoints={rollingAverage}
-              secondaryColor="oklch(0.70 0.12 76)"
-              secondaryLabel="45-day trend"
-              phases={phaseMarkers}
-              targetWeight={goal}
-              showRangeToggle
-            />
-          </section>
+            {/* Long-form weight chart — promoted to a full-width editorial moment. */}
+            <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
+              <FitnessLineChart
+                title={<>Weight <em>trajectory</em></>}
+                subtitle="Daily measurements, the live 45-day trend, and phase context across the selected window."
+                points={buildWeightSeries(dashboardSource)}
+                color="oklch(0.70 0.12 76)"
+                minY={chartBounds.min}
+                maxY={chartBounds.max}
+                annotations={[
+                  {
+                    date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
+                    value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
+                    title: 'Leanest point',
+                  },
+                  {
+                    date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
+                    value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
+                    title: 'Peak weight',
+                  },
+                  { date: latest.date, value: latest.weight, title: weightLabel },
+                ]}
+                secondaryPoints={rollingAverage}
+                secondaryColor="oklch(0.70 0.12 76)"
+                secondaryLabel="45-day trend"
+                phases={phaseMarkers}
+                targetWeight={goal}
+                showRangeToggle
+              />
+            </section>
 
-          <section className="fit-grid">
-            <div className="fit-main">
-              <div className="fit-panel">
-                <div className="fit-panel-head">
-                  <div>
-                    <h3>Phase <em>log</em></h3>
-                    <div className="meta">The story rendered in the same cadence as the reference dashboard</div>
-                  </div>
-                </div>
-                <div className="phase-log">
-                  {phaseRows.map((row) => (
-                    <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
-                      <div className={`swatch ${row.swatch}`} />
-                      <div className="name">{row.name} <em>{row.emphasis}</em><span className="when">{row.when}</span></div>
-                      <div className="duration">{row.duration}</div>
-                      <div className="start">{row.start}</div>
-                      <div className="end">{row.end}</div>
-                      <div className={`delta ${row.deltaClass}`}>{row.delta}</div>
+            <section className="fit-grid">
+              <div className="fit-main">
+                <div className="fit-panel">
+                  <div className="fit-panel-head">
+                    <div>
+                      <h3>Phase <em>log</em></h3>
+                      <div className="meta">The story rendered in the same cadence as the reference dashboard</div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="fit-panel fit-photo-panel">
-                <div className="fit-panel-head">
-                  <div>
-                    <h3>Visual <em>evidence</em></h3>
-                    <div className="meta">Date-stamped progress slots wired to this same timeline</div>
+                  </div>
+                  <div className="phase-log">
+                    {phaseRows.map((row) => (
+                      <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
+                        <div className={`swatch ${row.swatch}`} />
+                        <div className="name">{row.name} <em>{row.emphasis}</em><span className="when">{row.when}</span></div>
+                        <div className="duration">{row.duration}</div>
+                        <div className="start">{row.start}</div>
+                        <div className="end">{row.end}</div>
+                        <div className={`delta ${row.deltaClass}`}>{row.delta}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <PhotoTimeline items={photoMilestones} />
-              </div>
-            </div>
 
-            <aside className="fit-side">
-              <div className="goal-card">
-                <div className="head"><span>Current goal</span><span className="pill brass">{targetDelta <= 0 ? 'On target' : 'Active cut'}</span></div>
-                <div className="target">{goal.toFixed(1)}kg <em>working line</em></div>
-                <div className="by">
-                  {projectedGoal
-                    ? `Projected from current slope - ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                    : 'Projection appears once the trend line starts moving down'}
-                </div>
-                <div className="bar">
-                  <span className="fill" style={{ width: `${progress}%` }} />
-                  <span className="marker" style={{ left: '100%' }} />
-                </div>
-                <div className="stats">
-                  <div><div className="lbl">To goal</div><div className="v">{targetDelta.toFixed(1)}kg</div></div>
-                  <div><div className="lbl">7-day move</div><div className="v">{formatWeightDelta(sevenDayDelta)}</div></div>
-                  <div><div className="lbl">Intake plan</div><div className="v">{nutrition.intake.toLocaleString()} kcal</div></div>
-                  <div><div className="lbl">BMR estimate</div><div className="v">{nutrition.bmr.toLocaleString()} kcal</div></div>
+                <div className="fit-panel fit-photo-panel">
+                  <div className="fit-panel-head">
+                    <div>
+                      <h3>Visual <em>evidence</em></h3>
+                      <div className="meta">Date-stamped progress slots wired to this same timeline</div>
+                    </div>
+                  </div>
+                  <PhotoTimeline items={photoMilestones} />
                 </div>
               </div>
-            </aside>
-          </section>
+
+              <aside className="fit-side">
+                <div className="goal-card">
+                  <div className="head"><span>Current goal</span><span className="pill brass">{targetDelta <= 0 ? 'On target' : 'Active cut'}</span></div>
+                  <div className="target">{goal.toFixed(1)}kg <em>working line</em></div>
+                  <div className="by">
+                    {projectedGoal
+                      ? `Projected from current slope - ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                      : 'Projection appears once the trend line starts moving down'}
+                  </div>
+                  <div className="bar">
+                    <span className="fill" style={{ width: `${progress}%` }} />
+                    <span className="marker" style={{ left: '100%' }} />
+                  </div>
+                  <div className="stats">
+                    <div><div className="lbl">To goal</div><div className="v">{targetDelta.toFixed(1)}kg</div></div>
+                    <div><div className="lbl">7-day move</div><div className="v">{formatWeightDelta(sevenDayDelta)}</div></div>
+                    <div><div className="lbl">Intake plan</div><div className="v">{nutrition.intake.toLocaleString()} kcal</div></div>
+                    <div><div className="lbl">BMR estimate</div><div className="v">{nutrition.bmr.toLocaleString()} kcal</div></div>
+                  </div>
+                </div>
+              </aside>
+            </section>
+          </div>
         </section>
         </Reveal>
 
