@@ -5142,6 +5142,8 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>
 
+        <ImportNote opPw={opPw} onImported={refreshCloudReadings} />
+
       </main>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />
