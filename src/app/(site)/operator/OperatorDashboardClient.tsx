@@ -4062,7 +4062,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
             title={<>Current vs goal <em style={{ color:T.gold }}>composition</em></>}
             subtitle="Where the kilograms sit now, and what has to move if muscle is preserved on the way to goal."
           >
-            <PieComposition latest={latest} goal={goal} weightLabel={weightLabel} />
+            <PieComposition latest={latest} goal={goal} weightLabel="Today" />
           </FitPanel>
         </div>
 
