@@ -402,7 +402,7 @@ export default function FitnessLineChart({
         ))}
       </div>
       <div className="bc-chart-wrap">
-        <svg viewBox={`0 0 ${w} ${h}`} className="fitness-chart" role="img" aria-label={ariaLabel} preserveAspectRatio="none">
+        <svg viewBox={`0 0 ${w} ${h}`} className="fitness-chart" role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
           <rect x="0" y="0" width={w} height={h} fill="transparent" />
           <rect x={pad.l} y={pad.t} width={innerW} height={innerH} rx="10" className="bc-plot-bg" />
           {Array.from({ length: yTicks }).map((_, index) => {
@@ -493,18 +493,10 @@ export default function FitnessLineChart({
             <text key={`${time}-${index}`} x={xForTime(time)} y={h - 12} className="bc-x-label">{fmtTickTime(time, spanDays)}</text>
           ))}
 
-          {latestPoint && currentPointX !== null && currentPointY !== null && (
-            <g className="bc-current-callout">
-              <text
-                x={Math.min(w - pad.r - 6, currentPointX + 14)}
-                y={Math.max(pad.t + 14, currentPointY - 12)}
-                className="bc-current-kicker"
-                textAnchor={currentPointX > w - pad.r - 100 ? 'end' : 'start'}
-              >
-                {latestPoint.value.toFixed(1)} kg · today
-              </text>
-            </g>
-          )}
+          {/* Inline "today" label removed — the latest dot + halo already
+              signal the current point, and the clinical strip above shows
+              the live value. The annotation array still adds a Today /
+              Latest annotation when it doesn't echo the peak. */}
 
           {hover && (
             <g>

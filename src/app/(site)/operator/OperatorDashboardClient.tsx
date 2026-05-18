@@ -5057,24 +5057,6 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
         )}
       </div>
 
-      <div className="fit-food-section">
-        <div className="fit-food-section-head">
-          <span className="fit-food-section-label">Meal breakdown</span>
-          <span className="fit-food-section-meta">Meal-level split shown once your food log includes meal tags</span>
-        </div>
-        <div className="fit-food-meals">
-          {(['Breakfast', 'Lunch', 'Dinner', 'Snacks'] as const).map((meal) => (
-            <div key={meal} className="fit-food-meal">
-              <div className="fit-food-meal-label">{meal}</div>
-              <div className="fit-food-meal-num">—</div>
-              <div className="fit-food-meal-note">No log yet</div>
-            </div>
-          ))}
-        </div>
-        <div className="fit-food-empty soft">
-          Tag meals in your food tracker (or log breakfast / lunch / dinner / snacks separately in MyFitnessPal) and the per-meal share of calories will appear here.
-        </div>
-      </div>
     </section>
   );
 }
@@ -5413,6 +5395,7 @@ export default function OperatorDashboardClient() {
               <div className="lbl"><span>{weightLabel}</span><span style={{ opacity: 0.45, margin: '0 4px' }}>·</span><DateStamp iso={latest.date} /></div>
               <div className="num"><AnimatedNumber value={latest.weight} decimals={1} /><small>kg</small></div>
               <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} · 7-day</div>
+              <HeadlineSparkline readings={dashboardSource.slice(-4)} />
             </div>
           </div>
         </section>
@@ -5488,6 +5471,40 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
+        <Reveal delay={0.1}>
+        <section className="fit-anchor-section" id="operator-trajectory">
+          <section className="fit-editorial-chart" style={{ marginBottom: 28 }}>
+            <FitnessLineChart
+              title={<>Weight <em>trajectory</em></>}
+              subtitle="Daily measurements, the live 45-day trend, and phase context across the selected window."
+              points={buildWeightSeries(dashboardSource)}
+              color="oklch(0.70 0.12 76)"
+              minY={chartBounds.min}
+              maxY={chartBounds.max}
+              annotations={[
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Leanest point',
+                },
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Peak weight',
+                },
+                { date: latest.date, value: latest.weight, title: weightLabel },
+              ]}
+              secondaryPoints={rollingAverage}
+              secondaryColor="oklch(0.70 0.12 76)"
+              secondaryLabel="45-day trend"
+              phases={phaseMarkers}
+              targetWeight={goal}
+              showRangeToggle
+            />
+          </section>
+        </section>
+        </Reveal>
+
         <Reveal delay={0.12}>
           <FoodBreakdownSection snap={todaySnap} />
         </Reveal>
@@ -5524,38 +5541,7 @@ export default function OperatorDashboardClient() {
         <section className="fit-anchor-section" id="operator-story">
           <div className="fit-story-shell">
             {/* ───────────────────────── STORY ─────────────────────────── */}
-            <EditorialDivider eyebrow="Story" note="A clearer read on bodyweight, trend, and phase context." />
-
-            {/* Long-form weight chart — promoted to a full-width editorial moment. */}
-            <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
-              <FitnessLineChart
-                title={<>Weight <em>trajectory</em></>}
-                subtitle="Daily measurements, the live 45-day trend, and phase context across the selected window."
-                points={buildWeightSeries(dashboardSource)}
-                color="oklch(0.70 0.12 76)"
-                minY={chartBounds.min}
-                maxY={chartBounds.max}
-                annotations={[
-                  {
-                    date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
-                    value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
-                    title: 'Leanest point',
-                  },
-                  {
-                    date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
-                    value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
-                    title: 'Peak weight',
-                  },
-                  { date: latest.date, value: latest.weight, title: weightLabel },
-                ]}
-                secondaryPoints={rollingAverage}
-                secondaryColor="oklch(0.70 0.12 76)"
-                secondaryLabel="45-day trend"
-                phases={phaseMarkers}
-                targetWeight={goal}
-                showRangeToggle
-              />
-            </section>
+            <EditorialDivider eyebrow="Story" note="Phase context, milestones, and visual evidence." />
 
             <section className="fit-grid">
               <div className="fit-main">
