@@ -4,6 +4,7 @@ import {
   listFitnessReadings,
   saveFitnessReading,
 } from '@/lib/operatorFitnessStorage';
+import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
@@ -23,10 +24,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!authed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
+  const weight = Number(body.weight);
+  if (!isPlausibleWeightKg(weight)) {
+    return NextResponse.json({ error: 'weight_out_of_range' }, { status: 400 });
+  }
   try {
     const result = await saveFitnessReading({
       date: body.date,
-      weight: Number(body.weight),
+      weight,
       bmi: Number(body.bmi),
       bodyFat: Number(body.bodyFat),
       water: Number(body.water),

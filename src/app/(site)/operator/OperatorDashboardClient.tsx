@@ -9,6 +9,7 @@ import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
+import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
 
@@ -4798,7 +4799,10 @@ export default function OperatorDashboardClient() {
 
   const todayIso = localIsoDate();
   const sorted   = useMemo(() => [...readings].sort((a,b)=>a.date.localeCompare(b.date)), [readings]);
-  const dashboardSource = sorted;
+  const dashboardSource = useMemo(
+    () => sorted.filter((row) => isPlausibleWeightKg(row.weight)),
+    [sorted],
+  );
   const derivedSource = dashboardSource.length > 0 ? dashboardSource : SEED;
   const reg      = useMemo(() => regress(derivedSource), [derivedSource]);
   const latest   = dashboardSource[dashboardSource.length - 1];
@@ -5138,15 +5142,15 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <section className="fit-anchor-section" id="operator-story">
           {/* ───────────────────────── STORY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Story" note="The long line — every reading, every phase." />
+          <EditorialDivider eyebrow="Story" note="A clearer read on bodyweight, trend, and phase context." />
 
           {/* Long-form weight chart — promoted to a full-width editorial moment. */}
           <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
             <FitnessLineChart
-              title={<>The long <em>line</em></>}
-              subtitle="Every weigh-in, the live 45-day direction, and the body-state shifts that shaped the story."
+              title={<>Weight <em>trajectory</em></>}
+              subtitle="Daily measurements, the live 45-day trend, and phase context across the selected window."
               points={buildWeightSeries(dashboardSource)}
-              color="oklch(0.70 0.012 70 / 0.48)"
+              color="oklch(0.34 0.05 248)"
               minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
               maxY={Math.ceil(Math.max(...dashboardSource.map((row) => row.weight)) + 2)}
               annotations={[
@@ -5163,7 +5167,7 @@ export default function OperatorDashboardClient() {
                 { date: latest.date, value: latest.weight, title: weightLabel },
               ]}
               secondaryPoints={rollingAverage}
-              secondaryColor="oklch(0.70 0.12 76)"
+              secondaryColor="oklch(0.34 0.05 248)"
               secondaryLabel="45-day trend"
               phases={phaseMarkers}
               targetWeight={goal}

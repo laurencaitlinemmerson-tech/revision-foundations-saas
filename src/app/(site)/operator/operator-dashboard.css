@@ -753,12 +753,12 @@
   padding: 18px 18px 0;
   position: relative;
   background:
-    linear-gradient(180deg, oklch(0.985 0.01 85) 0%, oklch(0.995 0.005 85) 100%);
+    linear-gradient(180deg, oklch(0.998 0.003 255) 0%, oklch(0.985 0.004 245) 100%);
 }
 
 .bc-chart-wrap svg {
   width: 100%;
-  height: 360px;
+  height: 430px;
   overflow: visible;
 }
 
@@ -792,8 +792,73 @@
   border-top: 0.5px solid var(--rule);
 }
 
-.fitness-chart .bc-data-dot {
-  transition: r 0.12s ease, opacity 0.12s ease;
+.bc-clinical-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(26, 24, 21, 0.08);
+  border-bottom: 1px solid rgba(26, 24, 21, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(247, 250, 253, 0.92));
+}
+
+.bc-clinical-cell {
+  padding: 12px 18px 13px;
+  border-right: 1px solid rgba(26, 24, 21, 0.08);
+}
+
+.bc-clinical-cell:last-child {
+  border-right: none;
+}
+
+.bc-clinical-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.bc-clinical-value {
+  margin-top: 7px;
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: oklch(0.29 0.035 255);
+}
+
+.bc-clinical-note {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.bc-clinical-cell.primary .bc-clinical-value {
+  color: oklch(0.27 0.05 250);
+}
+
+.bc-clinical-cell.down .bc-clinical-value {
+  color: oklch(0.42 0.09 210);
+}
+
+.bc-clinical-cell.up .bc-clinical-value {
+  color: oklch(0.47 0.08 20);
+}
+
+.fitness-chart .bc-data-mark,
+.fitness-chart .bc-data-dot-active {
+  transition: opacity 0.12s ease, r 0.12s ease;
+}
+
+.fitness-chart .bc-data-mark {
+  stroke: rgba(44, 52, 68, 0.28);
+  stroke-width: 1.15;
+  stroke-linecap: round;
+}
+
+.fitness-chart .bc-data-dot-active {
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1.5;
 }
 
 .fitness-chart {
@@ -802,13 +867,13 @@
 }
 
 .bc-grid {
-  stroke: var(--rule-soft);
+  stroke: rgba(44, 52, 68, 0.08);
   stroke-width: 0.5;
 }
 
 .bc-plot-bg {
-  fill: oklch(0.992 0.004 85);
-  stroke: var(--rule-soft);
+  fill: rgba(255, 255, 255, 0.88);
+  stroke: rgba(44, 52, 68, 0.08);
   stroke-width: 0.6;
 }
 
@@ -825,51 +890,51 @@
 }
 
 .bc-phase-band {
-  opacity: 0.32;
+  opacity: 0.2;
 }
 
 .bc-phase-band.lean {
-  fill: oklch(0.93 0.035 150 / 0.4);
+  fill: oklch(0.95 0.03 165 / 0.45);
 }
 
 .bc-phase-band.bulk {
-  fill: oklch(0.95 0.03 86 / 0.36);
+  fill: oklch(0.95 0.02 90 / 0.38);
 }
 
 .bc-phase-band.cut {
-  fill: oklch(0.95 0.045 24 / 0.34);
+  fill: oklch(0.96 0.028 22 / 0.42);
 }
 
 .bc-phase-band.recomp {
-  fill: oklch(0.95 0.025 235 / 0.34);
+  fill: oklch(0.96 0.02 235 / 0.42);
 }
 
 .bc-phase-divider {
-  stroke: var(--rule);
+  stroke: rgba(44, 52, 68, 0.14);
   stroke-width: 0.5;
   stroke-dasharray: 3 3;
-  opacity: 0.45;
+  opacity: 0.4;
 }
 
 .bc-phase-pill {
-  stroke: rgba(26, 24, 21, 0.06);
+  stroke: rgba(44, 52, 68, 0.08);
   stroke-width: 0.6;
 }
 
 .bc-phase-pill.lean {
-  fill: oklch(0.96 0.02 150 / 0.88);
+  fill: rgba(255, 255, 255, 0.84);
 }
 
 .bc-phase-pill.bulk {
-  fill: oklch(0.97 0.015 86 / 0.9);
+  fill: rgba(255, 255, 255, 0.84);
 }
 
 .bc-phase-pill.cut {
-  fill: oklch(0.97 0.02 24 / 0.88);
+  fill: rgba(255, 255, 255, 0.84);
 }
 
 .bc-phase-pill.recomp {
-  fill: oklch(0.97 0.015 235 / 0.9);
+  fill: rgba(255, 255, 255, 0.84);
 }
 
 .bc-phase-label {
@@ -883,22 +948,22 @@
 
 .bc-line-avg {
   fill: none;
-  stroke: var(--brass-deep);
-  stroke-width: 2.6;
+  stroke: oklch(0.34 0.05 248);
+  stroke-width: 2.9;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 5px 12px oklch(0.72 0.08 78 / 0.12));
+  filter: drop-shadow(0 4px 14px oklch(0.34 0.05 248 / 0.09));
 }
 
 .bc-target-line {
-  stroke: var(--good);
+  stroke: oklch(0.52 0.1 196);
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
-  opacity: 0.78;
+  opacity: 0.76;
 }
 
 .bc-target-label {
-  fill: var(--good);
+  fill: oklch(0.44 0.08 196);
   font-weight: 700;
 }
 
@@ -909,20 +974,20 @@
 }
 
 .bc-pin-connector {
-  stroke: rgba(26, 24, 21, 0.3);
+  stroke: rgba(44, 52, 68, 0.22);
   stroke-width: 0.8;
 }
 
 .bc-current-connector {
-  stroke: oklch(0.72 0.08 78 / 0.55);
+  stroke: oklch(0.34 0.05 248 / 0.5);
   stroke-width: 1.2;
 }
 
 .bc-current-card {
-  fill: var(--paper);
-  stroke: oklch(0.72 0.08 78 / 0.28);
+  fill: rgba(255, 255, 255, 0.94);
+  stroke: oklch(0.34 0.05 248 / 0.18);
   stroke-width: 1;
-  filter: drop-shadow(0 8px 18px oklch(0.42 0.02 80 / 0.08));
+  filter: drop-shadow(0 12px 26px oklch(0.28 0.015 255 / 0.08));
 }
 
 .bc-current-kicker {
@@ -937,7 +1002,7 @@
   font-family: var(--font-display);
   font-size: 21px;
   letter-spacing: -0.03em;
-  fill: var(--ink);
+  fill: oklch(0.27 0.05 250);
 }
 
 .bc-current-meta {
@@ -951,17 +1016,17 @@
 }
 
 .bc-latest-halo {
-  fill: oklch(0.72 0.08 78 / 0.16);
+  fill: oklch(0.34 0.05 248 / 0.14);
 }
 
 .bc-latest-dot {
-  fill: var(--brass-deep);
+  fill: oklch(0.34 0.05 248);
   stroke: var(--paper);
   stroke-width: 1.5;
 }
 
 .bc-pin-dot {
-  fill: var(--brass-deep);
+  fill: oklch(0.34 0.05 248);
   stroke: var(--paper);
   stroke-width: 1.5;
 }
@@ -982,9 +1047,9 @@
 }
 
 .fitness-tip-box {
-  fill: var(--paper);
-  stroke: var(--rule);
-  filter: drop-shadow(0 6px 18px oklch(0.4 0.02 80 / 0.08));
+  fill: rgba(255, 255, 255, 0.96);
+  stroke: rgba(44, 52, 68, 0.12);
+  filter: drop-shadow(0 10px 24px oklch(0.28 0.015 255 / 0.08));
 }
 
 .fitness-tip,
@@ -1027,22 +1092,6 @@
   display: inline-block;
 }
 
-.bc-key .sw.lean {
-  background: oklch(0.94 0.04 145 / 0.85);
-}
-
-.bc-key .sw.bulk {
-  background: oklch(0.92 0.05 82 / 0.85);
-}
-
-.bc-key .sw.cut {
-  background: oklch(0.93 0.06 25 / 0.7);
-}
-
-.bc-key .sw.recomp {
-  background: oklch(0.92 0.045 240 / 0.7);
-}
-
 .bc-key .sw.avg,
 .bc-key .sw.raw {
   height: 2px;
@@ -1057,7 +1106,12 @@
 }
 
 .bc-key .sw.raw {
-  background: var(--ink-mute);
+  background: rgba(44, 52, 68, 0.38);
+}
+
+.bc-key .sw.phase {
+  height: 8px;
+  background: linear-gradient(90deg, oklch(0.95 0.03 165 / 0.7), oklch(0.96 0.02 235 / 0.7));
 }
 
 .week-grid {
@@ -2853,6 +2907,8 @@
   border: none;
   padding: 2px 0 10px;
   position: relative;
+  max-width: 1360px;
+  margin-inline: auto;
 }
 .fitness-reference-shell .fit-editorial-chart::before {
   content: "";
@@ -2870,6 +2926,13 @@
   border: none;
   border-radius: 0;
   overflow: visible;
+}
+
+.fitness-reference-shell .fitness-chart-panel .fit-panel-head,
+.fitness-reference-shell .fitness-chart-panel .bc-chart-wrap,
+.fitness-reference-shell .fitness-chart-panel .bc-key {
+  max-width: 1280px;
+  margin-inline: auto;
 }
 
 .fitness-reference-shell .fitness-chart-panel .fit-panel-head {
@@ -2901,6 +2964,18 @@
   background: rgba(255, 255, 255, 0.68);
   border-color: rgba(26, 24, 21, 0.08);
   backdrop-filter: blur(8px);
+}
+
+@media (max-width: 1380px) {
+  .fitness-reference-shell .fit-editorial-chart {
+    max-width: none;
+  }
+
+  .fitness-reference-shell .fitness-chart-panel .fit-panel-head,
+  .fitness-reference-shell .fitness-chart-panel .bc-chart-wrap,
+  .fitness-reference-shell .fitness-chart-panel .bc-key {
+    max-width: none;
+  }
 }
 
 /* ── Empty-state Playfair tone overrides ──────────────────────────── */

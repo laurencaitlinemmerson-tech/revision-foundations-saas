@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 
 export interface FitnessReadingInput {
   date: string;
@@ -63,7 +64,7 @@ function fromFallbackRaw(raw: unknown, startedAt: string): FitnessReadingRecord 
   const row = raw as Record<string, unknown>;
   const date = typeof row.date === 'string' && row.date.length >= 10 ? row.date.slice(0, 10) : startedAt.slice(0, 10);
   const weight = num(row.weight, NaN);
-  if (!Number.isFinite(weight)) return null;
+  if (!isPlausibleWeightKg(weight)) return null;
 
   return {
     id: fallbackId(date),
@@ -97,7 +98,12 @@ export async function listFitnessReadings() {
       .order('date', { ascending: true });
 
     if (!error) {
-      return { readings: (data ?? []).map((row) => fromTableRow(row as FitnessTableRow)), setupRequired: false };
+      return {
+        readings: (data ?? [])
+          .map((row) => fromTableRow(row as FitnessTableRow))
+          .filter((row) => isPlausibleWeightKg(row.weight)),
+        setupRequired: false,
+      };
     }
   } catch {}
 
@@ -121,6 +127,9 @@ export async function listFitnessReadings() {
 }
 
 export async function saveFitnessReading(reading: FitnessReadingInput) {
+  if (!isPlausibleWeightKg(reading.weight)) {
+    return { reading: null, setupRequired: false, error: 'weight_out_of_range' };
+  }
   try {
     const { data, error } = await supabaseAdmin
       .from('operator_fitness_readings')
@@ -179,6 +188,9 @@ export async function saveFitnessReading(reading: FitnessReadingInput) {
 }
 
 export async function upsertFitnessReading(reading: FitnessReadingInput) {
+  if (!isPlausibleWeightKg(reading.weight)) {
+    throw new Error('weight_out_of_range');
+  }
   const dayStart = `${isoDay(reading.date)}T00:00:00.000Z`;
   const dayEnd = `${isoDay(reading.date)}T23:59:59.999Z`;
 

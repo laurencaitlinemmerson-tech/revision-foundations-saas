@@ -5,6 +5,7 @@ import {
   type FitnessReadingRecord,
 } from '@/lib/operatorFitnessStorage'
 import { parseAppleHealthExport, type ImportedFitnessReading } from '@/lib/appleHealth'
+import { isPlausibleWeightKg } from '@/lib/fitnessValidation'
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? ''
@@ -63,9 +64,15 @@ export async function POST(req: NextRequest) {
   }
 
   const imported = parseAppleHealthExport(xml)
-  if (imported.length === 0) {
+  const validImported = imported.filter((reading) => isPlausibleWeightKg(reading.weight))
+  const invalidCount = imported.length - validImported.length
+  if (validImported.length === 0) {
     return NextResponse.json(
-      { error: 'No Apple Health body measurements found in export.xml' },
+      {
+        error: imported.length > 0
+          ? 'Apple Health export contained only implausible body-weight readings'
+          : 'No Apple Health body measurements found in export.xml',
+      },
       { status: 400 },
     )
   }
@@ -83,7 +90,7 @@ export async function POST(req: NextRequest) {
     let updatedCount = 0
     let skippedCount = 0
 
-    for (const reading of imported) {
+    for (const reading of validImported) {
       const existingRow = byDay.get(reading.date)
       if (!existingRow) {
         pending.push(reading)
@@ -121,12 +128,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      importedCount: imported.length,
+      importedCount: validImported.length,
+      invalidCount,
       insertedCount,
       updatedCount,
       skippedCount,
-      firstImportedDate: imported[0]?.date ?? null,
-      lastImportedDate: imported[imported.length - 1]?.date ?? null,
+      firstImportedDate: validImported[0]?.date ?? null,
+      lastImportedDate: validImported[validImported.length - 1]?.date ?? null,
     })
   } catch {
     return NextResponse.json({ error: 'import_failed' }, { status: 500 })

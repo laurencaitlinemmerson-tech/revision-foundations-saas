@@ -56,6 +56,29 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
+function mean(values: number[]) {
+  if (values.length === 0) return null
+  return values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
+function findPointAtOrBefore(points: SeriesPoint[], cutoffTime: number) {
+  let candidate: SeriesPoint | null = null
+  for (const point of points) {
+    const time = new Date(point.date).getTime()
+    if (time <= cutoffTime) {
+      candidate = point
+      continue
+    }
+    break
+  }
+  return candidate
+}
+
+function formatSignedKg(value: number | null) {
+  if (value === null || !Number.isFinite(value)) return null
+  return `${value > 0 ? '+' : ''}${value.toFixed(1)}kg`
+}
+
 function shortPhaseLabel(label: string) {
   const normalized = label.toLowerCase()
   if (normalized.includes('lean')) return 'Lean'
@@ -137,8 +160,8 @@ export default function FitnessLineChart({
 }: ChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
   const [range, setRange] = useState<'all' | '5y' | '2y' | '1y' | '6m'>('all')
-  const w = 1240
-  const h = 380
+  const w = 1180
+  const h = 430
   const pad = { l: 44, r: 164, t: 30, b: 32 }
   const innerW = w - pad.l - pad.r
   const innerH = h - pad.t - pad.b
@@ -207,6 +230,15 @@ export default function FitnessLineChart({
       })
   const hover = hoverIndex !== null ? filteredPoints[hoverIndex] : null
   const latestPoint = filteredPoints[filteredPoints.length - 1] ?? null
+  const latestTime = latestPoint ? new Date(latestPoint.date).getTime() : null
+  const recentWeekPoints = latestTime === null
+    ? []
+    : filteredPoints.filter((point) => new Date(point.date).getTime() >= latestTime - 6 * dayMs)
+  const weekAverage = mean(recentWeekPoints.map((point) => point.value))
+  const thirtyDayAnchor = latestTime === null ? null : findPointAtOrBefore(filteredPoints, latestTime - 30 * dayMs)
+  const thirtyDayDelta = latestPoint && thirtyDayAnchor ? latestPoint.value - thirtyDayAnchor.value : null
+  const rangeSpan = values.length > 0 ? Math.max(...values) - Math.min(...values) : null
+  const currentTargetGap = latestPoint && targetWeight !== undefined ? latestPoint.value - targetWeight : null
   const visibleAnnotations = annotations.filter((annotation) => {
     const time = new Date(annotation.date).getTime()
     const isLatestEcho = latestPoint
@@ -233,7 +265,6 @@ export default function FitnessLineChart({
   }
   const hoverTime = hover ? new Date(hover.date).getTime() : null
   const hoverPhase = phaseForTime(hoverTime)
-  const latestTime = latestPoint ? new Date(latestPoint.date).getTime() : null
   const latestPhase = phaseForTime(latestTime)
   const hoverTargetGap = hover && targetWeight !== undefined
     ? hover.value - targetWeight
@@ -248,7 +279,7 @@ export default function FitnessLineChart({
   ].filter(Boolean)
   const tipWidth = 208
   const tipHeight = 50 + tipLines.length * 14
-  const currentCalloutWidth = 128
+  const currentCalloutWidth = 134
   const currentCalloutHeight = 74
   const currentCalloutX = w - currentCalloutWidth - 18
   const currentPointX = latestPoint ? x(latestPoint.date) : null
@@ -264,6 +295,44 @@ export default function FitnessLineChart({
     : currentGoalLine <= 0
       ? `${Math.abs(currentGoalLine).toFixed(1)}kg under goal`
       : `${currentGoalLine.toFixed(1)}kg to goal`
+  const summaryStats = [
+    {
+      label: 'Current',
+      value: latestPoint ? `${latestPoint.value.toFixed(1)}kg` : '—',
+      note: latestPoint ? fmtHoverDate(latestPoint.date) : 'No readings',
+      tone: 'primary',
+    },
+    {
+      label: '7d average',
+      value: weekAverage === null ? '—' : `${weekAverage.toFixed(1)}kg`,
+      note: recentWeekPoints.length > 0 ? `${recentWeekPoints.length} readings in view` : 'Need more recent data',
+      tone: 'neutral',
+    },
+    {
+      label: '30d change',
+      value: formatSignedKg(thirtyDayDelta) ?? '—',
+      note: thirtyDayDelta === null ? 'Need at least one month of history' : 'Against the nearest reading 30 days earlier',
+      tone: thirtyDayDelta === null ? 'neutral' : thirtyDayDelta < 0 ? 'down' : thirtyDayDelta > 0 ? 'up' : 'neutral',
+    },
+    {
+      label: targetWeight !== undefined ? 'To target' : 'Window span',
+      value: targetWeight !== undefined
+        ? currentTargetGap === null
+          ? '—'
+          : `${Math.abs(currentTargetGap).toFixed(1)}kg`
+        : rangeSpan === null
+          ? '—'
+          : `${rangeSpan.toFixed(1)}kg`,
+      note: targetWeight !== undefined
+        ? currentTargetGap === null
+          ? 'No active target'
+          : currentTargetGap <= 0
+            ? 'At or below target'
+            : 'Current gap to goal'
+        : 'High to low across the selected window',
+      tone: targetWeight !== undefined && currentTargetGap !== null && currentTargetGap <= 0 ? 'down' : 'neutral',
+    },
+  ] as const
   const phaseBands = phases.flatMap((phase) => {
     const start = new Date(phase.start).getTime()
     const end = new Date(phase.end).getTime()
@@ -334,6 +403,15 @@ export default function FitnessLineChart({
             ))}
           </div>
         )}
+      </div>
+      <div className="bc-clinical-strip" aria-label="Clinical summary">
+        {summaryStats.map((stat) => (
+          <div key={stat.label} className={`bc-clinical-cell ${stat.tone}`}>
+            <div className="bc-clinical-label">{stat.label}</div>
+            <div className="bc-clinical-value">{stat.value}</div>
+            <div className="bc-clinical-note">{stat.note}</div>
+          </div>
+        ))}
       </div>
       <div className="bc-chart-wrap">
         <svg viewBox={`0 0 ${w} ${h}`} className="fitness-chart" role="img" aria-label={ariaLabel} preserveAspectRatio="none">
@@ -476,17 +554,32 @@ export default function FitnessLineChart({
           )}
 
           {/* Faint data dots so the user sees the underlying readings. */}
-          {filteredPoints.map((point, index) => (
-            <circle
-              key={`dot-${point.date}-${index}`}
-              cx={x(point.date)}
-              cy={y(point.value)}
-              r={hoverIndex === index ? 4 : 2.4}
-              className="bc-data-dot"
-              style={{ fill: hoverIndex === index ? color : 'var(--ink)', opacity: hoverIndex === index ? 1 : 0.35 }}
-              pointerEvents="none"
-            />
-          ))}
+          {filteredPoints.map((point, index) => {
+            const pointX = x(point.date)
+            const pointY = y(point.value)
+            const isHovered = hoverIndex === index
+            return (
+              <g key={`dot-${point.date}-${index}`} pointerEvents="none">
+                <line
+                  x1={pointX}
+                  y1={pointY - 2}
+                  x2={pointX}
+                  y2={pointY + 2}
+                  className="bc-data-mark"
+                  style={{ opacity: isHovered ? 0 : 0.26 }}
+                />
+                {isHovered && (
+                  <circle
+                    cx={pointX}
+                    cy={pointY}
+                    r={4}
+                    className="bc-data-dot-active"
+                    style={{ fill: color }}
+                  />
+                )}
+              </g>
+            )
+          })}
           {/* Single overlay captures hover anywhere across the plot, then
               snaps to the nearest point by x. Much smoother than per-dot
               hit targets. */}
@@ -546,13 +639,10 @@ export default function FitnessLineChart({
         )}
       </div>
       <div className="bc-key">
-        <span className="item"><i className="sw raw" />Daily reading</span>
+        <span className="item"><i className="sw raw" />Daily readings</span>
         {secondaryPath && <span className="item"><i className="sw avg" style={{ background: secondaryColor }} />{secondaryLabel}</span>}
         {targetWeight !== undefined && <span className="item"><i className="sw target" />Target line</span>}
-        <span className="item"><i className="sw lean" />Lean phase</span>
-        <span className="item"><i className="sw bulk" />Bulk</span>
-        <span className="item"><i className="sw cut" />Fat loss push</span>
-        <span className="item"><i className="sw recomp" />Recomposition</span>
+        <span className="item"><i className="sw phase" />Phase background</span>
       </div>
     </div>
   )
