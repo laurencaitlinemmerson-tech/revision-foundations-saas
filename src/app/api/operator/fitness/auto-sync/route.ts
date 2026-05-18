@@ -39,6 +39,18 @@ function parseNumber(value: unknown) {
   return Number.isFinite(num) ? num : null;
 }
 
+// Health Auto Export wraps most metrics as {qty, units} — handle both shapes.
+function qtyOf(value: unknown): { qty: number | null; units: string | undefined } {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const obj = value as Record<string, unknown>;
+    return {
+      qty: parseNumber(obj.qty ?? obj.value),
+      units: typeof obj.units === 'string' ? obj.units : typeof obj.unit === 'string' ? obj.unit : undefined,
+    };
+  }
+  return { qty: parseNumber(value), units: undefined };
+}
+
 function parseDay(value: string | undefined | null) {
   if (!value) return null;
   const matched = value.match(/^(\d{4}-\d{2}-\d{2})/);
@@ -587,18 +599,27 @@ function parseWorkouts(payload: Record<string, unknown>): WorkoutRow[] {
     if (!started) continue;
     const ended = isoOrNull(w.end ?? w.endDate);
 
-    const energyRaw = parseNumber(w.totalEnergyBurned ?? w.activeEnergyBurned);
-    const energy = energyRaw !== null ? round(convertEnergyToKcal(energyRaw, w.energyUnits), 1) : null;
+    const energyParsed = qtyOf(w.totalEnergyBurned ?? w.activeEnergyBurned);
+    const energy = energyParsed.qty !== null
+      ? round(convertEnergyToKcal(energyParsed.qty, energyParsed.units ?? w.energyUnits), 1)
+      : null;
 
-    const distanceRaw = parseNumber(w.totalDistance ?? w.distance);
-    const distance = distanceRaw !== null ? round(convertDistanceToKm(distanceRaw, w.distanceUnits), 2) : null;
+    const distanceParsed = qtyOf(w.totalDistance ?? w.distance);
+    const distance = distanceParsed.qty !== null
+      ? round(convertDistanceToKm(distanceParsed.qty, distanceParsed.units ?? w.distanceUnits), 2)
+      : null;
 
-    const durationRaw = parseNumber(w.duration);
-    let duration = durationRaw !== null ? round(convertDurationToMinutes(durationRaw, w.durationUnits), 1) : null;
+    const durationParsed = qtyOf(w.duration);
+    let duration = durationParsed.qty !== null
+      ? round(convertDurationToMinutes(durationParsed.qty, durationParsed.units ?? w.durationUnits), 1)
+      : null;
     if (duration === null && ended) {
       const computed = minutesBetween(started, ended);
       if (computed !== null) duration = computed;
     }
+
+    const avgHrParsed = qtyOf(w.avgHeartRate ?? w.averageHeartRate);
+    const maxHrParsed = qtyOf(w.maxHeartRate);
 
     rows.push({
       started_at: started,
@@ -606,12 +627,8 @@ function parseWorkouts(payload: Record<string, unknown>): WorkoutRow[] {
       type: (w.name ?? w.workoutName ?? null) as string | null,
       duration_min: duration,
       energy_kcal: energy,
-      avg_hr: parseNumber(w.avgHeartRate ?? w.averageHeartRate) !== null
-        ? Math.round(parseNumber(w.avgHeartRate ?? w.averageHeartRate) as number)
-        : null,
-      max_hr: parseNumber(w.maxHeartRate) !== null
-        ? Math.round(parseNumber(w.maxHeartRate) as number)
-        : null,
+      avg_hr: avgHrParsed.qty !== null ? Math.round(avgHrParsed.qty) : null,
+      max_hr: maxHrParsed.qty !== null ? Math.round(maxHrParsed.qty) : null,
       distance_km: distance,
       source: (w.source ?? null) as string | null,
       raw: w,
