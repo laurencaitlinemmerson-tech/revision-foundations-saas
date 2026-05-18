@@ -79,6 +79,11 @@ function formatSignedKg(value: number | null) {
   return `${value > 0 ? '+' : ''}${value.toFixed(1)}kg`
 }
 
+function trendToneClass(value: number | null) {
+  if (value === null || !Number.isFinite(value)) return 'neutral'
+  return value <= 0 ? 'down' : 'up'
+}
+
 function shortPhaseLabel(label: string) {
   const normalized = label.toLowerCase()
   if (normalized.includes('lean')) return 'Lean'
@@ -235,6 +240,8 @@ export default function FitnessLineChart({
     ? []
     : filteredPoints.filter((point) => new Date(point.date).getTime() >= latestTime - 6 * dayMs)
   const weekAverage = mean(recentWeekPoints.map((point) => point.value))
+  const sevenDayAnchor = latestTime === null ? null : findPointAtOrBefore(filteredPoints, latestTime - 7 * dayMs)
+  const sevenDayDelta = latestPoint && sevenDayAnchor ? latestPoint.value - sevenDayAnchor.value : null
   const thirtyDayAnchor = latestTime === null ? null : findPointAtOrBefore(filteredPoints, latestTime - 30 * dayMs)
   const thirtyDayDelta = latestPoint && thirtyDayAnchor ? latestPoint.value - thirtyDayAnchor.value : null
   const rangeSpan = values.length > 0 ? Math.max(...values) - Math.min(...values) : null
@@ -279,8 +286,8 @@ export default function FitnessLineChart({
   ].filter(Boolean)
   const tipWidth = 208
   const tipHeight = 50 + tipLines.length * 14
-  const currentCalloutWidth = 126
-  const currentCalloutHeight = 70
+  const currentCalloutWidth = 152
+  const currentCalloutHeight = 82
   const currentCalloutX = w - currentCalloutWidth - 18
   const currentPointX = latestPoint ? x(latestPoint.date) : null
   const currentPointY = latestPoint ? y(latestPoint.value) : null
@@ -524,10 +531,18 @@ export default function FitnessLineChart({
               />
               <text x={currentCalloutX + 14} y={currentCalloutY + 18} className="bc-current-kicker">Current</text>
               <text x={currentCalloutX + 14} y={currentCalloutY + 40} className="bc-current-value">{latestPoint.value.toFixed(1)}kg</text>
-              <text x={currentCalloutX + 14} y={currentCalloutY + 56} className="bc-current-meta">
+              <text x={currentCalloutX + 14} y={currentCalloutY + 54} className="bc-current-meta">
                 {latestPhase?.label ?? fmtHoverDate(latestPoint.date)}
               </text>
-              <text x={currentCalloutX + 14} y={currentCalloutY + 69} className="bc-current-meta bc-current-meta-soft">
+              <text x={currentCalloutX + 14} y={currentCalloutY + 68} className="bc-current-trend-label">7d</text>
+              <text x={currentCalloutX + 34} y={currentCalloutY + 68} className={`bc-current-trend-value ${trendToneClass(sevenDayDelta)}`}>
+                {formatSignedKg(sevenDayDelta) ?? '—'}
+              </text>
+              <text x={currentCalloutX + 92} y={currentCalloutY + 68} className="bc-current-trend-label">30d</text>
+              <text x={currentCalloutX + 118} y={currentCalloutY + 68} className={`bc-current-trend-value ${trendToneClass(thirtyDayDelta)}`}>
+                {formatSignedKg(thirtyDayDelta) ?? '—'}
+              </text>
+              <text x={currentCalloutX + 14} y={currentCalloutY + 79} className="bc-current-meta bc-current-meta-soft">
                 {currentGoalLabel ?? fmtHoverDate(latestPoint.date)}
               </text>
             </g>

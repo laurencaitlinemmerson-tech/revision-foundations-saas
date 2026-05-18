@@ -1010,6 +1010,32 @@
   fill: var(--ink-mute);
 }
 
+.bc-current-trend-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--ink-mute);
+}
+
+.bc-current-trend-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8.5px;
+  fill: var(--ink);
+}
+
+.bc-current-trend-value.down {
+  fill: oklch(0.42 0.09 210);
+}
+
+.bc-current-trend-value.up {
+  fill: oklch(0.47 0.08 20);
+}
+
+.bc-current-trend-value.neutral {
+  fill: var(--ink-soft);
+}
+
 .bc-latest-halo {
   fill: oklch(0.70 0.12 76 / 0.18);
 }
