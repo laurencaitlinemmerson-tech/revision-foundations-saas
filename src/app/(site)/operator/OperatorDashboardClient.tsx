@@ -4,7 +4,6 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties,
 } from 'react';
 import FitnessLineChart from '@/components/operator/fitness/FitnessLineChart';
-import OperatorTrainingSection from '@/components/operator/fitness/OperatorTrainingSection';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
@@ -19,6 +18,15 @@ interface FitnessReading {
 }
 interface Reg {
   slope: number; intercept: number; r2: number; t0: number;
+}
+
+// Local-timezone YYYY-MM-DD. Avoids toISOString() rolling back a day when
+// local clock is past midnight but still before midnight UTC.
+function localIsoDate(d: Date = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -4275,7 +4283,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
 function Compose({ open, onClose, onSubmit }: {
   open:boolean; onClose:()=>void; onSubmit:(r:FitnessReading)=>void;
 }) {
-  const [form, setForm] = useState({ date:new Date().toISOString().slice(0,10), weight:'', bmi:'', bodyFat:'', water:'', muscleMass:'', boneMass:'' });
+  const [form, setForm] = useState({ date:localIsoDate(), weight:'', bmi:'', bodyFat:'', water:'', muscleMass:'', boneMass:'' });
   useEffect(() => { if (!open) setForm(f=>({...f,weight:'',bmi:'',bodyFat:'',water:'',muscleMass:'',boneMass:''})); }, [open]);
   if (!open) return null;
   const set = (k:string) => (e:React.ChangeEvent<HTMLInputElement>) => setForm({...form,[k]:e.target.value});
@@ -4757,7 +4765,7 @@ export default function OperatorDashboardClient() {
   const progress = peakWeight <= goal ? 100 : Math.max(0, Math.min(100, ((peakWeight - latest.weight) / (peakWeight - goal)) * 100));
   const syncSummary = cloudOk === null ? 'Local-first mode' : cloudOk ? (syncing ? 'Cloud syncing now' : 'Cloud sync active') : 'Local backup only';
   const healthDays = healthStream.days;
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = localIsoDate();
   const latestHealthDay = healthDays[healthDays.length - 1] ?? null;
   const todayHealth = healthDays.find((d) => d.date.slice(0, 10) === todayIso) ?? latestHealthDay;
   const caloriesInToday = todayHealth?.nutrition?.dietaryEnergyKcal ?? null;
@@ -5047,7 +5055,6 @@ export default function OperatorDashboardClient() {
           {/* ───────────────────────── ACTION ────────────────────────── */}
           <EditorialDivider eyebrow="Action" note="Today, one move." />
 
-          <OperatorTrainingSection healthStream={healthStream} />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />

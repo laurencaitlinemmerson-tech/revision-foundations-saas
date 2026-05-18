@@ -2,6 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+// Local-timezone YYYY-MM-DD. Avoids the UTC rollback bug where "today" reads
+// as yesterday for users east of UTC after local midnight.
+function localIsoDate(d: Date = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 // ─── types ──────────────────────────────────────────────────────────────────
 
 interface ActivityMetrics {
@@ -706,7 +715,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
     }
     return out;
   }
-  const todayLifestyleIso = new Date().toISOString().slice(0, 10);
+  const todayLifestyleIso = localIsoDate();
   const todayWater = lifestyle[todayLifestyleIso]?.water ?? (latest?.nutrition?.waterMl ? Math.round(latest.nutrition.waterMl / 250) : 0);
   const todayCaffeine = lifestyle[todayLifestyleIso]?.caffeine ?? 0;
   const todayAlcohol = lifestyle[todayLifestyleIso]?.alcohol ?? 0;
@@ -857,7 +866,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
   }
 
   function evaluatePromise(date: string, kind: PromiseKind): 'kept' | 'missed' | 'pending' {
-    if (date === new Date().toISOString().slice(0, 10)) return 'pending';
+    if (date === localIsoDate()) return 'pending';
     const d = days.find((row) => row.date.slice(0, 10) === date);
     if (!d) return 'pending';
     if (kind === 'rest') return 'kept';
@@ -900,7 +909,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
 
   const keptCount = promiseLedger.filter((r) => r.status === 'kept').length;
   const setCount = promiseLedger.filter((r) => r.promise !== null).length;
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = localIsoDate();
   const todayPromise = promises[todayIso] ?? null;
 
 
