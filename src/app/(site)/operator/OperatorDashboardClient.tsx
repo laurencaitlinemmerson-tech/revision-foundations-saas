@@ -4673,19 +4673,22 @@ export default function OperatorDashboardClient() {
 
   const todayIso = localIsoDate();
   const sorted   = useMemo(() => [...readings].sort((a,b)=>a.date.localeCompare(b.date)), [readings]);
-  const dashboardSource = sorted.length > 0 ? sorted : SEED;
-  const reg      = useMemo(() => regress(dashboardSource), [dashboardSource]);
+  const dashboardSource = sorted;
+  const derivedSource = dashboardSource.length > 0 ? dashboardSource : SEED;
+  const reg      = useMemo(() => regress(derivedSource), [derivedSource]);
   const latest   = dashboardSource[dashboardSource.length - 1];
   const latestIsToday = latest ? isoDay(latest.date) === todayIso : false;
   const weightLabel = latestIsToday ? 'Today' : 'Latest';
-  const state    = useMemo(() => assessState(sorted.length > 0 ? sorted : SEED, goal, todayIso), [sorted, goal, todayIso]);
-  const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(dashboardSource), [dashboardSource]);
-  const phaseRows = useMemo(() => buildReferencePhaseRows(dashboardSource), [dashboardSource]);
-  const photoMilestones = useMemo(() => buildPhotoMilestones(dashboardSource), [dashboardSource]);
-  const heroMetrics = useMemo(() => buildHeroMetrics(dashboardSource), [dashboardSource]);
-  const rollingAverage = useMemo(() => buildRollingAverage(dashboardSource), [dashboardSource]);
-  const sideMetrics = useMemo(() => buildSideMetrics(dashboardSource, goal, reg), [dashboardSource, goal, reg]);
-  const weekRows = useMemo(() => buildWeekRows(dashboardSource, todayIso), [dashboardSource, todayIso]);
+  const state    = useMemo(() => (
+    dashboardSource.length > 0 ? assessState(dashboardSource, goal, todayIso) : null
+  ), [dashboardSource, goal, todayIso]);
+  const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(derivedSource), [derivedSource]);
+  const phaseRows = useMemo(() => buildReferencePhaseRows(derivedSource), [derivedSource]);
+  const photoMilestones = useMemo(() => buildPhotoMilestones(derivedSource), [derivedSource]);
+  const heroMetrics = useMemo(() => buildHeroMetrics(derivedSource), [derivedSource]);
+  const rollingAverage = useMemo(() => buildRollingAverage(derivedSource), [derivedSource]);
+  const sideMetrics = useMemo(() => buildSideMetrics(derivedSource, goal, reg), [derivedSource, goal, reg]);
+  const weekRows = useMemo(() => buildWeekRows(derivedSource, todayIso), [derivedSource, todayIso]);
 
   // Lift the Apple Health fetch so multiple slot renders share one network call.
   const healthStream = useHealthStream(authed ? opPw : '');
@@ -4697,7 +4700,109 @@ export default function OperatorDashboardClient() {
     }} />;
   }
 
-  if (!latest) return <div style={{ background:T.paper, minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}><p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted }}>The page is waiting for the first reading.</p></div>;
+  if (!latest || !state) {
+    const statusLabel = syncing
+      ? 'Checking for your latest reading'
+      : cloudOk === false
+      ? 'Cloud fitness storage needs finishing'
+      : 'No fitness readings logged yet';
+    const statusCopy = syncing
+      ? 'The operator dashboard is checking local and cloud fitness data now.'
+      : cloudOk === false
+      ? 'The old 17 May 2026 / 88.2kg value was coming from a baked-in demo feed. That fallback is now disabled, so this screen will wait for a real reading instead.'
+      : 'If you weighed in this morning on 18 May 2026 and it is not showing here yet, the reading has not been synced into the fitness ledger.';
+
+    return (
+      <div className="fitness-reference-shell">
+        <main className="wrap fitness-redesign" id="operator-overview">
+          <section style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '48px 0 120px',
+          }}>
+            <div style={{
+              width: 'min(680px, 100%)',
+              border: `1px solid ${T.line}`,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(251,248,243,0.96) 100%)',
+              boxShadow: CARD_SHADOW,
+              padding: '32px clamp(22px, 4vw, 40px)',
+            }}>
+              <Kicker style={{ marginBottom: 10 }}>Operator fitness</Kicker>
+              <h1 style={{ fontFamily: T.display, fontWeight: 400, fontSize: 'clamp(30px, 5vw, 44px)', color: T.ink, letterSpacing: '-0.02em', lineHeight: 1.04, margin: '0 0 12px' }}>
+                Waiting for a <em>real reading</em>
+              </h1>
+              <p style={{ fontFamily: T.sans, fontSize: 14, fontWeight: 300, color: T.body, lineHeight: 1.75, margin: '0 0 22px', maxWidth: '52ch' }}>
+                {statusCopy}
+              </p>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: 12,
+                marginBottom: 22,
+              }}>
+                <div style={{ border: `1px solid ${T.line}`, background: 'rgba(255,255,255,0.74)', padding: '14px 16px' }}>
+                  <Kicker style={{ marginBottom: 8 }}>Status</Kicker>
+                  <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, lineHeight: 1.05 }}>{statusLabel}</div>
+                </div>
+                <div style={{ border: `1px solid ${T.line}`, background: 'rgba(255,255,255,0.74)', padding: '14px 16px' }}>
+                  <Kicker style={{ marginBottom: 8 }}>Today</Kicker>
+                  <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, lineHeight: 1.05 }}>{fmtDate(todayIso, { long: true })}</div>
+                </div>
+                <div style={{ border: `1px solid ${T.line}`, background: 'rgba(255,255,255,0.74)', padding: '14px 16px' }}>
+                  <Kicker style={{ marginBottom: 8 }}>Cloud sync</Kicker>
+                  <div style={{ fontFamily: T.display, fontSize: 22, color: cloudOk === false ? T.rose : cloudOk ? T.green : T.gold, lineHeight: 1.05 }}>
+                    {cloudOk === false ? 'Setup required' : cloudOk ? 'Connected' : 'Checking'}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setCompose(true)}
+                  style={{
+                    background: T.ink,
+                    color: T.paper,
+                    border: `1px solid ${T.ink}`,
+                    cursor: 'pointer',
+                    padding: '11px 16px',
+                    fontFamily: T.sans,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  File reading
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { void refreshCloudReadings(); }}
+                  style={{
+                    background: 'transparent',
+                    color: T.ink,
+                    border: `1px solid ${T.line}`,
+                    cursor: 'pointer',
+                    padding: '11px 16px',
+                    fontFamily: T.sans,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Retry sync
+                </button>
+              </div>
+            </div>
+          </section>
+          <Compose open={compose} onClose={() => setCompose(false)} onSubmit={handleAdd} />
+        </main>
+      </div>
+    );
+  }
+
   const previousWeek = nearestReadingByDays(dashboardSource, latest, 7);
   const cadence = loggingCadence(dashboardSource);
   const nutrition = nutritionTargets(latest);
