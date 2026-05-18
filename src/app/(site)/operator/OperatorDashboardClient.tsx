@@ -281,11 +281,18 @@ function DateStamp({ iso, style }: { iso: string; style?: CSSProperties }) {
 }
 
 // Full-width editorial section divider with an eyebrow.
-function HeadlineSparkline({ readings }: { readings: FitnessReading[] }) {
+function HeadlineSparkline({
+  readings,
+  variant = 'compact',
+}: {
+  readings: FitnessReading[];
+  variant?: 'compact' | 'wide';
+}) {
   if (readings.length < 2) return null;
-  const w = 220;
-  const h = 48;
-  const pad = 4;
+  const isWide = variant === 'wide';
+  const w = isWide ? 520 : 220;
+  const h = isWide ? 68 : 48;
+  const pad = isWide ? 12 : 4;
   const ys = readings.map(r => r.weight);
   const yMin = Math.min(...ys) - 0.4;
   const yMax = Math.max(...ys) + 0.4;
@@ -294,13 +301,13 @@ function HeadlineSparkline({ readings }: { readings: FitnessReading[] }) {
   const ypts = readings.map(r => pad + (1 - (r.weight - yMin) / span) * (h - pad * 2));
   const path = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ypts[i].toFixed(1)}`).join(' ');
   return (
-    <div className="fit-hero-spark">
+    <div className={`fit-hero-spark ${isWide ? 'fit-hero-spark-wide' : ''}`}>
       <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
-        <path d={path} fill="none" stroke={T.ink} strokeWidth="1.1" strokeLinejoin="round" strokeLinecap="round" />
+        <path d={path} fill="none" stroke={T.ink} strokeWidth={isWide ? '1.55' : '1.1'} strokeLinejoin="round" strokeLinecap="round" />
         {xs.map((x, i) => (
           <g key={i}>
-            <circle cx={x} cy={ypts[i]} r={i === readings.length - 1 ? 3 : 2.2} fill={T.paper} stroke={T.ink} strokeWidth="0.8" />
-            {i === readings.length - 1 && <circle cx={x} cy={ypts[i]} r="1.3" fill={T.ink} />}
+            <circle cx={x} cy={ypts[i]} r={isWide ? (i === readings.length - 1 ? 4.4 : 3.4) : (i === readings.length - 1 ? 3 : 2.2)} fill={T.paper} stroke={T.ink} strokeWidth={isWide ? '1.2' : '0.8'} />
+            {i === readings.length - 1 && <circle cx={x} cy={ypts[i]} r={isWide ? '1.9' : '1.3'} fill={T.ink} />}
           </g>
         ))}
       </svg>
@@ -5605,7 +5612,6 @@ export default function OperatorDashboardClient() {
   const caloriesOutSub = todayHealth
     ? `BMR ${nutrition.bmr.toLocaleString('en-GB')} + active ${(activeKcalToday ?? 0).toLocaleString('en-GB')} kcal`
     : 'Connect Apple Health to populate';
-  const weightTodaySub = `${targetDelta <= 0 ? `${Math.abs(targetDelta).toFixed(1)} kg under` : `${targetDelta.toFixed(1)} kg to go`} · goal ${goal.toFixed(1)} kg`;
   const proteinToday = todayHealth?.nutrition?.proteinG ?? null;
   const carbsToday = todayHealth?.nutrition?.carbsG ?? null;
   const fatToday = todayHealth?.nutrition?.fatG ?? null;
@@ -5647,14 +5653,32 @@ export default function OperatorDashboardClient() {
               <span className="muted">{formatReferenceDate(todayIso)}</span>
             </div>
 
-            <div className="fit-glance-row">
-              <div className="glance-card">
-                <div className="gc-kicker">Weight</div>
-                <div className={`gc-num ${targetDelta <= 0 ? 'good' : 'warn'}`}>{latest.weight.toFixed(1)}</div>
-                <div className="gc-lbl">kg logged</div>
-                <div className="gc-sub muted">{weightTodaySub}</div>
+            <section className="fit-weight-feature">
+              <div className="fit-weight-number-card">
+                <div className="fit-kicker">This week&apos;s figure · {fmtDate(latest.date, { long: true })}</div>
+                <div className="fit-weight-feature-num">
+                  <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
+                  <span className="unit">kg</span>
+                </div>
+                <div className="fit-weight-feature-meta">
+                  <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
+                    {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)} kg · prev. reading
+                  </span>
+                  <span className="fit-weight-feature-note">
+                    {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
+                  </span>
+                </div>
               </div>
 
+              <div className="fit-weight-spark-card">
+                <div className="fit-kicker">Last four readings</div>
+                <div className="fit-weight-feature-spark">
+                  <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
+                </div>
+              </div>
+            </section>
+
+            <div className="fit-glance-row">
               <div className="glance-card">
                 <div className="gc-kicker">Body fat</div>
                 <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
