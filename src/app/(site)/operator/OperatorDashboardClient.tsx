@@ -29,6 +29,19 @@ function localIsoDate(d: Date = new Date()): string {
   return `${y}-${m}-${day}`;
 }
 
+function isoDay(value: string): string {
+  return value.slice(0, 10);
+}
+
+function parseLocalDateInput(value: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDay(value));
+  if (match) {
+    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0, 0);
+  }
+
+  return new Date(value);
+}
+
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const T = {
@@ -205,7 +218,7 @@ function goalDate(reg: Reg, goal: number): Date | null {
 
 // Monospace date stamp — "MAY · 17 · 2026".
 function dateStamp(iso: string): string {
-  const d = new Date(iso);
+  const d = parseLocalDateInput(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' })
     .toUpperCase()
@@ -343,7 +356,7 @@ function HeroIntention({ state, latest, goal }: { state: State; latest: FitnessR
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string, opts: { long?: boolean } = {}) {
-  const d = new Date(iso);
+  const d = parseLocalDateInput(iso);
   if (opts.long) return d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
   return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
 }
@@ -493,9 +506,11 @@ interface State {
   peak: { weight: number; date: string };
 }
 
-function assessState(sorted: FitnessReading[], goal: number, today: Date = new Date('2026-05-17')): State {
+function assessState(sorted: FitnessReading[], goal: number, todayIso: string = localIsoDate()): State {
   const latest = sorted[sorted.length - 1];
-  const daysSince = Math.floor((today.getTime() - new Date(latest.date).getTime()) / 86400000);
+  const today = parseLocalDateInput(todayIso);
+  const latestDate = parseLocalDateInput(latest.date);
+  const daysSince = Math.max(0, Math.round((today.getTime() - latestDate.getTime()) / 86400000));
   const status: State['weighInStatus'] =
     daysSince === 0 ? 'today' : daysSince <= 5 ? 'on-time' : daysSince <= 7 ? 'due-soon' : 'overdue';
 
@@ -3711,7 +3726,7 @@ function donutSlices(slices: Slice[], cx: number, cy: number, rOuter: number, rI
   });
 }
 
-function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number }) {
+function PieComposition({ latest, goal, weightLabel }: { latest: FitnessReading; goal: number; weightLabel: string }) {
   // Current
   const fatKg     = +(latest.weight * latest.bodyFat / 100).toFixed(1);
   const muscleKg  = +(latest.weight * latest.muscleMass / 100).toFixed(1);
@@ -3759,7 +3774,7 @@ function PieComposition({ latest, goal }: { latest: FitnessReading; goal: number
     <div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}`, gap:0 }}>
         <div style={{ borderRight:`0.5px solid ${T.line}` }}>
-          {renderPie(currentSlices, 'Today · the current composition', latest.weight, `at ${latest.weight} kg`)}
+          {renderPie(currentSlices, `${weightLabel} · the current composition`, latest.weight, `at ${latest.weight} kg`)}
         </div>
         <div>
           {renderPie(goalSlices, `At ${goal} kg · the target composition`, goal, 'estimated at 25% body fat')}
@@ -4047,7 +4062,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
             title={<>Current vs goal <em style={{ color:T.gold }}>composition</em></>}
             subtitle="Where the kilograms sit now, and what has to move if muscle is preserved on the way to goal."
           >
-            <PieComposition latest={latest} goal={goal} />
+            <PieComposition latest={latest} goal={goal} weightLabel={weightLabel} />
           </FitPanel>
         </div>
 
@@ -4480,7 +4495,7 @@ function referenceMetric(
 }
 
 function formatReferenceDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', {
+  return parseLocalDateInput(iso).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -4624,9 +4639,8 @@ function buildPhotoMilestones(sorted: FitnessReading[]): FitnessPhotoMilestone[]
   }));
 }
 
-function buildWeekRows(sorted: FitnessReading[]): ReferenceWeekRow[] {
-  const latest = sorted[sorted.length - 1];
-  const today = new Date(latest.date);
+function buildWeekRows(sorted: FitnessReading[], todayIso: string = localIsoDate()): ReferenceWeekRow[] {
+  const today = parseLocalDateInput(todayIso);
   const dayOfWeek = today.getDay();
   const monday = new Date(today);
   monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
@@ -4636,11 +4650,11 @@ function buildWeekRows(sorted: FitnessReading[]): ReferenceWeekRow[] {
   return dayLabels.map((day, index) => {
     const date = new Date(monday);
     date.setDate(monday.getDate() + index);
-    const isoDate = date.toISOString().slice(0, 10);
-    const entry = sorted.find((row) => row.date.slice(0, 10) === isoDate);
+    const isoDate = localIsoDate(date);
+    const entry = sorted.find((row) => isoDay(row.date) === isoDate);
     const previousDate = new Date(date);
     previousDate.setDate(date.getDate() - 1);
-    const previousEntry = sorted.find((row) => row.date.slice(0, 10) === previousDate.toISOString().slice(0, 10));
+    const previousEntry = sorted.find((row) => isoDay(row.date) === localIsoDate(previousDate));
     const weight = entry?.weight ?? null;
     const delta = weight !== null && previousEntry
       ? formatWeightDelta(weight - previousEntry.weight)
@@ -4656,7 +4670,7 @@ function buildWeekRows(sorted: FitnessReading[]): ReferenceWeekRow[] {
       detail: entry
         ? `BF ${entry.bodyFat.toFixed(1)}% · BMI ${entry.bmi.toFixed(1)}`
         : 'No weigh-in',
-      isToday: isoDate === latest.date.slice(0, 10),
+      isToday: isoDate === todayIso,
     };
   });
 }
@@ -4772,18 +4786,21 @@ export default function OperatorDashboardClient() {
     if (opPw) await apiDel(opPw, id);
   }, [readings, opPw, saveLocal]);
 
+  const todayIso = localIsoDate();
   const sorted   = useMemo(() => [...readings].sort((a,b)=>a.date.localeCompare(b.date)), [readings]);
   const dashboardSource = sorted.length > 0 ? sorted : SEED;
   const reg      = useMemo(() => regress(dashboardSource), [dashboardSource]);
   const latest   = dashboardSource[dashboardSource.length - 1];
-  const state    = useMemo(() => assessState(sorted.length > 0 ? sorted : SEED, goal), [sorted, goal]);
+  const latestIsToday = latest ? isoDay(latest.date) === todayIso : false;
+  const weightLabel = latestIsToday ? 'Today' : 'Latest';
+  const state    = useMemo(() => assessState(sorted.length > 0 ? sorted : SEED, goal, todayIso), [sorted, goal, todayIso]);
   const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(dashboardSource), [dashboardSource]);
   const phaseRows = useMemo(() => buildReferencePhaseRows(dashboardSource), [dashboardSource]);
   const photoMilestones = useMemo(() => buildPhotoMilestones(dashboardSource), [dashboardSource]);
   const heroMetrics = useMemo(() => buildHeroMetrics(dashboardSource), [dashboardSource]);
   const rollingAverage = useMemo(() => buildRollingAverage(dashboardSource), [dashboardSource]);
   const sideMetrics = useMemo(() => buildSideMetrics(dashboardSource, goal, reg), [dashboardSource, goal, reg]);
-  const weekRows = useMemo(() => buildWeekRows(dashboardSource), [dashboardSource]);
+  const weekRows = useMemo(() => buildWeekRows(dashboardSource, todayIso), [dashboardSource, todayIso]);
 
   // Lift the Apple Health fetch so multiple slot renders share one network call.
   const healthStream = useHealthStream(authed ? opPw : '');
@@ -4806,9 +4823,8 @@ export default function OperatorDashboardClient() {
   const progress = peakWeight <= goal ? 100 : Math.max(0, Math.min(100, ((peakWeight - latest.weight) / (peakWeight - goal)) * 100));
   const syncSummary = cloudOk === null ? 'Local-first mode' : cloudOk ? (syncing ? 'Cloud syncing now' : 'Cloud sync active') : 'Local backup only';
   const healthDays = healthStream.days;
-  const todayIso = localIsoDate();
   const latestHealthDay = healthDays[healthDays.length - 1] ?? null;
-  const todayHealth = healthDays.find((d) => d.date.slice(0, 10) === todayIso) ?? latestHealthDay;
+  const todayHealth = healthDays.find((d) => isoDay(d.date) === todayIso) ?? latestHealthDay;
   const caloriesInToday = todayHealth?.nutrition?.dietaryEnergyKcal ?? null;
   const activeKcalToday = todayHealth?.activity.activeEnergyKcal ?? null;
   const caloriesOutToday = todayHealth ? Math.round(nutrition.bmr + (activeKcalToday ?? 0)) : null;
@@ -4870,7 +4886,7 @@ export default function OperatorDashboardClient() {
                 <span className="fit-today-label">Today at a glance</span>
                 <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
               </div>
-              <span className="muted">{formatReferenceDate(latest.date)}</span>
+              <span className="muted">{formatReferenceDate(todayIso)}</span>
             </div>
 
             <div className="fit-glance-row">
@@ -4951,7 +4967,7 @@ export default function OperatorDashboardClient() {
             </div>
             <div className="fit-headline-stat">
               <div className="lbl" style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-                <span>Today</span>
+                <span>{weightLabel}</span>
                 <span style={{ opacity: 0.45 }}>·</span>
                 <DateStamp iso={latest.date} />
               </div>
@@ -5020,7 +5036,7 @@ export default function OperatorDashboardClient() {
                   value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
                   title: 'Peak weight',
                 },
-                { date: latest.date, value: latest.weight, title: 'Today' },
+                { date: latest.date, value: latest.weight, title: weightLabel },
               ]}
               secondaryPoints={rollingAverage}
               secondaryColor="oklch(0.70 0.12 76)"

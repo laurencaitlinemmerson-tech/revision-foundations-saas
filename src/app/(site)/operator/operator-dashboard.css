@@ -146,15 +146,17 @@
 }
 
 .fit-today {
-  margin-bottom: 28px;
+  margin: 8px 0 32px;
 }
 
 .fit-today-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--rule);
   flex-wrap: wrap;
 }
 
@@ -175,25 +177,42 @@
 }
 
 .fit-glance-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 12px;
   align-items: stretch;
 }
 
+@media (max-width: 980px) {
+  .fit-glance-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .fit-glance-row .glance-cal-balance {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .fit-glance-row {
+    grid-template-columns: 1fr;
+  }
+  .fit-glance-row .glance-cal-balance {
+    grid-column: auto;
+  }
+}
+
 .glance-card {
-  min-width: 180px;
-  flex: 1 1 180px;
   border: 0.5px solid var(--rule);
   border-radius: 0;
   background: transparent;
-  padding: 20px 20px 22px;
+  padding: 22px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 148px;
 }
 
 .glance-card.glance-cal-balance {
-  flex: 1 1 360px;
-  min-width: 320px;
-  padding: 22px 24px;
+  padding: 22px 24px 24px;
 }
 
 .gcb-row {
@@ -207,8 +226,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0 16px;
+  gap: 4px;
+  padding: 0 18px;
+  justify-content: center;
 }
 
 .gcb-col:first-child {
@@ -239,13 +259,13 @@
 .gc-num {
   font-size: 44px;
   font-style: italic;
-  margin-top: 14px;
+  margin-top: 12px;
   letter-spacing: -0.03em;
 }
 
 .gcb-lbl,
 .gc-lbl {
-  margin-top: 5px;
+  margin-top: 8px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -255,8 +275,9 @@
 
 .gcb-sub,
 .gc-sub {
-  margin-top: 5px;
+  margin-top: 6px;
   font-size: 11px;
+  line-height: 1.45;
   color: var(--ink-soft);
 }
 
