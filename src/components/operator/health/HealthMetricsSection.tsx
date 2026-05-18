@@ -402,21 +402,6 @@ function SleepNights({ days }: { days: DailyMetrics[] }) {
   );
 }
 
-// ─── workout type breakdown ─────────────────────────────────────────────────
-
-function workoutsByType(workouts: Workout[]): Array<{ type: string; count: number; minutes: number; kcal: number }> {
-  const map = new Map<string, { type: string; count: number; minutes: number; kcal: number }>();
-  for (const w of workouts) {
-    const key = w.type ?? 'Other';
-    const cur = map.get(key) ?? { type: key, count: 0, minutes: 0, kcal: 0 };
-    cur.count += 1;
-    cur.minutes += w.durationMin ?? 0;
-    cur.kcal += w.energyKcal ?? 0;
-    map.set(key, cur);
-  }
-  return Array.from(map.values()).sort((a, b) => b.minutes - a.minutes);
-}
-
 // ─── correlations narrative ─────────────────────────────────────────────────
 
 function describeCorrelation(r: number | null, positiveCopy: string, inverseCopy: string): { text: string; tone: 'good' | 'warn' | 'neutral' } {
@@ -441,6 +426,10 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
   const last30 = useMemo(() => days.slice(-30), [days]);
   const latest = days[days.length - 1] ?? null;
   const previousNight = days[days.length - 2] ?? null;
+  const currentDayIso = localIsoDate();
+  const latestDayIso = latest?.date ? latest.date.slice(0, 10) : null;
+  const latestIsToday = latestDayIso === currentDayIso;
+  const healthHeadline = latestIsToday ? 'Today, in body and motion' : 'Latest body and motion';
 
   // 7-day averages
   const stepsAvg7 = avg(last7.map((d) => d.activity.steps));
@@ -455,18 +444,6 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
   const rhrDelta = deltaPill(latest?.heart.restingHr ?? null, restingHrAvg7, { invert: true, suffix: ' bpm' });
   const hrvDelta = deltaPill(latest?.heart.hrvMs ?? null, hrvAvg7, { suffix: ' ms' });
   const sleepDelta = deltaPill(latest?.sleep.totalMin ?? null, sleepAvg7, { suffix: 'm' });
-
-  // Workouts week aggregates
-  const weekAgo = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 7);
-    return d.toISOString();
-  }, []);
-  const workoutsThisWeek = useMemo(() => workouts.filter((w) => w.startedAt >= weekAgo), [workouts, weekAgo]);
-  const workoutMinutesWeek = workoutsThisWeek.reduce((acc, w) => acc + (w.durationMin ?? 0), 0);
-  const workoutKcalWeek = workoutsThisWeek.reduce((acc, w) => acc + (w.energyKcal ?? 0), 0);
-  const byType = useMemo(() => workoutsByType(workoutsThisWeek), [workoutsThisWeek]);
-  const recentWorkouts = workouts.slice(0, 4);
 
   // 14-day step labels and values
   const stepBars = last14.map((d) => d.activity.steps);
@@ -1010,7 +987,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
         <header className="op-health-head">
           <div>
             <div className="op-health-kicker">Apple Health stream</div>
-            <h2 className="op-health-title">Today, in body and motion</h2>
+            <h2 className="op-health-title">{healthHeadline}</h2>
           </div>
           <div className="op-health-head-meta">
             <span className="op-date-stamp">{latest?.date ? new Date(latest.date).toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase().replace(/[ ,]+/g, ' · ') : '—'}</span>
@@ -1394,44 +1371,6 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
             <div><dt>Walking HR</dt><dd>{fmtNum(latest?.heart.walkingHrAvg ?? null, 0, ' bpm')}</dd></div>
             <div><dt>VO₂ max</dt><dd>{fmtNum(latest?.heart.vo2Max ?? null, 1)}</dd></div>
           </dl>
-        </article>
-
-        {/* Workouts — recent sessions only (the column chart lives in Analysis). */}
-        <article className="op-health-card">
-          <header className="op-health-card-head">
-            <span className="op-health-card-label">Recent sessions</span>
-            <span className="muted">Last 4 logged</span>
-          </header>
-
-          {recentWorkouts.length > 0 && (
-            <ul className="op-workout-list">
-              {recentWorkouts.map((w) => (
-                <li key={w.id}>
-                  <div className="op-workout-head">
-                    <span className="op-workout-type">{w.type ?? 'Workout'}</span>
-                    <span className="muted">{new Date(w.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
-                  </div>
-                  <div className="op-workout-meta">
-                    {w.durationMin !== null && <span>{Math.round(w.durationMin)} min</span>}
-                    {w.energyKcal !== null && <span>· {Math.round(w.energyKcal)} kcal</span>}
-                    {w.avgHr !== null && <span>· {Math.round(w.avgHr)} bpm</span>}
-                    {w.distanceKm !== null && <span>· {w.distanceKm.toFixed(2)} km</span>}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {workouts.length === 0 && (
-            <div className="op-workout-empty-state">
-              <p className="op-health-empty">
-                The workouts API is returning <code>{'{"workouts":[]}'}</code>.
-              </p>
-              <p>
-                Health Auto Export probably has workouts disabled. Re-enable workout export in the HAE automation so completed sessions start writing into the operator feed.
-              </p>
-            </div>
-          )}
         </article>
 
         {/* Consistency — 28-day heatmap + streaks */}

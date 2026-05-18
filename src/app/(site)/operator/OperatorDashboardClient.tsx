@@ -657,10 +657,6 @@ function AnalyticsSection({
   goal,
   nutrition,
   state,
-  rollingAverage,
-  cadence,
-  syncSummary,
-  opPw,
   healthStream,
 }: {
   latest: FitnessReading;
@@ -668,56 +664,10 @@ function AnalyticsSection({
   goal: number;
   nutrition: { bmr: number; activeTdee: number; intake: number; maintenance: number; protein: number };
   state: State;
-  rollingAverage: { date: string; value: number }[];
-  cadence: { count: number; score: number };
-  syncSummary: string;
-  opPw: string;
   healthStream?: HealthStreamFetch;
 }) {
-  interface WorkoutSummary {
-    id: string;
-    startedAt: string;
-    type: string | null;
-    durationMin: number | null;
-    energyKcal: number | null;
-    source: string | null;
-  }
-
-  const [fetchedWorkouts, setFetchedWorkouts] = useState<WorkoutSummary[]>([]);
-  const [fetchedWorkoutState, setFetchedWorkoutState] = useState<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
-
-  useEffect(() => {
-    if (healthStream) return;
-    if (!opPw) return;
-    setFetchedWorkoutState('loading');
-    fetch('/api/operator/workouts?limit=7', { headers: { 'x-operator-pw': opPw } })
-      .then((res) => res.json())
-      .then((data) => {
-        const fetched = (data?.workouts ?? []) as WorkoutSummary[];
-        setFetchedWorkouts(fetched);
-        setFetchedWorkoutState(fetched.length === 0 ? 'empty' : 'ready');
-      })
-      .catch(() => setFetchedWorkoutState('error'));
-  }, [healthStream, opPw]);
-
-  const workouts = healthStream
-    ? (healthStream.workouts as WorkoutSummary[])
-    : fetchedWorkouts;
-  const workoutState: 'idle' | 'loading' | 'ready' | 'empty' | 'error' = healthStream
-    ? (
-      healthStream.status === 'idle' || healthStream.status === 'loading'
-        ? 'loading'
-        : healthStream.status === 'error'
-          ? 'error'
-          : healthStream.workouts.length === 0
-            ? 'empty'
-            : 'ready'
-    )
-    : fetchedWorkoutState;
   const healthDays = healthStream?.days;
 
-  const startingWeight = sorted[0]?.weight ?? latest.weight;
-  const totalChange = latest.weight - startingWeight;
   const remainingWeight = Math.max(0, latest.weight - goal);
   const dailyDeficit = nutrition.activeTdee - nutrition.intake;
   const weeklyDeficit = dailyDeficit * 7;
@@ -762,15 +712,6 @@ function AnalyticsSection({
     : dailyDeficit > 900
     ? T.rose
     : T.green;
-  const activitySupport = cadence.score >= 80
-    ? 'Consistent training'
-    : cadence.score >= 60
-    ? 'OK cadence'
-    : 'Needs steadier logs';
-  const rollingValue = rollingAverage[rollingAverage.length - 1]?.value;
-  const workoutMinutesWeek = workouts.reduce((sum, w) => sum + (w.durationMin ?? 0), 0);
-  const workoutKcalWeek = workouts.reduce((sum, w) => sum + (w.energyKcal ?? 0), 0);
-  const recentWorkouts = workouts.slice(0, 3);
 
   // ── Chart data: last ~12 weeks of weekly-binned weights ──────────────────
   const weightTrendPoints = useMemo(() => {
@@ -778,30 +719,9 @@ function AnalyticsSection({
     return recent.map((r, i) => ({ x: i, w: r.weight, date: r.date }));
   }, [sorted]);
 
-  // ── Chart data: last 7 day-buckets of workouts (minutes) ─────────────────
-  const workoutWeekBuckets = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const buckets: { day: string; date: string; minutes: number; kcal: number }[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const iso = d.toISOString().slice(0, 10);
-      const dayLabel = d.toLocaleDateString('en-GB', { weekday: 'short' }).charAt(0);
-      const matched = workouts.filter((w) => w.startedAt.slice(0, 10) === iso);
-      buckets.push({
-        day: dayLabel,
-        date: iso,
-        minutes: matched.reduce((s, w) => s + (w.durationMin ?? 0), 0),
-        kcal: matched.reduce((s, w) => s + (w.energyKcal ?? 0), 0),
-      });
-    }
-    return buckets;
-  }, [workouts]);
-
   const proteinTarget = Math.round(latest.weight * 1.8);
   // Actual protein intake comes from Apple Health (MFP-fed), not the target.
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = localIsoDate();
   const todayHealth = healthDays?.find((d) => d.date.slice(0, 10) === todayIso) ?? healthDays?.[healthDays.length - 1];
   const proteinIntake = todayHealth?.nutrition?.proteinG ?? null;
   const proteinPct = proteinTarget > 0 && proteinIntake !== null ? Math.min(1.2, proteinIntake / proteinTarget) : 0;
@@ -829,7 +749,7 @@ function AnalyticsSection({
           <div>
             <h3 style={{ fontSize: 24 }}>Performance <em>analysis</em></h3>
             <div className="meta" style={{ fontSize: 12 }}>
-              Deficit, weight trend, workout load and protein support — at a glance.
+              Deficit, weight trend, and protein support — at a glance.
             </div>
           </div>
         </div>
@@ -880,45 +800,7 @@ function AnalyticsSection({
             />
           </AnalysisCard>
 
-          {/* ── Card 3: Workout load (this week) ── */}
-          <AnalysisCard
-            label="Workout load"
-            headline={`${Math.round(workoutMinutesWeek)} min`}
-            sub={`${workouts.length} sessions · ${Math.round(workoutKcalWeek)} kcal · ${activitySupport.toLowerCase()}`}
-            tone={cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}
-          >
-            {workoutState === 'loading' ? (
-              <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, margin: '24px 0' }}>Loading workouts…</p>
-            ) : workoutState === 'error' ? (
-              <p style={{ fontFamily: T.sans, fontSize: 12, color: T.rose, margin: '24px 0' }}>Unable to load workouts.</p>
-            ) : workoutState === 'empty' ? (
-              <div style={{ display: 'grid', gap: 8, margin: '16px 0' }}>
-                <p style={{ fontFamily: T.display, fontStyle: 'italic', fontSize: 15, color: T.body, lineHeight: 1.5, margin: 0 }}>
-                  The API is returning <code style={{ fontStyle: 'normal', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontSize: 12 }}>{'{"workouts":[]}'}</code>.
-                </p>
-                <p style={{ fontFamily: T.sans, fontSize: 12, color: T.muted, lineHeight: 1.65, margin: 0 }}>
-                  Most likely Health Auto Export has workouts disabled. Turn workout export back on in the HAE automation so session writes start hitting the operator workouts endpoint.
-                </p>
-              </div>
-            ) : (
-              <MiniColumnChart
-                values={workoutWeekBuckets.map((b) => b.minutes)}
-                labels={workoutWeekBuckets.map((b) => b.day)}
-                color={T.gold}
-                height={148}
-                formatValue={(v) => `${Math.round(v)} min`}
-              />
-            )}
-            <AnalysisStats
-              rows={[
-                ['Cadence score', `${cadence.score}/100`],
-                ['Days logged (14d)', `${cadence.count}`],
-                ['Recent', recentWorkouts.length > 0 ? `${recentWorkouts[0].type ?? 'Workout'} · ${new Date(recentWorkouts[0].startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'None yet'],
-              ]}
-            />
-          </AnalysisCard>
-
-          {/* ── Card 4: Protein vs target ── */}
+          {/* ── Card 3: Protein vs target ── */}
           <AnalysisCard
             label="Protein support"
             headline={proteinIntake !== null ? `${Math.round(proteinIntake)} g` : '—'}
@@ -2302,6 +2184,8 @@ function DashboardHero({
   cloudOk: boolean | null;
   syncing: boolean;
 }) {
+  const latestIsToday = isoDay(latest.date) === localIsoDate();
+  const weightLabel = latestIsToday ? 'Today' : 'Latest';
   const delta = latest.weight - previous.weight;
   const remaining = Math.max(0, latest.weight - goal);
   const syncLabel = cloudOk === null ? 'Local first' : cloudOk ? syncing ? 'Cloud syncing' : 'Cloud active' : 'Local backup';
@@ -2393,7 +2277,7 @@ function DashboardHero({
             minWidth:200,
           }}>
             <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:8 }}>
-              Today · {fmtDate(latest.date)}
+              {weightLabel} · {fmtDate(latest.date)}
             </div>
             <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:8 }}>
               <span style={{ fontFamily:T.display, fontSize:56, color:T.ink, letterSpacing:'-0.03em', lineHeight:0.92 }}>{latest.weight.toFixed(1)}</span>
@@ -3809,6 +3693,7 @@ function PieComposition({ latest, goal, weightLabel }: { latest: FitnessReading;
 function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number; reg: Reg | null }) {
   const [range, setRange] = useState<'all' | '2y' | '1y' | '6m'>('all');
   const latest = sorted[sorted.length - 1];
+  const weightLabel = isoDay(latest.date) === localIsoDate() ? 'Today' : 'Latest';
   const first  = sorted[0];
   const startMs = new Date(first.date).getTime();
   const lastMs  = new Date(latest.date).getTime();
@@ -4062,7 +3947,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
             title={<>Current vs goal <em style={{ color:T.gold }}>composition</em></>}
             subtitle="Where the kilograms sit now, and what has to move if muscle is preserved on the way to goal."
           >
-            <PieComposition latest={latest} goal={goal} weightLabel="Today" />
+            <PieComposition latest={latest} goal={goal} weightLabel={weightLabel} />
           </FitPanel>
         </div>
 
@@ -5117,10 +5002,6 @@ export default function OperatorDashboardClient() {
             goal={goal}
             nutrition={nutrition}
             state={state}
-            rollingAverage={rollingAverage}
-            cadence={cadence}
-            syncSummary={syncSummary}
-            opPw={opPw}
             healthStream={healthStream}
           />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
