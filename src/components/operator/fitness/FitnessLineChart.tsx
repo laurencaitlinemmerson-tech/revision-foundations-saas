@@ -210,8 +210,12 @@ export default function FitnessLineChart({
   // The smoothed/rolling-average series is the trustworthy line. The raw
   // daily readings sit behind as small dots so the eye can see the spread
   // without overshooting into impossible lows or bridging long data gaps.
+  // Bridge across long data gaps so the rolling-average line reads as one
+  // continuous trajectory. A 400-day window covers natural breaks (a
+  // forgotten scale, a moving month) while still splitting if the log
+  // genuinely stops for more than a year.
   const secondaryPath = filteredSecondary && filteredSecondary.length >= 2
-    ? splitByDateGap(filteredSecondary, 75)
+    ? splitByDateGap(filteredSecondary, 400)
       .filter((segment) => segment.length >= 2)
       .map((segment) => monotonePath(segment.map((point) => ({ x: x(point.date), y: y(point.value) }))))
       .join(' ')
