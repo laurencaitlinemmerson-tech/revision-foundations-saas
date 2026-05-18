@@ -77,8 +77,10 @@
 .fit-masthead {
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  margin-bottom: 8px;
+  gap: 18px;
+  margin: 22px 0 6px;
+  padding: 18px 0 0;
+  border-top: 0.5px solid var(--rule-soft);
 }
 
 .fit-masthead-row {
@@ -109,11 +111,11 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(40px, 6.4vw, 84px);
-  line-height: 0.98;
-  letter-spacing: -0.025em;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: 0;
   color: var(--ink);
-  max-width: 16ch;
+  max-width: 18ch;
 }
 
 .fit-masthead-headline em {
@@ -124,7 +126,7 @@
 .fit-masthead-intro {
   display: grid;
   grid-template-columns: 2.2fr 1fr;
-  gap: 56px;
+  gap: 34px;
   align-items: start;
 }
 
@@ -132,10 +134,10 @@
   margin: 0;
   font-family: var(--font-body, 'Inter', sans-serif);
   font-weight: 300;
-  font-size: 17px;
-  line-height: 1.65;
+  font-size: 14px;
+  line-height: 1.55;
   color: var(--ink-soft);
-  max-width: 52ch;
+  max-width: 64ch;
 }
 
 .fit-masthead-intro p em {
@@ -150,8 +152,8 @@
 .fit-masthead-aside-line {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.55;
   color: var(--ink-soft);
 }
 
@@ -160,7 +162,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  padding: 14px 0;
+  padding: 11px 0;
   border-top: 0.5px solid var(--rule);
   border-bottom: 0.5px solid var(--rule);
   flex-wrap: wrap;
@@ -217,11 +219,11 @@
 .fit-hero-reading {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
-  gap: 48px;
+  gap: 34px;
   align-items: end;
-  padding: 32px 0 40px;
-  border-bottom: 2px solid var(--ink);
-  margin: 30px 0 40px;
+  padding: 22px 0 28px;
+  border-bottom: 1px solid var(--ink);
+  margin: 18px 0 30px;
 }
 
 .fit-hero-reading-figure {
@@ -238,8 +240,8 @@
 .fit-hero-reading-num .value {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(72px, 12vw, 144px);
-  letter-spacing: -0.04em;
+  font-size: 104px;
+  letter-spacing: 0;
   line-height: 0.85;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
@@ -248,7 +250,7 @@
 .fit-hero-reading-num .unit {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: clamp(20px, 2.4vw, 32px);
+  font-size: 24px;
   color: var(--ink-mute);
   margin-bottom: 14px;
 }
@@ -310,13 +312,19 @@
     grid-template-columns: 1fr;
     gap: 24px;
   }
+  .fit-masthead-headline {
+    font-size: 38px;
+  }
   .fit-masthead-aside {
     padding-left: 18px;
   }
   .fit-hero-reading {
     grid-template-columns: 1fr;
-    gap: 32px;
-    padding: 24px 0 32px;
+    gap: 26px;
+    padding: 20px 0 28px;
+  }
+  .fit-hero-reading-num .value {
+    font-size: 72px;
   }
   .fit-hero-reading-spark {
     padding-left: 0;
@@ -431,7 +439,7 @@
 
 .fit-glance-row {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   align-items: stretch;
 }
@@ -440,17 +448,11 @@
   .fit-glance-row {
     grid-template-columns: 1fr 1fr;
   }
-  .fit-glance-row .glance-cal-balance {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 520px) {
   .fit-glance-row {
     grid-template-columns: 1fr;
-  }
-  .fit-glance-row .glance-cal-balance {
-    grid-column: auto;
   }
 }
 
@@ -572,6 +574,14 @@
   color: var(--warn);
 }
 
+.gc-num.good {
+  color: var(--good);
+}
+
+.gc-num.warn {
+  color: var(--warn);
+}
+
 .gc-kicker {
   display: inline-flex;
   align-items: center;
@@ -584,6 +594,11 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-soft);
+}
+
+.fit-top-nutrition-card {
+  margin-top: 14px;
+  min-height: 0;
 }
 
 .gc-bar {
@@ -3753,9 +3768,9 @@
 }
 
 .fitness-reference-shell .fitness-chart-panel .fit-panel-head h3 {
-  font-size: clamp(28px, 3vw, 38px);
-  line-height: 0.92;
-  letter-spacing: -0.04em;
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: 0;
   max-width: none;
 }
 
@@ -3777,6 +3792,34 @@
   backdrop-filter: blur(8px);
 }
 
+.fitness-reference-shell .fitness-chart-panel .bc-clinical-strip {
+  margin: 14px 0 18px;
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.46)),
+    rgba(250, 250, 248, 0.7);
+}
+
+.fitness-reference-shell .fitness-chart-panel .bc-clinical-cell {
+  padding: 15px 18px;
+}
+
+.fitness-reference-shell .fitness-chart-panel .bc-clinical-label {
+  font-size: 9.5px;
+}
+
+.fitness-reference-shell .fitness-chart-panel .bc-clinical-value {
+  margin-top: 6px;
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
+.fitness-reference-shell .fitness-chart-panel .bc-clinical-note {
+  margin-top: 6px;
+}
+
 @media (max-width: 1380px) {
   .fitness-reference-shell .fit-editorial-chart {
     max-width: none;
@@ -3792,8 +3835,16 @@
 }
 
 @media (max-width: 860px) {
+  .fitness-reference-shell .fitness-chart-panel .fit-panel-head h3 {
+    font-size: 28px;
+  }
+
   .bc-clinical-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fitness-reference-shell .fitness-chart-panel .bc-clinical-value {
+    font-size: 24px;
   }
 
   .bc-clinical-cell:nth-child(2n) {
