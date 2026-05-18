@@ -209,6 +209,21 @@
   display: flex;
   flex-direction: column;
   min-height: 148px;
+  transition:
+    border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glance-card:hover {
+  border-color: rgba(26, 24, 21, 0.28);
+  background: rgba(255, 255, 255, 0.55);
+  transform: translateY(-1px);
+}
+
+.glance-card .gc-num,
+.glance-card .gcb-num {
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glance-card.glance-cal-balance {
@@ -743,6 +758,32 @@
   width: 100%;
   height: 360px;
   overflow: visible;
+}
+
+/* ── Chart line entrance: draw from left to right on first paint. ── */
+@keyframes bcLineDraw {
+  from { stroke-dashoffset: 4000; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.fitness-chart .bc-line-raw,
+.fitness-chart .bc-line-avg {
+  stroke-dasharray: 4000;
+  stroke-dashoffset: 4000;
+  animation: bcLineDraw 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+
+.fitness-chart .bc-line-avg {
+  animation-delay: 0.35s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fitness-chart .bc-line-raw,
+  .fitness-chart .bc-line-avg {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none;
+  }
 }
 
 .bc-filter-note {

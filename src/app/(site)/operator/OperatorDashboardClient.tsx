@@ -1,13 +1,54 @@
 'use client';
 
 import React, {
-  useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties,
+  useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
+import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
 import FitnessLineChart from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
+
+// ─── Motion helpers ───────────────────────────────────────────────────────────
+
+const EASE_OUT = [0.16, 1, 0.3, 1] as const;
+
+function Reveal({ children, delay = 0, y = 14, className, id }: { children: ReactNode; delay?: number; y?: number; className?: string; id?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '0px 0px -80px 0px' });
+  const reduce = useReducedMotion();
+  if (reduce) {
+    return <div ref={ref} id={id} className={className}>{children}</div>;
+  }
+  return (
+    <motion.div
+      ref={ref}
+      id={id}
+      className={className}
+      initial={{ opacity: 0, y }}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      transition={{ duration: 0.7, ease: EASE_OUT, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function AnimatedNumber({ value, decimals = 1, className }: { value: number; decimals?: number; className?: string }) {
+  const reduce = useReducedMotion();
+  const motionValue = useMotionValue(reduce ? value : 0);
+  const display = useTransform(motionValue, (v) => v.toFixed(decimals));
+  useEffect(() => {
+    if (reduce) {
+      motionValue.set(value);
+      return;
+    }
+    const controls = animate(motionValue, value, { duration: 1.1, ease: EASE_OUT });
+    return controls.stop;
+  }, [value, reduce, motionValue]);
+  return <motion.span className={className}>{display}</motion.span>;
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -4949,6 +4990,7 @@ export default function OperatorDashboardClient() {
           </button>
         </div>
 
+        <Reveal>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
           <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '10px 0 18px' }} />
@@ -5016,7 +5058,9 @@ export default function OperatorDashboardClient() {
             </div>
           </section>
         </section>
+        </Reveal>
 
+        <Reveal delay={0.05}>
         <section className="fit-hero">
           <div className="fit-hero-top">
             <div>
@@ -5044,7 +5088,7 @@ export default function OperatorDashboardClient() {
                 <span style={{ opacity: 0.45 }}>·</span>
                 <DateStamp iso={latest.date} />
               </div>
-              <div className="num">{latest.weight.toFixed(1)}<small>kg</small></div>
+              <div className="num"><AnimatedNumber value={latest.weight} decimals={1} /><small>kg</small></div>
               <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} - 7-day marker</div>
               <HeadlineSparkline readings={dashboardSource.slice(-4)} />
             </div>
@@ -5060,11 +5104,15 @@ export default function OperatorDashboardClient() {
             ))}
           </div>
         </section>
+        </Reveal>
 
+        <Reveal delay={0.1}>
         <div className="fit-hero-signals">
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
+        </Reveal>
 
+        <Reveal delay={0.05}>
         <div className="fit-panel" style={{ marginBottom: 28 }}>
           <div className="fit-panel-head">
             <div>
@@ -5084,7 +5132,9 @@ export default function OperatorDashboardClient() {
             ))}
           </div>
         </div>
+        </Reveal>
 
+        <Reveal>
         <section className="fit-anchor-section" id="operator-story">
           {/* ───────────────────────── STORY ─────────────────────────── */}
           <EditorialDivider eyebrow="Story" note="The long line — every reading, every phase." />
@@ -5177,10 +5227,16 @@ export default function OperatorDashboardClient() {
             </aside>
           </section>
         </section>
+        </Reveal>
 
+        <Reveal>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
+        </Reveal>
+        <Reveal delay={0.05}>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
+        </Reveal>
 
+        <Reveal>
         <section className="fit-anchor-section" id="operator-health-stream">
           {/* ───────────────────────── TRENDS ────────────────────────── */}
           <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
@@ -5195,17 +5251,24 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
         </section>
+        </Reveal>
 
+        <Reveal>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
+        </Reveal>
 
+        <Reveal>
         <section className="fit-anchor-section" id="operator-action">
           {/* Action block — promise + readiness folded into trends scroll. */}
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>
+        </Reveal>
 
+        <Reveal>
         <ImportNote opPw={opPw} onImported={refreshCloudReadings} />
+        </Reveal>
 
       </main>
 
