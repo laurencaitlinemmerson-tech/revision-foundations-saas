@@ -46,7 +46,24 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   if (!authed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const id = new URL(req.url).searchParams.get('id');
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
+  const all = url.searchParams.get('all') === '1';
+
+  if (all) {
+    try {
+      const current = await listFitnessReadings();
+      let deleted = 0;
+      for (const r of current.readings) {
+        const result = await deleteFitnessReading(r.id);
+        if (result.success) deleted++;
+      }
+      return NextResponse.json({ success: true, deleted });
+    } catch {
+      return NextResponse.json({ error: 'db_unavailable' }, { status: 500 });
+    }
+  }
+
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
   try {
     const result = await deleteFitnessReading(id);
