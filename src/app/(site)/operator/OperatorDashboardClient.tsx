@@ -4854,36 +4854,16 @@ export default function OperatorDashboardClient() {
               {dashboardSource.length} readings · {syncSummary}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              type="button"
-              className="fitness-lock-btn"
-              onClick={async () => {
-                if (!opPw) return;
-                const ok = window.confirm(`Wipe all ${dashboardSource.length} cloud readings and clear local cache? Apple Health metrics (steps / HRV / sleep) are unaffected.`);
-                if (!ok) return;
-                try {
-                  await fetch('/api/operator/fitness?all=1', { method: 'DELETE', headers: { 'x-operator-pw': opPw } });
-                } catch { /* swallow — we'll still clear local */ }
-                try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
-                setReadings([]);
-                await loadData(opPw);
-              }}
-              title="Wipe contaminated SEED rows and start fresh"
-            >
-              Reset readings
-            </button>
-            <button
-              type="button"
-              className="fitness-lock-btn"
-              onClick={() => {
-                localStorage.removeItem(AUTH_KEY);
-                setAuthed(false);
-              }}
-            >
-              Lock
-            </button>
-          </div>
+          <button
+            type="button"
+            className="fitness-lock-btn"
+            onClick={() => {
+              localStorage.removeItem(AUTH_KEY);
+              setAuthed(false);
+            }}
+          >
+            Lock
+          </button>
         </div>
 
         <section className="fit-anchor-section" id="operator-today">
