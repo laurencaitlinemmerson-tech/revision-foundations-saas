@@ -49,7 +49,12 @@ function parseDay(value: string | undefined | null) {
 
 function parseAt(value: string | undefined | null) {
   if (!value) return Number.NEGATIVE_INFINITY;
-  const normalized = value.replace(/ ([+-]\d{2})(\d{2})$/, 'T$1:$2').replace(' ', 'T');
+  const trimmed = value.trim();
+  const normalized = trimmed
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{2})(\d{2})$/, '$1T$2$3:$4')
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})Z$/, '$1T$2Z')
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})$/, '$1T$2')
+    .replace(' ', 'T');
   const parsed = new Date(normalized);
   return Number.isNaN(parsed.getTime()) ? Number.NEGATIVE_INFINITY : parsed.getTime();
 }
@@ -176,7 +181,7 @@ function normalisePayload(body: unknown) {
     ? dateValue.slice(0, 10)
     : new Date().toISOString().slice(0, 10);
 
-  const weight = pickMetric(source, ['weight', 'bodyWeight', 'weightKg']);
+  const weight = pickMetric(source, ['weight', 'bodyWeight', 'weightKg', 'bodyWeightKg']);
   if (!weight) return null;
 
   const heightM = pickMetric(source, ['heightM', 'height']) ?? DEFAULT_HEIGHT_M;

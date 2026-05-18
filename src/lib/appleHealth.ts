@@ -38,14 +38,11 @@ const BODY_METRIC_TYPES = {
 
 function parseAppleHealthDate(input: string): Date | null {
   const trimmed = input.trim()
-  const match = trimmed.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{2})(\d{2})$/)
-  if (match) {
-    const [, day, time, tzHours, tzMinutes] = match
-    const parsed = new Date(`${day}T${time}${tzHours}:${tzMinutes}`)
-    return Number.isNaN(parsed.getTime()) ? null : parsed
-  }
-
-  const parsed = new Date(trimmed)
+  const normalized = trimmed
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{2})(\d{2})$/, '$1T$2$3:$4')
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})Z$/, '$1T$2Z')
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})$/, '$1T$2')
+  const parsed = new Date(normalized)
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
