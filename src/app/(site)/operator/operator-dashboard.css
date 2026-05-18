@@ -532,7 +532,7 @@
 
 .fit-story-shell {
   max-width: 1240px;
-  margin-inline: auto;
+  margin-right: auto;
 }
 
 .fit-reading-guide {
@@ -885,23 +885,23 @@
 }
 
 .bc-phase-band {
-  opacity: 0.13;
+  opacity: 0.3;
 }
 
 .bc-phase-band.lean {
-  fill: oklch(0.95 0.03 165 / 0.45);
+  fill: oklch(0.95 0.055 150 / 0.78);
 }
 
 .bc-phase-band.bulk {
-  fill: oklch(0.95 0.02 90 / 0.38);
+  fill: oklch(0.96 0.07 96 / 0.82);
 }
 
 .bc-phase-band.cut {
-  fill: oklch(0.96 0.028 22 / 0.42);
+  fill: oklch(0.95 0.07 26 / 0.78);
 }
 
 .bc-phase-band.recomp {
-  fill: oklch(0.96 0.02 235 / 0.42);
+  fill: oklch(0.94 0.05 240 / 0.84);
 }
 
 .bc-phase-divider {
@@ -912,24 +912,24 @@
 }
 
 .bc-phase-pill {
-  stroke: rgba(44, 52, 68, 0.08);
+  stroke: rgba(44, 52, 68, 0.12);
   stroke-width: 0.6;
 }
 
 .bc-phase-pill.lean {
-  fill: rgba(255, 255, 255, 0.84);
+  fill: oklch(0.97 0.04 150 / 0.96);
 }
 
 .bc-phase-pill.bulk {
-  fill: rgba(255, 255, 255, 0.84);
+  fill: oklch(0.98 0.05 96 / 0.96);
 }
 
 .bc-phase-pill.cut {
-  fill: rgba(255, 255, 255, 0.84);
+  fill: oklch(0.97 0.045 24 / 0.96);
 }
 
 .bc-phase-pill.recomp {
-  fill: rgba(255, 255, 255, 0.84);
+  fill: oklch(0.96 0.035 240 / 0.96);
 }
 
 .bc-phase-label {
@@ -938,7 +938,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  fill: var(--ink-soft);
+  fill: rgba(44, 52, 68, 0.82);
 }
 
 .bc-line-avg {
