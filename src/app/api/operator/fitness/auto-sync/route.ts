@@ -128,6 +128,29 @@ function latestMetricPoint(metric: HealthAutoExportMetric | undefined, day?: str
   return best;
 }
 
+// HAE's metric names use snake_case but the exact spelling shifts across
+// versions ("weight_body_mass" vs older "weight_&_body_mass" vs plain
+// "weight"). Normalise both sides before matching so a Weight metric is
+// recognised whatever it's called.
+function normaliseMetricKey(value: string | undefined): string {
+  return (value ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function pickHaeMetric(metrics: HealthAutoExportMetric[], candidates: string[]) {
+  const normalised = metrics.map((metric) => ({ metric, key: normaliseMetricKey(metric.name) }));
+  // Exact-match first, then fall back to substring (handles "weight" inside
+  // "weight_body_mass" and similar drift).
+  for (const candidate of candidates) {
+    const exact = normalised.find((row) => row.key === candidate);
+    if (exact) return exact.metric;
+  }
+  for (const candidate of candidates) {
+    const partial = normalised.find((row) => row.key.includes(candidate));
+    if (partial) return partial.metric;
+  }
+  return undefined;
+}
+
 function parseHealthAutoExportPayload(payload: Record<string, unknown>) {
   const root = (payload.data && typeof payload.data === 'object' && !Array.isArray(payload.data)
     ? payload.data
@@ -135,32 +158,38 @@ function parseHealthAutoExportPayload(payload: Record<string, unknown>) {
   const metrics = Array.isArray(root.metrics) ? (root.metrics as HealthAutoExportMetric[]) : null;
   if (!metrics || metrics.length === 0) return null;
 
-  const byName = new Map(metrics.map((metric) => [metric.name ?? '', metric]));
-  const weightMetric = byName.get('weight_&_body_mass') ?? byName.get('weight') ?? byName.get('body_mass');
+  const weightMetric = pickHaeMetric(metrics, ['weight_body_mass', 'body_mass', 'weight']);
   const weightPoint = latestMetricPoint(weightMetric);
   if (!weightMetric || !weightPoint || weightPoint.qty === undefined || !weightPoint.date) return null;
 
   const day = parseDay(weightPoint.date);
   if (!day) return null;
 
-  const weight = round(convertMassToKg(weightPoint.qty, weightMetric.units), 2);
-  const heightPoint = latestMetricPoint(byName.get('height'), day);
-  const heightM = heightPoint?.qty !== undefined ? convertHeightToMeters(heightPoint.qty, byName.get('height')?.units) : DEFAULT_HEIGHT_M;
+  const heightMetric = pickHaeMetric(metrics, ['height']);
+  const bmiMetric = pickHaeMetric(metrics, ['body_mass_index', 'bmi']);
+  const bodyFatMetric = pickHaeMetric(metrics, ['body_fat_percentage', 'body_fat']);
+  const leanMetric = pickHaeMetric(metrics, ['lean_body_mass', 'lean_mass']);
+  const waterMetric = pickHaeMetric(metrics, ['body_water_mass', 'body_water']);
+  const boneMetric = pickHaeMetric(metrics, ['bone_mass']);
 
-  const bmiPoint = latestMetricPoint(byName.get('body_mass_index'), day);
-  const bodyFatPoint = latestMetricPoint(byName.get('body_fat_percentage'), day);
-  const leanMassPoint = latestMetricPoint(byName.get('lean_body_mass'), day);
-  const waterMassPoint = latestMetricPoint(byName.get('body_water_mass'), day);
-  const boneMassPoint = latestMetricPoint(byName.get('bone_mass'), day);
+  const weight = round(convertMassToKg(weightPoint.qty, weightMetric.units), 2);
+  const heightPoint = latestMetricPoint(heightMetric, day);
+  const heightM = heightPoint?.qty !== undefined ? convertHeightToMeters(heightPoint.qty, heightMetric?.units) : DEFAULT_HEIGHT_M;
+
+  const bmiPoint = latestMetricPoint(bmiMetric, day);
+  const bodyFatPoint = latestMetricPoint(bodyFatMetric, day);
+  const leanMassPoint = latestMetricPoint(leanMetric, day);
+  const waterMassPoint = latestMetricPoint(waterMetric, day);
+  const boneMassPoint = latestMetricPoint(boneMetric, day);
 
   return {
     date: day,
     weight,
     bmi: round(bmiPoint?.qty ?? weight / (heightM * heightM), 1),
     body_fat: toPercent(bodyFatPoint?.qty ?? null),
-    water: waterMassPoint?.qty !== undefined ? toPercent((convertMassToKg(waterMassPoint.qty, byName.get('body_water_mass')?.units) / weight) * 100) : 0,
-    muscle_mass: leanMassPoint?.qty !== undefined ? toPercent((convertMassToKg(leanMassPoint.qty, byName.get('lean_body_mass')?.units) / weight) * 100) : 0,
-    bone_mass: boneMassPoint?.qty !== undefined ? round(convertMassToKg(boneMassPoint.qty, byName.get('bone_mass')?.units), 2) : 0,
+    water: waterMassPoint?.qty !== undefined ? toPercent((convertMassToKg(waterMassPoint.qty, waterMetric?.units) / weight) * 100) : 0,
+    muscle_mass: leanMassPoint?.qty !== undefined ? toPercent((convertMassToKg(leanMassPoint.qty, leanMetric?.units) / weight) * 100) : 0,
+    bone_mass: boneMassPoint?.qty !== undefined ? round(convertMassToKg(boneMassPoint.qty, boneMetric?.units), 2) : 0,
   };
 }
 
