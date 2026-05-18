@@ -1698,6 +1698,172 @@
   margin: 8px 0 0;
 }
 
+/* ── Insight + data quality cards ──────────────────────────────────────── */
+
+.fitness-reference-shell .op-insights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 20px 0;
+}
+
+@media (max-width: 820px) {
+  .fitness-reference-shell .op-insights {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fitness-reference-shell .op-insight-card {
+  background: rgba(255, 255, 255, 0.72);
+  border: 0.5px solid var(--rule);
+  padding: 22px 24px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fitness-reference-shell .op-insight-good { border-left: 2px solid var(--good); }
+.fitness-reference-shell .op-insight-warn { border-left: 2px solid var(--warn); }
+.fitness-reference-shell .op-insight-neutral { border-left: 2px solid var(--rule); }
+
+.fitness-reference-shell .op-insight-headline {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0;
+  font-weight: 400;
+}
+
+.fitness-reference-shell .op-insight-headline strong {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+.fitness-reference-shell .op-insight-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 18px;
+  border-top: 0.5px solid var(--rule);
+  padding-top: 14px;
+}
+
+.fitness-reference-shell .op-insight-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+  border-right: 0.5px solid var(--rule);
+}
+
+.fitness-reference-shell .op-insight-stat:first-child { padding-left: 0; }
+.fitness-reference-shell .op-insight-stat:last-child { padding-right: 0; border-right: 0; }
+
+.fitness-reference-shell .op-insight-stat-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-insight-stat-v {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.fitness-reference-shell .op-insight-stat-v.good { color: var(--good); }
+.fitness-reference-shell .op-insight-stat-v.warn { color: var(--warn); }
+
+/* ── Readiness caution band ────────────────────────────────────────────── */
+
+.fitness-reference-shell .op-readiness-caution {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-top: 0.5px solid var(--rule);
+  background: rgba(161, 74, 87, 0.05);
+}
+
+.fitness-reference-shell .op-readiness-caution-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--warn);
+  margin-bottom: 6px;
+}
+
+.fitness-reference-shell .op-readiness-caution-body {
+  display: block;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* ── Lifestyle causal strip ────────────────────────────────────────────── */
+
+.fitness-reference-shell .op-lifestyle-causal {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--rule);
+}
+
+.fitness-reference-shell .op-lifestyle-causal-head {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 10px;
+}
+
+.fitness-reference-shell .op-lifestyle-causal ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fitness-reference-shell .op-lifestyle-causal-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 0.5px solid var(--rule);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.fitness-reference-shell .op-lifestyle-causal-row.tone-good { border-left: 2px solid var(--good); }
+.fitness-reference-shell .op-lifestyle-causal-row.tone-warn { border-left: 2px solid var(--warn); }
+.fitness-reference-shell .op-lifestyle-causal-row.tone-neutral { border-left: 2px solid var(--rule); }
+
+.fitness-reference-shell .op-lifestyle-causal-input {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.fitness-reference-shell .op-lifestyle-causal-arrow {
+  font-size: 14px;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-lifestyle-causal-outcome {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
 /* ── Health section v2 polish ──────────────────────────────────────────── */
 
 .fitness-reference-shell .op-health-title {

@@ -507,15 +507,30 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
     return Math.max(0, Math.min(1, score)) * 100;
   }
 
-  const readinessAxes = [
-    { key: 'sleep', label: 'Sleep', score: readinessAxis(latest?.sleep.totalMin ?? null, sleepBaseline) },
-    { key: 'hrv', label: 'HRV', score: readinessAxis(latest?.heart.hrvMs ?? null, hrvBaseline) },
-    { key: 'rhr', label: 'RHR', score: readinessAxis(latest?.heart.restingHr ?? null, rhrBaseline, true) },
+  // Weighted composite: sleep matters most, then autonomic signals (HRV / RHR),
+  // then training load and yesterday's alcohol as small modifiers.
+  const trainingLoad7d = last7.reduce((s, d) => s + (d.activity.exerciseMinutes ?? 0), 0);
+  // Sweet spot ~150–300 min/week; below or above pushes the score down.
+  const loadScore = trainingLoad7d === 0
+    ? null
+    : trainingLoad7d < 60 ? 55
+    : trainingLoad7d < 150 ? 80
+    : trainingLoad7d <= 300 ? 95
+    : trainingLoad7d <= 450 ? 70
+    : 45;
+  const readinessAxes: { key: string; label: string; weight: number; score: number | null }[] = [
+    { key: 'sleep', label: 'Sleep', weight: 0.35, score: readinessAxis(latest?.sleep.totalMin ?? null, sleepBaseline) },
+    { key: 'hrv', label: 'HRV', weight: 0.25, score: readinessAxis(latest?.heart.hrvMs ?? null, hrvBaseline) },
+    { key: 'rhr', label: 'RHR', weight: 0.25, score: readinessAxis(latest?.heart.restingHr ?? null, rhrBaseline, true) },
+    { key: 'load', label: 'Load', weight: 0.15, score: loadScore },
   ];
-  const readinessScores = readinessAxes.map((a) => a.score).filter((s): s is number => s !== null);
-  const readinessScore = readinessScores.length > 0
-    ? Math.round(readinessScores.reduce((a, b) => a + b, 0) / readinessScores.length)
-    : null;
+  const readinessScore = (() => {
+    const present = readinessAxes.filter((a) => a.score !== null);
+    if (present.length === 0) return null;
+    const wSum = present.reduce((s, a) => s + a.weight, 0);
+    const wScore = present.reduce((s, a) => s + (a.score as number) * a.weight, 0);
+    return Math.round(wScore / wSum);
+  })();
   const readinessTone: 'good' | 'warn' | 'neutral' =
     readinessScore === null ? 'neutral'
     : readinessScore >= 70 ? 'good'
@@ -527,6 +542,26 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
     : readinessScore >= 55 ? 'Amber — steady aerobic only'
     : readinessScore >= 35 ? 'Amber — recover before pushing'
     : 'Red — rest, light movement, hydrate';
+
+  // Recovery caution: poor sleep + elevated RHR + suppressed HRV together is
+  // the cluster worth surfacing. All three must be present and red.
+  const recoveryCaution = (() => {
+    const sleepNow = latest?.sleep.totalMin ?? null;
+    const rhrNow = latest?.heart.restingHr ?? null;
+    const hrvNow = latest?.heart.hrvMs ?? null;
+    if (sleepNow === null || rhrNow === null || hrvNow === null) return null;
+    if (rhrBaseline === null || hrvBaseline === null) return null;
+    const sleepPoor = sleepNow < 360; // <6h
+    const rhrElevated = rhrNow > rhrBaseline + 5;
+    const hrvSuppressed = hrvNow < hrvBaseline * 0.9;
+    if (sleepPoor && rhrElevated && hrvSuppressed) {
+      return {
+        title: 'Recovery caution',
+        body: `Sleep ${formatMinutes(sleepNow)} (under 6h), RHR ${Math.round(rhrNow)} bpm (above your baseline) and HRV ${Math.round(hrvNow)} ms (suppressed). Lower intensity today and prioritise tonight's sleep.`,
+      };
+    }
+    return null;
+  })();
 
   // ── This week vs last week ───────────────────────────────────────────────
   const thisWeek = useMemo(() => days.slice(-7), [days]);
@@ -696,6 +731,42 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
   const todayWater = lifestyle[todayLifestyleIso]?.water ?? (latest?.nutrition?.waterMl ? Math.round(latest.nutrition.waterMl / 250) : 0);
   const todayCaffeine = lifestyle[todayLifestyleIso]?.caffeine ?? 0;
   const todayAlcohol = lifestyle[todayLifestyleIso]?.alcohol ?? 0;
+
+  // Yesterday's lifestyle → today's signals. Only emit a row when both sides
+  // exist; otherwise the strip stays quiet.
+  const yesterdayLifestyleDate = (() => {
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    return localIsoDate(d);
+  })();
+  const yesterdayCaffeine = lifestyle[yesterdayLifestyleDate]?.caffeine ?? null;
+  const yesterdayAlcoholForCausal = lifestyle[yesterdayLifestyleDate]?.alcohol ?? null;
+  const yesterdayWater = lifestyle[yesterdayLifestyleDate]?.water ?? null;
+  type CausalRow = { input: string; outcome: string; tone: 'good' | 'warn' | 'neutral' };
+  const lifestyleCausalRows: CausalRow[] = [];
+  if (yesterdayCaffeine !== null && yesterdayCaffeine > 0 && latest?.heart.hrvMs !== null && latest?.heart.hrvMs !== undefined && hrvAvg7 !== null) {
+    const diff = (latest.heart.hrvMs as number) - hrvAvg7;
+    lifestyleCausalRows.push({
+      input: `Caffeine ${yesterdayCaffeine} ${yesterdayCaffeine === 1 ? 'cup' : 'cups'} yesterday`,
+      outcome: `Today HRV ${diff >= 0 ? '+' : ''}${Math.round(diff)} ms vs 7-day avg`,
+      tone: diff < -5 ? 'warn' : diff > 5 ? 'good' : 'neutral',
+    });
+  }
+  if (yesterdayAlcoholForCausal !== null && yesterdayAlcoholForCausal > 0 && latest?.heart.restingHr !== null && latest?.heart.restingHr !== undefined && restingHrAvg7 !== null) {
+    const diff = (latest.heart.restingHr as number) - restingHrAvg7;
+    lifestyleCausalRows.push({
+      input: `Alcohol ${yesterdayAlcoholForCausal} ${yesterdayAlcoholForCausal === 1 ? 'unit' : 'units'} yesterday`,
+      outcome: `Today RHR ${diff >= 0 ? '+' : ''}${Math.round(diff)} bpm vs 7-day avg`,
+      tone: diff > 3 ? 'warn' : diff < -3 ? 'good' : 'neutral',
+    });
+  }
+  if (yesterdayWater !== null && yesterdayWater > 0 && latest?.activity.exerciseMinutes !== null && latest?.activity.exerciseMinutes !== undefined && exerciseAvg7 !== null) {
+    const diff = (latest.activity.exerciseMinutes as number) - exerciseAvg7;
+    lifestyleCausalRows.push({
+      input: `Water ${yesterdayWater} cups yesterday`,
+      outcome: `Today exercise ${diff >= 0 ? '+' : ''}${Math.round(diff)} min vs 7-day avg`,
+      tone: diff > 5 ? 'good' : diff < -10 ? 'warn' : 'neutral',
+    });
+  }
 
 
   // ── Today's one move (single named action) ──────────────────────────────
@@ -890,6 +961,99 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
   const todayPromise = promises[todayIso] ?? null;
 
 
+  // ── Weight insight (plain-English summary) ───────────────────────────────
+  const weightInsight = useMemo(() => {
+    if (readings.length === 0) return null;
+    const latestReading = readings[readings.length - 1];
+    const latestKg = latestReading.weight;
+    const latestMs = new Date(latestReading.date).getTime();
+    const findNearest = (daysBack: number) => {
+      const target = latestMs - daysBack * 86400000;
+      let best: { weight: number; date: string; diff: number } | null = null;
+      for (const r of readings) {
+        const t = new Date(r.date).getTime();
+        if (t > latestMs - 86400000) continue; // exclude same-day
+        const diff = Math.abs(t - target);
+        if (best === null || diff < best.diff) best = { weight: r.weight, date: r.date, diff };
+      }
+      return best && best.diff <= daysBack * 86400000 + 3 * 86400000 ? best : null;
+    };
+    const week = findNearest(7);
+    const month = findNearest(30);
+    const delta7 = week ? +(latestKg - week.weight).toFixed(2) : null;
+    const delta30 = month ? +(latestKg - month.weight).toFixed(2) : null;
+    // Linear fit on last 28 days for the trend rate.
+    const cutoff = latestMs - 28 * 86400000;
+    const window = readings
+      .filter((r) => new Date(r.date).getTime() >= cutoff)
+      .map((r) => ({ x: (new Date(r.date).getTime() - cutoff) / 86400000, y: r.weight }));
+    let ratePerWeek: number | null = null;
+    if (window.length >= 3) {
+      const n = window.length;
+      const sumX = window.reduce((s, p) => s + p.x, 0);
+      const sumY = window.reduce((s, p) => s + p.y, 0);
+      const sumXY = window.reduce((s, p) => s + p.x * p.y, 0);
+      const sumX2 = window.reduce((s, p) => s + p.x * p.x, 0);
+      const denom = n * sumX2 - sumX * sumX;
+      if (denom !== 0) {
+        const slope = (n * sumXY - sumX * sumY) / denom;
+        ratePerWeek = +(slope * 7).toFixed(2);
+      }
+    }
+    const direction = ratePerWeek === null ? 'unknown'
+      : ratePerWeek < -0.25 ? 'losing'
+      : ratePerWeek < -0.05 ? 'losing-slow'
+      : ratePerWeek <= 0.05 ? 'stable'
+      : 'gaining';
+    const tone: 'good' | 'warn' | 'neutral' =
+      direction === 'losing' || direction === 'losing-slow' ? 'good'
+      : direction === 'stable' ? 'neutral'
+      : direction === 'gaining' ? 'warn'
+      : 'neutral';
+    const headline = direction === 'losing' ? 'Losing.'
+      : direction === 'losing-slow' ? 'Losing slowly.'
+      : direction === 'stable' ? 'Holding steady.'
+      : direction === 'gaining' ? 'Drifting up.'
+      : 'Not enough data yet.';
+    const summary = (() => {
+      if (direction === 'unknown') return 'Log a few weigh-ins across the next two weeks to surface a real trend line.';
+      const rateLabel = ratePerWeek === null ? '' : `${ratePerWeek >= 0 ? '+' : ''}${ratePerWeek} kg/wk`;
+      const monthLabel = delta30 === null ? '' : `${delta30 >= 0 ? '+' : ''}${delta30.toFixed(1)} kg over 30 days`;
+      if (direction === 'losing') return `${monthLabel} at ${rateLabel}. Faster than the typical -0.45 kg/wk target — keep an eye on energy and protein.`;
+      if (direction === 'losing-slow') return `${monthLabel} at ${rateLabel}. Slower than the -0.45 kg/wk target — consistent with maintenance plus a small deficit.`;
+      if (direction === 'stable') return `${monthLabel} at ${rateLabel}. The line is essentially flat — either pace is matching intake, or the deficit isn't landing.`;
+      return `${monthLabel} at ${rateLabel}. The line is drifting up — worth checking food log, alcohol and step volume.`;
+    })();
+    return { latestKg, delta7, delta30, ratePerWeek, direction, tone, headline, summary };
+  }, [readings]);
+
+  // ── Data quality snapshot ────────────────────────────────────────────────
+  const dataQuality = useMemo(() => {
+    const weighInLast30 = readings.filter((r) => {
+      const t = new Date(r.date).getTime();
+      return t >= Date.now() - 30 * 86400000;
+    }).length;
+    const healthDaysLast14 = last14.filter((d) => d.sleep.totalMin !== null || d.heart.restingHr !== null || d.activity.steps !== null).length;
+    const presentMetrics: string[] = [];
+    if (last14.some((d) => d.sleep.totalMin !== null)) presentMetrics.push('sleep');
+    if (last14.some((d) => d.heart.hrvMs !== null)) presentMetrics.push('HRV');
+    if (last14.some((d) => d.heart.restingHr !== null)) presentMetrics.push('RHR');
+    if (last14.some((d) => d.activity.steps !== null)) presentMetrics.push('steps');
+    if (last14.some((d) => d.activity.exerciseMinutes !== null)) presentMetrics.push('exercise');
+    if (last14.some((d) => (d.nutrition?.dietaryEnergyKcal ?? null) !== null)) presentMetrics.push('nutrition');
+    const missingMetrics: string[] = [];
+    if (!last14.some((d) => d.sleep.totalMin !== null)) missingMetrics.push('sleep');
+    if (!last14.some((d) => d.heart.hrvMs !== null)) missingMetrics.push('HRV');
+    if (!last14.some((d) => d.heart.restingHr !== null)) missingMetrics.push('RHR');
+    if (!last14.some((d) => (d.nutrition?.dietaryEnergyKcal ?? null) !== null)) missingMetrics.push('nutrition');
+    const overlapDays = last30.filter((d) => {
+      const iso = d.date.slice(0, 10);
+      const hasReading = readings.some((r) => r.date.slice(0, 10) === iso);
+      return hasReading && d.sleep.totalMin !== null && d.heart.hrvMs !== null;
+    }).length;
+    return { weighInLast30, healthDaysLast14, presentMetrics, missingMetrics, overlapDays };
+  }, [readings, last14, last30]);
+
   // Correlations (30 days)
   const correlations = useMemo(() => {
     const sleepNights: number[] = [];
@@ -1007,7 +1171,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
         <div className="op-readiness-axes">
           {readinessAxes.map((a) => (
             <div key={a.key} className="op-readiness-axis">
-              <div className="op-readiness-axis-lbl">{a.label}</div>
+              <div className="op-readiness-axis-lbl">{a.label} <span className="muted" style={{ fontWeight: 400 }}>· {Math.round(a.weight * 100)}%</span></div>
               <div className="op-readiness-axis-bar">
                 <span style={{ width: `${a.score ?? 0}%` }} />
               </div>
@@ -1018,6 +1182,12 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
         <div className="op-readiness-verdict">
           <div className="op-readiness-verdict-lbl">Today reads as</div>
           <div className="op-readiness-verdict-txt">{readinessVerdict}</div>
+          {recoveryCaution && (
+            <div className="op-readiness-caution">
+              <span className="op-readiness-caution-label">{recoveryCaution.title}</span>
+              <span className="op-readiness-caution-body">{recoveryCaution.body}</span>
+            </div>
+          )}
         </div>
       </div>
       )}
@@ -1428,6 +1598,21 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
               hint="Units, not drinks. A glass of wine ≈ 1.5 units. Cleanest signal in the dashboard."
             />
           </div>
+
+          {lifestyleCausalRows.length > 0 && (
+            <div className="op-lifestyle-causal">
+              <div className="op-lifestyle-causal-head">Yesterday → today</div>
+              <ul>
+                {lifestyleCausalRows.map((row, i) => (
+                  <li key={i} className={`op-lifestyle-causal-row tone-${row.tone}`}>
+                    <span className="op-lifestyle-causal-input">{row.input}</span>
+                    <span className="op-lifestyle-causal-arrow">→</span>
+                    <span className="op-lifestyle-causal-outcome">{row.outcome}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </article>
       )}
 
@@ -1500,36 +1685,100 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
       </div>
       )}
 
-      {/* ── Correlations ─────────────────────────────────────────────── */}
+      {/* ── Insight & data quality (replaces old Patterns block) ─────── */}
       {(slot === 'all' || slot === 'correlations') && (
-      <div className="op-health-correlations">
-        <header className="op-health-card-head">
-          <span className="op-health-card-label">Patterns · last 30 days</span>
-          <span className="muted">Plain-English read of the numbers</span>
-        </header>
-        <ul className="op-corr-list">
-          <li>
-            <span className="op-corr-q">Does better sleep boost next-day HRV?</span>
-            <span className={`op-corr-a ${describeCorrelation(correlations.sleepHrv, 'Yes — more sleep, higher HRV', 'Inverse — more sleep, lower HRV').tone}`}>
-              {describeCorrelation(correlations.sleepHrv, 'Yes — more sleep, higher HRV', 'Inverse — more sleep, lower HRV').text}
-            </span>
-          </li>
-          <li>
-            <span className="op-corr-q">Do more steps move the scale down?</span>
-            <span className={`op-corr-a ${describeCorrelation(correlations.stepsWeight === null ? null : -correlations.stepsWeight, 'Yes — more steps, lower weight', 'No — more steps tracked higher weight').tone}`}>
-              {describeCorrelation(correlations.stepsWeight === null ? null : -correlations.stepsWeight, 'Yes — more steps, lower weight', 'No — more steps tracked higher weight').text}
-            </span>
-          </li>
-          <li>
-            <span className="op-corr-q">Does exercise volume lower resting HR?</span>
-            <span className={`op-corr-a ${describeCorrelation(correlations.exerciseRhr === null ? null : -correlations.exerciseRhr, 'Yes — more exercise, lower RHR', 'Hmm — more exercise but higher RHR').tone}`}>
-              {describeCorrelation(correlations.exerciseRhr === null ? null : -correlations.exerciseRhr, 'Yes — more exercise, lower RHR', 'Hmm — more exercise but higher RHR').text}
-            </span>
-          </li>
-        </ul>
-        <p className="op-corr-note">
-          r close to 0 = no relationship · |r| above 0.4 starts to mean something real · needs 4+ overlapping days.
-        </p>
+      <div className="op-insights">
+        <div className={`op-insight-card op-insight-${weightInsight?.tone ?? 'neutral'}`}>
+          <header className="op-health-card-head" style={{ marginBottom: 10 }}>
+            <span className="op-health-card-label">Weight insight</span>
+            <span className="muted">Last 30 days</span>
+          </header>
+          {weightInsight ? (
+            <>
+              <p className="op-insight-headline">
+                <strong>{weightInsight.headline}</strong> {weightInsight.summary}
+              </p>
+              <div className="op-insight-stats">
+                <div className="op-insight-stat">
+                  <span className="op-insight-stat-lbl">7-day Δ</span>
+                  <span className={`op-insight-stat-v ${weightInsight.delta7 === null ? '' : weightInsight.delta7 <= 0 ? 'good' : 'warn'}`}>
+                    {weightInsight.delta7 === null ? '—' : `${weightInsight.delta7 >= 0 ? '+' : ''}${weightInsight.delta7.toFixed(1)} kg`}
+                  </span>
+                </div>
+                <div className="op-insight-stat">
+                  <span className="op-insight-stat-lbl">30-day Δ</span>
+                  <span className={`op-insight-stat-v ${weightInsight.delta30 === null ? '' : weightInsight.delta30 <= 0 ? 'good' : 'warn'}`}>
+                    {weightInsight.delta30 === null ? '—' : `${weightInsight.delta30 >= 0 ? '+' : ''}${weightInsight.delta30.toFixed(1)} kg`}
+                  </span>
+                </div>
+                <div className="op-insight-stat">
+                  <span className="op-insight-stat-lbl">Rate</span>
+                  <span className={`op-insight-stat-v ${weightInsight.ratePerWeek === null ? '' : weightInsight.ratePerWeek <= 0 ? 'good' : 'warn'}`}>
+                    {weightInsight.ratePerWeek === null ? '—' : `${weightInsight.ratePerWeek >= 0 ? '+' : ''}${weightInsight.ratePerWeek.toFixed(2)} kg/wk`}
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="op-insight-headline muted">Log a few weigh-ins across the next two weeks to surface a real trend line.</p>
+          )}
+        </div>
+
+        <div className="op-insight-card op-insight-neutral">
+          <header className="op-health-card-head" style={{ marginBottom: 10 }}>
+            <span className="op-health-card-label">Data quality</span>
+            <span className="muted">What's syncing, what isn't</span>
+          </header>
+          <p className="op-insight-headline">
+            <strong>
+              {dataQuality.weighInLast30 >= 12 && dataQuality.healthDaysLast14 >= 10
+                ? 'Strong coverage.'
+                : dataQuality.weighInLast30 >= 4 && dataQuality.healthDaysLast14 >= 5
+                  ? 'Building up.'
+                  : 'Limited data.'}
+            </strong>{' '}
+            {dataQuality.weighInLast30} weigh-{dataQuality.weighInLast30 === 1 ? 'in' : 'ins'} in the last 30 days, {dataQuality.healthDaysLast14} of the last 14 days have Apple Health rows.
+            {dataQuality.presentMetrics.length > 0 && ` Syncing: ${dataQuality.presentMetrics.join(' · ')}.`}
+            {dataQuality.missingMetrics.length > 0 && ` Missing: ${dataQuality.missingMetrics.join(' · ')}.`}
+          </p>
+          <p className="op-corr-note" style={{ marginTop: 12 }}>
+            {dataQuality.overlapDays >= 14
+              ? `Correlations unlocked (${dataQuality.overlapDays} overlapping days).`
+              : `Correlation insights unlock at 14 overlapping days. Currently at ${dataQuality.overlapDays}.`}
+          </p>
+        </div>
+
+        {dataQuality.overlapDays >= 14 && (
+          <div className="op-insight-card op-insight-neutral">
+            <header className="op-health-card-head" style={{ marginBottom: 10 }}>
+              <span className="op-health-card-label">Patterns · last 30 days</span>
+              <span className="muted">Plain-English read of the numbers</span>
+            </header>
+            <ul className="op-corr-list">
+              <li>
+                <span className="op-corr-q">Does better sleep boost next-day HRV?</span>
+                <span className={`op-corr-a ${describeCorrelation(correlations.sleepHrv, 'Yes — more sleep, higher HRV', 'Inverse — more sleep, lower HRV').tone}`}>
+                  {describeCorrelation(correlations.sleepHrv, 'Yes — more sleep, higher HRV', 'Inverse — more sleep, lower HRV').text}
+                </span>
+              </li>
+              <li>
+                <span className="op-corr-q">Do more steps move the scale down?</span>
+                <span className={`op-corr-a ${describeCorrelation(correlations.stepsWeight === null ? null : -correlations.stepsWeight, 'Yes — more steps, lower weight', 'No — more steps tracked higher weight').tone}`}>
+                  {describeCorrelation(correlations.stepsWeight === null ? null : -correlations.stepsWeight, 'Yes — more steps, lower weight', 'No — more steps tracked higher weight').text}
+                </span>
+              </li>
+              <li>
+                <span className="op-corr-q">Does exercise volume lower resting HR?</span>
+                <span className={`op-corr-a ${describeCorrelation(correlations.exerciseRhr === null ? null : -correlations.exerciseRhr, 'Yes — more exercise, lower RHR', 'Hmm — more exercise but higher RHR').tone}`}>
+                  {describeCorrelation(correlations.exerciseRhr === null ? null : -correlations.exerciseRhr, 'Yes — more exercise, lower RHR', 'Hmm — more exercise but higher RHR').text}
+                </span>
+              </li>
+            </ul>
+            <p className="op-corr-note">
+              r close to 0 = no relationship · |r| above 0.4 starts to mean something real.
+            </p>
+          </div>
+        )}
       </div>
       )}
     </section>
