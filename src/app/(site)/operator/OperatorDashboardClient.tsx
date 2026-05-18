@@ -5352,51 +5352,76 @@ export default function OperatorDashboardClient() {
   return (
     <div className="fitness-reference-shell">
       <main className="wrap fitness-redesign" id="operator-overview">
-        <div className="fitness-utility-bar">
-          <div>
-            <div className="fitness-utility-kicker">Operator fitness</div>
-            <div className="fitness-utility-meta">
-              {dashboardSource.length} readings · {syncSummary}
+        <Reveal>
+        <section className="fit-masthead">
+          <div className="fit-masthead-row">
+            <div className="fit-kicker">The Operator Log · Vol. 01 · Issue {String(dashboardSource.length).padStart(2, '0')}</div>
+            <div className="fit-kicker fit-kicker-ink">{fmtDate(latest.date, { long: true })}</div>
+          </div>
+
+          <h1 className="fit-masthead-headline">
+            Weight, composition &amp; the <em>line headed home</em>.
+          </h1>
+
+          <div className="fit-masthead-intro">
+            <p>
+              {dashboardSource.length} recorded weigh-{dashboardSource.length === 1 ? 'in' : 'ins'} since {fmtDate(dashboardSource[0].date, { long: true })}. A private operator log charting the slow march of the body, the slope of the trend, and what the regression projects forward against the <em style={{ fontFamily: T.display, color: T.gold }}>{goal.toFixed(1)} kg</em> goal.
+            </p>
+            <div className="fit-masthead-aside">
+              <div className="fit-kicker" style={{ marginBottom: 6 }}>By the Numbers</div>
+              <div className="fit-masthead-aside-line">
+                {dashboardSource.length} readings · {phaseMarkers.length} phases · slope{' '}
+                <span style={{ color: state.trendKgPerWeek >= 0 ? T.rose : T.green }}>
+                  {state.trendKgPerWeek >= 0 ? '+' : ''}{state.trendKgPerWeek.toFixed(2)} kg/wk
+                </span>
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            className="fitness-lock-btn"
-            onClick={() => {
-              localStorage.removeItem(AUTH_KEY);
-              setAuthed(false);
-            }}
-          >
-            Lock
-          </button>
-        </div>
 
-        <Reveal>
-        <section className="fit-hero">
-          <div className="fit-hero-top">
-            <div>
-              <div className="fit-eyebrow">
-                <span>Operator fitness</span>
-                <span className="slash">/</span>
-                <span className={`pill ${cloudOk ? 'brass' : 'neutral'}`}>{cloudOk === null ? 'Local first' : cloudOk ? (syncing ? 'Cloud syncing' : 'Cloud sync active') : 'Local backup only'}</span>
-                <span className="pill neutral">Last log {formatReferenceDate(latest.date)}</span>
+          <div className="fit-masthead-bar">
+            <div className="fit-masthead-bar-meta">
+              <div className="fit-kicker">
+                <span className={`fit-sync-dot ${cloudOk ? 'good' : cloudOk === false ? 'warn' : 'idle'}`} />
+                {cloudOk === null ? 'Local Sync' : cloudOk ? (syncing ? 'Cloud Syncing' : 'Cloud Sync') : 'Local Backup'} · {dashboardSource.length} entries
               </div>
-              <h1>Body composition <em>timeline</em></h1>
-              <p className="fit-hero-intention">{intentionLine(state, latest, goal)}</p>
-              <div className="sub">
-                <DateStamp iso={dashboardSource[0].date} />
-                <span className="dot" />
-                <span>{dashboardSource.length.toLocaleString('en-GB')} readings</span>
-                <span className="dot" />
-                <span>{phaseMarkers.length} phases</span>
-              </div>
+              <div className="fit-kicker">Linear model · R² {reg ? Math.round(reg.r2 * 100) : 0}%</div>
             </div>
-            <div className="fit-headline-stat">
-              <div className="lbl"><span>{weightLabel}</span><span style={{ opacity: 0.45, margin: '0 4px' }}>·</span><DateStamp iso={latest.date} /></div>
-              <div className="num"><AnimatedNumber value={latest.weight} decimals={1} /><small>kg</small></div>
-              <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} · 7-day</div>
-              <HeadlineSparkline readings={dashboardSource.slice(-4)} />
+            <button
+              type="button"
+              className="fit-lock-link"
+              onClick={() => {
+                localStorage.removeItem(AUTH_KEY);
+                setAuthed(false);
+              }}
+            >
+              Lock ⌃
+            </button>
+          </div>
+        </section>
+        </Reveal>
+
+        <Reveal delay={0.04}>
+        <section className="fit-hero-reading">
+          <div className="fit-hero-reading-figure">
+            <div className="fit-kicker" style={{ marginBottom: 14 }}>
+              This week&apos;s figure · {fmtDate(latest.date, { long: true })}
             </div>
+            <div className="fit-hero-reading-num">
+              <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
+              <span className="unit">kg</span>
+            </div>
+            <div className="fit-hero-reading-meta">
+              <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
+                {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)} kg · prev. reading
+              </span>
+              <span className="fit-hero-reading-note">
+                {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
+              </span>
+            </div>
+          </div>
+          <div className="fit-hero-reading-spark">
+            <div className="fit-kicker" style={{ marginBottom: 10 }}>Last four readings</div>
+            <HeadlineSparkline readings={dashboardSource.slice(-4)} />
           </div>
         </section>
         </Reveal>
