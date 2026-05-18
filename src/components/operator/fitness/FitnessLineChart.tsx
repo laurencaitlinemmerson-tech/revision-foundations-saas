@@ -56,23 +56,64 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
-function smoothPath(points: Array<{ x: number; y: number }>) {
+function shortPhaseLabel(label: string) {
+  const normalized = label.toLowerCase()
+  if (normalized.includes('lean')) return 'Lean'
+  if (normalized.includes('bulk')) return 'Bulk'
+  if (normalized.includes('fat') || normalized.includes('cut')) return 'Fat loss'
+  return 'Recomp'
+}
+
+function splitByDateGap(points: SeriesPoint[], maxGapDays: number) {
+  if (points.length === 0) return []
+
+  const segments: SeriesPoint[][] = [[points[0]]]
+  for (let i = 1; i < points.length; i += 1) {
+    const prev = points[i - 1]
+    const current = points[i]
+    const gapDays = (new Date(current.date).getTime() - new Date(prev.date).getTime()) / (24 * 60 * 60 * 1000)
+    if (gapDays > maxGapDays) {
+      segments.push([current])
+    } else {
+      segments[segments.length - 1].push(current)
+    }
+  }
+  return segments
+}
+
+function monotonePath(points: Array<{ x: number; y: number }>) {
   if (points.length < 2) return ''
   if (points.length === 2) {
     return `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)} L ${points[1].x.toFixed(2)} ${points[1].y.toFixed(2)}`
   }
 
+  const xs = points.map((point) => point.x)
+  const ys = points.map((point) => point.y)
+  const n = points.length
+  const h = Array.from({ length: n - 1 }, (_, i) => xs[i + 1] - xs[i])
+  const slopes = Array.from({ length: n - 1 }, (_, i) => (ys[i + 1] - ys[i]) / Math.max(h[i], 1e-6))
+  const tangents = new Array<number>(n).fill(0)
+
+  tangents[0] = slopes[0]
+  tangents[n - 1] = slopes[n - 2]
+  for (let i = 1; i < n - 1; i += 1) {
+    if (slopes[i - 1] === 0 || slopes[i] === 0 || Math.sign(slopes[i - 1]) !== Math.sign(slopes[i])) {
+      tangents[i] = 0
+      continue
+    }
+    const w1 = 2 * h[i] + h[i - 1]
+    const w2 = h[i] + 2 * h[i - 1]
+    tangents[i] = (w1 + w2) / ((w1 / slopes[i - 1]) + (w2 / slopes[i]))
+  }
+
   let d = `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p0 = points[Math.max(0, i - 1)]
-    const p1 = points[i]
-    const p2 = points[i + 1]
-    const p3 = points[Math.min(points.length - 1, i + 2)]
-    const cp1x = p1.x + (p2.x - p0.x) / 6
-    const cp1y = p1.y + (p2.y - p0.y) / 6
-    const cp2x = p2.x - (p3.x - p1.x) / 6
-    const cp2y = p2.y - (p3.y - p1.y) / 6
-    d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
+  for (let i = 0; i < n - 1; i += 1) {
+    const dx = h[i]
+    const cp1x = xs[i] + dx / 3
+    const cp1y = ys[i] + (tangents[i] * dx) / 3
+    const cp2x = xs[i + 1] - dx / 3
+    const cp2y = ys[i + 1] - (tangents[i + 1] * dx) / 3
+    d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${xs[i + 1].toFixed(2)} ${ys[i + 1].toFixed(2)}`
   }
   return d
 }
@@ -96,7 +137,7 @@ export default function FitnessLineChart({
 }: ChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
   const [range, setRange] = useState<'all' | '5y' | '2y' | '1y' | '6m'>('all')
-  const w = 1100
+  const w = 1240
   const h = 380
   const pad = { l: 44, r: 164, t: 30, b: 32 }
   const innerW = w - pad.l - pad.r
@@ -143,9 +184,12 @@ export default function FitnessLineChart({
 
   // The smoothed/rolling-average series is the trustworthy line. The raw
   // daily readings sit behind as small dots so the eye can see the spread
-  // without the Bezier curve overshooting noisy daily fluctuations.
+  // without overshooting into impossible lows or bridging long data gaps.
   const secondaryPath = filteredSecondary && filteredSecondary.length >= 2
-    ? smoothPath(filteredSecondary.map((point) => ({ x: x(point.date), y: y(point.value) })))
+    ? splitByDateGap(filteredSecondary, 75)
+      .filter((segment) => segment.length >= 2)
+      .map((segment) => monotonePath(segment.map((point) => ({ x: x(point.date), y: y(point.value) }))))
+      .join(' ')
     : null
   const yTicks = 5
   // Evenly-spaced date ticks, scaled to the time window so labels don't
@@ -220,6 +264,59 @@ export default function FitnessLineChart({
     : currentGoalLine <= 0
       ? `${Math.abs(currentGoalLine).toFixed(1)}kg under goal`
       : `${currentGoalLine.toFixed(1)}kg to goal`
+  const phaseBands = phases.flatMap((phase) => {
+    const start = new Date(phase.start).getTime()
+    const end = new Date(phase.end).getTime()
+    if (end < xMin || start > xMax) return []
+    const xa = pad.l + ((Math.max(start, xMin) - xMin) / Math.max(1, xMax - xMin)) * innerW
+    const xb = pad.l + ((Math.min(end, xMax) - xMin) / Math.max(1, xMax - xMin)) * innerW
+    return [{ phase, xa, xb, width: Math.max(3, xb - xa), className: phaseClass(phase.label) }]
+  })
+  const phaseLabels = phaseBands.reduce<Array<{
+    id: string
+    label: string
+    className: string
+    x: number
+    width: number
+  }>>((acc, band) => {
+    const label = shortPhaseLabel(band.phase.label)
+    const width = Math.max(58, label.length * 7.2 + 20)
+    if (band.width < width + 14) return acc
+    const centeredX = clamp(((band.xa + band.xb) / 2) - width / 2, pad.l + 10, w - pad.r - width - 10)
+    const previous = acc[acc.length - 1]
+    if (previous && centeredX < previous.x + previous.width + 10) return acc
+    acc.push({
+      id: band.phase.id,
+      label,
+      className: band.className,
+      x: centeredX,
+      width,
+    })
+    return acc
+  }, [])
+  const annotationLayouts = visibleAnnotations.map((annotation) => {
+    const cx = x(annotation.date)
+    const cy = y(annotation.value)
+    const placeLeft = cx > pad.l + innerW * 0.7
+    const placeBelow = cy < pad.t + 54
+    const textAnchor: 'start' | 'end' = placeLeft ? 'end' : 'start'
+    const textX = clamp(cx + (placeLeft ? -14 : 14), pad.l + 16, w - pad.r - 16)
+    const titleY = clamp(cy + (placeBelow ? 18 : -14), pad.t + 16, pad.t + innerH - 26)
+    const subY = titleY + 12
+    const connectorX = placeLeft ? textX + 6 : textX - 6
+    const connectorY = placeBelow ? titleY - 4 : titleY + 2
+    return {
+      annotation,
+      cx,
+      cy,
+      textAnchor,
+      textX,
+      titleY,
+      subY,
+      connectorX,
+      connectorY,
+    }
+  })
 
   return (
     <div className="fit-panel fitness-chart-panel">
@@ -254,20 +351,20 @@ export default function FitnessLineChart({
             )
           })}
 
-          {phases.map((phase) => {
-            const start = new Date(phase.start).getTime()
-            const end = new Date(phase.end).getTime()
-            if (end < xMin || start > xMax) return null
-            const xa = pad.l + ((Math.max(start, xMin) - xMin) / Math.max(1, xMax - xMin)) * innerW
-            const xb = pad.l + ((Math.min(end, xMax) - xMin) / Math.max(1, xMax - xMin)) * innerW
+          {phaseBands.map((band) => {
             return (
-              <g key={phase.id}>
-                <rect className={`bc-phase-band ${phaseClass(phase.label)}`} x={xa} y={pad.t} width={Math.max(3, xb - xa)} height={innerH} />
-                <line className="bc-phase-divider" x1={xa} y1={pad.t} x2={xa} y2={pad.t + innerH} />
-                {xb - xa > 66 && <text x={xa + 10} y={pad.t + 15} className="bc-phase-label">{phase.label.toUpperCase()}</text>}
+              <g key={band.phase.id}>
+                <rect className={`bc-phase-band ${band.className}`} x={band.xa} y={pad.t} width={band.width} height={innerH} />
+                <line className="bc-phase-divider" x1={band.xa} y1={pad.t} x2={band.xa} y2={pad.t + innerH} />
               </g>
             )
           })}
+          {phaseLabels.map((label) => (
+            <g key={`phase-label-${label.id}`}>
+              <rect x={label.x} y={pad.t + 8} width={label.width} height={18} rx="9" className={`bc-phase-pill ${label.className}`} />
+              <text x={label.x + label.width / 2} y={pad.t + 20} textAnchor="middle" className="bc-phase-label">{label.label}</text>
+            </g>
+          ))}
           {overlays}
           {targetWeight !== undefined && targetWeight >= low && targetWeight <= high && (
             <g>
@@ -300,26 +397,24 @@ export default function FitnessLineChart({
             </g>
           )}
 
-          {visibleAnnotations.map((annotation, index) => {
-            const cx = x(annotation.date)
-            const cy = y(annotation.value)
-            const above = index % 2 === 0
+          {annotationLayouts.map((layout) => {
+            const { annotation, cx, cy, textAnchor, textX, titleY, subY, connectorX, connectorY } = layout
             return (
               <g key={`${annotation.title}-${annotation.date}`}>
-                <line x1={cx} y1={pad.t} x2={cx} y2={cy} className="bc-pin-line" />
+                <line x1={cx} y1={cy} x2={connectorX} y2={connectorY} className="bc-pin-connector" />
                 <circle cx={cx} cy={cy} r="4.5" className="bc-pin-dot" />
                 <text
-                  x={Math.min(w - 24, Math.max(pad.l + 24, cx))}
-                  y={above ? pad.t + 12 : cy + 22}
-                  textAnchor={cx > w - 100 ? 'end' : cx < pad.l + 80 ? 'start' : 'middle'}
+                  x={textX}
+                  y={titleY}
+                  textAnchor={textAnchor}
                   className="bc-pin-label"
                 >
                   {annotation.title}
                 </text>
                 <text
-                  x={Math.min(w - 24, Math.max(pad.l + 24, cx))}
-                  y={above ? pad.t + 25 : cy + 35}
-                  textAnchor={cx > w - 100 ? 'end' : cx < pad.l + 80 ? 'start' : 'middle'}
+                  x={textX}
+                  y={subY}
+                  textAnchor={textAnchor}
                   className="bc-pin-sub"
                 >
                   {annotation.value.toFixed(1)}kg

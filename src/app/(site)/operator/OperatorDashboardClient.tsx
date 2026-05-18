@@ -4468,10 +4468,11 @@ function buildWeightSeries(sorted: FitnessReading[]) {
   return sorted.map((row) => ({ date: row.date, value: row.weight }));
 }
 
-function buildRollingAverage(sorted: FitnessReading[], windowDays = 45) {
-  return sorted.map((row) => {
+function buildRollingAverage(sorted: FitnessReading[], windowDays = 45, minDisplayValue = 60) {
+  const cleaned = sorted.filter((row) => Number.isFinite(row.weight) && row.weight >= minDisplayValue)
+  return cleaned.map((row) => {
     const target = new Date(row.date).getTime();
-    const sample = sorted.filter((item) => {
+    const sample = cleaned.filter((item) => {
       const time = new Date(item.date).getTime();
       return time >= target - windowDays * REFERENCE_DAY && time <= target;
     });
@@ -5142,8 +5143,8 @@ export default function OperatorDashboardClient() {
           {/* Long-form weight chart — promoted to a full-width editorial moment. */}
           <section className="fit-editorial-chart" style={{ marginBottom: 22 }}>
             <FitnessLineChart
-              title={<>Weight, phases and <em>evidence</em></>}
-              subtitle="Raw readings · smoothed trend · phase bands · pinned events"
+              title={<>The long <em>line</em></>}
+              subtitle="Every weigh-in, the live 45-day direction, and the body-state shifts that shaped the story."
               points={buildWeightSeries(dashboardSource)}
               color="oklch(0.70 0.012 70 / 0.48)"
               minY={Math.floor(Math.min(...dashboardSource.map((row) => row.weight), goal) - 2)}
@@ -5264,10 +5265,6 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>
-        </Reveal>
-
-        <Reveal>
-        <ImportNote opPw={opPw} onImported={refreshCloudReadings} />
         </Reveal>
 
       </main>

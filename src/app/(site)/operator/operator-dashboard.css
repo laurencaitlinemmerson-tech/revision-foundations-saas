@@ -21,9 +21,9 @@
 }
 
 .fitness-reference-shell .wrap {
-  max-width: 1220px;
+  max-width: 1540px;
   margin: 0 auto;
-  padding: 56px 20px 96px;
+  padding: 56px 24px 104px;
 }
 
 .fitness-reference-shell button,
@@ -671,8 +671,8 @@
 
 .fit-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 372px;
+  gap: 24px;
   align-items: start;
 }
 
@@ -825,36 +825,58 @@
 }
 
 .bc-phase-band {
-  opacity: 0.55;
+  opacity: 0.32;
 }
 
 .bc-phase-band.lean {
-  fill: oklch(0.95 0.03 145 / 0.45);
+  fill: oklch(0.93 0.035 150 / 0.4);
 }
 
 .bc-phase-band.bulk {
-  fill: oklch(0.94 0.04 82 / 0.45);
+  fill: oklch(0.95 0.03 86 / 0.36);
 }
 
 .bc-phase-band.cut {
-  fill: oklch(0.95 0.04 25 / 0.4);
+  fill: oklch(0.95 0.045 24 / 0.34);
 }
 
 .bc-phase-band.recomp {
-  fill: oklch(0.94 0.035 240 / 0.38);
+  fill: oklch(0.95 0.025 235 / 0.34);
 }
 
 .bc-phase-divider {
   stroke: var(--rule);
   stroke-width: 0.5;
   stroke-dasharray: 3 3;
+  opacity: 0.45;
+}
+
+.bc-phase-pill {
+  stroke: rgba(26, 24, 21, 0.06);
+  stroke-width: 0.6;
+}
+
+.bc-phase-pill.lean {
+  fill: oklch(0.96 0.02 150 / 0.88);
+}
+
+.bc-phase-pill.bulk {
+  fill: oklch(0.97 0.015 86 / 0.9);
+}
+
+.bc-phase-pill.cut {
+  fill: oklch(0.97 0.02 24 / 0.88);
+}
+
+.bc-phase-pill.recomp {
+  fill: oklch(0.97 0.015 235 / 0.9);
 }
 
 .bc-phase-label {
-  font-family: var(--font-body);
-  font-size: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8.5px;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   fill: var(--ink-soft);
 }
@@ -880,11 +902,15 @@
   font-weight: 700;
 }
 
-.bc-current-line,
-.bc-pin-line {
+.bc-current-line {
   stroke: var(--ink-mute);
   stroke-width: 0.5;
   stroke-dasharray: 2 3;
+}
+
+.bc-pin-connector {
+  stroke: rgba(26, 24, 21, 0.3);
+  stroke-width: 0.8;
 }
 
 .bc-current-connector {
@@ -2823,19 +2849,58 @@
 
 /* ── Editorial chart promotion ───────────────────────────────────── */
 .fitness-reference-shell .fit-editorial-chart {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0)) ,
-    var(--paper);
-  border: 0.5px solid var(--rule);
-  padding: 6px 6px 4px;
+  background: transparent;
+  border: none;
+  padding: 2px 0 10px;
   position: relative;
 }
 .fitness-reference-shell .fit-editorial-chart::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border: 0.5px solid rgba(255,255,255,0.7);
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(26, 24, 21, 0.14), transparent);
   pointer-events: none;
+}
+
+.fitness-reference-shell .fitness-chart-panel {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.fitness-reference-shell .fitness-chart-panel .fit-panel-head {
+  padding: 24px 0 18px;
+  border-bottom: 1px solid rgba(26, 24, 21, 0.08);
+  align-items: flex-start;
+}
+
+.fitness-reference-shell .fitness-chart-panel .fit-panel-head h3 {
+  font-size: clamp(32px, 3.7vw, 46px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  max-width: 9ch;
+}
+
+.fitness-reference-shell .fitness-chart-panel .fit-panel-head .meta {
+  margin-top: 10px;
+  max-width: 56ch;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.45;
+  letter-spacing: 0;
+  color: color-mix(in srgb, var(--ink-soft) 82%, white);
+}
+
+.fitness-reference-shell .fitness-chart-panel .bc-range-toggle {
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.68);
+  border-color: rgba(26, 24, 21, 0.08);
+  backdrop-filter: blur(8px);
 }
 
 /* ── Empty-state Playfair tone overrides ──────────────────────────── */
