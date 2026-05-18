@@ -159,10 +159,10 @@ export default function FitnessLineChart({
   minDisplayValue = 60,
 }: ChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-  const [range, setRange] = useState<'all' | '1y' | '6m' | '30d' | '7d'>('all')
+  const [range, setRange] = useState<'all' | '3y' | '1y' | '6m' | '30d' | '7d'>('3y')
   const w = 1120
-  const h = 500
-  const pad = { l: 42, r: 152, t: 18, b: 30 }
+  const h = 620
+  const pad = { l: 56, r: 72, t: 40, b: 48 }
   const innerW = w - pad.l - pad.r
   const innerH = h - pad.t - pad.b
 
@@ -180,7 +180,8 @@ export default function FitnessLineChart({
   const filteredPoints = useMemo(() => {
     if (range === 'all' || !cleanedPoints.length) return cleanedPoints
     const cutoff = new Date(cleanedPoints[cleanedPoints.length - 1].date)
-    if (range === '1y') cutoff.setMonth(cutoff.getMonth() - 12)
+    if (range === '3y') cutoff.setFullYear(cutoff.getFullYear() - 3)
+    else if (range === '1y') cutoff.setMonth(cutoff.getMonth() - 12)
     else if (range === '6m') cutoff.setMonth(cutoff.getMonth() - 6)
     else cutoff.setDate(cutoff.getDate() - (range === '30d' ? 30 : 7))
     return cleanedPoints.filter((point) => new Date(point.date).getTime() >= cutoff.getTime())
@@ -247,7 +248,7 @@ export default function FitnessLineChart({
       && Math.abs(annotation.value - latestPoint.value) < 0.05
     return time >= xMin && time <= xMax && !isLatestEcho
   })
-  const ranges = ['all', '1y', '6m', '30d', '7d'] as const
+  const ranges = ['all', '3y', '1y', '6m', '30d', '7d'] as const
   const ariaLabel = typeof title === 'string' ? title : 'Fitness timeline chart'
   const phaseClass = (label: string) => {
     const normalized = label.toLowerCase()
@@ -280,22 +281,8 @@ export default function FitnessLineChart({
   ].filter(Boolean)
   const tipWidth = 208
   const tipHeight = 50 + tipLines.length * 14
-  const currentCalloutWidth = 126
-  const currentCalloutHeight = 70
-  const currentCalloutX = w - currentCalloutWidth - 18
   const currentPointX = latestPoint ? x(latestPoint.date) : null
   const currentPointY = latestPoint ? y(latestPoint.value) : null
-  const currentCalloutY = currentPointY === null
-    ? null
-    : clamp(currentPointY - currentCalloutHeight / 2, pad.t + 8, pad.t + innerH - currentCalloutHeight - 8)
-  const currentGoalLine = latestPoint && targetWeight !== undefined
-    ? latestPoint.value - targetWeight
-    : null
-  const currentGoalLabel = currentGoalLine === null
-    ? null
-    : currentGoalLine <= 0
-      ? `${Math.abs(currentGoalLine).toFixed(1)}kg under goal`
-      : `${currentGoalLine.toFixed(1)}kg to goal`
   const summaryStats = [
     {
       label: 'Current',
@@ -506,30 +493,15 @@ export default function FitnessLineChart({
             <text key={`${time}-${index}`} x={xForTime(time)} y={h - 12} className="bc-x-label">{fmtTickTime(time, spanDays)}</text>
           ))}
 
-          {latestPoint && currentPointX !== null && currentPointY !== null && currentCalloutY !== null && (
+          {latestPoint && currentPointX !== null && currentPointY !== null && (
             <g className="bc-current-callout">
-              <line
-                x1={currentPointX + 8}
-                y1={currentPointY}
-                x2={currentCalloutX - 8}
-                y2={currentCalloutY + currentCalloutHeight / 2}
-                className="bc-current-connector"
-              />
-              <rect
-                x={currentCalloutX}
-                y={currentCalloutY}
-                width={currentCalloutWidth}
-                height={currentCalloutHeight}
-                rx="8"
-                className="bc-current-card"
-              />
-              <text x={currentCalloutX + 14} y={currentCalloutY + 18} className="bc-current-kicker">Current</text>
-              <text x={currentCalloutX + 14} y={currentCalloutY + 40} className="bc-current-value">{latestPoint.value.toFixed(1)}kg</text>
-              <text x={currentCalloutX + 14} y={currentCalloutY + 56} className="bc-current-meta">
-                {latestPhase?.label ?? fmtHoverDate(latestPoint.date)}
-              </text>
-              <text x={currentCalloutX + 14} y={currentCalloutY + 69} className="bc-current-meta bc-current-meta-soft">
-                {currentGoalLabel ?? fmtHoverDate(latestPoint.date)}
+              <text
+                x={Math.min(w - pad.r - 6, currentPointX + 14)}
+                y={Math.max(pad.t + 14, currentPointY - 12)}
+                className="bc-current-kicker"
+                textAnchor={currentPointX > w - pad.r - 100 ? 'end' : 'start'}
+              >
+                {latestPoint.value.toFixed(1)} kg · today
               </text>
             </g>
           )}

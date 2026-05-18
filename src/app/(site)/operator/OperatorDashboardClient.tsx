@@ -410,33 +410,34 @@ function fmtDateObj(d: Date) {
 // ─── Status helpers ───────────────────────────────────────────────────────────
 
 function weightStatus(w: number, goal: number): [string, string] {
-  if (w <= goal) return ['AT GOAL', T.green];
-  return ['ABOVE GOAL', T.rose];
+  if (w <= goal) return ['At goal', T.green];
+  return ['Above goal', T.gold];
 }
 function bmiStatus(b: number): [string, string] {
-  if (b < 18.5) return ['UNDERWEIGHT', T.gold];
-  if (b < 25)   return ['HEALTHY', T.green];
-  if (b < 30)   return ['OVERWEIGHT', T.gold];
-  return ['VERY HIGH', T.rose];
+  if (b < 18.5) return ['Below healthy range', T.gold];
+  if (b < 25)   return ['Healthy range', T.green];
+  if (b < 30)   return ['Above healthy range', T.gold];
+  if (b < 35)   return ['Above healthy range', T.rose];
+  return ['Clinical risk range', T.rose];
 }
 function fatStatus(f: number): [string, string] {
-  if (f < 21) return ['LOW', T.gold];
-  if (f < 33) return ['HEALTHY', T.green];
-  if (f < 39) return ['HIGH', T.gold];
-  return ['VERY HIGH', T.rose];
+  if (f < 21) return ['Below typical', T.gold];
+  if (f < 33) return ['Healthy range', T.green];
+  if (f < 39) return ['Above target', T.gold];
+  return ['Above healthy range', T.rose];
 }
 function waterStatus(w: number): [string, string] {
-  if (w < 45) return ['LOW', T.rose];
-  return ['HEALTHY', T.green];
+  if (w < 45) return ['Below target', T.gold];
+  return ['Healthy range', T.green];
 }
 function muscleStatus(m: number): [string, string] {
-  if (m >= 45) return ['STRONG', T.green];
-  if (m >= 38) return ['AVERAGE', T.gold];
-  return ['LOW', T.rose];
+  if (m >= 45) return ['Strong', T.green];
+  if (m >= 38) return ['Within range', T.gold];
+  return ['Below average', T.gold];
 }
 function boneStatus(b: number): [string, string] {
-  if (b >= 3.0) return ['HEALTHY', T.green];
-  return ['LOW', T.gold];
+  if (b >= 3.0) return ['Healthy range', T.green];
+  return ['Below typical', T.gold];
 }
 
 function nutritionTargets(reading: FitnessReading) {
@@ -4724,6 +4725,360 @@ function buildSideMetrics(sorted: FitnessReading[], goal: number, reg: Reg | nul
   ];
 }
 
+// ─── Today's Read · Next best action · Food breakdown ───────────────────────
+
+interface TodaySnapshot {
+  latest: FitnessReading;
+  state: State;
+  goal: number;
+  cadence: { count: number; score: number };
+  nutrition: { bmr: number; activeTdee: number; intake: number; maintenance: number; protein: number };
+  caloriesInToday: number | null;
+  caloriesOutToday: number | null;
+  actualDeficitToday: number | null;
+  targetDeficit: number;
+  proteinG: number | null;
+  carbsG: number | null;
+  fatG: number | null;
+  fiberG: number | null;
+  waterMl: number | null;
+  stepsToday: number | null;
+  sevenDayDelta: number;
+}
+
+interface NextAction {
+  tone: 'primary' | 'support';
+  title: string;
+  detail: string;
+}
+
+function buildNextActions(snap: TodaySnapshot): NextAction[] {
+  const actions: NextAction[] = [];
+
+  if (snap.state.weighInStatus === 'overdue' || snap.state.weighInStatus === 'due-soon') {
+    actions.push({
+      tone: 'primary',
+      title: 'File a weigh-in',
+      detail: `${snap.state.daysSinceWeighIn} days since the last reading. A fresh number resets the read on everything else.`,
+    });
+  }
+
+  if (snap.caloriesInToday === null) {
+    actions.push({
+      tone: actions.length === 0 ? 'primary' : 'support',
+      title: `Stay close to ${snap.nutrition.intake.toLocaleString('en-GB')} kcal`,
+      detail: 'Once today\'s food log syncs, the deficit picture below fills in automatically.',
+    });
+  } else {
+    const deficitShort = snap.actualDeficitToday !== null && snap.actualDeficitToday < snap.targetDeficit;
+    if (deficitShort) {
+      const gap = snap.actualDeficitToday !== null ? Math.max(0, snap.targetDeficit - snap.actualDeficitToday) : snap.targetDeficit;
+      actions.push({
+        tone: actions.length === 0 ? 'primary' : 'support',
+        title: 'Add a short walk or protein-led meal',
+        detail: `Deficit is about ${gap.toLocaleString('en-GB')} kcal short of plan. A 20-minute walk and a protein-forward dinner usually closes that.`,
+      });
+    }
+  }
+
+  if (snap.proteinG !== null && snap.proteinG < snap.nutrition.protein * 0.85) {
+    const remaining = Math.max(0, Math.round(snap.nutrition.protein - snap.proteinG));
+    actions.push({
+      tone: actions.length === 0 ? 'primary' : 'support',
+      title: 'Prioritise protein at the next meal',
+      detail: `${remaining} g still to reach today's ${snap.nutrition.protein} g target.`,
+    });
+  } else if (snap.proteinG === null) {
+    actions.push({
+      tone: actions.length === 0 ? 'primary' : 'support',
+      title: `Aim for ${snap.nutrition.protein} g protein`,
+      detail: 'Protein log will start populating once macros sync from your food tracker.',
+    });
+  }
+
+  if (snap.stepsToday !== null && snap.stepsToday < 8000) {
+    actions.push({
+      tone: 'support',
+      title: 'Walk to 8,000–10,000 steps',
+      detail: `${snap.stepsToday.toLocaleString('en-GB')} so far. The cleanest deficit days finish in this band.`,
+    });
+  }
+
+  if (Math.abs(snap.sevenDayDelta) < 0.5 && snap.sevenDayDelta > 0) {
+    actions.push({
+      tone: 'support',
+      title: 'Hold the line — do not cut calories yet',
+      detail: 'Today\'s uptick is inside normal day-to-day variance. Wait for 7 clean tracking days before changing anything.',
+    });
+  }
+
+  if (actions.length === 0) {
+    actions.push({
+      tone: 'primary',
+      title: 'Keep the day boring',
+      detail: 'Targets are in range. Protect consistency, log dinner, walk after the last meal.',
+    });
+  }
+
+  return actions.slice(0, 3);
+}
+
+function NextBestActionCard({ snap, onLog }: { snap: TodaySnapshot; onLog: () => void }) {
+  const actions = buildNextActions(snap);
+  const [primary, ...rest] = actions;
+  const showLogButton = snap.state.weighInStatus === 'overdue' || snap.state.weighInStatus === 'due-soon';
+  return (
+    <article className="fit-nba">
+      <div className="fit-nba-head">
+        <div className="fit-nba-eyebrow">Next best action</div>
+        <div className="fit-nba-meta">Generated from today's data</div>
+      </div>
+      <div className="fit-nba-primary">
+        <div className="fit-nba-primary-title">{primary.title}</div>
+        <p className="fit-nba-primary-detail">{primary.detail}</p>
+        {showLogButton && (
+          <button type="button" className="fit-nba-cta" onClick={onLog}>
+            File reading
+          </button>
+        )}
+      </div>
+      {rest.length > 0 && (
+        <ul className="fit-nba-support">
+          {rest.map((action, index) => (
+            <li key={`${action.title}-${index}`}>
+              <span className="fit-nba-support-title">{action.title}</span>
+              <span className="fit-nba-support-detail">{action.detail}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
+  );
+}
+
+interface ReadLine {
+  tone: 'good' | 'neutral' | 'warn';
+  text: string;
+}
+
+function buildTodayRead(snap: TodaySnapshot): { headline: string; lines: ReadLine[] } {
+  const lines: ReadLine[] = [];
+
+  // Calorie / deficit read
+  if (snap.actualDeficitToday !== null && snap.caloriesInToday !== null) {
+    if (snap.actualDeficitToday >= snap.targetDeficit) {
+      lines.push({ tone: 'good', text: `Intake is controlled and the deficit is at or above the planned ${snap.targetDeficit.toLocaleString('en-GB')} kcal range.` });
+    } else if (snap.actualDeficitToday >= 0) {
+      const shortBy = snap.targetDeficit - snap.actualDeficitToday;
+      lines.push({ tone: 'neutral', text: `Deficit is roughly ${shortBy.toLocaleString('en-GB')} kcal short of plan. Don't change calories yet — focus on another clean tracking day and steps.` });
+    } else {
+      lines.push({ tone: 'warn', text: `Today is currently in surplus. A 20-minute walk or lighter dinner will pull it back into deficit.` });
+    }
+  } else {
+    lines.push({ tone: 'neutral', text: 'Food log has not synced yet. The deficit read fills in once today\'s intake lands.' });
+  }
+
+  // Weight noise vs. signal
+  const absDelta = Math.abs(snap.sevenDayDelta);
+  if (absDelta < 0.5) {
+    lines.push({ tone: 'good', text: `7-day move is ${formatWeightDelta(snap.sevenDayDelta)} — within normal day-to-day fluctuation, not a signal.` });
+  } else if (snap.sevenDayDelta > 0) {
+    lines.push({ tone: 'neutral', text: `Weight is up ${snap.sevenDayDelta.toFixed(1)} kg over 7 days. Could be water or food timing — wait for two more readings before reacting.` });
+  } else {
+    lines.push({ tone: 'good', text: `Weight is down ${Math.abs(snap.sevenDayDelta).toFixed(1)} kg over 7 days. Trend line is moving the right way.` });
+  }
+
+  // Logging cadence
+  if (snap.cadence.score >= 80) {
+    lines.push({ tone: 'good', text: `Logging is consistent — ${snap.cadence.count}/14 days. Adjustments are safe to evaluate when needed.` });
+  } else if (snap.cadence.score >= 60) {
+    lines.push({ tone: 'neutral', text: `Logging cadence is ${snap.cadence.count}/14 days. A couple more clean days makes the read tighter.` });
+  } else {
+    lines.push({ tone: 'warn', text: `Logging gap — only ${snap.cadence.count}/14 days. File the next reading before treating any swing as real.` });
+  }
+
+  // Headline
+  let headline: string;
+  if (snap.state.weighInStatus === 'overdue') {
+    headline = 'Reading overdue';
+  } else if (lines.some((l) => l.tone === 'warn')) {
+    headline = 'Slightly off plan';
+  } else if (lines.every((l) => l.tone === 'good')) {
+    headline = 'On track';
+  } else {
+    headline = 'Close to target';
+  }
+
+  return { headline, lines };
+}
+
+function TodayReadCard({ snap }: { snap: TodaySnapshot }) {
+  const { headline, lines } = buildTodayRead(snap);
+  return (
+    <article className="fit-read">
+      <div className="fit-read-head">
+        <div className="fit-read-eyebrow">Today's read</div>
+        <div className="fit-read-headline">{headline}</div>
+      </div>
+      <ul className="fit-read-list">
+        {lines.map((line, index) => (
+          <li key={index} className={`fit-read-item ${line.tone}`}>
+            <span className="fit-read-dot" aria-hidden="true" />
+            <span>{line.text}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+interface MacroTile {
+  label: string;
+  value: number | null;
+  target: number;
+  unit: string;
+}
+
+function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
+  const intakeTarget = snap.nutrition.intake;
+  const proteinTarget = snap.nutrition.protein;
+  // Sensible defaults if data is missing — these are clearly labelled as targets, not actual.
+  const carbsTarget = Math.round((intakeTarget * 0.4) / 4);
+  const fatTarget = Math.round((intakeTarget * 0.3) / 9);
+  const fiberTarget = 30;
+  const waterTargetMl = 2000;
+
+  const calIn = snap.caloriesInToday;
+  const calRemaining = calIn === null ? null : intakeTarget - calIn;
+  const calPct = calIn === null ? 0 : Math.min(1.15, calIn / Math.max(1, intakeTarget));
+
+  const macros: MacroTile[] = [
+    { label: 'Protein', value: snap.proteinG, target: proteinTarget, unit: 'g' },
+    { label: 'Carbs', value: snap.carbsG, target: carbsTarget, unit: 'g' },
+    { label: 'Fat', value: snap.fatG, target: fatTarget, unit: 'g' },
+    { label: 'Fibre', value: snap.fiberG, target: fiberTarget, unit: 'g' },
+  ];
+
+  const hasAnyMacros = macros.some((m) => m.value !== null);
+  const waterCups = snap.waterMl !== null ? snap.waterMl / 250 : null;
+  const waterTargetCups = waterTargetMl / 250;
+
+  return (
+    <section className="fit-food">
+      <div className="fit-food-head">
+        <div>
+          <div className="fit-food-eyebrow">Food breakdown</div>
+          <h3 className="fit-food-title">Nutrition <em>picture</em></h3>
+          <p className="fit-food-copy">Calories, macros, water and meal balance for today — built from your food log.</p>
+        </div>
+      </div>
+
+      <div className="fit-food-grid">
+        <div className="fit-food-card fit-food-cal">
+          <div className="fit-food-card-head">
+            <span className="fit-food-card-label">Calorie balance</span>
+            <span className="fit-food-card-meta">{intakeTarget.toLocaleString('en-GB')} kcal target · {snap.nutrition.maintenance.toLocaleString('en-GB')} kcal maintenance</span>
+          </div>
+          <div className="fit-food-cal-row">
+            <div className="fit-food-cal-col">
+              <div className="fit-food-cal-num">{calIn !== null ? Math.round(calIn).toLocaleString('en-GB') : '—'}</div>
+              <div className="fit-food-cal-lbl">Logged</div>
+            </div>
+            <div className="fit-food-cal-col">
+              <div className="fit-food-cal-num">{intakeTarget.toLocaleString('en-GB')}</div>
+              <div className="fit-food-cal-lbl">Target</div>
+            </div>
+            <div className="fit-food-cal-col">
+              <div className={`fit-food-cal-num ${calRemaining === null ? '' : calRemaining >= 0 ? 'good' : 'warn'}`}>
+                {calRemaining === null ? '—' : `${calRemaining >= 0 ? '' : '+'}${Math.abs(Math.round(calRemaining)).toLocaleString('en-GB')}`}
+              </div>
+              <div className="fit-food-cal-lbl">{calRemaining === null ? 'Remaining' : calRemaining >= 0 ? 'Remaining' : 'Over target'}</div>
+            </div>
+          </div>
+          <div className="fit-food-bar" aria-hidden="true">
+            <span className="fit-food-bar-fill" style={{ width: `${Math.min(100, calPct * 100)}%` }} />
+            <span className={`fit-food-bar-marker ${calIn !== null && calIn > intakeTarget ? 'over' : ''}`} style={{ left: '100%' }} />
+          </div>
+          {calIn === null && (
+            <div className="fit-food-empty">No food log synced yet for today. Targets shown so you have a number to aim at.</div>
+          )}
+        </div>
+
+        <div className="fit-food-card fit-food-water">
+          <div className="fit-food-card-head">
+            <span className="fit-food-card-label">Water</span>
+            <span className="fit-food-card-meta">{waterTargetMl / 1000}L target</span>
+          </div>
+          <div className="fit-food-water-num">
+            {waterCups !== null ? Math.round(waterCups) : '—'}
+            <small>cups</small>
+          </div>
+          <div className="fit-food-water-bar" aria-hidden="true">
+            {Array.from({ length: Math.ceil(waterTargetCups) }).map((_, i) => (
+              <span key={i} className={`fit-food-water-cup ${waterCups !== null && i < Math.round(waterCups) ? 'filled' : ''}`} />
+            ))}
+          </div>
+          {waterCups === null && (
+            <div className="fit-food-empty soft">No water logged yet. Connect Apple Health or log manually.</div>
+          )}
+        </div>
+      </div>
+
+      <div className="fit-food-section">
+        <div className="fit-food-section-head">
+          <span className="fit-food-section-label">Macronutrients</span>
+          <span className="fit-food-section-meta">Targets are based on {snap.nutrition.activeTdee.toLocaleString('en-GB')} kcal active TDEE · 1.8 g/kg protein</span>
+        </div>
+        {hasAnyMacros ? (
+          <div className="fit-food-macros">
+            {macros.map((macro) => {
+              const value = macro.value;
+              const pct = value === null ? 0 : Math.min(1.15, value / Math.max(1, macro.target));
+              const tone = value === null ? 'empty' : pct >= 0.95 ? 'good' : pct >= 0.7 ? 'neutral' : 'warn';
+              return (
+                <div key={macro.label} className={`fit-food-macro ${tone}`}>
+                  <div className="fit-food-macro-label">{macro.label}</div>
+                  <div className="fit-food-macro-num">
+                    {value === null ? '—' : Math.round(value)}
+                    <small>{macro.unit}</small>
+                  </div>
+                  <div className="fit-food-macro-target">of {macro.target}{macro.unit} target</div>
+                  <div className="fit-food-macro-bar" aria-hidden="true">
+                    <span className="fit-food-macro-fill" style={{ width: `${Math.min(100, pct * 100)}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="fit-food-empty-block">
+            No macro data yet. Add protein, carbs, and fat to make this section more useful — most food trackers (MyFitnessPal, Lifesum, Cronometer) sync these directly into Apple Health.
+          </div>
+        )}
+      </div>
+
+      <div className="fit-food-section">
+        <div className="fit-food-section-head">
+          <span className="fit-food-section-label">Meal breakdown</span>
+          <span className="fit-food-section-meta">Meal-level split shown once your food log includes meal tags</span>
+        </div>
+        <div className="fit-food-meals">
+          {(['Breakfast', 'Lunch', 'Dinner', 'Snacks'] as const).map((meal) => (
+            <div key={meal} className="fit-food-meal">
+              <div className="fit-food-meal-label">{meal}</div>
+              <div className="fit-food-meal-num">—</div>
+              <div className="fit-food-meal-note">No log yet</div>
+            </div>
+          ))}
+        </div>
+        <div className="fit-food-empty soft">
+          Tag meals in your food tracker (or log breakfast / lunch / dinner / snacks separately in MyFitnessPal) and the per-meal share of calories will appear here.
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Main app ─────────────────────────────────────────────────────────────────
 
 export default function OperatorDashboardClient() {
@@ -4983,11 +5338,35 @@ export default function OperatorDashboardClient() {
         : `${Math.abs(actualDeficitToday).toLocaleString('en-GB')} kcal over burn`;
   const caloriesInSub = caloriesInToday !== null
     ? `${(caloriesInToday - nutrition.intake) >= 0 ? '+' : ''}${Math.round(caloriesInToday - nutrition.intake)} vs ${nutrition.intake.toLocaleString('en-GB')} target`
-    : 'Awaiting food log sync';
+    : 'No food log synced yet today';
   const caloriesOutSub = todayHealth
     ? `BMR ${nutrition.bmr.toLocaleString('en-GB')} + active ${(activeKcalToday ?? 0).toLocaleString('en-GB')} kcal`
-    : 'Awaiting Apple Health sync';
+    : 'Connect Apple Health to populate';
   const weightTodaySub = `${targetDelta <= 0 ? `${Math.abs(targetDelta).toFixed(1)} kg under` : `${targetDelta.toFixed(1)} kg to go`} · goal ${goal.toFixed(1)} kg`;
+  const proteinToday = todayHealth?.nutrition?.proteinG ?? null;
+  const carbsToday = todayHealth?.nutrition?.carbsG ?? null;
+  const fatToday = todayHealth?.nutrition?.fatG ?? null;
+  const fiberToday = todayHealth?.nutrition?.fiberG ?? null;
+  const waterMlToday = todayHealth?.nutrition?.waterMl ?? null;
+  const stepsToday = todayHealth?.activity?.steps ?? null;
+  const todaySnap: TodaySnapshot = {
+    latest,
+    state,
+    goal,
+    cadence,
+    nutrition,
+    caloriesInToday,
+    caloriesOutToday,
+    actualDeficitToday,
+    targetDeficit,
+    proteinG: proteinToday,
+    carbsG: carbsToday,
+    fatG: fatToday,
+    fiberG: fiberToday,
+    waterMl: waterMlToday,
+    stepsToday,
+    sevenDayDelta,
+  };
   return (
     <div className="fitness-reference-shell">
       <main className="wrap fitness-redesign" id="operator-overview">
@@ -5011,9 +5390,38 @@ export default function OperatorDashboardClient() {
         </div>
 
         <Reveal>
+        <section className="fit-hero">
+          <div className="fit-hero-top">
+            <div>
+              <div className="fit-eyebrow">
+                <span>Operator fitness</span>
+                <span className="slash">/</span>
+                <span className={`pill ${cloudOk ? 'brass' : 'neutral'}`}>{cloudOk === null ? 'Local first' : cloudOk ? (syncing ? 'Cloud syncing' : 'Cloud sync active') : 'Local backup only'}</span>
+                <span className="pill neutral">Last log {formatReferenceDate(latest.date)}</span>
+              </div>
+              <h1>Body composition <em>timeline</em></h1>
+              <p className="fit-hero-intention">{intentionLine(state, latest, goal)}</p>
+              <div className="sub">
+                <DateStamp iso={dashboardSource[0].date} />
+                <span className="dot" />
+                <span>{dashboardSource.length.toLocaleString('en-GB')} readings</span>
+                <span className="dot" />
+                <span>{phaseMarkers.length} phases</span>
+              </div>
+            </div>
+            <div className="fit-headline-stat">
+              <div className="lbl"><span>{weightLabel}</span><span style={{ opacity: 0.45, margin: '0 4px' }}>·</span><DateStamp iso={latest.date} /></div>
+              <div className="num"><AnimatedNumber value={latest.weight} decimals={1} /><small>kg</small></div>
+              <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} · 7-day</div>
+            </div>
+          </div>
+        </section>
+        </Reveal>
+
+        <Reveal delay={0.05}>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '10px 0 18px' }} />
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '4px 0 16px' }} />
 
           <section className="fit-today">
             <div className="fit-today-head">
@@ -5080,53 +5488,11 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
-        <Reveal delay={0.05}>
-        <section className="fit-hero">
-          <div className="fit-hero-top">
-            <div>
-              <div className="fit-eyebrow">
-                <span>Fitness</span>
-                <span className="slash">/</span>
-                <span className="pill brass">Auto sync live</span>
-                <span className="pill neutral">Last log {formatReferenceDate(latest.date)}</span>
-              </div>
-              <h1>Body composition <em>timeline</em></h1>
-              <HeroIntention state={state} latest={latest} goal={goal} />
-              <div className="sub" style={{ marginTop: 18 }}>
-                <DateStamp iso={dashboardSource[0].date} />
-                <span className="dot" />
-                <span>{dashboardSource.length.toLocaleString('en-GB')} readings</span>
-                <span className="dot" />
-                <span>{phaseMarkers.length} phases logged</span>
-                <span className="dot" />
-                <span className="muted">{syncSummary}</span>
-              </div>
-            </div>
-            <div className="fit-headline-stat">
-              <div className="lbl" style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-                <span>{weightLabel}</span>
-                <span style={{ opacity: 0.45 }}>·</span>
-                <DateStamp iso={latest.date} />
-              </div>
-              <div className="num"><AnimatedNumber value={latest.weight} decimals={1} /><small>kg</small></div>
-              <div className={`delta ${sevenDayDelta <= 0 ? 'down' : 'up'}`}>{formatWeightDelta(sevenDayDelta)} - 7-day marker</div>
-              <HeadlineSparkline readings={dashboardSource.slice(-4)} />
-            </div>
-          </div>
-
-          <div className="fit-stat-strip">
-            {heroMetrics.map((metric) => (
-              <div className="cell" key={metric.label}>
-                <div className="lbl">{metric.label}</div>
-                <div className="v">{metric.value}</div>
-                <div className={`meta ${metric.tone}`}>{metric.status}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <Reveal delay={0.12}>
+          <FoodBreakdownSection snap={todaySnap} />
         </Reveal>
 
-        <Reveal delay={0.1}>
+        <Reveal delay={0.15}>
         <div className="fit-hero-signals">
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
