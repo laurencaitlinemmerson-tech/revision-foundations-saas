@@ -4932,11 +4932,96 @@ function TodayReadCard({ snap }: { snap: TodaySnapshot }) {
   );
 }
 
-interface MacroTile {
+interface NutritionPieSlice {
   label: string;
-  value: number | null;
-  target: number;
-  unit: string;
+  value: number;
+  color: string;
+}
+
+interface NutritionPieLegendItem {
+  label: string;
+  value: string;
+  color: string;
+  meta?: string;
+}
+
+function NutritionPieCard({
+  label,
+  meta,
+  slices,
+  legend,
+  center,
+  sub,
+  emptyText,
+}: {
+  label: string;
+  meta: string;
+  slices: NutritionPieSlice[];
+  legend: NutritionPieLegendItem[];
+  center: { value: string; unit: string };
+  sub?: string;
+  emptyText?: string;
+}) {
+  const total = slices.reduce((sum, slice) => sum + Math.max(0, slice.value), 0);
+  const radius = 68;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
+  return (
+    <article className="fit-food-card fit-food-pie-card">
+      <div className="fit-food-card-head">
+        <span className="fit-food-card-label">{label}</span>
+        <span className="fit-food-card-meta">{meta}</span>
+      </div>
+
+      <div className="fit-food-pie-layout">
+        <div className="fit-food-pie-wrap" aria-hidden="true">
+          <svg className="fit-food-pie" viewBox="0 0 180 180">
+            <circle className="fit-food-pie-track" cx="90" cy="90" r={radius} />
+            {total > 0 && slices.map((slice) => {
+              const arc = (Math.max(0, slice.value) / total) * circumference;
+              const segment = (
+                <circle
+                  key={slice.label}
+                  className="fit-food-pie-segment"
+                  cx="90"
+                  cy="90"
+                  r={radius}
+                  stroke={slice.color}
+                  strokeDasharray={`${arc} ${Math.max(0, circumference - arc)}`}
+                  strokeDashoffset={-offset}
+                />
+              );
+              offset += arc;
+              return segment;
+            })}
+          </svg>
+          <div className="fit-food-pie-centre">
+            <strong>{center.value}</strong>
+            <span>{center.unit}</span>
+          </div>
+        </div>
+
+        <dl className="fit-food-pie-legend">
+          {legend.map((item) => (
+            <div key={item.label} className="fit-food-pie-legend-row">
+              <dt>
+                <span style={{ background: item.color }} aria-hidden="true" />
+                {item.label}
+              </dt>
+              <dd>
+                <strong>{item.value}</strong>
+                {item.meta && <small>{item.meta}</small>}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      {sub && <div className="fit-food-pie-sub">{sub}</div>}
+      {emptyText && <div className="fit-food-empty soft">{emptyText}</div>}
+    </article>
+  );
 }
 
 function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
@@ -4950,16 +5035,66 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
 
   const calIn = snap.caloriesInToday;
   const calRemaining = calIn === null ? null : intakeTarget - calIn;
-  const calPct = calIn === null ? 0 : Math.min(1.15, calIn / Math.max(1, intakeTarget));
+  const calTargetPct = calIn === null ? 0 : calIn / Math.max(1, intakeTarget);
 
-  const macros: MacroTile[] = [
-    { label: 'Protein', value: snap.proteinG, target: proteinTarget, unit: 'g' },
-    { label: 'Carbs', value: snap.carbsG, target: carbsTarget, unit: 'g' },
-    { label: 'Fat', value: snap.fatG, target: fatTarget, unit: 'g' },
-    { label: 'Fibre', value: snap.fiberG, target: fiberTarget, unit: 'g' },
+  const calorieOver = calIn === null ? 0 : Math.max(0, calIn - intakeTarget);
+  const caloriePieSlices: NutritionPieSlice[] = calIn === null ? [] : calorieOver > 0
+    ? [
+        { label: 'Target', value: intakeTarget, color: T.gold },
+        { label: 'Over', value: calorieOver, color: T.rose },
+      ]
+    : [
+        { label: 'Logged', value: Math.max(0, calIn), color: T.green },
+        { label: 'Remaining', value: Math.max(0, intakeTarget - calIn), color: 'rgba(26, 24, 21, 0.11)' },
+      ].filter((slice) => slice.value > 0);
+  const calorieLegend: NutritionPieLegendItem[] = [
+    {
+      label: 'Logged',
+      value: calIn === null ? '-' : `${Math.round(calIn).toLocaleString('en-GB')} kcal`,
+      color: T.green,
+      meta: calIn === null ? 'waiting for food log' : `${Math.round(calTargetPct * 100)}% of target`,
+    },
+    {
+      label: calRemaining === null ? 'Remaining' : calRemaining >= 0 ? 'Remaining' : 'Over',
+      value: calRemaining === null
+        ? '-'
+        : `${Math.abs(Math.round(calRemaining)).toLocaleString('en-GB')} kcal`,
+      color: calRemaining !== null && calRemaining < 0 ? T.rose : 'rgba(26, 24, 21, 0.35)',
+      meta: calRemaining === null ? 'target shown' : calRemaining >= 0 ? 'left today' : 'above target',
+    },
+    {
+      label: 'Target',
+      value: `${intakeTarget.toLocaleString('en-GB')} kcal`,
+      color: T.gold,
+      meta: `${snap.nutrition.maintenance.toLocaleString('en-GB')} kcal maintenance`,
+    },
   ];
 
-  const hasAnyMacros = macros.some((m) => m.value !== null);
+  const macroEntries = [
+    { label: 'Protein', grams: snap.proteinG, target: proteinTarget, kcalPerGram: 4, color: T.green },
+    { label: 'Carbs', grams: snap.carbsG, target: carbsTarget, kcalPerGram: 4, color: T.blue },
+    { label: 'Fat', grams: snap.fatG, target: fatTarget, kcalPerGram: 9, color: T.gold },
+  ];
+  const macroPieSlices: NutritionPieSlice[] = macroEntries
+    .filter((macro) => macro.grams !== null && macro.grams > 0)
+    .map((macro) => ({
+      label: macro.label,
+      value: Math.round((macro.grams ?? 0) * macro.kcalPerGram),
+      color: macro.color,
+    }));
+  const macroTotalKcal = macroPieSlices.reduce((sum, slice) => sum + slice.value, 0);
+  const macroLegend: NutritionPieLegendItem[] = macroEntries.map((macro) => {
+    const kcal = macro.grams === null ? null : Math.round(macro.grams * macro.kcalPerGram);
+    const pct = macroTotalKcal > 0 && kcal !== null ? Math.round((kcal / macroTotalKcal) * 100) : null;
+    return {
+      label: macro.label,
+      value: macro.grams === null ? '-' : `${Math.round(macro.grams)}g`,
+      color: macro.color,
+      meta: kcal === null ? `target ${macro.target}g` : `${kcal.toLocaleString('en-GB')} kcal${pct !== null ? ` / ${pct}%` : ''}`,
+    };
+  });
+
+  const hasAnyMacros = macroPieSlices.length > 0;
   const waterCups = snap.waterMl !== null ? snap.waterMl / 250 : null;
   const waterTargetCups = waterTargetMl / 250;
 
@@ -4973,37 +5108,41 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
         </div>
       </div>
 
-      <div className="fit-food-grid">
-        <div className="fit-food-card fit-food-cal">
-          <div className="fit-food-card-head">
-            <span className="fit-food-card-label">Calorie balance</span>
-            <span className="fit-food-card-meta">{intakeTarget.toLocaleString('en-GB')} kcal target · {snap.nutrition.maintenance.toLocaleString('en-GB')} kcal maintenance</span>
-          </div>
-          <div className="fit-food-cal-row">
-            <div className="fit-food-cal-col">
-              <div className="fit-food-cal-num">{calIn !== null ? Math.round(calIn).toLocaleString('en-GB') : '—'}</div>
-              <div className="fit-food-cal-lbl">Logged</div>
-            </div>
-            <div className="fit-food-cal-col">
-              <div className="fit-food-cal-num">{intakeTarget.toLocaleString('en-GB')}</div>
-              <div className="fit-food-cal-lbl">Target</div>
-            </div>
-            <div className="fit-food-cal-col">
-              <div className={`fit-food-cal-num ${calRemaining === null ? '' : calRemaining >= 0 ? 'good' : 'warn'}`}>
-                {calRemaining === null ? '—' : `${calRemaining >= 0 ? '' : '+'}${Math.abs(Math.round(calRemaining)).toLocaleString('en-GB')}`}
-              </div>
-              <div className="fit-food-cal-lbl">{calRemaining === null ? 'Remaining' : calRemaining >= 0 ? 'Remaining' : 'Over target'}</div>
-            </div>
-          </div>
-          <div className="fit-food-bar" aria-hidden="true">
-            <span className="fit-food-bar-fill" style={{ width: `${Math.min(100, calPct * 100)}%` }} />
-            <span className={`fit-food-bar-marker ${calIn !== null && calIn > intakeTarget ? 'over' : ''}`} style={{ left: '100%' }} />
-          </div>
-          {calIn === null && (
-            <div className="fit-food-empty">No food log synced yet for today. Targets shown so you have a number to aim at.</div>
-          )}
-        </div>
+      <div className="fit-food-pies">
+        <NutritionPieCard
+          label="Calorie balance"
+          meta={`${intakeTarget.toLocaleString('en-GB')} kcal target`}
+          slices={caloriePieSlices}
+          legend={calorieLegend}
+          center={{
+            value: calIn === null ? '-' : Math.round(calIn).toLocaleString('en-GB'),
+            unit: calIn === null ? 'not logged' : 'kcal logged',
+          }}
+          sub={calRemaining === null ? undefined : calRemaining >= 0
+            ? `${Math.round(calRemaining).toLocaleString('en-GB')} kcal left against today's target.`
+            : `${Math.abs(Math.round(calRemaining)).toLocaleString('en-GB')} kcal over today's target.`}
+          emptyText={calIn === null ? 'No food log synced yet for today. Targets shown so you have a number to aim at.' : undefined}
+        />
 
+        <NutritionPieCard
+          label="Macronutrients"
+          meta={`${snap.nutrition.activeTdee.toLocaleString('en-GB')} kcal active TDEE`}
+          slices={macroPieSlices}
+          legend={macroLegend}
+          center={{
+            value: hasAnyMacros ? macroTotalKcal.toLocaleString('en-GB') : '-',
+            unit: hasAnyMacros ? 'macro kcal' : 'no macros',
+          }}
+          sub={hasAnyMacros && snap.fiberG !== null
+            ? `Fibre ${Math.round(snap.fiberG)}g of ${fiberTarget}g target.`
+            : hasAnyMacros
+              ? `Targets: protein ${proteinTarget}g, carbs ${carbsTarget}g, fat ${fatTarget}g.`
+              : undefined}
+          emptyText={!hasAnyMacros ? 'No macro data yet. Add protein, carbs, and fat to make this section more useful.' : undefined}
+        />
+      </div>
+
+      <div className="fit-food-support">
         <div className="fit-food-card fit-food-water">
           <div className="fit-food-card-head">
             <span className="fit-food-card-label">Water</span>
@@ -5022,39 +5161,6 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
             <div className="fit-food-empty soft">No water logged yet. Connect Apple Health or log manually.</div>
           )}
         </div>
-      </div>
-
-      <div className="fit-food-section">
-        <div className="fit-food-section-head">
-          <span className="fit-food-section-label">Macronutrients</span>
-          <span className="fit-food-section-meta">Targets are based on {snap.nutrition.activeTdee.toLocaleString('en-GB')} kcal active TDEE · 1.8 g/kg protein</span>
-        </div>
-        {hasAnyMacros ? (
-          <div className="fit-food-macros">
-            {macros.map((macro) => {
-              const value = macro.value;
-              const pct = value === null ? 0 : Math.min(1.15, value / Math.max(1, macro.target));
-              const tone = value === null ? 'empty' : pct >= 0.95 ? 'good' : pct >= 0.7 ? 'neutral' : 'warn';
-              return (
-                <div key={macro.label} className={`fit-food-macro ${tone}`}>
-                  <div className="fit-food-macro-label">{macro.label}</div>
-                  <div className="fit-food-macro-num">
-                    {value === null ? '—' : Math.round(value)}
-                    <small>{macro.unit}</small>
-                  </div>
-                  <div className="fit-food-macro-target">of {macro.target}{macro.unit} target</div>
-                  <div className="fit-food-macro-bar" aria-hidden="true">
-                    <span className="fit-food-macro-fill" style={{ width: `${Math.min(100, pct * 100)}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="fit-food-empty-block">
-            No macro data yet. Add protein, carbs, and fat to make this section more useful — most food trackers (MyFitnessPal, Lifesum, Cronometer) sync these directly into Apple Health.
-          </div>
-        )}
       </div>
 
     </section>
@@ -5353,80 +5459,6 @@ export default function OperatorDashboardClient() {
     <div className="fitness-reference-shell">
       <main className="wrap fitness-redesign" id="operator-overview">
         <Reveal>
-        <section className="fit-masthead">
-          <div className="fit-masthead-row">
-            <div className="fit-kicker">The Operator Log · Vol. 01 · Issue {String(dashboardSource.length).padStart(2, '0')}</div>
-            <div className="fit-kicker fit-kicker-ink">{fmtDate(latest.date, { long: true })}</div>
-          </div>
-
-          <h1 className="fit-masthead-headline">
-            Weight, composition &amp; the <em>line headed home</em>.
-          </h1>
-
-          <div className="fit-masthead-intro">
-            <p>
-              {dashboardSource.length} recorded weigh-{dashboardSource.length === 1 ? 'in' : 'ins'} since {fmtDate(dashboardSource[0].date, { long: true })}. A private operator log charting the slow march of the body, the slope of the trend, and what the regression projects forward against the <em style={{ fontFamily: T.display, color: T.gold }}>{goal.toFixed(1)} kg</em> goal.
-            </p>
-            <div className="fit-masthead-aside">
-              <div className="fit-kicker" style={{ marginBottom: 6 }}>By the Numbers</div>
-              <div className="fit-masthead-aside-line">
-                {dashboardSource.length} readings · {phaseMarkers.length} phases · slope{' '}
-                <span style={{ color: state.trendKgPerWeek >= 0 ? T.rose : T.green }}>
-                  {state.trendKgPerWeek >= 0 ? '+' : ''}{state.trendKgPerWeek.toFixed(2)} kg/wk
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="fit-masthead-bar">
-            <div className="fit-masthead-bar-meta">
-              <div className="fit-kicker">
-                <span className={`fit-sync-dot ${cloudOk ? 'good' : cloudOk === false ? 'warn' : 'idle'}`} />
-                {cloudOk === null ? 'Local Sync' : cloudOk ? (syncing ? 'Cloud Syncing' : 'Cloud Sync') : 'Local Backup'} · {dashboardSource.length} entries
-              </div>
-              <div className="fit-kicker">Linear model · R² {reg ? Math.round(reg.r2 * 100) : 0}%</div>
-            </div>
-            <button
-              type="button"
-              className="fit-lock-link"
-              onClick={() => {
-                localStorage.removeItem(AUTH_KEY);
-                setAuthed(false);
-              }}
-            >
-              Lock ⌃
-            </button>
-          </div>
-        </section>
-        </Reveal>
-
-        <Reveal delay={0.04}>
-        <section className="fit-hero-reading">
-          <div className="fit-hero-reading-figure">
-            <div className="fit-kicker" style={{ marginBottom: 14 }}>
-              This week&apos;s figure · {fmtDate(latest.date, { long: true })}
-            </div>
-            <div className="fit-hero-reading-num">
-              <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
-              <span className="unit">kg</span>
-            </div>
-            <div className="fit-hero-reading-meta">
-              <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
-                {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)} kg · prev. reading
-              </span>
-              <span className="fit-hero-reading-note">
-                {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
-              </span>
-            </div>
-          </div>
-          <div className="fit-hero-reading-spark">
-            <div className="fit-kicker" style={{ marginBottom: 10 }}>Last four readings</div>
-            <HeadlineSparkline readings={dashboardSource.slice(-4)} />
-          </div>
-        </section>
-        </Reveal>
-
-        <Reveal delay={0.05}>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
           <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '4px 0 16px' }} />
@@ -5496,7 +5528,81 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
-        <Reveal delay={0.1}>
+        <Reveal delay={0.04}>
+        <section className="fit-masthead">
+          <div className="fit-masthead-row">
+            <div className="fit-kicker">The Operator Log · Vol. 01 · Issue {String(dashboardSource.length).padStart(2, '0')}</div>
+            <div className="fit-kicker fit-kicker-ink">{fmtDate(latest.date, { long: true })}</div>
+          </div>
+
+          <h1 className="fit-masthead-headline">
+            Weight, composition &amp; the <em>line headed home</em>.
+          </h1>
+
+          <div className="fit-masthead-intro">
+            <p>
+              {dashboardSource.length} recorded weigh-{dashboardSource.length === 1 ? 'in' : 'ins'} since {fmtDate(dashboardSource[0].date, { long: true })}. A private operator log charting the slow march of the body, the slope of the trend, and what the regression projects forward against the <em style={{ fontFamily: T.display, color: T.gold }}>{goal.toFixed(1)} kg</em> goal.
+            </p>
+            <div className="fit-masthead-aside">
+              <div className="fit-kicker" style={{ marginBottom: 6 }}>By the Numbers</div>
+              <div className="fit-masthead-aside-line">
+                {dashboardSource.length} readings · {phaseMarkers.length} phases · slope{' '}
+                <span style={{ color: state.trendKgPerWeek >= 0 ? T.rose : T.green }}>
+                  {state.trendKgPerWeek >= 0 ? '+' : ''}{state.trendKgPerWeek.toFixed(2)} kg/wk
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="fit-masthead-bar">
+            <div className="fit-masthead-bar-meta">
+              <div className="fit-kicker">
+                <span className={`fit-sync-dot ${cloudOk ? 'good' : cloudOk === false ? 'warn' : 'idle'}`} />
+                {cloudOk === null ? 'Local Sync' : cloudOk ? (syncing ? 'Cloud Syncing' : 'Cloud Sync') : 'Local Backup'} · {dashboardSource.length} entries
+              </div>
+              <div className="fit-kicker">Linear model · R² {reg ? Math.round(reg.r2 * 100) : 0}%</div>
+            </div>
+            <button
+              type="button"
+              className="fit-lock-link"
+              onClick={() => {
+                localStorage.removeItem(AUTH_KEY);
+                setAuthed(false);
+              }}
+            >
+              Lock ⌃
+            </button>
+          </div>
+        </section>
+        </Reveal>
+
+        <Reveal delay={0.06}>
+        <section className="fit-hero-reading">
+          <div className="fit-hero-reading-figure">
+            <div className="fit-kicker" style={{ marginBottom: 14 }}>
+              This week&apos;s figure · {fmtDate(latest.date, { long: true })}
+            </div>
+            <div className="fit-hero-reading-num">
+              <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
+              <span className="unit">kg</span>
+            </div>
+            <div className="fit-hero-reading-meta">
+              <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
+                {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)} kg · prev. reading
+              </span>
+              <span className="fit-hero-reading-note">
+                {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
+              </span>
+            </div>
+          </div>
+          <div className="fit-hero-reading-spark">
+            <div className="fit-kicker" style={{ marginBottom: 10 }}>Last four readings</div>
+            <HeadlineSparkline readings={dashboardSource.slice(-4)} />
+          </div>
+        </section>
+        </Reveal>
+
+        <Reveal delay={0.08}>
         <section className="fit-anchor-section" id="operator-trajectory">
           <section className="fit-editorial-chart" style={{ marginBottom: 28 }}>
             <FitnessLineChart
@@ -5530,17 +5636,7 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
-        <Reveal delay={0.12}>
-          <FoodBreakdownSection snap={todaySnap} />
-        </Reveal>
-
-        <Reveal delay={0.15}>
-        <div className="fit-hero-signals">
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
-        </div>
-        </Reveal>
-
-        <Reveal delay={0.05}>
+        <Reveal delay={0.1}>
         <div className="fit-panel" style={{ marginBottom: 28 }}>
           <div className="fit-panel-head">
             <div>
@@ -5559,6 +5655,16 @@ export default function OperatorDashboardClient() {
               </div>
             ))}
           </div>
+        </div>
+        </Reveal>
+
+        <Reveal delay={0.12}>
+          <FoodBreakdownSection snap={todaySnap} />
+        </Reveal>
+
+        <Reveal delay={0.15}>
+        <div className="fit-hero-signals">
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
         </Reveal>
 
