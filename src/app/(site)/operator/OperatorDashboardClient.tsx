@@ -4439,26 +4439,109 @@ function buildRollingAverage(sorted: FitnessReading[], windowDays = 45) {
   });
 }
 
+// Derive phases from the actual weight line, not from index buckets.
+//
+// 1. Bin readings into 28-day windows and average the weight in each.
+// 2. Convert consecutive-bin deltas into kg-per-week rates.
+// 3. Classify each rate: strong down → cut, mild down → lean,
+//    flat ± 0.05 kg/wk → recomp, anything else → bulk.
+// 4. Merge adjacent windows with the same classification.
+// 5. Absorb any single-window noise into the longer neighbour.
 function buildReferencePhaseMarkers(sorted: FitnessReading[]): ReferencePhaseMarker[] {
-  if (sorted.length < 2) return [];
-  const lastIndex = sorted.length - 1;
-  const bounds = [
-    0,
-    Math.max(1, Math.floor(lastIndex * 0.24)),
-    Math.max(2, Math.floor(lastIndex * 0.52)),
-    Math.max(3, Math.floor(lastIndex * 0.78)),
-    lastIndex,
-  ].map((index, position, arr) => {
-    const min = position === 0 ? 0 : arr[position - 1];
-    return Math.min(lastIndex, Math.max(min, index));
-  });
+  if (sorted.length < 4) return [];
 
-  return [
-    { id: 'p1', label: 'lean phase', start: sorted[bounds[0]].date, end: sorted[bounds[1]].date },
-    { id: 'p2', label: 'bulk phase', start: sorted[bounds[1]].date, end: sorted[bounds[2]].date },
-    { id: 'p3', label: 'fat loss push', start: sorted[bounds[2]].date, end: sorted[bounds[3]].date },
-    { id: 'p4', label: 'recomposition', start: sorted[bounds[3]].date, end: sorted[bounds[4]].date },
-  ];
+  const BUCKET_DAYS = 28;
+  const BUCKET_MS = BUCKET_DAYS * REFERENCE_DAY;
+  const firstMs = new Date(sorted[0].date).getTime();
+  const lastMs = new Date(sorted[sorted.length - 1].date).getTime();
+
+  type Bin = { start: string; end: string; weight: number; startMs: number; endMs: number };
+  const bins: Bin[] = [];
+  for (let cursor = firstMs; cursor <= lastMs; cursor += BUCKET_MS) {
+    const windowEnd = cursor + BUCKET_MS;
+    const inWindow = sorted.filter((row) => {
+      const t = new Date(row.date).getTime();
+      return t >= cursor && t < windowEnd;
+    });
+    if (inWindow.length === 0) continue;
+    const avg = inWindow.reduce((sum, row) => sum + row.weight, 0) / inWindow.length;
+    bins.push({
+      start: inWindow[0].date,
+      end: inWindow[inWindow.length - 1].date,
+      weight: avg,
+      startMs: cursor,
+      endMs: Math.min(windowEnd, lastMs),
+    });
+  }
+  if (bins.length < 2) return [];
+
+  type Phase = 'cut' | 'lean' | 'recomp' | 'bulk';
+  const classify = (kgPerWeek: number): Phase => {
+    if (kgPerWeek < -0.3) return 'cut';
+    if (kgPerWeek < -0.05) return 'lean';
+    if (kgPerWeek <= 0.05) return 'recomp';
+    return 'bulk';
+  };
+  const labelOf: Record<Phase, ReferencePhaseMarker['label']> = {
+    cut: 'fat loss push',
+    lean: 'lean phase',
+    recomp: 'recomposition',
+    bulk: 'bulk phase',
+  };
+
+  type Run = { phase: Phase; start: string; end: string; binCount: number };
+  const runs: Run[] = [];
+  for (let i = 1; i < bins.length; i += 1) {
+    const delta = bins[i].weight - bins[i - 1].weight;
+    const ratePerWeek = delta / 4;
+    const phase = classify(ratePerWeek);
+    const last = runs[runs.length - 1];
+    if (last && last.phase === phase) {
+      last.end = bins[i].end;
+      last.binCount += 1;
+    } else {
+      runs.push({ phase, start: bins[i - 1].start, end: bins[i].end, binCount: 1 });
+    }
+  }
+
+  // Single-bin runs are noisy. Fold them into whichever neighbour is longer.
+  for (let i = 0; i < runs.length; i += 1) {
+    if (runs[i].binCount > 1) continue;
+    const prev = runs[i - 1];
+    const next = runs[i + 1];
+    if (!prev && !next) continue;
+    const target = !prev ? next : !next ? prev : prev.binCount >= next.binCount ? prev : next;
+    if (target === prev) {
+      prev.end = runs[i].end;
+      prev.binCount += 1;
+      runs.splice(i, 1);
+      i -= 1;
+    } else if (target === next) {
+      next.start = runs[i].start;
+      next.binCount += 1;
+      runs.splice(i, 1);
+      i -= 1;
+    }
+  }
+
+  // Coalesce again — merging may have created new adjacencies.
+  const collapsed: Run[] = [];
+  for (const run of runs) {
+    const last = collapsed[collapsed.length - 1];
+    if (last && last.phase === run.phase) {
+      last.end = run.end;
+      last.binCount += run.binCount;
+    } else {
+      collapsed.push({ ...run });
+    }
+  }
+
+  return collapsed.map((run, index) => ({
+    id: `p${index + 1}`,
+    label: labelOf[run.phase],
+    start: run.start,
+    end: run.end,
+  }));
 }
 
 function formatPhaseDuration(startIso: string, endIso: string) {
