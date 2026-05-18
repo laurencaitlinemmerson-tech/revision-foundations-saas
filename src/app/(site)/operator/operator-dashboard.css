@@ -766,19 +766,13 @@
   to   { stroke-dashoffset: 0; }
 }
 
-.fitness-chart .bc-line-raw,
 .fitness-chart .bc-line-avg {
   stroke-dasharray: 4000;
   stroke-dashoffset: 4000;
   animation: bcLineDraw 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
 }
 
-.fitness-chart .bc-line-avg {
-  animation-delay: 0.35s;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .fitness-chart .bc-line-raw,
   .fitness-chart .bc-line-avg {
     stroke-dasharray: none;
     stroke-dashoffset: 0;
@@ -823,23 +817,23 @@
 }
 
 .bc-phase-band {
-  opacity: 0.85;
+  opacity: 0.55;
 }
 
 .bc-phase-band.lean {
-  fill: oklch(0.94 0.04 145 / 0.55);
+  fill: oklch(0.95 0.03 145 / 0.45);
 }
 
 .bc-phase-band.bulk {
-  fill: oklch(0.92 0.05 82 / 0.55);
+  fill: oklch(0.94 0.04 82 / 0.45);
 }
 
 .bc-phase-band.cut {
-  fill: oklch(0.93 0.06 25 / 0.45);
+  fill: oklch(0.95 0.04 25 / 0.4);
 }
 
 .bc-phase-band.recomp {
-  fill: oklch(0.92 0.045 240 / 0.45);
+  fill: oklch(0.94 0.035 240 / 0.38);
 }
 
 .bc-phase-divider {
@@ -857,22 +851,13 @@
   fill: var(--ink-soft);
 }
 
-.bc-line-raw {
-  fill: none;
-  stroke-width: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 2 7;
-  opacity: 0.42;
-}
-
 .bc-line-avg {
   fill: none;
   stroke: var(--brass-deep);
-  stroke-width: 2.35;
+  stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 5px 12px oklch(0.72 0.08 78 / 0.10));
+  filter: drop-shadow(0 5px 12px oklch(0.72 0.08 78 / 0.12));
 }
 
 .bc-current-line,

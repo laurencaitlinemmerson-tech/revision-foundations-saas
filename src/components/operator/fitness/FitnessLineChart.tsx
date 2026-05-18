@@ -130,17 +130,27 @@ export default function FitnessLineChart({
 
   const y = (value: number) => pad.t + (1 - (value - low) / Math.max(1, high - low)) * innerH
 
-  const path = smoothPath(filteredPoints.map((point) => ({ x: x(point.date), y: y(point.value) })))
+  // The smoothed/rolling-average series is the trustworthy line. The raw
+  // daily readings sit behind as small dots so the eye can see the spread
+  // without the Bezier curve overshooting noisy daily fluctuations.
   const secondaryPath = filteredSecondary && filteredSecondary.length >= 2
     ? smoothPath(filteredSecondary.map((point) => ({ x: x(point.date), y: y(point.value) })))
     : null
   const yTicks = 5
-  const xTickDates = [
-    filteredPoints[0],
-    filteredPoints[Math.floor(filteredPoints.length * 0.33)],
-    filteredPoints[Math.floor(filteredPoints.length * 0.66)],
-    filteredPoints[filteredPoints.length - 1],
-  ].filter(Boolean)
+  // Evenly-spaced date ticks, scaled to the time window so labels don't
+  // bunch up at narrower ranges.
+  const dayMs = 24 * 60 * 60 * 1000
+  const spanDays = filteredPoints.length === 0 ? 0 : (xMax - xMin) / dayMs
+  const xTickCount = spanDays === 0 ? 0
+    : spanDays > 365 * 3 ? 6
+    : spanDays > 365 ? 5
+    : 4
+  const xTickDates = filteredPoints.length === 0 ? []
+    : Array.from({ length: xTickCount }, (_, i) => {
+        const ratio = i / Math.max(1, xTickCount - 1)
+        const idx = Math.round(ratio * (filteredPoints.length - 1))
+        return filteredPoints[idx]
+      }).filter(Boolean)
   const hover = hoverIndex !== null ? filteredPoints[hoverIndex] : null
   const visibleAnnotations = annotations.filter((annotation) => {
     const time = new Date(annotation.date).getTime()
@@ -226,8 +236,10 @@ export default function FitnessLineChart({
               </text>
             </g>
           )}
-          <path d={path} className="bc-line-raw" style={{ stroke: color }} />
-          {secondaryPath && <path d={secondaryPath} className="bc-line-avg" />}
+          {/* Raw readings now render as scatter dots only (further down) —
+              dropping the smoothed Bezier path keeps daily noise from
+              creating fake undulations through the 45-day trend. */}
+          {secondaryPath && <path d={secondaryPath} className="bc-line-avg" style={{ stroke: secondaryColor }} />}
 
           {visibleAnnotations.map((annotation, index) => {
             const cx = x(annotation.date)
