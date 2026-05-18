@@ -745,6 +745,20 @@
   overflow: visible;
 }
 
+.bc-filter-note {
+  margin: 6px 0 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  border-top: 0.5px solid var(--rule);
+}
+
+.fitness-chart .bc-data-dot {
+  transition: r 0.12s ease, opacity 0.12s ease;
+}
+
 .fitness-chart {
   width: 100%;
   height: auto;

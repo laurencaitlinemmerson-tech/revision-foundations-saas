@@ -35,6 +35,8 @@ interface ChartProps {
   secondaryLabel?: string
   showRangeToggle?: boolean
   targetWeight?: number
+  /** Hide any reading whose value falls below this floor (default 60). */
+  minDisplayValue?: number
 }
 
 function fmtDate(iso: string): string {
@@ -77,6 +79,7 @@ export default function FitnessLineChart({
   secondaryLabel = 'monthly avg',
   showRangeToggle = false,
   targetWeight,
+  minDisplayValue = 60,
 }: ChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
   const [range, setRange] = useState<'all' | '5y' | '2y' | '1y' | '6m'>('all')
@@ -86,26 +89,39 @@ export default function FitnessLineChart({
   const innerW = w - pad.l - pad.r
   const innerH = h - pad.t - pad.b
 
+  // Drop sub-threshold readings (stones-as-kg outliers, accidental zero
+  // entries, etc.) before any further filtering.
+  const cleanedPoints = useMemo(
+    () => points.filter((p) => Number.isFinite(p.value) && p.value >= minDisplayValue),
+    [points, minDisplayValue],
+  )
+  const cleanedSecondary = useMemo(
+    () => secondaryPoints?.filter((p) => Number.isFinite(p.value) && p.value >= minDisplayValue),
+    [secondaryPoints, minDisplayValue],
+  )
+
   const filteredPoints = useMemo(() => {
-    if (range === 'all' || !points.length) return points
+    if (range === 'all' || !cleanedPoints.length) return cleanedPoints
     const months = range === '5y' ? 60 : range === '2y' ? 24 : range === '1y' ? 12 : 6
-    const cutoff = new Date(points[points.length - 1].date)
+    const cutoff = new Date(cleanedPoints[cleanedPoints.length - 1].date)
     cutoff.setMonth(cutoff.getMonth() - months)
-    return points.filter((point) => new Date(point.date).getTime() >= cutoff.getTime())
-  }, [points, range])
+    return cleanedPoints.filter((point) => new Date(point.date).getTime() >= cutoff.getTime())
+  }, [cleanedPoints, range])
 
   const filteredSecondary = useMemo(() => {
-    if (!secondaryPoints?.length) return secondaryPoints
-    if (range === 'all' || !filteredPoints.length) return secondaryPoints
+    if (!cleanedSecondary?.length) return cleanedSecondary
+    if (range === 'all' || !filteredPoints.length) return cleanedSecondary
     const start = new Date(filteredPoints[0].date).getTime()
-    return secondaryPoints.filter((point) => new Date(point.date).getTime() >= start)
-  }, [filteredPoints, range, secondaryPoints])
+    return cleanedSecondary.filter((point) => new Date(point.date).getTime() >= start)
+  }, [filteredPoints, range, cleanedSecondary])
 
   const xMin = new Date(filteredPoints[0]?.date ?? Date.now()).getTime()
   const xMax = new Date(filteredPoints[filteredPoints.length - 1]?.date ?? Date.now()).getTime()
   const values = filteredPoints.map((point) => point.value)
-  const low = minY ?? Math.min(...values) - 1
-  const high = maxY ?? Math.max(...values) + 1
+  const dataLow = values.length > 0 ? Math.min(...values) - 1 : minDisplayValue
+  const dataHigh = values.length > 0 ? Math.max(...values) + 1 : minDisplayValue + 20
+  const low = Math.max(minY ?? dataLow, minDisplayValue)
+  const high = maxY ?? dataHigh
 
   const x = (date: string) => {
     const time = new Date(date).getTime()
@@ -255,18 +271,75 @@ export default function FitnessLineChart({
             </g>
           )}
 
+          {/* Faint data dots so the user sees the underlying readings. */}
           {filteredPoints.map((point, index) => (
             <circle
-              key={`${point.date}-${index}`}
+              key={`dot-${point.date}-${index}`}
               cx={x(point.date)}
               cy={y(point.value)}
-              r={8}
-              fill="transparent"
-              onMouseEnter={() => setHoverIndex(index)}
-              onMouseLeave={() => setHoverIndex(null)}
+              r={hoverIndex === index ? 4 : 2.4}
+              className="bc-data-dot"
+              style={{ fill: hoverIndex === index ? color : 'var(--ink)', opacity: hoverIndex === index ? 1 : 0.35 }}
+              pointerEvents="none"
             />
           ))}
+          {/* Single overlay captures hover anywhere across the plot, then
+              snaps to the nearest point by x. Much smoother than per-dot
+              hit targets. */}
+          <rect
+            x={pad.l}
+            y={pad.t}
+            width={innerW}
+            height={innerH}
+            fill="transparent"
+            onMouseMove={(event) => {
+              if (filteredPoints.length === 0) return
+              const svg = event.currentTarget.ownerSVGElement
+              if (!svg) return
+              const rect = svg.getBoundingClientRect()
+              const localX = ((event.clientX - rect.left) / rect.width) * w
+              let bestIndex = 0
+              let bestDist = Infinity
+              for (let i = 0; i < filteredPoints.length; i += 1) {
+                const px = x(filteredPoints[i].date)
+                const d = Math.abs(px - localX)
+                if (d < bestDist) {
+                  bestDist = d
+                  bestIndex = i
+                }
+              }
+              setHoverIndex(bestIndex)
+            }}
+            onMouseLeave={() => setHoverIndex(null)}
+            onTouchMove={(event) => {
+              if (filteredPoints.length === 0) return
+              const touch = event.touches[0]
+              if (!touch) return
+              const svg = event.currentTarget.ownerSVGElement
+              if (!svg) return
+              const rect = svg.getBoundingClientRect()
+              const localX = ((touch.clientX - rect.left) / rect.width) * w
+              let bestIndex = 0
+              let bestDist = Infinity
+              for (let i = 0; i < filteredPoints.length; i += 1) {
+                const px = x(filteredPoints[i].date)
+                const d = Math.abs(px - localX)
+                if (d < bestDist) {
+                  bestDist = d
+                  bestIndex = i
+                }
+              }
+              setHoverIndex(bestIndex)
+            }}
+            onTouchEnd={() => setHoverIndex(null)}
+            style={{ cursor: 'crosshair' }}
+          />
         </svg>
+        {cleanedPoints.length < points.length && (
+          <p className="bc-filter-note">
+            Hiding {points.length - cleanedPoints.length} reading{points.length - cleanedPoints.length === 1 ? '' : 's'} under {minDisplayValue} kg.
+          </p>
+        )}
       </div>
       <div className="bc-key">
         <span className="item"><i className="sw raw" />Daily reading</span>
