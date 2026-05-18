@@ -528,11 +528,12 @@
 
 .fit-anchor-section {
   scroll-margin-top: 28px;
+  width: 100%;
 }
 
 .fit-story-shell {
-  max-width: 1240px;
-  margin-right: auto;
+  width: 100%;
+  max-width: none;
 }
 
 .fit-reading-guide {
