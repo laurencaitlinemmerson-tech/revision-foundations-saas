@@ -4976,6 +4976,26 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
         </div>
 
+        <div className="fit-panel" style={{ marginBottom: 28 }}>
+          <div className="fit-panel-head">
+            <div>
+              <h3>This <em>week</em></h3>
+              <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+            </div>
+          </div>
+          <div className="week-grid">
+            {weekRows.map((row) => (
+              <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                <div className="dow">{row.day}</div>
+                <div className="date">{row.date}</div>
+                <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                <div className="icons"><span>{row.detail}</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <section className="fit-anchor-section" id="operator-story">
           {/* ───────────────────────── STORY ─────────────────────────── */}
           <EditorialDivider eyebrow="Story" note="The long line — every reading, every phase." />
@@ -5098,26 +5118,6 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
-
-          <div className="fit-panel">
-            <div className="fit-panel-head">
-              <div>
-                <h3>This <em>week</em></h3>
-                <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
-              </div>
-            </div>
-            <div className="week-grid">
-              {weekRows.map((row) => (
-                <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
-                  <div className="dow">{row.day}</div>
-                  <div className="date">{row.date}</div>
-                  <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
-                  <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
-                  <div className="icons"><span>{row.detail}</span></div>
-                </div>
-              ))}
-            </div>
-          </div>
         </section>
 
       </main>
