@@ -1,17 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import {
+  listFitnessReadings,
+  upsertFitnessReading,
+  type FitnessReadingRecord,
+} from '@/lib/operatorFitnessStorage'
 import { parseAppleHealthExport, type ImportedFitnessReading } from '@/lib/appleHealth'
-
-type FitnessRow = {
-  id: string
-  date: string
-  weight: number
-  bmi: number
-  body_fat: number
-  water: number
-  muscle_mass: number
-  bone_mass: number
-}
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? ''
@@ -26,27 +19,27 @@ function mergeMetric(current: number, incoming: number) {
   return incoming > 0 ? incoming : current
 }
 
-function mergeReading(existing: FitnessRow, incoming: ImportedFitnessReading) {
+function mergeReading(existing: FitnessReadingRecord, incoming: ImportedFitnessReading) {
   return {
     date: incoming.date,
     weight: incoming.weight || existing.weight,
     bmi: mergeMetric(existing.bmi, incoming.bmi),
-    body_fat: mergeMetric(existing.body_fat, incoming.bodyFat),
+    bodyFat: mergeMetric(existing.bodyFat, incoming.bodyFat),
     water: mergeMetric(existing.water, incoming.water),
-    muscle_mass: mergeMetric(existing.muscle_mass, incoming.muscleMass),
-    bone_mass: mergeMetric(existing.bone_mass, incoming.boneMass),
+    muscleMass: mergeMetric(existing.muscleMass, incoming.muscleMass),
+    boneMass: mergeMetric(existing.boneMass, incoming.boneMass),
   }
 }
 
-function hasChanged(existing: FitnessRow, merged: ReturnType<typeof mergeReading>) {
+function hasChanged(existing: FitnessReadingRecord, merged: ReturnType<typeof mergeReading>) {
   return (
     toRowDateKey(existing.date) !== toRowDateKey(merged.date) ||
     Number(existing.weight) !== Number(merged.weight) ||
     Number(existing.bmi) !== Number(merged.bmi) ||
-    Number(existing.body_fat) !== Number(merged.body_fat) ||
+    Number(existing.bodyFat) !== Number(merged.bodyFat) ||
     Number(existing.water) !== Number(merged.water) ||
-    Number(existing.muscle_mass) !== Number(merged.muscle_mass) ||
-    Number(existing.bone_mass) !== Number(merged.bone_mass)
+    Number(existing.muscleMass) !== Number(merged.muscleMass) ||
+    Number(existing.boneMass) !== Number(merged.boneMass)
   )
 }
 
@@ -78,73 +71,59 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { data, error } = await supabaseAdmin
-      .from('operator_fitness_readings')
-      .select('id, date, weight, bmi, body_fat, water, muscle_mass, bone_mass')
-      .order('date', { ascending: true })
-
-    if (error) {
-      return NextResponse.json({ error: error.message, setup_required: true }, { status: 500 })
+    const existing = await listFitnessReadings()
+    if (existing.setupRequired) {
+      return NextResponse.json({ error: 'fitness_storage_unavailable', setup_required: true }, { status: 500 })
     }
 
-    const existing = (data ?? []) as FitnessRow[]
-    const byDay = new Map(existing.map((row) => [toRowDateKey(row.date), row]))
+    const byDay = new Map(existing.readings.map((row) => [toRowDateKey(row.date), row]))
 
-    const inserts: Array<Record<string, string | number>> = []
-    const updates: Array<{ id: string; values: ReturnType<typeof mergeReading> }> = []
+    const pending: ImportedFitnessReading[] = []
+    let insertedCount = 0
+    let updatedCount = 0
     let skippedCount = 0
 
     for (const reading of imported) {
       const existingRow = byDay.get(reading.date)
       if (!existingRow) {
-        inserts.push({
-          date: reading.date,
-          weight: reading.weight,
-          bmi: reading.bmi,
-          body_fat: reading.bodyFat,
-          water: reading.water,
-          muscle_mass: reading.muscleMass,
-          bone_mass: reading.boneMass,
-        })
+        pending.push(reading)
+        insertedCount += 1
         continue
       }
 
       const merged = mergeReading(existingRow, reading)
       if (hasChanged(existingRow, merged)) {
-        updates.push({ id: existingRow.id, values: merged })
+        pending.push(reading)
+        updatedCount += 1
       } else {
         skippedCount += 1
       }
     }
 
-    if (inserts.length > 0) {
-      const { error: insertError } = await supabaseAdmin
-        .from('operator_fitness_readings')
-        .insert(inserts)
-
-      if (insertError) {
-        return NextResponse.json({ error: insertError.message }, { status: 500 })
-      }
-    }
-
-    if (updates.length > 0) {
-      for (const update of updates) {
-        const { error: updateError } = await supabaseAdmin
-          .from('operator_fitness_readings')
-          .update(update.values)
-          .eq('id', update.id)
-
-        if (updateError) {
-          return NextResponse.json({ error: updateError.message }, { status: 500 })
-        }
+    for (const reading of pending) {
+      try {
+        await upsertFitnessReading({
+          date: reading.date,
+          weight: reading.weight,
+          bmi: reading.bmi,
+          bodyFat: reading.bodyFat,
+          water: reading.water,
+          muscleMass: reading.muscleMass,
+          boneMass: reading.boneMass,
+        })
+      } catch (error) {
+        return NextResponse.json(
+          { error: error instanceof Error ? error.message : 'fitness_import_failed', setup_required: true },
+          { status: 500 },
+        )
       }
     }
 
     return NextResponse.json({
       ok: true,
       importedCount: imported.length,
-      insertedCount: inserts.length,
-      updatedCount: updates.length,
+      insertedCount,
+      updatedCount,
       skippedCount,
       firstImportedDate: imported[0]?.date ?? null,
       lastImportedDate: imported[imported.length - 1]?.date ?? null,

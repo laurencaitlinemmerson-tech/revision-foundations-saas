@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { upsertFitnessReading } from '@/lib/operatorFitnessStorage';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-
-type FitnessRow = {
-  id: string
-  date: string
-  weight: number
-  bmi: number
-  body_fat: number
-  water: number
-  muscle_mass: number
-  bone_mass: number
-}
 
 type HealthAutoExportPoint = {
   qty?: number
@@ -73,12 +63,6 @@ function toPercent(value: number | null) {
   if (value === null) return 0;
   const percent = value <= 1.2 ? value * 100 : value;
   return Math.max(0, Math.min(100, round(percent, 1)));
-}
-
-function nextDay(day: string) {
-  const date = new Date(`${day}T00:00:00.000Z`);
-  date.setUTCDate(date.getUTCDate() + 1);
-  return date.toISOString();
 }
 
 function pickMetric(source: Record<string, unknown>, keys: string[]) {
@@ -226,23 +210,6 @@ function normalisePayload(body: unknown) {
     water,
     muscle_mass: muscleMass,
     bone_mass: boneMass,
-  };
-}
-
-function mergeMetric(current: number, incoming: number) {
-  return incoming > 0 ? incoming : current;
-}
-
-function mergeReading(existing: FitnessRow, incoming: ReturnType<typeof normalisePayload>) {
-  if (!incoming) return null;
-  return {
-    date: incoming.date,
-    weight: incoming.weight || existing.weight,
-    bmi: mergeMetric(existing.bmi, incoming.bmi),
-    body_fat: mergeMetric(existing.body_fat, incoming.body_fat),
-    water: mergeMetric(existing.water, incoming.water),
-    muscle_mass: mergeMetric(existing.muscle_mass, incoming.muscle_mass),
-    bone_mass: mergeMetric(existing.bone_mass, incoming.bone_mass),
   };
 }
 
@@ -687,35 +654,15 @@ async function upsertWorkouts(rows: WorkoutRow[]) {
 async function syncBodyComposition(body: unknown) {
   const reading = normalisePayload(body);
   if (!reading) return { action: 'skipped' as const };
-
-  const dayStart = `${reading.date}T00:00:00.000Z`;
-  const dayEnd = nextDay(reading.date);
-
-  const { data: existingRows, error: loadError } = await supabaseAdmin
-    .from('operator_fitness_readings')
-    .select('id, date, weight, bmi, body_fat, water, muscle_mass, bone_mass')
-    .gte('date', dayStart)
-    .lt('date', dayEnd)
-    .order('date', { ascending: false })
-    .limit(1);
-  if (loadError) throw new Error(loadError.message);
-
-  const existing = (existingRows?.[0] as FitnessRow | undefined) ?? null;
-  if (existing) {
-    const merged = mergeReading(existing, reading);
-    const { error } = await supabaseAdmin
-      .from('operator_fitness_readings')
-      .update(merged)
-      .eq('id', existing.id);
-    if (error) throw new Error(error.message);
-    return { action: 'updated' as const, date: reading.date };
-  }
-
-  const { error } = await supabaseAdmin
-    .from('operator_fitness_readings')
-    .insert([reading]);
-  if (error) throw new Error(error.message);
-  return { action: 'inserted' as const, date: reading.date };
+  return upsertFitnessReading({
+    date: reading.date,
+    weight: reading.weight,
+    bmi: reading.bmi,
+    bodyFat: reading.body_fat,
+    water: reading.water,
+    muscleMass: reading.muscle_mass,
+    boneMass: reading.bone_mass,
+  });
 }
 
 export async function POST(req: NextRequest) {
