@@ -5028,8 +5028,8 @@ function TopNutritionCaloriesCard({
   healthDays: HealthStreamFetch['days'];
   activeKcalToday: number | null;
 }) {
-  const calorieTarget = 1600;
-  const targetDeficit = 800;
+  const calorieTarget = Math.round(snap.nutrition.intake);
+  const targetDeficit = Math.round(snap.targetDeficit);
   const targetNet = -targetDeficit;
   const caloriesIn = snap.caloriesInToday;
   const caloriesOut = snap.caloriesOutToday;
@@ -5045,6 +5045,9 @@ function TopNutritionCaloriesCard({
   const deficitProgress = netToday !== null
     ? Math.min(100, Math.max(0, (Math.min(0, netToday) / targetNet) * 100))
     : 0;
+  const avgTargetCoverage = avgNet7 !== null
+    ? Math.max(0, Math.round((Math.min(0, avgNet7) / targetNet) * 100))
+    : null;
   const hasNutritionData = healthDays.some((day) => (day.nutrition?.dietaryEnergyKcal ?? null) !== null);
   const fmtInt = (value: number | null) => (
     value === null || !Number.isFinite(value) ? '—' : Math.round(value).toLocaleString('en-GB')
@@ -5056,12 +5059,31 @@ function TopNutritionCaloriesCard({
     if (value < 0) return `−${abs}`;
     return abs;
   };
+  const netTone = netToday !== null && netToday <= targetNet ? 'good' : netToday !== null && netToday < 0 ? 'neutral' : 'warn';
+  const avgTone = avgNet7 !== null && avgNet7 <= targetNet ? 'good' : avgNet7 !== null && avgNet7 < 0 ? 'neutral' : 'warn';
+  const netHeadline = netToday === null
+    ? 'Waiting on food log'
+    : netToday <= targetNet
+      ? 'Ahead of target'
+      : netToday < 0
+        ? 'Close, not there yet'
+        : 'Currently in surplus';
+  const netNarrative = netToday === null
+    ? 'Calories and deficit progress update after the next Apple Health food export lands.'
+    : netToday <= targetNet
+      ? 'The deficit target is already cleared for today. A calm finish keeps the line clean.'
+      : netToday < 0
+        ? 'You are still in a deficit, but the day has not fully reached the target yet.'
+        : 'Intake is currently running above burn. The next meal decides whether this becomes a surplus.';
 
   return (
     <article className="op-health-card op-card-wide fit-top-nutrition-card">
-      <header className="op-health-card-head">
-        <span className="op-health-card-label">Nutrition · calories</span>
-        <span className="muted">In vs out · target deficit {targetDeficit} kcal</span>
+      <header className="op-health-card-head op-nutri-head">
+        <div className="op-nutri-head-copy">
+          <span className="op-health-card-label">Calorie balance</span>
+          <p className="op-nutri-headline">Intake, burn and deficit rhythm for today.</p>
+        </div>
+        <span className="op-nutri-target">Target deficit {targetDeficit.toLocaleString('en-GB')} kcal</span>
       </header>
 
       {!hasNutritionData ? (
@@ -5070,46 +5092,71 @@ function TopNutritionCaloriesCard({
         </div>
       ) : (
         <>
-          <div className="op-nutri-numbers">
-            <div className="op-nutri-cell">
-              <div className="op-nutri-lbl">In</div>
-              <div className="op-nutri-num">{fmtInt(caloriesIn)}</div>
-              <div className="op-nutri-sub muted">
-                {caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget} target` : `Target ${calorieTarget}`}
+          <div className="op-nutri-layout">
+            <section className={`op-nutri-hero is-${netTone}`}>
+              <div className="op-nutri-hero-top">
+                <span className="op-nutri-hero-label">Today&apos;s net</span>
+                <span className={`op-nutri-hero-pill is-${netTone}`}>{netHeadline}</span>
               </div>
-            </div>
-            <div className="op-nutri-cell">
-              <div className="op-nutri-lbl">Out</div>
-              <div className="op-nutri-num">{fmtInt(caloriesOut)}</div>
-              <div className="op-nutri-sub muted">
-                BMR {fmtInt(bmr)} + active {fmtInt(activeKcalToday)}
+              <div className={`op-nutri-hero-num ${netTone}`}>{fmtSigned(netToday)}</div>
+              <p className="op-nutri-hero-copy">{netNarrative}</p>
+
+              <div className="op-nutri-progress">
+                <div className="op-nutri-progress-head">
+                  <span>Deficit progress</span>
+                  <strong>{Math.round(deficitProgress)}%</strong>
+                </div>
+                <div className="op-nutri-progress-bar">
+                  <span className={`is-${netTone}`} style={{ width: `${deficitProgress}%` }} />
+                </div>
+                <div className="op-nutri-progress-meta">
+                  <span>{fmtSigned(netToday)} today</span>
+                  <span>Target {fmtSigned(targetNet)} kcal</span>
+                </div>
               </div>
-            </div>
-            <div className="op-nutri-cell">
-              <div className="op-nutri-lbl">Net</div>
-              <div className={`op-nutri-num ${netToday !== null && netToday <= targetNet ? 'good' : netToday !== null && netToday < 0 ? 'neutral' : 'warn'}`}>
-                {fmtSigned(netToday)}
+            </section>
+
+            <div className="op-nutri-metrics">
+              <div className="op-nutri-metric-card">
+                <div className="op-nutri-lbl">Calories in</div>
+                <div className="op-nutri-num">{fmtInt(caloriesIn)}</div>
+                <div className="op-nutri-sub muted">
+                  {caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget.toLocaleString('en-GB')} target` : `Target ${calorieTarget.toLocaleString('en-GB')}`}
+                </div>
               </div>
-              <div className="op-nutri-sub muted">Target {targetNet} kcal</div>
-            </div>
-            <div className="op-nutri-cell">
-              <div className="op-nutri-lbl">7-day avg net</div>
-              <div className={`op-nutri-num ${avgNet7 !== null && avgNet7 <= targetNet ? 'good' : avgNet7 !== null && avgNet7 < 0 ? 'neutral' : 'warn'}`}>
-                {fmtSigned(avgNet7)}
+
+              <div className="op-nutri-metric-card">
+                <div className="op-nutri-lbl">Calories out</div>
+                <div className="op-nutri-num">{fmtInt(caloriesOut)}</div>
+                <div className="op-nutri-sub muted">
+                  BMR {fmtInt(bmr)} + active {fmtInt(activeKcalToday)}
+                </div>
               </div>
-              <div className="op-nutri-sub muted">
-                {avgNet7 !== null ? `${Math.round((avgNet7 / targetNet) * 100)}% of deficit target` : '—'}
+
+              <div className="op-nutri-metric-card op-nutri-metric-card-wide">
+                <div className="op-nutri-lbl">7-day average net</div>
+                <div className={`op-nutri-num ${avgTone}`}>{fmtSigned(avgNet7)}</div>
+                <div className="op-nutri-sub muted">
+                  {avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target across the last week` : 'Need more overlapping days'}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="op-nutri-bar-wrap">
-            <div className="op-nutri-bar-lbl muted">Deficit progress (today)</div>
-            <div className="op-nutri-bar">
-              <span className={netToday !== null && netToday <= 0 ? 'good' : 'warn'} style={{ width: `${deficitProgress}%` }} />
+          <div className="op-nutri-footer">
+            <div className="op-nutri-footer-item">
+              <span className="op-nutri-footer-label">Target intake</span>
+              <strong>{calorieTarget.toLocaleString('en-GB')} kcal</strong>
+            </div>
+            <div className="op-nutri-footer-item">
+              <span className="op-nutri-footer-label">Burn model</span>
+              <strong>BMR {fmtInt(bmr)} + activity</strong>
+            </div>
+            <div className="op-nutri-footer-item">
+              <span className="op-nutri-footer-label">Weekly read</span>
+              <strong>{avgNet7 !== null && avgNet7 <= targetNet ? 'Consistent deficit' : avgNet7 !== null && avgNet7 < 0 ? 'Partial deficit' : 'Needs tightening'}</strong>
             </div>
           </div>
-
         </>
       )}
     </article>
