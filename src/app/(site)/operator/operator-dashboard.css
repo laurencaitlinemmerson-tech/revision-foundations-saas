@@ -3687,29 +3687,13 @@
 
 .fitness-reference-shell .op-nutri-head,
 .fitness-reference-shell .op-nutri-layout,
-.fitness-reference-shell .op-nutri-footer,
 .fitness-reference-shell .op-nutri-empty {
   position: relative;
   z-index: 1;
 }
 
 .fitness-reference-shell .op-nutri-head {
-  align-items: flex-start;
-}
-
-.fitness-reference-shell .op-nutri-head-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.fitness-reference-shell .op-nutri-headline {
-  margin: 0;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 16px;
-  line-height: 1.15;
-  color: var(--ink);
+  align-items: center;
 }
 
 .fitness-reference-shell .op-nutri-target {
@@ -3753,8 +3737,7 @@
 }
 
 .fitness-reference-shell .op-nutri-hero-label,
-.fitness-reference-shell .op-nutri-progress-head span,
-.fitness-reference-shell .op-nutri-footer-label {
+.fitness-reference-shell .op-nutri-progress-head span {
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: 0.22em;
@@ -3828,14 +3811,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.fitness-reference-shell .op-nutri-hero-copy {
-  margin: 0;
-  max-width: 36ch;
-  font-size: 11px;
-  line-height: 1.55;
-  color: var(--ink-soft);
-}
-
 .fitness-reference-shell .op-nutri-progress {
   display: flex;
   flex-direction: column;
@@ -3880,17 +3855,6 @@
   background: linear-gradient(90deg, #bf6170 0%, var(--warn) 100%);
 }
 
-.fitness-reference-shell .op-nutri-progress-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-size: 9px;
-  letter-spacing: 0.05em;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
 .fitness-reference-shell .op-nutri-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3910,29 +3874,6 @@
 .fitness-reference-shell .op-nutri-metric-card-wide {
   grid-column: 1 / -1;
   min-height: 96px;
-}
-
-.fitness-reference-shell .op-nutri-footer {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.fitness-reference-shell .op-nutri-footer-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-top: 10px;
-  border-top: 0.5px solid var(--rule-soft);
-}
-
-.fitness-reference-shell .op-nutri-footer-item strong {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-style: italic;
-  font-weight: 400;
-  line-height: 1.1;
-  color: var(--ink);
 }
 
 .fitness-reference-shell .op-nutri-empty {
@@ -3965,8 +3906,7 @@
     flex-direction: column;
   }
 
-  .fitness-reference-shell .op-nutri-metrics,
-  .fitness-reference-shell .op-nutri-footer {
+  .fitness-reference-shell .op-nutri-metrics {
     grid-template-columns: 1fr;
   }
 
@@ -3977,11 +3917,6 @@
   .fitness-reference-shell .op-nutri-hero,
   .fitness-reference-shell .op-nutri-metric-card {
     padding: 16px;
-  }
-
-  .fitness-reference-shell .op-nutri-progress-meta {
-    flex-direction: column;
-    gap: 4px;
   }
 }
 

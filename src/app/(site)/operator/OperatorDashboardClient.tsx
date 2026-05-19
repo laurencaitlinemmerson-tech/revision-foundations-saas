@@ -5068,21 +5068,11 @@ function TopNutritionCaloriesCard({
       : netToday < 0
         ? 'Close, not there yet'
         : 'Currently in surplus';
-  const netNarrative = netToday === null
-    ? 'Calories and deficit progress update after the next Apple Health food export lands.'
-    : netToday <= targetNet
-      ? 'The deficit target is already cleared for today. A calm finish keeps the line clean.'
-      : netToday < 0
-        ? 'You are still in a deficit, but the day has not fully reached the target yet.'
-        : 'Intake is currently running above burn. The next meal decides whether this becomes a surplus.';
 
   return (
     <article className="op-health-card op-card-wide fit-top-nutrition-card">
       <header className="op-health-card-head op-nutri-head">
-        <div className="op-nutri-head-copy">
-          <span className="op-health-card-label">Calorie balance</span>
-          <p className="op-nutri-headline">Intake, burn and deficit rhythm for today.</p>
-        </div>
+        <span className="op-health-card-label">Calorie balance</span>
         <span className="op-nutri-target">Target deficit {targetDeficit.toLocaleString('en-GB')} kcal</span>
       </header>
 
@@ -5099,7 +5089,6 @@ function TopNutritionCaloriesCard({
                 <span className={`op-nutri-hero-pill is-${netTone}`}>{netHeadline}</span>
               </div>
               <div className={`op-nutri-hero-num ${netTone}`}>{fmtSigned(netToday)}</div>
-              <p className="op-nutri-hero-copy">{netNarrative}</p>
 
               <div className="op-nutri-progress">
                 <div className="op-nutri-progress-head">
@@ -5108,10 +5097,6 @@ function TopNutritionCaloriesCard({
                 </div>
                 <div className="op-nutri-progress-bar">
                   <span className={`is-${netTone}`} style={{ width: `${deficitProgress}%` }} />
-                </div>
-                <div className="op-nutri-progress-meta">
-                  <span>{fmtSigned(netToday)} today</span>
-                  <span>Target {fmtSigned(targetNet)} kcal</span>
                 </div>
               </div>
             </section>
@@ -5143,20 +5128,6 @@ function TopNutritionCaloriesCard({
             </div>
           </div>
 
-          <div className="op-nutri-footer">
-            <div className="op-nutri-footer-item">
-              <span className="op-nutri-footer-label">Target intake</span>
-              <strong>{calorieTarget.toLocaleString('en-GB')} kcal</strong>
-            </div>
-            <div className="op-nutri-footer-item">
-              <span className="op-nutri-footer-label">Burn model</span>
-              <strong>BMR {fmtInt(bmr)} + activity</strong>
-            </div>
-            <div className="op-nutri-footer-item">
-              <span className="op-nutri-footer-label">Weekly read</span>
-              <strong>{avgNet7 !== null && avgNet7 <= targetNet ? 'Consistent deficit' : avgNet7 !== null && avgNet7 < 0 ? 'Partial deficit' : 'Needs tightening'}</strong>
-            </div>
-          </div>
         </>
       )}
     </article>
