@@ -5575,14 +5575,52 @@ export default function OperatorDashboardClient() {
   const fiberToday = todayHealth?.nutrition?.fiberG ?? null;
   const waterMlToday = todayHealth?.nutrition?.waterMl ?? null;
   const stepsToday = todayHealth?.activity?.steps ?? null;
+  const exerciseToday = todayHealth?.activity?.exerciseMinutes ?? null;
   const goalGapTone = targetDelta <= 0 ? 'good' : targetDelta <= 12 ? 'neutral' : 'warn';
   const bodyFatTone = latest.bodyFat < 33 ? 'good' : latest.bodyFat < 39 ? 'neutral' : 'warn';
   const cadenceTone = cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn';
-  const trendSummary = sevenDayDelta <= -0.3
-    ? 'The recent line is easing down again. Keep the routine steady and let the trend keep compounding.'
-    : sevenDayDelta >= 0.3
-      ? 'The recent line has drifted up. Tightening the next few days should show quickly on the scale.'
-      : 'The recent line is almost flat. One more clean weigh-in will decide whether this turns into momentum.';
+  const todayTrackRead = (() => {
+    if (!todayHealth) {
+      return {
+        tone: 'neutral' as const,
+        label: 'Waiting on today',
+        note: 'Health data has not refreshed yet, so this read is still provisional.',
+      };
+    }
+
+    if (caloriesInToday === null) {
+      return {
+        tone: 'neutral' as const,
+        label: 'Tracking still open',
+        note: 'Movement is coming through, but the food log still needs to sync before the day can read on track.',
+      };
+    }
+
+    const movementReady = (stepsToday ?? 0) >= 7000 || (exerciseToday ?? 0) >= 30;
+    if (actualDeficitToday !== null && actualDeficitToday >= targetDeficit && movementReady) {
+      return {
+        tone: 'good' as const,
+        label: 'On track today',
+        note: 'Deficit is in range and movement is already supporting the day.',
+      };
+    }
+
+    if (actualDeficitToday !== null && actualDeficitToday >= 0) {
+      return {
+        tone: 'neutral' as const,
+        label: 'Still in range',
+        note: movementReady
+          ? 'Calories are pointed the right way. Keep the finish tidy and log the last meal.'
+          : 'Calories are pointed the right way, but movement still needs topping up.',
+      };
+    }
+
+    return {
+      tone: 'warn' as const,
+      label: 'Off track right now',
+      note: 'The day is running behind plan, but a walk and a cleaner finish can still rescue it.',
+    };
+  })();
   const todaySnap: TodaySnapshot = {
     latest,
     state,
@@ -5607,7 +5645,7 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '4px 0 16px' }} />
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '18px 0 16px' }} />
 
           <section className="fit-today">
             <div className="fit-today-head">
@@ -5618,15 +5656,18 @@ export default function OperatorDashboardClient() {
               <span className="muted">{formatReferenceDate(todayIso)}</span>
             </div>
 
+            <div className="fit-today-signals">
+              <div className="fit-today-signals-head">
+                <span className={`fit-today-track-pill is-${todayTrackRead.tone}`}>{todayTrackRead.label}</span>
+                <p className="fit-today-track-note">{todayTrackRead.note}</p>
+              </div>
+              <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
+            </div>
+
             <section className="fit-weight-feature">
               <div className="fit-weight-spotlight">
                 <div className="fit-weight-spotlight-figure">
                   <div className="fit-weight-spotlight-copy">
-                    <div className="fit-kicker fit-kicker-ink">Current weight</div>
-                    <div className="fit-weight-feature-num">
-                      <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
-                      <span className="unit">kg</span>
-                    </div>
                     <div className="fit-weight-spotlight-facts">
                       <div className="fit-weight-spotlight-fact">
                         <span className="fit-weight-spotlight-fact-label">Goal gap</span>
@@ -5657,9 +5698,12 @@ export default function OperatorDashboardClient() {
                 <div className="fit-weight-spotlight-meta">
                   <div className="fit-weight-spotlight-meta-head">
                     <div className="fit-kicker">This week&apos;s figure · {fmtDate(latest.date, { long: true })}</div>
-                    <p className="fit-weight-spotlight-summary">{trendSummary}</p>
+                    <div className="fit-weight-spotlight-meta-value">
+                      <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
+                      <span className="unit">kg</span>
+                    </div>
                   </div>
-                  <div className="fit-weight-spotlight-spark">
+                  <div className="fit-weight-spotlight-spark fit-weight-spotlight-spark-meta">
                     <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
                   </div>
                   <div className="fit-weight-feature-meta">
@@ -5698,7 +5742,6 @@ export default function OperatorDashboardClient() {
             </div>
 
             <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
-            <FoodBreakdownSection snap={todaySnap} />
           </section>
         </section>
         </Reveal>
@@ -5756,10 +5799,10 @@ export default function OperatorDashboardClient() {
         </div>
         </Reveal>
 
-        <Reveal delay={0.15}>
-        <div className="fit-hero-signals">
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
-        </div>
+        <Reveal delay={0.18}>
+        <section className="fit-anchor-section" id="operator-food">
+          <FoodBreakdownSection snap={todaySnap} />
+        </section>
         </Reveal>
 
         <Reveal>

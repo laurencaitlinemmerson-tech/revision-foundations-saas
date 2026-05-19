@@ -449,7 +449,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
   const stepBars = last14.map((d) => d.activity.steps);
   const stepLabels = last14.map((d) => shortDate(d.date).charAt(0));
 
-  // ── Nutrition: calories in / out / net ──────────────────────────────────
+  // ── Nutrition: net / deficit context ────────────────────────────────────
   const latestWeight = readings.length > 0 ? readings[readings.length - 1].weight : null;
   const bmr = latestWeight !== null ? estimateBMR(latestWeight) : null;
 
@@ -461,18 +461,12 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
     return kIn - (bmr + kActive);
   }
 
-  const caloriesIn = latest?.nutrition?.dietaryEnergyKcal ?? null;
-  const activeKcalToday = latest?.activity.activeEnergyKcal ?? null;
-  const caloriesOut = bmr !== null ? bmr + (activeKcalToday ?? 0) : null;
   const netToday = netForDay(latest);
   const targetNet = -GOALS.deficit;
   const nets7 = last7.map(netForDay);
   const avgNet7 = avg(nets7);
   const deficitToday = netToday !== null ? Math.max(0, -netToday) : null;
   const deficitAvg7 = avgNet7 !== null ? Math.max(0, -avgNet7) : null;
-  const proteinToday = latest?.nutrition?.proteinG ?? null;
-  const carbsToday = latest?.nutrition?.carbsG ?? null;
-  const fatToday = latest?.nutrition?.fatG ?? null;
   const hasNutritionData = days.some((d) => (d.nutrition?.dietaryEnergyKcal ?? null) !== null);
   const deficitDelta = (() => {
     if (netToday === null) {
@@ -1415,108 +1409,6 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
           </ul>
         </article>
 
-        {/* Nutrition (wide) */}
-        <article className="op-health-card op-card-wide">
-          <header className="op-health-card-head">
-            <span className="op-health-card-label">Nutrition · calories</span>
-            <span className="muted">In vs out · target deficit {GOALS.deficit} kcal</span>
-          </header>
-
-          {!hasNutritionData ? (
-            <div className="op-nutri-empty">
-              <p>
-                Nothing from MyFitnessPal yet. In MFP, switch on{' '}
-                <em>Settings → Apps &amp; Devices → Apple Health</em> for at least <em>Calories</em>,{' '}
-                <em>Protein</em>, <em>Carbs</em> and <em>Fat</em> — then enable Dietary Energy + macros
-                on the same Health Auto Export automation. The numbers arrive on the next sync.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="op-nutri-numbers">
-                <div className="op-nutri-cell">
-                  <div className="op-nutri-lbl">In</div>
-                  <div className="op-nutri-num">{fmtInt(caloriesIn)}</div>
-                  <div className="op-nutri-sub muted">
-                    {caloriesIn !== null ? `${(caloriesIn - GOALS.calorieIntake) >= 0 ? '+' : ''}${Math.round(caloriesIn - GOALS.calorieIntake)} vs ${GOALS.calorieIntake} target` : `Target ${GOALS.calorieIntake}`}
-                  </div>
-                </div>
-                <div className="op-nutri-cell">
-                  <div className="op-nutri-lbl">Out</div>
-                  <div className="op-nutri-num">{fmtInt(caloriesOut)}</div>
-                  <div className="op-nutri-sub muted">
-                    BMR {fmtInt(bmr)} + active {fmtInt(activeKcalToday)}
-                  </div>
-                </div>
-                <div className="op-nutri-cell">
-                  <div className="op-nutri-lbl">Net</div>
-                  <div className={`op-nutri-num ${netToday !== null && netToday <= targetNet ? 'good' : netToday !== null && netToday < 0 ? 'neutral' : 'warn'}`}>
-                    {netToday !== null ? `${netToday >= 0 ? '+' : ''}${Math.round(netToday)}` : '—'}
-                  </div>
-                  <div className="op-nutri-sub muted">
-                    Target {targetNet} kcal
-                  </div>
-                </div>
-                <div className="op-nutri-cell">
-                  <div className="op-nutri-lbl">7-day avg net</div>
-                  <div className={`op-nutri-num ${avgNet7 !== null && avgNet7 <= targetNet ? 'good' : avgNet7 !== null && avgNet7 < 0 ? 'neutral' : 'warn'}`}>
-                    {avgNet7 !== null ? `${avgNet7 >= 0 ? '+' : ''}${Math.round(avgNet7)}` : '—'}
-                  </div>
-                  <div className="op-nutri-sub muted">
-                    {avgNet7 !== null
-                      ? `${Math.round((avgNet7 / targetNet) * 100)}% of deficit target`
-                      : '—'}
-                  </div>
-                </div>
-              </div>
-
-              <div className="op-nutri-bar-wrap">
-                <div className="op-nutri-bar-lbl muted">Deficit progress (today)</div>
-                <div className="op-nutri-bar">
-                  <span
-                    className={netToday !== null && netToday <= 0 ? 'good' : 'warn'}
-                    style={{
-                      width: netToday !== null
-                        ? `${Math.min(100, Math.max(0, (Math.min(0, netToday) / targetNet) * 100))}%`
-                        : '0%',
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="op-macros-row">
-                <MacroDonut
-                  protein={proteinToday}
-                  carbs={carbsToday}
-                  fat={fatToday}
-                />
-                <dl className="op-macros-legend">
-                  <div className="op-macros-legend-row">
-                    <span className="op-macros-swatch" style={{ background: 'var(--good)' }} />
-                    <dt>Protein</dt>
-                    <dd>{fmtNum(proteinToday, 0, ' g')}</dd>
-                  </div>
-                  <div className="op-macros-legend-row">
-                    <span className="op-macros-swatch" style={{ background: 'var(--brass)' }} />
-                    <dt>Carbs</dt>
-                    <dd>{fmtNum(carbsToday, 0, ' g')}</dd>
-                  </div>
-                  <div className="op-macros-legend-row">
-                    <span className="op-macros-swatch" style={{ background: 'var(--warn)' }} />
-                    <dt>Fat</dt>
-                    <dd>{fmtNum(fatToday, 0, ' g')}</dd>
-                  </div>
-                  <div className="op-macros-legend-row">
-                    <span className="op-macros-swatch" style={{ background: 'transparent', border: '0.5px solid var(--rule)' }} />
-                    <dt>BMR</dt>
-                    <dd>{fmtInt(bmr)} kcal</dd>
-                  </div>
-                </dl>
-              </div>
-            </>
-          )}
-        </article>
-
         {/* Heart */}
         <article className="op-health-card">
           <header className="op-health-card-head">
@@ -1832,61 +1724,6 @@ function Heatmap({ days, goal }: { days: DailyMetrics[]; goal: number }) {
         </span>
       </div>
     </div>
-  );
-}
-
-function MacroDonut({ protein, carbs, fat }: { protein: number | null; carbs: number | null; fat: number | null }) {
-  const p = protein ?? 0;
-  const c = carbs ?? 0;
-  const f = fat ?? 0;
-  const kcalP = p * 4;
-  const kcalC = c * 4;
-  const kcalF = f * 9;
-  const total = kcalP + kcalC + kcalF;
-  const size = 148;
-  const r = 60;
-  const stroke = 16;
-  const c2pi = 2 * Math.PI * r;
-  if (total === 0) {
-    return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-label="Macro split unavailable">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--rule)" strokeWidth={stroke} />
-      </svg>
-    );
-  }
-  const slices = [
-    { k: 'p', value: kcalP, color: 'var(--good)' },
-    { k: 'c', value: kcalC, color: 'var(--brass)' },
-    { k: 'f', value: kcalF, color: 'var(--warn)' },
-  ];
-  let offset = 0;
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-label="Macro split">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--rule-soft)" strokeWidth={stroke} />
-      {slices.map((s) => {
-        const pct = s.value / total;
-        const dash = c2pi * pct;
-        const el = (
-          <circle
-            key={s.k}
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            fill="none"
-            stroke={s.color}
-            strokeWidth={stroke}
-            strokeDasharray={`${dash} ${c2pi - dash}`}
-            strokeDashoffset={-offset}
-            transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            opacity={0.85}
-          />
-        );
-        offset += dash;
-        return el;
-      })}
-      <text x={size / 2} y={size / 2 - 6} textAnchor="middle" fontSize={10} fill="var(--ink-mute)" letterSpacing="0.16em">KCAL</text>
-      <text x={size / 2} y={size / 2 + 18} textAnchor="middle" fontFamily="'Playfair Display', Georgia, serif" fontSize={24} fill="var(--ink)">{Math.round(total).toLocaleString('en-GB')}</text>
-    </svg>
   );
 }
 
