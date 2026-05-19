@@ -1383,98 +1383,6 @@
   margin: 8px 0 28px;
 }
 
-.fit-line-moved {
-  display: grid;
-  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-  padding-top: 6px;
-}
-
-.fit-line-moved-head {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 6px;
-}
-
-.fit-line-moved-eyebrow {
-  display: inline-block;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.fit-line-moved-copy {
-  margin-top: 0;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--ink-soft);
-  max-width: 22ch;
-}
-
-.fit-line-moved-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  border: 0.5px solid var(--rule);
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.68);
-}
-
-.fit-line-moved-card {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-height: 0;
-  padding: 12px 14px 11px;
-  border: none;
-  border-left: 0.5px solid var(--rule-soft);
-  border-radius: 0;
-  background: transparent;
-}
-
-.fit-line-moved-card:first-child {
-  border-left: none;
-}
-
-.fit-line-moved-card.is-good {
-  box-shadow: inset 0 2px 0 rgba(28, 122, 103, 0.46);
-}
-
-.fit-line-moved-card.is-neutral {
-  box-shadow: inset 0 2px 0 rgba(99, 56, 6, 0.28);
-}
-
-.fit-line-moved-card.is-warn {
-  box-shadow: inset 0 2px 0 rgba(161, 74, 87, 0.34);
-}
-
-.fit-line-moved-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-}
-
-.fit-line-moved-value {
-  font-family: var(--font-display);
-  font-size: 20px;
-  line-height: 1.06;
-  color: var(--ink);
-}
-
-.fit-line-moved-note {
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--ink-soft);
-}
-
 .fit-consistency-card {
   display: flex;
   flex-direction: column;
@@ -1515,6 +1423,7 @@
 }
 
 .fit-consistency-rows {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1555,6 +1464,114 @@
   border-radius: 3px;
   background: var(--rule-soft);
   border: 0.5px solid transparent;
+  cursor: pointer;
+  transition: outline-color 120ms ease, transform 120ms ease;
+}
+
+.fit-consistency-cell.is-active {
+  outline: 0.5px solid var(--ink);
+  outline-offset: 1px;
+  transform: scale(1.06);
+}
+
+.fit-consistency-tooltip {
+  position: absolute;
+  top: -10px;
+  transform: translate(-50%, -100%);
+  min-width: 200px;
+  background: var(--paper);
+  border: 0.5px solid var(--ink);
+  padding: 11px 13px 12px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.fit-consistency-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 0.5px;
+  height: 4px;
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+
+.fit-consistency-tooltip-window {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+}
+
+.fit-consistency-tooltip-lede {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding-bottom: 9px;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fit-consistency-tooltip-lede strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.fit-consistency-tooltip-lede span {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.fit-consistency-tooltip-lede em {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--ink-mute);
+  margin-left: auto;
+  letter-spacing: 0.02em;
+}
+
+.fit-consistency-tooltip-lede em.is-down { color: var(--good); }
+.fit-consistency-tooltip-lede em.is-up { color: var(--warn); }
+
+.fit-consistency-tooltip-lede.is-empty {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-mute);
+  margin-bottom: 10px;
+  padding-bottom: 9px;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fit-consistency-tooltip-rows {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fit-consistency-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+}
+
+.fit-consistency-tooltip-row dt {
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.fit-consistency-tooltip-row dd {
+  color: var(--ink);
+  margin: 0;
+  font-weight: 500;
 }
 
 .fit-consistency-cell.is-missing {
@@ -1564,33 +1581,23 @@
 }
 
 .fit-consistency-cell.is-weigh.is-logged {
-  background: rgba(196, 135, 47, 0.72);
-  border-color: rgba(99, 56, 6, 0.12);
+  background: #b76e79;
+  border-color: transparent;
 }
 
-.fit-consistency-cell.is-intake.is-good {
-  background: rgba(28, 122, 103, 0.74);
-}
-
-.fit-consistency-cell.is-intake.is-neutral {
-  background: rgba(196, 135, 47, 0.58);
-}
-
-.fit-consistency-cell.is-intake.is-warn {
-  background: rgba(161, 74, 87, 0.68);
-}
-
+.fit-consistency-cell.is-intake.is-good,
 .fit-consistency-cell.is-steps.is-good {
-  background: rgba(24, 95, 165, 0.82);
+  background: rgba(28, 122, 103, 0.78);
 }
 
+.fit-consistency-cell.is-intake.is-neutral,
 .fit-consistency-cell.is-steps.is-neutral {
-  background: rgba(24, 95, 165, 0.42);
+  background: rgba(196, 135, 47, 0.62);
 }
 
+.fit-consistency-cell.is-intake.is-warn,
 .fit-consistency-cell.is-steps.is-warn {
-  background: rgba(26, 24, 21, 0.14);
-  border-color: rgba(26, 24, 21, 0.06);
+  background: rgba(161, 74, 87, 0.62);
 }
 
 .fit-consistency-legend {
@@ -1618,48 +1625,25 @@
 }
 
 .fit-consistency-dot.is-logged {
-  background: rgba(196, 135, 47, 0.72);
+  background: #b76e79;
 }
 
 .fit-consistency-dot.is-good {
-  background: rgba(28, 122, 103, 0.74);
+  background: rgba(28, 122, 103, 0.78);
 }
 
 .fit-consistency-dot.is-neutral {
-  background: rgba(196, 135, 47, 0.58);
+  background: rgba(196, 135, 47, 0.62);
 }
 
 .fit-consistency-dot.is-warn {
-  background: rgba(161, 74, 87, 0.68);
+  background: rgba(161, 74, 87, 0.62);
 }
 
 @media (max-width: 860px) {
   .fit-consistency-card-head {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .fit-line-moved {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .fit-line-moved-grid {
-    grid-template-columns: 1fr;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-  }
-
-  .fit-line-moved-card {
-    border-left: none;
-    border-top: 0.5px solid var(--rule-soft);
-    padding: 10px 0 0;
-  }
-
-  .fit-line-moved-card:first-child {
-    border-top: none;
-    padding-top: 0;
   }
 
   .fit-consistency-row {
@@ -2473,20 +2457,19 @@
 
 .bc-line-avg {
   fill: none;
-  stroke: oklch(0.70 0.12 76);
-  stroke-width: 3.1;
+  stroke: #b76e79;
+  stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 4px 14px oklch(0.70 0.12 76 / 0.12));
 }
 
 .bc-line-gap {
   fill: none;
-  stroke: oklch(0.70 0.12 76);
-  stroke-width: 1.6;
+  stroke: #b76e79;
+  stroke-width: 0.8;
   stroke-linecap: round;
   stroke-dasharray: 3 7;
-  opacity: 0.42;
+  opacity: 0.4;
 }
 
 .bc-target-line {
@@ -2498,22 +2481,22 @@
 
 .bc-checkpoint-path {
   fill: none;
-  stroke: oklch(0.48 0.08 55);
-  stroke-width: 1.7;
+  stroke: #b76e79;
+  stroke-width: 1.2;
   stroke-linecap: round;
   stroke-dasharray: 7 6;
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 .bc-checkpoint-connector {
-  stroke: rgba(99, 56, 6, 0.24);
+  stroke: rgba(183, 110, 121, 0.32);
   stroke-width: 0.8;
 }
 
 .bc-checkpoint-dot {
-  fill: rgba(250, 250, 248, 0.98);
-  stroke: oklch(0.48 0.08 55);
-  stroke-width: 2;
+  fill: var(--paper);
+  stroke: #b76e79;
+  stroke-width: 1.4;
 }
 
 .bc-checkpoint-label {
@@ -2546,19 +2529,18 @@
 }
 
 .bc-pin-connector {
-  stroke: rgba(44, 52, 68, 0.22);
+  stroke: rgba(183, 110, 121, 0.32);
   stroke-width: 0.8;
 }
 
 .bc-latest-halo {
-  fill: oklch(0.70 0.12 76 / 0.12);
+  fill: rgba(183, 110, 121, 0.14);
 }
 
 .bc-latest-dot {
-  fill: oklch(0.70 0.12 76);
+  fill: #b76e79;
   stroke: var(--paper);
-  stroke-width: 1.8;
-  filter: drop-shadow(0 1px 3px rgba(125, 76, 13, 0.18));
+  stroke-width: 1.6;
 }
 
 .bc-current-kicker {
@@ -2570,7 +2552,7 @@
 }
 
 .bc-pin-dot {
-  fill: oklch(0.70 0.12 76);
+  fill: #b76e79;
   stroke: var(--paper);
   stroke-width: 1.5;
 }

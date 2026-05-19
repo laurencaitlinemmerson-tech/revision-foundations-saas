@@ -47,6 +47,10 @@ interface ChartProps {
   targetWeight?: number
   /** Hide any reading whose value falls below this floor (default 60). */
   minDisplayValue?: number
+  /** When set, snap the crosshair + tooltip to the point nearest this date even without pointer hover. */
+  activeIso?: string | null
+  /** Fires when the user scrubs the chart, or clears (mouse leave). */
+  onActiveChange?: (iso: string | null) => void
 }
 
 function fmtHoverDate(iso: string): string {
@@ -171,8 +175,10 @@ export default function FitnessLineChart({
   showRangeToggle = false,
   targetWeight,
   minDisplayValue = 60,
+  activeIso,
+  onActiveChange,
 }: ChartProps) {
-  const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const [internalHoverIndex, setInternalHoverIndex] = useState<number | null>(null)
   const [internalRange, setInternalRange] = useState<FitnessChartRange>(defaultRange)
   const activeRange = controlledRange ?? internalRange
   const w = 1120
@@ -231,17 +237,18 @@ export default function FitnessLineChart({
   // lands on each dot. Gaps longer than 30 days get a dashed bridge
   // instead of a smooth curve — the eye can still follow the arc, but
   // the dashes make it clear we're spanning missing data.
-  const primarySegments = useMemo(
-    () => splitByDateGap(filteredPoints, 30).filter((segment) => segment.length >= 2),
+  const allSegments = useMemo(
+    () => splitByDateGap(filteredPoints, 30),
     [filteredPoints],
   )
-  const primaryPath = primarySegments
+  const pathSegments = allSegments.filter((segment) => segment.length >= 2)
+  const primaryPath = pathSegments
     .map((segment) => monotonePath(segment.map((point) => ({ x: x(point.date), y: y(point.value) }))))
     .join(' ') || null
   const gapBridges: string[] = []
-  for (let i = 0; i < primarySegments.length - 1; i += 1) {
-    const last = primarySegments[i][primarySegments[i].length - 1]
-    const next = primarySegments[i + 1][0]
+  for (let i = 0; i < allSegments.length - 1; i += 1) {
+    const last = allSegments[i][allSegments[i].length - 1]
+    const next = allSegments[i + 1][0]
     gapBridges.push(`M ${x(last.date).toFixed(2)} ${y(last.value).toFixed(2)} L ${x(next.date).toFixed(2)} ${y(next.value).toFixed(2)}`)
   }
   const gapBridgePath = gapBridges.length > 0 ? gapBridges.join(' ') : null
@@ -258,6 +265,18 @@ export default function FitnessLineChart({
         const ratio = i / Math.max(1, xTickCount - 1)
         return xMin + ratio * (xMax - xMin)
       })
+  const indexFromActiveIso = useMemo(() => {
+    if (!activeIso || filteredPoints.length === 0) return null
+    const target = new Date(activeIso).getTime()
+    let bestIdx = 0
+    let bestDist = Infinity
+    for (let i = 0; i < filteredPoints.length; i += 1) {
+      const d = Math.abs(new Date(filteredPoints[i].date).getTime() - target)
+      if (d < bestDist) { bestDist = d; bestIdx = i }
+    }
+    return bestIdx
+  }, [activeIso, filteredPoints])
+  const hoverIndex = internalHoverIndex ?? indexFromActiveIso
   const hover = hoverIndex !== null ? filteredPoints[hoverIndex] : null
   const recentWeekPoints = latestTime === null
     ? []
@@ -588,24 +607,32 @@ export default function FitnessLineChart({
             </g>
           )}
 
-          {/* Each reading anchored as a white dot ringed in the line colour
-              so the underlying data points stay visible on top of the line. */}
-          {filteredPoints.map((point, index) => (
-            <circle
-              key={`dot-${point.date}-${index}`}
-              cx={x(point.date)}
-              cy={y(point.value)}
-              r={hoverIndex === index ? 4.4 : 2.8}
-              className="bc-data-dot"
-              style={{
-                fill: hoverIndex === index ? color : '#FAFAF8',
-                stroke: color,
-                strokeWidth: hoverIndex === index ? 1.5 : 1,
-                opacity: hoverIndex === index ? 1 : 0.95,
-              }}
-              pointerEvents="none"
-            />
-          ))}
+          {/* Each reading is a filled bar rising from the x-axis to the
+              reading's y position. Width adapts to how many readings fit in
+              the visible window — wide on short ranges, slim on long ones —
+              and is clamped so they never disappear or become slabs. */}
+          {(() => {
+            if (filteredPoints.length === 0) return null
+            const natural = (innerW / filteredPoints.length) * 0.78
+            const barWidth = Math.max(1.4, Math.min(18, natural))
+            return filteredPoints.map((point, index) => {
+              const px = x(point.date)
+              const py = y(point.value)
+              const isActive = hoverIndex === index
+              return (
+                <rect
+                  key={`bar-${point.date}-${index}`}
+                  x={px - barWidth / 2}
+                  y={py}
+                  width={barWidth}
+                  height={Math.max(0, pad.t + innerH - py)}
+                  fill={color}
+                  opacity={isActive ? 0.78 : 0.22}
+                  pointerEvents="none"
+                />
+              )
+            })
+          })()}
           {/* Single overlay captures hover anywhere across the plot, then
               snaps to the nearest point by x. Much smoother than per-dot
               hit targets. */}
@@ -631,9 +658,10 @@ export default function FitnessLineChart({
                   bestIndex = i
                 }
               }
-              setHoverIndex(bestIndex)
+              setInternalHoverIndex(bestIndex)
+              onActiveChange?.(filteredPoints[bestIndex].date)
             }}
-            onMouseLeave={() => setHoverIndex(null)}
+            onMouseLeave={() => { setInternalHoverIndex(null); onActiveChange?.(null) }}
             onTouchMove={(event) => {
               if (filteredPoints.length === 0) return
               const touch = event.touches[0]
@@ -652,9 +680,10 @@ export default function FitnessLineChart({
                   bestIndex = i
                 }
               }
-              setHoverIndex(bestIndex)
+              setInternalHoverIndex(bestIndex)
+              onActiveChange?.(filteredPoints[bestIndex].date)
             }}
-            onTouchEnd={() => setHoverIndex(null)}
+            onTouchEnd={() => { setInternalHoverIndex(null); onActiveChange?.(null) }}
             style={{ cursor: 'crosshair' }}
           />
         </svg>
