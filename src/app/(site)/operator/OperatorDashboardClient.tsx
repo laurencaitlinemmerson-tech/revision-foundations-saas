@@ -353,75 +353,6 @@ function EditorialDivider({ eyebrow, note, style }: { eyebrow: string; note?: st
   );
 }
 
-function CollapsibleSection({ eyebrow, note, children, defaultOpen = true, dividerStyle }: {
-  eyebrow: string;
-  note?: string;
-  children: ReactNode;
-  defaultOpen?: boolean;
-  dividerStyle?: CSSProperties;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  const contentId = `op-collapsible-${eyebrow.toLowerCase().replace(/\s+/g, '-')}`;
-  return (
-    <>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'auto 1fr auto auto',
-        alignItems: 'center',
-        gap: 18,
-        margin: '40px 0 22px',
-        ...dividerStyle,
-      }}>
-        <span style={{
-          fontFamily: T.sans,
-          fontSize: 9.5,
-          letterSpacing: '0.32em',
-          textTransform: 'uppercase',
-          fontWeight: 600,
-          color: T.ink,
-        }}>{eyebrow}</span>
-        <span style={{ height: 0.5, background: T.line, display: 'block' }} />
-        {note ? (
-          <span style={{
-            fontFamily: T.display,
-            fontStyle: 'italic',
-            fontSize: 13,
-            color: T.muted,
-          }}>{note}</span>
-        ) : <span />}
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-controls={contentId}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            background: 'transparent',
-            border: 'none',
-            padding: '4px 0 4px 14px',
-            fontFamily: T.sans,
-            fontSize: 9.5,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            fontWeight: 600,
-            color: T.muted,
-            cursor: 'pointer',
-            lineHeight: 1,
-          }}
-        >
-          <span>{open ? 'Hide' : 'Show'}</span>
-          <span aria-hidden style={{ fontSize: 11, lineHeight: 1, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 180ms ease', display: 'inline-block' }}>▾</span>
-        </button>
-      </div>
-      <div id={contentId} hidden={!open}>
-        {children}
-      </div>
-    </>
-  );
-}
-
 // Auto-generated italic intention line — reads current state aloud.
 function intentionLine(state: State, latest: FitnessReading, goal: number): string {
   const delta = latest.weight - goal;
@@ -2358,68 +2289,27 @@ function DashboardHero({
       color:syncColor,
     },
   ];
-  const jumpLinks = [
-    { href:'#operator-today', label:'Today' },
-    { href:'#operator-trajectory', label:'Trajectory' },
-    { href:'#operator-food', label:'Food' },
-    { href:'#operator-story', label:'Story' },
-    { href:'#operator-health-stream', label:'Trends' },
-    { href:'#operator-action', label:'Action' },
-  ];
-  const driftLabel = delta > 0
-    ? `+${delta.toFixed(1)} kg since the last check-in`
-    : delta < 0
-      ? `−${Math.abs(delta).toFixed(1)} kg since the last check-in`
-      : 'Holding the line since the last check-in';
 
   return (
     <section style={{
-      position:'relative',
-      background:'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(251,248,243,0.98) 52%, rgba(250,238,218,0.78) 100%)',
+      background:'rgba(255,255,255,0.96)',
       border:`1px solid ${T.line}`,
-      borderRadius:32,
-      boxShadow:'0 34px 90px rgba(26,24,21,0.08)',
+      boxShadow:CARD_SHADOW,
       overflow:'hidden',
-      marginBottom:32,
+      marginBottom:20,
     }}>
-      <div style={{
-        position:'absolute',
-        width:320,
-        height:320,
-        borderRadius:'50%',
-        top:-160,
-        left:-70,
-        background:'radial-gradient(circle, rgba(24,95,165,0.15) 0%, rgba(24,95,165,0) 72%)',
-        pointerEvents:'none',
-      }} />
-      <div style={{
-        position:'absolute',
-        width:360,
-        height:360,
-        borderRadius:'50%',
-        right:-110,
-        bottom:-210,
-        background:'radial-gradient(circle, rgba(196,135,47,0.18) 0%, rgba(196,135,47,0) 72%)',
-        pointerEvents:'none',
-      }} />
-      <div style={{ position:'relative', padding:'30px clamp(20px, 4vw, 34px) 22px' }}>
-        <div style={{
-          display:'grid',
-          gridTemplateColumns:'repeat(auto-fit, minmax(290px, 1fr))',
-          gap:24,
-          alignItems:'end',
-        }}>
-          <div style={{ minWidth:0 }}>
+      <div style={{ padding:'24px clamp(18px, 4vw, 28px) 18px' }}>
+        <div style={{ display:'flex', gap:24, alignItems:'flex-end', flexWrap:'wrap' }}>
+          <div style={{ flex:'1 1 560px', minWidth:0 }}>
             <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', marginBottom:12 }}>
               <span style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:T.muted, fontWeight:600 }}>Fitness</span>
               <span style={{ color:T.muted, opacity:0.45 }}>/</span>
               <FitPill color={T.gold} background={`${T.gold}12`}>{state.phaseName} live</FitPill>
               <FitPill color={syncColor} background={`${syncColor}12`}>{state.daysSinceWeighIn === 0 ? 'Logged today' : `Logged ${state.daysSinceWeighIn}d ago`}</FitPill>
             </div>
-            <h1 style={{ fontFamily:T.display, fontSize:'clamp(38px, 5vw, 60px)', fontWeight:400, letterSpacing:'-0.03em', lineHeight:0.92, color:T.ink, margin:'0 0 10px', maxWidth:'11ch' }}>
-              Protect the line. <em style={{ color:T.gold, fontStyle:'italic' }}>{state.phaseName}</em> is the season.
+            <h1 style={{ fontFamily:T.display, fontSize:'clamp(34px, 4.8vw, 52px)', fontWeight:400, letterSpacing:'-0.02em', lineHeight:0.96, color:T.ink, margin:'0 0 10px', maxWidth:'11ch' }}>
+              Body composition <em style={{ color:T.gold, fontStyle:'italic' }}>timeline</em>
             </h1>
-            <HeroIntention state={state} latest={latest} goal={goal} />
             <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', fontFamily:T.sans, fontSize:13, color:T.body }}>
               <span>{fmtDate(sorted[0].date, { long:true })} start</span>
               <span style={{ width:4, height:4, borderRadius:'50%', background:T.muted }} />
@@ -2432,92 +2322,35 @@ function DashboardHero({
           </div>
 
           <div style={{
-            minWidth:0,
-            border:`1px solid ${T.softLine}`,
-            borderRadius:24,
-            background:'rgba(255,255,255,0.68)',
-            padding:'20px 22px 18px',
-            backdropFilter:'blur(10px)',
-            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.7)',
+            flex:'1 1 280px',
+            textAlign:'right',
+            minWidth:200,
           }}>
             <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:8 }}>
-              {weightLabel} reading · {fmtDate(latest.date)}
+              {weightLabel} · {fmtDate(latest.date)}
             </div>
-            <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:6 }}>
-              <span style={{ fontFamily:T.display, fontSize:'clamp(54px, 7vw, 72px)', color:T.ink, letterSpacing:'-0.05em', lineHeight:0.9 }}>{latest.weight.toFixed(1)}</span>
-              <span style={{ fontFamily:T.display, fontSize:24, fontStyle:'italic', color:T.muted }}>kg</span>
+            <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:8 }}>
+              <span style={{ fontFamily:T.display, fontSize:56, color:T.ink, letterSpacing:'-0.03em', lineHeight:0.92 }}>{latest.weight.toFixed(1)}</span>
+              <span style={{ fontFamily:T.sans, fontSize:22, color:T.muted }}>kg</span>
             </div>
-            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:11, letterSpacing:'0.04em', color:delta <= 0 ? T.green : T.rose, marginTop:6 }}>
-              {driftLabel}
-            </div>
-            <p style={{ margin:'8px 0 0', fontFamily:T.sans, fontSize:12, lineHeight:1.55, color:T.body }}>
-              {remaining === 0 ? 'Goal line met. The dashboard can switch from chase mode to control mode.' : `${remaining.toFixed(1)} kg sits between the current reading and the working line.`}
-            </p>
-            <div style={{ marginTop:16 }}>
-              <HeadlineSparkline readings={sorted.slice(-5)} variant="wide" />
-            </div>
-            <div style={{
-              display:'grid',
-              gridTemplateColumns:'repeat(2, minmax(0, 1fr))',
-              gap:12,
-              marginTop:14,
-            }}>
-              <div style={{ paddingTop:10, borderTop:`1px solid ${T.softLine}` }}>
-                <div style={{ fontFamily:T.sans, fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, fontWeight:600 }}>7-day read</div>
-                <div style={{ fontFamily:T.display, fontSize:24, lineHeight:1, letterSpacing:'-0.03em', color:sevenDayDelta <= 0 ? T.green : T.rose, marginTop:6 }}>
-                  {sevenDayDelta > 0 ? '+' : ''}{sevenDayDelta.toFixed(1)} kg
-                </div>
-              </div>
-              <div style={{ paddingTop:10, borderTop:`1px solid ${T.softLine}` }}>
-                <div style={{ fontFamily:T.sans, fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, fontWeight:600 }}>This week&apos;s line</div>
-                <div style={{ fontFamily:T.display, fontSize:24, lineHeight:1, letterSpacing:'-0.03em', color:T.gold, marginTop:6 }}>
-                  {state.thisWeekTarget.toFixed(1)} kg
-                </div>
-              </div>
+            <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:11, letterSpacing:'0.04em', color:sevenDayDelta <= 0 ? T.green : T.rose, marginTop:6 }}>
+              {sevenDayDelta > 0 ? '+' : ''}{sevenDayDelta.toFixed(1)} · 7-day marker
             </div>
           </div>
         </div>
-
-        <nav aria-label="Operator dashboard sections" style={{ display:'flex', gap:10, flexWrap:'wrap', marginTop:20 }}>
-          {jumpLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              style={{
-                display:'inline-flex',
-                alignItems:'center',
-                justifyContent:'center',
-                padding:'9px 14px',
-                borderRadius:999,
-                border:`1px solid ${T.softLine}`,
-                background:'rgba(255,255,255,0.72)',
-                color:T.ink,
-                textDecoration:'none',
-                fontFamily:T.sans,
-                fontSize:10,
-                fontWeight:600,
-                letterSpacing:'0.16em',
-                textTransform:'uppercase',
-                backdropFilter:'blur(10px)',
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
       </div>
 
       <div style={{
         display:'grid',
-        gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))',
-        gap:1,
-        background:'rgba(26,24,21,0.06)',
+        gridTemplateColumns:'repeat(6, minmax(0, 1fr))',
+        gap:0,
+        background:T.surface,
         borderTop:`1px solid ${T.softLine}`,
       }}>
-        {statCells.map((cell) => (
+        {statCells.map((cell, index) => (
           <div key={cell.label} style={{
-            padding:'16px 18px',
-            background:'rgba(255,255,255,0.56)',
+            padding:'14px 16px',
+            borderRight:index < statCells.length - 1 ? `1px solid ${T.softLine}` : 'none',
           }}>
             <div style={{ fontFamily:T.sans, fontSize:9, fontWeight:600, letterSpacing:'0.20em', textTransform:'uppercase', color:T.muted, marginBottom:6 }}>
               {cell.label}
@@ -5743,7 +5576,6 @@ export default function OperatorDashboardClient() {
   }
 
   const previousWeek = nearestReadingByDays(dashboardSource, latest, 7);
-  const previousReading = dashboardSource[dashboardSource.length - 2] ?? latest;
   const cadence = loggingCadence(dashboardSource);
   const nutrition = nutritionTargets(latest);
   const targetDelta = latest.weight - goal;
@@ -5857,19 +5689,10 @@ export default function OperatorDashboardClient() {
   return (
     <div className="fitness-reference-shell">
       <main className="wrap fitness-redesign" id="operator-overview">
-        <DashboardHero
-          latest={latest}
-          previous={previousReading}
-          sorted={dashboardSource}
-          state={state}
-          goal={goal}
-          cloudOk={cloudOk}
-          syncing={syncing}
-        />
         <Reveal>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '28px 0 32px' }} />
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '64px 0 40px' }} />
 
           <section className="fit-today">
             <div className="fit-today-head">
@@ -6006,11 +5829,11 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
-        <CollapsibleSection eyebrow="Story" note="Phase context, milestones, and visual evidence.">
         <Reveal>
         <section className="fit-anchor-section" id="operator-story">
           <div className="fit-story-shell">
             {/* ───────────────────────── STORY ─────────────────────────── */}
+            <EditorialDivider eyebrow="Story" note="Phase context, milestones, and visual evidence." />
 
             <section className="fit-grid">
               <div className="fit-main">
@@ -6078,12 +5901,11 @@ export default function OperatorDashboardClient() {
         <Reveal delay={0.05}>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
         </Reveal>
-        </CollapsibleSection>
 
-        <CollapsibleSection eyebrow="Trends" note="What the lines are doing — and why.">
         <Reveal>
         <section className="fit-anchor-section" id="operator-health-stream">
           {/* ───────────────────────── TRENDS ────────────────────────── */}
+          <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
           <AnalyticsSection
             latest={latest}
             sorted={dashboardSource}
@@ -6100,9 +5922,7 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
         </Reveal>
-        </CollapsibleSection>
 
-        <CollapsibleSection eyebrow="Action" note="Today's next move.">
         <Reveal>
         <section className="fit-anchor-section" id="operator-action">
           {/* Action block — promise + readiness folded into trends scroll. */}
@@ -6111,7 +5931,6 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>
         </Reveal>
-        </CollapsibleSection>
 
       </main>
 
