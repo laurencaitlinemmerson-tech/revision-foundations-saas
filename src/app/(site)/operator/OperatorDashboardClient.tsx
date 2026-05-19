@@ -5081,54 +5081,83 @@ function TopNutritionCaloriesCard({
           <p>No food log synced yet today. Calories and macros will appear here after the next Apple Health export.</p>
         </div>
       ) : (
-        <>
-          <div className="op-nutri-layout">
-            <section className={`op-nutri-hero is-${netTone}`}>
-              <div className="op-nutri-hero-top">
-                <span className="op-nutri-hero-label">Today&apos;s net</span>
-                <span className={`op-nutri-hero-pill is-${netTone}`}>{netHeadline}</span>
-              </div>
-              <div className={`op-nutri-hero-num ${netTone}`}>{fmtSigned(netToday)}</div>
-
-              <div className="op-nutri-progress">
-                <div className="op-nutri-progress-head">
-                  <span>Deficit progress</span>
-                  <strong>{Math.round(deficitProgress)}%</strong>
-                </div>
-                <div className="op-nutri-progress-bar">
-                  <span className={`is-${netTone}`} style={{ width: `${deficitProgress}%` }} />
-                </div>
-              </div>
-            </section>
-
-            <div className="op-nutri-metrics">
-              <div className="op-nutri-metric-card">
-                <div className="op-nutri-lbl">Calories in</div>
-                <div className="op-nutri-num">{fmtInt(caloriesIn)}</div>
-                <div className="op-nutri-sub muted">
-                  {caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget.toLocaleString('en-GB')} target` : `Target ${calorieTarget.toLocaleString('en-GB')}`}
-                </div>
-              </div>
-
-              <div className="op-nutri-metric-card">
-                <div className="op-nutri-lbl">Calories out</div>
-                <div className="op-nutri-num">{fmtInt(caloriesOut)}</div>
-                <div className="op-nutri-sub muted">
-                  BMR {fmtInt(bmr)} + active {fmtInt(activeKcalToday)}
-                </div>
-              </div>
-
-              <div className="op-nutri-metric-card op-nutri-metric-card-wide">
-                <div className="op-nutri-lbl">7-day average net</div>
-                <div className={`op-nutri-num ${avgTone}`}>{fmtSigned(avgNet7)}</div>
-                <div className="op-nutri-sub muted">
-                  {avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target across the last week` : 'Need more overlapping days'}
-                </div>
-              </div>
+        <div className="op-nutri-editorial">
+          <div className="op-nutri-figure">
+            <div className="op-nutri-figure-meta">
+              <span className="op-nutri-figure-label">Today&apos;s net</span>
+              <span className={`op-nutri-figure-status is-${netTone}`}>{netHeadline}</span>
             </div>
+            <div className={`op-nutri-figure-num is-${netTone}`}>{fmtSigned(netToday)}</div>
+            <div className="op-nutri-figure-sub">kcal · {Math.round(deficitProgress)}% of {fmtSigned(targetNet)} target</div>
           </div>
 
-        </>
+          {(() => {
+            const scale = Math.max(
+              Math.abs(netToday ?? 0),
+              Math.abs(caloriesOut ?? 0),
+              Math.abs(caloriesIn ?? 0),
+              Math.abs(avgNet7 ?? 0),
+              Math.abs(targetNet),
+              1,
+            );
+            const targetMarkPct = Math.min(100, (Math.abs(targetNet) / scale) * 100);
+            const rows = [
+              {
+                key: 'in',
+                label: 'Eaten',
+                value: caloriesIn,
+                sub: caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget.toLocaleString('en-GB')} target` : `Target ${calorieTarget.toLocaleString('en-GB')}`,
+                pct: caloriesIn !== null ? Math.min(100, (caloriesIn / scale) * 100) : 0,
+                tone: 'eaten' as const,
+                marker: null as number | null,
+              },
+              {
+                key: 'out',
+                label: 'Burned',
+                value: caloriesOut,
+                sub: `BMR ${fmtInt(bmr)} + active ${fmtInt(activeKcalToday)}`,
+                pct: caloriesOut !== null ? Math.min(100, (caloriesOut / scale) * 100) : 0,
+                tone: 'burned' as const,
+                marker: null as number | null,
+              },
+              {
+                key: 'deficit',
+                label: 'Deficit today',
+                value: netToday,
+                sub: `Target ${fmtSigned(targetNet)} kcal`,
+                pct: netToday !== null ? Math.min(100, (Math.abs(netToday) / scale) * 100) : 0,
+                tone: netTone,
+                marker: targetMarkPct,
+              },
+              {
+                key: 'avg',
+                label: '7-day average',
+                value: avgNet7,
+                sub: avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target` : 'Need more overlapping days',
+                pct: avgNet7 !== null ? Math.min(100, (Math.abs(avgNet7) / scale) * 100) : 0,
+                tone: avgTone,
+                marker: targetMarkPct,
+              },
+            ];
+            return (
+              <ol className="op-nutri-ledger">
+                {rows.map((row) => (
+                  <li key={row.key} className="op-nutri-row">
+                    <span className="op-nutri-row-label">{row.label}</span>
+                    <div className="op-nutri-row-bar" aria-hidden="true">
+                      <span className={`op-nutri-row-fill is-${row.tone}`} style={{ width: `${row.pct}%` }} />
+                      {row.marker !== null && (
+                        <span className="op-nutri-row-marker" style={{ left: `${row.marker}%` }} />
+                      )}
+                    </div>
+                    <span className={`op-nutri-row-value is-${row.tone}`}>{row.value !== null ? (row.key === 'deficit' || row.key === 'avg' ? fmtSigned(row.value) : fmtInt(row.value)) : '—'}</span>
+                    <span className="op-nutri-row-sub">{row.sub}</span>
+                  </li>
+                ))}
+              </ol>
+            );
+          })()}
+        </div>
       )}
     </article>
   );

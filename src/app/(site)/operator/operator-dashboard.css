@@ -3664,29 +3664,15 @@
 
 .fitness-reference-shell .fit-top-nutrition-card {
   position: relative;
-  overflow: hidden;
-  padding: 18px 18px 16px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 246, 241, 0.92) 100%),
-    radial-gradient(circle at 12% 12%, rgba(28, 122, 103, 0.05), transparent 32%),
-    radial-gradient(circle at 86% 10%, rgba(196, 135, 47, 0.08), transparent 34%);
-  border-color: rgba(26, 24, 21, 0.1);
-  gap: 14px;
+  padding: clamp(28px, 4vw, 44px) clamp(28px, 5vw, 56px);
+  background: rgba(252, 250, 246, 0.6);
+  border: 0.5px solid rgba(26, 24, 21, 0.08);
+  gap: 0;
   min-height: 0;
 }
 
-.fitness-reference-shell .fit-top-nutrition-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.02) 100%);
-  pointer-events: none;
-}
-
 .fitness-reference-shell .op-nutri-head,
-.fitness-reference-shell .op-nutri-layout,
+.fitness-reference-shell .op-nutri-editorial,
 .fitness-reference-shell .op-nutri-empty {
   position: relative;
   z-index: 1;
@@ -3694,50 +3680,63 @@
 
 .fitness-reference-shell .op-nutri-head {
   align-items: center;
+  padding-bottom: 22px;
+  border-bottom: 0.5px solid rgba(26, 24, 21, 0.08);
 }
 
 .fitness-reference-shell .op-nutri-target {
   display: inline-flex;
   align-items: center;
-  padding: 5px 10px;
-  border: 0.5px solid rgba(125, 76, 13, 0.16);
-  background: rgba(250, 238, 218, 0.82);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--brass-deep);
+  color: var(--ink-mute);
   white-space: nowrap;
 }
 
-.fitness-reference-shell .op-nutri-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 12px;
-  align-items: stretch;
-}
-
-.fitness-reference-shell .op-nutri-hero {
+.fitness-reference-shell .op-nutri-editorial {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px;
-  border: 0.5px solid rgba(26, 24, 21, 0.08);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.58) 100%),
-    radial-gradient(circle at 18% 10%, rgba(28, 122, 103, 0.08), transparent 30%);
+  gap: 28px;
+  padding-top: 28px;
 }
 
-.fitness-reference-shell .op-nutri-hero-top {
+.fitness-reference-shell .op-nutri-figure {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: clamp(20px, 4vw, 48px);
+  align-items: baseline;
+}
+
+.fitness-reference-shell .op-nutri-figure-num {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  font-family: var(--font-display);
+  font-size: clamp(60px, 8vw, 96px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.fitness-reference-shell .op-nutri-figure-num.is-good { color: var(--good); }
+.fitness-reference-shell .op-nutri-figure-num.is-neutral { color: var(--brass-deep); }
+.fitness-reference-shell .op-nutri-figure-num.is-warn { color: var(--warn); }
+
+.fitness-reference-shell .op-nutri-figure-meta {
+  grid-column: 2;
+  grid-row: 1;
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
+  align-items: baseline;
+  gap: 14px;
   flex-wrap: wrap;
+  padding-bottom: 6px;
+  border-bottom: 0.5px solid rgba(26, 24, 21, 0.1);
 }
 
-.fitness-reference-shell .op-nutri-hero-label,
-.fitness-reference-shell .op-nutri-progress-head span {
+.fitness-reference-shell .op-nutri-figure-label {
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: 0.22em;
@@ -3745,141 +3744,133 @@
   color: var(--ink-mute);
 }
 
-.fitness-reference-shell .op-nutri-hero-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 8px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.fitness-reference-shell .op-nutri-hero-pill.is-good {
-  color: var(--good);
-  background: rgba(28, 122, 103, 0.1);
-}
-
-.fitness-reference-shell .op-nutri-hero-pill.is-neutral {
-  color: var(--brass-deep);
-  background: rgba(196, 135, 47, 0.12);
-}
-
-.fitness-reference-shell .op-nutri-hero-pill.is-warn {
-  color: var(--warn);
-  background: rgba(161, 74, 87, 0.11);
-}
-
-.fitness-reference-shell .op-nutri-hero-num {
+.fitness-reference-shell .op-nutri-figure-status {
   font-family: var(--font-display);
-  font-size: clamp(42px, 5vw, 64px);
-  line-height: 0.9;
-  letter-spacing: -0.045em;
+  font-style: italic;
+  font-size: 15px;
   color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+.fitness-reference-shell .op-nutri-figure-status.is-good { color: var(--good); }
+.fitness-reference-shell .op-nutri-figure-status.is-neutral { color: var(--brass-deep); }
+.fitness-reference-shell .op-nutri-figure-status.is-warn { color: var(--warn); }
+
+.fitness-reference-shell .op-nutri-figure-sub {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
 }
 
-.fitness-reference-shell .op-nutri-hero-num.good { color: var(--good); }
-.fitness-reference-shell .op-nutri-hero-num.neutral { color: var(--brass-deep); }
-.fitness-reference-shell .op-nutri-hero-num.warn { color: var(--warn); }
-
-.fitness-reference-shell .op-nutri-lbl {
-  font-size: 9.5px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  font-weight: 500;
-}
-
-.fitness-reference-shell .op-nutri-num {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 24px;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-}
-
-.fitness-reference-shell .op-nutri-num.good { color: var(--good); }
-.fitness-reference-shell .op-nutri-num.warn { color: var(--warn); }
-.fitness-reference-shell .op-nutri-num.neutral { color: var(--ink); }
-
-.fitness-reference-shell .op-nutri-sub {
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  font-variant-numeric: tabular-nums;
-}
-
-.fitness-reference-shell .op-nutri-progress {
+.fitness-reference-shell .op-nutri-ledger {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: auto;
 }
 
-.fitness-reference-shell .op-nutri-progress-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: baseline;
+.fitness-reference-shell .op-nutri-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 22px;
+  row-gap: 4px;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 0.5px solid rgba(26, 24, 21, 0.08);
 }
 
-.fitness-reference-shell .op-nutri-progress-head strong {
-  font-family: var(--font-display);
-  font-size: 18px;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--ink);
+.fitness-reference-shell .op-nutri-row:last-child {
+  border-bottom: 0.5px solid rgba(26, 24, 21, 0.08);
 }
 
-.fitness-reference-shell .op-nutri-progress-bar {
-  height: 7px;
-  background: rgba(26, 24, 21, 0.08);
+.fitness-reference-shell .op-nutri-row-label {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  align-self: center;
+}
+
+.fitness-reference-shell .op-nutri-row-bar {
+  grid-column: 2;
+  grid-row: 1;
   position: relative;
+  height: 4px;
+  background: rgba(26, 24, 21, 0.07);
   overflow: hidden;
 }
 
-.fitness-reference-shell .op-nutri-progress-bar > span {
+.fitness-reference-shell .op-nutri-row-fill {
   position: absolute;
   inset: 0 auto 0 0;
   display: block;
-  background: linear-gradient(90deg, var(--good) 0%, #4da18a 100%);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fitness-reference-shell .op-nutri-progress-bar > span.is-neutral {
-  background: linear-gradient(90deg, var(--brass-deep) 0%, var(--brass) 100%);
+.fitness-reference-shell .op-nutri-row-fill.is-eaten { background: rgba(26, 24, 21, 0.5); }
+.fitness-reference-shell .op-nutri-row-fill.is-burned { background: var(--brass); }
+.fitness-reference-shell .op-nutri-row-fill.is-good { background: var(--good); }
+.fitness-reference-shell .op-nutri-row-fill.is-neutral { background: var(--brass-deep); }
+.fitness-reference-shell .op-nutri-row-fill.is-warn { background: var(--warn); }
+
+.fitness-reference-shell .op-nutri-row-marker {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: rgba(26, 24, 21, 0.55);
 }
 
-.fitness-reference-shell .op-nutri-progress-bar > span.is-warn {
-  background: linear-gradient(90deg, #bf6170 0%, var(--warn) 100%);
+.fitness-reference-shell .op-nutri-row-marker::after {
+  content: 'TARGET';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 7.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  white-space: nowrap;
 }
 
-.fitness-reference-shell .op-nutri-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+.fitness-reference-shell .op-nutri-row-value {
+  grid-column: 3;
+  grid-row: 1;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
-.fitness-reference-shell .op-nutri-metric-card {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-height: 104px;
-  padding: 14px 16px;
-  border: 0.5px solid rgba(26, 24, 21, 0.08);
-  background: rgba(255, 255, 255, 0.66);
-}
+.fitness-reference-shell .op-nutri-row-value.is-good { color: var(--good); }
+.fitness-reference-shell .op-nutri-row-value.is-neutral { color: var(--brass-deep); }
+.fitness-reference-shell .op-nutri-row-value.is-warn { color: var(--warn); }
 
-.fitness-reference-shell .op-nutri-metric-card-wide {
-  grid-column: 1 / -1;
-  min-height: 96px;
+.fitness-reference-shell .op-nutri-row-sub {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
 }
 
 .fitness-reference-shell .op-nutri-empty {
   padding: 20px 22px;
-  background: rgba(255, 255, 255, 0.64);
-  border: 0.5px solid rgba(26, 24, 21, 0.08);
+  border-top: 0.5px solid rgba(26, 24, 21, 0.08);
 }
 
 .fitness-reference-shell .op-nutri-empty p {
@@ -3889,34 +3880,63 @@
   line-height: 1.7;
 }
 
-.fitness-reference-shell .op-nutri-empty em {
-  color: var(--ink);
-  font-style: normal;
-  font-weight: 500;
-}
-
-@media (max-width: 980px) {
-  .fitness-reference-shell .op-nutri-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 720px) {
   .fitness-reference-shell .op-nutri-head {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 
-  .fitness-reference-shell .op-nutri-metrics {
+  .fitness-reference-shell .op-nutri-figure {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 0;
+    row-gap: 12px;
   }
 
-  .fitness-reference-shell .op-nutri-metric-card-wide {
-    grid-column: auto;
+  .fitness-reference-shell .op-nutri-figure-num {
+    grid-column: 1;
+    grid-row: 2;
   }
 
-  .fitness-reference-shell .op-nutri-hero,
-  .fitness-reference-shell .op-nutri-metric-card {
-    padding: 16px;
+  .fitness-reference-shell .op-nutri-figure-meta {
+    grid-column: 1;
+    grid-row: 1;
+    border-bottom: 0.5px solid rgba(26, 24, 21, 0.1);
+    padding-bottom: 10px;
+  }
+
+  .fitness-reference-shell .op-nutri-figure-sub {
+    grid-column: 1;
+    grid-row: 3;
+    margin-top: 0;
+  }
+
+  .fitness-reference-shell .op-nutri-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    row-gap: 8px;
+  }
+
+  .fitness-reference-shell .op-nutri-row-label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .fitness-reference-shell .op-nutri-row-value {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 22px;
+  }
+
+  .fitness-reference-shell .op-nutri-row-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .fitness-reference-shell .op-nutri-row-sub {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 }
 
