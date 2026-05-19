@@ -353,6 +353,87 @@ function EditorialDivider({ eyebrow, note, style }: { eyebrow: string; note?: st
   );
 }
 
+function CollapsibleSection({ eyebrow, note, children, defaultOpen = false, dividerStyle }: {
+  eyebrow: string;
+  note?: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+  dividerStyle?: CSSProperties;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const contentId = `op-collapsible-${eyebrow.toLowerCase().replace(/\s+/g, '-')}`;
+
+  return (
+    <>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'auto 1fr auto auto',
+        alignItems: 'center',
+        gap: 18,
+        margin: '40px 0 22px',
+        ...dividerStyle,
+      }}>
+        <span style={{
+          fontFamily: T.sans,
+          fontSize: 9.5,
+          letterSpacing: '0.32em',
+          textTransform: 'uppercase',
+          fontWeight: 600,
+          color: T.ink,
+        }}>{eyebrow}</span>
+        <span style={{ height: 0.5, background: T.line, display: 'block' }} />
+        {note ? (
+          <span style={{
+            fontFamily: T.display,
+            fontStyle: 'italic',
+            fontSize: 13,
+            color: T.muted,
+          }}>{note}</span>
+        ) : <span />}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls={contentId}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'transparent',
+            border: 'none',
+            padding: '4px 0 4px 14px',
+            fontFamily: T.sans,
+            fontSize: 9.5,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            fontWeight: 600,
+            color: T.muted,
+            cursor: 'pointer',
+            lineHeight: 1,
+          }}
+        >
+          <span>{open ? 'Hide' : 'Show'}</span>
+          <span
+            aria-hidden
+            style={{
+              fontSize: 11,
+              lineHeight: 1,
+              transform: open ? 'rotate(180deg)' : 'none',
+              transition: 'transform 180ms ease',
+              display: 'inline-block',
+            }}
+          >
+            ▾
+          </span>
+        </button>
+      </div>
+      <div id={contentId} hidden={!open}>
+        {children}
+      </div>
+    </>
+  );
+}
+
 // Auto-generated italic intention line — reads current state aloud.
 function intentionLine(state: State, latest: FitnessReading, goal: number): string {
   const delta = latest.weight - goal;
@@ -5829,12 +5910,11 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
+        <CollapsibleSection eyebrow="Story" note="Phase context, milestones, and visual evidence.">
         <Reveal>
         <section className="fit-anchor-section" id="operator-story">
           <div className="fit-story-shell">
             {/* ───────────────────────── STORY ─────────────────────────── */}
-            <EditorialDivider eyebrow="Story" note="Phase context, milestones, and visual evidence." />
-
             <section className="fit-grid">
               <div className="fit-main">
                 <div className="fit-panel">
@@ -5901,11 +5981,12 @@ export default function OperatorDashboardClient() {
         <Reveal delay={0.05}>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
         </Reveal>
+        </CollapsibleSection>
 
+        <CollapsibleSection eyebrow="Trends" note="What the lines are doing — and why.">
         <Reveal>
         <section className="fit-anchor-section" id="operator-health-stream">
           {/* ───────────────────────── TRENDS ────────────────────────── */}
-          <EditorialDivider eyebrow="Trends" note="What the lines are doing — and why." />
           <AnalyticsSection
             latest={latest}
             sorted={dashboardSource}
@@ -5922,7 +6003,9 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
         </Reveal>
+        </CollapsibleSection>
 
+        <CollapsibleSection eyebrow="Action" note="Today's next move.">
         <Reveal>
         <section className="fit-anchor-section" id="operator-action">
           {/* Action block — promise + readiness folded into trends scroll. */}
@@ -5931,6 +6014,7 @@ export default function OperatorDashboardClient() {
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>
         </Reveal>
+        </CollapsibleSection>
 
       </main>
 
