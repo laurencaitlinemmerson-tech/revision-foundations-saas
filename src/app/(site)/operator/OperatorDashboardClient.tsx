@@ -4477,19 +4477,6 @@ function buildWeightSeries(sorted: FitnessReading[]) {
   return sorted.map((row) => ({ date: row.date, value: row.weight }));
 }
 
-function buildRollingAverage(sorted: FitnessReading[], windowDays = 45, minDisplayValue = 60) {
-  const cleaned = sorted.filter((row) => Number.isFinite(row.weight) && row.weight >= minDisplayValue)
-  return cleaned.map((row) => {
-    const target = new Date(row.date).getTime();
-    const sample = cleaned.filter((item) => {
-      const time = new Date(item.date).getTime();
-      return time >= target - windowDays * REFERENCE_DAY && time <= target;
-    });
-    const average = sample.reduce((sum, item) => sum + item.weight, 0) / Math.max(1, sample.length);
-    return { date: row.date, value: Math.round(average * 10) / 10 };
-  });
-}
-
 // Derive phases from the actual weight line, not from index buckets.
 //
 // 1. Bin readings into 28-day windows and average the weight in each.
@@ -5440,7 +5427,6 @@ export default function OperatorDashboardClient() {
   const phaseRows = useMemo(() => buildReferencePhaseRows(derivedSource), [derivedSource]);
   const photoMilestones = useMemo(() => buildPhotoMilestones(derivedSource), [derivedSource]);
   const heroMetrics = useMemo(() => buildHeroMetrics(derivedSource), [derivedSource]);
-  const rollingAverage = useMemo(() => buildRollingAverage(derivedSource), [derivedSource]);
   const sideMetrics = useMemo(() => buildSideMetrics(derivedSource, goal, reg), [derivedSource, goal, reg]);
   const weekRows = useMemo(() => buildWeekRows(derivedSource, todayIso), [derivedSource, todayIso]);
   const chartBounds = useMemo(() => {
@@ -5711,7 +5697,7 @@ export default function OperatorDashboardClient() {
           <section className="fit-editorial-chart" style={{ marginBottom: 28 }}>
             <FitnessLineChart
               title={<>Weight <em>trajectory</em></>}
-              subtitle="Daily measurements, the live 45-day trend, and phase context across the selected window."
+              subtitle="Every daily reading, connected in order, with phase context across the selected window."
               points={buildWeightSeries(dashboardSource)}
               color="oklch(0.70 0.12 76)"
               minY={chartBounds.min}
@@ -5729,9 +5715,6 @@ export default function OperatorDashboardClient() {
                 },
                 { date: latest.date, value: latest.weight, title: weightLabel },
               ]}
-              secondaryPoints={rollingAverage}
-              secondaryColor="oklch(0.70 0.12 76)"
-              secondaryLabel="45-day trend"
               phases={phaseMarkers}
               targetWeight={goal}
               showRangeToggle

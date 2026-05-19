@@ -30,9 +30,6 @@ interface ChartProps {
   annotations?: AnnotationPoint[]
   overlays?: ReactNode
   phases?: PhaseBand[]
-  secondaryPoints?: SeriesPoint[]
-  secondaryColor?: string
-  secondaryLabel?: string
   showRangeToggle?: boolean
   targetWeight?: number
   /** Hide any reading whose value falls below this floor (default 60). */
@@ -151,9 +148,6 @@ export default function FitnessLineChart({
   annotations = [],
   overlays,
   phases = [],
-  secondaryPoints,
-  secondaryColor = '#44D9A8',
-  secondaryLabel = 'monthly avg',
   showRangeToggle = false,
   targetWeight,
   minDisplayValue = 60,
@@ -172,10 +166,6 @@ export default function FitnessLineChart({
     () => points.filter((p) => Number.isFinite(p.value) && p.value >= minDisplayValue),
     [points, minDisplayValue],
   )
-  const cleanedSecondary = useMemo(
-    () => secondaryPoints?.filter((p) => Number.isFinite(p.value) && p.value >= minDisplayValue),
-    [secondaryPoints, minDisplayValue],
-  )
 
   const filteredPoints = useMemo(() => {
     if (range === 'all' || !cleanedPoints.length) return cleanedPoints
@@ -186,13 +176,6 @@ export default function FitnessLineChart({
     else cutoff.setDate(cutoff.getDate() - (range === '30d' ? 30 : 7))
     return cleanedPoints.filter((point) => new Date(point.date).getTime() >= cutoff.getTime())
   }, [cleanedPoints, range])
-
-  const filteredSecondary = useMemo(() => {
-    if (!cleanedSecondary?.length) return cleanedSecondary
-    if (range === 'all' || !filteredPoints.length) return cleanedSecondary
-    const start = new Date(filteredPoints[0].date).getTime()
-    return cleanedSecondary.filter((point) => new Date(point.date).getTime() >= start)
-  }, [filteredPoints, range, cleanedSecondary])
 
   const xMin = new Date(filteredPoints[0]?.date ?? Date.now()).getTime()
   const xMax = new Date(filteredPoints[filteredPoints.length - 1]?.date ?? Date.now()).getTime()
@@ -207,19 +190,24 @@ export default function FitnessLineChart({
 
   const y = (value: number) => pad.t + (1 - (value - low) / Math.max(1, high - low)) * innerH
 
-  // The smoothed/rolling-average series is the trustworthy line. The raw
-  // daily readings sit behind as small dots so the eye can see the spread
-  // without overshooting into impossible lows or bridging long data gaps.
-  // Bridge across long data gaps so the rolling-average line reads as one
-  // continuous trajectory. A 400-day window covers natural breaks (a
-  // forgotten scale, a moving month) while still splitting if the log
-  // genuinely stops for more than a year.
-  const secondaryPath = filteredSecondary && filteredSecondary.length >= 2
-    ? splitByDateGap(filteredSecondary, 400)
-      .filter((segment) => segment.length >= 2)
-      .map((segment) => monotonePath(segment.map((point) => ({ x: x(point.date), y: y(point.value) }))))
-      .join(' ')
-    : null
+  // Trajectory is a monotone cubic spline through every reading so it
+  // lands on each dot. Gaps longer than 30 days get a dashed bridge
+  // instead of a smooth curve — the eye can still follow the arc, but
+  // the dashes make it clear we're spanning missing data.
+  const primarySegments = useMemo(
+    () => splitByDateGap(filteredPoints, 30).filter((segment) => segment.length >= 2),
+    [filteredPoints],
+  )
+  const primaryPath = primarySegments
+    .map((segment) => monotonePath(segment.map((point) => ({ x: x(point.date), y: y(point.value) }))))
+    .join(' ') || null
+  const gapBridges: string[] = []
+  for (let i = 0; i < primarySegments.length - 1; i += 1) {
+    const last = primarySegments[i][primarySegments[i].length - 1]
+    const next = primarySegments[i + 1][0]
+    gapBridges.push(`M ${x(last.date).toFixed(2)} ${y(last.value).toFixed(2)} L ${x(next.date).toFixed(2)} ${y(next.value).toFixed(2)}`)
+  }
+  const gapBridgePath = gapBridges.length > 0 ? gapBridges.join(' ') : null
   const yTicks = 4
   // Evenly-spaced date ticks, scaled to the time window so labels don't
   // bunch up at narrower ranges.
@@ -455,10 +443,8 @@ export default function FitnessLineChart({
               </text>
             </g>
           )}
-          {/* Raw readings now render as scatter dots only (further down) —
-              dropping the smoothed Bezier path keeps daily noise from
-              creating fake undulations through the 45-day trend. */}
-          {secondaryPath && <path d={secondaryPath} className="bc-line-avg" style={{ stroke: secondaryColor }} />}
+          {gapBridgePath && <path d={gapBridgePath} className="bc-line-gap" style={{ stroke: color }} />}
+          {primaryPath && <path d={primaryPath} className="bc-line-avg" style={{ stroke: color }} />}
 
           {latestPoint && (
             <g>
@@ -522,15 +508,21 @@ export default function FitnessLineChart({
             </g>
           )}
 
-          {/* Faint data dots so the user sees the underlying readings. */}
+          {/* Each reading anchored as a white dot ringed in the line colour
+              so the underlying data points stay visible on top of the line. */}
           {filteredPoints.map((point, index) => (
             <circle
               key={`dot-${point.date}-${index}`}
               cx={x(point.date)}
               cy={y(point.value)}
-              r={hoverIndex === index ? 4.2 : 2.35}
+              r={hoverIndex === index ? 4.4 : 2.8}
               className="bc-data-dot"
-              style={{ fill: hoverIndex === index ? color : 'oklch(0.34 0.03 248)', opacity: hoverIndex === index ? 0.92 : 0.18 }}
+              style={{
+                fill: hoverIndex === index ? color : '#FAFAF8',
+                stroke: color,
+                strokeWidth: hoverIndex === index ? 1.5 : 1,
+                opacity: hoverIndex === index ? 1 : 0.95,
+              }}
               pointerEvents="none"
             />
           ))}
@@ -594,7 +586,7 @@ export default function FitnessLineChart({
       </div>
       <div className="bc-key">
         <span className="item"><i className="sw raw" />Daily readings</span>
-        {secondaryPath && <span className="item"><i className="sw avg" style={{ background: secondaryColor }} />{secondaryLabel}</span>}
+        {gapBridgePath && <span className="item"><i className="sw gap" />Missing days</span>}
         {targetWeight !== undefined && <span className="item"><i className="sw target" />Target line</span>}
         <span className="item"><i className="sw phase" />Phase background</span>
       </div>
