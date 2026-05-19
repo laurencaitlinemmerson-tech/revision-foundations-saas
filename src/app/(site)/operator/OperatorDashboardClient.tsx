@@ -5888,12 +5888,12 @@ export default function OperatorDashboardClient() {
     const observedMax = Math.max(...weights);
     const observedSpan = Math.max(2.5, observedMax - observedMin);
     const lowerPad = Math.max(0.9, observedSpan * 0.22);
-    const upperPad = Math.max(1.2, observedSpan * 0.3);
+    const upperPad = Math.min(1.4, Math.max(0.8, observedSpan * 0.12));
     const goalIsCloseEnoughToPlot = goal >= observedMin - Math.max(3.5, observedSpan * 0.38);
     const min = goalIsCloseEnoughToPlot
       ? Math.floor(Math.min(observedMin - lowerPad, goal - 1) * 2) / 2
       : Math.floor((observedMin - lowerPad) * 2) / 2;
-    const max = Math.ceil((observedMax + upperPad) * 2) / 2;
+    const max = Math.ceil(observedMax + upperPad);
     return { min, max };
   }, [dashboardSource, derivedSource, goal]);
 

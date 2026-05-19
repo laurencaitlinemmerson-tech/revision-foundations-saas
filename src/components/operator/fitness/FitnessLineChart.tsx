@@ -543,7 +543,7 @@ export default function FitnessLineChart({
             </g>
           )}
           {gapBridgePath && <path d={gapBridgePath} className="bc-line-gap" style={{ stroke: color }} />}
-          {primaryPath && <path d={primaryPath} className="bc-line-avg" style={{ stroke: color }} />}
+          {primaryPath && <path d={primaryPath} className="bc-line-raw" style={{ stroke: color }} />}
 
           {latestPoint && (
             <g>

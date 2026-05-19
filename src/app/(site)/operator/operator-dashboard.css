@@ -2331,14 +2331,14 @@
   to   { stroke-dashoffset: 0; }
 }
 
-.fitness-chart .bc-line-avg {
+.fitness-chart .bc-line-raw {
   stroke-dasharray: 4000;
   stroke-dashoffset: 4000;
   animation: bcLineDraw 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fitness-chart .bc-line-avg {
+  .fitness-chart .bc-line-raw {
     stroke-dasharray: none;
     stroke-dashoffset: 0;
     animation: none;
@@ -2521,7 +2521,7 @@
   fill: rgba(44, 52, 68, 0.82);
 }
 
-.bc-line-avg {
+.bc-line-raw {
   fill: none;
   stroke: var(--accent);
   stroke-width: 1;
@@ -2683,7 +2683,6 @@
   display: inline-block;
 }
 
-.bc-key .sw.avg,
 .bc-key .sw.raw {
   height: 2px;
   align-self: center;
@@ -2697,7 +2696,7 @@
 }
 
 .bc-key .sw.raw {
-  background: rgba(44, 52, 68, 0.38);
+  background: oklch(0.7 0.12 76);
 }
 
 .bc-key .sw.phase {
