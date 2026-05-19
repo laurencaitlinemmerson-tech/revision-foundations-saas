@@ -644,10 +644,10 @@ export default function FitnessLineChart({
             fill="transparent"
             onMouseMove={(event) => {
               if (filteredPoints.length === 0) return
-              const svg = event.currentTarget.ownerSVGElement
-              if (!svg) return
-              const rect = svg.getBoundingClientRect()
-              const localX = ((event.clientX - rect.left) / rect.width) * w
+              const overlayRect = event.currentTarget.getBoundingClientRect()
+              if (overlayRect.width === 0) return
+              const fraction = (event.clientX - overlayRect.left) / overlayRect.width
+              const localX = pad.l + fraction * innerW
               let bestIndex = 0
               let bestDist = Infinity
               for (let i = 0; i < filteredPoints.length; i += 1) {
@@ -666,10 +666,10 @@ export default function FitnessLineChart({
               if (filteredPoints.length === 0) return
               const touch = event.touches[0]
               if (!touch) return
-              const svg = event.currentTarget.ownerSVGElement
-              if (!svg) return
-              const rect = svg.getBoundingClientRect()
-              const localX = ((touch.clientX - rect.left) / rect.width) * w
+              const overlayRect = event.currentTarget.getBoundingClientRect()
+              if (overlayRect.width === 0) return
+              const fraction = (touch.clientX - overlayRect.left) / overlayRect.width
+              const localX = pad.l + fraction * innerW
               let bestIndex = 0
               let bestDist = Infinity
               for (let i = 0; i < filteredPoints.length; i += 1) {

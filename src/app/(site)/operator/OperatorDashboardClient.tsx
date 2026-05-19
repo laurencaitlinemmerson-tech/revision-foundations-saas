@@ -5781,6 +5781,23 @@ export default function OperatorDashboardClient() {
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
   const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('3y');
   const [activeTrajectoryIso, setActiveTrajectoryIso] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  // Resolve initial theme on the client only — localStorage takes precedence,
+  // otherwise honour the OS preference. Stays out of SSR to avoid hydration mismatch.
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('operator-theme') : null;
+    if (stored === 'light' || stored === 'dark') { setTheme(stored); return; }
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  }, []);
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      if (typeof window !== 'undefined') window.localStorage.setItem('operator-theme', next);
+      return next;
+    });
+  }, []);
 
   const saveLocal = useCallback((rs:FitnessReading[]) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(rs)); }, []);
 
@@ -5905,7 +5922,7 @@ export default function OperatorDashboardClient() {
       : 'If you weighed in this morning on 18 May 2026 and it is not showing here yet, the reading has not been synced into the fitness ledger.';
 
     return (
-      <div className="fitness-reference-shell">
+      <div className="fitness-reference-shell" data-theme={theme}>
         <main className="wrap fitness-redesign" id="operator-overview">
           <section style={{
             minHeight: '100vh',
@@ -6118,7 +6135,16 @@ export default function OperatorDashboardClient() {
     sevenDayDelta,
   };
   return (
-    <div className="fitness-reference-shell">
+    <div className="fitness-reference-shell" data-theme={theme}>
+      <button
+        type="button"
+        className="op-theme-toggle"
+        onClick={toggleTheme}
+        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      >
+        <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
+      </button>
       <main className="wrap fitness-redesign" id="operator-overview">
         <Reveal>
         <section className="fit-anchor-section" id="operator-today">
@@ -6207,7 +6233,7 @@ export default function OperatorDashboardClient() {
               title={<>Weight <em>trajectory</em></>}
               subtitle="Every daily reading, connected in order, with phase context across the selected window."
               points={buildWeightSeries(dashboardSource)}
-              color="#b76e79"
+              color={theme === 'dark' ? '#d48a95' : '#b76e79'}
               minY={chartBounds.min}
               maxY={chartBounds.max}
               annotations={[

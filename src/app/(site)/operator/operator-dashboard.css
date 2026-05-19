@@ -13,17 +13,83 @@
   --brass: #c4872f;
   --brass-deep: #7d4c0d;
   --brass-haze: rgba(196, 135, 47, 0.08);
+  --accent: #b76e79;
+  --accent-soft: rgba(183, 110, 121, 0.32);
+  --accent-haze: rgba(183, 110, 121, 0.14);
+  --cell-good: rgba(28, 122, 103, 0.78);
+  --cell-brass: rgba(196, 135, 47, 0.62);
+  --cell-warn: rgba(161, 74, 87, 0.62);
+  --shell-tint-a: rgba(124, 198, 255, 0.12);
+  --shell-tint-b: rgba(255, 154, 122, 0.10);
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 8%, rgba(124, 198, 255, 0.12), transparent 34%),
-    radial-gradient(circle at 88% 0%, rgba(255, 154, 122, 0.10), transparent 36%),
+    radial-gradient(circle at 12% 8%, var(--shell-tint-a), transparent 34%),
+    radial-gradient(circle at 88% 0%, var(--shell-tint-b), transparent 36%),
     var(--paper);
+  transition: background-color 240ms ease;
+}
+
+.fitness-reference-shell[data-theme="dark"] {
+  --paper: #1c1916;
+  --paper-deep: #14110f;
+  --bone: #221e1a;
+  --ink: #ebe5dc;
+  --ink-soft: #b7afa3;
+  --ink-mute: #7d756a;
+  --ink-dim: rgba(235, 229, 220, 0.40);
+  --rule: rgba(235, 229, 220, 0.14);
+  --rule-soft: rgba(235, 229, 220, 0.08);
+  --good: #4cc1a7;
+  --warn: #d68a96;
+  --brass: #e4a85d;
+  --brass-deep: #c4872f;
+  --brass-haze: rgba(228, 168, 93, 0.10);
+  --accent: #d48a95;
+  --accent-soft: rgba(212, 138, 149, 0.32);
+  --accent-haze: rgba(212, 138, 149, 0.14);
+  --cell-good: rgba(76, 193, 167, 0.62);
+  --cell-brass: rgba(228, 168, 93, 0.52);
+  --cell-warn: rgba(214, 138, 150, 0.55);
+  --shell-tint-a: rgba(76, 138, 200, 0.06);
+  --shell-tint-b: rgba(228, 168, 93, 0.06);
 }
 
 .fitness-reference-shell .wrap {
   max-width: 1540px;
   margin: 0 auto;
   padding: 56px 24px 104px;
+}
+
+.op-theme-toggle {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 60;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  color: var(--ink);
+  border: 0.5px solid var(--rule);
+  cursor: pointer;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  border-radius: 0;
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.op-theme-toggle:hover {
+  background: var(--paper-deep);
+  border-color: var(--ink-soft);
+}
+
+.op-theme-toggle:focus-visible {
+  outline: 0.5px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .fitness-reference-shell button,
@@ -1581,23 +1647,23 @@
 }
 
 .fit-consistency-cell.is-weigh.is-logged {
-  background: #b76e79;
+  background: var(--accent);
   border-color: transparent;
 }
 
 .fit-consistency-cell.is-intake.is-good,
 .fit-consistency-cell.is-steps.is-good {
-  background: rgba(28, 122, 103, 0.78);
+  background: var(--cell-good);
 }
 
 .fit-consistency-cell.is-intake.is-neutral,
 .fit-consistency-cell.is-steps.is-neutral {
-  background: rgba(196, 135, 47, 0.62);
+  background: var(--cell-brass);
 }
 
 .fit-consistency-cell.is-intake.is-warn,
 .fit-consistency-cell.is-steps.is-warn {
-  background: rgba(161, 74, 87, 0.62);
+  background: var(--cell-warn);
 }
 
 .fit-consistency-legend {
@@ -1625,19 +1691,19 @@
 }
 
 .fit-consistency-dot.is-logged {
-  background: #b76e79;
+  background: var(--accent);
 }
 
 .fit-consistency-dot.is-good {
-  background: rgba(28, 122, 103, 0.78);
+  background: var(--cell-good);
 }
 
 .fit-consistency-dot.is-neutral {
-  background: rgba(196, 135, 47, 0.62);
+  background: var(--cell-brass);
 }
 
 .fit-consistency-dot.is-warn {
-  background: rgba(161, 74, 87, 0.62);
+  background: var(--cell-warn);
 }
 
 @media (max-width: 860px) {
@@ -2457,7 +2523,7 @@
 
 .bc-line-avg {
   fill: none;
-  stroke: #b76e79;
+  stroke: var(--accent);
   stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -2465,7 +2531,7 @@
 
 .bc-line-gap {
   fill: none;
-  stroke: #b76e79;
+  stroke: var(--accent);
   stroke-width: 0.8;
   stroke-linecap: round;
   stroke-dasharray: 3 7;
@@ -2481,7 +2547,7 @@
 
 .bc-checkpoint-path {
   fill: none;
-  stroke: #b76e79;
+  stroke: var(--accent);
   stroke-width: 1.2;
   stroke-linecap: round;
   stroke-dasharray: 7 6;
@@ -2489,13 +2555,13 @@
 }
 
 .bc-checkpoint-connector {
-  stroke: rgba(183, 110, 121, 0.32);
+  stroke: var(--accent-soft);
   stroke-width: 0.8;
 }
 
 .bc-checkpoint-dot {
   fill: var(--paper);
-  stroke: #b76e79;
+  stroke: var(--accent);
   stroke-width: 1.4;
 }
 
@@ -2529,16 +2595,16 @@
 }
 
 .bc-pin-connector {
-  stroke: rgba(183, 110, 121, 0.32);
+  stroke: var(--accent-soft);
   stroke-width: 0.8;
 }
 
 .bc-latest-halo {
-  fill: rgba(183, 110, 121, 0.14);
+  fill: var(--accent-haze);
 }
 
 .bc-latest-dot {
-  fill: #b76e79;
+  fill: var(--accent);
   stroke: var(--paper);
   stroke-width: 1.6;
 }
@@ -2552,7 +2618,7 @@
 }
 
 .bc-pin-dot {
-  fill: #b76e79;
+  fill: var(--accent);
   stroke: var(--paper);
   stroke-width: 1.5;
 }
