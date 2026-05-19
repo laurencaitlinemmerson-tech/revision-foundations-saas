@@ -73,7 +73,10 @@ function findPointAtOrBefore(points: SeriesPoint[], cutoffTime: number) {
 
 function formatSignedKg(value: number | null) {
   if (value === null || !Number.isFinite(value)) return null
-  return `${value > 0 ? '+' : ''}${value.toFixed(1)}kg`
+  const abs = Math.abs(value).toFixed(1)
+  if (value > 0) return `+${abs} kg`
+  if (value < 0) return `−${abs} kg`
+  return `${abs} kg`
 }
 
 function shortPhaseLabel(label: string) {
@@ -268,8 +271,8 @@ export default function FitnessLineChart({
     hoverTargetGap === null
       ? null
       : hoverTargetGap <= 0
-        ? `${Math.abs(hoverTargetGap).toFixed(1)}kg under target`
-        : `${hoverTargetGap.toFixed(1)}kg above target`,
+        ? `${Math.abs(hoverTargetGap).toFixed(1)} kg under target`
+        : `${hoverTargetGap.toFixed(1)} kg above target`,
   ].filter(Boolean)
   const tipWidth = 208
   const tipHeight = 50 + tipLines.length * 14
@@ -278,13 +281,13 @@ export default function FitnessLineChart({
   const summaryStats = [
     {
       label: 'Current',
-      value: latestPoint ? `${latestPoint.value.toFixed(1)}kg` : '—',
+      value: latestPoint ? `${latestPoint.value.toFixed(1)} kg` : '—',
       note: latestPoint ? fmtHoverDate(latestPoint.date) : 'No readings',
       tone: 'primary',
     },
     {
       label: '7d average',
-      value: weekAverage === null ? '—' : `${weekAverage.toFixed(1)}kg`,
+      value: weekAverage === null ? '—' : `${weekAverage.toFixed(1)} kg`,
       note: recentWeekPoints.length > 0 ? `${recentWeekPoints.length} readings` : 'Need more recent data',
       tone: 'neutral',
     },
@@ -299,10 +302,10 @@ export default function FitnessLineChart({
       value: targetWeight !== undefined
         ? currentTargetGap === null
           ? '—'
-          : `${Math.abs(currentTargetGap).toFixed(1)}kg`
+          : `${Math.abs(currentTargetGap).toFixed(1)} kg`
         : rangeSpan === null
           ? '—'
-          : `${rangeSpan.toFixed(1)}kg`,
+          : `${rangeSpan.toFixed(1)} kg`,
       note: targetWeight !== undefined
         ? currentTargetGap === null
           ? 'No active target'
@@ -473,7 +476,7 @@ export default function FitnessLineChart({
                   textAnchor={textAnchor}
                   className="bc-pin-sub"
                 >
-                  {annotation.value.toFixed(1)}kg
+                  {annotation.value.toFixed(1)} kg
                 </text>
               </g>
             )
@@ -494,7 +497,7 @@ export default function FitnessLineChart({
               <circle cx={x(hover.date)} cy={y(hover.value)} r="5" className="bc-pin-dot" />
               <rect x={Math.min(w - (tipWidth + 10), x(hover.date) + 10)} y={pad.t + 8} width={tipWidth} height={tipHeight} rx="6" className="fitness-tip-box" />
               <text x={Math.min(w - tipWidth, x(hover.date) + 18)} y={pad.t + 28} className="fitness-tip">{fmtHoverDate(hover.date)}</text>
-              <text x={Math.min(w - tipWidth, x(hover.date) + 18)} y={pad.t + 46} className="fitness-tip fitness-tip-strong">{hover.value.toFixed(1)}kg</text>
+              <text x={Math.min(w - tipWidth, x(hover.date) + 18)} y={pad.t + 46} className="fitness-tip fitness-tip-strong">{hover.value.toFixed(1)} kg</text>
               {tipLines.map((line, index) => (
                 <text
                   key={line}

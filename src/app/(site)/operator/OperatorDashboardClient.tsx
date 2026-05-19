@@ -1752,7 +1752,7 @@ function ThisWeekGrid({ sorted, state, showHeader = true }: { sorted: FitnessRea
                   </div>
                   {d.delta !== null && (
                     <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:10, color: d.delta > 0 ? T.rose : d.delta < 0 ? T.green : T.muted }}>
-                      {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(1)}
+                      {d.delta > 0 ? '+' : d.delta < 0 ? '−' : ''}{Math.abs(d.delta).toFixed(1)}
                     </div>
                   )}
                   <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:10, color:T.muted, marginTop:6 }}>
@@ -5103,11 +5103,13 @@ function TopNutritionCaloriesCard({
   const fmtInt = (value: number | null) => (
     value === null || !Number.isFinite(value) ? '—' : Math.round(value).toLocaleString('en-GB')
   );
-  const fmtSigned = (value: number | null) => (
-    value === null || !Number.isFinite(value)
-      ? '—'
-      : `${value >= 0 ? '+' : ''}${Math.round(value).toLocaleString('en-GB')}`
-  );
+  const fmtSigned = (value: number | null) => {
+    if (value === null || !Number.isFinite(value)) return '—';
+    const abs = Math.abs(Math.round(value)).toLocaleString('en-GB');
+    if (value > 0) return `+${abs}`;
+    if (value < 0) return `−${abs}`;
+    return abs;
+  };
 
   return (
     <article className="op-health-card op-card-wide fit-top-nutrition-card">
@@ -5592,9 +5594,10 @@ export default function OperatorDashboardClient() {
       : actualDeficitToday >= 0
         ? `${(targetDeficit - actualDeficitToday).toLocaleString('en-GB')} kcal short of target`
         : `${Math.abs(actualDeficitToday).toLocaleString('en-GB')} kcal over burn`;
-  const caloriesInSub = caloriesInToday !== null
-    ? `${(caloriesInToday - nutrition.intake) >= 0 ? '+' : ''}${Math.round(caloriesInToday - nutrition.intake)} vs ${nutrition.intake.toLocaleString('en-GB')} target`
-    : 'No food log synced yet today';
+  const caloriesInDiff = caloriesInToday !== null ? Math.round(caloriesInToday - nutrition.intake) : null;
+  const caloriesInSub = caloriesInDiff === null
+    ? 'No food log synced yet today'
+    : `${caloriesInDiff > 0 ? '+' : caloriesInDiff < 0 ? '−' : ''}${Math.abs(caloriesInDiff).toLocaleString('en-GB')} vs ${nutrition.intake.toLocaleString('en-GB')} target`;
   const caloriesOutSub = todayHealth
     ? `BMR ${nutrition.bmr.toLocaleString('en-GB')} + active ${(activeKcalToday ?? 0).toLocaleString('en-GB')} kcal`
     : 'Connect Apple Health to populate';
@@ -5640,26 +5643,22 @@ export default function OperatorDashboardClient() {
             </div>
 
             <section className="fit-weight-feature">
-              <div className="fit-weight-number-card">
+              <div className="fit-weight-spotlight">
                 <div className="fit-kicker">This week&apos;s figure · {fmtDate(latest.date, { long: true })}</div>
                 <div className="fit-weight-feature-num">
                   <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
                   <span className="unit">kg</span>
                 </div>
+                <div className="fit-weight-spotlight-spark">
+                  <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
+                </div>
                 <div className="fit-weight-feature-meta">
                   <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
-                    {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)} kg · prev. reading
+                    {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)}{' '}kg · prev. reading
                   </span>
                   <span className="fit-weight-feature-note">
                     {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
                   </span>
-                </div>
-              </div>
-
-              <div className="fit-weight-spark-card">
-                <div className="fit-kicker">Last four readings</div>
-                <div className="fit-weight-feature-spark">
-                  <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
                 </div>
               </div>
             </section>
