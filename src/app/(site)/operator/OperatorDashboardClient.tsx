@@ -5019,6 +5019,41 @@ function NutritionPieCard({
 }
 
 
+function CalorieNetSparkline({ values, target }: { values: number[]; target: number }) {
+  if (values.length < 2) return null;
+  const W = 168;
+  const H = 52;
+  const padX = 6;
+  const padY = 8;
+  const innerW = W - padX * 2;
+  const innerH = H - padY * 2;
+  const allValues = [...values, target, 0];
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+  const range = Math.max(max - min, 1);
+  const xs = values.map((_, i) => padX + (i / (values.length - 1)) * innerW);
+  const ys = values.map((v) => padY + (1 - (v - min) / range) * innerH);
+  const targetY = padY + (1 - (target - min) / range) * innerH;
+  const zeroY = padY + (1 - (0 - min) / range) * innerH;
+  const path = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="op-nutri-spark-svg" aria-hidden="true">
+      <line x1={padX} y1={zeroY} x2={W - padX} y2={zeroY} className="op-nutri-spark-zero" />
+      <line x1={padX} y1={targetY} x2={W - padX} y2={targetY} className="op-nutri-spark-target" />
+      <path d={path} className="op-nutri-spark-line" />
+      {xs.map((x, i) => (
+        <circle
+          key={i}
+          cx={x}
+          cy={ys[i]}
+          r={i === values.length - 1 ? 2.8 : 1.6}
+          className={i === values.length - 1 ? 'op-nutri-spark-dot is-latest' : 'op-nutri-spark-dot'}
+        />
+      ))}
+    </svg>
+  );
+}
+
 function TopNutritionCaloriesCard({
   snap,
   healthDays,
@@ -5082,32 +5117,93 @@ function TopNutritionCaloriesCard({
         </div>
       ) : (
         <div className="op-nutri-editorial">
-          <div className="op-nutri-figure">
-            <div className="op-nutri-figure-meta">
-              <span className="op-nutri-figure-label">Today&apos;s net</span>
-              <span className={`op-nutri-figure-status is-${netTone}`}>{netHeadline}</span>
+          <div className="op-nutri-hero">
+            <div className="op-nutri-hero-text">
+              <span className="op-nutri-hero-eyebrow">Today&apos;s net</span>
+              <div className={`op-nutri-hero-num is-${netTone}`}>
+                <span className="value">{fmtSigned(netToday)}</span>
+                <span className="unit">kcal</span>
+              </div>
+              <div className={`op-nutri-hero-status is-${netTone}`}>{netHeadline}</div>
             </div>
-            <div className={`op-nutri-figure-num is-${netTone}`}>{fmtSigned(netToday)}</div>
-            <div className="op-nutri-figure-sub">kcal · {Math.round(deficitProgress)}% of {fmtSigned(targetNet)} target</div>
+            {nets7.length >= 2 && (
+              <div className="op-nutri-hero-spark">
+                <span className="op-nutri-hero-spark-label">Last 7 days · net</span>
+                <CalorieNetSparkline values={nets7} target={targetNet} />
+                <span className="op-nutri-hero-spark-foot">
+                  avg <strong>{fmtSigned(avgNet7)}</strong>
+                  {avgTargetCoverage !== null && <em> · {avgTargetCoverage}% of target</em>}
+                </span>
+              </div>
+            )}
           </div>
 
-          <dl className="op-nutri-stats">
-            <div className="op-nutri-stat">
-              <dt>Eaten</dt>
-              <dd>{fmtInt(caloriesIn)}</dd>
-              <small>{caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget.toLocaleString('en-GB')} target` : `Target ${calorieTarget.toLocaleString('en-GB')}`}</small>
-            </div>
-            <div className="op-nutri-stat">
-              <dt>Burned</dt>
-              <dd>{fmtInt(caloriesOut)}</dd>
-              <small>BMR {fmtInt(bmr)} + active {fmtInt(activeKcalToday)}</small>
-            </div>
-            <div className="op-nutri-stat">
-              <dt>7-day average</dt>
-              <dd className={`is-${avgTone}`}>{fmtSigned(avgNet7)}</dd>
-              <small>{avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target` : 'Need more overlapping days'}</small>
-            </div>
-          </dl>
+          {(() => {
+            const scale = Math.max(
+              Math.abs(netToday ?? 0),
+              Math.abs(caloriesOut ?? 0),
+              Math.abs(caloriesIn ?? 0),
+              Math.abs(avgNet7 ?? 0),
+              Math.abs(targetNet),
+              1,
+            );
+            const targetMarkPct = Math.min(100, (Math.abs(targetNet) / scale) * 100);
+            const rows = [
+              {
+                key: 'in',
+                label: 'Eaten',
+                value: caloriesIn,
+                sub: caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget.toLocaleString('en-GB')} target` : `Target ${calorieTarget.toLocaleString('en-GB')}`,
+                pct: caloriesIn !== null ? Math.min(100, (caloriesIn / scale) * 100) : 0,
+                tone: 'eaten' as const,
+                marker: null as number | null,
+              },
+              {
+                key: 'out',
+                label: 'Burned',
+                value: caloriesOut,
+                sub: `BMR ${fmtInt(bmr)} + active ${fmtInt(activeKcalToday)}`,
+                pct: caloriesOut !== null ? Math.min(100, (caloriesOut / scale) * 100) : 0,
+                tone: 'burned' as const,
+                marker: null as number | null,
+              },
+              {
+                key: 'deficit',
+                label: 'Deficit today',
+                value: netToday,
+                sub: `Target ${fmtSigned(targetNet)} kcal`,
+                pct: netToday !== null ? Math.min(100, (Math.abs(netToday) / scale) * 100) : 0,
+                tone: netTone,
+                marker: targetMarkPct,
+              },
+              {
+                key: 'avg',
+                label: '7-day average',
+                value: avgNet7,
+                sub: avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target` : 'Need more overlapping days',
+                pct: avgNet7 !== null ? Math.min(100, (Math.abs(avgNet7) / scale) * 100) : 0,
+                tone: avgTone,
+                marker: targetMarkPct,
+              },
+            ];
+            return (
+              <ol className="op-nutri-ledger">
+                {rows.map((row) => (
+                  <li key={row.key} className="op-nutri-row">
+                    <span className="op-nutri-row-label">{row.label}</span>
+                    <div className="op-nutri-row-bar" aria-hidden="true">
+                      <span className={`op-nutri-row-fill is-${row.tone}`} style={{ width: `${row.pct}%` }} />
+                      {row.marker !== null && (
+                        <span className="op-nutri-row-marker" style={{ left: `${row.marker}%` }} />
+                      )}
+                    </div>
+                    <span className={`op-nutri-row-value is-${row.tone}`}>{row.value !== null ? (row.key === 'deficit' || row.key === 'avg' ? fmtSigned(row.value) : fmtInt(row.value)) : '—'}</span>
+                    <span className="op-nutri-row-sub">{row.sub}</span>
+                  </li>
+                ))}
+              </ol>
+            );
+          })()}
         </div>
       )}
     </article>
