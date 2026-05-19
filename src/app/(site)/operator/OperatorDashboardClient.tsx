@@ -5007,6 +5007,285 @@ function TodayReadCard({ snap }: { snap: TodaySnapshot }) {
   );
 }
 
+type DashboardTone = 'good' | 'neutral' | 'warn';
+
+interface LineMoveDriver {
+  label: string;
+  value: string;
+  note: string;
+  tone: DashboardTone;
+}
+
+interface ConsistencyCell {
+  tone: 'good' | 'neutral' | 'warn' | 'logged' | 'missing';
+  title: string;
+}
+
+function averageNullable(values: Array<number | null | undefined>): number | null {
+  const numbers = values.filter((value): value is number => value !== null && value !== undefined && Number.isFinite(value));
+  if (numbers.length === 0) return null;
+  return numbers.reduce((sum, value) => sum + value, 0) / numbers.length;
+}
+
+function formatSignedInt(value: number): string {
+  const rounded = Math.round(value);
+  const abs = Math.abs(rounded).toLocaleString('en-GB');
+  if (rounded > 0) return `+${abs}`;
+  if (rounded < 0) return `−${abs}`;
+  return abs;
+}
+
+function formatCompactCount(value: number): string {
+  const abs = Math.abs(value);
+  if (abs >= 1000) {
+    const digits = abs >= 10000 ? 0 : 1;
+    return `${(abs / 1000).toFixed(digits)}k`;
+  }
+  return Math.round(abs).toLocaleString('en-GB');
+}
+
+function formatMinutesCompact(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.round(totalMinutes % 60);
+  if (hours <= 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}
+
+function buildLineMoveDrivers(
+  healthDays: HealthStreamFetch['days'],
+  nutrition: TodaySnapshot['nutrition'],
+): LineMoveDriver[] {
+  const recent7 = healthDays.slice(-7);
+  const previous14 = healthDays.slice(-21, -7);
+
+  const avgIntake7 = averageNullable(recent7.map((day) => day.nutrition?.dietaryEnergyKcal ?? null));
+  const avgSteps7 = averageNullable(recent7.map((day) => day.activity.steps));
+  const avgStepsBaseline = averageNullable(previous14.map((day) => day.activity.steps));
+  const avgSleep7 = averageNullable(recent7.map((day) => day.sleep.totalMin));
+  const avgSleepBaseline = averageNullable(previous14.map((day) => day.sleep.totalMin));
+  const sleepCoverage = recent7.filter((day) => day.sleep.totalMin !== null).length;
+
+  const food: LineMoveDriver = avgIntake7 === null
+    ? {
+        label: 'Food',
+        value: 'No food log',
+        note: '7-day intake context missing',
+        tone: 'neutral',
+      }
+    : (() => {
+        const delta = avgIntake7 - nutrition.intake;
+        if (Math.abs(delta) <= 80) {
+          return {
+            label: 'Food',
+            value: 'On target',
+            note: `7-day avg ${Math.round(avgIntake7).toLocaleString('en-GB')} kcal/day`,
+            tone: 'good' as const,
+          };
+        }
+        return {
+          label: 'Food',
+          value: `${formatSignedInt(delta)} kcal`,
+          note: `vs ${Math.round(nutrition.intake).toLocaleString('en-GB')} target`,
+          tone: delta > 0 ? 'warn' as const : 'good' as const,
+        };
+      })();
+
+  const steps: LineMoveDriver = avgSteps7 === null
+    ? {
+        label: 'Steps',
+        value: 'No step data',
+        note: 'movement context missing',
+        tone: 'neutral',
+      }
+    : (() => {
+        const baseline = avgStepsBaseline ?? 10000;
+        const delta = avgSteps7 - baseline;
+        if (Math.abs(delta) < 500) {
+          return {
+            label: 'Steps',
+            value: `${formatCompactCount(avgSteps7)}/day`,
+            note: 'steady against recent pace',
+            tone: avgSteps7 >= 8000 ? 'good' as const : 'neutral' as const,
+          };
+        }
+        if (avgStepsBaseline === null) {
+          return {
+            label: 'Steps',
+            value: `${formatCompactCount(avgSteps7)}/day`,
+            note: delta >= 0 ? 'above 10k goal' : 'below 10k goal',
+            tone: delta >= 0 ? 'good' as const : avgSteps7 >= 8000 ? 'neutral' as const : 'warn' as const,
+          };
+        }
+        return {
+          label: 'Steps',
+          value: `${delta > 0 ? '+' : '−'}${formatCompactCount(delta)} steps`,
+          note: 'vs recent baseline',
+          tone: delta >= 0 ? 'good' as const : avgSteps7 >= 8000 ? 'neutral' as const : 'warn' as const,
+        };
+      })();
+
+  const sleep: LineMoveDriver = sleepCoverage < 3 || avgSleep7 === null
+    ? {
+        label: 'Sleep',
+        value: 'No sleep data',
+        note: 'harder to explain water noise',
+        tone: 'neutral',
+      }
+    : (() => {
+        const baseline = avgSleepBaseline ?? 480;
+        const delta = avgSleep7 - baseline;
+        if (Math.abs(delta) < 20) {
+          return {
+            label: 'Sleep',
+            value: 'Steady',
+            note: `7-day avg ${formatMinutesCompact(avgSleep7)}`,
+            tone: avgSleep7 >= 450 ? 'good' as const : 'neutral' as const,
+          };
+        }
+        return {
+          label: 'Sleep',
+          value: `${delta > 0 ? '+' : '−'}${Math.abs(Math.round(delta))}m`,
+          note: avgSleepBaseline === null ? 'vs 8h target' : 'vs recent baseline',
+          tone: delta >= 0 ? 'good' as const : 'warn' as const,
+        };
+      })();
+
+  return [food, steps, sleep];
+}
+
+function WhyTheLineMovedStrip({
+  healthDays,
+  nutrition,
+}: {
+  healthDays: HealthStreamFetch['days'];
+  nutrition: TodaySnapshot['nutrition'];
+}) {
+  const drivers = buildLineMoveDrivers(healthDays, nutrition);
+  return (
+    <section className="fit-line-moved" aria-label="Why the line moved">
+      <div className="fit-line-moved-head">
+        <div>
+          <span className="fit-line-moved-eyebrow">Why the line moved</span>
+          <div className="fit-line-moved-copy">A tiny read on the levers most likely shaping the trend right now.</div>
+        </div>
+      </div>
+      <div className="fit-line-moved-grid">
+        {drivers.map((driver) => (
+          <article key={driver.label} className={`fit-line-moved-card is-${driver.tone}`}>
+            <span className="fit-line-moved-label">{driver.label}</span>
+            <strong className="fit-line-moved-value">{driver.value}</strong>
+            <span className="fit-line-moved-note">{driver.note}</span>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ConsistencyHeatmapCard({
+  endIso,
+  healthDays,
+  readings,
+  calorieTarget,
+}: {
+  endIso: string;
+  healthDays: HealthStreamFetch['days'];
+  readings: FitnessReading[];
+  calorieTarget: number;
+}) {
+  const healthByDay = new Map(healthDays.map((day) => [isoDay(day.date), day]));
+  const weighInDays = new Set(readings.map((reading) => isoDay(reading.date)));
+  const dates: string[] = [];
+  const endDate = parseLocalDateInput(endIso);
+
+  for (let offset = 27; offset >= 0; offset -= 1) {
+    const date = new Date(endDate);
+    date.setDate(endDate.getDate() - offset);
+    dates.push(localIsoDate(date));
+  }
+
+  const weighCells: ConsistencyCell[] = dates.map((iso) => ({
+    tone: weighInDays.has(iso) ? 'logged' : 'missing',
+    title: weighInDays.has(iso) ? `${iso}: weigh-in logged` : `${iso}: no weigh-in`,
+  }));
+
+  const intakeCells: ConsistencyCell[] = dates.map((iso) => {
+    const kcal = healthByDay.get(iso)?.nutrition?.dietaryEnergyKcal ?? null;
+    if (kcal === null) {
+      return { tone: 'missing', title: `${iso}: intake missing` };
+    }
+    if (kcal <= calorieTarget + 100) {
+      return { tone: 'good', title: `${iso}: ${Math.round(kcal).toLocaleString('en-GB')} kcal, on plan` };
+    }
+    if (kcal <= calorieTarget + 300) {
+      return { tone: 'neutral', title: `${iso}: ${Math.round(kcal).toLocaleString('en-GB')} kcal, slightly over` };
+    }
+    return { tone: 'warn', title: `${iso}: ${Math.round(kcal).toLocaleString('en-GB')} kcal, well over target` };
+  });
+
+  const stepCells: ConsistencyCell[] = dates.map((iso) => {
+    const steps = healthByDay.get(iso)?.activity.steps ?? null;
+    if (steps === null) {
+      return { tone: 'missing', title: `${iso}: step data missing` };
+    }
+    if (steps >= 10000) {
+      return { tone: 'good', title: `${iso}: ${Math.round(steps).toLocaleString('en-GB')} steps, goal hit` };
+    }
+    if (steps >= 7000) {
+      return { tone: 'neutral', title: `${iso}: ${Math.round(steps).toLocaleString('en-GB')} steps, close` };
+    }
+    return { tone: 'warn', title: `${iso}: ${Math.round(steps).toLocaleString('en-GB')} steps, below goal` };
+  });
+  const intakeLogged = intakeCells.filter((cell) => cell.tone !== 'missing').length;
+  const stepLogged = stepCells.filter((cell) => cell.tone !== 'missing').length;
+
+  const rows = [
+    { key: 'weigh', label: 'Weigh-ins', meta: `${weighCells.filter((cell) => cell.tone === 'logged').length}/28 logged`, cells: weighCells },
+    { key: 'intake', label: 'Intake', meta: intakeLogged > 0 ? `${intakeCells.filter((cell) => cell.tone === 'good').length}/${intakeLogged} on plan` : 'No food logs', cells: intakeCells },
+    { key: 'steps', label: 'Steps', meta: stepLogged > 0 ? `${stepCells.filter((cell) => cell.tone === 'good').length}/${stepLogged} hit goal` : 'No step sync', cells: stepCells },
+  ] as const;
+
+  return (
+    <article className="fit-consistency-card">
+      <div className="fit-consistency-card-head">
+        <div>
+          <span className="fit-consistency-card-eyebrow">Consistency</span>
+          <div className="fit-consistency-card-title">Last 28 days</div>
+        </div>
+        <span className="fit-consistency-card-meta">Weigh-in rhythm, intake target, step goal</span>
+      </div>
+
+      <div className="fit-consistency-rows">
+        {rows.map((row) => (
+          <div key={row.key} className="fit-consistency-row">
+            <div className="fit-consistency-row-meta">
+              <span className="fit-consistency-row-label">{row.label}</span>
+              <span className="fit-consistency-row-count">{row.meta}</span>
+            </div>
+            <div className="fit-consistency-grid" role="presentation">
+              {row.cells.map((cell, index) => (
+                <span
+                  key={`${row.key}-${dates[index]}`}
+                  className={`fit-consistency-cell is-${row.key} is-${cell.tone}`}
+                  title={cell.title}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="fit-consistency-legend">
+        <span className="fit-consistency-legend-item"><i className="fit-consistency-dot is-logged" />Weigh-in logged</span>
+        <span className="fit-consistency-legend-item"><i className="fit-consistency-dot is-good" />Target hit</span>
+        <span className="fit-consistency-legend-item"><i className="fit-consistency-dot is-neutral" />Close</span>
+        <span className="fit-consistency-legend-item"><i className="fit-consistency-dot is-warn" />Missed</span>
+      </div>
+    </article>
+  );
+}
+
 interface NutritionPieSlice {
   label: string;
   value: number;
@@ -5704,6 +5983,18 @@ export default function OperatorDashboardClient() {
   const waterMlToday = todayHealth?.nutrition?.waterMl ?? null;
   const stepsToday = todayHealth?.activity?.steps ?? null;
   const exerciseToday = todayHealth?.activity?.exerciseMinutes ?? null;
+  const checkpointWeeklyLossKg = 0.45;
+  const goalCheckpoints = [30, 90].map((daysOut) => {
+    const checkpointDate = parseLocalDateInput(latest.date);
+    checkpointDate.setDate(checkpointDate.getDate() + daysOut);
+    const projectedWeight = Math.max(goal, Math.round((latest.weight - ((checkpointWeeklyLossKg * daysOut) / 7)) * 10) / 10);
+    return {
+      date: localIsoDate(checkpointDate),
+      value: projectedWeight,
+      label: `${daysOut}D`,
+      note: projectedWeight <= goal ? 'goal line' : `${projectedWeight.toFixed(1)} kg`,
+    };
+  });
   const goalGapTone = targetDelta <= 0 ? 'good' : targetDelta <= 12 ? 'neutral' : 'warn';
   const bodyFatTone = latest.bodyFat < 33 ? 'good' : latest.bodyFat < 39 ? 'neutral' : 'warn';
   const cadenceTone = cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn';
@@ -5874,39 +6165,21 @@ export default function OperatorDashboardClient() {
                 { date: latest.date, value: latest.weight, title: weightLabel },
               ]}
               phases={phaseMarkers}
+              checkpointMarkers={goalCheckpoints}
               targetWeight={goal}
               showRangeToggle
             />
           </section>
-        </section>
-        </Reveal>
 
-        <Reveal delay={0.1}>
-        <div className="fit-panel" style={{ marginBottom: 28 }}>
-          <div className="fit-panel-head">
-            <div>
-              <h3>This <em>week</em></h3>
-              <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
-            </div>
+          <div className="fit-trajectory-support">
+            <WhyTheLineMovedStrip healthDays={healthDays} nutrition={todaySnap.nutrition} />
+            <ConsistencyHeatmapCard
+              endIso={todayIso}
+              healthDays={healthDays}
+              readings={dashboardSource}
+              calorieTarget={todaySnap.nutrition.intake}
+            />
           </div>
-          <div className="week-grid">
-            {weekRows.map((row) => (
-              <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
-                <div className="dow">{row.day}</div>
-                <div className="date">{row.date}</div>
-                <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
-                <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
-                <div className="icons"><span>{row.detail}</span></div>
-              </div>
-            ))}
-          </div>
-        </div>
-        </Reveal>
-
-        <Reveal delay={0.18}>
-        <section className="fit-anchor-section" id="operator-food">
-          <FoodBreakdownSection snap={todaySnap} />
-          <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
         </section>
         </Reveal>
 
@@ -5982,6 +6255,35 @@ export default function OperatorDashboardClient() {
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
         </Reveal>
         </CollapsibleSection>
+
+        <Reveal delay={0.1}>
+        <div className="fit-panel" style={{ marginBottom: 28 }}>
+          <div className="fit-panel-head">
+            <div>
+              <h3>This <em>week</em></h3>
+              <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+            </div>
+          </div>
+          <div className="week-grid">
+            {weekRows.map((row) => (
+              <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                <div className="dow">{row.day}</div>
+                <div className="date">{row.date}</div>
+                <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                <div className="icons"><span>{row.detail}</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        </Reveal>
+
+        <Reveal delay={0.18}>
+        <section className="fit-anchor-section" id="operator-food">
+          <FoodBreakdownSection snap={todaySnap} />
+          <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
+        </section>
+        </Reveal>
 
         <CollapsibleSection eyebrow="Trends" note="What the lines are doing — and why.">
         <Reveal>

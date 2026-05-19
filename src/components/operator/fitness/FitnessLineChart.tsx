@@ -20,6 +20,13 @@ interface PhaseBand {
   end: string
 }
 
+interface CheckpointMarker {
+  date: string
+  value: number
+  label: string
+  note?: string
+}
+
 interface ChartProps {
   title: ReactNode
   subtitle?: string
@@ -30,6 +37,7 @@ interface ChartProps {
   annotations?: AnnotationPoint[]
   overlays?: ReactNode
   phases?: PhaseBand[]
+  checkpointMarkers?: CheckpointMarker[]
   showRangeToggle?: boolean
   targetWeight?: number
   /** Hide any reading whose value falls below this floor (default 60). */
@@ -151,6 +159,7 @@ export default function FitnessLineChart({
   annotations = [],
   overlays,
   phases = [],
+  checkpointMarkers = [],
   showRangeToggle = false,
   targetWeight,
   minDisplayValue = 60,
@@ -180,13 +189,29 @@ export default function FitnessLineChart({
     return cleanedPoints.filter((point) => new Date(point.date).getTime() >= cutoff.getTime())
   }, [cleanedPoints, range])
 
-  const xMin = new Date(filteredPoints[0]?.date ?? Date.now()).getTime()
-  const xMax = new Date(filteredPoints[filteredPoints.length - 1]?.date ?? Date.now()).getTime()
+  const fallbackDate = filteredPoints[0]?.date ?? cleanedPoints[0]?.date ?? '1970-01-01'
+  const xMin = new Date(filteredPoints[0]?.date ?? fallbackDate).getTime()
+  const latestPoint = filteredPoints[filteredPoints.length - 1] ?? null
+  const latestTime = latestPoint ? new Date(latestPoint.date).getTime() : null
+  const dayMs = 24 * 60 * 60 * 1000
+  const checkpointWindowDays = range === '7d' ? 0 : range === '30d' ? 30 : 90
   const values = filteredPoints.map((point) => point.value)
   const dataLow = values.length > 0 ? Math.min(...values) - 1 : minDisplayValue
   const dataHigh = values.length > 0 ? Math.max(...values) + 1 : minDisplayValue + 20
   const low = Math.max(minY ?? dataLow, minDisplayValue)
   const high = maxY ?? dataHigh
+  const visibleCheckpointMarkers = latestTime === null
+    ? []
+    : checkpointMarkers.filter((marker) => {
+        const time = new Date(marker.date).getTime()
+        if (time <= latestTime) return false
+        if (time > latestTime + checkpointWindowDays * dayMs) return false
+        return marker.value >= low && marker.value <= high
+      })
+  const xMax = Math.max(
+    new Date(filteredPoints[filteredPoints.length - 1]?.date ?? fallbackDate).getTime(),
+    ...visibleCheckpointMarkers.map((marker) => new Date(marker.date).getTime()),
+  )
 
   const xForTime = (time: number) => pad.l + ((time - xMin) / Math.max(1, xMax - xMin)) * innerW
   const x = (date: string) => xForTime(new Date(date).getTime())
@@ -214,7 +239,6 @@ export default function FitnessLineChart({
   const yTicks = 4
   // Evenly-spaced date ticks, scaled to the time window so labels don't
   // bunch up at narrower ranges.
-  const dayMs = 24 * 60 * 60 * 1000
   const spanDays = filteredPoints.length === 0 ? 0 : (xMax - xMin) / dayMs
   const xTickCount = spanDays === 0 ? 0
     : spanDays > 365 * 3 ? 6
@@ -226,8 +250,6 @@ export default function FitnessLineChart({
         return xMin + ratio * (xMax - xMin)
       })
   const hover = hoverIndex !== null ? filteredPoints[hoverIndex] : null
-  const latestPoint = filteredPoints[filteredPoints.length - 1] ?? null
-  const latestTime = latestPoint ? new Date(latestPoint.date).getTime() : null
   const recentWeekPoints = latestTime === null
     ? []
     : filteredPoints.filter((point) => new Date(point.date).getTime() >= latestTime - 6 * dayMs)
@@ -278,6 +300,32 @@ export default function FitnessLineChart({
   const tipHeight = 50 + tipLines.length * 14
   const currentPointX = latestPoint ? x(latestPoint.date) : null
   const currentPointY = latestPoint ? y(latestPoint.value) : null
+  const checkpointLayouts = visibleCheckpointMarkers.map((marker, index) => {
+    const cx = x(marker.date)
+    const cy = y(marker.value)
+    const placeLeft = cx > pad.l + innerW * 0.82
+    const offset = index % 2 === 0 ? -20 : 24
+    const textAnchor: 'start' | 'end' = placeLeft ? 'end' : 'start'
+    const textX = clamp(cx + (placeLeft ? -14 : 14), pad.l + 18, w - pad.r - 18)
+    const titleY = clamp(cy + offset, pad.t + 20, pad.t + innerH - 24)
+    const subY = titleY + 12
+    const connectorX = placeLeft ? textX + 6 : textX - 6
+    const connectorY = titleY - 4
+    return {
+      marker,
+      cx,
+      cy,
+      textAnchor,
+      textX,
+      titleY,
+      subY,
+      connectorX,
+      connectorY,
+    }
+  })
+  const checkpointPath = currentPointX !== null && currentPointY !== null && checkpointLayouts.length > 0
+    ? `M ${currentPointX.toFixed(2)} ${currentPointY.toFixed(2)} ${checkpointLayouts.map((layout) => `L ${layout.cx.toFixed(2)} ${layout.cy.toFixed(2)}`).join(' ')}`
+    : null
   const summaryStats = [
     {
       label: 'Current',
@@ -427,6 +475,22 @@ export default function FitnessLineChart({
             </g>
           ))}
           {overlays}
+          {checkpointPath && <path d={checkpointPath} className="bc-checkpoint-path" />}
+          {checkpointLayouts.map((layout) => {
+            const { marker, cx, cy, textAnchor, textX, titleY, subY, connectorX, connectorY } = layout
+            return (
+              <g key={`${marker.label}-${marker.date}`}>
+                <line x1={cx} y1={cy} x2={connectorX} y2={connectorY} className="bc-checkpoint-connector" />
+                <circle cx={cx} cy={cy} r="5" className="bc-checkpoint-dot" />
+                <text x={textX} y={titleY} textAnchor={textAnchor} className="bc-checkpoint-label">
+                  {marker.label}
+                </text>
+                <text x={textX} y={subY} textAnchor={textAnchor} className="bc-checkpoint-sub">
+                  {marker.note ?? `${marker.value.toFixed(1)} kg`}
+                </text>
+              </g>
+            )
+          })}
           {targetWeight !== undefined && targetWeight >= low && targetWeight <= high && (
             <g>
               <line
@@ -591,6 +655,7 @@ export default function FitnessLineChart({
         <span className="item"><i className="sw raw" />Daily readings</span>
         {gapBridgePath && <span className="item"><i className="sw gap" />Missing days</span>}
         {targetWeight !== undefined && <span className="item"><i className="sw target" />Target line</span>}
+        {checkpointLayouts.length > 0 && <span className="item"><i className="sw checkpoint" />30d / 90d checkpoints</span>}
         <span className="item"><i className="sw phase" />Phase background</span>
       </div>
     </div>
