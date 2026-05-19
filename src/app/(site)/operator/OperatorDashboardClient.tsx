@@ -5091,72 +5091,23 @@ function TopNutritionCaloriesCard({
             <div className="op-nutri-figure-sub">kcal · {Math.round(deficitProgress)}% of {fmtSigned(targetNet)} target</div>
           </div>
 
-          {(() => {
-            const scale = Math.max(
-              Math.abs(netToday ?? 0),
-              Math.abs(caloriesOut ?? 0),
-              Math.abs(caloriesIn ?? 0),
-              Math.abs(avgNet7 ?? 0),
-              Math.abs(targetNet),
-              1,
-            );
-            const targetMarkPct = Math.min(100, (Math.abs(targetNet) / scale) * 100);
-            const rows = [
-              {
-                key: 'in',
-                label: 'Eaten',
-                value: caloriesIn,
-                sub: caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget.toLocaleString('en-GB')} target` : `Target ${calorieTarget.toLocaleString('en-GB')}`,
-                pct: caloriesIn !== null ? Math.min(100, (caloriesIn / scale) * 100) : 0,
-                tone: 'eaten' as const,
-                marker: null as number | null,
-              },
-              {
-                key: 'out',
-                label: 'Burned',
-                value: caloriesOut,
-                sub: `BMR ${fmtInt(bmr)} + active ${fmtInt(activeKcalToday)}`,
-                pct: caloriesOut !== null ? Math.min(100, (caloriesOut / scale) * 100) : 0,
-                tone: 'burned' as const,
-                marker: null as number | null,
-              },
-              {
-                key: 'deficit',
-                label: 'Deficit today',
-                value: netToday,
-                sub: `Target ${fmtSigned(targetNet)} kcal`,
-                pct: netToday !== null ? Math.min(100, (Math.abs(netToday) / scale) * 100) : 0,
-                tone: netTone,
-                marker: targetMarkPct,
-              },
-              {
-                key: 'avg',
-                label: '7-day average',
-                value: avgNet7,
-                sub: avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target` : 'Need more overlapping days',
-                pct: avgNet7 !== null ? Math.min(100, (Math.abs(avgNet7) / scale) * 100) : 0,
-                tone: avgTone,
-                marker: targetMarkPct,
-              },
-            ];
-            return (
-              <ol className="op-nutri-ledger">
-                {rows.map((row) => (
-                  <li key={row.key} className="op-nutri-row">
-                    <span className="op-nutri-row-label">{row.label}</span>
-                    <div className="op-nutri-row-bar" aria-hidden="true">
-                      <span className={`op-nutri-row-fill is-${row.tone}`} style={{ width: `${row.pct}%` }} />
-                      {row.marker !== null && (
-                        <span className="op-nutri-row-marker" style={{ left: `${row.marker}%` }} />
-                      )}
-                    </div>
-                    <span className={`op-nutri-row-value is-${row.tone}`}>{row.value !== null ? (row.key === 'deficit' || row.key === 'avg' ? fmtSigned(row.value) : fmtInt(row.value)) : '—'}</span>
-                    <span className="op-nutri-row-sub">{row.sub}</span>
-                  </li>
-                ))}
-              </ol>
-            );
-          })()}
+          <dl className="op-nutri-stats">
+            <div className="op-nutri-stat">
+              <dt>Eaten</dt>
+              <dd>{fmtInt(caloriesIn)}</dd>
+              <small>{caloriesIn !== null ? `${fmtSigned(caloriesIn - calorieTarget)} vs ${calorieTarget.toLocaleString('en-GB')} target` : `Target ${calorieTarget.toLocaleString('en-GB')}`}</small>
+            </div>
+            <div className="op-nutri-stat">
+              <dt>Burned</dt>
+              <dd>{fmtInt(caloriesOut)}</dd>
+              <small>BMR {fmtInt(bmr)} + active {fmtInt(activeKcalToday)}</small>
+            </div>
+            <div className="op-nutri-stat">
+              <dt>7-day average</dt>
+              <dd className={`is-${avgTone}`}>{fmtSigned(avgNet7)}</dd>
+              <small>{avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target` : 'Need more overlapping days'}</small>
+            </div>
+          </dl>
         </div>
       )}
     </article>
@@ -5718,7 +5669,6 @@ export default function OperatorDashboardClient() {
               </div>
             </section>
 
-            <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
           </section>
         </section>
         </Reveal>
@@ -5779,6 +5729,7 @@ export default function OperatorDashboardClient() {
         <Reveal delay={0.18}>
         <section className="fit-anchor-section" id="operator-food">
           <FoodBreakdownSection snap={todaySnap} />
+          <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
         </section>
         </Reveal>
 

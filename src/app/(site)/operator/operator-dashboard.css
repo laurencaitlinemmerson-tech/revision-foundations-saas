@@ -3766,106 +3766,77 @@
   font-variant-numeric: tabular-nums;
 }
 
-.fitness-reference-shell .op-nutri-ledger {
+.fitness-reference-shell .op-nutri-stats {
   margin: 0;
   padding: 0;
-  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: flex-start;
+}
+
+.fitness-reference-shell .op-nutri-stat {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  padding: 0 clamp(18px, 3vw, 32px);
+  border-left: 0.5px solid rgba(26, 24, 21, 0.1);
 }
 
-.fitness-reference-shell .op-nutri-row {
-  display: grid;
-  grid-template-columns: 120px minmax(0, 1fr) auto;
-  grid-template-rows: auto auto;
-  column-gap: 22px;
-  row-gap: 4px;
-  align-items: center;
-  padding: 14px 0;
-  border-top: 0.5px solid rgba(26, 24, 21, 0.08);
+.fitness-reference-shell .op-nutri-stat:first-child {
+  padding-left: 0;
+  border-left: none;
 }
 
-.fitness-reference-shell .op-nutri-row:last-child {
-  border-bottom: 0.5px solid rgba(26, 24, 21, 0.08);
+.fitness-reference-shell .op-nutri-stat:last-child {
+  padding-right: 0;
 }
 
-.fitness-reference-shell .op-nutri-row-label {
-  grid-column: 1;
-  grid-row: 1;
+.fitness-reference-shell .op-nutri-stat dt {
+  margin: 0;
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--ink-soft);
-  align-self: center;
-}
-
-.fitness-reference-shell .op-nutri-row-bar {
-  grid-column: 2;
-  grid-row: 1;
-  position: relative;
-  height: 4px;
-  background: rgba(26, 24, 21, 0.07);
-  overflow: hidden;
-}
-
-.fitness-reference-shell .op-nutri-row-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  display: block;
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fitness-reference-shell .op-nutri-row-fill.is-eaten { background: rgba(26, 24, 21, 0.5); }
-.fitness-reference-shell .op-nutri-row-fill.is-burned { background: var(--brass); }
-.fitness-reference-shell .op-nutri-row-fill.is-good { background: var(--good); }
-.fitness-reference-shell .op-nutri-row-fill.is-neutral { background: var(--brass-deep); }
-.fitness-reference-shell .op-nutri-row-fill.is-warn { background: var(--warn); }
-
-.fitness-reference-shell .op-nutri-row-marker {
-  position: absolute;
-  top: -3px;
-  bottom: -3px;
-  width: 1px;
-  background: rgba(26, 24, 21, 0.55);
-}
-
-.fitness-reference-shell .op-nutri-row-marker::after {
-  content: 'TARGET';
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 7.5px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
   color: var(--ink-mute);
-  white-space: nowrap;
 }
 
-.fitness-reference-shell .op-nutri-row-value {
-  grid-column: 3;
-  grid-row: 1;
+.fitness-reference-shell .op-nutri-stat dd {
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: clamp(30px, 3.4vw, 38px);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
-  text-align: right;
 }
 
-.fitness-reference-shell .op-nutri-row-value.is-good { color: var(--good); }
-.fitness-reference-shell .op-nutri-row-value.is-neutral { color: var(--brass-deep); }
-.fitness-reference-shell .op-nutri-row-value.is-warn { color: var(--warn); }
+.fitness-reference-shell .op-nutri-stat dd.is-good { color: var(--good); }
+.fitness-reference-shell .op-nutri-stat dd.is-neutral { color: var(--brass-deep); }
+.fitness-reference-shell .op-nutri-stat dd.is-warn { color: var(--warn); }
 
-.fitness-reference-shell .op-nutri-row-sub {
-  grid-column: 2 / -1;
-  grid-row: 2;
-  font-size: 10px;
+.fitness-reference-shell .op-nutri-stat small {
+  font-size: 10.5px;
+  line-height: 1.5;
   letter-spacing: 0.02em;
-  color: var(--ink-mute);
+  color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-nutri-stats {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .fitness-reference-shell .op-nutri-stat {
+    padding: 0;
+    border-left: none;
+    border-top: 0.5px solid rgba(26, 24, 21, 0.1);
+    padding-top: 14px;
+  }
+  .fitness-reference-shell .op-nutri-stat:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
 }
 
 .fitness-reference-shell .op-nutri-empty {
@@ -3912,32 +3883,6 @@
     margin-top: 0;
   }
 
-  .fitness-reference-shell .op-nutri-row {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto auto;
-    row-gap: 8px;
-  }
-
-  .fitness-reference-shell .op-nutri-row-label {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .fitness-reference-shell .op-nutri-row-value {
-    grid-column: 2;
-    grid-row: 1;
-    font-size: 22px;
-  }
-
-  .fitness-reference-shell .op-nutri-row-bar {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .fitness-reference-shell .op-nutri-row-sub {
-    grid-column: 1 / -1;
-    grid-row: 3;
-  }
 }
 
 /* ── Readiness band ───────────────────────────────────────────────── */
