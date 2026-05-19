@@ -4,7 +4,7 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
 import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
-import FitnessLineChart from '@/components/operator/fitness/FitnessLineChart';
+import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
@@ -5008,6 +5008,8 @@ function TodayReadCard({ snap }: { snap: TodaySnapshot }) {
 }
 
 type DashboardTone = 'good' | 'neutral' | 'warn';
+type HealthDay = HealthStreamFetch['days'][number];
+type DatedRow = { date: string };
 
 interface LineMoveDriver {
   label: string;
@@ -5019,6 +5021,11 @@ interface LineMoveDriver {
 interface ConsistencyCell {
   tone: 'good' | 'neutral' | 'warn' | 'logged' | 'missing';
   title: string;
+}
+
+interface ConsistencyBucket {
+  startIso: string;
+  endIso: string;
 }
 
 function averageNullable(values: Array<number | null | undefined>): number | null {
@@ -5052,46 +5059,183 @@ function formatMinutesCompact(totalMinutes: number): string {
   return `${hours}h ${minutes}m`;
 }
 
+function trajectoryRangeLabel(range: FitnessChartRange): string {
+  switch (range) {
+    case '7d': return '7 days';
+    case '30d': return '30 days';
+    case '6m': return '6 months';
+    case '1y': return '1 year';
+    case '3y': return '3 years';
+    default: return 'all synced history';
+  }
+}
+
+function trajectoryRangeHeadline(range: FitnessChartRange): string {
+  switch (range) {
+    case '7d': return 'Last 7 days';
+    case '30d': return 'Last 30 days';
+    case '6m': return 'Last 6 months';
+    case '1y': return 'Last year';
+    case '3y': return 'Last 3 years';
+    default: return 'Synced history';
+  }
+}
+
+function trajectoryRangeAverageLabel(range: FitnessChartRange): string {
+  switch (range) {
+    case '7d': return '7-day avg';
+    case '30d': return '30-day avg';
+    case '6m': return '6-month avg';
+    case '1y': return '1-year avg';
+    case '3y': return '3-year avg';
+    default: return 'Synced avg';
+  }
+}
+
+function rangeCutoffForIso(anchorIso: string, range: FitnessChartRange): Date {
+  const cutoff = parseLocalDateInput(anchorIso);
+  if (range === '3y') cutoff.setFullYear(cutoff.getFullYear() - 3);
+  else if (range === '1y') cutoff.setMonth(cutoff.getMonth() - 12);
+  else if (range === '6m') cutoff.setMonth(cutoff.getMonth() - 6);
+  else if (range === '30d') cutoff.setDate(cutoff.getDate() - 30);
+  else if (range === '7d') cutoff.setDate(cutoff.getDate() - 7);
+  return cutoff;
+}
+
+function filterRowsForTrajectoryRange<T extends DatedRow>(
+  rows: T[],
+  range: FitnessChartRange,
+  anchorIso?: string,
+): T[] {
+  if (rows.length === 0) return [];
+  if (range === 'all') return rows;
+  const anchor = anchorIso ?? isoDay(rows[rows.length - 1].date);
+  const cutoffTime = rangeCutoffForIso(anchor, range).getTime();
+  return rows.filter((row) => parseLocalDateInput(isoDay(row.date)).getTime() >= cutoffTime);
+}
+
+function previousRowsForTrajectoryRange<T extends DatedRow>(
+  rows: T[],
+  range: FitnessChartRange,
+  anchorIso?: string,
+): T[] {
+  if (rows.length === 0 || range === 'all') return [];
+  const currentRows = filterRowsForTrajectoryRange(rows, range, anchorIso);
+  if (currentRows.length === 0) return [];
+  const previousWindowEnd = parseLocalDateInput(isoDay(currentRows[0].date));
+  previousWindowEnd.setDate(previousWindowEnd.getDate() - 1);
+  const previousEndTime = previousWindowEnd.getTime();
+  const previousCutoffTime = rangeCutoffForIso(localIsoDate(previousWindowEnd), range).getTime();
+  return rows.filter((row) => {
+    const time = parseLocalDateInput(isoDay(row.date)).getTime();
+    return time >= previousCutoffTime && time <= previousEndTime;
+  });
+}
+
+function earliestIso(values: Array<string | null | undefined>, fallbackIso: string): string {
+  const available = values.filter((value): value is string => Boolean(value)).map((value) => isoDay(value));
+  if (available.length === 0) return fallbackIso;
+  return [...available].sort()[0];
+}
+
+function daysBetweenIso(startIso: string, endIso: string): number {
+  const dayMs = 24 * 60 * 60 * 1000;
+  return Math.max(1, Math.round((parseLocalDateInput(endIso).getTime() - parseLocalDateInput(startIso).getTime()) / dayMs) + 1);
+}
+
+function buildConsistencyBuckets(startIso: string, endIso: string, range: FitnessChartRange): { buckets: ConsistencyBucket[]; bucketSizeDays: number } {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const totalDays = daysBetweenIso(startIso, endIso);
+  const bucketSizeDays = range === '7d' || range === '30d'
+    ? 1
+    : range === '6m'
+      ? 7
+      : range === '1y'
+        ? 14
+        : range === '3y'
+          ? 30
+          : Math.max(30, Math.ceil(totalDays / 24));
+  const bucketCount = Math.max(1, Math.ceil(totalDays / bucketSizeDays));
+  const startTime = parseLocalDateInput(startIso).getTime();
+  const endTime = parseLocalDateInput(endIso).getTime();
+  const buckets: ConsistencyBucket[] = [];
+
+  for (let index = 0; index < bucketCount; index += 1) {
+    const bucketStartTime = startTime + index * bucketSizeDays * dayMs;
+    if (bucketStartTime > endTime) break;
+    const bucketEndTime = Math.min(endTime, bucketStartTime + (bucketSizeDays - 1) * dayMs);
+    buckets.push({
+      startIso: localIsoDate(new Date(bucketStartTime)),
+      endIso: localIsoDate(new Date(bucketEndTime)),
+    });
+  }
+
+  return { buckets, bucketSizeDays };
+}
+
+function consistencyBlockLabel(bucketSizeDays: number): string {
+  if (bucketSizeDays <= 1) return 'Daily blocks';
+  if (bucketSizeDays <= 3) return `${bucketSizeDays}-day blocks`;
+  if (bucketSizeDays <= 8) return 'Weekly blocks';
+  if (bucketSizeDays <= 16) return 'Two-week blocks';
+  if (bucketSizeDays <= 45) return 'Monthly blocks';
+  return 'Bi-monthly blocks';
+}
+
+function bucketLabel(bucket: ConsistencyBucket): string {
+  if (bucket.startIso === bucket.endIso) return fmtDate(bucket.startIso);
+  return `${fmtDate(bucket.startIso)} → ${fmtDate(bucket.endIso)}`;
+}
+
+function buildLineMoveSummary(readings: FitnessReading[], range: FitnessChartRange): string {
+  const windowLabel = range === 'all' ? 'all synced history' : `${trajectoryRangeLabel(range).toLowerCase()} view`;
+  if (readings.length < 2) return `Reading the ${windowLabel}. Add more weigh-ins to sharpen what is actually moving the line.`;
+  const delta = readings[readings.length - 1].weight - readings[0].weight;
+  if (Math.abs(delta) < 0.3) return `The line is broadly flat in the ${windowLabel}. The cards read the same window underneath it.`;
+  return `${delta < 0 ? 'Down' : 'Up'} ${Math.abs(delta).toFixed(1)} kg in the ${windowLabel}. The cards below follow that same slice of time.`;
+}
+
 function buildLineMoveDrivers(
-  healthDays: HealthStreamFetch['days'],
+  currentDays: HealthDay[],
+  previousDays: HealthDay[],
   nutrition: TodaySnapshot['nutrition'],
+  range: FitnessChartRange,
 ): LineMoveDriver[] {
-  const recent7 = healthDays.slice(-7);
-  const previous14 = healthDays.slice(-21, -7);
+  const currentWindowLabel = trajectoryRangeAverageLabel(range);
+  const previousWindowLabel = range === 'all' ? 'earlier data' : `previous ${trajectoryRangeLabel(range).toLowerCase()}`;
+  const avgIntake = averageNullable(currentDays.map((day) => day.nutrition?.dietaryEnergyKcal ?? null));
+  const avgSteps = averageNullable(currentDays.map((day) => day.activity.steps));
+  const avgStepsBaseline = averageNullable(previousDays.map((day) => day.activity.steps));
+  const avgSleep = averageNullable(currentDays.map((day) => day.sleep.totalMin));
+  const avgSleepBaseline = averageNullable(previousDays.map((day) => day.sleep.totalMin));
+  const sleepCoverage = currentDays.filter((day) => day.sleep.totalMin !== null).length;
 
-  const avgIntake7 = averageNullable(recent7.map((day) => day.nutrition?.dietaryEnergyKcal ?? null));
-  const avgSteps7 = averageNullable(recent7.map((day) => day.activity.steps));
-  const avgStepsBaseline = averageNullable(previous14.map((day) => day.activity.steps));
-  const avgSleep7 = averageNullable(recent7.map((day) => day.sleep.totalMin));
-  const avgSleepBaseline = averageNullable(previous14.map((day) => day.sleep.totalMin));
-  const sleepCoverage = recent7.filter((day) => day.sleep.totalMin !== null).length;
-
-  const food: LineMoveDriver = avgIntake7 === null
+  const food: LineMoveDriver = avgIntake === null
     ? {
         label: 'Food',
         value: 'No food log',
-        note: '7-day intake context missing',
+        note: `${currentWindowLabel} intake still missing`,
         tone: 'neutral',
       }
     : (() => {
-        const delta = avgIntake7 - nutrition.intake;
+        const delta = avgIntake - nutrition.intake;
         if (Math.abs(delta) <= 80) {
           return {
             label: 'Food',
             value: 'On target',
-            note: `7-day avg ${Math.round(avgIntake7).toLocaleString('en-GB')} kcal/day`,
+            note: `${currentWindowLabel} ${Math.round(avgIntake).toLocaleString('en-GB')} kcal/day`,
             tone: 'good' as const,
           };
         }
         return {
           label: 'Food',
-          value: `${formatSignedInt(delta)} kcal`,
+          value: `${formatSignedInt(delta)} kcal/day`,
           note: `vs ${Math.round(nutrition.intake).toLocaleString('en-GB')} target`,
           tone: delta > 0 ? 'warn' as const : 'good' as const,
         };
       })();
 
-  const steps: LineMoveDriver = avgSteps7 === null
+  const steps: LineMoveDriver = avgSteps === null
     ? {
         label: 'Steps',
         value: 'No step data',
@@ -5099,33 +5243,24 @@ function buildLineMoveDrivers(
         tone: 'neutral',
       }
     : (() => {
-        const baseline = avgStepsBaseline ?? 10000;
-        const delta = avgSteps7 - baseline;
-        if (Math.abs(delta) < 500) {
+        if (avgStepsBaseline !== null && Math.abs(avgSteps - avgStepsBaseline) >= 500) {
           return {
             label: 'Steps',
-            value: `${formatCompactCount(avgSteps7)}/day`,
-            note: 'steady against recent pace',
-            tone: avgSteps7 >= 8000 ? 'good' as const : 'neutral' as const,
+            value: `${avgSteps > avgStepsBaseline ? '+' : '−'}${formatCompactCount(avgSteps - avgStepsBaseline)}/day`,
+            note: `vs ${previousWindowLabel}`,
+            tone: avgSteps > avgStepsBaseline ? 'good' as const : avgSteps >= 8000 ? 'neutral' as const : 'warn' as const,
           };
         }
-        if (avgStepsBaseline === null) {
-          return {
-            label: 'Steps',
-            value: `${formatCompactCount(avgSteps7)}/day`,
-            note: delta >= 0 ? 'above 10k goal' : 'below 10k goal',
-            tone: delta >= 0 ? 'good' as const : avgSteps7 >= 8000 ? 'neutral' as const : 'warn' as const,
-          };
-        }
+        const goalDelta = avgSteps - 10000;
         return {
           label: 'Steps',
-          value: `${delta > 0 ? '+' : '−'}${formatCompactCount(delta)} steps`,
-          note: 'vs recent baseline',
-          tone: delta >= 0 ? 'good' as const : avgSteps7 >= 8000 ? 'neutral' as const : 'warn' as const,
+          value: `${formatCompactCount(avgSteps)}/day`,
+          note: goalDelta >= 0 ? 'above 10k goal' : 'below 10k goal',
+          tone: goalDelta >= 0 ? 'good' as const : avgSteps >= 8000 ? 'neutral' as const : 'warn' as const,
         };
       })();
 
-  const sleep: LineMoveDriver = sleepCoverage < 3 || avgSleep7 === null
+  const sleep: LineMoveDriver = sleepCoverage < 3 || avgSleep === null
     ? {
         label: 'Sleep',
         value: 'No sleep data',
@@ -5133,21 +5268,19 @@ function buildLineMoveDrivers(
         tone: 'neutral',
       }
     : (() => {
-        const baseline = avgSleepBaseline ?? 480;
-        const delta = avgSleep7 - baseline;
-        if (Math.abs(delta) < 20) {
+        if (avgSleepBaseline !== null && Math.abs(avgSleep - avgSleepBaseline) >= 20) {
           return {
             label: 'Sleep',
-            value: 'Steady',
-            note: `7-day avg ${formatMinutesCompact(avgSleep7)}`,
-            tone: avgSleep7 >= 450 ? 'good' as const : 'neutral' as const,
+            value: `${avgSleep > avgSleepBaseline ? '+' : '−'}${Math.abs(Math.round(avgSleep - avgSleepBaseline))}m`,
+            note: `vs ${previousWindowLabel}`,
+            tone: avgSleep > avgSleepBaseline ? 'good' as const : 'warn' as const,
           };
         }
         return {
           label: 'Sleep',
-          value: `${delta > 0 ? '+' : '−'}${Math.abs(Math.round(delta))}m`,
-          note: avgSleepBaseline === null ? 'vs 8h target' : 'vs recent baseline',
-          tone: delta >= 0 ? 'good' as const : 'warn' as const,
+          value: formatMinutesCompact(avgSleep),
+          note: avgSleep >= 480 ? 'meeting 8h target' : `${currentWindowLabel} sleep avg`,
+          tone: avgSleep >= 450 ? 'good' as const : 'neutral' as const,
         };
       })();
 
@@ -5155,19 +5288,26 @@ function buildLineMoveDrivers(
 }
 
 function WhyTheLineMovedStrip({
+  range,
   healthDays,
+  previousHealthDays,
+  readings,
   nutrition,
 }: {
-  healthDays: HealthStreamFetch['days'];
+  range: FitnessChartRange;
+  healthDays: HealthDay[];
+  previousHealthDays: HealthDay[];
+  readings: FitnessReading[];
   nutrition: TodaySnapshot['nutrition'];
 }) {
-  const drivers = buildLineMoveDrivers(healthDays, nutrition);
+  const drivers = buildLineMoveDrivers(healthDays, previousHealthDays, nutrition, range);
+  const summary = buildLineMoveSummary(readings, range);
   return (
     <section className="fit-line-moved" aria-label="Why the line moved">
       <div className="fit-line-moved-head">
         <div>
           <span className="fit-line-moved-eyebrow">Why the line moved</span>
-          <div className="fit-line-moved-copy">A tiny read on the levers most likely shaping the trend right now.</div>
+          <div className="fit-line-moved-copy">{summary}</div>
         </div>
       </div>
       <div className="fit-line-moved-grid">
@@ -5184,64 +5324,81 @@ function WhyTheLineMovedStrip({
 }
 
 function ConsistencyHeatmapCard({
-  endIso,
+  anchorIso,
+  range,
   healthDays,
   readings,
   calorieTarget,
 }: {
-  endIso: string;
-  healthDays: HealthStreamFetch['days'];
+  anchorIso: string;
+  range: FitnessChartRange;
+  healthDays: HealthDay[];
   readings: FitnessReading[];
   calorieTarget: number;
 }) {
-  const healthByDay = new Map(healthDays.map((day) => [isoDay(day.date), day]));
-  const weighInDays = new Set(readings.map((reading) => isoDay(reading.date)));
-  const dates: string[] = [];
-  const endDate = parseLocalDateInput(endIso);
+  const visibleHealthDays = filterRowsForTrajectoryRange(healthDays, range, anchorIso);
+  const visibleReadings = filterRowsForTrajectoryRange(readings, range, anchorIso);
+  const windowStartIso = earliestIso([visibleHealthDays[0]?.date, visibleReadings[0]?.date], anchorIso);
+  const { buckets, bucketSizeDays } = buildConsistencyBuckets(windowStartIso, anchorIso, range);
 
-  for (let offset = 27; offset >= 0; offset -= 1) {
-    const date = new Date(endDate);
-    date.setDate(endDate.getDate() - offset);
-    dates.push(localIsoDate(date));
-  }
-
-  const weighCells: ConsistencyCell[] = dates.map((iso) => ({
-    tone: weighInDays.has(iso) ? 'logged' : 'missing',
-    title: weighInDays.has(iso) ? `${iso}: weigh-in logged` : `${iso}: no weigh-in`,
-  }));
-
-  const intakeCells: ConsistencyCell[] = dates.map((iso) => {
-    const kcal = healthByDay.get(iso)?.nutrition?.dietaryEnergyKcal ?? null;
-    if (kcal === null) {
-      return { tone: 'missing', title: `${iso}: intake missing` };
-    }
-    if (kcal <= calorieTarget + 100) {
-      return { tone: 'good', title: `${iso}: ${Math.round(kcal).toLocaleString('en-GB')} kcal, on plan` };
-    }
-    if (kcal <= calorieTarget + 300) {
-      return { tone: 'neutral', title: `${iso}: ${Math.round(kcal).toLocaleString('en-GB')} kcal, slightly over` };
-    }
-    return { tone: 'warn', title: `${iso}: ${Math.round(kcal).toLocaleString('en-GB')} kcal, well over target` };
+  const daysForBucket = (bucket: ConsistencyBucket) => visibleHealthDays.filter((day) => {
+    const iso = isoDay(day.date);
+    return iso >= bucket.startIso && iso <= bucket.endIso;
+  });
+  const readingsForBucket = (bucket: ConsistencyBucket) => visibleReadings.filter((reading) => {
+    const iso = isoDay(reading.date);
+    return iso >= bucket.startIso && iso <= bucket.endIso;
   });
 
-  const stepCells: ConsistencyCell[] = dates.map((iso) => {
-    const steps = healthByDay.get(iso)?.activity.steps ?? null;
-    if (steps === null) {
-      return { tone: 'missing', title: `${iso}: step data missing` };
-    }
-    if (steps >= 10000) {
-      return { tone: 'good', title: `${iso}: ${Math.round(steps).toLocaleString('en-GB')} steps, goal hit` };
-    }
-    if (steps >= 7000) {
-      return { tone: 'neutral', title: `${iso}: ${Math.round(steps).toLocaleString('en-GB')} steps, close` };
-    }
-    return { tone: 'warn', title: `${iso}: ${Math.round(steps).toLocaleString('en-GB')} steps, below goal` };
+  const weighCells: ConsistencyCell[] = buckets.map((bucket) => {
+    const bucketReadings = readingsForBucket(bucket);
+    const label = bucketLabel(bucket);
+    return {
+      tone: bucketReadings.length > 0 ? 'logged' : 'missing',
+      title: bucketReadings.length > 0 ? `${label}: ${bucketReadings.length} weigh-in${bucketReadings.length === 1 ? '' : 's'} logged` : `${label}: no weigh-ins`,
+    };
   });
+
+  const intakeCells: ConsistencyCell[] = buckets.map((bucket) => {
+    const intakeDays = daysForBucket(bucket).filter((day) => (day.nutrition?.dietaryEnergyKcal ?? null) !== null);
+    const label = bucketLabel(bucket);
+    if (intakeDays.length === 0) {
+      return { tone: 'missing', title: `${label}: intake missing` };
+    }
+    const onPlanDays = intakeDays.filter((day) => (day.nutrition?.dietaryEnergyKcal ?? 0) <= calorieTarget + 100).length;
+    const closeDays = intakeDays.filter((day) => (day.nutrition?.dietaryEnergyKcal ?? 0) <= calorieTarget + 300).length;
+    if (onPlanDays / intakeDays.length >= 0.7) {
+      return { tone: 'good', title: `${label}: ${onPlanDays}/${intakeDays.length} days on plan` };
+    }
+    if (closeDays / intakeDays.length >= 0.5) {
+      return { tone: 'neutral', title: `${label}: ${onPlanDays}/${intakeDays.length} days on plan` };
+    }
+    return { tone: 'warn', title: `${label}: intake ran hot in most logged days` };
+  });
+
+  const stepCells: ConsistencyCell[] = buckets.map((bucket) => {
+    const bucketDays = daysForBucket(bucket).filter((day) => day.activity.steps !== null);
+    const label = bucketLabel(bucket);
+    if (bucketDays.length === 0) {
+      return { tone: 'missing', title: `${label}: step data missing` };
+    }
+    const goalDays = bucketDays.filter((day) => (day.activity.steps ?? 0) >= 10000).length;
+    const closeDays = bucketDays.filter((day) => (day.activity.steps ?? 0) >= 7000).length;
+    if (goalDays / bucketDays.length >= 0.7) {
+      return { tone: 'good', title: `${label}: step goal hit ${goalDays}/${bucketDays.length} days` };
+    }
+    if (closeDays / bucketDays.length >= 0.5) {
+      return { tone: 'neutral', title: `${label}: close on ${closeDays}/${bucketDays.length} days` };
+    }
+    return { tone: 'warn', title: `${label}: step goal missed most days` };
+  });
+
+  const weighLogged = weighCells.filter((cell) => cell.tone === 'logged').length;
   const intakeLogged = intakeCells.filter((cell) => cell.tone !== 'missing').length;
   const stepLogged = stepCells.filter((cell) => cell.tone !== 'missing').length;
 
   const rows = [
-    { key: 'weigh', label: 'Weigh-ins', meta: `${weighCells.filter((cell) => cell.tone === 'logged').length}/28 logged`, cells: weighCells },
+    { key: 'weigh', label: 'Weigh-ins', meta: `${weighLogged}/${weighCells.length} active`, cells: weighCells },
     { key: 'intake', label: 'Intake', meta: intakeLogged > 0 ? `${intakeCells.filter((cell) => cell.tone === 'good').length}/${intakeLogged} on plan` : 'No food logs', cells: intakeCells },
     { key: 'steps', label: 'Steps', meta: stepLogged > 0 ? `${stepCells.filter((cell) => cell.tone === 'good').length}/${stepLogged} hit goal` : 'No step sync', cells: stepCells },
   ] as const;
@@ -5251,9 +5408,9 @@ function ConsistencyHeatmapCard({
       <div className="fit-consistency-card-head">
         <div>
           <span className="fit-consistency-card-eyebrow">Consistency</span>
-          <div className="fit-consistency-card-title">Last 28 days</div>
+          <div className="fit-consistency-card-title">{trajectoryRangeHeadline(range)}</div>
         </div>
-        <span className="fit-consistency-card-meta">Weigh-in rhythm, intake target, step goal</span>
+        <span className="fit-consistency-card-meta">{consistencyBlockLabel(bucketSizeDays)} · weigh-in rhythm, intake target, step goal</span>
       </div>
 
       <div className="fit-consistency-rows">
@@ -5263,10 +5420,10 @@ function ConsistencyHeatmapCard({
               <span className="fit-consistency-row-label">{row.label}</span>
               <span className="fit-consistency-row-count">{row.meta}</span>
             </div>
-            <div className="fit-consistency-grid" role="presentation">
+            <div className="fit-consistency-grid" role="presentation" style={{ gridTemplateColumns: `repeat(${row.cells.length}, minmax(0, 1fr))` }}>
               {row.cells.map((cell, index) => (
                 <span
-                  key={`${row.key}-${dates[index]}`}
+                  key={`${row.key}-${index}`}
                   className={`fit-consistency-cell is-${row.key} is-${cell.tone}`}
                   title={cell.title}
                 />
@@ -5723,6 +5880,7 @@ export default function OperatorDashboardClient() {
   const [compose, setCompose] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
+  const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('3y');
 
   const saveLocal = useCallback((rs:FitnessReading[]) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(rs)); }, []);
 
@@ -5824,6 +5982,20 @@ export default function OperatorDashboardClient() {
 
   // Lift the Apple Health fetch so multiple slot renders share one network call.
   const healthStream = useHealthStream(authed ? opPw : '');
+  const healthDays = healthStream.days;
+  const trajectoryAnchorIso = latest ? isoDay(latest.date) : todayIso;
+  const visibleTrajectoryReadings = useMemo(
+    () => filterRowsForTrajectoryRange(dashboardSource, trajectoryRange, trajectoryAnchorIso),
+    [dashboardSource, trajectoryAnchorIso, trajectoryRange],
+  );
+  const visibleTrajectoryHealthDays = useMemo(
+    () => filterRowsForTrajectoryRange(healthDays, trajectoryRange, trajectoryAnchorIso),
+    [healthDays, trajectoryAnchorIso, trajectoryRange],
+  );
+  const previousTrajectoryHealthDays = useMemo(
+    () => previousRowsForTrajectoryRange(healthDays, trajectoryRange, trajectoryAnchorIso),
+    [healthDays, trajectoryAnchorIso, trajectoryRange],
+  );
 
   if (!authed) {
     return <Lock onUnlock={() => {
@@ -5944,7 +6116,6 @@ export default function OperatorDashboardClient() {
   const peakWeight = Math.max(...dashboardSource.map((row) => row.weight));
   const progress = peakWeight <= goal ? 100 : Math.max(0, Math.min(100, ((peakWeight - latest.weight) / (peakWeight - goal)) * 100));
   const syncSummary = cloudOk === null ? 'Local-first mode' : cloudOk ? (syncing ? 'Cloud syncing now' : 'Cloud sync active') : 'Local backup only';
-  const healthDays = healthStream.days;
   const latestHealthDay = healthDays[healthDays.length - 1] ?? null;
   const todayHealth = healthDays.find((d) => isoDay(d.date) === todayIso) ?? latestHealthDay;
   const caloriesInToday = todayHealth?.nutrition?.dietaryEnergyKcal ?? null;
@@ -6166,15 +6337,24 @@ export default function OperatorDashboardClient() {
               ]}
               phases={phaseMarkers}
               checkpointMarkers={goalCheckpoints}
+              range={trajectoryRange}
+              onRangeChange={setTrajectoryRange}
               targetWeight={goal}
               showRangeToggle
             />
           </section>
 
           <div className="fit-trajectory-support">
-            <WhyTheLineMovedStrip healthDays={healthDays} nutrition={todaySnap.nutrition} />
+            <WhyTheLineMovedStrip
+              range={trajectoryRange}
+              healthDays={visibleTrajectoryHealthDays}
+              previousHealthDays={previousTrajectoryHealthDays}
+              readings={visibleTrajectoryReadings}
+              nutrition={todaySnap.nutrition}
+            />
             <ConsistencyHeatmapCard
-              endIso={todayIso}
+              anchorIso={trajectoryAnchorIso}
+              range={trajectoryRange}
               healthDays={healthDays}
               readings={dashboardSource}
               calorieTarget={todaySnap.nutrition.intake}

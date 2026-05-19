@@ -27,6 +27,8 @@ interface CheckpointMarker {
   note?: string
 }
 
+export type FitnessChartRange = 'all' | '3y' | '1y' | '6m' | '30d' | '7d'
+
 interface ChartProps {
   title: ReactNode
   subtitle?: string
@@ -38,6 +40,9 @@ interface ChartProps {
   overlays?: ReactNode
   phases?: PhaseBand[]
   checkpointMarkers?: CheckpointMarker[]
+  range?: FitnessChartRange
+  defaultRange?: FitnessChartRange
+  onRangeChange?: (range: FitnessChartRange) => void
   showRangeToggle?: boolean
   targetWeight?: number
   /** Hide any reading whose value falls below this floor (default 60). */
@@ -160,12 +165,16 @@ export default function FitnessLineChart({
   overlays,
   phases = [],
   checkpointMarkers = [],
+  range: controlledRange,
+  defaultRange = '3y',
+  onRangeChange,
   showRangeToggle = false,
   targetWeight,
   minDisplayValue = 60,
 }: ChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-  const [range, setRange] = useState<'all' | '3y' | '1y' | '6m' | '30d' | '7d'>('3y')
+  const [internalRange, setInternalRange] = useState<FitnessChartRange>(defaultRange)
+  const activeRange = controlledRange ?? internalRange
   const w = 1120
   const h = 620
   const pad = { l: 56, r: 72, t: 40, b: 48 }
@@ -180,21 +189,21 @@ export default function FitnessLineChart({
   )
 
   const filteredPoints = useMemo(() => {
-    if (range === 'all' || !cleanedPoints.length) return cleanedPoints
+    if (activeRange === 'all' || !cleanedPoints.length) return cleanedPoints
     const cutoff = new Date(cleanedPoints[cleanedPoints.length - 1].date)
-    if (range === '3y') cutoff.setFullYear(cutoff.getFullYear() - 3)
-    else if (range === '1y') cutoff.setMonth(cutoff.getMonth() - 12)
-    else if (range === '6m') cutoff.setMonth(cutoff.getMonth() - 6)
-    else cutoff.setDate(cutoff.getDate() - (range === '30d' ? 30 : 7))
+    if (activeRange === '3y') cutoff.setFullYear(cutoff.getFullYear() - 3)
+    else if (activeRange === '1y') cutoff.setMonth(cutoff.getMonth() - 12)
+    else if (activeRange === '6m') cutoff.setMonth(cutoff.getMonth() - 6)
+    else cutoff.setDate(cutoff.getDate() - (activeRange === '30d' ? 30 : 7))
     return cleanedPoints.filter((point) => new Date(point.date).getTime() >= cutoff.getTime())
-  }, [cleanedPoints, range])
+  }, [activeRange, cleanedPoints])
 
   const fallbackDate = filteredPoints[0]?.date ?? cleanedPoints[0]?.date ?? '1970-01-01'
   const xMin = new Date(filteredPoints[0]?.date ?? fallbackDate).getTime()
   const latestPoint = filteredPoints[filteredPoints.length - 1] ?? null
   const latestTime = latestPoint ? new Date(latestPoint.date).getTime() : null
   const dayMs = 24 * 60 * 60 * 1000
-  const checkpointWindowDays = range === '7d' ? 0 : range === '30d' ? 30 : 90
+  const checkpointWindowDays = activeRange === '7d' ? 0 : activeRange === '30d' ? 30 : 90
   const values = filteredPoints.map((point) => point.value)
   const dataLow = values.length > 0 ? Math.min(...values) - 1 : minDisplayValue
   const dataHigh = values.length > 0 ? Math.max(...values) + 1 : minDisplayValue + 20
@@ -265,7 +274,7 @@ export default function FitnessLineChart({
       && Math.abs(annotation.value - latestPoint.value) < 0.05
     return time >= xMin && time <= xMax && !isLatestEcho
   })
-  const ranges = ['all', '3y', '1y', '6m', '30d', '7d'] as const
+  const ranges: FitnessChartRange[] = ['all', '3y', '1y', '6m', '30d', '7d']
   const ariaLabel = typeof title === 'string' ? title : 'Fitness timeline chart'
   const phaseClass = (label: string) => {
     const normalized = label.toLowerCase()
@@ -284,7 +293,6 @@ export default function FitnessLineChart({
   }
   const hoverTime = hover ? new Date(hover.date).getTime() : null
   const hoverPhase = phaseForTime(hoverTime)
-  const latestPhase = phaseForTime(latestTime)
   const hoverTargetGap = hover && targetWeight !== undefined
     ? hover.value - targetWeight
     : null
@@ -418,6 +426,11 @@ export default function FitnessLineChart({
     }
   })
 
+  const handleRangeSelect = (nextRange: FitnessChartRange) => {
+    if (controlledRange === undefined) setInternalRange(nextRange)
+    onRangeChange?.(nextRange)
+  }
+
   return (
     <div className="fit-panel fitness-chart-panel">
       <div className="fit-panel-head">
@@ -428,7 +441,7 @@ export default function FitnessLineChart({
         {showRangeToggle && (
           <div className="bc-range-toggle" aria-label="Chart range">
             {ranges.map((item) => (
-              <button key={item} type="button" className={range === item ? 'active' : ''} onClick={() => setRange(item)}>
+              <button key={item} type="button" className={activeRange === item ? 'active' : ''} onClick={() => handleRangeSelect(item)}>
                 {item === 'all' ? 'All' : item}
               </button>
             ))}
