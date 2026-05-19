@@ -5718,29 +5718,6 @@ export default function OperatorDashboardClient() {
               </div>
             </section>
 
-            <div className="fit-glance-row">
-              <div className="glance-card">
-                <div className="gc-kicker">Body fat</div>
-                <div className="gc-num">{latest.bodyFat.toFixed(1)}</div>
-                <div className="gc-lbl">current composition</div>
-                <div className={`gc-sub ${latest.bodyFat < 39 ? 'good' : 'warn'}`}>{fatStatus(latest.bodyFat)[0]}</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">BMI</div>
-                <div className="gc-num">{latest.bmi.toFixed(1)}</div>
-                <div className="gc-lbl">body mass index</div>
-                <div className={`gc-sub ${latest.bmi < 30 ? 'good' : 'warn'}`}>{bmiStatus(latest.bmi)[0]}</div>
-              </div>
-
-              <div className="glance-card">
-                <div className="gc-kicker">Logging</div>
-                <div className="gc-num">{cadence.count}</div>
-                <div className="gc-lbl">days logged</div>
-                <div className={`gc-sub ${cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn'}`}>{cadence.score}/100 cadence</div>
-              </div>
-            </div>
-
             <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
           </section>
         </section>
