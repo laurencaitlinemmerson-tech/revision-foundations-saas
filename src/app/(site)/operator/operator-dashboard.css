@@ -407,7 +407,7 @@
 }
 
 .fit-today {
-  margin: 4px 0 24px;
+  margin: 20px 0 36px;
 }
 
 .fit-today-head {
@@ -415,8 +415,8 @@
   justify-content: space-between;
   align-items: flex-end;
   gap: 16px;
-  margin-bottom: 14px;
-  padding-bottom: 12px;
+  margin-bottom: 26px;
+  padding-bottom: 22px;
   border-bottom: 0.5px solid var(--rule-soft);
   flex-wrap: wrap;
 }
@@ -430,9 +430,9 @@
 }
 
 .fit-today-copy {
-  margin-top: 6px;
+  margin-top: 10px;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--ink-soft);
   max-width: 60ch;
 }

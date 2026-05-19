@@ -5616,7 +5616,7 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '18px 0 16px' }} />
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '64px 0 40px' }} />
 
           <section className="fit-today">
             <div className="fit-today-head">
