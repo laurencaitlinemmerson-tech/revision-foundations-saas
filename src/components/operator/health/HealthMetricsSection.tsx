@@ -1284,36 +1284,42 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
           value={fmtInt(latest?.activity.steps ?? null)}
           baseline={`7d avg ${fmtInt(stepsAvg7)}`}
           delta={stepsDelta}
+          spark={last7.map((d) => d.activity.steps)}
         />
         <SnapshotCell
           label="Deficit"
-          value={deficitToday !== null ? `${Math.round(deficitToday)} kcal` : '—'}
-          baseline={deficitAvg7 !== null ? `7d avg ${Math.round(deficitAvg7)} kcal` : `Target ${GOALS.deficit} kcal`}
+          value={deficitToday !== null ? `${Math.round(deficitToday).toLocaleString('en-GB')} kcal` : '—'}
+          baseline={deficitAvg7 !== null ? `7d avg ${Math.round(deficitAvg7).toLocaleString('en-GB')} kcal` : `Target ${GOALS.deficit.toLocaleString('en-GB')} kcal`}
           delta={deficitDelta}
+          spark={nets7.map((n) => (n === null ? null : Math.max(0, -n)))}
         />
         <SnapshotCell
           label="Sleep"
           value={formatMinutes(latest?.sleep.totalMin ?? null)}
           baseline={`7d avg ${formatMinutes(sleepAvg7)}`}
           delta={sleepDelta}
+          spark={last7.map((d) => d.sleep.totalMin)}
         />
         <SnapshotCell
           label="Exercise"
           value={`${fmtInt(latest?.activity.exerciseMinutes ?? null)} min`}
           baseline={`Goal ${GOALS.exerciseMinutes}`}
           delta={exerciseDelta}
+          spark={last7.map((d) => d.activity.exerciseMinutes)}
         />
         <SnapshotCell
           label="Resting HR"
           value={fmtNum(latest?.heart.restingHr ?? null, 0, ' bpm')}
           baseline={`7d avg ${fmtNum(restingHrAvg7, 0, ' bpm')}`}
           delta={rhrDelta}
+          spark={last7.map((d) => d.heart.restingHr)}
         />
         <SnapshotCell
           label="HRV"
           value={fmtNum(latest?.heart.hrvMs ?? null, 0, ' ms')}
           baseline={`7d avg ${fmtNum(hrvAvg7, 0, ' ms')}`}
           delta={hrvDelta}
+          spark={last7.map((d) => d.heart.hrvMs)}
         />
       </div>
       )}
@@ -1811,18 +1817,85 @@ function PRCell({ label, value, date }: { label: string; value: string; date: st
   );
 }
 
-function SnapshotCell({ label, value, baseline, delta }: {
+function SnapshotCell({ label, value, baseline, delta, spark }: {
   label: string;
   value: string;
   baseline: string;
   delta: { text: string; tone: 'good' | 'warn' | 'neutral' };
+  spark?: Array<number | null>;
 }) {
+  const hasDelta = delta.text !== '—';
+  const trimmed = delta.text.trim();
+  const arrow = !hasDelta
+    ? null
+    : trimmed.startsWith('+')
+      ? '↑'
+      : trimmed.startsWith('-') || trimmed.startsWith('−')
+        ? '↓'
+        : null;
   return (
     <div className="op-snap-cell">
       <div className="op-snap-label">{label}</div>
       <div className="op-snap-value">{value}</div>
+      <div className="op-snap-spark-row">
+        {spark && spark.filter((v) => v !== null).length >= 2 ? (
+          <MiniSpark points={spark} tone={delta.tone} />
+        ) : (
+          <span className="op-snap-spark-empty" aria-hidden />
+        )}
+      </div>
+      {hasDelta ? (
+        <div className={`op-snap-delta ${delta.tone}`}>
+          {arrow ? <span className="op-snap-delta-arrow" aria-hidden>{arrow}</span> : null}
+          <span>{delta.text}</span>
+        </div>
+      ) : (
+        <div className="op-snap-delta neutral op-snap-delta-empty" aria-hidden>—</div>
+      )}
       <div className="op-snap-baseline muted">{baseline}</div>
-      <div className={`op-snap-delta ${delta.tone}`}>{delta.text}</div>
     </div>
+  );
+}
+
+function MiniSpark({ points, tone }: {
+  points: Array<number | null>;
+  tone: 'good' | 'warn' | 'neutral';
+}) {
+  const W = 100;
+  const H = 18;
+  const valid = points.flatMap((v, i) => (v === null ? [] : [{ v: v as number, i }]));
+  const values = valid.map((p) => p.v);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const denom = Math.max(1, points.length - 1);
+  const xs = valid.map((p) => (p.i / denom) * W);
+  const ys = valid.map((p) => H - ((p.v - min) / range) * (H - 3) - 1.5);
+  const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  const lastX = xs[xs.length - 1];
+  const lastY = ys[ys.length - 1];
+  const stroke =
+    tone === 'warn' ? 'var(--warn)' :
+    tone === 'good' ? 'var(--good)' :
+    'var(--ink-soft)';
+  return (
+    <svg
+      className="op-snap-spark"
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      <path
+        d={d}
+        fill="none"
+        stroke={stroke}
+        strokeWidth={1.1}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.55}
+        vectorEffect="non-scaling-stroke"
+      />
+      <circle cx={lastX} cy={lastY} r={1.6} fill={stroke} />
+    </svg>
   );
 }

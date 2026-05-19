@@ -407,7 +407,7 @@
 }
 
 .fit-today {
-  margin: 20px 0 36px;
+  margin: 24px 0 40px;
 }
 
 .fit-today-head {
@@ -415,25 +415,30 @@
   justify-content: space-between;
   align-items: flex-end;
   gap: 16px;
-  margin-bottom: 26px;
-  padding-bottom: 22px;
+  margin-bottom: 30px;
+  padding-bottom: 24px;
   border-bottom: 0.5px solid var(--rule-soft);
   flex-wrap: wrap;
 }
 
 .fit-today-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+  text-transform: none;
 }
 
 .fit-today-copy {
-  margin-top: 10px;
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--ink-soft);
+  margin-top: 12px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink-mute);
   max-width: 60ch;
 }
 
@@ -3326,8 +3331,9 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 0;
-  border: 0.5px solid var(--rule);
-  background: var(--paper);
+  border-top: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule-soft);
+  background: transparent;
   margin-bottom: 20px;
 }
 
@@ -3344,12 +3350,11 @@
 }
 
 .fitness-reference-shell .op-snap-cell {
-  padding: 16px 18px;
-  border-right: 0.5px solid var(--rule);
-  border-bottom: 0.5px solid var(--rule);
+  padding: 22px 22px 20px;
+  border-right: 0.5px solid var(--rule-soft);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .fitness-reference-shell .op-snap-cell:last-child {
@@ -3357,14 +3362,26 @@
 }
 
 @media (max-width: 980px) {
+  .fitness-reference-shell .op-snap-cell {
+    border-bottom: 0.5px solid var(--rule-soft);
+  }
   .fitness-reference-shell .op-snap-cell:nth-child(3n) {
     border-right: none;
+  }
+  .fitness-reference-shell .op-snap-cell:nth-last-child(-n + 3) {
+    border-bottom: none;
   }
 }
 
 @media (max-width: 560px) {
+  .fitness-reference-shell .op-snap-cell:nth-child(3n) {
+    border-right: 0.5px solid var(--rule-soft);
+  }
   .fitness-reference-shell .op-snap-cell:nth-child(2n) {
     border-right: none;
+  }
+  .fitness-reference-shell .op-snap-cell:nth-last-child(-n + 2) {
+    border-bottom: none;
   }
 }
 
@@ -3373,29 +3390,31 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink-mute);
-  font-weight: 500;
+  font-weight: 600;
+  margin-bottom: 2px;
 }
 
 .fitness-reference-shell .op-snap-value {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 22px;
+  font-size: 26px;
   color: var(--ink);
   font-weight: 400;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .fitness-reference-shell .op-snap-baseline {
   font-size: 10px;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
 }
 
 .fitness-reference-shell .op-snap-delta {
   font-size: 10px;
   letter-spacing: 0.04em;
-  margin-top: 4px;
+  margin-top: 2px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
 }
@@ -3664,7 +3683,7 @@
 
 .fitness-reference-shell .fit-top-nutrition-card {
   position: relative;
-  padding: clamp(28px, 4vw, 44px) clamp(28px, 5vw, 56px);
+  padding: clamp(20px, 2.5vw, 30px) clamp(22px, 3vw, 36px);
   background: rgba(252, 250, 246, 0.6);
   border: 0.5px solid rgba(26, 24, 21, 0.08);
   gap: 0;
@@ -3698,8 +3717,8 @@
 .fitness-reference-shell .op-nutri-editorial {
   display: flex;
   flex-direction: column;
-  gap: 36px;
-  padding-top: 32px;
+  gap: 22px;
+  padding-top: 20px;
 }
 
 /* ── Hero: big net + 7-day sparkline side by side ───────────────── */
@@ -3714,7 +3733,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
+  gap: 10px;
 }
 
 .fitness-reference-shell .op-nutri-hero-eyebrow {
@@ -3738,13 +3757,13 @@
 }
 
 .fitness-reference-shell .op-nutri-hero-num .value {
-  font-size: clamp(72px, 9vw, 112px);
+  font-size: clamp(26px, 2.6vw, 34px);
 }
 
 .fitness-reference-shell .op-nutri-hero-num .unit {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: clamp(20px, 2.2vw, 28px);
+  font-size: clamp(13px, 1.3vw, 16px);
   letter-spacing: -0.02em;
   color: var(--ink-mute);
 }
@@ -3755,10 +3774,10 @@
 
 .fitness-reference-shell .op-nutri-hero-status {
   position: relative;
-  padding-top: 12px;
+  padding-top: 10px;
   font-family: var(--font-display);
   font-style: italic;
-  font-size: clamp(16px, 1.6vw, 19px);
+  font-size: clamp(13px, 1.3vw, 16px);
   color: var(--ink);
   letter-spacing: -0.005em;
 }
@@ -3768,7 +3787,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 38px;
+  width: 28px;
   height: 1px;
   background: var(--brass);
 }
@@ -3851,7 +3870,7 @@
 /* ── Stacked ledger: four horizontal bars ─────────────────────── */
 .fitness-reference-shell .op-nutri-ledger {
   margin: 0;
-  padding: 28px 0 0;
+  padding: 18px 0 0;
   list-style: none;
   display: flex;
   flex-direction: column;
@@ -3860,12 +3879,12 @@
 
 .fitness-reference-shell .op-nutri-row {
   display: grid;
-  grid-template-columns: 120px minmax(0, 1fr) auto;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
   grid-template-rows: auto auto;
-  column-gap: 22px;
-  row-gap: 4px;
+  column-gap: 18px;
+  row-gap: 2px;
   align-items: center;
-  padding: 16px 0;
+  padding: 10px 0;
   border-top: 0.5px solid rgba(26, 24, 21, 0.08);
 }
 
@@ -3931,7 +3950,7 @@
   grid-column: 3;
   grid-row: 1;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--ink);
