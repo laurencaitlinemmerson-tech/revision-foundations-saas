@@ -5018,60 +5018,6 @@ function NutritionPieCard({
   );
 }
 
-function TopMacroDonut({ protein, carbs, fat }: { protein: number | null; carbs: number | null; fat: number | null }) {
-  const p = protein ?? 0;
-  const c = carbs ?? 0;
-  const f = fat ?? 0;
-  const kcalP = p * 4;
-  const kcalC = c * 4;
-  const kcalF = f * 9;
-  const total = kcalP + kcalC + kcalF;
-  const size = 148;
-  const r = 60;
-  const stroke = 16;
-  const c2pi = 2 * Math.PI * r;
-  if (total === 0) {
-    return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-label="Macro split unavailable">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--rule)" strokeWidth={stroke} />
-      </svg>
-    );
-  }
-  const slices = [
-    { k: 'p', value: kcalP, color: 'var(--good)' },
-    { k: 'c', value: kcalC, color: 'var(--brass)' },
-    { k: 'f', value: kcalF, color: 'var(--warn)' },
-  ];
-  let offset = 0;
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-label="Macro split">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--rule-soft)" strokeWidth={stroke} />
-      {slices.map((s) => {
-        const pct = s.value / total;
-        const dash = c2pi * pct;
-        const el = (
-          <circle
-            key={s.k}
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            fill="none"
-            stroke={s.color}
-            strokeWidth={stroke}
-            strokeDasharray={`${dash} ${c2pi - dash}`}
-            strokeDashoffset={-offset}
-            transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            opacity={0.85}
-          />
-        );
-        offset += dash;
-        return el;
-      })}
-      <text x={size / 2} y={size / 2 - 6} textAnchor="middle" fontSize={10} fill="var(--ink-mute)" letterSpacing="0.16em">KCAL</text>
-      <text x={size / 2} y={size / 2 + 18} textAnchor="middle" fontFamily="'Playfair Display', Georgia, serif" fontSize={24} fill="var(--ink)">{Math.round(total).toLocaleString('en-GB')}</text>
-    </svg>
-  );
-}
 
 function TopNutritionCaloriesCard({
   snap,
@@ -5164,31 +5110,6 @@ function TopNutritionCaloriesCard({
             </div>
           </div>
 
-          <div className="op-macros-row">
-            <TopMacroDonut protein={snap.proteinG} carbs={snap.carbsG} fat={snap.fatG} />
-            <dl className="op-macros-legend">
-              <div className="op-macros-legend-row">
-                <span className="op-macros-swatch" style={{ background: 'var(--good)' }} />
-                <dt>Protein</dt>
-                <dd>{snap.proteinG !== null ? `${Math.round(snap.proteinG)} g` : '—'}</dd>
-              </div>
-              <div className="op-macros-legend-row">
-                <span className="op-macros-swatch" style={{ background: 'var(--brass)' }} />
-                <dt>Carbs</dt>
-                <dd>{snap.carbsG !== null ? `${Math.round(snap.carbsG)} g` : '—'}</dd>
-              </div>
-              <div className="op-macros-legend-row">
-                <span className="op-macros-swatch" style={{ background: 'var(--warn)' }} />
-                <dt>Fat</dt>
-                <dd>{snap.fatG !== null ? `${Math.round(snap.fatG)} g` : '—'}</dd>
-              </div>
-              <div className="op-macros-legend-row">
-                <span className="op-macros-swatch" style={{ background: 'transparent', border: '0.5px solid var(--rule)' }} />
-                <dt>BMR</dt>
-                <dd>{fmtInt(bmr)} kcal</dd>
-              </div>
-            </dl>
-          </div>
         </>
       )}
     </article>
@@ -5607,6 +5528,14 @@ export default function OperatorDashboardClient() {
   const fiberToday = todayHealth?.nutrition?.fiberG ?? null;
   const waterMlToday = todayHealth?.nutrition?.waterMl ?? null;
   const stepsToday = todayHealth?.activity?.steps ?? null;
+  const goalGapTone = targetDelta <= 0 ? 'good' : targetDelta <= 12 ? 'neutral' : 'warn';
+  const bodyFatTone = latest.bodyFat < 33 ? 'good' : latest.bodyFat < 39 ? 'neutral' : 'warn';
+  const cadenceTone = cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn';
+  const trendSummary = sevenDayDelta <= -0.3
+    ? 'The recent line is easing down again. Keep the routine steady and let the trend keep compounding.'
+    : sevenDayDelta >= 0.3
+      ? 'The recent line has drifted up. Tightening the next few days should show quickly on the scale.'
+      : 'The recent line is almost flat. One more clean weigh-in will decide whether this turns into momentum.';
   const todaySnap: TodaySnapshot = {
     latest,
     state,
@@ -5644,21 +5573,56 @@ export default function OperatorDashboardClient() {
 
             <section className="fit-weight-feature">
               <div className="fit-weight-spotlight">
-                <div className="fit-kicker">This week&apos;s figure · {fmtDate(latest.date, { long: true })}</div>
-                <div className="fit-weight-feature-num">
-                  <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
-                  <span className="unit">kg</span>
+                <div className="fit-weight-spotlight-figure">
+                  <div className="fit-weight-spotlight-copy">
+                    <div className="fit-kicker fit-kicker-ink">Current weight</div>
+                    <div className="fit-weight-feature-num">
+                      <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
+                      <span className="unit">kg</span>
+                    </div>
+                    <div className="fit-weight-spotlight-facts">
+                      <div className="fit-weight-spotlight-fact">
+                        <span className="fit-weight-spotlight-fact-label">Goal gap</span>
+                        <span className={`fit-weight-spotlight-fact-value is-${goalGapTone}`}>
+                          {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)} kg`}
+                        </span>
+                        <span className="fit-weight-spotlight-fact-meta">
+                          {targetDelta <= 0 ? 'working line met' : `${goal.toFixed(1)} kg target`}
+                        </span>
+                      </div>
+                      <div className="fit-weight-spotlight-fact">
+                        <span className="fit-weight-spotlight-fact-label">Body fat</span>
+                        <span className={`fit-weight-spotlight-fact-value is-${bodyFatTone}`}>
+                          {latest.bodyFat.toFixed(1)}%
+                        </span>
+                        <span className="fit-weight-spotlight-fact-meta">{fatStatus(latest.bodyFat)[0]}</span>
+                      </div>
+                      <div className="fit-weight-spotlight-fact">
+                        <span className="fit-weight-spotlight-fact-label">Cadence</span>
+                        <span className={`fit-weight-spotlight-fact-value is-${cadenceTone}`}>
+                          {cadence.score}/100
+                        </span>
+                        <span className="fit-weight-spotlight-fact-meta">{cadence.count} days logged</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="fit-weight-spotlight-spark">
-                  <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
-                </div>
-                <div className="fit-weight-feature-meta">
-                  <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
-                    {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)}{' '}kg · prev. reading
-                  </span>
-                  <span className="fit-weight-feature-note">
-                    {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
-                  </span>
+                <div className="fit-weight-spotlight-meta">
+                  <div className="fit-weight-spotlight-meta-head">
+                    <div className="fit-kicker">This week&apos;s figure · {fmtDate(latest.date, { long: true })}</div>
+                    <p className="fit-weight-spotlight-summary">{trendSummary}</p>
+                  </div>
+                  <div className="fit-weight-spotlight-spark">
+                    <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
+                  </div>
+                  <div className="fit-weight-feature-meta">
+                    <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
+                      {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)}{' '}kg · vs 7d marker
+                    </span>
+                    <span className="fit-weight-feature-note">
+                      {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </section>
@@ -5687,6 +5651,7 @@ export default function OperatorDashboardClient() {
             </div>
 
             <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
+            <FoodBreakdownSection snap={todaySnap} />
           </section>
         </section>
         </Reveal>
