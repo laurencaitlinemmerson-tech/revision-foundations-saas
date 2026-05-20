@@ -4393,6 +4393,98 @@
   stroke: var(--ink);
 }
 
+/* ── Daily deficit history strip (30-day bar pattern) ────────── */
+.fitness-reference-shell .op-deficit-history {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 0.5px solid var(--rule-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fitness-reference-shell .op-deficit-history-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fitness-reference-shell .op-deficit-history-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-deficit-history-meta {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-deficit-history-grid {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  height: 72px;
+  align-items: end;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-deficit-history-target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 0.5px dashed var(--ink-mute);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fitness-reference-shell .op-deficit-cell {
+  height: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: stretch;
+  background: transparent;
+}
+
+.fitness-reference-shell .op-deficit-cell-bar {
+  display: block;
+  width: 100%;
+  min-height: 1px;
+}
+
+.fitness-reference-shell .op-deficit-cell.is-good .op-deficit-cell-bar {
+  background: var(--cell-good);
+}
+
+.fitness-reference-shell .op-deficit-cell.is-neutral .op-deficit-cell-bar {
+  background: var(--cell-brass);
+}
+
+.fitness-reference-shell .op-deficit-cell.is-warn .op-deficit-cell-bar {
+  background: var(--cell-warn);
+}
+
+.fitness-reference-shell .op-deficit-cell.is-missing {
+  border-left: 0.5px dashed var(--rule-soft);
+}
+
+.fitness-reference-shell .op-deficit-history-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-deficit-history-foot strong {
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Stacked ledger: four horizontal bars ─────────────────────── */
 .fitness-reference-shell .op-nutri-ledger {
   margin: 0;

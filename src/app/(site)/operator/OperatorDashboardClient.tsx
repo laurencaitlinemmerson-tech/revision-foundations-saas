@@ -5648,6 +5648,83 @@ function CalorieNetSparkline({ values, target }: { values: number[]; target: num
   );
 }
 
+function DeficitHistoryStrip({
+  healthDays,
+  bmr,
+  targetNet,
+  days = 30,
+}: {
+  healthDays: HealthStreamFetch['days'];
+  bmr: number;
+  targetNet: number; // negative kcal value — the target net (intake − burn) per day
+  days?: number;
+}) {
+  const window = healthDays.slice(-days);
+  if (window.length < 3) return null;
+
+  const netForDay = (day: HealthStreamFetch['days'][number]): number | null => {
+    const intake = day.nutrition?.dietaryEnergyKcal ?? null;
+    if (intake === null) return null;
+    return intake - (bmr + (day.activity.activeEnergyKcal ?? 0));
+  };
+
+  const items = window.map((day) => ({ date: day.date, net: netForDay(day) }));
+  const validNets = items.map((i) => i.net).filter((n): n is number => n !== null && Number.isFinite(n));
+  if (validNets.length < 3) return null;
+
+  const targetMag = Math.abs(targetNet);
+  const maxMag = Math.max(targetMag * 1.4, ...validNets.map((n) => Math.abs(n)));
+  const targetLinePct = (targetMag / maxMag) * 100;
+  const hitCount = validNets.filter((n) => n <= targetNet).length;
+  const avgNet = validNets.reduce((s, n) => s + n, 0) / validNets.length;
+
+  const fmtDateShort = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const fmtSignedKcal = (value: number) => {
+    const abs = Math.abs(Math.round(value)).toLocaleString('en-GB');
+    if (value > 0) return `+${abs}`;
+    if (value < 0) return `−${abs}`;
+    return abs;
+  };
+
+  return (
+    <div className="op-deficit-history" aria-label={`Daily net calories over the last ${items.length} days`}>
+      <div className="op-deficit-history-head">
+        <span className="op-deficit-history-label">Daily deficit · last {items.length} days</span>
+        <span className="op-deficit-history-meta">{hitCount}/{validNets.length} hit target</span>
+      </div>
+      <div className="op-deficit-history-grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
+        <span className="op-deficit-history-target" style={{ bottom: `${targetLinePct}%` }} aria-hidden="true" />
+        {items.map((it, i) => {
+          if (it.net === null) {
+            return (
+              <span
+                key={`${it.date}-${i}`}
+                className="op-deficit-cell is-missing"
+                title={`${fmtDateShort(it.date)} · no food log`}
+              />
+            );
+          }
+          const pct = Math.min(100, (Math.abs(it.net) / maxMag) * 100);
+          const tone = it.net <= targetNet ? 'good' : it.net < 0 ? 'neutral' : 'warn';
+          return (
+            <div
+              key={`${it.date}-${i}`}
+              className={`op-deficit-cell is-${tone}`}
+              title={`${fmtDateShort(it.date)} · ${fmtSignedKcal(it.net)} kcal`}
+            >
+              <span className="op-deficit-cell-bar" style={{ height: `${pct}%` }} />
+            </div>
+          );
+        })}
+      </div>
+      <div className="op-deficit-history-foot">
+        <span>Avg <strong>{fmtSignedKcal(avgNet)}</strong> kcal/day</span>
+        <span>Target {fmtSignedKcal(targetNet)} kcal</span>
+      </div>
+    </div>
+  );
+}
+
 function TopNutritionCaloriesCard({
   snap,
   healthDays,
@@ -5798,6 +5875,12 @@ function TopNutritionCaloriesCard({
               </ol>
             );
           })()}
+
+          <DeficitHistoryStrip
+            healthDays={healthDays}
+            bmr={bmr}
+            targetNet={targetNet}
+          />
         </div>
       )}
     </article>
