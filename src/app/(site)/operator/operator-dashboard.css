@@ -4393,24 +4393,24 @@
   stroke: var(--ink);
 }
 
-/* ── Daily deficit history strip (30-day bar pattern) ────────── */
-.fitness-reference-shell .op-deficit-history {
+/* ── Per-day deficit inspector (prev/next arrows) ───────────── */
+.fitness-reference-shell .op-day-inspector {
   margin-top: 22px;
   padding-top: 18px;
   border-top: 0.5px solid var(--rule-soft);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
-.fitness-reference-shell .op-deficit-history-head {
+.fitness-reference-shell .op-day-inspector-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.fitness-reference-shell .op-deficit-history-label {
+.fitness-reference-shell .op-day-inspector-label {
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -4418,71 +4418,134 @@
   color: var(--ink-mute);
 }
 
-.fitness-reference-shell .op-deficit-history-meta {
-  font-size: 11px;
-  color: var(--ink-soft);
+.fitness-reference-shell .op-day-inspector-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.fitness-reference-shell .op-deficit-history-grid {
-  position: relative;
-  display: grid;
-  gap: 2px;
-  height: 72px;
-  align-items: end;
-  border-bottom: 0.5px solid var(--rule-soft);
-}
-
-.fitness-reference-shell .op-deficit-history-target {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 0;
-  border-top: 0.5px dashed var(--ink-mute);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.fitness-reference-shell .op-deficit-cell {
-  height: 100%;
-  display: flex;
-  align-items: end;
-  justify-content: stretch;
+.fitness-reference-shell .op-day-inspector-arrow {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
+  color: var(--ink);
+  border: 0.5px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, opacity 160ms ease;
 }
 
-.fitness-reference-shell .op-deficit-cell-bar {
-  display: block;
-  width: 100%;
-  min-height: 1px;
+.fitness-reference-shell .op-day-inspector-arrow:hover:not(:disabled) {
+  background: var(--paper-deep);
+  border-color: var(--ink-soft);
 }
 
-.fitness-reference-shell .op-deficit-cell.is-good .op-deficit-cell-bar {
-  background: var(--cell-good);
+.fitness-reference-shell .op-day-inspector-arrow:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+  color: var(--ink-mute);
 }
 
-.fitness-reference-shell .op-deficit-cell.is-neutral .op-deficit-cell-bar {
-  background: var(--cell-brass);
+.fitness-reference-shell .op-day-inspector-date {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+  min-width: 18ch;
+  text-align: center;
 }
 
-.fitness-reference-shell .op-deficit-cell.is-warn .op-deficit-cell-bar {
-  background: var(--cell-warn);
-}
-
-.fitness-reference-shell .op-deficit-cell.is-missing {
-  border-left: 0.5px dashed var(--rule-soft);
-}
-
-.fitness-reference-shell .op-deficit-history-foot {
+.fitness-reference-shell .op-day-inspector-hero {
   display: flex;
-  justify-content: space-between;
-  font-size: 11.5px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px 16px;
+  border: 0.5px solid var(--rule-soft);
+  background: var(--paper-deep);
+}
+
+.fitness-reference-shell .op-day-inspector-hero-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-day-inspector-hero-num {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.fitness-reference-shell .op-day-inspector-hero-num .value {
+  font-size: 34px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.fitness-reference-shell .op-day-inspector-hero.is-good .value { color: var(--good); }
+.fitness-reference-shell .op-day-inspector-hero.is-warn .value { color: var(--warn); }
+.fitness-reference-shell .op-day-inspector-hero.is-neutral .value { color: var(--ink); }
+
+.fitness-reference-shell .op-day-inspector-hero-num .unit {
+  font-family: var(--font-body);
+  font-size: 12px;
   color: var(--ink-soft);
 }
 
-.fitness-reference-shell .op-deficit-history-foot strong {
+.fitness-reference-shell .op-day-inspector-hero-status {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-day-inspector-rows {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 18px;
+}
+
+.fitness-reference-shell .op-day-inspector-rows > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fitness-reference-shell .op-day-inspector-rows dt {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin: 0;
+}
+
+.fitness-reference-shell .op-day-inspector-rows dd {
+  margin: 0;
+  font-size: 13px;
   color: var(--ink);
-  font-weight: 500;
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .fitness-reference-shell .op-day-inspector-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .fitness-reference-shell .op-day-inspector-date {
+    min-width: 0;
+  }
 }
 
 /* ── Stacked ledger: four horizontal bars ─────────────────────── */

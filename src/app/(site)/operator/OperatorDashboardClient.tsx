@@ -5648,79 +5648,123 @@ function CalorieNetSparkline({ values, target }: { values: number[]; target: num
   );
 }
 
-function DeficitHistoryStrip({
+function DayDeficitInspector({
   healthDays,
   bmr,
   targetNet,
-  days = 30,
 }: {
   healthDays: HealthStreamFetch['days'];
   bmr: number;
   targetNet: number; // negative kcal value — the target net (intake − burn) per day
-  days?: number;
 }) {
-  const window = healthDays.slice(-days);
-  if (window.length < 3) return null;
-
   const netForDay = (day: HealthStreamFetch['days'][number]): number | null => {
     const intake = day.nutrition?.dietaryEnergyKcal ?? null;
     if (intake === null) return null;
     return intake - (bmr + (day.activity.activeEnergyKcal ?? 0));
   };
 
-  const items = window.map((day) => ({ date: day.date, net: netForDay(day) }));
-  const validNets = items.map((i) => i.net).filter((n): n is number => n !== null && Number.isFinite(n));
-  if (validNets.length < 3) return null;
+  // Only days with a food log — stepping through empty days is frustrating.
+  const loggedDays = useMemo(
+    () => healthDays
+      .map((day) => ({
+        date: day.date,
+        intake: day.nutrition?.dietaryEnergyKcal ?? null,
+        activeKcal: day.activity.activeEnergyKcal ?? 0,
+        net: netForDay(day),
+      }))
+      .filter((item) => item.net !== null && Number.isFinite(item.net)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [healthDays, bmr],
+  );
 
-  const targetMag = Math.abs(targetNet);
-  const maxMag = Math.max(targetMag * 1.4, ...validNets.map((n) => Math.abs(n)));
-  const targetLinePct = (targetMag / maxMag) * 100;
-  const hitCount = validNets.filter((n) => n <= targetNet).length;
-  const avgNet = validNets.reduce((s, n) => s + n, 0) / validNets.length;
+  // Start on the most recent logged day; clamp if data shrinks.
+  const [index, setIndex] = useState(Math.max(0, loggedDays.length - 1));
+  useEffect(() => {
+    if (loggedDays.length === 0) return;
+    if (index > loggedDays.length - 1) setIndex(loggedDays.length - 1);
+  }, [loggedDays.length, index]);
 
-  const fmtDateShort = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  if (loggedDays.length === 0) return null;
+
+  const safeIndex = Math.min(index, loggedDays.length - 1);
+  const day = loggedDays[safeIndex];
+  const net = day.net as number;
+  const tone = net <= targetNet ? 'good' : net < 0 ? 'neutral' : 'warn';
+  const status = net <= targetNet
+    ? 'Hit target deficit'
+    : net < 0
+      ? 'Below target deficit'
+      : 'In surplus';
+
+  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+  });
   const fmtSignedKcal = (value: number) => {
     const abs = Math.abs(Math.round(value)).toLocaleString('en-GB');
     if (value > 0) return `+${abs}`;
     if (value < 0) return `−${abs}`;
     return abs;
   };
+  const fmtInt = (value: number) => Math.round(value).toLocaleString('en-GB');
+
+  const burn = bmr + day.activeKcal;
+  const canPrev = safeIndex > 0;
+  const canNext = safeIndex < loggedDays.length - 1;
 
   return (
-    <div className="op-deficit-history" aria-label={`Daily net calories over the last ${items.length} days`}>
-      <div className="op-deficit-history-head">
-        <span className="op-deficit-history-label">Daily deficit · last {items.length} days</span>
-        <span className="op-deficit-history-meta">{hitCount}/{validNets.length} hit target</span>
+    <div className="op-day-inspector" aria-label="Daily calorie balance browser">
+      <div className="op-day-inspector-head">
+        <span className="op-day-inspector-label">Daily breakdown · {safeIndex + 1}/{loggedDays.length}</span>
+        <div className="op-day-inspector-nav">
+          <button
+            type="button"
+            className="op-day-inspector-arrow"
+            onClick={() => canPrev && setIndex(safeIndex - 1)}
+            disabled={!canPrev}
+            aria-label="Previous logged day"
+          >
+            ←
+          </button>
+          <span className="op-day-inspector-date">{fmtDate(day.date)}</span>
+          <button
+            type="button"
+            className="op-day-inspector-arrow"
+            onClick={() => canNext && setIndex(safeIndex + 1)}
+            disabled={!canNext}
+            aria-label="Next logged day"
+          >
+            →
+          </button>
+        </div>
       </div>
-      <div className="op-deficit-history-grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
-        <span className="op-deficit-history-target" style={{ bottom: `${targetLinePct}%` }} aria-hidden="true" />
-        {items.map((it, i) => {
-          if (it.net === null) {
-            return (
-              <span
-                key={`${it.date}-${i}`}
-                className="op-deficit-cell is-missing"
-                title={`${fmtDateShort(it.date)} · no food log`}
-              />
-            );
-          }
-          const pct = Math.min(100, (Math.abs(it.net) / maxMag) * 100);
-          const tone = it.net <= targetNet ? 'good' : it.net < 0 ? 'neutral' : 'warn';
-          return (
-            <div
-              key={`${it.date}-${i}`}
-              className={`op-deficit-cell is-${tone}`}
-              title={`${fmtDateShort(it.date)} · ${fmtSignedKcal(it.net)} kcal`}
-            >
-              <span className="op-deficit-cell-bar" style={{ height: `${pct}%` }} />
-            </div>
-          );
-        })}
+
+      <div className={`op-day-inspector-hero is-${tone}`}>
+        <span className="op-day-inspector-hero-eyebrow">Net</span>
+        <div className="op-day-inspector-hero-num">
+          <span className="value">{fmtSignedKcal(net)}</span>
+          <span className="unit">kcal</span>
+        </div>
+        <div className="op-day-inspector-hero-status">{status}</div>
       </div>
-      <div className="op-deficit-history-foot">
-        <span>Avg <strong>{fmtSignedKcal(avgNet)}</strong> kcal/day</span>
-        <span>Target {fmtSignedKcal(targetNet)} kcal</span>
-      </div>
+
+      <dl className="op-day-inspector-rows">
+        <div>
+          <dt>Eaten</dt>
+          <dd>{day.intake !== null ? fmtInt(day.intake) : '—'} kcal</dd>
+        </div>
+        <div>
+          <dt>Burned</dt>
+          <dd>{fmtInt(burn)} kcal</dd>
+        </div>
+        <div>
+          <dt>Breakdown</dt>
+          <dd>BMR {fmtInt(bmr)} + active {fmtInt(day.activeKcal)}</dd>
+        </div>
+        <div>
+          <dt>Target</dt>
+          <dd>{fmtSignedKcal(targetNet)} kcal</dd>
+        </div>
+      </dl>
     </div>
   );
 }
@@ -5876,7 +5920,7 @@ function TopNutritionCaloriesCard({
             );
           })()}
 
-          <DeficitHistoryStrip
+          <DayDeficitInspector
             healthDays={healthDays}
             bmr={bmr}
             targetNet={targetNet}
