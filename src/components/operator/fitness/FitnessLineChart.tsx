@@ -227,9 +227,60 @@ export default function FitnessLineChart({
         if (time > latestTime + checkpointWindowDays * dayMs) return false
         return marker.value >= low && marker.value <= high
       })
+
+  // Forward projection: linear regression on the trailing 30 days of
+  // readings, extended past the latest point until it either reaches the
+  // target weight or hits a 120-day horizon. Independent of the active
+  // range so the projection stays stable as the user scrubs ranges.
+  const projection = useMemo(() => {
+    if (!latestPoint || latestTime === null || cleanedPoints.length < 3) return null
+    const windowMs = 30 * dayMs
+    const recent = cleanedPoints.filter((p) => new Date(p.date).getTime() >= latestTime - windowMs)
+    if (recent.length < 3) return null
+    const t0 = new Date(recent[0].date).getTime()
+    const xs = recent.map((p) => (new Date(p.date).getTime() - t0) / dayMs)
+    const ys = recent.map((p) => p.value)
+    const n = xs.length
+    const meanX = xs.reduce((s, v) => s + v, 0) / n
+    const meanY = ys.reduce((s, v) => s + v, 0) / n
+    let num = 0
+    let den = 0
+    for (let i = 0; i < n; i += 1) {
+      num += (xs[i] - meanX) * (ys[i] - meanY)
+      den += (xs[i] - meanX) ** 2
+    }
+    if (den === 0) return null
+    const slope = num / den // kg per day
+    if (!Number.isFinite(slope) || Math.abs(slope) < 1e-6) return null
+    const latestT = (latestTime - t0) / dayMs
+    const fittedLatestY = meanY + slope * (latestT - meanX)
+    const horizonDays = 120
+    let days = horizonDays
+    let hitsGoal = false
+    if (targetWeight !== undefined) {
+      const daysToTarget = (targetWeight - fittedLatestY) / slope
+      if (daysToTarget > 0 && daysToTarget < horizonDays) {
+        days = daysToTarget
+        hitsGoal = true
+      }
+    }
+    const endTime = latestTime + days * dayMs
+    const endValue = fittedLatestY + slope * days
+    return {
+      startTime: latestTime,
+      startValue: latestPoint.value,
+      endTime,
+      endValue,
+      days,
+      slope,
+      hitsGoal,
+    }
+  }, [cleanedPoints, latestPoint, latestTime, targetWeight, dayMs])
+
   const xMax = Math.max(
     new Date(filteredPoints[filteredPoints.length - 1]?.date ?? fallbackDate).getTime(),
     ...visibleCheckpointMarkers.map((marker) => new Date(marker.date).getTime()),
+    projection ? projection.endTime : -Infinity,
   )
 
   const xForTime = (time: number) => pad.l + ((time - xMin) / Math.max(1, xMax - xMin)) * innerW
@@ -548,6 +599,40 @@ export default function FitnessLineChart({
           )}
           {gapBridgePath && <path d={gapBridgePath} className="bc-line-gap" style={{ stroke: color }} />}
           {primaryPath && <path d={primaryPath} className="bc-line-raw" style={{ stroke: color }} />}
+          {projection && latestPoint && (() => {
+            const x0 = x(latestPoint.date)
+            const y0 = y(latestPoint.value)
+            const x1 = xForTime(projection.endTime)
+            const y1 = y(projection.endValue)
+            const weeks = projection.days / 7
+            const labelOnLeft = x1 > pad.l + innerW * 0.75
+            const labelX = clamp(labelOnLeft ? x1 - 8 : x1 + 8, pad.l + 6, w - pad.r - 6)
+            const labelY = clamp(y1 - 8, pad.t + 12, pad.t + innerH - 6)
+            return (
+              <g className="bc-projection">
+                <path
+                  d={`M ${x0.toFixed(2)} ${y0.toFixed(2)} L ${x1.toFixed(2)} ${y1.toFixed(2)}`}
+                  fill="none"
+                  stroke={barFill}
+                  strokeWidth={1}
+                  strokeDasharray="4 5"
+                  strokeLinecap="round"
+                  opacity={0.7}
+                />
+                <circle cx={x1} cy={y1} r="3" fill={barFill} opacity={0.85} />
+                <text
+                  x={labelX}
+                  y={labelY}
+                  textAnchor={labelOnLeft ? 'end' : 'start'}
+                  className="bc-projection-label"
+                >
+                  {projection.hitsGoal
+                    ? `Goal · ~${Math.round(weeks)} wks`
+                    : `Trend → ${projection.endValue.toFixed(1)} kg`}
+                </text>
+              </g>
+            )
+          })()}
 
           {latestPoint && (
             <g>

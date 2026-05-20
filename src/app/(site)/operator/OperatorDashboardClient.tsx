@@ -5124,6 +5124,179 @@ function bucketLabel(bucket: ConsistencyBucket): string {
   return `${fmtDate(bucket.startIso)} → ${fmtDate(bucket.endIso)}`;
 }
 
+interface TrajectoryReadStats {
+  slopeKgPerWeek: number;
+  latestWeight: number;
+  recentCount: number;
+}
+
+function computeRecentTrendKgPerWeek(
+  readings: FitnessReading[],
+  horizonDays = 30,
+): TrajectoryReadStats | null {
+  if (readings.length < 3) return null;
+  const dayMs = 24 * 60 * 60 * 1000;
+  const sorted = [...readings].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
+  const latest = sorted[sorted.length - 1];
+  const cutoff = new Date(latest.date).getTime() - horizonDays * dayMs;
+  const recent = sorted.filter((r) => new Date(r.date).getTime() >= cutoff);
+  if (recent.length < 3) return null;
+  const t0 = new Date(recent[0].date).getTime();
+  const xs = recent.map((r) => (new Date(r.date).getTime() - t0) / dayMs);
+  const ys = recent.map((r) => r.weight);
+  const n = xs.length;
+  const meanX = xs.reduce((s, v) => s + v, 0) / n;
+  const meanY = ys.reduce((s, v) => s + v, 0) / n;
+  let num = 0;
+  let den = 0;
+  for (let i = 0; i < n; i += 1) {
+    num += (xs[i] - meanX) * (ys[i] - meanY);
+    den += (xs[i] - meanX) ** 2;
+  }
+  if (den === 0) return null;
+  const slopePerDay = num / den;
+  if (!Number.isFinite(slopePerDay)) return null;
+  return {
+    slopeKgPerWeek: slopePerDay * 7,
+    latestWeight: latest.weight,
+    recentCount: recent.length,
+  };
+}
+
+interface TrendInterpretation {
+  tone: 'good' | 'neutral' | 'warn';
+  headline: string;
+  copy: string;
+}
+
+function interpretTrend(slopeKgPerWeek: number, kgToGo: number): TrendInterpretation {
+  const abs = Math.abs(slopeKgPerWeek);
+  const needsLoss = kgToGo > 0.5;
+  const needsGain = kgToGo < -0.5;
+
+  if (abs < 0.08) {
+    return {
+      tone: 'neutral',
+      headline: 'Plateau',
+      copy: needsLoss
+        ? 'No net loss across the trailing 30 days. If intake felt right, run a fresh 3-day food log — creep is the usual culprit before the deficit comes back.'
+        : needsGain
+          ? 'No net gain across the trailing 30 days. Likely eating at maintenance — nudge intake up by 200–300 kcal/day if you want the line to move.'
+          : 'Holding steady at goal weight. Maintenance pace.',
+    };
+  }
+
+  if (needsLoss && slopeKgPerWeek < 0) {
+    if (slopeKgPerWeek < -0.9) {
+      return {
+        tone: 'warn',
+        headline: 'Cutting fast',
+        copy: `Losing ${abs.toFixed(2)} kg/wk sits above the safe upper limit (about 1 % bodyweight/wk). Risk of muscle loss and metabolic stall — ease the deficit toward −0.5 kg/wk.`,
+      };
+    }
+    if (slopeKgPerWeek < -0.3) {
+      return {
+        tone: 'good',
+        headline: 'Sustainable cut',
+        copy: `Losing ${abs.toFixed(2)} kg/wk lands in the sustainable range. Keep the deficit, keep the protein high, and the line keeps moving.`,
+      };
+    }
+    return {
+      tone: 'neutral',
+      headline: 'Cutting slow',
+      copy: `Losing ${abs.toFixed(2)} kg/wk — real progress, but the line could move faster. Safe to deepen the deficit another 100–200 kcal/day if you want.`,
+    };
+  }
+
+  if (needsLoss && slopeKgPerWeek > 0) {
+    return {
+      tone: 'warn',
+      headline: 'Going the wrong way',
+      copy: `Goal is to lose, but the trend is +${slopeKgPerWeek.toFixed(2)} kg/wk over the trailing 30 days. Log a fresh 3-day food window — the gap is almost certainly in unlogged intake.`,
+    };
+  }
+
+  if (needsGain && slopeKgPerWeek > 0) {
+    if (slopeKgPerWeek > 0.5) {
+      return {
+        tone: 'warn',
+        headline: 'Bulking fast',
+        copy: `Gaining ${slopeKgPerWeek.toFixed(2)} kg/wk is above lean-gain territory. Risk of carrying excess fat — pull the surplus back toward +0.2 kg/wk.`,
+      };
+    }
+    return {
+      tone: 'good',
+      headline: 'Lean gain',
+      copy: `Gaining ${slopeKgPerWeek.toFixed(2)} kg/wk — solid lean-bulk pace. Keep the protein high and the training honest.`,
+    };
+  }
+
+  if (needsGain && slopeKgPerWeek < 0) {
+    return {
+      tone: 'warn',
+      headline: 'Drifting down',
+      copy: `Goal is to gain, but the trend is ${slopeKgPerWeek.toFixed(2)} kg/wk. Bump intake by 200–300 kcal/day — likely under maintenance.`,
+    };
+  }
+
+  return {
+    tone: 'neutral',
+    headline: 'On the line',
+    copy: 'Trend matches the goal direction. Hold the inputs.',
+  };
+}
+
+function TrajectoryReadCard({
+  readings,
+  goal,
+}: {
+  readings: FitnessReading[];
+  goal: number;
+}) {
+  const trend = useMemo(() => computeRecentTrendKgPerWeek(readings), [readings]);
+  if (!trend) {
+    return (
+      <article className="fit-trajectory-read is-empty">
+        <span className="fit-trajectory-read-eyebrow">Read</span>
+        <p className="fit-trajectory-read-copy">
+          Need at least three weigh-ins in the trailing 30 days to read the trend. Keep logging.
+        </p>
+      </article>
+    );
+  }
+  const kgToGo = trend.latestWeight - goal;
+  const { tone, headline, copy } = interpretTrend(trend.slopeKgPerWeek, kgToGo);
+  const sign = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '');
+  const weeksToGoal =
+    trend.slopeKgPerWeek !== 0 && Math.sign(trend.slopeKgPerWeek) === Math.sign(-kgToGo)
+      ? Math.abs(kgToGo / trend.slopeKgPerWeek)
+      : null;
+
+  return (
+    <article className={`fit-trajectory-read is-${tone}`}>
+      <span className="fit-trajectory-read-eyebrow">Read</span>
+      <h3 className="fit-trajectory-read-headline">{headline}</h3>
+      <p className="fit-trajectory-read-copy">{copy}</p>
+      <dl className="fit-trajectory-read-stats">
+        <div>
+          <dt>To goal</dt>
+          <dd>{sign(kgToGo)}{Math.abs(kgToGo).toFixed(1)} kg</dd>
+        </div>
+        <div>
+          <dt>Trend (30d)</dt>
+          <dd>{sign(trend.slopeKgPerWeek)}{Math.abs(trend.slopeKgPerWeek).toFixed(2)} kg/wk</dd>
+        </div>
+        <div>
+          <dt>ETA at trend</dt>
+          <dd>{weeksToGoal === null ? '—' : weeksToGoal > 200 ? '200+ wks' : `~${Math.round(weeksToGoal)} wks`}</dd>
+        </div>
+      </dl>
+    </article>
+  );
+}
+
 function ConsistencyHeatmapCard({
   anchorIso,
   range,
@@ -6281,6 +6454,7 @@ export default function OperatorDashboardClient() {
           </section>
 
           <div className="fit-trajectory-support">
+            <TrajectoryReadCard readings={dashboardSource} goal={goal} />
             <ConsistencyHeatmapCard
               anchorIso={trajectoryAnchorIso}
               range={trajectoryRange}

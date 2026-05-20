@@ -1481,6 +1481,90 @@
   margin: 8px 0 28px;
 }
 
+.fit-trajectory-read {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 0 20px;
+  border-top: 0.5px solid var(--rule-soft);
+  background: transparent;
+}
+
+.fit-trajectory-read-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fit-trajectory-read-headline {
+  margin: 4px 0 6px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.08;
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.fit-trajectory-read.is-good .fit-trajectory-read-headline { color: var(--good); }
+.fit-trajectory-read.is-warn .fit-trajectory-read-headline { color: var(--warn); }
+.fit-trajectory-read.is-neutral .fit-trajectory-read-headline { color: var(--ink); }
+
+.fit-trajectory-read-copy {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 64ch;
+}
+
+.fit-trajectory-read.is-empty .fit-trajectory-read-copy {
+  font-style: italic;
+  color: var(--ink-mute);
+}
+
+.fit-trajectory-read-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--rule-soft);
+}
+
+.fit-trajectory-read-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fit-trajectory-read-stats dt {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin: 0;
+}
+
+.fit-trajectory-read-stats dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .fit-trajectory-read-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
 .fit-consistency-card {
   display: flex;
   flex-direction: column;
@@ -2629,6 +2713,15 @@
   font-size: 9px;
   letter-spacing: 0.12em;
   opacity: 0.78;
+}
+
+.bc-projection-label {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: var(--ink-soft);
 }
 
 .bc-current-line {
