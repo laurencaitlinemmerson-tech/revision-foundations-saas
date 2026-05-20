@@ -51,6 +51,8 @@ interface ChartProps {
   activeIso?: string | null
   /** Fires when the user scrubs the chart, or clears (mouse leave). */
   onActiveChange?: (iso: string | null) => void
+  /** Per-reading bar fill. Defaults to `color` so existing call sites don't need to change. */
+  barColor?: string
 }
 
 function fmtHoverDate(iso: string): string {
@@ -177,7 +179,9 @@ export default function FitnessLineChart({
   minDisplayValue = 60,
   activeIso,
   onActiveChange,
+  barColor,
 }: ChartProps) {
+  const barFill = barColor ?? color
   const [internalHoverIndex, setInternalHoverIndex] = useState<number | null>(null)
   const [internalRange, setInternalRange] = useState<FitnessChartRange>(defaultRange)
   const activeRange = controlledRange ?? internalRange
@@ -607,32 +611,9 @@ export default function FitnessLineChart({
             </g>
           )}
 
-          {/* Each reading is a filled bar rising from the x-axis to the
-              reading's y position. Width adapts to how many readings fit in
-              the visible window — wide on short ranges, slim on long ones —
-              and is clamped so they never disappear or become slabs. */}
-          {(() => {
-            if (filteredPoints.length === 0) return null
-            const natural = (innerW / filteredPoints.length) * 0.78
-            const barWidth = Math.max(1.4, Math.min(18, natural))
-            return filteredPoints.map((point, index) => {
-              const px = x(point.date)
-              const py = y(point.value)
-              const isActive = hoverIndex === index
-              return (
-                <rect
-                  key={`bar-${point.date}-${index}`}
-                  x={px - barWidth / 2}
-                  y={py}
-                  width={barWidth}
-                  height={Math.max(0, pad.t + innerH - py)}
-                  fill={color}
-                  opacity={isActive ? 0.78 : 0.22}
-                  pointerEvents="none"
-                />
-              )
-            })
-          })()}
+          {/* No per-reading markers — the line itself is the trajectory.
+              Hover state (crosshair + pin dot + tooltip, rendered above)
+              handles individual reading inspection. */}
           {/* Single overlay captures hover anywhere across the plot, then
               snaps to the nearest point by x. Much smoother than per-dot
               hit targets. */}

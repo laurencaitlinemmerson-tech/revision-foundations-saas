@@ -1,13 +1,18 @@
 .fitness-reference-shell {
   --paper: #fafaf8;
   --paper-deep: #f5f3ef;
+  --surface: #fbf8f3;
   --bone: #f3efe8;
   --ink: #1a1815;
   --ink-soft: #5a5750;
   --ink-mute: #9a948c;
   --ink-dim: rgba(26, 24, 21, 0.35);
+  --body: #5a5750;
+  --muted: #9a948c;
   --rule: rgba(26, 24, 21, 0.12);
   --rule-soft: rgba(26, 24, 21, 0.08);
+  --line: rgba(26, 24, 21, 0.11);
+  --soft-line: rgba(26, 24, 21, 0.07);
   --good: #1c7a67;
   --warn: #a14a57;
   --brass: #c4872f;
@@ -19,6 +24,15 @@
   --cell-good: rgba(28, 122, 103, 0.78);
   --cell-brass: rgba(196, 135, 47, 0.62);
   --cell-warn: rgba(161, 74, 87, 0.62);
+  --blue: #185fa5;
+  --blue-soft: #eaf1fa;
+  --green: #1c7a67;
+  --green-soft: #e4f2ec;
+  --gold: #633806;
+  --gold-soft: #faeeda;
+  --rose: #a14a57;
+  --rose-soft: #f9e8eb;
+  --card-shadow: 0 24px 60px rgba(26, 24, 21, 0.05);
   --shell-tint-a: rgba(124, 198, 255, 0.12);
   --shell-tint-b: rgba(255, 154, 122, 0.10);
   min-height: 100vh;
@@ -32,13 +46,18 @@
 .fitness-reference-shell[data-theme="dark"] {
   --paper: #1c1916;
   --paper-deep: #14110f;
-  --bone: #221e1a;
+  --surface: #221e1a;
+  --bone: #232019;
   --ink: #ebe5dc;
   --ink-soft: #b7afa3;
   --ink-mute: #7d756a;
   --ink-dim: rgba(235, 229, 220, 0.40);
+  --body: #b7afa3;
+  --muted: #7d756a;
   --rule: rgba(235, 229, 220, 0.14);
   --rule-soft: rgba(235, 229, 220, 0.08);
+  --line: rgba(235, 229, 220, 0.16);
+  --soft-line: rgba(235, 229, 220, 0.08);
   --good: #4cc1a7;
   --warn: #d68a96;
   --brass: #e4a85d;
@@ -50,6 +69,15 @@
   --cell-good: rgba(76, 193, 167, 0.62);
   --cell-brass: rgba(228, 168, 93, 0.52);
   --cell-warn: rgba(214, 138, 150, 0.55);
+  --blue: #7aa8d6;
+  --blue-soft: rgba(122, 168, 214, 0.14);
+  --green: #4cc1a7;
+  --green-soft: rgba(76, 193, 167, 0.14);
+  --gold: #e4a85d;
+  --gold-soft: rgba(228, 168, 93, 0.14);
+  --rose: #d68a96;
+  --rose-soft: rgba(214, 138, 150, 0.14);
+  --card-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   --shell-tint-a: rgba(76, 138, 200, 0.06);
   --shell-tint-b: rgba(228, 168, 93, 0.06);
 }
@@ -62,28 +90,32 @@
 
 .op-theme-toggle {
   position: fixed;
-  top: 18px;
-  right: 18px;
-  z-index: 60;
-  width: 34px;
-  height: 34px;
+  top: calc(82px + env(safe-area-inset-top));
+  right: 20px;
+  z-index: 130;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--paper);
-  color: var(--ink);
+  background: transparent;
+  color: var(--ink-soft);
   border: 0.5px solid var(--rule);
   cursor: pointer;
-  font-family: var(--font-display, Georgia, serif);
-  font-size: 16px;
-  line-height: 1;
   padding: 0;
   border-radius: 0;
-  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.op-theme-toggle svg {
+  width: 15px;
+  height: 15px;
+  display: block;
 }
 
 .op-theme-toggle:hover {
   background: var(--paper-deep);
+  color: var(--ink);
   border-color: var(--ink-soft);
 }
 
@@ -117,7 +149,7 @@
   padding: 5px 9px;
   border-radius: 999px;
   border: 1px solid var(--rule);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--paper);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -444,7 +476,7 @@
 .fitness-lock-btn,
 .fitness-action-btn.secondary,
 .fitness-action-btn.subtle {
-  background: rgba(255, 255, 255, 0.76);
+  background: var(--paper);
   color: var(--ink);
 }
 
@@ -530,7 +562,7 @@
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--paper);
 }
 
 .fit-today-track-pill.is-good {
@@ -901,7 +933,7 @@
 .glance-card {
   border: 0.5px solid var(--rule-soft);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--paper);
   padding: 18px 20px 20px;
   display: flex;
   flex-direction: column;
@@ -914,7 +946,7 @@
 
 .glance-card:hover {
   border-color: rgba(26, 24, 21, 0.18);
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--paper);
   transform: translateY(-1px);
 }
 
@@ -1280,11 +1312,11 @@
   padding: 20px 22px 22px;
   border: 0.5px solid var(--rule);
   border-radius: 10px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(251, 248, 243, 0.86) 100%);
+  background: var(--paper);
 }
 
 .fit-nba {
-  background: linear-gradient(180deg, rgba(250, 238, 218, 0.42) 0%, rgba(255, 255, 255, 0.86) 100%);
+  background: var(--paper);
   border-color: rgba(125, 76, 13, 0.18);
 }
 
@@ -1790,7 +1822,7 @@
   padding: 18px 20px 20px;
   border: 0.5px solid var(--rule-soft);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--paper);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -1851,7 +1883,7 @@
 }
 
 .fit-food-pie-track {
-  stroke: rgba(26, 24, 21, 0.075);
+  stroke: var(--rule-soft);
 }
 
 .fit-food-pie-segment {
@@ -2017,7 +2049,7 @@
   padding: 14px;
   border: 0.5px dashed var(--rule);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--paper);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -2055,7 +2087,7 @@
   padding: 16px 18px;
   border: 0.5px dashed var(--rule);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.42);
+  background: var(--paper);
 }
 
 .fit-food-empty.soft {
@@ -2079,7 +2111,7 @@
   padding: 18px 20px 20px;
   border: 1px solid var(--rule);
   border-radius: 4px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 243, 239, 0.94) 100%);
+  background: var(--paper);
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   gap: 18px 24px;
@@ -2123,7 +2155,7 @@
   padding: 14px;
   border: 1px solid var(--rule);
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--paper);
   text-align: left;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
@@ -2132,7 +2164,7 @@
 .fit-reading-stop:hover {
   transform: translateY(-1px);
   border-color: rgba(26, 24, 21, 0.24);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--paper);
 }
 
 .fit-reading-step {
@@ -2160,7 +2192,7 @@
   margin: 56px 0 12px;
   padding: 28px 30px 30px;
   border: 1px solid var(--rule);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(251, 248, 243, 0.96) 100%);
+  background: var(--paper);
 }
 
 .fit-inline-intro__kicker {
@@ -2229,7 +2261,7 @@
 }
 
 .fit-panel {
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--paper);
   border: 0.5px solid var(--rule-soft);
   border-radius: 10px;
   overflow: hidden;
@@ -2268,7 +2300,7 @@
   padding: 3px;
   border: 0.5px solid var(--rule);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--paper);
 }
 
 .bc-range-toggle button {
@@ -2289,7 +2321,7 @@
 
 .bc-range-toggle button:hover {
   color: var(--ink);
-  background: rgba(26, 24, 21, 0.04);
+  background: var(--rule-soft);
 }
 
 .bc-range-toggle button.active {
@@ -2300,7 +2332,7 @@
 .bc-chart-wrap {
   padding: 26px 14px 10px;
   position: relative;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--paper);
   border-radius: 14px;
   display: flex;
   justify-content: center;
@@ -2362,7 +2394,7 @@
   margin: 8px 12px 0;
   border: 0.5px solid var(--rule-soft);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--paper);
   overflow: hidden;
 }
 
@@ -2408,7 +2440,7 @@
   font-size: 24px;
   line-height: 1;
   letter-spacing: -0.03em;
-  color: oklch(0.29 0.035 255);
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1, "ss01" 1;
 }
@@ -2421,15 +2453,15 @@
 }
 
 .bc-clinical-cell.primary .bc-clinical-value {
-  color: oklch(0.27 0.05 250);
+  color: var(--ink);
 }
 
 .bc-clinical-cell.down .bc-clinical-value {
-  color: oklch(0.42 0.09 210);
+  color: var(--good);
 }
 
 .bc-clinical-cell.up .bc-clinical-value {
-  color: oklch(0.47 0.08 20);
+  color: var(--warn);
 }
 
 .fitness-chart .bc-data-dot {
@@ -2442,13 +2474,13 @@
 }
 
 .bc-grid {
-  stroke: rgba(44, 52, 68, 0.06);
+  stroke: var(--rule-soft);
   stroke-width: 0.5;
 }
 
 .bc-plot-bg {
-  fill: rgba(255, 255, 255, 0.88);
-  stroke: rgba(44, 52, 68, 0.06);
+  fill: var(--paper);
+  stroke: var(--rule-soft);
   stroke-width: 0.6;
 }
 
@@ -2485,14 +2517,14 @@
 }
 
 .bc-phase-divider {
-  stroke: rgba(44, 52, 68, 0.08);
+  stroke: var(--rule);
   stroke-width: 0.5;
   stroke-dasharray: 3 3;
-  opacity: 0.22;
+  opacity: 0.5;
 }
 
 .bc-phase-pill {
-  stroke: rgba(44, 52, 68, 0.12);
+  stroke: var(--rule);
   stroke-width: 0.6;
 }
 
@@ -2518,8 +2550,19 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  fill: rgba(44, 52, 68, 0.82);
+  fill: var(--ink-soft);
 }
+
+/* Phase bands + pills in dark mode: subdued warm tints instead of pastels. */
+.fitness-reference-shell[data-theme="dark"] .bc-phase-band.lean { fill: rgba(76, 193, 167, 0.30); }
+.fitness-reference-shell[data-theme="dark"] .bc-phase-band.bulk { fill: rgba(228, 168, 93, 0.28); }
+.fitness-reference-shell[data-theme="dark"] .bc-phase-band.cut { fill: rgba(214, 138, 150, 0.28); }
+.fitness-reference-shell[data-theme="dark"] .bc-phase-band.recomp { fill: rgba(122, 168, 214, 0.26); }
+
+.fitness-reference-shell[data-theme="dark"] .bc-phase-pill.lean { fill: rgba(76, 193, 167, 0.18); }
+.fitness-reference-shell[data-theme="dark"] .bc-phase-pill.bulk { fill: rgba(228, 168, 93, 0.18); }
+.fitness-reference-shell[data-theme="dark"] .bc-phase-pill.cut { fill: rgba(214, 138, 150, 0.18); }
+.fitness-reference-shell[data-theme="dark"] .bc-phase-pill.recomp { fill: rgba(122, 168, 214, 0.16); }
 
 .bc-line-raw {
   fill: none;
@@ -2539,7 +2582,7 @@
 }
 
 .bc-target-line {
-  stroke: oklch(0.55 0.07 196);
+  stroke: var(--blue);
   stroke-width: 1.1;
   stroke-dasharray: 5 5;
   opacity: 0.58;
@@ -2571,17 +2614,17 @@
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  fill: oklch(0.42 0.07 55);
+  fill: var(--ink);
 }
 
 .bc-checkpoint-sub {
   font-family: var(--font-body);
   font-size: 8.8px;
-  fill: rgba(90, 87, 80, 0.92);
+  fill: var(--ink-soft);
 }
 
 .bc-target-label {
-  fill: oklch(0.46 0.06 196);
+  fill: var(--blue);
   font-weight: 600;
   font-size: 9px;
   letter-spacing: 0.12em;
@@ -2639,9 +2682,8 @@
 }
 
 .fitness-tip-box {
-  fill: rgba(255, 255, 255, 0.96);
-  stroke: rgba(44, 52, 68, 0.12);
-  filter: drop-shadow(0 8px 18px oklch(0.28 0.015 255 / 0.07));
+  fill: var(--paper);
+  stroke: var(--rule);
 }
 
 .fitness-tip,
@@ -2696,7 +2738,7 @@
 }
 
 .bc-key .sw.raw {
-  background: oklch(0.7 0.12 76);
+  background: var(--accent);
 }
 
 .bc-key .sw.phase {
@@ -2707,7 +2749,7 @@
 .bc-key .sw.gap {
   height: 0;
   align-self: center;
-  border-top: 1.8px dashed oklch(0.70 0.12 76);
+  border-top: 1.8px dashed var(--accent);
   border-radius: 0;
   opacity: 0.62;
 }
@@ -2715,7 +2757,7 @@
 .bc-key .sw.checkpoint {
   height: 0;
   align-self: center;
-  border-top: 2px dashed oklch(0.48 0.08 55);
+  border-top: 2px dashed var(--accent);
   border-radius: 0;
 }
 
@@ -3028,10 +3070,10 @@
 }
 
 .fitness-photo-card {
-  border: 1px solid rgba(26, 24, 21, 0.08);
+  border: 1px solid var(--rule-soft);
   border-radius: 5px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.76);
+  background: var(--paper);
 }
 
 .fitness-photo-frame {
@@ -3246,7 +3288,7 @@
 }
 
 .fitness-reference-shell .op-health-card {
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--paper);
   border: 0.5px solid var(--rule);
   padding: 22px 22px 18px;
   display: flex;
@@ -3522,7 +3564,7 @@
 }
 
 .fitness-reference-shell .op-insight-card {
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--paper);
   border: 0.5px solid var(--rule);
   padding: 22px 24px 24px;
   display: flex;
@@ -3647,7 +3689,7 @@
   gap: 12px;
   padding: 8px 12px;
   border: 0.5px solid var(--rule);
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--paper);
 }
 
 .fitness-reference-shell .op-lifestyle-causal-row.tone-good { border-left: 2px solid var(--good); }
@@ -3832,7 +3874,7 @@
   margin-bottom: 24px;
   padding: 22px;
   border: 0.5px solid var(--rule);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 243, 239, 0.94) 100%);
+  background: var(--paper);
 }
 
 .fitness-reference-shell .op-card-wide {
@@ -4075,8 +4117,8 @@
 .fitness-reference-shell .fit-top-nutrition-card {
   position: relative;
   padding: clamp(20px, 2.5vw, 30px) clamp(22px, 3vw, 36px);
-  background: rgba(252, 250, 246, 0.6);
-  border: 0.5px solid rgba(26, 24, 21, 0.08);
+  background: var(--paper);
+  border: 0.5px solid var(--rule-soft);
   gap: 0;
   min-height: 0;
 }
@@ -4091,7 +4133,7 @@
 .fitness-reference-shell .op-nutri-head {
   align-items: center;
   padding-bottom: 22px;
-  border-bottom: 0.5px solid rgba(26, 24, 21, 0.08);
+  border-bottom: 0.5px solid var(--rule-soft);
 }
 
 .fitness-reference-shell .op-nutri-target {
@@ -4265,7 +4307,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  border-top: 0.5px solid rgba(26, 24, 21, 0.08);
+  border-top: 0.5px solid var(--rule-soft);
 }
 
 .fitness-reference-shell .op-nutri-row {
@@ -4276,7 +4318,7 @@
   row-gap: 2px;
   align-items: center;
   padding: 10px 0;
-  border-top: 0.5px solid rgba(26, 24, 21, 0.08);
+  border-top: 0.5px solid var(--rule-soft);
 }
 
 .fitness-reference-shell .op-nutri-row:first-child {
@@ -4403,7 +4445,7 @@
 
 .fitness-reference-shell .op-nutri-empty {
   padding: 20px 22px;
-  border-top: 0.5px solid rgba(26, 24, 21, 0.08);
+  border-top: 0.5px solid var(--rule-soft);
 }
 
 .fitness-reference-shell .op-nutri-empty p {
@@ -4833,7 +4875,7 @@
 
 .fitness-reference-shell .fitness-chart-panel .fit-panel-head {
   padding: 14px 0 12px;
-  border-bottom: 1px solid rgba(26, 24, 21, 0.08);
+  border-bottom: 1px solid var(--rule-soft);
   align-items: end;
 }
 
@@ -4857,8 +4899,8 @@
 
 .fitness-reference-shell .fitness-chart-panel .bc-range-toggle {
   margin-top: 2px;
-  background: rgba(255, 255, 255, 0.68);
-  border-color: rgba(26, 24, 21, 0.08);
+  background: var(--paper);
+  border-color: var(--rule-soft);
   backdrop-filter: blur(8px);
 }
 
@@ -4867,9 +4909,7 @@
   border-right: 0;
   border-left: 0;
   border-radius: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.46)),
-    rgba(250, 250, 248, 0.7);
+  background: var(--paper);
 }
 
 .fitness-reference-shell .fitness-chart-panel .bc-clinical-cell {
@@ -4922,7 +4962,7 @@
   }
 
   .bc-clinical-cell:nth-child(-n + 2) {
-    border-bottom: 1px solid rgba(26, 24, 21, 0.08);
+    border-bottom: 1px solid var(--rule-soft);
   }
 }
 

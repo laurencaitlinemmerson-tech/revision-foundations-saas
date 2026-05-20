@@ -4,6 +4,7 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
 import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
+import { Moon, Sun } from 'lucide-react';
 import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
@@ -86,14 +87,18 @@ function parseLocalDateInput(value: string): Date {
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
+// All colour fields are CSS variables defined in operator-dashboard.css under
+// .fitness-reference-shell (light) and .fitness-reference-shell[data-theme="dark"].
+// Pointing T at the vars makes every inline style that consumes T.* theme-aware
+// without touching the ~657 call sites.
 const T = {
-  paper:    '#FAFAF8', surface: '#FBF8F3',
-  ink:      '#1A1815', body:    '#5A5750', muted: '#9A948C',
-  line:     'rgba(26,24,21,0.11)', softLine: 'rgba(26,24,21,0.07)',
-  blue:     '#185FA5', blueSoft:  '#EAF1FA',
-  green:    '#1C7A67', greenSoft: '#E4F2EC',
-  gold:     '#633806', goldSoft:  '#FAEEDA',
-  rose:     '#A14A57', roseSoft:  '#F9E8EB',
+  paper:    'var(--paper)', surface: 'var(--surface)',
+  ink:      'var(--ink)',   body:    'var(--body)',   muted: 'var(--muted)',
+  line:     'var(--line)',  softLine: 'var(--soft-line)',
+  blue:     'var(--blue)',  blueSoft:  'var(--blue-soft)',
+  green:    'var(--green)', greenSoft: 'var(--green-soft)',
+  gold:     'var(--gold)',  goldSoft:  'var(--gold-soft)',
+  rose:     'var(--rose)',  roseSoft:  'var(--rose-soft)',
   display:  "'Playfair Display', Georgia, serif",
   sans:     "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
 } as const;
@@ -544,7 +549,7 @@ const kStyle: CSSProperties = {
   fontFamily: T.sans, fontSize: 10, fontWeight: 500,
   letterSpacing: '0.24em', textTransform: 'uppercase', color: T.muted,
 };
-const CARD_SHADOW = '0 24px 60px rgba(26,24,21,0.05)';
+const CARD_SHADOW = 'var(--card-shadow)';
 
 function Kicker({ children, color, style }: { children: React.ReactNode; color?: string; style?: CSSProperties }) {
   return <div style={{ ...kStyle, color: color ?? T.muted, ...style }}>{children}</div>;
@@ -575,7 +580,7 @@ function AccordionPanel({
       open={defaultOpen}
       style={{
         border: `1px solid ${T.line}`,
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(251,248,243,0.96) 100%)',
+        background: T.paper,
         padding: '0 20px',
         ...style,
       }}
@@ -763,7 +768,7 @@ function StatusStrip({ state, latest, goal, setTab }: {
             <button key={i} onClick={c.onClick} style={{
               padding:'16px 16px 14px',
               border:`1px solid ${T.line}`,
-              background:'rgba(255,255,255,0.76)',
+              background:T.paper,
               cursor:'pointer',
               textAlign:'left',
               fontFamily:T.sans,
@@ -872,7 +877,7 @@ function AnalyticsSection({
   return (
     <section style={{ marginBottom: 36 }}>
       <div style={{
-        background: `linear-gradient(180deg, ${T.paper} 0%, rgba(251,248,243,0.94) 100%)`,
+        background: T.paper,
         border: `0.5px solid ${T.line}`,
         padding: '22px 22px 24px',
       }}>
@@ -966,7 +971,7 @@ function AnalysisCard({
   const toneColor = tone === 'good' ? T.green : tone === 'warn' ? T.rose : T.muted;
   return (
     <article style={{
-      background: 'rgba(255,255,255,0.72)', border: `0.5px solid ${T.line}`, padding: '22px 22px 18px',
+      background: T.paper, border: `0.5px solid ${T.line}`, padding: '22px 22px 18px',
       display: 'flex', flexDirection: 'column', gap: 14, minHeight: 320,
     }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -1173,7 +1178,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
 
   return (
     <div style={{
-      background:'linear-gradient(135deg, rgba(251,248,243,0.98) 0%, rgba(255,255,255,0.92) 100%)',
+      background:T.paper,
       border:`1px solid ${T.line}`,
       boxShadow:CARD_SHADOW,
       padding:'clamp(20px, 4vw, 30px)',
@@ -1217,7 +1222,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
         </div>
         <div style={{
           border:`1px solid ${T.line}`,
-          background:'rgba(255,255,255,0.78)',
+          background:T.paper,
           padding:'18px 18px 16px',
         }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:12, marginBottom:14, flexWrap:'wrap' }}>
@@ -1242,7 +1247,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:12, marginTop:18 }}>
         {callouts.map((item) => (
-          <div key={item.kicker} style={{ border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.72)', padding:'14px 16px' }}>
+          <div key={item.kicker} style={{ border:`1px solid ${T.line}`, background:T.paper, padding:'14px 16px' }}>
             <Kicker style={{ marginBottom:8 }}>{item.kicker}</Kicker>
             <div style={{ fontFamily:T.display, fontSize:22, color:item.color, letterSpacing:'-0.02em', lineHeight:1.05, marginBottom:4 }}>{item.value}</div>
             <span style={{ fontFamily:T.sans, fontSize:11, color:T.body }}>{item.sub}</span>
@@ -1295,7 +1300,7 @@ function ThisWeek({ state, latest, setCompose, setTab }: {
       <Rule style={{ margin:'0 0 16px' }} />
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))', gap:12 }}>
-        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:'rgba(255,255,255,0.58)' }}>
+        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:6 }}>Next Monday Goal</Kicker>
           <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
             <span style={{ fontFamily:T.display, fontSize:24, color:T.gold, letterSpacing:'-0.01em', lineHeight:1 }}>{state.thisWeekTarget}</span>
@@ -1305,7 +1310,7 @@ function ThisWeek({ state, latest, setCompose, setTab }: {
             {targetDelta.toFixed(2)} kg
           </span>
         </div>
-        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:'rgba(255,255,255,0.58)' }}>
+        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:6 }}>Last weigh-in</Kicker>
           <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
             <span style={{ fontFamily:T.display, fontSize:24, color:T.ink, letterSpacing:'-0.01em', lineHeight:1 }}>{state.daysSinceWeighIn}</span>
@@ -1315,7 +1320,7 @@ function ThisWeek({ state, latest, setCompose, setTab }: {
             {overdue ? 'OVERDUE' : 'On schedule'}
           </span>
         </div>
-        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:'rgba(255,255,255,0.58)' }}>
+        <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:6 }}>Today&apos;s priority</Kicker>
           <button onClick={() => setTab('Plan')} style={{ background:'none', border:'none', cursor:'pointer', padding:0, textAlign:'left' }}>
             <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.ink, lineHeight:1.3, marginBottom:2 }}>
@@ -1718,7 +1723,7 @@ function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReadin
   const onTrack = state.direction !== 'gaining' && state.weighInStatus !== 'overdue';
 
   return (
-    <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.96)', boxShadow:CARD_SHADOW }}>
+    <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:T.paper, boxShadow:CARD_SHADOW }}>
       <div style={{ marginBottom:10, display:'flex', justifyContent:'space-between', gap:10, alignItems:'center', flexWrap:'wrap' }}>
         <span style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:T.muted, fontWeight:600 }}>
           Current goal
@@ -1987,7 +1992,7 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
         Safari can&apos;t read HealthKit directly, so the browser-safe route is to export your Apple Health data and import the body measurements into this ledger.
       </p>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:14, margin:'18px 0 22px' }}>
-        <label style={{ display:'block', padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.78)' }}>
+        <label style={{ display:'block', padding:'16px 18px', border:`1px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:8 }}>Upload export.xml</Kicker>
           <input
             type="file"
@@ -2004,7 +2009,7 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
           </p>
         </label>
 
-        <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.78)' }}>
+        <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:8 }}>Import status</Kicker>
           <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 8px' }}>
             {file ? file.name : 'No file selected yet.'}
@@ -2051,7 +2056,7 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
           <strong style={{ color:T.ink, fontWeight:500 }}>What to send.</strong> Send JSON with <code>date</code>, <code>weight</code>, and any of <code>bmi</code>, <code>bodyFat</code>, <code>water</code>, <code>waterMassKg</code>, <code>leanMassKg</code>, or <code>boneMassKg</code>. The route updates the existing day if it already exists, so repeated syncs don&apos;t create duplicate rows.
         </li>
       </ul>
-      <div style={{ marginTop:18, padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.72)' }}>
+      <div style={{ marginTop:18, padding:'16px 18px', border:`1px solid ${T.line}`, background:T.paper }}>
         <Kicker style={{ marginBottom:8 }}>Shortcut payload example</Kicker>
         <pre style={{ margin:0, whiteSpace:'pre-wrap', fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:11, lineHeight:1.7, color:T.ink }}>
 {`POST /api/operator/fitness/auto-sync
@@ -2074,7 +2079,7 @@ x-operator-pw: your operator password
 function FitPill({
   children,
   color = T.muted,
-  background = 'rgba(255,255,255,0.72)',
+  background = T.paper,
 }: {
   children: React.ReactNode;
   color?: string;
@@ -2116,7 +2121,7 @@ function FitPanel({
 }) {
   return (
     <section style={{
-      background:'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(251,248,243,0.98) 100%)',
+      background:T.paper,
       border:`1px solid ${T.line}`,
       boxShadow:CARD_SHADOW,
       overflow:'hidden',
@@ -2217,7 +2222,7 @@ function TodayGlanceStrip({
         <div style={{
           flex:'1 1 360px',
           minWidth:320,
-          background:'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,248,243,0.98) 100%)',
+          background:T.paper,
           border:`1px solid ${T.line}`,
           borderRadius:8,
           padding:'18px 20px',
@@ -2373,7 +2378,7 @@ function DashboardHero({
 
   return (
     <section style={{
-      background:'rgba(255,255,255,0.96)',
+      background:T.paper,
       border:`1px solid ${T.line}`,
       boxShadow:CARD_SHADOW,
       overflow:'hidden',
@@ -2614,7 +2619,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(145deg, ${T.paper} 0%, ${T.surface} 60%, ${T.goldSoft} 100%)`, padding:24 }}>
-      <form onSubmit={submit} style={{ width:'100%', maxWidth:400, textAlign:'center', padding:'32px 28px 36px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.82)', boxShadow:CARD_SHADOW, backdropFilter:'blur(8px)' }}>
+      <form onSubmit={submit} style={{ width:'100%', maxWidth:400, textAlign:'center', padding:'32px 28px 36px', border:`1px solid ${T.line}`, background:T.paper, boxShadow:CARD_SHADOW, backdropFilter:'blur(8px)' }}>
         <Kicker style={{ marginBottom:20 }}>Vol. 01 · Restricted Access</Kicker>
         <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize: 24, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
           Operator.
@@ -2722,7 +2727,7 @@ function DetailLaunchpad({ setCompose, setTab }: { setCompose: (open: boolean) =
         {actions.map((item) => (
           <button key={item.label} onClick={item.action} style={{
             border:`1px solid ${T.line}`,
-            background:'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(251,248,243,0.96) 100%)',
+            background:T.paper,
             padding:'16px 16px 14px',
             textAlign:'left',
             cursor:'pointer',
@@ -3466,7 +3471,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
                 </p>
 
                 {/* BF projection */}
-                <div style={{ display:'inline-flex', gap:24, marginBottom:16, padding:'10px 14px', background: ph.current ? 'rgba(255,255,255,0.5)' : T.surface }}>
+                <div style={{ display:'inline-flex', gap:24, marginBottom:16, padding:'10px 14px', background: ph.current ? T.paper : T.surface }}>
                   <div>
                     <Kicker style={{ marginBottom:3 }}>Start BF</Kicker>
                     <span style={{ fontFamily:T.display, fontSize:20, color:T.rose }}>{ph.startBF.toFixed(1)}%</span>
@@ -3928,7 +3933,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
   return (
     <div>
       <section style={{
-        background:'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,248,243,0.98) 100%)',
+        background:T.paper,
         border:`1px solid ${T.line}`,
         boxShadow:CARD_SHADOW,
         overflow:'hidden',
@@ -3956,7 +3961,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
               </div>
             </div>
 
-            <div style={{ flex:'1 1 260px', padding:'16px 18px', border:`1px solid ${T.line}`, background:'rgba(255,255,255,0.76)' }}>
+            <div style={{ flex:'1 1 260px', padding:'16px 18px', border:`1px solid ${T.line}`, background:T.paper }}>
               <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', color:T.muted, marginBottom:8 }}>
                 Current body fat
               </div>
@@ -4004,7 +4009,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
             title={<>Weight <em style={{ color:T.gold }}>timeline</em></>}
             subtitle="Raw readings, a smoothed line, and phase bands in the calmer reference layout."
             actions={
-              <div style={{ display:'inline-flex', border:`1px solid ${T.line}`, borderRadius:999, overflow:'hidden', background:'rgba(255,255,255,0.88)' }}>
+              <div style={{ display:'inline-flex', border:`1px solid ${T.line}`, borderRadius:999, overflow:'hidden', background:T.paper }}>
                 {([
                   { key:'all', label:'All' },
                   { key:'2y', label:'2Y' },
@@ -5893,7 +5898,9 @@ export default function OperatorDashboardClient() {
     const min = goalIsCloseEnoughToPlot
       ? Math.floor(Math.min(observedMin - lowerPad, goal - 1) * 2) / 2
       : Math.floor((observedMin - lowerPad) * 2) / 2;
-    const max = Math.ceil(observedMax + upperPad);
+    // Pin the ceiling to at least 100kg so the trajectory sits centered
+    // rather than hugging the top edge.
+    const max = Math.max(100, Math.ceil(observedMax + upperPad));
     return { min, max };
   }, [dashboardSource, derivedSource, goal]);
 
@@ -5902,11 +5909,30 @@ export default function OperatorDashboardClient() {
   const healthDays = healthStream.days;
   const trajectoryAnchorIso = latest ? isoDay(latest.date) : todayIso;
 
+  const themeToggleButton = (
+    <button
+      type="button"
+      className="op-theme-toggle"
+      onClick={toggleTheme}
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    >
+      {theme === 'dark'
+        ? <Sun aria-hidden="true" strokeWidth={1.4} />
+        : <Moon aria-hidden="true" strokeWidth={1.4} />}
+    </button>
+  );
+
   if (!authed) {
-    return <Lock onUnlock={() => {
-      // auth state was set in Lock before calling onUnlock
-      handleUnlock();
-    }} />;
+    return (
+      <div className="fitness-reference-shell" data-theme={theme}>
+        {themeToggleButton}
+        <Lock onUnlock={() => {
+          // auth state was set in Lock before calling onUnlock
+          handleUnlock();
+        }} />
+      </div>
+    );
   }
 
   if (!latest || !state) {
@@ -5923,6 +5949,7 @@ export default function OperatorDashboardClient() {
 
     return (
       <div className="fitness-reference-shell" data-theme={theme}>
+        {themeToggleButton}
         <main className="wrap fitness-redesign" id="operator-overview">
           <section style={{
             minHeight: '100vh',
@@ -5934,7 +5961,7 @@ export default function OperatorDashboardClient() {
             <div style={{
               width: 'min(680px, 100%)',
               border: `1px solid ${T.line}`,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(251,248,243,0.96) 100%)',
+              background: T.paper,
               boxShadow: CARD_SHADOW,
               padding: '32px clamp(22px, 4vw, 40px)',
             }}>
@@ -5951,15 +5978,15 @@ export default function OperatorDashboardClient() {
                 gap: 12,
                 marginBottom: 22,
               }}>
-                <div style={{ border: `1px solid ${T.line}`, background: 'rgba(255,255,255,0.74)', padding: '14px 16px' }}>
+                <div style={{ border: `1px solid ${T.line}`, background: T.paper, padding: '14px 16px' }}>
                   <Kicker style={{ marginBottom: 8 }}>Status</Kicker>
                   <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, lineHeight: 1.05 }}>{statusLabel}</div>
                 </div>
-                <div style={{ border: `1px solid ${T.line}`, background: 'rgba(255,255,255,0.74)', padding: '14px 16px' }}>
+                <div style={{ border: `1px solid ${T.line}`, background: T.paper, padding: '14px 16px' }}>
                   <Kicker style={{ marginBottom: 8 }}>Today</Kicker>
                   <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, lineHeight: 1.05 }}>{fmtDate(todayIso, { long: true })}</div>
                 </div>
-                <div style={{ border: `1px solid ${T.line}`, background: 'rgba(255,255,255,0.74)', padding: '14px 16px' }}>
+                <div style={{ border: `1px solid ${T.line}`, background: T.paper, padding: '14px 16px' }}>
                   <Kicker style={{ marginBottom: 8 }}>Cloud sync</Kicker>
                   <div style={{ fontFamily: T.display, fontSize: 22, color: cloudOk === false ? T.rose : cloudOk ? T.green : T.gold, lineHeight: 1.05 }}>
                     {cloudOk === false ? 'Setup required' : cloudOk ? 'Connected' : 'Checking'}
@@ -6136,15 +6163,7 @@ export default function OperatorDashboardClient() {
   };
   return (
     <div className="fitness-reference-shell" data-theme={theme}>
-      <button
-        type="button"
-        className="op-theme-toggle"
-        onClick={toggleTheme}
-        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
-      </button>
+      {themeToggleButton}
       <main className="wrap fitness-redesign" id="operator-overview">
         <Reveal>
         <section className="fit-anchor-section" id="operator-today">
@@ -6234,6 +6253,7 @@ export default function OperatorDashboardClient() {
               subtitle="Every daily reading, connected in order, with phase context across the selected window."
               points={buildWeightSeries(dashboardSource)}
               color={theme === 'dark' ? '#d48a95' : '#b76e79'}
+              barColor={theme === 'dark' ? '#c8b3e8' : '#aa92d3'}
               minY={chartBounds.min}
               maxY={chartBounds.max}
               annotations={[
