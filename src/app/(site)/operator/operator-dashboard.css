@@ -5866,3 +5866,846 @@
 .fitness-reference-shell .op-health-section--slot {
   margin: 0;
 }
+
+.fitness-reference-shell .op-workout-studio {
+  margin-top: 28px;
+}
+
+.fitness-reference-shell .op-workout-studio-head {
+  align-items: baseline;
+}
+
+.fitness-reference-shell .op-workout-studio-head h3 em {
+  font-style: italic;
+  color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-headside {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.fitness-reference-shell .op-workout-studio-headside .pill {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brass-deep);
+}
+
+.fitness-reference-shell .op-workout-studio-headnote {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-body {
+  padding: 26px 28px 28px;
+}
+
+.fitness-reference-shell .op-workout-studio-planbar {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+  margin: 0 0 24px;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-tab {
+  position: relative;
+  padding: 10px 18px 12px;
+  margin-bottom: -0.5px;
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  color: var(--ink-mute);
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-tab:first-child {
+  padding-left: 0;
+}
+
+.fitness-reference-shell .op-workout-studio-tab:hover {
+  color: var(--ink-soft);
+  border-color: transparent;
+  transform: none;
+}
+
+.fitness-reference-shell .op-workout-studio-tab.is-active {
+  color: var(--ink);
+  background: transparent;
+  border-color: transparent;
+  border-bottom-color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-intro {
+  display: block;
+  margin: 0 0 26px;
+}
+
+.fitness-reference-shell .op-workout-studio-intro > div {
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.fitness-reference-shell .op-workout-studio-intro > div + div {
+  display: none;
+}
+
+.fitness-reference-shell .op-workout-studio-intro > div .op-workout-studio-kicker {
+  display: none;
+}
+
+.fitness-reference-shell .op-workout-studio-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-intro p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-style: italic;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--ink-soft);
+  max-width: 56ch;
+}
+
+.fitness-reference-shell .op-workout-studio-cadence,
+.fitness-reference-shell .op-workout-studio-empty,
+.fitness-reference-shell .op-workout-studio-itemtop p,
+.fitness-reference-shell .op-workout-studio-detail {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--body);
+}
+
+.fitness-reference-shell .op-workout-studio-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.85fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.fitness-reference-shell .op-workout-studio-main,
+.fitness-reference-shell .op-workout-studio-side {
+  min-width: 0;
+}
+
+.fitness-reference-shell .op-workout-studio-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-left: 28px;
+  border-left: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-command,
+.fitness-reference-shell .op-workout-studio-panel,
+.fitness-reference-shell .op-workout-studio-item {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.fitness-reference-shell .op-workout-studio-command {
+  padding: 0 0 24px;
+  margin-bottom: 24px;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-commandtop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.fitness-reference-shell .op-workout-studio-restrow,
+.fitness-reference-shell .op-workout-studio-commandfoot,
+.fitness-reference-shell .op-workout-studio-targethead,
+.fitness-reference-shell .op-workout-studio-panelhead,
+.fitness-reference-shell .op-workout-studio-liveitem,
+.fitness-reference-shell .op-workout-studio-historyitem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fitness-reference-shell .op-workout-studio-timer {
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.fitness-reference-shell .op-workout-studio-timeractions,
+.fitness-reference-shell .op-workout-studio-restactions {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.fitness-reference-shell .op-workout-studio-ghost,
+.fitness-reference-shell .op-workout-studio-mini,
+.fitness-reference-shell .op-workout-studio-restbtn {
+  padding: 4px 0;
+  border: none;
+  border-bottom: 0.5px solid var(--rule);
+  border-radius: 0;
+  color: var(--ink-soft);
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-ghost:hover,
+.fitness-reference-shell .op-workout-studio-mini:hover,
+.fitness-reference-shell .op-workout-studio-restbtn:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-ghost.is-live {
+  color: var(--ink);
+  background: transparent;
+  border-bottom-color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-progressline,
+.fitness-reference-shell .op-workout-studio-targetbar {
+  height: 1px;
+  border-radius: 0;
+  background: var(--rule-soft);
+  overflow: hidden;
+}
+
+.fitness-reference-shell .op-workout-studio-progressline {
+  margin: 18px 0 10px;
+}
+
+.fitness-reference-shell .op-workout-studio-progressline span,
+.fitness-reference-shell .op-workout-studio-targetbar span {
+  display: block;
+  height: 100%;
+  border-radius: 0;
+  background: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-progressmeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-progressmeta strong,
+.fitness-reference-shell .op-workout-studio-restvalue,
+.fitness-reference-shell .op-workout-studio-targethead strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.fitness-reference-shell .op-workout-studio-restrow {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-reststate {
+  min-width: 0;
+}
+
+.fitness-reference-shell .op-workout-studio-restvalue {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.fitness-reference-shell .op-workout-studio-commandfoot {
+  margin-top: 18px;
+}
+
+.fitness-reference-shell .op-workout-studio-save {
+  padding: 6px 0;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-save:hover {
+  opacity: 0.65;
+  transform: none;
+}
+
+.fitness-reference-shell .op-workout-studio-textbtn {
+  border: none;
+  background: transparent;
+  color: var(--ink-mute);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-textbtn:hover {
+  color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-savehint {
+  min-height: 16px;
+  margin-top: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  opacity: 0.85;
+  transition: color 160ms ease, opacity 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-savehint.is-visible {
+  color: var(--good);
+  opacity: 1;
+}
+
+.fitness-reference-shell .op-workout-studio-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 18px;
+  padding: 22px 0;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-item:last-child {
+  border-bottom: none;
+}
+
+.fitness-reference-shell .op-workout-studio-item.is-done {
+  background: transparent;
+  opacity: 0.55;
+}
+
+.fitness-reference-shell .op-workout-studio-check {
+  width: 18px;
+  height: 18px;
+  margin-top: 6px;
+  border: 0.5px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-check span {
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  background: transparent;
+  transition: background-color 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-check.is-done {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-check.is-done span {
+  background: var(--paper);
+}
+
+.fitness-reference-shell .op-workout-studio-itembody {
+  min-width: 0;
+}
+
+.fitness-reference-shell .op-workout-studio-itemtop {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: baseline;
+}
+
+.fitness-reference-shell .op-workout-studio-itemtop h4 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-liveitem h5,
+.fitness-reference-shell .op-workout-studio-historyitem h5 {
+  margin: 0 0 3px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-prescription {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-muscles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0 8px;
+}
+
+.fitness-reference-shell .op-workout-studio-muscles span {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-muscles span + span::before {
+  content: '·';
+  margin: 0 8px;
+  color: var(--ink-dim);
+}
+
+.fitness-reference-shell .op-workout-studio-detail {
+  margin-bottom: 14px;
+  font-style: italic;
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+
+.fitness-reference-shell .op-workout-studio-controls {
+  display: flex;
+  gap: 24px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.fitness-reference-shell .op-workout-studio-field,
+.fitness-reference-shell .op-workout-studio-note,
+.fitness-reference-shell .op-workout-studio-targetinput,
+.fitness-reference-shell .op-workout-studio-effort {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fitness-reference-shell .op-workout-studio-field span,
+.fitness-reference-shell .op-workout-studio-note span,
+.fitness-reference-shell .op-workout-studio-targetinput span,
+.fitness-reference-shell .op-workout-studio-effort > span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-field input,
+.fitness-reference-shell .op-workout-studio-note input,
+.fitness-reference-shell .op-workout-studio-targetinput input {
+  min-height: 0;
+  padding: 6px 0;
+  border: none;
+  border-bottom: 0.5px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: -0.005em;
+  transition: border-color 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-field input {
+  min-width: 96px;
+}
+
+.fitness-reference-shell .op-workout-studio-note {
+  margin-top: 14px;
+}
+
+.fitness-reference-shell .op-workout-studio-note input {
+  width: 100%;
+  font-size: 14px;
+  font-family: inherit;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-field input:focus,
+.fitness-reference-shell .op-workout-studio-note input:focus,
+.fitness-reference-shell .op-workout-studio-targetinput input:focus {
+  border-bottom-color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.fitness-reference-shell .op-workout-studio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 0.5px solid var(--rule);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.fitness-reference-shell .op-workout-studio-dot.is-filled {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-panel {
+  padding: 0 0 24px;
+  margin: 0;
+  border: none;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-panel:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.fitness-reference-shell .op-workout-studio-panelhead {
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.fitness-reference-shell .op-workout-studio-panelhead .pill {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-panelmeta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 0 0 16px;
+  border-top: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-stats div {
+  padding: 12px 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-stats div:nth-child(odd) {
+  padding-right: 16px;
+  border-right: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-stats div:nth-child(even) {
+  padding-left: 16px;
+}
+
+.fitness-reference-shell .op-workout-studio-stats div:nth-last-child(-n+2) {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.fitness-reference-shell .op-workout-studio-stats span {
+  display: block;
+  margin-bottom: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-stats strong,
+.fitness-reference-shell .op-workout-studio-historymeta strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.fitness-reference-shell .op-workout-studio-liveitem span {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.fitness-reference-shell .op-workout-studio-target {
+  margin-top: 6px;
+}
+
+.fitness-reference-shell .op-workout-studio-targethead {
+  margin-bottom: 8px;
+}
+
+.fitness-reference-shell .op-workout-studio-targethead span:first-child {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-targethead strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.fitness-reference-shell .op-workout-studio-targetinput {
+  margin-top: 12px;
+  max-width: 120px;
+}
+
+.fitness-reference-shell .op-workout-studio-cadence {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--rule-soft);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-livefeed,
+.fitness-reference-shell .op-workout-studio-history {
+  display: flex;
+  flex-direction: column;
+}
+
+.fitness-reference-shell .op-workout-studio-liveitem,
+.fitness-reference-shell .op-workout-studio-historyitem {
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-workout-studio-liveitem:last-child,
+.fitness-reference-shell .op-workout-studio-historyitem:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.fitness-reference-shell .op-workout-studio-liveitem p,
+.fitness-reference-shell .op-workout-studio-historyitem p,
+.fitness-reference-shell .op-workout-studio-historymeta span {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-mute);
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+}
+
+.fitness-reference-shell .op-workout-studio-historymeta {
+  text-align: right;
+}
+
+.fitness-reference-shell .op-workout-studio-empty {
+  padding: 0;
+  font-style: italic;
+  color: var(--ink-mute);
+}
+
+.fitness-reference-shell .op-workout-studio-tab:focus-visible,
+.fitness-reference-shell .op-workout-studio-ghost:focus-visible,
+.fitness-reference-shell .op-workout-studio-mini:focus-visible,
+.fitness-reference-shell .op-workout-studio-save:focus-visible,
+.fitness-reference-shell .op-workout-studio-textbtn:focus-visible,
+.fitness-reference-shell .op-workout-studio-restbtn:focus-visible,
+.fitness-reference-shell .op-workout-studio-check:focus-visible,
+.fitness-reference-shell .op-workout-studio-dot:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+  .fitness-reference-shell .op-workout-studio-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .fitness-reference-shell .op-workout-studio-side {
+    padding-left: 0;
+    padding-top: 24px;
+    border-left: none;
+    border-top: 0.5px solid var(--rule-soft);
+  }
+}
+
+@media (max-width: 880px) {
+  .fitness-reference-shell .op-workout-studio-body {
+    padding: 20px 18px 22px;
+  }
+
+  .fitness-reference-shell .op-workout-studio-item {
+    grid-template-columns: 1fr;
+  }
+
+  .fitness-reference-shell .op-workout-studio-check {
+    margin-top: 0;
+  }
+
+  .fitness-reference-shell .op-workout-studio-itemtop,
+  .fitness-reference-shell .op-workout-studio-commandtop,
+  .fitness-reference-shell .op-workout-studio-restrow,
+  .fitness-reference-shell .op-workout-studio-commandfoot,
+  .fitness-reference-shell .op-workout-studio-panelhead,
+  .fitness-reference-shell .op-workout-studio-liveitem,
+  .fitness-reference-shell .op-workout-studio-historyitem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fitness-reference-shell .op-workout-studio-timer {
+    font-size: 48px;
+  }
+
+  .fitness-reference-shell .op-workout-studio-intro p {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .fitness-reference-shell .op-workout-studio-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .fitness-reference-shell .op-workout-studio-stats div:nth-child(odd) {
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .fitness-reference-shell .op-workout-studio-stats div:nth-child(even) {
+    padding-left: 0;
+  }
+
+  .fitness-reference-shell .op-workout-studio-stats div:nth-last-child(-n+2) {
+    border-bottom: 0.5px solid var(--rule-soft);
+    padding-bottom: 12px;
+  }
+
+  .fitness-reference-shell .op-workout-studio-stats div:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .fitness-reference-shell .op-workout-studio-progressmeta {
+    flex-direction: column;
+  }
+
+  .fitness-reference-shell .op-workout-studio-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fitness-reference-shell .op-workout-studio-field input,
+  .fitness-reference-shell .op-workout-studio-targetinput {
+    max-width: none;
+  }
+
+  .fitness-reference-shell .op-workout-studio-targetinput {
+    width: 100%;
+  }
+}

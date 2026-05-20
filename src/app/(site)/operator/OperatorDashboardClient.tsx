@@ -7,6 +7,7 @@ import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransf
 import { Moon, Sun } from 'lucide-react';
 import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
+import WorkoutStudio from '@/components/operator/fitness/WorkoutStudio';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
@@ -6719,12 +6720,13 @@ export default function OperatorDashboardClient() {
         </Reveal>
         </CollapsibleSection>
 
-        <CollapsibleSection eyebrow="Action" note="Today's next move.">
+        <CollapsibleSection eyebrow="Action" note="Today's next move." defaultOpen>
         <Reveal>
         <section className="fit-anchor-section" id="operator-action">
           {/* Action block — promise + readiness folded into trends scroll. */}
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
+          <WorkoutStudio workouts={healthStream.workouts} />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>
         </Reveal>
