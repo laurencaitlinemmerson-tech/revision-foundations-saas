@@ -158,8 +158,8 @@ const GOALS = {
   restingHrTarget: 60,
   calorieIntake: 1600,
   deficit: 1100,
-  bmrHeightM: 1.57,
-  bmrAgeYears: 30,
+  bmrHeightM: 1.5748,
+  bmrAgeYears: 26,
 } as const;
 
 // Mifflin-St Jeor for women (matches existing dashboard defaults)

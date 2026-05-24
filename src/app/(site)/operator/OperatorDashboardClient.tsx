@@ -19,7 +19,7 @@ import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 import { computeTdee } from '@/lib/fitness/tdee';
 import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
-import { useDashboardMotion, Breather } from './operator-motion-extras';
+import { useDashboardMotion } from './operator-motion-extras';
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
 
@@ -119,8 +119,8 @@ const AUTH_KEY    = 'operator-log-auth-v3';
 const GOAL_KEY    = 'operator-log-goal-v3';
 const PACE_KEY    = 'operator-log-pace-v1';
 const AUTH_TTL    = 30 * 24 * 60 * 60 * 1000;
-const HEIGHT_M    = 1.57;
-const DEFAULT_AGE = 30;
+const HEIGHT_M    = 1.5748;
+const DEFAULT_AGE = 26;
 const TRAINING_WEEK_ACTIVITY = 1.4;
 const KCAL_PER_KG = 7700;
 const TARGET_WEEKLY_LOSS_KG = 1;
@@ -388,84 +388,175 @@ function EditorialDivider({ eyebrow, note, style }: { eyebrow: string; note?: st
   );
 }
 
-function CollapsibleSection({ eyebrow, note, children, defaultOpen = false, dividerStyle }: {
+function CollapsibleSection({ eyebrow, note, children, defaultOpen = false }: {
   eyebrow: string;
   note?: string;
   children: ReactNode;
   defaultOpen?: boolean;
-  dividerStyle?: CSSProperties;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const contentId = `op-collapsible-${eyebrow.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
-    <>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'auto 1fr auto auto',
-        alignItems: 'center',
-        gap: 18,
-        margin: '40px 0 22px',
-        ...dividerStyle,
-      }}>
-        <span style={{
-          fontFamily: T.sans,
-          fontSize: 9.5,
-          letterSpacing: '0.32em',
-          textTransform: 'uppercase',
-          fontWeight: 600,
-          color: T.ink,
-        }}>{eyebrow}</span>
-        <span style={{ height: 0.5, background: T.line, display: 'block' }} />
-        {note ? (
-          <span style={{
-            fontFamily: T.display,
-            fontStyle: 'italic',
-            fontSize: 13,
-            color: T.muted,
-          }}>{note}</span>
-        ) : <span />}
+    <section className={`fit-dashboard-section-shell ${open ? 'is-open' : 'is-closed'}`}>
+      <div className="fit-dashboard-section-bar" data-section>
+        <div className="fit-dashboard-section-heading">
+          <span className="fit-dashboard-section-kicker">{eyebrow}</span>
+          {note ? <p className="fit-dashboard-section-note">{note}</p> : null}
+        </div>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={contentId}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            background: 'transparent',
-            border: 'none',
-            padding: '4px 0 4px 14px',
-            fontFamily: T.sans,
-            fontSize: 9.5,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            fontWeight: 600,
-            color: T.muted,
-            cursor: 'pointer',
-            lineHeight: 1,
-          }}
+          className="fit-dashboard-section-toggle"
         >
-          <span>{open ? 'Hide' : 'Show'}</span>
+          <span>{open ? 'Collapse' : 'Expand'}</span>
           <span
+            className="fit-dashboard-section-toggle-icon"
             aria-hidden
-            style={{
-              fontSize: 11,
-              lineHeight: 1,
-              transform: open ? 'rotate(180deg)' : 'none',
-              transition: 'transform 180ms ease',
-              display: 'inline-block',
-            }}
           >
             ▾
           </span>
         </button>
       </div>
-      <div id={contentId} hidden={!open}>
+      <div id={contentId} hidden={!open} className="fit-dashboard-section-body">
         {children}
       </div>
-    </>
+    </section>
+  );
+}
+
+function toneClass(tone: ReferenceMetricTone) {
+  if (tone === 'good') return 'is-good';
+  if (tone === 'warn') return 'is-warn';
+  if (tone === 'brass') return 'is-brass';
+  return 'is-neutral';
+}
+
+function OperatorCommandDeck({
+  latest,
+  pace,
+  syncSummary,
+  targetDelta,
+  projectedGoal,
+  heroMetrics,
+  sideMetrics,
+  onLog,
+  onRefresh,
+  syncing,
+}: {
+  latest: FitnessReading;
+  pace: PaceOption;
+  syncSummary: string;
+  targetDelta: number;
+  projectedGoal: Date | null;
+  heroMetrics: ReferenceMetric[];
+  sideMetrics: ReferenceMetric[];
+  onLog: () => void;
+  onRefresh: () => void;
+  syncing: boolean;
+}) {
+  const jumpLinks = [
+    { href: '#operator-today', label: 'Today' },
+    { href: '#operator-trajectory', label: 'Trajectory' },
+    { href: '#operator-story', label: 'History' },
+    { href: '#operator-food', label: 'Fuel' },
+    { href: '#operator-health-stream', label: 'Insights' },
+    { href: '#operator-action', label: 'Plan' },
+  ];
+
+  return (
+    <section className="fit-command-deck">
+      <div className="fit-command-deck-top">
+        <div className="fit-command-deck-copy">
+          <span className="fit-command-deck-kicker">Operator dashboard</span>
+          <h1>Weight, nutrition, recovery, and pace in one board.</h1>
+          <p>
+            Check the current state, spot the risks, and jump straight to the section that needs attention.
+          </p>
+          <div className="fit-command-deck-pills">
+            <span className="fit-command-pill is-neutral">{syncSummary}</span>
+            <span className="fit-command-pill is-brass">{pace.label}</span>
+            <span className={`fit-command-pill ${targetDelta <= 0 ? 'is-good' : 'is-neutral'}`}>
+              {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)}kg to goal`}
+            </span>
+            <span className="fit-command-pill is-neutral">
+              {projectedGoal
+                ? `ETA ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+                : 'ETA pending trend'}
+            </span>
+          </div>
+        </div>
+
+        <div className="fit-command-deck-aside">
+          <div className="fit-command-deck-current">
+            <span className="label">Current reading</span>
+            <span className="value">{latest.weight.toFixed(1)}kg</span>
+            <span className="meta">{fmtDate(latest.date, { long: true })}</span>
+          </div>
+          <div className="fit-command-deck-actions">
+            <button type="button" className="fit-dashboard-btn is-primary" onClick={onLog}>
+              Log reading
+            </button>
+            <button type="button" className="fit-dashboard-btn" onClick={onRefresh}>
+              {syncing ? 'Refreshing...' : 'Refresh sync'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="fit-command-deck-grid">
+        {heroMetrics.map((metric) => (
+          <article key={metric.label} className={`fit-command-stat ${toneClass(metric.tone)}`}>
+            <span className="fit-command-stat-label">{metric.label}</span>
+            <strong className="fit-command-stat-value">{metric.value}</strong>
+            <span className="fit-command-stat-meta">{metric.status}</span>
+          </article>
+        ))}
+      </div>
+
+      <div className="fit-command-deck-grid is-secondary">
+        {sideMetrics.slice(0, 4).map((metric) => (
+          <article key={metric.label} className={`fit-command-stat is-secondary ${toneClass(metric.tone)}`}>
+            <span className="fit-command-stat-label">{metric.label}</span>
+            <strong className="fit-command-stat-value">{metric.value}</strong>
+            <span className="fit-command-stat-meta">{metric.status}</span>
+          </article>
+        ))}
+      </div>
+
+      <nav className="fit-dashboard-nav" aria-label="Operator sections">
+        {jumpLinks.map((link) => (
+          <a key={link.href} href={link.href} className="fit-dashboard-nav-link">
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    </section>
+  );
+}
+
+function DashboardBandHeader({
+  kicker,
+  title,
+  note,
+  meta,
+}: {
+  kicker: string;
+  title: string;
+  note: string;
+  meta?: string;
+}) {
+  return (
+    <div className="fit-dashboard-band-head" data-section>
+      <div className="fit-dashboard-band-copy">
+        <span className="fit-dashboard-band-kicker">{kicker}</span>
+        <h2 className="fit-dashboard-band-title">{title}</h2>
+        <p className="fit-dashboard-band-note">{note}</p>
+      </div>
+      {meta ? <span className="fit-dashboard-band-meta">{meta}</span> : null}
+    </div>
   );
 }
 
@@ -3527,7 +3618,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
 
       {/* TDEE estimate */}
       <div style={{ padding:'24px 0', borderBottom:`0.5px solid ${T.line}` }}>
-        <Kicker style={{ marginBottom:14 }}>Estimated Daily Energy Expenditure · Mifflin-St Jeor (female, 30)</Kicker>
+        <Kicker style={{ marginBottom:14 }}>Estimated Daily Energy Expenditure · Mifflin-St Jeor (female, 26)</Kicker>
         <p style={{ fontFamily:T.sans, fontSize:12, color:T.body, fontWeight:300, lineHeight:1.6, margin:'0 0 14px', maxWidth:'50ch' }}>
           The dashboard now assumes an exercising week by default, so the working maintenance baseline is <strong style={{ color:T.ink, fontWeight:500 }}>{activeTdee.toLocaleString()} kcal/day</strong>.
         </p>
@@ -4883,12 +4974,15 @@ function Compose({ open, onClose, onSubmit }: {
 function apiAuthH(pw:string) { return { 'x-operator-pw':pw }; }
 function apiH(pw:string) { return { 'Content-Type':'application/json', 'x-operator-pw':pw }; }
 async function apiLoad(pw:string) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 4000);
   try {
-    const res = await fetch('/api/operator/fitness', { headers:apiH(pw) });
+    const res = await fetch('/api/operator/fitness', { headers:apiH(pw), signal: controller.signal });
     if (!res.ok) return null;
     const j = await res.json();
     return j.setup_required ? null : (j.readings as FitnessReading[]);
   } catch { return null; }
+  finally { window.clearTimeout(timeout); }
 }
 async function apiSave(pw:string, r:FitnessReading) {
   try {
@@ -6813,6 +6907,7 @@ export default function OperatorDashboardClient() {
   const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('3y');
   const [activeTrajectoryIso, setActiveTrajectoryIso] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [secondaryReady, setSecondaryReady] = useState(false);
   // Resolve initial theme on the client only — localStorage takes precedence,
   // otherwise honour the OS preference. Stays out of SSR to avoid hydration mismatch.
   useEffect(() => {
@@ -6847,9 +6942,29 @@ export default function OperatorDashboardClient() {
     const localOnly = local.filter(r => !cloudIds.has(r.id));
     const merged = [...cloud, ...localOnly].sort((a, b) => a.date.localeCompare(b.date));
     setReadings(merged); saveLocal(merged);
-    for (const r of localOnly) {
-      const nid = await apiSave(pw, r);
-      if (nid && nid !== r.id) r.id = nid;
+    if (localOnly.length > 0) {
+      void Promise.allSettled(
+        localOnly.map(async (r) => {
+          const nid = await apiSave(pw, r);
+          return nid && nid !== r.id ? { from: r.id, to: nid } : null;
+        }),
+      ).then((results) => {
+        const idMap = new Map<string, string>();
+        for (const result of results) {
+          if (result.status === 'fulfilled' && result.value) {
+            idMap.set(result.value.from, result.value.to);
+          }
+        }
+        if (idMap.size === 0) return;
+        setReadings((current) => {
+          const next = current.map((item) => {
+            const replacement = idMap.get(item.id);
+            return replacement ? { ...item, id: replacement } : item;
+          });
+          saveLocal(next);
+          return next;
+        });
+      });
     }
   }, [saveLocal]);
 
@@ -6880,6 +6995,12 @@ export default function OperatorDashboardClient() {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(PACE_KEY, paceKey);
   }, [paceKey]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const id = window.setTimeout(() => setSecondaryReady(true), 180);
+    return () => window.clearTimeout(id);
+  }, []);
 
   const handleUnlock = useCallback(async () => {
     const stored = localStorage.getItem(AUTH_KEY);
@@ -7186,16 +7307,26 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '64px 0 40px' }} />
+          <OperatorCommandDeck
+            latest={latest}
+            pace={pace}
+            syncSummary={syncSummary}
+            targetDelta={targetDelta}
+            projectedGoal={projectedGoal}
+            heroMetrics={heroMetrics}
+            sideMetrics={sideMetrics}
+            onLog={() => setCompose(true)}
+            onRefresh={() => { void refreshCloudReadings(); }}
+            syncing={syncing}
+          />
 
           <section className="fit-today">
-            <div className="fit-today-head">
-              <div>
-                <span className="fit-today-label">Today at a glance</span>
-                <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
-              </div>
-              <span className="muted">{formatReferenceDate(todayIso)}</span>
-            </div>
+            <DashboardBandHeader
+              kicker="Daily board"
+              title="Today at a glance"
+              note="Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking."
+              meta={formatReferenceDate(todayIso)}
+            />
 
             <TodayCommandCard
               snap={todaySnap}
@@ -7237,7 +7368,7 @@ export default function OperatorDashboardClient() {
                 </div>
                 <div className="fit-weight-spotlight-meta">
                   <div className="fit-weight-spotlight-meta-head">
-                    <div className="fit-kicker">This week&apos;s figure · {fmtDate(latest.date, { long: true })}</div>
+                    <div className="fit-kicker">Current checkpoint · {fmtDate(latest.date, { long: true })}</div>
                     <div className="fit-weight-spotlight-meta-value">
                       <span className="value" data-hero-num><AnimatedNumber value={latest.weight} decimals={1} /></span>
                       <span className="unit">kg</span>
@@ -7264,10 +7395,15 @@ export default function OperatorDashboardClient() {
 
         <Reveal delay={0.08}>
         <section className="fit-anchor-section" id="operator-trajectory">
+          <DashboardBandHeader
+            kicker="Trajectory"
+            title="Weight trend and consistency"
+            note="Read the slope, watch for plateaus, and compare the latest week against the longer line."
+          />
           <section className="fit-editorial-chart" style={{ marginBottom: 28 }}>
             <FitnessLineChart
-              title={<>Weight <em>trajectory</em></>}
-              subtitle="Every daily reading, connected in order, with phase context across the selected window."
+              title={<>Weight trend</>}
+              subtitle="Daily readings, phase markers, and goal checkpoints across the selected window."
               points={buildWeightSeries(dashboardSource)}
               color={theme === 'dark' ? '#d48a95' : '#b76e79'}
               barColor={theme === 'dark' ? '#c8b3e8' : '#aa92d3'}
@@ -7355,9 +7491,9 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
-        <Breather num="01" title={<>The <em>story</em> so far</>} />
-
-        <CollapsibleSection eyebrow="Story" note="Phase context, milestones, and visual evidence.">
+        {secondaryReady ? (
+          <>
+        <CollapsibleSection eyebrow="History" note="Phase changes, progress markers, and comparison panels." defaultOpen>
         <Reveal>
         <section className="fit-anchor-section" id="operator-story">
           <div className="fit-story-shell">
@@ -7367,8 +7503,8 @@ export default function OperatorDashboardClient() {
                 <div className="fit-panel">
                   <div className="fit-panel-head">
                     <div>
-                      <h3>Phase <em>log</em></h3>
-                      <div className="meta">The story rendered in the same cadence as the reference dashboard</div>
+                      <h3>Phase <em>history</em></h3>
+                      <div className="meta">Cycle changes, durations, and delta across the full log</div>
                     </div>
                   </div>
                   <div className="phase-log">
@@ -7388,8 +7524,8 @@ export default function OperatorDashboardClient() {
                 <div className="fit-panel fit-photo-panel">
                   <div className="fit-panel-head">
                     <div>
-                      <h3>Visual <em>evidence</em></h3>
-                      <div className="meta">Date-stamped progress slots wired to this same timeline</div>
+                      <h3>Progress <em>photos</em></h3>
+                      <div className="meta">Date-stamped comparison slots tied to the same timeline</div>
                     </div>
                   </div>
                   <PhotoTimeline items={photoMilestones} />
@@ -7490,8 +7626,8 @@ export default function OperatorDashboardClient() {
         <div className="fit-panel" style={{ marginBottom: 28 }}>
           <div className="fit-panel-head">
             <div>
-              <h3>This <em>week</em></h3>
-              <div className="meta">Monday through Sunday - weigh-ins, deltas and body-state context</div>
+              <h3>Weekly <em>board</em></h3>
+              <div className="meta">Monday through Sunday: weigh-ins, deltas, and body-state context</div>
             </div>
           </div>
           <div className="week-grid">
@@ -7514,9 +7650,7 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
 
-        <Breather num="02" title={<>Where the <em>lines</em> are going</>} />
-
-        <CollapsibleSection eyebrow="Trends" note="What the lines are doing — and why.">
+        <CollapsibleSection eyebrow="Insights" note="Trend direction, recovery signal, and the context behind the latest movement." defaultOpen>
         <Reveal>
         <section className="fit-anchor-section" id="operator-health-stream">
           {/* ───────────────────────── TRENDS ────────────────────────── */}
@@ -7557,9 +7691,7 @@ export default function OperatorDashboardClient() {
         </Reveal>
         </CollapsibleSection>
 
-        <Breather num="03" title={<>Today&apos;s next <em>move</em></>} />
-
-        <CollapsibleSection eyebrow="Action" note="Today's next move." defaultOpen>
+        <CollapsibleSection eyebrow="Plan" note="Today&apos;s intake, recovery, and training priorities." defaultOpen>
         <Reveal>
         <section className="fit-anchor-section" id="operator-action">
           {/* Action block — promise + readiness folded into trends scroll. */}
@@ -7592,6 +7724,13 @@ export default function OperatorDashboardClient() {
         </section>
         </Reveal>
         </CollapsibleSection>
+          </>
+        ) : (
+          <section className="fit-deferred-note" aria-live="polite">
+            <div className="fit-deferred-note-kicker">Loading supporting panels</div>
+            <p>The summary board lands first. The heavier comparison, recovery, and studio panels mount a beat later so the page feels faster on entry.</p>
+          </section>
+        )}
 
       </main>
 

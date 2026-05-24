@@ -194,8 +194,8 @@
 
 /* ---------- 8. Section breathers ---------- */
 .fit-breather {
-  margin: 96px 0 64px;
-  padding: 36px 0;
+  margin: 64px 0 36px;
+  padding: 24px 0;
   border-top: 0.5px solid var(--rule);
   border-bottom: 0.5px solid var(--rule);
   display: grid;

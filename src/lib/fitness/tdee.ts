@@ -32,9 +32,9 @@
 export interface TdeeInputs {
   /** Weight in kilograms */
   weightKg: number;
-  /** Height in metres (defaults to 1.57 — i.e. 5'2") */
+  /** Height in metres (defaults to 1.5748 — i.e. 5'2") */
   heightM?: number;
-  /** Age in years (defaults to 30) */
+  /** Age in years (defaults to 26) */
   ageYears?: number;
   /** Sex — defaults to female (Mifflin–St Jeor female variant) */
   sex?: 'female' | 'male';
@@ -74,8 +74,8 @@ export interface TdeeBreakdown {
 }
 
 const KCAL_PER_KG = 7700;
-const DEFAULT_HEIGHT_M = 1.57;
-const DEFAULT_AGE = 30;
+const DEFAULT_HEIGHT_M = 1.5748;
+const DEFAULT_AGE = 26;
 const DEFAULT_NEAT_FACTOR = 0.25;
 const DEFAULT_PLANNED_EX = 280; // ~4× 45-min sessions/wk averaged
 const DEFAULT_PROTEIN_SHARE = 0.25;

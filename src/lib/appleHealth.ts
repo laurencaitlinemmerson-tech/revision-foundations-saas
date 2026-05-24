@@ -24,7 +24,7 @@ interface DayBucket {
   heightM?: Sample
 }
 
-const DEFAULT_HEIGHT_M = 1.57
+const DEFAULT_HEIGHT_M = 1.5748
 
 const BODY_METRIC_TYPES = {
   weight: 'HKQuantityTypeIdentifierBodyMass',

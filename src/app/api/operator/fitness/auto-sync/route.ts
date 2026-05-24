@@ -13,7 +13,7 @@ type HealthAutoExportMetric = {
   data?: HealthAutoExportPoint[]
 }
 
-const DEFAULT_HEIGHT_M = 1.57;
+const DEFAULT_HEIGHT_M = 1.5748;
 
 function authed(req: NextRequest) {
   const bearer = req.headers.get('authorization') ?? '';

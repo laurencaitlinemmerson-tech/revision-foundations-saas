@@ -28,14 +28,17 @@ export interface SundayIssueData {
   letter: string;
 }
 
-export function buildSundayIssue(input: Omit<SundayIssueData, 'letter' | 'signal'>): SundayIssueData {
+type SundayIssueBuildInput = Omit<SundayIssueData, 'letter' | 'signal'>;
+type SundayIssueDraft = Omit<SundayIssueData, 'letter'>;
+
+export function buildSundayIssue(input: SundayIssueBuildInput): SundayIssueData {
   // Auto-pick signal of the week
   const signal = pickSignal(input);
   const letter = composeLetter({ ...input, signal });
   return { ...input, signal, letter };
 }
 
-function pickSignal(d: Omit<SundayIssueData, 'letter' | 'signal'>): SundayIssueData['signal'] {
+function pickSignal(d: SundayIssueBuildInput): SundayIssueData['signal'] {
   // Order: weight movement > training > sleep > nutrition
   if (Math.abs(d.weeklyDelta) >= 0.4) {
     return {
@@ -55,7 +58,7 @@ function pickSignal(d: Omit<SundayIssueData, 'letter' | 'signal'>): SundayIssueD
   return { label: 'Steady week', detail: 'Nothing dramatic moved.' };
 }
 
-function composeLetter(d: SundayIssueData): string {
+function composeLetter(d: SundayIssueDraft): string {
   const pieces: string[] = [];
   const dir = d.weeklyDelta < 0 ? 'down' : d.weeklyDelta > 0 ? 'up' : 'flat';
   pieces.push(`Week of ${fmtRange(d.weekStart, d.weekEnd)}. The scale finished ${dir === 'flat' ? 'flat' : `${dir} ${Math.abs(d.weeklyDelta).toFixed(1)} kg`} on ${d.weightEnd.toFixed(1)} kg.`);
