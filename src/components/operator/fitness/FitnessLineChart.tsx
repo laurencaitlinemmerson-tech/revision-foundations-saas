@@ -252,6 +252,10 @@ export default function FitnessLineChart({
     if (den === 0) return null
     const slope = num / den // kg per day
     if (!Number.isFinite(slope) || Math.abs(slope) < 1e-6) return null
+    const intercept = meanY - slope * meanX
+    // Residual root-mean-square error — drives the ±1 SD confidence band.
+    const ssRes = ys.reduce((acc, yv, i) => acc + (yv - (slope * xs[i] + intercept)) ** 2, 0)
+    const rmse = Math.sqrt(ssRes / Math.max(1, n - 2))
     const latestT = (latestTime - t0) / dayMs
     const fittedLatestY = meanY + slope * (latestT - meanX)
     const horizonDays = 120
@@ -266,6 +270,22 @@ export default function FitnessLineChart({
     }
     const endTime = latestTime + days * dayMs
     const endValue = fittedLatestY + slope * days
+    // Sample the band at fixed steps across the projection horizon. Band
+    // widens with horizon: rmse · sqrt(1 + h/60) — modest near the latest
+    // point, more honest about uncertainty further out.
+    const sampleCount = 24
+    const samples = Array.from({ length: sampleCount }, (_, i) => {
+      const frac = i / (sampleCount - 1)
+      const h = frac * days
+      const yCenter = fittedLatestY + slope * (latestT + h - meanX)
+      const band = rmse * Math.sqrt(1 + h / 60)
+      return {
+        time: latestTime + h * dayMs,
+        y: yCenter,
+        upper: yCenter + band,
+        lower: yCenter - band,
+      }
+    })
     return {
       startTime: latestTime,
       startValue: latestPoint.value,
@@ -274,6 +294,8 @@ export default function FitnessLineChart({
       days,
       slope,
       hitsGoal,
+      rmse,
+      samples,
     }
   }, [cleanedPoints, latestPoint, latestTime, targetWeight, dayMs])
 
@@ -608,8 +630,24 @@ export default function FitnessLineChart({
             const labelOnLeft = x1 > pad.l + innerW * 0.75
             const labelX = clamp(labelOnLeft ? x1 - 8 : x1 + 8, pad.l + 6, w - pad.r - 6)
             const labelY = clamp(y1 - 8, pad.t + 12, pad.t + innerH - 6)
+            // ±1 SD confidence band — drawn first so the projection line and
+            // endpoint sit on top.
+            const bandPath = (() => {
+              if (!projection.samples || projection.samples.length < 2) return null
+              const upper = projection.samples.map((s, i) => `${i === 0 ? 'M' : 'L'} ${xForTime(s.time).toFixed(2)} ${y(s.upper).toFixed(2)}`).join(' ')
+              const lower = [...projection.samples].reverse().map((s) => `L ${xForTime(s.time).toFixed(2)} ${y(s.lower).toFixed(2)}`).join(' ')
+              return `${upper} ${lower} Z`
+            })()
             return (
               <g className="bc-projection">
+                {bandPath && (
+                  <path
+                    d={bandPath}
+                    fill={barFill}
+                    opacity={0.08}
+                    stroke="none"
+                  />
+                )}
                 <path
                   d={`M ${x0.toFixed(2)} ${y0.toFixed(2)} L ${x1.toFixed(2)} ${y1.toFixed(2)}`}
                   fill="none"

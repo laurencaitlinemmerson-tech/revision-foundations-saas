@@ -8,10 +8,18 @@ import { Moon, Sun } from 'lucide-react';
 import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import WorkoutStudio from '@/components/operator/fitness/WorkoutStudio';
+import { EnergyLedger } from '@/components/operator/fitness/EnergyLedger';
+import { SundayIssue, buildSundayIssue } from '@/components/operator/fitness/SundayIssue';
+import { ProteinRecovery } from '@/components/operator/fitness/ProteinRecovery';
+import { PrintIssueButton } from '@/components/operator/fitness/PrintIssueButton';
+import { useChartDrawObserver, useDimOnRead } from '@/components/operator/fitness/dynamic-extras';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
+import { computeTdee } from '@/lib/fitness/tdee';
+import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
+import { useDashboardMotion, Breather } from './operator-motion-extras';
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
 
@@ -109,11 +117,32 @@ const T = {
 const STORAGE_KEY = 'operator-log-v4';
 const AUTH_KEY    = 'operator-log-auth-v3';
 const GOAL_KEY    = 'operator-log-goal-v3';
+const PACE_KEY    = 'operator-log-pace-v1';
 const AUTH_TTL    = 30 * 24 * 60 * 60 * 1000;
 const HEIGHT_M    = 1.57;
 const DEFAULT_AGE = 30;
 const TRAINING_WEEK_ACTIVITY = 1.4;
-const MODERATE_DEFICIT_KCAL = 500;
+const KCAL_PER_KG = 7700;
+const TARGET_WEEKLY_LOSS_KG = 1;
+const TARGET_DAILY_DEFICIT_KCAL = Math.round((KCAL_PER_KG * TARGET_WEEKLY_LOSS_KG) / 7);
+
+const PACE_OPTIONS = [
+  { key: 'maintenance', label: 'Maintenance', shortLabel: 'Hold', weeklyLossKg: 0, note: 'Hold weight and clean up consistency.' },
+  { key: 'steady', label: '0.5 kg/wk', shortLabel: '0.5', weeklyLossKg: 0.5, note: 'Easiest to sustain.' },
+  { key: 'focused', label: '0.75 kg/wk', shortLabel: '0.75', weeklyLossKg: 0.75, note: 'Harder push, still manageable.' },
+  { key: 'aggressive', label: '1.0 kg/wk', shortLabel: '1.0', weeklyLossKg: 1, note: 'Ceiling pace. Tight tracking required.' },
+] as const;
+
+type PaceKey = typeof PACE_OPTIONS[number]['key'];
+type PaceOption = typeof PACE_OPTIONS[number];
+
+function dailyDeficitForWeeklyLoss(weeklyLossKg: number): number {
+  return Math.round((KCAL_PER_KG * weeklyLossKg) / 7);
+}
+
+function findPaceOption(key: PaceKey): PaceOption {
+  return PACE_OPTIONS.find((option) => option.key === key) ?? PACE_OPTIONS[PACE_OPTIONS.length - 1];
+}
 
 // 110 weekly readings from Aug 2023 → May 2026 (imported from scale CSV)
 const SEED: FitnessReading[] = [
@@ -534,14 +563,45 @@ function boneStatus(b: number): [string, string] {
   return ['Below typical', T.gold];
 }
 
-function nutritionTargets(reading: FitnessReading) {
-  const bmr = Math.round(10 * reading.weight + 6.25 * HEIGHT_M * 100 - 5 * DEFAULT_AGE - 161);
-  const activeTdee = Math.round(bmr * TRAINING_WEEK_ACTIVITY);
-  const intake = Math.round((activeTdee - MODERATE_DEFICIT_KCAL) / 20) * 20;
-  const maintenance = Math.round(activeTdee / 20) * 20;
+// Real TDEE — assembles from BMR + NEAT + measured exercise (Apple Health)
+// + protein-weighted TEF. Falls back to estimates when signals are absent,
+// so phase planning (which passes only weight + loss target) still works.
+//
+// Returns the legacy shape ({ bmr, activeTdee, intake, maintenance, protein })
+// PLUS exerciseSource and confidence so the UI can show "measured" vs
+// "planned" and a confidence pill on the breakdown.
+function nutritionTargets(
+  reading: FitnessReading,
+  weeklyLossKg: number = TARGET_WEEKLY_LOSS_KG,
+  signals: {
+    measuredExerciseKcal?: number | null;
+    intakeKcal?: number | null;
+    proteinShare?: number;
+  } = {},
+) {
+  const t = computeTdee({
+    weightKg: reading.weight,
+    heightM: HEIGHT_M,
+    ageYears: DEFAULT_AGE,
+    sex: 'female',
+    weeklyChangeKg: weeklyLossKg,
+    measuredExerciseKcal: signals.measuredExerciseKcal ?? null,
+    intakeKcal: signals.intakeKcal ?? null,
+    proteinShare: signals.proteinShare,
+  });
   const protein = Math.round(reading.weight * 1.8);
-
-  return { bmr, activeTdee, intake, maintenance, protein };
+  return {
+    bmr: t.bmr,
+    activeTdee: t.tdee,
+    intake: t.targetIntake,
+    maintenance: Math.round(t.tdee / 20) * 20,
+    protein,
+    neat: t.neat,
+    exercise: t.exercise,
+    tef: t.tef,
+    exerciseSource: t.exerciseSource,
+    confidence: t.confidence,
+  };
 }
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
@@ -643,7 +703,12 @@ interface State {
   peak: { weight: number; date: string };
 }
 
-function assessState(sorted: FitnessReading[], goal: number, todayIso: string = localIsoDate()): State {
+function assessState(
+  sorted: FitnessReading[],
+  goal: number,
+  todayIso: string = localIsoDate(),
+  targetWeeklyLossKg: number = TARGET_WEEKLY_LOSS_KG,
+): State {
   const latest = sorted[sorted.length - 1];
   const today = parseLocalDateInput(todayIso);
   const latestDate = parseLocalDateInput(latest.date);
@@ -660,14 +725,15 @@ function assessState(sorted: FitnessReading[], goal: number, todayIso: string = 
     ? (last8[last8.length - 1].weight - last8[0].weight) / Math.max(1, last8.length - 1)
     : 0;
 
+  const losingFastThreshold = targetWeeklyLossKg > 0 ? targetWeeklyLossKg * 1.1 : 0.6;
   let direction: State['direction'];
   if (trend4 > 0.2)      direction = 'gaining';
   else if (trend4 > -0.1) direction = 'stable';
-  else if (trend4 > -0.6) direction = 'losing-slow';
+  else if (trend4 > -losingFastThreshold) direction = 'losing-slow';
   else                    direction = 'losing-fast';
 
-  // Recommended this-week target: −0.45 kg (moderate cut)
-  const thisWeekTarget = Math.round((latest.weight - 0.45) * 10) / 10;
+  // Target this-week reading at the active pace, which may be a cut or maintenance.
+  const thisWeekTarget = Math.round((latest.weight - targetWeeklyLossKg) * 10) / 10;
 
   // Phase derivation by weight band
   let phaseNum: number, phaseName: string, phaseColor: string;
@@ -735,7 +801,7 @@ function StatusStrip({ state, latest, goal, setTab }: {
     },
     {
       kicker: 'This week → target',
-      value: `${state.thisWeekTarget}`, unit: 'kg', sub: '−0.45 kg pace', subColor: T.gold,
+      value: `${state.thisWeekTarget}`, unit: 'kg', sub: '−1 kg pace', subColor: T.gold,
       onClick: () => setTab('Plan'),
     },
     {
@@ -795,21 +861,24 @@ function AnalyticsSection({
   nutrition,
   state,
   healthStream,
+  targetWeeklyLossKg,
 }: {
   latest: FitnessReading;
   sorted: FitnessReading[];
   goal: number;
-  nutrition: { bmr: number; activeTdee: number; intake: number; maintenance: number; protein: number };
+  nutrition: { bmr: number; activeTdee: number; intake: number; maintenance: number; protein: number; neat?: number; exercise?: number; tef?: number; exerciseSource?: 'measured' | 'planned'; confidence?: number };
   state: State;
   healthStream?: HealthStreamFetch;
+  targetWeeklyLossKg: number;
 }) {
   const healthDays = healthStream?.days;
 
   const remainingWeight = Math.max(0, latest.weight - goal);
   const dailyDeficit = nutrition.activeTdee - nutrition.intake;
   const weeklyDeficit = dailyDeficit * 7;
-  const expectedLoss = weeklyDeficit > 0 ? weeklyDeficit / 7700 : 0;
-  const expectedTrend = -0.45;
+  const expectedLoss = weeklyDeficit > 0 ? weeklyDeficit / KCAL_PER_KG : 0;
+  const targetDailyDeficit = dailyDeficitForWeeklyLoss(targetWeeklyLossKg);
+  const expectedTrend = -targetWeeklyLossKg;
   const trendDifference = Number.isFinite(state.trendKgPerWeek)
     ? state.trendKgPerWeek - expectedTrend
     : NaN;
@@ -835,18 +904,22 @@ function AnalyticsSection({
     : 'Not enough trend data yet';
   const deficitStatus = !Number.isFinite(dailyDeficit)
     ? 'Not enough data yet'
+    : targetWeeklyLossKg === 0
+    ? Math.abs(dailyDeficit) <= 120 ? 'Holding maintenance' : dailyDeficit > 0 ? 'Below maintenance' : 'Above maintenance'
     : dailyDeficit <= 0
     ? 'Maintenance likely'
-    : dailyDeficit < 200
+    : dailyDeficit < targetDailyDeficit * 0.75
     ? 'Deficit too small'
-    : dailyDeficit > 900
+    : dailyDeficit > targetDailyDeficit * 1.15
     ? 'Deficit too aggressive'
     : 'On track';
-  const deficitTone = dailyDeficit <= 0
+  const deficitTone = targetWeeklyLossKg === 0
+    ? Math.abs(dailyDeficit) <= 120 ? T.green : T.gold
+    : dailyDeficit <= 0
     ? T.gold
-    : dailyDeficit < 200
+    : dailyDeficit < targetDailyDeficit * 0.75
     ? T.rose
-    : dailyDeficit > 900
+    : dailyDeficit > targetDailyDeficit * 1.15
     ? T.rose
     : T.green;
 
@@ -874,6 +947,26 @@ function AnalyticsSection({
     : todayHealth.date.slice(0, 10) === todayIso
       ? 'Logged today'
       : `Latest log ${formatReferenceDate(todayHealth.date)}`;
+
+  // ── TDEE breakdown: use the real computed components from computeTdee()
+  // rather than re-deriving them from the BMR×1.4 multiplier. These are
+  // now sourced from Apple Health measured burn + (when logged) intake.
+  const tdeeBmr = nutrition.bmr;
+  const tdeeNeat = nutrition.neat ?? Math.round(tdeeBmr * 0.25);
+  const tdeeExercise = nutrition.exercise ?? Math.max(0, nutrition.activeTdee - tdeeBmr - (nutrition.neat ?? Math.round(tdeeBmr * 0.25)));
+  const tdeeTotal = nutrition.activeTdee;
+  const tefEstimate = nutrition.tef ?? Math.round(nutrition.intake * 0.1);
+  const exerciseSource: 'measured' | 'planned' = nutrition.exerciseSource ?? 'planned';
+  const confidence = nutrition.confidence ?? 0;
+  const active7 = healthDays
+    ? healthDays.slice(-7).map((d) => d.activity.activeEnergyKcal).filter((v): v is number => v !== null && Number.isFinite(v))
+    : [];
+  const active7Avg = active7.length > 0
+    ? Math.round(active7.reduce((a, b) => a + b, 0) / active7.length)
+    : null;
+  const measuredCompare = active7Avg !== null && tdeeExercise > 0
+    ? Math.round(((active7Avg - tdeeExercise) / tdeeExercise) * 100)
+    : null;
 
   return (
     <section style={{ marginBottom: 36 }}>
@@ -919,8 +1012,10 @@ function AnalyticsSection({
           <AnalysisCard
             label="Energy balance"
             headline={dailyDeficit > 0 ? `${dailyDeficit.toLocaleString()} kcal` : 'Setup'}
-            sub={`${deficitStatus} · expected ${expectedLoss.toFixed(2)} kg/wk loss`}
-            tone={dailyDeficit > 0 && dailyDeficit < 900 && dailyDeficit >= 200 ? 'good' : 'warn'}
+            sub={`${deficitStatus} · plan projects ${expectedLoss.toFixed(2)} kg/wk loss`}
+            tone={targetWeeklyLossKg === 0
+              ? Math.abs(dailyDeficit) <= 120 ? 'good' : 'neutral'
+              : dailyDeficit > 0 && dailyDeficit <= targetDailyDeficit * 1.15 && dailyDeficit >= targetDailyDeficit * 0.75 ? 'good' : 'warn'}
           >
             <BalanceBars
               maintenance={nutrition.activeTdee}
@@ -932,7 +1027,7 @@ function AnalyticsSection({
               rows={[
                 ['Maintenance', `${nutrition.activeTdee.toLocaleString()} kcal`],
                 ['Target intake', `${nutrition.intake.toLocaleString()} kcal`],
-                ['Weekly deficit', weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : '—'],
+                ['Planned weekly deficit', weeklyDeficit > 0 ? `${weeklyDeficit.toLocaleString()} kcal` : '—'],
               ]}
             />
           </AnalysisCard>
@@ -956,6 +1051,20 @@ function AnalyticsSection({
           </AnalysisCard>
 
         </div>
+
+        {/* ── TDEE breakdown · how maintenance is calculated ─────────────── */}
+        <TdeeBreakdown
+          bmr={tdeeBmr}
+          neat={tdeeNeat}
+          exercise={tdeeExercise}
+          total={tdeeTotal}
+          tefEstimate={tefEstimate}
+          intake={nutrition.intake}
+          active7Avg={active7Avg}
+          measuredCompare={measuredCompare}
+          exerciseSource={exerciseSource}
+          confidence={confidence}
+        />
       </div>
     </section>
   );
@@ -971,7 +1080,7 @@ function AnalysisCard({
 }) {
   const toneColor = tone === 'good' ? T.green : tone === 'warn' ? T.rose : T.muted;
   return (
-    <article style={{
+    <article data-card style={{
       background: T.paper, border: `0.5px solid ${T.line}`, padding: '22px 22px 18px',
       display: 'flex', flexDirection: 'column', gap: 14, minHeight: 320,
     }}>
@@ -1018,17 +1127,34 @@ function MiniLineChart({ points, goal, color, height }: { points: number[]; goal
   const yFor = (v: number) => height - ((v - min) / range) * (height - 10) - 5;
   const path = points.map((v, i) => `${i === 0 ? 'M' : 'L'}${(i * step).toFixed(1)},${yFor(v).toFixed(1)}`).join(' ');
   const goalY = goal !== undefined ? yFor(goal) : null;
+  // Approximate path length for the stroke-dasharray draw effect.
+  let pathLen = 0;
+  for (let i = 1; i < points.length; i++) {
+    const dx = step;
+    const dy = yFor(points[i]) - yFor(points[i - 1]);
+    pathLen += Math.sqrt(dx * dx + dy * dy);
+  }
   return (
-    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
-      {goalY !== null && (
-        <>
-          <line x1={0} x2={width} y1={goalY} y2={goalY} stroke={T.green} strokeWidth={0.5} strokeDasharray="3 3" />
-          <text x={width - 2} y={goalY - 4} textAnchor="end" fontSize={9} fill={T.green} fontFamily={T.sans} letterSpacing="0.08em">GOAL {goal?.toFixed(1)}</text>
-        </>
-      )}
-      <path d={path} fill="none" stroke={color} strokeWidth={1.25} strokeLinejoin="round" />
-      <circle cx={(points.length - 1) * step} cy={yFor(points[points.length - 1])} r={2.5} fill={color} />
-    </svg>
+    <div className="fit-chart">
+      <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+        {goalY !== null && (
+          <>
+            <line x1={0} x2={width} y1={goalY} y2={goalY} stroke={T.green} strokeWidth={0.5} strokeDasharray="3 3" />
+            <text x={width - 2} y={goalY - 4} textAnchor="end" fontSize={9} fill={T.green} fontFamily={T.sans} letterSpacing="0.08em">GOAL {goal?.toFixed(1)}</text>
+          </>
+        )}
+        <path
+          d={path}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.25}
+          strokeLinejoin="round"
+          data-trend="observed"
+          style={{ ['--len' as never]: pathLen.toFixed(0) } as React.CSSProperties}
+        />
+        <circle data-point cx={(points.length - 1) * step} cy={yFor(points[points.length - 1])} r={2.5} fill={color} />
+      </svg>
+    </div>
   );
 }
 
@@ -1060,6 +1186,341 @@ function MiniColumnChart({ values, labels, color, height, formatValue }: {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function TdeeBreakdown({
+  bmr,
+  neat,
+  exercise,
+  total,
+  tefEstimate,
+  intake,
+  active7Avg,
+  measuredCompare,
+  exerciseSource = 'planned',
+  confidence = 0,
+}: {
+  bmr: number;
+  neat: number;
+  exercise: number;
+  total: number;
+  tefEstimate: number;
+  intake: number;
+  active7Avg: number | null;
+  measuredCompare: number | null;
+  exerciseSource?: 'measured' | 'planned';
+  confidence?: number;
+}) {
+  const confidenceLabel: 'high' | 'moderate' | 'low' =
+    confidence > 0.6 ? 'high' : confidence > 0.3 ? 'moderate' : 'low';
+  const confidenceTone =
+    confidenceLabel === 'high' ? T.green : confidenceLabel === 'moderate' ? T.gold : T.muted;
+  const pct = (value: number) => total > 0 ? Math.round((value / total) * 100) : 0;
+  const measuredCopy = active7Avg === null
+    ? null
+    : measuredCompare === null
+      ? ` Apple Health shows ${active7Avg.toLocaleString()} kcal/day active over the last 7 days.`
+      : Math.abs(measuredCompare) < 5
+        ? ` Apple Health logs ${active7Avg.toLocaleString()} kcal/day over the last 7 days — in line with this estimate.`
+        : ` Apple Health logs ${active7Avg.toLocaleString()} kcal/day over the last 7 days — ${measuredCompare > 0 ? `${measuredCompare}% above` : `${Math.abs(measuredCompare)}% below`} this estimate.`;
+
+  const rows: Array<{
+    acronym: string;
+    fullName: string;
+    value: number;
+    valueLabel: string;
+    shareLabel: string;
+    color: string;
+    sharePct: number;
+    body: React.ReactNode;
+    dashed?: boolean;
+  }> = [
+    {
+      acronym: 'BMR',
+      fullName: 'Basal Metabolic Rate',
+      value: bmr,
+      valueLabel: `${bmr.toLocaleString()} kcal`,
+      shareLabel: `${pct(bmr)}% of TDEE`,
+      color: T.ink,
+      sharePct: pct(bmr),
+      body: <>The calories your body needs at complete rest — organs running, blood circulating, lungs breathing, temperature steady. The biggest single chunk of your day. Calculated as 10 × weight + 6.25 × height − 5 × age − 161 for women (Mifflin–St Jeor).</>,
+    },
+    {
+      acronym: 'NEAT',
+      fullName: 'Non-Exercise Activity Thermogenesis',
+      value: neat,
+      valueLabel: `${neat.toLocaleString()} kcal`,
+      shareLabel: `${pct(neat)}% of TDEE`,
+      color: T.body,
+      sharePct: pct(neat),
+      body: <>Everything you move through in a normal day that isn&apos;t a workout — walking to the kitchen, standing, fidgeting, posture, errands. Varies enormously between sedentary and active days. Estimated here as roughly 25% on top of BMR.</>,
+    },
+    {
+      acronym: 'TEA',
+      fullName: 'Thermic Effect of Activity',
+      value: exercise,
+      valueLabel: `${exercise.toLocaleString()} kcal`,
+      shareLabel: exerciseSource === 'measured'
+        ? 'From Apple Health · 7d avg'
+        : 'Planned estimate · log to refine',
+      color: T.gold,
+      sharePct: pct(exercise),
+      body: <>Calories burned during deliberate training — lifting, runs, classes, the workouts you log. The bit you have the most direct control over week to week.{measuredCopy}</>,
+    },
+    {
+      acronym: 'TEF',
+      fullName: 'Thermic Effect of Food',
+      value: tefEstimate,
+      valueLabel: `~${tefEstimate.toLocaleString()} kcal`,
+      shareLabel: `~10% of intake`,
+      color: T.muted,
+      sharePct: Math.round((tefEstimate / Math.max(total, 1)) * 100),
+      dashed: true,
+      body: <>The energy your body spends digesting and metabolising what you eat — about 10% of intake, higher for protein than carbs or fat. Implicit in the multiplier above, but worth knowing: this is one reason a high-protein diet helps during a cut.</>,
+    },
+  ];
+
+  return (
+    <div style={{
+      marginTop: 28,
+      paddingTop: 28,
+      borderTop: `0.5px solid ${T.line}`,
+    }}>
+      {/* Header */}
+      <header style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)',
+        gap: '32px',
+        alignItems: 'end',
+        marginBottom: 24,
+      }}>
+        <div>
+          <Kicker style={{ marginBottom: 10 }}>How maintenance is calculated</Kicker>
+          <h4 style={{
+            margin: 0,
+            fontFamily: T.display,
+            fontSize: 30,
+            color: T.ink,
+            letterSpacing: '-0.02em',
+            lineHeight: 1.05,
+          }}>
+            TDEE <em style={{ fontStyle: 'italic', fontWeight: 400 }}>breakdown</em>
+          </h4>
+          <p style={{
+            margin: '12px 0 0',
+            fontFamily: T.sans,
+            fontSize: 13,
+            color: T.body,
+            lineHeight: 1.65,
+            maxWidth: '52ch',
+            fontWeight: 300,
+          }}>
+            Total Daily Energy Expenditure is the rough number of calories your body uses over 24 hours — the line you eat under to lose, at to hold, or over to gain. Estimated from weight, height ({HEIGHT_M.toFixed(2)} m) and age ({DEFAULT_AGE}) via Mifflin–St Jeor, then scaled for a training week.
+          </p>
+        </div>
+        <div style={{
+          borderLeft: `0.5px solid ${T.line}`,
+          paddingLeft: 28,
+        }}>
+          <Kicker style={{ marginBottom: 8 }}>Estimated total · per day</Kicker>
+          <div style={{
+            fontFamily: T.display,
+            fontSize: 56,
+            color: T.ink,
+            lineHeight: 0.95,
+            letterSpacing: '-0.03em',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {total.toLocaleString()}
+          </div>
+          <div style={{
+            marginTop: 6,
+            fontFamily: T.sans,
+            fontSize: 10,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: T.muted,
+            fontWeight: 500,
+          }}>
+            kcal · maintenance estimate
+          </div>
+          <div style={{
+            marginTop: 10,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '4px 10px',
+            border: `0.5px solid ${confidenceTone}`,
+            color: confidenceTone,
+            fontFamily: T.sans,
+            fontSize: 9.5,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            fontWeight: 600,
+          }}>
+            <span style={{ width: 5, height: 5, background: confidenceTone, display: 'inline-block' }} aria-hidden />
+            {confidenceLabel} confidence
+          </div>
+        </div>
+      </header>
+
+      {/* Slim composition ribbon */}
+      <div style={{ marginBottom: 26 }}>
+        <div style={{
+          display: 'flex',
+          height: 14,
+          background: T.softLine,
+          border: `0.5px solid ${T.line}`,
+          overflow: 'hidden',
+        }}>
+          <div style={{ flex: bmr, background: T.ink }} title={`BMR · ${bmr.toLocaleString()} kcal`} />
+          <div style={{ flex: neat, background: T.body }} title={`NEAT · ${neat.toLocaleString()} kcal`} />
+          <div style={{ flex: Math.max(exercise, 1), background: T.gold }} title={`TEA · ${exercise.toLocaleString()} kcal`} />
+        </div>
+        <div style={{
+          display: 'flex',
+          marginTop: 8,
+          fontFamily: T.sans,
+          fontSize: 9.5,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          fontWeight: 500,
+          color: T.muted,
+        }}>
+          <div style={{ flex: bmr, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <span style={{ width: 6, height: 6, background: T.ink, display: 'inline-block' }} aria-hidden />
+            <span style={{ color: T.ink, fontWeight: 600 }}>BMR</span>
+            <span>· {pct(bmr)}%</span>
+          </div>
+          <div style={{ flex: neat, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <span style={{ width: 6, height: 6, background: T.body, display: 'inline-block' }} aria-hidden />
+            <span style={{ color: T.ink, fontWeight: 600 }}>NEAT</span>
+            <span>· {pct(neat)}%</span>
+          </div>
+          <div style={{ flex: Math.max(exercise, 1), display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <span style={{ width: 6, height: 6, background: T.gold, display: 'inline-block' }} aria-hidden />
+            <span style={{ color: T.ink, fontWeight: 600 }}>TEA</span>
+            <span>· {pct(exercise)}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Component rows */}
+      <dl style={{
+        display: 'grid',
+        gap: 0,
+        margin: 0,
+        borderTop: `0.5px solid ${T.softLine}`,
+      }}>
+        {rows.map((row) => (
+          <div
+            key={row.acronym}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(120px, 150px) minmax(0, 1fr)',
+              gap: 28,
+              padding: '20px 0',
+              borderBottom: `0.5px solid ${T.softLine}`,
+              alignItems: 'start',
+            }}
+          >
+            <dt style={{ margin: 0 }}>
+              <div style={{
+                fontFamily: T.display,
+                fontSize: 28,
+                color: T.ink,
+                lineHeight: 1,
+                letterSpacing: '-0.015em',
+                fontVariantNumeric: 'tabular-nums',
+              }}>
+                {row.valueLabel}
+              </div>
+              <div style={{
+                marginTop: 6,
+                fontFamily: T.sans,
+                fontSize: 10,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: T.muted,
+                fontWeight: 500,
+              }}>
+                {row.shareLabel}
+              </div>
+            </dt>
+            <dd style={{ margin: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+                <span style={{
+                  fontFamily: T.sans,
+                  fontSize: 11,
+                  letterSpacing: '0.24em',
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                  color: T.ink,
+                }}>{row.acronym}</span>
+                <span style={{
+                  fontFamily: T.display,
+                  fontStyle: 'italic',
+                  fontSize: 14,
+                  color: T.body,
+                  fontWeight: 400,
+                }}>{row.fullName}</span>
+              </div>
+              <div style={{
+                position: 'relative',
+                height: 4,
+                background: T.softLine,
+                marginBottom: 12,
+                overflow: 'hidden',
+              }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: `${Math.min(100, Math.max(2, row.sharePct))}%`,
+                    background: row.color,
+                    opacity: row.dashed ? 0 : 1,
+                  }}
+                />
+                {row.dashed && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: `${Math.min(100, Math.max(2, row.sharePct))}%`,
+                      backgroundImage: `repeating-linear-gradient(90deg, ${row.color} 0 4px, transparent 4px 8px)`,
+                    }}
+                  />
+                )}
+              </div>
+              <p style={{
+                margin: 0,
+                fontFamily: T.sans,
+                fontSize: 12.5,
+                color: T.body,
+                lineHeight: 1.7,
+                fontWeight: 300,
+                maxWidth: '64ch',
+              }}>
+                {row.body}
+              </p>
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <p style={{
+        margin: '22px 0 0',
+        fontFamily: T.display,
+        fontStyle: 'italic',
+        fontSize: 13,
+        color: T.muted,
+        lineHeight: 1.65,
+        maxWidth: '70ch',
+      }}>
+        All figures are estimates. The {TRAINING_WEEK_ACTIVITY.toFixed(2)}× multiplier assumes an exercising week; on a rest-heavy week real burn drops. The cleanest reality check is the scale trend over two to three weeks — if weight is moving as expected, the estimate is fit for purpose. {intake > 0 && <>Your current target intake of <strong style={{ color: T.ink, fontStyle: 'normal', fontWeight: 500 }}>{intake.toLocaleString()} kcal/day</strong> sits below this maintenance line.</>}
+      </p>
     </div>
   );
 }
@@ -1125,7 +1586,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
   setTab: (tab: string) => void;
 }) {
   const remaining = Math.max(0, latest.weight - goal);
-  const moderateEta = new Date(new Date(latest.date).getTime() + (remaining / 0.45) * 7 * 86400000);
+  const targetEta = new Date(new Date(latest.date).getTime() + (remaining / TARGET_WEEKLY_LOSS_KG) * 7 * 86400000);
   const syncLabel = cloudOk === null ? 'Local-first mode' : cloudOk ? syncing ? 'Cloud syncing now' : 'Cloud sync active' : 'Local backup only';
   const syncColor = cloudOk ? T.green : cloudOk === false ? T.gold : T.muted;
   const focus = state.weighInStatus === 'overdue'
@@ -1145,7 +1606,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
     : state.direction === 'stable'
     ? {
         label: 'Plateau window',
-        copy: 'The line is flat enough to intervene cleanly. Use the plan tab and restart the moderate deficit this week.',
+        copy: 'The line is flat enough to intervene cleanly. Use the plan tab and restart the 1 kg/week cut this week.',
         color: T.gold,
         soft: T.goldSoft,
       }
@@ -1164,9 +1625,9 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
       color: T.ink,
     },
     {
-      kicker: 'Moderate-cut ETA',
-      value: moderateEta.toLocaleDateString('en-GB', { month:'short', year:'numeric' }),
-      sub: 'Assumes 0.45 kg per week',
+      kicker: '1 kg/wk ETA',
+      value: targetEta.toLocaleDateString('en-GB', { month:'short', year:'numeric' }),
+      sub: 'Assumes 1 kg per week',
       color: T.gold,
     },
     {
@@ -1421,7 +1882,7 @@ function PlanOpener({ state, sorted, setTab }: { state: State; sorted: FitnessRe
     'stable': {
       label: 'PRIORITY · BEGIN CUT',
       title: 'Initiate cut.',
-      copy: `Trend: ${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk. Drop intake by 500 kcal.`,
+      copy: `Trend: ${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk. Move to the 1 kg/week intake target.`,
       action: 'Hit five non-negotiables.',
       color: T.gold, bg: T.goldSoft,
     },
@@ -1716,7 +2177,7 @@ function TopStatStrip({ sorted, state }: { sorted: FitnessReading[]; state: Stat
 // ─── Current Goal Card ───────────────────────────────────────────────────────
 
 function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReading; goal: number }) {
-  const weeks = Math.max(0, (latest.weight - goal) / 0.45);
+  const weeks = Math.max(0, (latest.weight - goal) / TARGET_WEEKLY_LOSS_KG);
   const projectedGoalDate = new Date(new Date(latest.date).getTime() + weeks * 7 * 86400000);
   const { intake } = nutritionTargets(latest);
   const progressBase = Math.max(state.peak.weight, latest.weight);
@@ -1738,7 +2199,7 @@ function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReadin
         {goal.toFixed(1)}kg <em style={{ color:T.gold, fontStyle:'italic', fontSize:24 }}>working line</em>
       </div>
       <div style={{ fontFamily:T.sans, fontSize:11.5, color:T.muted, letterSpacing:'0.02em', marginBottom:14 }}>
-        Moderate-cut ETA · {projectedGoalDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
+        1 kg/wk ETA · {projectedGoalDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
       </div>
 
       <div style={{ height:6, background:T.surface, borderRadius:999, overflow:'hidden', marginBottom:8, position:'relative' }}>
@@ -2260,7 +2721,7 @@ function TodayGlanceStrip({
               <div style={{ fontFamily:T.sans, fontSize:10, fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:T.muted, marginBottom:6 }}>
                 Today
               </div>
-              <div style={{ fontFamily:T.display, fontSize:34, color:T.ink, lineHeight:0.95, letterSpacing:'-0.03em', marginBottom:4 }}>
+              <div data-hero-num style={{ fontFamily:T.display, fontSize:34, color:T.ink, lineHeight:0.95, letterSpacing:'-0.03em', marginBottom:4 }}>
                 {latest.weight.toFixed(1)}
               </div>
               <div style={{ fontFamily:T.sans, fontSize:10, color:T.muted, textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:6 }}>
@@ -2417,7 +2878,7 @@ function DashboardHero({
               {weightLabel} · {fmtDate(latest.date)}
             </div>
             <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:8 }}>
-              <span style={{ fontFamily:T.display, fontSize:56, color:T.ink, letterSpacing:'-0.03em', lineHeight:0.92 }}>{latest.weight.toFixed(1)}</span>
+              <span data-hero-num style={{ fontFamily:T.display, fontSize:56, color:T.ink, letterSpacing:'-0.03em', lineHeight:0.92 }}>{latest.weight.toFixed(1)}</span>
               <span style={{ fontFamily:T.sans, fontSize:22, color:T.muted }}>kg</span>
             </div>
             <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:11, letterSpacing:'0.04em', color:sevenDayDelta <= 0 ? T.green : T.rose, marginTop:6 }}>
@@ -2671,7 +3132,7 @@ function HeroReading({ latest, previous, sorted }: { latest:FitnessReading; prev
       <div>
         <Kicker style={{ marginBottom:14 }}>This Week&apos;s Figure · {fmtDate(latest.date, { long:true })}</Kicker>
         <div style={{ display:'flex', alignItems:'baseline', gap:16, marginBottom:12 }}>
-          <span style={{ fontFamily:T.display, fontWeight:400, fontSize: 32, letterSpacing:'-0.04em', lineHeight:0.85, color:T.ink }}>
+          <span data-hero-num style={{ fontFamily:T.display, fontWeight:400, fontSize: 32, letterSpacing:'-0.04em', lineHeight:0.85, color:T.ink }}>
             {latest.weight.toFixed(1)}
           </span>
           <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:28, color:T.muted }}>kg</span>
@@ -2996,8 +3457,6 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
   const { bmr, activeTdee } = nutritionTargets(latest);
   const tdee = { sedentary: Math.round(bmr*1.2), light: Math.round(bmr*1.375), moderate: Math.round(bmr*1.55) };
 
-  const KcalPerKg = 7700;
-
   const strategies = [
     {
       name:'Slow & Steady', deficit:300,
@@ -3006,7 +3465,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
       con:'Longest timeline — requires patience',
     },
     {
-      name:'Moderate Cut', deficit:500, recommended:true,
+      name:'Moderate Cut', deficit:500,
       note:'The evidence-backed sweet spot. Clinically recommended as the primary approach for sustainable fat loss.',
       pro:'Sustainable for 6–12 months, protects muscle when paired with resistance training',
       con:'Requires consistent tracking of intake',
@@ -3018,31 +3477,31 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
       con:'Elevated hunger, fatigue, some muscle loss risk',
     },
     {
-      name:'Maximum Safe', deficit:1000,
-      note:'Upper clinical limit. Appropriate only short-term or under medical supervision.',
+      name:'1 kg/week target', deficit:TARGET_DAILY_DEFICIT_KCAL, recommended:true,
+      note:'Your requested pace. It sits right on the upper-limit cut, so recovery, steps, protein and lifting all need to stay tidy.',
       pro:'Fastest route to the goal',
-      con:'Nutrient deficiency risk, energy crash, significant muscle loss without careful protein intake',
+      con:'Highest fatigue and adherence risk if tracking slips or recovery gets messy',
     },
   ];
 
   const nowMs = new Date(latest.date).getTime();
 
   const goalDateForDeficit = (deficit:number) => {
-    const kgPerWeek = deficit / KcalPerKg * 7;
+    const kgPerWeek = deficit / KCAL_PER_KG * 7;
     const weeksNeeded = toGo / kgPerWeek;
     return new Date(nowMs + weeksNeeded * 7 * 86400000);
   };
 
   const thisWeekTarget = (deficit:number) => {
-    const kgPerDay = deficit / KcalPerKg;
+    const kgPerDay = deficit / KCAL_PER_KG;
     return Math.max(0, latest.weight - kgPerDay * 7).toFixed(1);
   };
 
   // Verdict logic
   const verdict = latest.bmi >= 30 && latest.bodyFat > 33;
   const verdictText = verdict
-    ? `Yes — cut. BMI ${latest.bmi.toFixed(1)} (obese class ${latest.bmi >= 35 ? 'II' : 'I'}) and body fat ${latest.bodyFat.toFixed(1)}% both indicate a calorie deficit is clinically appropriate. The moderate cut is the recommended starting point.`
-    : `Moderate deficit recommended. Your metrics suggest fat loss would improve health markers significantly.`;
+    ? `Yes — cut. BMI ${latest.bmi.toFixed(1)} (obese class ${latest.bmi >= 35 ? 'II' : 'I'}) and body fat ${latest.bodyFat.toFixed(1)}% both indicate a calorie deficit is clinically appropriate. For your requested pace, the 1 kg/week target is the active plan.`
+    : `A calorie deficit is still the right move here. The dashboard is now calibrated to your requested 1 kg/week pace.`;
 
   return (
     <div style={{ marginTop:80 }}>
@@ -3102,7 +3561,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
             ))}
           </div>
           {strategies.map((s, i) => {
-            const kgPerWeek = (s.deficit/KcalPerKg*7);
+            const kgPerWeek = (s.deficit/KCAL_PER_KG*7);
             const intake = activeTdee - s.deficit;
             const gDate = goalDateForDeficit(s.deficit);
             const isRec = s.recommended;
@@ -3196,8 +3655,8 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
       <div style={{ marginTop:40, padding:'24px', background:T.greenSoft, borderLeft:`2px solid ${T.green}` }}>
         <Kicker color={T.green} style={{ marginBottom:10 }}>Muscle Mass · {latest.muscleMass.toFixed(1)}% · Your strongest metric</Kicker>
         <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:0 }}>
-          Muscle at {latest.muscleMass.toFixed(1)}% is your best number. Aggressive cuts risk eroding it.{' '}
-          <strong style={{ color:T.ink, fontWeight:500 }}>Recommendation:</strong> start with the moderate cut (−500 kcal/day) and pair it with 2–3 resistance sessions per week.
+          Muscle at {latest.muscleMass.toFixed(1)}% is your best number. Faster cuts risk eroding it.{' '}
+          <strong style={{ color:T.ink, fontWeight:500 }}>Recommendation:</strong> if you are running the 1 kg/week target, keep resistance training at 2–3 sessions per week and do not let protein slip.
           Ensure protein intake is at least <strong style={{ color:T.ink, fontWeight:500 }}>{Math.round(latest.weight * 1.6)}–{Math.round(latest.weight * 2.0)} g/day</strong> ({(latest.weight*1.6).toFixed(0)}–{(latest.weight*2.0).toFixed(0)} g at current weight) to protect lean mass during the cut.
         </p>
       </div>
@@ -3218,7 +3677,7 @@ function projectedBF(targetWeight: number, r: FitnessReading): number {
 }
 
 function weeksToWeight(latest: FitnessReading, target: number, deficitKcal: number): number {
-  const kgPerWeek = deficitKcal / 7700 * 7;
+  const kgPerWeek = deficitKcal / KCAL_PER_KG * 7;
   return Math.max(0, (latest.weight - target) / kgPerWeek);
 }
 
@@ -3244,7 +3703,7 @@ interface Phase {
 
 function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number; reg: Reg | null }) {
   const latest  = sorted[sorted.length - 1];
-  const deficit = MODERATE_DEFICIT_KCAL;
+  const deficit = TARGET_DAILY_DEFICIT_KCAL;
   const currentNutrition = nutritionTargets(latest);
   const phase78Nutrition = nutritionTargets({ ...latest, weight: 78 });
   const phase70Nutrition = nutritionTargets({ ...latest, weight: 70 });
@@ -3279,13 +3738,13 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       startWeight: latest.weight, endWeight: 78,
       startBF: latest.bodyFat, endBF: bf78,
       durationWeeks: Math.round(w1),
-      deficit: 500,
+      deficit: TARGET_DAILY_DEFICIT_KCAL,
       actions: [
-        `Eat at about ${currentNutrition.intake.toLocaleString()} kcal/day on average (training-week maintenance − 500)`,
+        `Eat at about ${currentNutrition.intake.toLocaleString()} kcal/day on average (training-week maintenance − ${TARGET_DAILY_DEFICIT_KCAL.toLocaleString()})`,
         `Protein: ${currentNutrition.protein} g/day minimum to protect muscle`,
         'Resistance training 3× per week — this is non-negotiable',
         'Weigh in weekly at the same time. Log every reading.',
-        'Target: −0.5 kg per week. Slower is fine; faster is risky.',
+        'Target: −1 kg per week. This is the ceiling pace, so recovery and protein have to stay tight.',
       ],
       trigger: `Scale reads 78 kg and body fat estimated below ${bf78.toFixed(0)}%`,
     },
@@ -3313,9 +3772,9 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       startWeight: 78, endWeight: 70,
       startBF: bf78, endBF: bf70,
       durationWeeks: Math.round(w2 - w1),
-      deficit: 500,
+      deficit: TARGET_DAILY_DEFICIT_KCAL,
       actions: [
-        'Resume −500 kcal/day deficit',
+        `Resume −${TARGET_DAILY_DEFICIT_KCAL.toLocaleString()} kcal/day deficit`,
         `Protein: ${phase78Nutrition.protein} g/day (recalculated for new weight)`,
         'Increase training intensity if energy allows',
         'Body fat is dropping — muscle definition will start to appear',
@@ -3512,7 +3971,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
 
       {/* Summary timeline strip */}
       <div style={{ marginTop:48 }}>
-        <Kicker style={{ marginBottom:14 }}>Full Timeline at −500 kcal/day Moderate Cut</Kicker>
+        <Kicker style={{ marginBottom:14 }}>Full Timeline at −{TARGET_DAILY_DEFICIT_KCAL.toLocaleString()} kcal/day · 1 kg/week target</Kicker>
         <div style={{ display:'flex', borderTop:`2px solid ${T.ink}`, borderBottom:`0.5px solid ${T.line}` }}>
           {phases.filter(ph => ph.durationWeeks > 0 || ph.id === 7).map((ph,i) => {
             const ts  = typeStyles[ph.type];
@@ -4166,7 +4625,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
 function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; goal: number; state: State; setTab: (t: string) => void }) {
   const latest = sorted[sorted.length - 1];
   const { activeTdee, intake, protein } = nutritionTargets(latest);
-  const goalDate = new Date(new Date(latest.date).getTime() + ((latest.weight - goal) / 0.45 * 7) * 86400000);
+  const goalDate = new Date(new Date(latest.date).getTime() + ((latest.weight - goal) / TARGET_WEEKLY_LOSS_KG * 7) * 86400000);
 
   const sectionGap = { marginTop: 64 };
 
@@ -4200,7 +4659,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
         <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, margin:0, lineHeight:1.5 }}>
           {(latest.weight-goal).toFixed(1)} kilograms in roughly{' '}
           <em style={{ color:T.gold }}>{goalDate.toLocaleDateString('en-GB',{month:'long', year:'numeric'})}</em>.
-          Sustainable rate. No crash diets.
+          Aggressive pace. Tight tracking, protein and recovery only.
         </p>
       </div>
 
@@ -4213,7 +4672,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
         <ThickRule />
         {[
           {n:'01', r:'Weigh in every Monday morning',                                        d:'Same time, same clothing (or none). One number per week — that is the data point. Ignore daily fluctuation.'},
-          {n:'02', r:`Eat around ${intake.toLocaleString()} kcal per day on average`,        d:`This assumes you are training. It uses an exercising-week TDEE of about ${activeTdee.toLocaleString()} kcal and applies a 500-kcal moderate deficit.`},
+          {n:'02', r:`Eat around ${intake.toLocaleString()} kcal per day on average`,        d:`This assumes you are training. It uses an exercising-week TDEE of about ${activeTdee.toLocaleString()} kcal and applies a ${TARGET_DAILY_DEFICIT_KCAL.toLocaleString()}-kcal deficit to chase the 1 kg/week target.`},
           {n:'03', r:`Hit ${protein}g of protein every day`,                                 d:'1.8g per kg of bodyweight. This protects muscle during the deficit. Non-negotiable on training days especially.'},
           {n:'04', r:'Lift three times per week, minimum',                                   d:'45-60 minute sessions. Compound movements. Progressive overload. Walks do not count as resistance training.'},
           {n:'05', r:'Log every reading, every meal, every session',                         d:'Even the bad weeks. Especially the bad weeks. Data with gaps cannot be analysed.'},
@@ -4812,8 +5271,9 @@ interface TodaySnapshot {
   latest: FitnessReading;
   state: State;
   goal: number;
+  pace: PaceOption;
   cadence: { count: number; score: number };
-  nutrition: { bmr: number; activeTdee: number; intake: number; maintenance: number; protein: number };
+  nutrition: { bmr: number; activeTdee: number; intake: number; maintenance: number; protein: number; neat?: number; exercise?: number; tef?: number; exerciseSource?: 'measured' | 'planned'; confidence?: number };
   caloriesInToday: number | null;
   caloriesOutToday: number | null;
   actualDeficitToday: number | null;
@@ -4824,6 +5284,7 @@ interface TodaySnapshot {
   fiberG: number | null;
   waterMl: number | null;
   stepsToday: number | null;
+  exerciseToday: number | null;
   sevenDayDelta: number;
 }
 
@@ -4856,8 +5317,10 @@ function buildNextActions(snap: TodaySnapshot): NextAction[] {
       const gap = snap.actualDeficitToday !== null ? Math.max(0, snap.targetDeficit - snap.actualDeficitToday) : snap.targetDeficit;
       actions.push({
         tone: actions.length === 0 ? 'primary' : 'support',
-        title: 'Add a short walk or protein-led meal',
-        detail: `Deficit is about ${gap.toLocaleString('en-GB')} kcal short of plan. A 20-minute walk and a protein-forward dinner usually closes that.`,
+        title: snap.targetDeficit === 0 ? 'Pull the day back to maintenance' : 'Add a short walk or protein-led meal',
+        detail: snap.targetDeficit === 0
+          ? `The day is running about ${Math.abs(snap.actualDeficitToday ?? 0).toLocaleString('en-GB')} kcal above maintenance. Tighten dinner or add a short walk.`
+          : `Deficit is about ${gap.toLocaleString('en-GB')} kcal short of plan. A 20-minute walk and a protein-forward dinner usually closes that.`,
       });
     }
   }
@@ -4947,7 +5410,13 @@ function buildTodayRead(snap: TodaySnapshot): { headline: string; lines: ReadLin
 
   // Calorie / deficit read
   if (snap.actualDeficitToday !== null && snap.caloriesInToday !== null) {
-    if (snap.actualDeficitToday >= snap.targetDeficit) {
+    if (snap.targetDeficit === 0) {
+      if (snap.actualDeficitToday >= 0) {
+        lines.push({ tone: 'good', text: 'Intake is sitting at or below maintenance so far today.' });
+      } else {
+        lines.push({ tone: 'warn', text: `Today is running about ${Math.abs(snap.actualDeficitToday).toLocaleString('en-GB')} kcal above maintenance. Tighten the finish rather than changing the whole plan.` });
+      }
+    } else if (snap.actualDeficitToday >= snap.targetDeficit) {
       lines.push({ tone: 'good', text: `Intake is controlled and the deficit is at or above the planned ${snap.targetDeficit.toLocaleString('en-GB')} kcal range.` });
     } else if (snap.actualDeficitToday >= 0) {
       const shortBy = snap.targetDeficit - snap.actualDeficitToday;
@@ -5010,6 +5479,141 @@ function TodayReadCard({ snap }: { snap: TodaySnapshot }) {
         ))}
       </ul>
     </article>
+  );
+}
+
+function PaceSelector({ value, onChange }: { value: PaceKey; onChange: (value: PaceKey) => void }) {
+  return (
+    <div className="fit-pace-switch" role="tablist" aria-label="Weight-loss pace">
+      {PACE_OPTIONS.map((option) => {
+        const active = option.key === value;
+        return (
+          <button
+            key={option.key}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            className={`fit-pace-switch-btn${active ? ' is-active' : ''}`}
+            onClick={() => onChange(option.key)}
+            title={option.note}
+          >
+            <span>{option.shortLabel}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TodayCommandCard({
+  snap,
+  paceKey,
+  onPaceChange,
+  onLog,
+}: {
+  snap: TodaySnapshot;
+  paceKey: PaceKey;
+  onPaceChange: (value: PaceKey) => void;
+  onLog: () => void;
+}) {
+  const actions = buildNextActions(snap);
+  const [primary, ...rest] = actions;
+  const read = buildTodayRead(snap);
+  const pace = findPaceOption(paceKey);
+  const tone: 'good' | 'neutral' | 'warn' = snap.state.weighInStatus === 'overdue'
+    ? 'warn'
+    : read.lines.some((line) => line.tone === 'warn')
+      ? 'warn'
+      : read.lines.every((line) => line.tone === 'good')
+        ? 'good'
+        : 'neutral';
+  const calorieSummary = snap.caloriesInToday === null
+    ? `${snap.nutrition.intake.toLocaleString('en-GB')} kcal target`
+    : `${Math.round(snap.caloriesInToday).toLocaleString('en-GB')} / ${snap.nutrition.intake.toLocaleString('en-GB')} kcal`;
+  const calorieMeta = snap.caloriesInToday === null
+    ? pace.weeklyLossKg === 0 ? 'Maintenance mode' : `${pace.label} ceiling pace`
+    : `${Math.max(0, snap.nutrition.intake - snap.caloriesInToday).toLocaleString('en-GB')} kcal left`;
+  const proteinRemaining = snap.proteinG === null ? snap.nutrition.protein : Math.max(0, Math.round(snap.nutrition.protein - snap.proteinG));
+  const proteinSummary = snap.proteinG === null
+    ? `${snap.nutrition.protein} g target`
+    : `${Math.round(snap.proteinG)} / ${snap.nutrition.protein} g`;
+  const proteinMeta = snap.proteinG === null
+    ? 'Waiting on macro sync'
+    : proteinRemaining > 0 ? `${proteinRemaining} g still to land` : 'Protein covered';
+  const stepsFloor = 8000;
+  const stepsSummary = snap.stepsToday === null
+    ? `${stepsFloor.toLocaleString('en-GB')} step floor`
+    : `${snap.stepsToday.toLocaleString('en-GB')} steps`;
+  const stepsMeta = snap.stepsToday === null
+    ? 'Waiting on movement sync'
+    : snap.stepsToday >= stepsFloor
+      ? 'Movement floor hit'
+      : `${(stepsFloor - snap.stepsToday).toLocaleString('en-GB')} steps to floor`;
+  const weighInSummary = snap.state.weighInStatus === 'today'
+    ? 'Logged today'
+    : `${snap.state.daysSinceWeighIn} days ago`;
+  const weighInMeta = snap.state.weighInStatus === 'overdue'
+    ? 'Needs a fresh reading'
+    : `7-day move ${formatWeightDelta(snap.sevenDayDelta)}`;
+
+  return (
+    <section className={`fit-command-card is-${tone}`}>
+      <div className="fit-command-head">
+        <div className="fit-command-head-copy">
+          <span className="fit-command-eyebrow">Today&apos;s command</span>
+          <div className="fit-command-mode">
+            {pace.weeklyLossKg === 0 ? 'Maintenance mode' : `${pace.label} target`}
+          </div>
+          <div className="fit-command-note">{pace.note}</div>
+        </div>
+        <PaceSelector value={paceKey} onChange={onPaceChange} />
+      </div>
+
+      <div className="fit-command-body">
+        <div className="fit-command-primary">
+          <span className={`fit-command-pill is-${tone}`}>{read.headline}</span>
+          <h3 className="fit-command-title">{primary.title}</h3>
+          <p className="fit-command-detail">{primary.detail}</p>
+          {(snap.state.weighInStatus === 'overdue' || snap.state.weighInStatus === 'due-soon') && (
+            <button type="button" className="fit-command-cta" onClick={onLog}>
+              File reading
+            </button>
+          )}
+        </div>
+
+        <dl className="fit-command-metrics">
+          {[
+            { label: 'Calories', value: calorieSummary, meta: calorieMeta },
+            { label: 'Protein', value: proteinSummary, meta: proteinMeta },
+            { label: 'Steps', value: stepsSummary, meta: stepsMeta },
+            { label: 'Weigh-in', value: weighInSummary, meta: weighInMeta },
+          ].map((item) => (
+            <div key={item.label} className="fit-command-metric">
+              <dt>{item.label}</dt>
+              <dd>{item.value}</dd>
+              <small>{item.meta}</small>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      {(rest.length > 0 || read.lines.length > 0) && (
+        <div className="fit-command-support">
+          {rest.slice(0, 2).map((action, index) => (
+            <div key={`${action.title}-${index}`} className="fit-command-support-item">
+              <strong>{action.title}</strong>
+              <span>{action.detail}</span>
+            </div>
+          ))}
+          {read.lines.slice(0, 2).map((line, index) => (
+            <div key={`${line.text}-${index}`} className={`fit-command-support-item is-${line.tone}`}>
+              <strong>Why</strong>
+              <span>{line.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -5194,7 +5798,7 @@ function interpretTrend(slopeKgPerWeek: number, kgToGo: number): TrendInterpreta
       return {
         tone: 'warn',
         headline: 'Cutting fast',
-        copy: `Losing ${abs.toFixed(2)} kg/wk sits above the safe upper limit (about 1 % bodyweight/wk). Risk of muscle loss and metabolic stall — ease the deficit toward −0.5 kg/wk.`,
+        copy: `Losing ${abs.toFixed(2)} kg/wk sits above the safe upper limit (about 1 % bodyweight/wk). Risk of muscle loss and metabolic stall — ease the deficit back toward −1.0 kg/wk.`,
       };
     }
     if (slopeKgPerWeek < -0.3) {
@@ -5782,9 +6386,13 @@ function TopNutritionCaloriesCard({
   const calorieTarget = Math.round(snap.nutrition.intake);
   const targetDeficit = Math.round(snap.targetDeficit);
   const targetNet = -targetDeficit;
+  const isMaintenanceMode = snap.pace.weeklyLossKg === 0;
   const caloriesIn = snap.caloriesInToday;
   const caloriesOut = snap.caloriesOutToday;
   const bmr = snap.nutrition.bmr;
+  const proteinRemaining = snap.proteinG === null ? snap.nutrition.protein : Math.max(0, Math.round(snap.nutrition.protein - snap.proteinG));
+  const calorieRemaining = caloriesIn === null ? null : Math.round(calorieTarget - caloriesIn);
+  const stepFloor = 8000;
   const netToday = caloriesIn !== null && caloriesOut !== null ? caloriesIn - caloriesOut : null;
   const netForDay = (day: HealthStreamFetch['days'][number]): number | null => {
     const intake = day.nutrition?.dietaryEnergyKcal ?? null;
@@ -5793,10 +6401,17 @@ function TopNutritionCaloriesCard({
   };
   const nets7 = healthDays.slice(-7).map(netForDay).filter((value): value is number => value !== null && Number.isFinite(value));
   const avgNet7 = nets7.length > 0 ? nets7.reduce((sum, value) => sum + value, 0) / nets7.length : null;
-  const deficitProgress = netToday !== null
-    ? Math.min(100, Math.max(0, (Math.min(0, netToday) / targetNet) * 100))
-    : 0;
-  const avgTargetCoverage = avgNet7 !== null
+  const avgDeficit7 = avgNet7 !== null ? Math.max(0, -avgNet7) : null;
+  const weeklyAverageDeficit = avgDeficit7 !== null ? avgDeficit7 * 7 : null;
+  const projectedWeightChangeKgPerWeek = avgNet7 !== null ? (-avgNet7 * 7) / KCAL_PER_KG : null;
+  const predictedWeightLossKgPerWeek = projectedWeightChangeKgPerWeek !== null
+    ? Math.max(0, projectedWeightChangeKgPerWeek)
+    : null;
+  const predictedWeightLossKgPerMonth = predictedWeightLossKgPerWeek !== null
+    ? predictedWeightLossKgPerWeek * 4
+    : null;
+  const loggedDaysLabel = `${nets7.length} logged day${nets7.length === 1 ? '' : 's'}`;
+  const avgTargetCoverage = targetDeficit > 0 && avgNet7 !== null
     ? Math.max(0, Math.round((Math.min(0, avgNet7) / targetNet) * 100))
     : null;
   const hasNutritionData = healthDays.some((day) => (day.nutrition?.dietaryEnergyKcal ?? null) !== null);
@@ -5810,26 +6425,87 @@ function TopNutritionCaloriesCard({
     if (value < 0) return `−${abs}`;
     return abs;
   };
-  const netTone = netToday !== null && netToday <= targetNet ? 'good' : netToday !== null && netToday < 0 ? 'neutral' : 'warn';
-  const avgTone = avgNet7 !== null && avgNet7 <= targetNet ? 'good' : avgNet7 !== null && avgNet7 < 0 ? 'neutral' : 'warn';
+  const netTone = targetDeficit === 0
+    ? netToday !== null && netToday <= 0 ? 'good' : netToday !== null ? 'warn' : 'neutral'
+    : netToday !== null && netToday <= targetNet ? 'good' : netToday !== null && netToday < 0 ? 'neutral' : 'warn';
+  const avgTone = targetDeficit === 0
+    ? avgNet7 !== null && avgNet7 <= 0 ? 'good' : avgNet7 !== null ? 'warn' : 'neutral'
+    : avgNet7 !== null && avgNet7 <= targetNet ? 'good' : avgNet7 !== null && avgNet7 < 0 ? 'neutral' : 'warn';
+  const weeklyDeficitTone = avgNet7 === null ? 'neutral' : avgNet7 < 0 ? 'good' : 'warn';
+  const predictedLossTone = projectedWeightChangeKgPerWeek === null
+    ? 'neutral'
+    : projectedWeightChangeKgPerWeek > 0
+      ? 'good'
+      : 'warn';
   const netHeadline = netToday === null
     ? 'Waiting on food log'
-    : netToday <= targetNet
-      ? 'Ahead of target'
-      : netToday < 0
-        ? 'Close, not there yet'
-        : 'Currently in surplus';
+    : targetDeficit === 0
+      ? netToday <= 0
+        ? 'At or below maintenance'
+        : 'Above maintenance right now'
+      : netToday <= targetNet
+        ? 'Ahead of target'
+        : netToday < 0
+          ? 'Close, not there yet'
+          : 'Currently in surplus';
 
   return (
-    <article className="op-health-card op-card-wide fit-top-nutrition-card">
+    <article className="op-health-card op-card-wide fit-top-nutrition-card" data-today="latest">
       <header className="op-health-card-head op-nutri-head">
-        <span className="op-health-card-label">Calorie balance</span>
-        <span className="op-nutri-target">Target deficit {targetDeficit.toLocaleString('en-GB')} kcal</span>
+        <span className="op-health-card-label">Fuel &amp; deficit</span>
+        <span className="op-nutri-target">
+          {isMaintenanceMode
+            ? 'Maintenance mode'
+            : `${snap.pace.label} · target deficit ${targetDeficit.toLocaleString('en-GB')} kcal`}
+        </span>
       </header>
+
+      <section className="op-nutri-targets" aria-label="Today targets">
+        {[
+          {
+            label: 'Calories',
+            value: `${calorieTarget.toLocaleString('en-GB')} kcal`,
+            meta: calorieRemaining === null
+              ? (isMaintenanceMode ? 'Hold around maintenance' : `${snap.pace.label} ceiling pace`)
+              : calorieRemaining >= 0
+                ? `${calorieRemaining.toLocaleString('en-GB')} kcal left`
+                : `${Math.abs(calorieRemaining).toLocaleString('en-GB')} kcal over`,
+          },
+          {
+            label: 'Protein',
+            value: `${snap.nutrition.protein} g`,
+            meta: snap.proteinG === null
+              ? 'Macro sync pending'
+              : proteinRemaining > 0
+                ? `${proteinRemaining} g still to land`
+                : 'Protein target covered',
+          },
+          {
+            label: 'Steps floor',
+            value: `${stepFloor.toLocaleString('en-GB')} steps`,
+            meta: snap.stepsToday === null
+              ? 'Movement sync pending'
+              : snap.stepsToday >= stepFloor
+                ? 'Floor already hit'
+                : `${(stepFloor - snap.stepsToday).toLocaleString('en-GB')} steps to go`,
+          },
+          {
+            label: 'Why this pace',
+            value: isMaintenanceMode ? 'Hold the line' : snap.pace.label,
+            meta: snap.pace.note,
+          },
+        ].map((item) => (
+          <article key={item.label} className="op-nutri-target-card">
+            <span className="op-nutri-target-card-label">{item.label}</span>
+            <strong className="op-nutri-target-card-value">{item.value}</strong>
+            <span className="op-nutri-target-card-meta">{item.meta}</span>
+          </article>
+        ))}
+      </section>
 
       {!hasNutritionData ? (
         <div className="op-nutri-empty">
-          <p>No food log synced yet today. Calories and macros will appear here after the next Apple Health export.</p>
+          <p>No food log synced yet today. The targets above still give you the shape of the day; the live calorie read fills in after the next Apple Health export.</p>
         </div>
       ) : (
         <div className="op-nutri-editorial">
@@ -5863,7 +6539,7 @@ function TopNutritionCaloriesCard({
               Math.abs(targetNet),
               1,
             );
-            const targetMarkPct = Math.min(100, (Math.abs(targetNet) / scale) * 100);
+            const targetMarkPct = targetDeficit > 0 ? Math.min(100, (Math.abs(targetNet) / scale) * 100) : null;
             const rows = [
               {
                 key: 'in',
@@ -5887,7 +6563,7 @@ function TopNutritionCaloriesCard({
                 key: 'deficit',
                 label: 'Deficit today',
                 value: netToday,
-                sub: `Target ${fmtSigned(targetNet)} kcal`,
+                sub: targetDeficit > 0 ? `Target ${fmtSigned(targetNet)} kcal` : 'Hold around maintenance',
                 pct: netToday !== null ? Math.min(100, (Math.abs(netToday) / scale) * 100) : 0,
                 tone: netTone,
                 marker: targetMarkPct,
@@ -5896,7 +6572,9 @@ function TopNutritionCaloriesCard({
                 key: 'avg',
                 label: '7-day average',
                 value: avgNet7,
-                sub: avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target` : 'Need more overlapping days',
+                sub: targetDeficit > 0
+                  ? avgTargetCoverage !== null ? `${avgTargetCoverage}% of deficit target` : 'Need more overlapping days'
+                  : 'Use this as a maintenance drift check',
                 pct: avgNet7 !== null ? Math.min(100, (Math.abs(avgNet7) / scale) * 100) : 0,
                 tone: avgTone,
                 marker: targetMarkPct,
@@ -5920,6 +6598,49 @@ function TopNutritionCaloriesCard({
               </ol>
             );
           })()}
+
+          <section className="op-nutri-weekly" aria-label="Weekly deficit and predicted weight loss">
+            <div className="op-nutri-weekly-head">
+              <span className="op-nutri-weekly-title">Weekly average deficit &amp; projected loss</span>
+              <span className="op-nutri-weekly-meta">
+                {nets7.length > 0 ? `Trailing 7 days · ${loggedDaysLabel}` : 'Need overlapping food and burn data'}
+              </span>
+            </div>
+
+            <div className="op-nutri-weekly-grid">
+              <article className="op-nutri-weekly-card">
+                <span className="op-nutri-weekly-card-label">Weekly average deficit</span>
+                <strong className={`op-nutri-weekly-card-value is-${weeklyDeficitTone}`}>
+                  {weeklyAverageDeficit !== null ? `${Math.round(weeklyAverageDeficit).toLocaleString('en-GB')} kcal` : '—'}
+                </strong>
+                <p className="op-nutri-weekly-card-copy">
+                  {avgNet7 === null
+                    ? 'Waiting for synced intake and burn data before the weekly average can be calculated.'
+                    : avgNet7 < 0
+                      ? `${Math.round(avgDeficit7 ?? 0).toLocaleString('en-GB')} kcal/day average deficit across ${loggedDaysLabel}.`
+                      : avgNet7 > 0
+                        ? `Currently averaging ${fmtSigned(avgNet7)} kcal/day, so no weekly deficit is building yet.`
+                        : `Currently sitting at maintenance on average across ${loggedDaysLabel}.`}
+                </p>
+              </article>
+
+              <article className="op-nutri-weekly-card">
+                <span className="op-nutri-weekly-card-label">Predicted weight loss</span>
+                <strong className={`op-nutri-weekly-card-value is-${predictedLossTone}`}>
+                  {predictedWeightLossKgPerWeek !== null ? `${predictedWeightLossKgPerWeek.toFixed(2)} kg/wk` : '—'}
+                </strong>
+                <p className="op-nutri-weekly-card-copy">
+                  {projectedWeightChangeKgPerWeek === null
+                    ? 'Need more overlapping days before projecting a reliable weekly loss pace.'
+                    : projectedWeightChangeKgPerWeek > 0
+                      ? `About ${predictedWeightLossKgPerMonth?.toFixed(1)} kg over 4 weeks if this average holds.`
+                      : projectedWeightChangeKgPerWeek < 0
+                        ? `Current average points closer to ${Math.abs(projectedWeightChangeKgPerWeek).toFixed(2)} kg/wk gain than loss.`
+                        : 'Current average points to maintenance rather than weight loss.'}
+                </p>
+              </article>
+            </div>
+          </section>
 
           <DayDeficitInspector
             healthDays={healthDays}
@@ -6078,10 +6799,14 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
 // ─── Main app ─────────────────────────────────────────────────────────────────
 
 export default function OperatorDashboardClient() {
+  useDashboardMotion();
+  useChartDrawObserver();
+  useDimOnRead();
   const [authed, setAuthed]   = useState(false);
   const [opPw, setOpPw]       = useState('');
   const [readings, setReadings] = useState<FitnessReading[]>([]);
   const [goal, setGoal]       = useState(60.0);
+  const [paceKey, setPaceKey] = useState<PaceKey>('aggressive');
   const [compose, setCompose] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
@@ -6137,6 +6862,10 @@ export default function OperatorDashboardClient() {
     if (typeof window === 'undefined') return;
     const g = localStorage.getItem(GOAL_KEY);
     if (g) setGoal(parseFloat(g));
+    const savedPace = localStorage.getItem(PACE_KEY);
+    if (savedPace && PACE_OPTIONS.some((option) => option.key === savedPace)) {
+      setPaceKey(savedPace as PaceKey);
+    }
     const stored = localStorage.getItem(AUTH_KEY);
     if (stored) {
       try {
@@ -6146,6 +6875,11 @@ export default function OperatorDashboardClient() {
       } catch { localStorage.removeItem(AUTH_KEY); }
     }
   }, [loadData]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(PACE_KEY, paceKey);
+  }, [paceKey]);
 
   const handleUnlock = useCallback(async () => {
     const stored = localStorage.getItem(AUTH_KEY);
@@ -6178,9 +6912,10 @@ export default function OperatorDashboardClient() {
   const latest   = dashboardSource[dashboardSource.length - 1];
   const latestIsToday = latest ? isoDay(latest.date) === todayIso : false;
   const weightLabel = latestIsToday ? 'Today' : 'Latest';
+  const pace = findPaceOption(paceKey);
   const state    = useMemo(() => (
-    dashboardSource.length > 0 ? assessState(dashboardSource, goal, todayIso) : null
-  ), [dashboardSource, goal, todayIso]);
+    dashboardSource.length > 0 ? assessState(dashboardSource, goal, todayIso, pace.weeklyLossKg) : null
+  ), [dashboardSource, goal, todayIso, pace.weeklyLossKg]);
   const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(derivedSource), [derivedSource]);
   const phaseRows = useMemo(() => buildReferencePhaseRows(derivedSource), [derivedSource]);
   const photoMilestones = useMemo(() => buildPhotoMilestones(derivedSource), [derivedSource]);
@@ -6342,7 +7077,29 @@ export default function OperatorDashboardClient() {
 
   const previousWeek = nearestReadingByDays(dashboardSource, latest, 7);
   const cadence = loggingCadence(dashboardSource);
-  const nutrition = nutritionTargets(latest);
+
+  // Feed real measured signals into the TDEE estimate so maintenance/intake
+  // reflect Apple Health burn and (if logged) today's food rather than a
+  // flat 1.4× multiplier.
+  const active7Series = healthDays
+    .slice(-7)
+    .map((d) => d.activity.activeEnergyKcal)
+    .filter((v): v is number => v !== null && Number.isFinite(v));
+  const active7AvgForTdee = active7Series.length > 0
+    ? active7Series.reduce((a, b) => a + b, 0) / active7Series.length
+    : null;
+  const todayHealthForTdee = healthDays.find((d) => isoDay(d.date) === todayIso) ?? healthDays[healthDays.length - 1] ?? null;
+  const todayIntakeForTdee = todayHealthForTdee?.nutrition?.dietaryEnergyKcal ?? null;
+  const todayProteinG = todayHealthForTdee?.nutrition?.proteinG ?? null;
+  const proteinShareForTdee = todayIntakeForTdee && todayProteinG !== null && todayIntakeForTdee > 0
+    ? Math.min(0.55, Math.max(0.1, (todayProteinG * 4) / todayIntakeForTdee))
+    : undefined;
+
+  const nutrition = nutritionTargets(latest, pace.weeklyLossKg, {
+    measuredExerciseKcal: active7AvgForTdee,
+    intakeKcal: todayIntakeForTdee,
+    proteinShare: proteinShareForTdee,
+  });
   const targetDelta = latest.weight - goal;
   const sevenDayDelta = latest.weight - previousWeek.weight;
   const projectedGoal = reg ? goalDate(reg, goal) : null;
@@ -6387,7 +7144,7 @@ export default function OperatorDashboardClient() {
   const waterMlToday = todayHealth?.nutrition?.waterMl ?? null;
   const stepsToday = todayHealth?.activity?.steps ?? null;
   const exerciseToday = todayHealth?.activity?.exerciseMinutes ?? null;
-  const checkpointWeeklyLossKg = 0.45;
+  const checkpointWeeklyLossKg = pace.weeklyLossKg;
   const goalCheckpoints = [30, 90].map((daysOut) => {
     const checkpointDate = parseLocalDateInput(latest.date);
     checkpointDate.setDate(checkpointDate.getDate() + daysOut);
@@ -6402,52 +7159,11 @@ export default function OperatorDashboardClient() {
   const goalGapTone = targetDelta <= 0 ? 'good' : targetDelta <= 12 ? 'neutral' : 'warn';
   const bodyFatTone = latest.bodyFat < 33 ? 'good' : latest.bodyFat < 39 ? 'neutral' : 'warn';
   const cadenceTone = cadence.score >= 80 ? 'good' : cadence.score >= 60 ? 'neutral' : 'warn';
-  const todayTrackRead = (() => {
-    if (!todayHealth) {
-      return {
-        tone: 'neutral' as const,
-        label: 'Waiting on today',
-        note: 'Health data has not refreshed yet, so this read is still provisional.',
-      };
-    }
-
-    if (caloriesInToday === null) {
-      return {
-        tone: 'neutral' as const,
-        label: 'Tracking still open',
-        note: 'Movement is coming through, but the food log still needs to sync before the day can read on track.',
-      };
-    }
-
-    const movementReady = (stepsToday ?? 0) >= 7000 || (exerciseToday ?? 0) >= 30;
-    if (actualDeficitToday !== null && actualDeficitToday >= targetDeficit && movementReady) {
-      return {
-        tone: 'good' as const,
-        label: 'On track today',
-        note: 'Deficit is in range and movement is already supporting the day.',
-      };
-    }
-
-    if (actualDeficitToday !== null && actualDeficitToday >= 0) {
-      return {
-        tone: 'neutral' as const,
-        label: 'Still in range',
-        note: movementReady
-          ? 'Calories are pointed the right way. Keep the finish tidy and log the last meal.'
-          : 'Calories are pointed the right way, but movement still needs topping up.',
-      };
-    }
-
-    return {
-      tone: 'warn' as const,
-      label: 'Off track right now',
-      note: 'The day is running behind plan, but a walk and a cleaner finish can still rescue it.',
-    };
-  })();
   const todaySnap: TodaySnapshot = {
     latest,
     state,
     goal,
+    pace,
     cadence,
     nutrition,
     caloriesInToday,
@@ -6460,6 +7176,7 @@ export default function OperatorDashboardClient() {
     fiberG: fiberToday,
     waterMl: waterMlToday,
     stepsToday,
+    exerciseToday,
     sevenDayDelta,
   };
   return (
@@ -6480,13 +7197,12 @@ export default function OperatorDashboardClient() {
               <span className="muted">{formatReferenceDate(todayIso)}</span>
             </div>
 
-            <div className="fit-today-signals">
-              <div className="fit-today-signals-head">
-                <span className={`fit-today-track-pill is-${todayTrackRead.tone}`}>{todayTrackRead.label}</span>
-                <p className="fit-today-track-note">{todayTrackRead.note}</p>
-              </div>
-              <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
-            </div>
+            <TodayCommandCard
+              snap={todaySnap}
+              paceKey={paceKey}
+              onPaceChange={setPaceKey}
+              onLog={() => setCompose(true)}
+            />
 
             <section className="fit-weight-feature">
               <div className="fit-weight-spotlight">
@@ -6523,7 +7239,7 @@ export default function OperatorDashboardClient() {
                   <div className="fit-weight-spotlight-meta-head">
                     <div className="fit-kicker">This week&apos;s figure · {fmtDate(latest.date, { long: true })}</div>
                     <div className="fit-weight-spotlight-meta-value">
-                      <span className="value"><AnimatedNumber value={latest.weight} decimals={1} /></span>
+                      <span className="value" data-hero-num><AnimatedNumber value={latest.weight} decimals={1} /></span>
                       <span className="unit">kg</span>
                     </div>
                   </div>
@@ -6581,6 +7297,49 @@ export default function OperatorDashboardClient() {
             />
           </section>
 
+          {(() => {
+            const plateau = detectPlateau(
+              dashboardSource.map((r) => ({ date: r.date, weight: r.weight })),
+            );
+            if (!plateau) return null;
+            const tone = T.gold;
+            return (
+              <aside style={{
+                marginBottom: 24,
+                padding: '20px 24px',
+                borderLeft: `2px solid ${tone}`,
+                background: `${tone}10`,
+                display: 'grid',
+                gridTemplateColumns: 'minmax(0, 1fr) auto',
+                gap: 24,
+                alignItems: 'baseline',
+              }}>
+                <div>
+                  <Kicker style={{ color: tone, marginBottom: 6 }}>
+                    Plateau · {plateau.days} days · slope {plateau.slopePerWeek >= 0 ? '+' : ''}{plateau.slopePerWeek.toFixed(2)} kg/wk
+                  </Kicker>
+                  <p style={{
+                    margin: 0,
+                    fontFamily: T.sans,
+                    fontSize: 13,
+                    color: T.body,
+                    lineHeight: 1.6,
+                    maxWidth: '62ch',
+                    fontWeight: 300,
+                  }}>
+                    {plateauSuggestion(plateau, nutrition.intake, nutrition.activeTdee)}
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <Kicker style={{ marginBottom: 4 }}>Window mean</Kicker>
+                  <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, letterSpacing: '-0.015em' }}>
+                    {plateau.meanWeight.toFixed(1)} kg
+                  </div>
+                </div>
+              </aside>
+            );
+          })()}
+
           <div className="fit-trajectory-support">
             <TrajectoryReadCard readings={dashboardSource} goal={goal} />
             <ConsistencyHeatmapCard
@@ -6595,6 +7354,8 @@ export default function OperatorDashboardClient() {
           </div>
         </section>
         </Reveal>
+
+        <Breather num="01" title={<>The <em>story</em> so far</>} />
 
         <CollapsibleSection eyebrow="Story" note="Phase context, milestones, and visual evidence.">
         <Reveal>
@@ -6667,6 +7428,62 @@ export default function OperatorDashboardClient() {
         <Reveal delay={0.05}>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
         </Reveal>
+
+        <Reveal delay={0.1}>
+          {(() => {
+            // 7-day rolling window ending on the latest reading
+            const sortedAsc = [...dashboardSource].sort((a, b) => a.date.localeCompare(b.date));
+            if (sortedAsc.length < 2) return null;
+            const endIdx = sortedAsc.length - 1;
+            const startIdx = Math.max(0, endIdx - 6);
+            const weekStart = sortedAsc[startIdx].date;
+            const weekEnd = sortedAsc[endIdx].date;
+            const weightStart = sortedAsc[startIdx].weight;
+            const weightEnd = sortedAsc[endIdx].weight;
+
+            const last7Health = healthDays.slice(-7);
+            const avg = (vals: (number | null | undefined)[]) => {
+              const ns = vals.filter((v): v is number => v !== null && v !== undefined && Number.isFinite(v));
+              return ns.length > 0 ? ns.reduce((a, b) => a + b, 0) / ns.length : null;
+            };
+            const avgSleepHours = (() => {
+              const m = avg(last7Health.map((d) => d.sleep?.totalMin ?? null));
+              return m !== null ? m / 60 : null;
+            })();
+            const avgRhr = avg(last7Health.map((d) => d.heart?.restingHr ?? null));
+            const avgHrv = avg(last7Health.map((d) => d.heart?.hrvMs ?? null));
+            const avgIntake = avg(last7Health.map((d) => d.nutrition?.dietaryEnergyKcal ?? null));
+            const avgActive = avg(last7Health.map((d) => d.activity?.activeEnergyKcal ?? null)) ?? 0;
+            const avgTdee = Math.round(nutrition.bmr + nutrition.neat + avgActive + (avgIntake !== null ? avgIntake * 0.1 : (nutrition.bmr + nutrition.neat + avgActive) * 0.1));
+
+            const weekStartMs = new Date(weekStart).getTime();
+            const weekEndMs = new Date(weekEnd).getTime();
+            const workouts = (healthStream.workouts ?? []).filter((w) => {
+              const t = new Date(w.startedAt).getTime();
+              return t >= weekStartMs && t <= weekEndMs + 86_400_000;
+            }).length;
+
+            const issue = buildSundayIssue({
+              weekStart, weekEnd,
+              weightStart, weightEnd,
+              weeklyDelta: weightEnd - weightStart,
+              workouts,
+              avgSleepHours,
+              avgRhr,
+              avgHrv,
+              avgIntake,
+              avgTdee,
+            });
+            return (
+              <section data-print-page>
+                <SundayIssue data={issue} />
+                <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                  <PrintIssueButton />
+                </div>
+              </section>
+            );
+          })()}
+        </Reveal>
         </CollapsibleSection>
 
         <Reveal delay={0.1}>
@@ -6693,10 +7510,11 @@ export default function OperatorDashboardClient() {
 
         <Reveal delay={0.18}>
         <section className="fit-anchor-section" id="operator-food">
-          <FoodBreakdownSection snap={todaySnap} />
           <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
         </section>
         </Reveal>
+
+        <Breather num="02" title={<>Where the <em>lines</em> are going</>} />
 
         <CollapsibleSection eyebrow="Trends" note="What the lines are doing — and why.">
         <Reveal>
@@ -6709,6 +7527,7 @@ export default function OperatorDashboardClient() {
             nutrition={nutrition}
             state={state}
             healthStream={healthStream}
+            targetWeeklyLossKg={pace.weeklyLossKg}
           />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
@@ -6716,9 +7535,29 @@ export default function OperatorDashboardClient() {
         </Reveal>
 
         <Reveal>
+          {(() => {
+            const last14 = healthDays.slice(-14);
+            if (last14.length === 0) return null;
+            const ledgerDays = last14.map((d) => {
+              const active = d.activity?.activeEnergyKcal ?? 0;
+              const intake = d.nutrition?.dietaryEnergyKcal ?? null;
+              const tef = intake !== null ? intake * 0.1 : (nutrition.bmr + nutrition.neat + active) * 0.1;
+              return {
+                date: isoDay(d.date),
+                intake,
+                tdee: Math.round(nutrition.bmr + nutrition.neat + active + tef),
+              };
+            });
+            return <EnergyLedger days={ledgerDays} targetDeficit={Math.round((7700 * pace.weeklyLossKg) / 7)} />;
+          })()}
+        </Reveal>
+
+        <Reveal>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
         </Reveal>
         </CollapsibleSection>
+
+        <Breather num="03" title={<>Today&apos;s next <em>move</em></>} />
 
         <CollapsibleSection eyebrow="Action" note="Today's next move." defaultOpen>
         <Reveal>
@@ -6726,6 +7565,28 @@ export default function OperatorDashboardClient() {
           {/* Action block — promise + readiness folded into trends scroll. */}
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
+          {(() => {
+            const last7Health = healthDays.slice(-7);
+            const avg = (vals: (number | null | undefined)[]) => {
+              const ns = vals.filter((v): v is number => v !== null && v !== undefined && Number.isFinite(v));
+              return ns.length > 0 ? ns.reduce((a, b) => a + b, 0) / ns.length : null;
+            };
+            const rhrWeekAvg = avg(last7Health.map((d) => d.heart?.restingHr ?? null));
+            const hrvWeekAvg = avg(last7Health.map((d) => d.heart?.hrvMs ?? null));
+            const load7 = last7Health.map((d) => d.activity?.activeEnergyKcal ?? null);
+            const trainingLoad7Day = avg(load7) ?? 0;
+            const trainingLoadYesterday = load7[load7.length - 2] ?? 0;
+            return (
+              <ProteinRecovery
+                proteinTodayG={todayProteinG}
+                proteinTargetG={Math.round(latest.weight * 1.8)}
+                rhrWeekAvg={rhrWeekAvg}
+                hrvWeekAvg={hrvWeekAvg}
+                trainingLoad7Day={trainingLoad7Day}
+                trainingLoadYesterday={trainingLoadYesterday}
+              />
+            );
+          })()}
           <WorkoutStudio workouts={healthStream.workouts} />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>

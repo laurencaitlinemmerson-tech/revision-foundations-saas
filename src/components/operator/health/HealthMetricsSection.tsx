@@ -157,7 +157,7 @@ const GOALS = {
   sleepMinutes: 480,
   restingHrTarget: 60,
   calorieIntake: 1600,
-  deficit: 800,
+  deficit: 1100,
   bmrHeightM: 1.57,
   bmrAgeYears: 30,
 } as const;
@@ -1013,8 +1013,8 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
       if (direction === 'unknown') return 'Log a few weigh-ins across the next two weeks to surface a real trend line.';
       const rateLabel = ratePerWeek === null ? '' : `${ratePerWeek >= 0 ? '+' : ''}${ratePerWeek} kg/wk`;
       const monthLabel = delta30 === null ? '' : `${delta30 >= 0 ? '+' : ''}${delta30.toFixed(1)} kg over 30 days`;
-      if (direction === 'losing') return `${monthLabel} at ${rateLabel}. Faster than the typical -0.45 kg/wk target — keep an eye on energy and protein.`;
-      if (direction === 'losing-slow') return `${monthLabel} at ${rateLabel}. Slower than the -0.45 kg/wk target — consistent with maintenance plus a small deficit.`;
+      if (direction === 'losing') return `${monthLabel} at ${rateLabel}. Faster than the current -1.0 kg/wk target — keep an eye on energy and protein.`;
+      if (direction === 'losing-slow') return `${monthLabel} at ${rateLabel}. Slower than the current -1.0 kg/wk target — consistent with maintenance plus a smaller-than-planned deficit.`;
       if (direction === 'stable') return `${monthLabel} at ${rateLabel}. The line is essentially flat — either pace is matching intake, or the deficit isn't landing.`;
       return `${monthLabel} at ${rateLabel}. The line is drifting up — worth checking food log, alcohol and step volume.`;
     })();
