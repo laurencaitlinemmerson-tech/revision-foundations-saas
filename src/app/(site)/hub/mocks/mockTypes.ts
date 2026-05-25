@@ -38,8 +38,12 @@ export interface MockQuestion {
   title: string;
   prompt: string;
   wordGuide: string;
+  marks?: string;
+  focusLabel?: string;
   howToApproach: QuestionApproach;
   answerStructure: string[];
+  exemplarAnswer?: string[];
+  topBandUnlocks?: string[];
   toScoreHighly: string[];
   thinkAbout: string[];
   examinerInsight: ExaminerInsight;
