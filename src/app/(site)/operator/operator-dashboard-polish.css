@@ -66,18 +66,13 @@
    }, []);
 */
 
-/* ---------- 2. Ambient breathing background ---------- */
+/* ---------- 2. Ambient breathing background — DISABLED ---------- */
+/* The blue/grey radial tints at the corners made the page look incohesive
+   (grey at the top, cream elsewhere). Keep the shell on a flat cream so the
+   whole page reads as one editorial sheet. */
 .fitness-reference-shell {
-  background:
-    radial-gradient(circle at 12% calc(8% + var(--ambient-shift, 0px)), var(--shell-tint-a), transparent 34%),
-    radial-gradient(circle at 88% calc(0% - var(--ambient-shift, 0px)), var(--shell-tint-b), transparent 36%),
-    var(--paper) !important;
-  transition: background-color 240ms ease;
+  background: var(--paper) !important;
 }
-
-/* Page sets --ambient-shift to a small scroll-driven offset:
-   document.documentElement.style.setProperty('--ambient-shift', `${window.scrollY * 0.08}px`);
-*/
 
 /* ---------- 3. Section eyebrow rail (sticky kicker) ---------- */
 .fit-kicker[data-rail] {

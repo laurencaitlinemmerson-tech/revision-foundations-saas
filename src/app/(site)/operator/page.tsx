@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
 import './operator-dashboard.css';
-import './operator-dashboard-polish.css';
-import './print-issue.css';
 import OperatorDashboardClient from './OperatorDashboardClient';
 
 export const metadata: Metadata = {

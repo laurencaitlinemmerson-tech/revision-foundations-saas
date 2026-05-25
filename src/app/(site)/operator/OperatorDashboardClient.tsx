@@ -9,17 +9,13 @@ import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
 import WorkoutStudio from '@/components/operator/fitness/WorkoutStudio';
 import { EnergyLedger } from '@/components/operator/fitness/EnergyLedger';
-import { SundayIssue, buildSundayIssue } from '@/components/operator/fitness/SundayIssue';
 import { ProteinRecovery } from '@/components/operator/fitness/ProteinRecovery';
-import { PrintIssueButton } from '@/components/operator/fitness/PrintIssueButton';
-import { useChartDrawObserver, useDimOnRead } from '@/components/operator/fitness/dynamic-extras';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 import { computeTdee } from '@/lib/fitness/tdee';
 import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
-import { useDashboardMotion } from './operator-motion-extras';
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
 
@@ -6747,6 +6743,144 @@ function TopNutritionCaloriesCard({
   );
 }
 
+// ─── Maintenance / TDEE card ────────────────────────────────────────────────
+// Sits underneath the Fuel & deficit card inside the nutrition section.
+// Lets the user toggle between cut, maintain, and bulk modes — the headline
+// target intake adjusts, breakdown of BMR/NEAT/Exercise/TEF stays constant.
+type TdeeMode = 'aggressive-cut' | 'cut' | 'slow-cut' | 'maintain' | 'lean-bulk';
+
+const TDEE_MODES: { key: TdeeMode; label: string; weeklyChangeKg: number; tagline: string }[] = [
+  { key: 'aggressive-cut', label: 'Aggressive cut', weeklyChangeKg: -1.0, tagline: 'Lose ~1 kg / week' },
+  { key: 'cut',            label: 'Cut',            weeklyChangeKg: -0.5, tagline: 'Lose ~0.5 kg / week' },
+  { key: 'slow-cut',       label: 'Slow cut',       weeklyChangeKg: -0.25, tagline: 'Lose ~0.25 kg / week' },
+  { key: 'maintain',       label: 'Maintain',       weeklyChangeKg: 0,    tagline: 'Hold current weight' },
+  { key: 'lean-bulk',      label: 'Lean bulk',      weeklyChangeKg: 0.25, tagline: 'Gain ~0.25 kg / week' },
+];
+
+function MaintenanceCard({
+  snap,
+  activeKcalToday,
+}: {
+  snap: TodaySnapshot;
+  activeKcalToday: number | null;
+}) {
+  const [mode, setMode] = useState<TdeeMode>('cut');
+
+  const bmr = snap.nutrition.bmr;
+
+  // ── Today's measured signals ─────────────────────────────────────────
+  // Apple Health "Active Energy" already includes NEAT (steps, fidgeting,
+  // standing) AND deliberate exercise — so when we have it, we use it as
+  // the whole non-resting bucket. No separate NEAT line, no double-count.
+  const activeToday = activeKcalToday !== null && Number.isFinite(activeKcalToday) ? Math.round(activeKcalToday) : 0;
+  const activeSource: 'measured' | 'pending' = activeKcalToday !== null ? 'measured' : 'pending';
+
+  // TEF — protein-weighted thermic effect of TODAY's logged macros.
+  // Protein ≈ 27.5%, Carbs ≈ 7.5%, Fat ≈ 2.5%. Falls back to 10% × intake.
+  const tefToday = (() => {
+    const p = snap.proteinG;
+    const c = snap.carbsG;
+    const f = snap.fatG;
+    if (p !== null || c !== null || f !== null) {
+      const proteinKcal = (p ?? 0) * 4;
+      const carbsKcal = (c ?? 0) * 4;
+      const fatKcal = (f ?? 0) * 9;
+      return Math.round(proteinKcal * 0.275 + carbsKcal * 0.075 + fatKcal * 0.025);
+    }
+    if (snap.caloriesInToday !== null) {
+      return Math.round(snap.caloriesInToday * 0.1);
+    }
+    return 0;
+  })();
+  const tefSource: 'measured' | 'pending' = (snap.proteinG !== null || snap.caloriesInToday !== null) ? 'measured' : 'pending';
+
+  // Today's running TDEE — only what's actually been measured
+  const runningTdee = bmr + activeToday + tefToday;
+
+  // Expected DAILY TDEE for target-intake planning.
+  // When Apple Health hasn't synced, assume a moderate activity floor
+  // (BMR × 0.4 ≈ light-to-moderate non-resting load). TEF falls back to
+  // 10% of the existing target intake.
+  const fallbackActive = Math.round(bmr * 0.40);
+  const fallbackTef = snap.nutrition.tef ?? Math.round(snap.nutrition.intake * 0.1);
+  const expectedActive = activeSource === 'measured' && activeToday > 0 ? activeToday : fallbackActive;
+  const expectedTef = tefSource === 'measured' && tefToday > 0 ? tefToday : fallbackTef;
+  const expectedTdee = bmr + expectedActive + expectedTef;
+
+  const current = TDEE_MODES.find((m) => m.key === mode) ?? TDEE_MODES[3];
+  const dailyDelta = Math.round((7700 * current.weeklyChangeKg) / 7);
+  const targetIntake = Math.max(1200, Math.round((expectedTdee + dailyDelta) / 20) * 20);
+
+  const pct = (v: number) => runningTdee > 0 ? Math.round((v / runningTdee) * 100) : 0;
+  const parts: { label: string; value: number; meta: string; pending?: boolean }[] = [
+    { label: 'BMR',    value: bmr,         meta: `${pct(bmr)}% · at rest` },
+    { label: 'Active', value: activeToday, meta: activeSource === 'measured' ? `${pct(activeToday)}% · movement + training` : 'awaiting Apple Health sync', pending: activeSource === 'pending' },
+    { label: 'TEF',    value: tefToday,    meta: tefSource === 'measured' ? `${pct(tefToday)}% · from today's macros` : 'awaiting food log', pending: tefSource === 'pending' },
+  ];
+
+  return (
+    <article className="fit-top-nutrition-card op-maintenance-card">
+      <header className="op-health-card-head op-nutri-head">
+        <span className="op-health-card-label">TDEE &middot; today so far</span>
+        <span className="op-nutri-target">Female &middot; 26 &middot; 5&apos;2&quot;</span>
+      </header>
+
+      {/* Mode picker — italic Playfair tabs separated by hairlines */}
+      <nav className="op-maintenance-modes" aria-label="Goal mode">
+        {TDEE_MODES.map((m) => (
+          <button
+            key={m.key}
+            type="button"
+            onClick={() => setMode(m.key)}
+            className={`op-maintenance-mode ${m.key === mode ? 'is-active' : ''}`}
+            aria-pressed={m.key === mode}
+          >
+            {m.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Headline target intake — changes with selected mode. TDEE is computed
+          from TODAY's actual signals: BMR + estimated NEAT + measured exercise
+          + macro-weighted TEF on today's logged food. */}
+      <div className="op-maintenance-headline">
+        <div className="op-maintenance-headline-value">
+          {targetIntake.toLocaleString('en-GB')}
+          <span className="op-maintenance-headline-unit">kcal / day</span>
+        </div>
+        <p className="op-maintenance-headline-tag">{current.tagline}</p>
+        <p className="op-maintenance-headline-detail">
+          {current.weeklyChangeKg === 0
+            ? `Eat at your expected TDEE of ${expectedTdee.toLocaleString('en-GB')} kcal to hold weight steady.`
+            : current.weeklyChangeKg < 0
+              ? `Eat ${Math.abs(dailyDelta).toLocaleString('en-GB')} kcal below your expected TDEE (${expectedTdee.toLocaleString('en-GB')}) to lose roughly ${Math.abs(current.weeklyChangeKg)} kg per week.`
+              : `Eat ${dailyDelta.toLocaleString('en-GB')} kcal above your expected TDEE (${expectedTdee.toLocaleString('en-GB')}) for slow lean gain at ${current.weeklyChangeKg} kg per week.`}
+          {' '}Today's running burn is <strong>{runningTdee.toLocaleString('en-GB')} kcal</strong> so far
+          {(activeSource === 'pending' || tefSource === 'pending') ? ' — it climbs as Apple Health and your food log sync in.' : '.'}
+        </p>
+      </div>
+
+      {/* Composition ribbon — visual proportion of TDEE components from TODAY's actuals */}
+      <div className="op-maintenance-ribbon" aria-hidden>
+        <div style={{ flex: bmr }} title={`BMR · ${bmr.toLocaleString()} kcal`} />
+        <div style={{ flex: Math.max(activeToday, 1) }} title={`Active · ${activeToday.toLocaleString()} kcal`} />
+        <div style={{ flex: Math.max(tefToday, 1) }} title={`TEF · ${tefToday.toLocaleString()} kcal`} />
+      </div>
+
+      {/* TDEE breakdown — 4 equal-spaced parts */}
+      <div className="op-maintenance-parts">
+        {parts.map((p) => (
+          <div key={p.label} className="op-maintenance-part">
+            <span className="op-maintenance-part-label">{p.label}</span>
+            <span className="op-maintenance-part-value">{p.value.toLocaleString('en-GB')}</span>
+            <span className="op-maintenance-part-meta">{p.meta}</span>
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
   const intakeTarget = snap.nutrition.intake;
   const proteinTarget = snap.nutrition.protein;
@@ -6893,9 +7027,6 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
 // ─── Main app ─────────────────────────────────────────────────────────────────
 
 export default function OperatorDashboardClient() {
-  useDashboardMotion();
-  useChartDrawObserver();
-  useDimOnRead();
   const [authed, setAuthed]   = useState(false);
   const [opPw, setOpPw]       = useState('');
   const [readings, setReadings] = useState<FitnessReading[]>([]);
@@ -7307,33 +7438,35 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <section className="fit-anchor-section" id="operator-today">
           {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <OperatorCommandDeck
-            latest={latest}
-            pace={pace}
-            syncSummary={syncSummary}
-            targetDelta={targetDelta}
-            projectedGoal={projectedGoal}
-            heroMetrics={heroMetrics}
-            sideMetrics={sideMetrics}
-            onLog={() => setCompose(true)}
-            onRefresh={() => { void refreshCloudReadings(); }}
-            syncing={syncing}
-          />
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '32px 0 36px' }} />
 
           <section className="fit-today">
-            <DashboardBandHeader
-              kicker="Daily board"
-              title="Today at a glance"
-              note="Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking."
-              meta={formatReferenceDate(todayIso)}
-            />
+            <div className="fit-today-head">
+              <div>
+                <span className="fit-today-label">Today at a glance</span>
+                <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
+              </div>
+              <span className="muted">{formatReferenceDate(todayIso)}</span>
+            </div>
 
-            <TodayCommandCard
-              snap={todaySnap}
-              paceKey={paceKey}
-              onPaceChange={setPaceKey}
-              onLog={() => setCompose(true)}
-            />
+            {(() => {
+              const read = buildTodayRead(todaySnap);
+              const tone: 'good' | 'neutral' | 'warn' = read.lines.some((line) => line.tone === 'warn')
+                ? 'warn'
+                : read.lines.every((line) => line.tone === 'good')
+                  ? 'good'
+                  : 'neutral';
+              const note = read.lines[0]?.text ?? '';
+              return (
+                <div className="fit-today-signals">
+                  <div className="fit-today-signals-head">
+                    <span className={`fit-today-track-pill is-${tone}`}>{read.headline}</span>
+                    <p className="fit-today-track-note">{note}</p>
+                  </div>
+                  <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
+                </div>
+              );
+            })()}
 
             <section className="fit-weight-feature">
               <div className="fit-weight-spotlight">
@@ -7565,61 +7698,6 @@ export default function OperatorDashboardClient() {
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
         </Reveal>
 
-        <Reveal delay={0.1}>
-          {(() => {
-            // 7-day rolling window ending on the latest reading
-            const sortedAsc = [...dashboardSource].sort((a, b) => a.date.localeCompare(b.date));
-            if (sortedAsc.length < 2) return null;
-            const endIdx = sortedAsc.length - 1;
-            const startIdx = Math.max(0, endIdx - 6);
-            const weekStart = sortedAsc[startIdx].date;
-            const weekEnd = sortedAsc[endIdx].date;
-            const weightStart = sortedAsc[startIdx].weight;
-            const weightEnd = sortedAsc[endIdx].weight;
-
-            const last7Health = healthDays.slice(-7);
-            const avg = (vals: (number | null | undefined)[]) => {
-              const ns = vals.filter((v): v is number => v !== null && v !== undefined && Number.isFinite(v));
-              return ns.length > 0 ? ns.reduce((a, b) => a + b, 0) / ns.length : null;
-            };
-            const avgSleepHours = (() => {
-              const m = avg(last7Health.map((d) => d.sleep?.totalMin ?? null));
-              return m !== null ? m / 60 : null;
-            })();
-            const avgRhr = avg(last7Health.map((d) => d.heart?.restingHr ?? null));
-            const avgHrv = avg(last7Health.map((d) => d.heart?.hrvMs ?? null));
-            const avgIntake = avg(last7Health.map((d) => d.nutrition?.dietaryEnergyKcal ?? null));
-            const avgActive = avg(last7Health.map((d) => d.activity?.activeEnergyKcal ?? null)) ?? 0;
-            const avgTdee = Math.round(nutrition.bmr + nutrition.neat + avgActive + (avgIntake !== null ? avgIntake * 0.1 : (nutrition.bmr + nutrition.neat + avgActive) * 0.1));
-
-            const weekStartMs = new Date(weekStart).getTime();
-            const weekEndMs = new Date(weekEnd).getTime();
-            const workouts = (healthStream.workouts ?? []).filter((w) => {
-              const t = new Date(w.startedAt).getTime();
-              return t >= weekStartMs && t <= weekEndMs + 86_400_000;
-            }).length;
-
-            const issue = buildSundayIssue({
-              weekStart, weekEnd,
-              weightStart, weightEnd,
-              weeklyDelta: weightEnd - weightStart,
-              workouts,
-              avgSleepHours,
-              avgRhr,
-              avgHrv,
-              avgIntake,
-              avgTdee,
-            });
-            return (
-              <section data-print-page>
-                <SundayIssue data={issue} />
-                <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                  <PrintIssueButton />
-                </div>
-              </section>
-            );
-          })()}
-        </Reveal>
         </CollapsibleSection>
 
         <Reveal delay={0.1}>
@@ -7647,6 +7725,8 @@ export default function OperatorDashboardClient() {
         <Reveal delay={0.18}>
         <section className="fit-anchor-section" id="operator-food">
           <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
+          <MaintenanceCard snap={todaySnap} activeKcalToday={activeKcalToday} />
+          <FoodBreakdownSection snap={todaySnap} />
         </section>
         </Reveal>
 

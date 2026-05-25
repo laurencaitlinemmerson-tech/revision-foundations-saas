@@ -33,14 +33,10 @@
   --rose: #a14a57;
   --rose-soft: #f9e8eb;
   --card-shadow: 0 24px 60px rgba(26, 24, 21, 0.05);
-  --shell-tint-a: rgba(124, 198, 255, 0.12);
-  --shell-tint-b: rgba(255, 154, 122, 0.10);
+  --shell-tint-a: transparent;
+  --shell-tint-b: transparent;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 12% 8%, var(--shell-tint-a), transparent 34%),
-    radial-gradient(circle at 88% 0%, var(--shell-tint-b), transparent 36%),
-    var(--paper);
-  transition: background-color 240ms ease;
+  background: var(--paper);
 }
 
 .fitness-reference-shell[data-theme="dark"] {
@@ -939,22 +935,22 @@
 .fit-today-label {
   display: block;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(22px, 2.2vw, 28px);
+  font-size: clamp(36px, 4.2vw, 56px);
   font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
   color: var(--ink);
   text-transform: none;
 }
 
 .fit-today-copy {
-  margin-top: 12px;
+  margin-top: 14px;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 14px;
+  font-size: 15px;
   font-style: italic;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--ink-mute);
-  max-width: 60ch;
+  max-width: 54ch;
 }
 
 .fit-command-card {
@@ -1307,7 +1303,7 @@
 .fit-weight-spotlight-facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
+  gap: 36px;
   max-width: none;
   min-width: 0;
   width: 100%;
@@ -1320,10 +1316,10 @@
 .fit-weight-spotlight-fact {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 18px 0 0;
+  gap: 6px;
+  padding: 0;
   border-top: none;
-  border-right: 0.5px solid var(--rule-soft);
+  border-right: none;
   min-width: 0;
 }
 
@@ -1339,18 +1335,20 @@
 }
 
 .fit-weight-spotlight-fact-label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--ink-mute);
 }
 
 .fit-weight-spotlight-fact-value {
   font-family: var(--font-display);
-  font-size: clamp(18px, 1.5vw, 22px);
+  font-size: clamp(28px, 2.4vw, 36px);
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   color: var(--ink);
 }
 
@@ -4562,11 +4560,15 @@
 }
 
 .fitness-reference-shell .op-snap-cell {
-  padding: 22px 22px 20px;
-  border-right: 0.5px solid var(--rule-soft);
+  padding: 28px 24px 26px;
+  border-right: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+}
+
+.fitness-reference-shell .op-snap-cell + .op-snap-cell {
+  padding-left: 32px;
 }
 
 .fitness-reference-shell .op-snap-cell:last-child {
@@ -4598,27 +4600,31 @@
 }
 
 .fitness-reference-shell .op-snap-label {
-  font-size: 9px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.005em;
+  text-transform: none;
   color: var(--ink-mute);
-  font-weight: 600;
-  margin-bottom: 2px;
+  font-weight: 400;
+  margin-bottom: 4px;
 }
 
 .fitness-reference-shell .op-snap-value {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 26px;
+  font-size: 34px;
   color: var(--ink);
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
-  line-height: 1.05;
+  line-height: 1.02;
 }
 
 .fitness-reference-shell .op-snap-baseline {
-  font-size: 10px;
-  letter-spacing: 0.04em;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
 }
@@ -7520,4 +7526,193 @@
   .fitness-reference-shell .op-workout-studio-targetinput {
     width: 100%;
   }
+}
+
+/* ── Maintenance / TDEE card ─────────────────────────────────────────────
+   Sits inside the nutrition section. Cut/maintain/bulk mode picker on top,
+   a confident headline target intake, and a 4-up part breakdown — all
+   evenly spaced, hairline-only, no boxes inside.
+   ─────────────────────────────────────────────────────────────────────── */
+.fitness-reference-shell .op-maintenance-card {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.fitness-reference-shell .op-maintenance-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding-top: 6px;
+  padding-bottom: 18px;
+  border-bottom: 0.5px solid var(--rule-soft);
+}
+
+.fitness-reference-shell .op-maintenance-mode {
+  flex: 1 1 0;
+  background: transparent;
+  border: none;
+  border-right: 0.5px solid var(--rule-soft);
+  padding: 12px 16px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink-mute);
+  cursor: pointer;
+  transition: color 160ms ease;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.fitness-reference-shell .op-maintenance-mode:last-child {
+  border-right: none;
+}
+
+.fitness-reference-shell .op-maintenance-mode:hover {
+  color: var(--ink-soft);
+}
+
+.fitness-reference-shell .op-maintenance-mode.is-active {
+  color: var(--ink);
+  font-style: italic;
+  position: relative;
+}
+
+.fitness-reference-shell .op-maintenance-mode.is-active::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: -19px;
+  height: 1px;
+  background: var(--ink);
+}
+
+.fitness-reference-shell .op-maintenance-headline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 60ch;
+}
+
+.fitness-reference-shell .op-maintenance-headline-value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(48px, 5.5vw, 72px);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.fitness-reference-shell .op-maintenance-headline-unit {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 0.34em;
+  color: var(--ink-mute);
+  letter-spacing: 0;
+}
+
+.fitness-reference-shell .op-maintenance-headline-tag {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-soft);
+  letter-spacing: 0;
+}
+
+.fitness-reference-shell .op-maintenance-headline-detail {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 56ch;
+}
+
+.fitness-reference-shell .op-maintenance-parts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px;
+  padding-top: 24px;
+  border-top: 0.5px solid var(--rule-soft);
+}
+
+@media (max-width: 720px) {
+  .fitness-reference-shell .op-maintenance-parts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+.fitness-reference-shell .op-maintenance-part {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fitness-reference-shell .op-maintenance-part-label {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-mute);
+  letter-spacing: 0;
+}
+
+.fitness-reference-shell .op-maintenance-part-value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.fitness-reference-shell .op-maintenance-part-meta {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* Composition ribbon — slim visualization of TDEE component proportions */
+.fitness-reference-shell .op-maintenance-ribbon {
+  display: flex;
+  height: 4px;
+  margin: -8px 0 -4px;
+  gap: 4px;
+}
+
+.fitness-reference-shell .op-maintenance-ribbon > div:nth-child(1) {
+  background: var(--ink);
+  opacity: 0.85;
+}
+
+.fitness-reference-shell .op-maintenance-ribbon > div:nth-child(2) {
+  background: var(--ink);
+  opacity: 0.55;
+}
+
+.fitness-reference-shell .op-maintenance-ribbon > div:nth-child(3) {
+  background: var(--brass-deep, var(--gold));
+  opacity: 0.85;
+}
+
+.fitness-reference-shell .op-maintenance-ribbon > div:nth-child(4) {
+  background: var(--brass-deep, var(--gold));
+  opacity: 0.4;
+}
+
+/* Stronger active mode tab — keep italic, lift the colour */
+.fitness-reference-shell .op-maintenance-mode.is-active {
+  color: var(--ink);
+  font-weight: 500;
 }
