@@ -424,7 +424,6 @@ function QuestionStep({
   const isUnlocked = !!progress.guidanceUnlocked[question.id];
   const canUnlock = words >= 30;
   const showingSelfMark = !!progress.showSelfMark[question.id];
-  const topBandUnlocks = question.topBandUnlocks ?? question.toScoreHighly;
 
   // Timer
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -471,6 +470,12 @@ function QuestionStep({
     });
   }, [progress.expandedSections, onUpdate]);
 
+  const handleRevealStructure = useCallback(() => {
+    onUpdate({
+      revealedStructures: { ...progress.revealedStructures, [question.id]: true },
+    });
+  }, [question.id, progress.revealedStructures, onUpdate]);
+
   const handleShowSelfMark = useCallback(() => {
     onUpdate({
       showSelfMark: { ...progress.showSelfMark, [question.id]: true },
@@ -493,6 +498,7 @@ function QuestionStep({
   }, [question.id, progress.deteriorationResponses, onUpdate]);
 
   const approachKey = `${question.id}-approach`;
+  const scoreKey = `${question.id}-score`;
   const thinkKey = `${question.id}-think`;
   const examinerKey = `${question.id}-examiner`;
   const lowmarkKey = `${question.id}-lowmark`;
@@ -513,9 +519,8 @@ function QuestionStep({
           <span className="mk-q-numeral">{question.number}</span>
           <div className="mk-q-meta">
             <h3 className="mk-q-title">{question.title}</h3>
-            <div className="mk-q-badges">
-              {question.marks ? <span className="mk-mark-badge">{question.marks}</span> : null}
-              <span className="mk-word-badge">{question.wordGuide}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <span className="mk-q-word-guide">{question.wordGuide}</span>
               <span className="mk-chip" data-accent={isPartB ? 'warm' : 'blue'}>{question.partLabel}</span>
               <button
                 type="button"
@@ -528,9 +533,6 @@ function QuestionStep({
                 {progress.flaggedQuestions[question.id] ? '\u2691 Flagged' : '\u2690 Flag'}
               </button>
             </div>
-            {question.focusLabel ? (
-              <p className="mk-q-focus">{question.focusLabel}</p>
-            ) : null}
           </div>
         </div>
 
@@ -604,36 +606,38 @@ function QuestionStep({
               </div>
             </ExpandablePanel>
 
-            <div className="mk-framework-card">
-              <p className="mk-framework-label">Answer structure</p>
-              <ol className="mk-framework-list">
-                {question.answerStructure.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-            </div>
-
-            {question.exemplarAnswer && question.exemplarAnswer.length > 0 ? (
-              <div className="mk-exemplar-card">
-                <p className="mk-exemplar-label">Exemplar answer</p>
-                {question.exemplarAnswer.map((paragraph, i) => (
-                  <p key={i} className="mk-exemplar-paragraph">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            ) : null}
-
-            {topBandUnlocks.length > 0 ? (
-              <div className="mk-topband-box">
-                <p className="mk-topband-label">Top band unlocks</p>
-                <ul className="mk-topband-list">
-                  {topBandUnlocks.map((item, i) => (
-                    <li key={i}>{item}</li>
+            {/* Answer structure */}
+            {!progress.revealedStructures[question.id] ? (
+              <button
+                type="button"
+                className="mk-reveal-btn"
+                onClick={handleRevealStructure}
+              >
+                Reveal answer structure
+              </button>
+            ) : (
+              <div className="mk-reveal-body" style={{ marginTop: '12px', marginBottom: '10px' }}>
+                <ol>
+                  {question.answerStructure.map((step, i) => (
+                    <li key={i}>{step}</li>
                   ))}
-                </ul>
+                </ol>
               </div>
-            ) : null}
+            )}
+
+            {/* To score highly */}
+            <ExpandablePanel
+              label="To score highly"
+              panelClass="mk-score-body"
+              isOpen={!!progress.expandedSections[scoreKey]}
+              onToggle={() => handleToggleSection(scoreKey)}
+            >
+              <ul className="mk-expand-list">
+                {question.toScoreHighly.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </ExpandablePanel>
 
             {/* Think about */}
             <ExpandablePanel
