@@ -287,6 +287,54 @@ function goalDate(reg: Reg, goal: number): Date | null {
   return new Date(reg.t0 + days * 86400000);
 }
 
+// ─── Trend math: calendar-day-correct weekly rate + smoothed weight ───────────
+//
+// The old `trend4` formula was (last.weight − first.weight) / (length − 1),
+// labelled as "kg/wk" — but that divisor is reading-gaps, not weeks. Whenever
+// weigh-in cadence drifted (catch-up readings, missed weeks), the number was
+// silently wrong. These helpers replace that with regression over the actual
+// calendar-day window, so kg/wk is genuinely kg/wk, and a single noisy
+// weigh-in can't swing the number the way a two-point delta does.
+
+function windowedWeeklyTrend(
+  sorted: FitnessReading[],
+  windowDays: number,
+  todayIso: string = localIsoDate(),
+): { kgPerWeek: number; r2: number; readingsUsed: number } {
+  if (sorted.length < 2) return { kgPerWeek: 0, r2: 1, readingsUsed: sorted.length };
+  const todayMs = parseLocalDateInput(todayIso).getTime();
+  const cutoffMs = todayMs - windowDays * 86400000;
+  const window = sorted.filter(r => new Date(r.date).getTime() >= cutoffMs);
+  // Too sparse? Fall back to the last 4 readings rather than returning 0.
+  const usable = window.length >= 2 ? window : sorted.slice(-Math.min(sorted.length, 4));
+  const reg = regress(usable);
+  if (!reg) return { kgPerWeek: 0, r2: 1, readingsUsed: usable.length };
+  return { kgPerWeek: reg.slope * 7, r2: reg.r2, readingsUsed: usable.length };
+}
+
+// Regression-smoothed weight at a given offset in days before the latest
+// reading. Fits a local line over the last `windowDays` and projects — strips
+// out single-day water/sodium spikes that distort raw "today − last week"
+// subtraction.
+function smoothedWeightAt(
+  sorted: FitnessReading[],
+  daysBeforeLatest: number = 0,
+  windowDays: number = 28,
+): number | null {
+  if (sorted.length === 0) return null;
+  if (sorted.length === 1) return sorted[0].weight;
+  const latest = sorted[sorted.length - 1];
+  const latestMs = new Date(latest.date).getTime();
+  const cutoffMs = latestMs - windowDays * 86400000;
+  const window = sorted.filter(r => new Date(r.date).getTime() >= cutoffMs);
+  const usable = window.length >= 2 ? window : sorted.slice(-Math.min(sorted.length, 4));
+  const reg = regress(usable);
+  if (!reg) return latest.weight;
+  const targetMs = latestMs - daysBeforeLatest * 86400000;
+  const daysFromT0 = (targetMs - reg.t0) / 86400000;
+  return reg.intercept + reg.slope * daysFromT0;
+}
+
 // ─── Editorial helpers ────────────────────────────────────────────────────────
 
 // Monospace date stamp — "MAY · 17 · 2026".
@@ -778,8 +826,11 @@ function ScrollRail({
 interface State {
   daysSinceWeighIn: number;
   weighInStatus: 'today' | 'on-time' | 'due-soon' | 'overdue';
-  trendKgPerWeek: number;           // last 4 readings
-  trendKgPerWeek8: number;          // last 8 readings
+  trendKgPerWeek: number;           // 28-day regression slope × 7 (kg/wk)
+  trendKgPerWeek8: number;          // 56-day regression slope × 7 (kg/wk)
+  trendConfidence: number;          // R² of the 28-day regression (0-1)
+  smoothedWeight: number;           // regression-smoothed weight today
+  smoothedWeightLastWeek: number;   // regression-smoothed weight 7 days ago
   direction: 'gaining' | 'stable' | 'losing-slow' | 'losing-fast';
   thisWeekTarget: number;           // recommended weight 7 days from latest
   phaseNum: number;
@@ -803,14 +854,17 @@ function assessState(
   const status: State['weighInStatus'] =
     daysSince === 0 ? 'today' : daysSince <= 5 ? 'on-time' : daysSince <= 7 ? 'due-soon' : 'overdue';
 
-  const last4 = sorted.slice(-4);
-  const last8 = sorted.slice(-8);
-  const trend4 = last4.length >= 2
-    ? (last4[last4.length - 1].weight - last4[0].weight) / Math.max(1, last4.length - 1)
-    : 0;
-  const trend8 = last8.length >= 2
-    ? (last8[last8.length - 1].weight - last8[0].weight) / Math.max(1, last8.length - 1)
-    : 0;
+  // Windowed kg/wk: regression slope × 7 over calendar days, not reading
+  // count. The old (last − first) / (length − 1) silently became "kg per
+  // reading-gap" whenever weigh-in cadence drifted (skipped weeks, catch-up
+  // logs). Regression also averages over multiple readings, so a single
+  // noisy weigh-in can't swing the result the way endpoint subtraction did.
+  const trend4Result = windowedWeeklyTrend(sorted, 28, todayIso);
+  const trend8Result = windowedWeeklyTrend(sorted, 56, todayIso);
+  const trend4 = trend4Result.kgPerWeek;
+  const trend8 = trend8Result.kgPerWeek;
+  const smoothedNow = smoothedWeightAt(sorted, 0) ?? latest.weight;
+  const smoothedLastWeek = smoothedWeightAt(sorted, 7) ?? latest.weight;
 
   const losingFastThreshold = targetWeeklyLossKg > 0 ? targetWeeklyLossKg * 1.1 : 0.6;
   let direction: State['direction'];
@@ -849,6 +903,9 @@ function assessState(
     weighInStatus: status,
     trendKgPerWeek: trend4,
     trendKgPerWeek8: trend8,
+    trendConfidence: trend4Result.r2,
+    smoothedWeight: smoothedNow,
+    smoothedWeightLastWeek: smoothedLastWeek,
     direction,
     thisWeekTarget,
     phaseNum,
@@ -2876,16 +2933,10 @@ function DashboardHero({
   const syncLabel = cloudOk === null ? 'Local first' : cloudOk ? syncing ? 'Cloud syncing' : 'Cloud active' : 'Local backup';
   const syncColor = cloudOk ? T.green : cloudOk === false ? T.gold : T.muted;
   const phaseCount = detectPhases(sorted).length;
-  const sevenDayTarget = new Date(new Date(latest.date).getTime() - 7 * 86400000).getTime();
-  const weekAnchor = sorted.length > 1
-    ? sorted.reduce((best, reading) => {
-        if (reading.id === latest.id) return best;
-        const diff = Math.abs(new Date(reading.date).getTime() - sevenDayTarget);
-        const bestDiff = Math.abs(new Date(best.date).getTime() - sevenDayTarget);
-        return diff < bestDiff ? reading : best;
-      }, sorted[0])
-    : latest;
-  const sevenDayDelta = latest.weight - weekAnchor.weight;
+  // Regression-smoothed 7-day move — strips the single-reading water/sodium
+  // noise that swung the old endpoint subtraction by 0.5–1.5 kg some weeks.
+  const sevenDayDelta = (smoothedWeightAt(sorted, 0) ?? latest.weight)
+                      - (smoothedWeightAt(sorted, 7) ?? latest.weight);
   const statCells = [
     {
       label:'Weight',
@@ -7353,7 +7404,10 @@ export default function OperatorDashboardClient() {
     proteinShare: proteinShareForTdee,
   });
   const targetDelta = latest.weight - goal;
-  const sevenDayDelta = latest.weight - previousWeek.weight;
+  // Regression-smoothed week-over-week move; falls back to the raw
+  // previous-week reading only if smoothing returns null (single data point).
+  const sevenDayDelta = (smoothedWeightAt(dashboardSource, 0) ?? latest.weight)
+                      - (smoothedWeightAt(dashboardSource, 7) ?? previousWeek.weight);
   const projectedGoal = reg ? goalDate(reg, goal) : null;
   const peakWeight = Math.max(...dashboardSource.map((row) => row.weight));
   const progress = peakWeight <= goal ? 100 : Math.max(0, Math.min(100, ((peakWeight - latest.weight) / (peakWeight - goal)) * 100));
