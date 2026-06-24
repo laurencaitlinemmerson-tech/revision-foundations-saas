@@ -4,18 +4,20 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
 import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Menu } from 'lucide-react';
+import OperatorSidebar, { type OperatorSection, SECTION_EMOJI } from './OperatorSidebar';
 import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
-import WorkoutStudio from '@/components/operator/fitness/WorkoutStudio';
 import { EnergyLedger } from '@/components/operator/fitness/EnergyLedger';
 import { ProteinRecovery } from '@/components/operator/fitness/ProteinRecovery';
+import EatingPlan from '@/components/operator/fitness/EatingPlan';
 import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 import { computeTdee } from '@/lib/fitness/tdee';
 import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
+import { T } from '@/components/operator/theme';
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
 
@@ -89,24 +91,6 @@ function parseLocalDateInput(value: string): Date {
 
   return new Date(value);
 }
-
-// ─── Design tokens ────────────────────────────────────────────────────────────
-
-// All colour fields are CSS variables defined in operator-dashboard.css under
-// .fitness-reference-shell (light) and .fitness-reference-shell[data-theme="dark"].
-// Pointing T at the vars makes every inline style that consumes T.* theme-aware
-// without touching the ~657 call sites.
-const T = {
-  paper:    'var(--paper)', surface: 'var(--surface)',
-  ink:      'var(--ink)',   body:    'var(--body)',   muted: 'var(--muted)',
-  line:     'var(--line)',  softLine: 'var(--soft-line)',
-  blue:     'var(--blue)',  blueSoft:  'var(--blue-soft)',
-  green:    'var(--green)', greenSoft: 'var(--green-soft)',
-  gold:     'var(--gold)',  goldSoft:  'var(--gold-soft)',
-  rose:     'var(--rose)',  roseSoft:  'var(--rose-soft)',
-  display:  "'Playfair Display', Georgia, serif",
-  sans:     "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-} as const;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -401,205 +385,25 @@ function HeadlineSparkline({
   );
 }
 
-function EditorialDivider({ eyebrow, note, style }: { eyebrow: string; note?: string; style?: CSSProperties }) {
+function PageHeader({ emoji, title, note }: { emoji: string; title: string; note?: string }) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'auto 1fr auto',
-      alignItems: 'center',
-      gap: 18,
-      margin: '40px 0 22px',
-      ...style,
-    }}>
-      <span style={{
-        fontFamily: T.sans,
-        fontSize: 9.5,
-        letterSpacing: '0.32em',
-        textTransform: 'uppercase',
-        fontWeight: 600,
-        color: T.ink,
-      }}>{eyebrow}</span>
-      <span style={{ height: 0.5, background: T.line, display: 'block' }} />
-      {note ? (
-        <span style={{
-          fontFamily: T.display,
-          fontStyle: 'italic',
-          fontSize: 13,
-          color: T.muted,
-        }}>{note}</span>
-      ) : <span />}
+    <div className="fit-page-header">
+      <span className="fit-page-header-emoji" aria-hidden>{emoji}</span>
+      <h1 className="fit-page-header-title">{title}</h1>
+      {note ? <p className="fit-page-header-note">{note}</p> : null}
     </div>
   );
 }
 
-function CollapsibleSection({ eyebrow, note, children, defaultOpen = false }: {
-  eyebrow: string;
-  note?: string;
+function Callout({ tone = 'neutral', emoji, children }: {
+  tone?: 'neutral' | 'good' | 'warn' | 'brass';
+  emoji?: string;
   children: ReactNode;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  const contentId = `op-collapsible-${eyebrow.toLowerCase().replace(/\s+/g, '-')}`;
-
-  return (
-    <section className={`fit-dashboard-section-shell ${open ? 'is-open' : 'is-closed'}`}>
-      <div className="fit-dashboard-section-bar" data-section>
-        <div className="fit-dashboard-section-heading">
-          <span className="fit-dashboard-section-kicker">{eyebrow}</span>
-          {note ? <p className="fit-dashboard-section-note">{note}</p> : null}
-        </div>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls={contentId}
-          className="fit-dashboard-section-toggle"
-        >
-          <span>{open ? 'Collapse' : 'Expand'}</span>
-          <span
-            className="fit-dashboard-section-toggle-icon"
-            aria-hidden
-          >
-            ▾
-          </span>
-        </button>
-      </div>
-      <div id={contentId} hidden={!open} className="fit-dashboard-section-body">
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function toneClass(tone: ReferenceMetricTone) {
-  if (tone === 'good') return 'is-good';
-  if (tone === 'warn') return 'is-warn';
-  if (tone === 'brass') return 'is-brass';
-  return 'is-neutral';
-}
-
-function OperatorCommandDeck({
-  latest,
-  pace,
-  syncSummary,
-  targetDelta,
-  projectedGoal,
-  heroMetrics,
-  sideMetrics,
-  onLog,
-  onRefresh,
-  syncing,
-}: {
-  latest: FitnessReading;
-  pace: PaceOption;
-  syncSummary: string;
-  targetDelta: number;
-  projectedGoal: Date | null;
-  heroMetrics: ReferenceMetric[];
-  sideMetrics: ReferenceMetric[];
-  onLog: () => void;
-  onRefresh: () => void;
-  syncing: boolean;
-}) {
-  const jumpLinks = [
-    { href: '#operator-today', label: 'Today' },
-    { href: '#operator-trajectory', label: 'Trajectory' },
-    { href: '#operator-story', label: 'History' },
-    { href: '#operator-food', label: 'Fuel' },
-    { href: '#operator-health-stream', label: 'Insights' },
-    { href: '#operator-action', label: 'Plan' },
-  ];
-
-  return (
-    <section className="fit-command-deck">
-      <div className="fit-command-deck-top">
-        <div className="fit-command-deck-copy">
-          <span className="fit-command-deck-kicker">Operator dashboard</span>
-          <h1>Weight, nutrition, recovery, and pace in one board.</h1>
-          <p>
-            Check the current state, spot the risks, and jump straight to the section that needs attention.
-          </p>
-          <div className="fit-command-deck-pills">
-            <span className="fit-command-pill is-neutral">{syncSummary}</span>
-            <span className="fit-command-pill is-brass">{pace.label}</span>
-            <span className={`fit-command-pill ${targetDelta <= 0 ? 'is-good' : 'is-neutral'}`}>
-              {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)}kg to goal`}
-            </span>
-            <span className="fit-command-pill is-neutral">
-              {projectedGoal
-                ? `ETA ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
-                : 'ETA pending trend'}
-            </span>
-          </div>
-        </div>
-
-        <div className="fit-command-deck-aside">
-          <div className="fit-command-deck-current">
-            <span className="label">Current reading</span>
-            <span className="value">{latest.weight.toFixed(1)}kg</span>
-            <span className="meta">{fmtDate(latest.date, { long: true })}</span>
-          </div>
-          <div className="fit-command-deck-actions">
-            <button type="button" className="fit-dashboard-btn is-primary" onClick={onLog}>
-              Log reading
-            </button>
-            <button type="button" className="fit-dashboard-btn" onClick={onRefresh}>
-              {syncing ? 'Refreshing...' : 'Refresh sync'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="fit-command-deck-grid">
-        {heroMetrics.map((metric) => (
-          <article key={metric.label} className={`fit-command-stat ${toneClass(metric.tone)}`}>
-            <span className="fit-command-stat-label">{metric.label}</span>
-            <strong className="fit-command-stat-value">{metric.value}</strong>
-            <span className="fit-command-stat-meta">{metric.status}</span>
-          </article>
-        ))}
-      </div>
-
-      <div className="fit-command-deck-grid is-secondary">
-        {sideMetrics.slice(0, 4).map((metric) => (
-          <article key={metric.label} className={`fit-command-stat is-secondary ${toneClass(metric.tone)}`}>
-            <span className="fit-command-stat-label">{metric.label}</span>
-            <strong className="fit-command-stat-value">{metric.value}</strong>
-            <span className="fit-command-stat-meta">{metric.status}</span>
-          </article>
-        ))}
-      </div>
-
-      <nav className="fit-dashboard-nav" aria-label="Operator sections">
-        {jumpLinks.map((link) => (
-          <a key={link.href} href={link.href} className="fit-dashboard-nav-link">
-            {link.label}
-          </a>
-        ))}
-      </nav>
-    </section>
-  );
-}
-
-function DashboardBandHeader({
-  kicker,
-  title,
-  note,
-  meta,
-}: {
-  kicker: string;
-  title: string;
-  note: string;
-  meta?: string;
 }) {
   return (
-    <div className="fit-dashboard-band-head" data-section>
-      <div className="fit-dashboard-band-copy">
-        <span className="fit-dashboard-band-kicker">{kicker}</span>
-        <h2 className="fit-dashboard-band-title">{title}</h2>
-        <p className="fit-dashboard-band-note">{note}</p>
-      </div>
-      {meta ? <span className="fit-dashboard-band-meta">{meta}</span> : null}
+    <div className={`fit-callout${tone !== 'neutral' ? ` is-${tone}` : ''}`}>
+      {emoji ? <span className="fit-callout-emoji" aria-hidden>{emoji}</span> : null}
+      <div className="fit-callout-body">{children}</div>
     </div>
   );
 }
@@ -642,7 +446,7 @@ function HeroIntention({ state, latest, goal }: { state: State; latest: FitnessR
   return (
     <p style={{
       fontFamily: T.display,
-      fontStyle: 'italic',
+      fontStyle: 'normal',
       fontSize: 17,
       lineHeight: 1.45,
       color: T.ink,
@@ -783,7 +587,7 @@ function AccordionPanel({
     >
       <summary style={{ cursor: 'pointer', padding: '18px 0 16px' }}>
         <Kicker style={{ marginBottom: 8 }}>{kicker}</Kicker>
-        <div style={{ fontFamily: T.display, fontStyle: 'italic', fontSize: 18, color: T.ink, marginBottom: 6 }}>
+        <div style={{ fontFamily: T.display, fontStyle: 'normal', fontSize: 18, color: T.ink, marginBottom: 6 }}>
           {title}
         </div>
         <p style={{ fontFamily: T.sans, fontSize: 12, color: T.body, fontWeight: 300, lineHeight: 1.6, margin: 0, maxWidth: '52ch' }}>
@@ -1450,7 +1254,7 @@ function TdeeBreakdown({
             letterSpacing: '-0.02em',
             lineHeight: 1.05,
           }}>
-            TDEE <em style={{ fontStyle: 'italic', fontWeight: 400 }}>breakdown</em>
+            TDEE <em style={{ fontStyle: 'normal', fontWeight: 400 }}>breakdown</em>
           </h4>
           <p style={{
             margin: '12px 0 0',
@@ -1605,7 +1409,7 @@ function TdeeBreakdown({
                 }}>{row.acronym}</span>
                 <span style={{
                   fontFamily: T.display,
-                  fontStyle: 'italic',
+                  fontStyle: 'normal',
                   fontSize: 14,
                   color: T.body,
                   fontWeight: 400,
@@ -1657,7 +1461,7 @@ function TdeeBreakdown({
       <p style={{
         margin: '22px 0 0',
         fontFamily: T.display,
-        fontStyle: 'italic',
+        fontStyle: 'normal',
         fontSize: 13,
         color: T.muted,
         lineHeight: 1.65,
@@ -1797,7 +1601,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
             <span style={{ width:8, height:8, borderRadius:'50%', background:focus.color }} />
             <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase' }}>{focus.label}</span>
           </div>
-          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.ink, lineHeight:1.25, margin:'0 0 12px', maxWidth:'16ch' }}>
+          <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:24, color:T.ink, lineHeight:1.25, margin:'0 0 12px', maxWidth:'16ch' }}>
             See the signal first, then act on it.
           </p>
           <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:0, maxWidth:'58ch' }}>
@@ -1929,7 +1733,7 @@ function ThisWeek({ state, latest, setCompose, setTab }: {
         <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:6 }}>Today&apos;s priority</Kicker>
           <button onClick={() => setTab('Plan')} style={{ background:'none', border:'none', cursor:'pointer', padding:0, textAlign:'left' }}>
-            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.ink, lineHeight:1.3, marginBottom:2 }}>
+            <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.ink, lineHeight:1.3, marginBottom:2 }}>
               See the plan →
             </div>
             <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted, fontWeight:500, letterSpacing:'0.05em' }}>
@@ -1983,7 +1787,7 @@ function JourneyStory({ sorted, state, showHeader = true }: { sorted: FitnessRea
           <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:22, letterSpacing:'-0.01em', lineHeight:1.1, color:T.ink, margin:'0 0 4px' }}>
             {totalWeeks} weeks observed.
           </h2>
-          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'0 0 0' }}>
+          <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:13, color:T.muted, margin:'0 0 0' }}>
             Four key moments.
           </p>
           <Rule style={{ margin: '14px 0 0' }} />
@@ -1998,7 +1802,7 @@ function JourneyStory({ sorted, state, showHeader = true }: { sorted: FitnessRea
           }}>
             <Kicker color={i === events.length - 1 ? T.gold : T.muted}>{e.kicker}</Kicker>
             <div>
-              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: i === events.length - 1 ? T.gold : T.ink, marginBottom:4 }}>
+              <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color: i === events.length - 1 ? T.gold : T.ink, marginBottom:4 }}>
                 {e.title}
               </div>
               <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, lineHeight:1.5, margin:0, maxWidth:'50ch' }}>{e.copy}</p>
@@ -2060,7 +1864,7 @@ function PlanOpener({ state, sorted, setTab }: { state: State; sorted: FitnessRe
         </p>
         <div style={{ display:'flex', alignItems:'center', gap:10, paddingTop:10, borderTop:`0.5px solid ${b.color}33` }}>
           <Kicker color={b.color}>Action:</Kicker>
-          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.ink }}>{b.action}</span>
+          <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:14, color:T.ink }}>{b.action}</span>
         </div>
       </div>
 
@@ -2340,7 +2144,7 @@ function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReadin
       </div>
 
       <div style={{ fontFamily:T.display, fontSize:30, color:T.ink, letterSpacing:'-0.02em', lineHeight:1, marginBottom:4 }}>
-        {goal.toFixed(1)}kg <em style={{ color:T.gold, fontStyle:'italic', fontSize:24 }}>working line</em>
+        {goal.toFixed(1)}kg <em style={{ color:T.gold, fontStyle: 'normal', fontSize:24 }}>working line</em>
       </div>
       <div style={{ fontFamily:T.sans, fontSize:11.5, color:T.muted, letterSpacing:'0.02em', marginBottom:14 }}>
         1 kg/wk ETA · {projectedGoalDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
@@ -2453,7 +2257,7 @@ function ThisWeekGrid({ sorted, state, showHeader = true }: { sorted: FitnessRea
                 </>
               ) : (
                 <>
-                  <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.muted }}>—</div>
+                  <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:22, color:T.muted }}>—</div>
                   <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:10, color:T.muted, marginTop:8 }}>{d.isFuture ? 'to come' : 'no log'}</div>
                 </>
               )}
@@ -2506,7 +2310,7 @@ function PhaseLog({ sorted, showHeader = true }: { sorted: FitnessReading[]; sho
       {showHeader && (
         <>
           <Kicker style={{ marginBottom:10 }}>Phase log</Kicker>
-          <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:24, fontStyle:'italic', color:T.ink, margin:'0 0 6px' }}>
+          <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:24, fontStyle: 'normal', color:T.ink, margin:'0 0 6px' }}>
             The story: rise, collapse, rebuild, discipline.
           </h3>
           <ThickRule style={{ margin:'18px 0 0' }} />
@@ -2591,7 +2395,7 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
   return (
     <div style={{ marginTop:48, padding:'24px 28px', background:T.surface, border:`0.5px solid ${T.line}` }}>
       <Kicker style={{ marginBottom:12 }}>Data sources · Apple Health</Kicker>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 12px' }}>
+      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, margin:'0 0 12px' }}>
         Apple Health now has a working import path here.
       </p>
       <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.7, margin:'0 0 12px' }}>
@@ -2617,7 +2421,7 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
 
         <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:8 }}>Import status</Kicker>
-          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 8px' }}>
+          <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, margin:'0 0 8px' }}>
             {file ? file.name : 'No file selected yet.'}
           </p>
           <button
@@ -2650,15 +2454,15 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
 
       <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:10 }}>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
-          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>i.</span>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle: 'normal' }}>i.</span>
           <strong style={{ color:T.ink, fontWeight:500 }}>Apple Health export.</strong> In the Health app, open your profile and choose <em>Export All Health Data</em>. This importer reads body weight, BMI, body fat, lean mass, body water mass, and bone mass when those samples exist, then derives the dashboard-friendly fields it can.
         </li>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
-          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>ii.</span>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle: 'normal' }}>ii.</span>
           <strong style={{ color:T.ink, fontWeight:500 }}>Automatic sync is now ready.</strong> Your site can now accept push updates at <code>/api/operator/fitness/auto-sync</code>. It supports both the simple JSON payload I showed earlier and Health Auto Export&apos;s native REST API JSON structure.
         </li>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
-          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>iii.</span>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle: 'normal' }}>iii.</span>
           <strong style={{ color:T.ink, fontWeight:500 }}>What to send.</strong> Send JSON with <code>date</code>, <code>weight</code>, and any of <code>bmi</code>, <code>bodyFat</code>, <code>water</code>, <code>waterMassKg</code>, <code>leanMassKg</code>, or <code>boneMassKg</code>. The route updates the existing day if it already exists, so repeated syncs don&apos;t create duplicate rows.
         </li>
       </ul>
@@ -2994,7 +2798,7 @@ function DashboardHero({
               <FitPill color={syncColor} background={`${syncColor}12`}>{state.daysSinceWeighIn === 0 ? 'Logged today' : `Logged ${state.daysSinceWeighIn}d ago`}</FitPill>
             </div>
             <h1 style={{ fontFamily:T.display, fontSize:'clamp(34px, 4.8vw, 52px)', fontWeight:400, letterSpacing:'-0.02em', lineHeight:0.96, color:T.ink, margin:'0 0 10px', maxWidth:'11ch' }}>
-              Body composition <em style={{ color:T.gold, fontStyle:'italic' }}>timeline</em>
+              Body composition <em style={{ color:T.gold, fontStyle: 'normal' }}>timeline</em>
             </h1>
             <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', fontFamily:T.sans, fontSize:13, color:T.body }}>
               <span>{fmtDate(sorted[0].date, { long:true })} start</span>
@@ -3221,10 +3025,10 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
     <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(145deg, ${T.paper} 0%, ${T.surface} 60%, ${T.goldSoft} 100%)`, padding:24 }}>
       <form onSubmit={submit} style={{ width:'100%', maxWidth:400, textAlign:'center', padding:'32px 28px 36px', border:`1px solid ${T.line}`, background:T.paper, boxShadow:CARD_SHADOW, backdropFilter:'blur(8px)' }}>
         <Kicker style={{ marginBottom:20 }}>Vol. 01 · Restricted Access</Kicker>
-        <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize: 24, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
+        <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle: 'normal', fontSize: 24, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
           Operator.
         </h1>
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.muted, margin:'0 0 40px' }}>a private weighing log.</p>
+        <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color:T.muted, margin:'0 0 40px' }}>a private weighing log.</p>
         <ThickRule style={{ marginBottom:32 }} />
         <div style={{ borderBottom:`0.5px solid ${err ? T.rose : T.line}`, marginBottom:24, transition:'border-color 0.2s' }}>
           <input
@@ -3235,7 +3039,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
             onChange={e => setPw(e.target.value)}
             style={{
               width:'100%', background:'transparent', border:'none', outline:'none',
-              fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink,
+              fontFamily:T.display, fontStyle: 'normal', fontSize:20, color:T.ink,
               padding:'4px 0 10px', textAlign:'center',
             }}
           />
@@ -3273,7 +3077,7 @@ function HeroReading({ latest, previous, sorted }: { latest:FitnessReading; prev
           <span data-hero-num style={{ fontFamily:T.display, fontWeight:400, fontSize: 32, letterSpacing:'-0.04em', lineHeight:0.85, color:T.ink }}>
             {latest.weight.toFixed(1)}
           </span>
-          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:28, color:T.muted }}>kg</span>
+          <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:28, color:T.muted }}>kg</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:20 }}>
           <span style={{
@@ -3332,7 +3136,7 @@ function DetailLaunchpad({ setCompose, setTab }: { setCompose: (open: boolean) =
             textAlign:'left',
             cursor:'pointer',
           }}>
-            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, marginBottom:6 }}>{item.label}</div>
+            <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, marginBottom:6 }}>{item.label}</div>
             <span style={{ fontFamily:T.sans, fontSize:11, color:T.body, lineHeight:1.5 }}>{item.sub}</span>
           </button>
         ))}
@@ -3538,7 +3342,7 @@ function Milestones({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|nu
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         Waypoints <em>on the route home</em>.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         {reg && reg.slope < 0 ? 'Estimated at your current rate of loss.' : 'Requires a trend reversal — current direction is away from goal.'}
       </p>
       <ThickRule style={{ margin:'18px 0 0' }} />
@@ -3564,7 +3368,7 @@ function Milestones({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|nu
                 padding:'18px 0', borderBottom: i < steps.length-1 ? `0.5px solid ${T.softLine}` : 'none',
                 alignItems:'baseline',
               }}>
-                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color: isGoal ? T.gold : T.ink }}>
+                <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:20, color: isGoal ? T.gold : T.ink }}>
                   {isGoal ? 'Goal ★' : `−${(latest.weight-kg).toFixed(1)} kg waypoint`}
                 </div>
                 <div style={{ fontFamily:T.display, fontSize:26, color: isGoal ? T.gold : T.ink, textAlign:'right', letterSpacing:'-0.01em' }}>
@@ -3647,7 +3451,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         Should you cut? <em>Yes. Here is how.</em>
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         Four strategies, their trade-offs, and what each means for your goal date.
       </p>
       <ThickRule style={{ margin:'18px 0 0' }} />
@@ -3685,7 +3489,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
             </div>
           ))}
         </div>
-        <p style={{ fontFamily:T.sans, fontSize:11, color:T.muted, fontWeight:300, margin:'12px 20px 0', fontStyle:'italic' }}>
+        <p style={{ fontFamily:T.sans, fontSize:11, color:T.muted, fontWeight:300, margin:'12px 20px 0', fontStyle: 'normal' }}>
           Estimate only. Verify with a full TDEE calculator using your actual age and activity level.
         </p>
       </div>
@@ -3713,7 +3517,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
               }}>
                 <div>
                   <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color: isRec?T.gold:T.ink }}>{s.name}</span>
+                    <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color: isRec?T.gold:T.ink }}>{s.name}</span>
                     {isRec && <span style={{ fontFamily:T.sans, fontSize:8, fontWeight:600, letterSpacing:'0.2em', color:T.gold, padding:'2px 7px', border:`0.5px solid ${T.gold}` }}>RECOMMENDED</span>}
                   </div>
                   <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, margin:'6px 0 0', lineHeight:1.5, maxWidth:'28ch' }}>{s.note}</p>
@@ -3731,7 +3535,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
                   <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kg/wk</span>
                 </div>
                 <div style={{ textAlign:'right' }}>
-                  <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: isRec?T.gold:T.body }}>
+                  <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color: isRec?T.gold:T.body }}>
                     {fmtDateObj(gDate)}
                   </span>
                 </div>
@@ -4006,7 +3810,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         When to cut, when to rest, <em>when to build</em>.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         Seven phases from today to goal and beyond — triggered by body fat, not just scale weight.
       </p>
 
@@ -4064,7 +3868,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
                     {ph.name}
                   </span>
                 </div>
-                <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.body, margin:'0 0 16px', lineHeight:1.5 }}>
+                <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:14, color:T.body, margin:'0 0 16px', lineHeight:1.5 }}>
                   {ph.tagline}
                 </p>
 
@@ -4117,7 +3921,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
             return (
               <div key={ph.id} style={{ flex, padding:'14px 10px', borderRight:`0.5px solid ${T.line}`, background: ph.current ? T.goldSoft : 'transparent', minWidth:0 }}>
                 <span style={{ display:'block', fontFamily:T.sans, fontSize:8, fontWeight:700, letterSpacing:'0.2em', color:ts.color, marginBottom:5 }}>{ts.label}</span>
-                <span style={{ display:'block', fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.ink, lineHeight:1.2, marginBottom:4 }}>
+                <span style={{ display:'block', fontFamily:T.display, fontStyle: 'normal', fontSize:11, color:T.ink, lineHeight:1.2, marginBottom:4 }}>
                   {ph.endWeight === ph.startWeight ? `${ph.startWeight.toFixed(0)} kg` : `${ph.startWeight.toFixed(0)}→${ph.endWeight.toFixed(0)} kg`}
                 </span>
                 {ph.durationWeeks > 0 && <Kicker style={{ fontSize:8 }}>{ph.durationWeeks}wk</Kicker>}
@@ -4177,7 +3981,7 @@ function Insights({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|null
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         What the numbers <em>are saying</em>.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         Practical context behind each figure.
       </p>
       <ThickRule style={{ margin:'18px 0 0' }} />
@@ -4383,7 +4187,7 @@ function PieComposition({ latest, goal, weightLabel }: { latest: FitnessReading;
           </text>
           <text x={cx} y={cy+17} textAnchor="middle" fontFamily={T.sans} fontSize="10" fill={T.muted} letterSpacing="0.18em">KG TOTAL</text>
         </svg>
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'8px 0 0' }}>{sub}</p>
+        <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:13, color:T.muted, margin:'8px 0 0' }}>{sub}</p>
       </div>
     );
   };
@@ -4545,7 +4349,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
                 <FitPill color={T.gold} background={`${T.gold}12`}>All graphs live here</FitPill>
               </div>
               <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:36, letterSpacing:'-0.03em', lineHeight:0.94, color:T.ink, margin:'0 0 10px', maxWidth:'12ch' }}>
-                Health, trend and <em style={{ color:T.gold, fontStyle:'italic' }}>composition</em>.
+                Health, trend and <em style={{ color:T.gold, fontStyle: 'normal' }}>composition</em>.
               </h2>
               <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.75, margin:'0 0 12px', maxWidth:'60ch' }}>
                 This section now keeps the visual story in one place: the weight timeline, the longer-term line, the monthly pattern, and the composition changes that explain what the scale is doing.
@@ -4787,14 +4591,14 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             <div style={{ fontFamily:T.display, fontSize: 24, color:T.rose, letterSpacing:'-0.02em', lineHeight:1 }}>{latest.weight}</div>
             <Kicker color={T.muted} style={{ marginTop:6 }}>FROM (kg)</Kicker>
           </div>
-          <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted, textAlign:'center' }}>→</div>
+          <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:24, color:T.muted, textAlign:'center' }}>→</div>
           <div style={{ textAlign:'right' }}>
             <div style={{ fontFamily:T.display, fontSize: 24, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>{goal.toFixed(0)}</div>
             <Kicker color={T.muted} style={{ marginTop:6 }}>TO (kg)</Kicker>
           </div>
         </div>
         <Rule style={{ margin:'24px 0' }} />
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, margin:0, lineHeight:1.5 }}>
+        <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:20, color:T.ink, margin:0, lineHeight:1.5 }}>
           {(latest.weight-goal).toFixed(1)} kilograms in roughly{' '}
           <em style={{ color:T.gold }}>{goalDate.toLocaleDateString('en-GB',{month:'long', year:'numeric'})}</em>.
           Aggressive pace. Tight tracking, protein and recovery only.
@@ -4816,7 +4620,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
           {n:'05', r:'Log every reading, every meal, every session',                         d:'Even the bad weeks. Especially the bad weeks. Data with gaps cannot be analysed.'},
         ].map(rule => (
           <div key={rule.n} style={{ display:'grid', gridTemplateColumns:'56px 1fr', padding:'22px 0', borderBottom:`0.5px solid ${T.softLine}`, alignItems:'baseline', gap:16 }}>
-            <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize: 20, color:T.gold, lineHeight:1 }}>{rule.n}</span>
+            <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize: 20, color:T.gold, lineHeight:1 }}>{rule.n}</span>
             <div>
               <p style={{ fontFamily:T.display, fontSize:19, color:T.ink, margin:'0 0 4px', fontWeight:400, lineHeight:1.4 }}>{rule.r}</p>
               <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }}>{rule.d}</p>
@@ -4842,7 +4646,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             ].map((meal,i,arr)=>(
               <div key={i} style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', padding:'18px 0', borderBottom: i<arr.length-1?`0.5px solid ${T.softLine}`:'none', alignItems:'baseline', gap:16 }}>
                 <Kicker color={T.gold}>{meal.t}</Kicker>
-                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:17, color:T.ink }}>{meal.m}</span>
+                <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:17, color:T.ink }}>{meal.m}</span>
                 <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.5, margin:0 }}>{meal.f}</p>
                 <span style={{ fontFamily:T.display, fontSize:18, color:T.ink, textAlign:'right' }}>{meal.kcal} <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
                 <span style={{ fontFamily:T.display, fontSize:18, color:T.green, textAlign:'right' }}>{meal.p}g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
@@ -4873,7 +4677,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
           ].map((d,i)=>(
             <div key={i} style={{ padding:'22px 22px', borderRight: i<2?`0.5px solid ${T.line}`:'none' }}>
               <Kicker color={T.gold} style={{ marginBottom:8 }}>{d.day}</Kicker>
-              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 14px' }}>{d.focus}</p>
+              <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, margin:'0 0 14px' }}>{d.focus}</p>
               <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:6 }}>
                 {d.exs.map((e,j)=>(
                   <li key={j} style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, padding:'6px 0', borderBottom:`0.5px solid ${T.softLine}` }}>{e}</li>
@@ -4882,7 +4686,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             </div>
           ))}
         </div>
-        <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'14px 0 0', fontStyle:'italic' }}>
+        <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'14px 0 0', fontStyle: 'normal' }}>
           Add a 30-minute walk on rest days. Aim for 8,000 steps daily. Movement is the multiplier.
         </p>
       </AccordionPanel>
@@ -4903,7 +4707,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             'Write one sentence answering: what worked, what didn&apos;t, what to change.',
           ].map((s,i)=>(
             <li key={i} style={{ display:'grid', gridTemplateColumns:'40px 1fr', padding:'16px 0', borderBottom:`0.5px solid ${T.softLine}`, gap:12 }}>
-              <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.gold }}>{(i+1).toString().padStart(2,'0')}</span>
+              <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:22, color:T.gold }}>{(i+1).toString().padStart(2,'0')}</span>
               <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }} dangerouslySetInnerHTML={{ __html: s }} />
             </li>
           ))}
@@ -4926,7 +4730,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             { p:'Friends/family ask why you&apos;re being strange about food', d:'Brief answer: "I&apos;m working on something." You owe nobody a long explanation. Track quietly.' },
           ].map((t, i) => (
             <div key={i} style={{ padding:'20px 22px', borderRight: i%2===0?`0.5px solid ${T.line}`:'none', borderBottom: i<4?`0.5px solid ${T.line}`:'none' }}>
-              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.rose, margin:'0 0 8px', lineHeight:1.4 }} dangerouslySetInnerHTML={{ __html: t.p }} />
+              <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color:T.rose, margin:'0 0 8px', lineHeight:1.4 }} dangerouslySetInnerHTML={{ __html: t.p }} />
               <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }} dangerouslySetInnerHTML={{ __html: t.d }} />
             </div>
           ))}
@@ -4935,7 +4739,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
 
       <div style={{ ...sectionGap, padding:'28px 30px', background:T.goldSoft, borderLeft:`3px solid ${T.gold}` }}>
         <Kicker color={T.gold} style={{ marginBottom:12 }}>The Closing Thought</Kicker>
-        <p style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:22, color:T.ink, lineHeight:1.4, margin:'0 0 10px' }}>
+        <p style={{ fontFamily:T.display, fontWeight:400, fontStyle: 'normal', fontSize:22, color:T.ink, lineHeight:1.4, margin:'0 0 10px' }}>
           {sorted.length} readings show that you can lose weight; you have done it before, from {Math.max(...sorted.map(r=>r.weight))} kg down to {Math.min(...sorted.map(r=>r.weight))} kg.
         </p>
         <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.7, margin:0, maxWidth:'62ch' }}>
@@ -4978,7 +4782,7 @@ function Compose({ open, onClose, onSubmit }: {
           value={form[key as keyof typeof form]}
           onChange={set(key)}
           required={key==='weight'}
-          style={{ flex:1, background:'transparent', border:'none', outline:'none', fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.ink, padding:'4px 0' }}
+          style={{ flex:1, background:'transparent', border:'none', outline:'none', fontFamily:T.display, fontStyle: 'normal', fontSize:24, color:T.ink, padding:'4px 0' }}
         />
         {unit && <span style={{ fontFamily:T.sans, fontSize:12, color:T.muted }}>{unit}</span>}
       </div>
@@ -4992,7 +4796,7 @@ function Compose({ open, onClose, onSubmit }: {
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:28 }}>
           <div>
             <Kicker style={{ marginBottom:8 }}>Compose new reading</Kicker>
-            <h2 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:28, color:T.ink, margin:0 }}>File a weigh-in.</h2>
+            <h2 style={{ fontFamily:T.display, fontWeight:400, fontStyle: 'normal', fontSize:28, color:T.ink, margin:0 }}>File a weigh-in.</h2>
           </div>
           <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, letterSpacing:'0.2em', color:T.muted }}>CLOSE</button>
         </div>
@@ -5066,15 +4870,6 @@ async function apiImportAppleHealth(pw:string, file: File) {
   }
 }
 
-type ReferenceMetricTone = 'good' | 'warn' | 'brass' | 'neutral';
-
-interface ReferenceMetric {
-  label: string;
-  value: string;
-  status: string;
-  tone: ReferenceMetricTone;
-}
-
 interface ReferencePhaseMarker {
   id: string;
   label: string;
@@ -5106,15 +4901,6 @@ interface ReferenceWeekRow {
 }
 
 const REFERENCE_DAY = 24 * 60 * 60 * 1000;
-
-function referenceMetric(
-  label: string,
-  value: string,
-  status: string,
-  tone: ReferenceMetricTone = 'neutral',
-): ReferenceMetric {
-  return { label, value, status, tone };
-}
 
 function formatReferenceDate(iso: string) {
   return parseLocalDateInput(iso).toLocaleDateString('en-GB', {
@@ -5366,44 +5152,6 @@ function buildWeekRows(sorted: FitnessReading[], todayIso: string = localIsoDate
       isToday: isoDate === todayIso,
     };
   });
-}
-
-function buildHeroMetrics(sorted: FitnessReading[]) {
-  const latest = sorted[sorted.length - 1];
-  const monthAgo = nearestReadingByDays(sorted, latest, 30);
-  const discipline = loggingCadence(sorted);
-  const bodyFatDelta = latest.bodyFat - monthAgo.bodyFat;
-  const muscleDelta = latest.muscleMass - monthAgo.muscleMass;
-  const boneDelta = latest.boneMass - monthAgo.boneMass;
-  const bmiLabel = bmiStatus(latest.bmi)[0];
-  const waterLabel = waterStatus(latest.water)[0];
-
-  // Surface the four metrics worth scanning at a glance — body fat / muscle
-  // get the 30-day delta, BMI shows status, discipline rolls up logging.
-  // Water + bone live in the deeper Health section.
-  void waterLabel; void boneDelta;
-  return [
-    referenceMetric('Body fat', `${latest.bodyFat.toFixed(1)}%`, `${bodyFatDelta > 0 ? '+' : ''}${bodyFatDelta.toFixed(1)} in 30d`, bodyFatDelta <= 0 ? 'good' : 'warn'),
-    referenceMetric('Muscle mass', `${latest.muscleMass.toFixed(1)}%`, `${muscleDelta > 0 ? '+' : ''}${muscleDelta.toFixed(1)} in 30d`, muscleDelta >= 0 ? 'good' : 'warn'),
-    referenceMetric('BMI', latest.bmi.toFixed(1), bmiLabel, latest.bmi < 30 ? 'good' : 'warn'),
-    referenceMetric('Discipline', `${discipline.score}/100`, `${discipline.count}/14 days logged`, discipline.score >= 80 ? 'brass' : discipline.score >= 60 ? 'neutral' : 'warn'),
-  ];
-}
-
-function buildSideMetrics(sorted: FitnessReading[], goal: number, reg: Reg | null) {
-  const latest = sorted[sorted.length - 1];
-  const monthAgo = nearestReadingByDays(sorted, latest, 30);
-  const monthlyDelta = latest.weight - monthAgo.weight;
-  const weeklyRate = reg ? reg.slope * 7 : 0;
-
-  return [
-    referenceMetric('Weight', `${latest.weight.toFixed(1)}kg`, latest.weight <= goal ? 'At goal' : `${(latest.weight - goal).toFixed(1)}kg to goal`, latest.weight <= goal ? 'good' : 'warn'),
-    referenceMetric('BMI', latest.bmi.toFixed(1), bmiStatus(latest.bmi)[0], latest.bmi < 30 ? 'good' : 'warn'),
-    referenceMetric('Body fat', `${latest.bodyFat.toFixed(1)}%`, fatStatus(latest.bodyFat)[0], latest.bodyFat < 39 ? 'good' : 'warn'),
-    referenceMetric('Water', `${latest.water.toFixed(1)}%`, waterStatus(latest.water)[0], latest.water >= 40 ? 'good' : 'warn'),
-    referenceMetric('Monthly delta', formatWeightDelta(monthlyDelta), monthlyDelta <= 0 ? 'Moving lower' : 'Moving higher', monthlyDelta <= 0 ? 'good' : 'warn'),
-    referenceMetric('Trend rate', reg ? `${weeklyRate > 0 ? '+' : ''}${weeklyRate.toFixed(2)}kg/wk` : 'Need more data', reg ? (weeklyRate < 0 ? 'Regression line down' : 'Regression line up') : 'Awaiting trend', reg ? (weeklyRate < 0 ? 'good' : 'warn') : 'neutral'),
-  ];
 }
 
 // ─── Today's Read · Next best action · Food breakdown ───────────────────────
@@ -7084,12 +6832,22 @@ export default function OperatorDashboardClient() {
   const [goal, setGoal]       = useState(60.0);
   const [paceKey, setPaceKey] = useState<PaceKey>('aggressive');
   const [compose, setCompose] = useState(false);
+  const [lowCelebrate, setLowCelebrate] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
   const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('3y');
   const [activeTrajectoryIso, setActiveTrajectoryIso] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [secondaryReady, setSecondaryReady] = useState(false);
+  const [activeSection, setActiveSection] = useState<OperatorSection>('today');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('operator-section') : null;
+    if (stored) setActiveSection(stored as OperatorSection);
+  }, []);
+  const selectSection = useCallback((section: OperatorSection) => {
+    setActiveSection(section);
+    if (typeof window !== 'undefined') window.localStorage.setItem('operator-section', section);
+  }, []);
   // Resolve initial theme on the client only — localStorage takes precedence,
   // otherwise honour the OS preference. Stays out of SSR to avoid hydration mismatch.
   useEffect(() => {
@@ -7178,12 +6936,6 @@ export default function OperatorDashboardClient() {
     window.localStorage.setItem(PACE_KEY, paceKey);
   }, [paceKey]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const id = window.setTimeout(() => setSecondaryReady(true), 180);
-    return () => window.clearTimeout(id);
-  }, []);
-
   const handleUnlock = useCallback(async () => {
     const stored = localStorage.getItem(AUTH_KEY);
     if (stored) {
@@ -7193,8 +6945,15 @@ export default function OperatorDashboardClient() {
   }, [loadData]);
 
   const handleAdd = useCallback(async (r:FitnessReading) => {
+    const priorPlausible = readings.filter(x => isPlausibleWeightKg(x.weight));
+    const priorMin = priorPlausible.length > 0 ? Math.min(...priorPlausible.map(x => x.weight)) : Infinity;
     const next = [...readings, r].sort((a,b)=>a.date.localeCompare(b.date));
     setReadings(next); saveLocal(next);
+    // New all-time low weigh-in — brief pink/purple celebration.
+    if (isPlausibleWeightKg(r.weight) && priorPlausible.length > 0 && r.weight < priorMin) {
+      setLowCelebrate(true);
+      window.setTimeout(() => setLowCelebrate(false), 1600);
+    }
     if (opPw) { const nid = await apiSave(opPw, r); if (nid&&nid!==r.id) { const u=next.map(x=>x.id===r.id?{...x,id:nid}:x); setReadings(u); saveLocal(u); } }
   }, [readings, opPw, saveLocal]);
 
@@ -7222,8 +6981,6 @@ export default function OperatorDashboardClient() {
   const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(derivedSource), [derivedSource]);
   const phaseRows = useMemo(() => buildReferencePhaseRows(derivedSource), [derivedSource]);
   const photoMilestones = useMemo(() => buildPhotoMilestones(derivedSource), [derivedSource]);
-  const heroMetrics = useMemo(() => buildHeroMetrics(derivedSource), [derivedSource]);
-  const sideMetrics = useMemo(() => buildSideMetrics(derivedSource, goal, reg), [derivedSource, goal, reg]);
   const weekRows = useMemo(() => buildWeekRows(derivedSource, todayIso), [derivedSource, todayIso]);
   const chartBounds = useMemo(() => {
     const chartSource = dashboardSource.length > 0 ? dashboardSource : derivedSource;
@@ -7251,7 +7008,7 @@ export default function OperatorDashboardClient() {
   const themeToggleButton = (
     <button
       type="button"
-      className="op-theme-toggle"
+      className="op-theme-toggle is-floating"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
@@ -7485,24 +7242,66 @@ export default function OperatorDashboardClient() {
     exerciseToday,
     sevenDayDelta,
   };
+  const sectionMeta: Record<OperatorSection, { title: string; note: string }> = {
+    today: {
+      title: 'Today',
+      note: "Calories in, calories out, deficit, weight, and the quality of today's tracking.",
+    },
+    trajectory: {
+      title: 'Trajectory',
+      note: 'Read the slope, watch for plateaus, and compare the latest week against the longer line.',
+    },
+    history: {
+      title: 'History',
+      note: 'Phase changes, progress markers, the weekly board, and comparison panels.',
+    },
+    nutrition: {
+      title: 'Nutrition',
+      note: "Today's targets, maintenance, and the food breakdown.",
+    },
+    insights: {
+      title: 'Insights',
+      note: 'Trend direction, recovery signal, and the context behind the latest movement.',
+    },
+    plan: {
+      title: 'Plan',
+      note: "The full eating plan, today's intake, recovery, and training priorities.",
+    },
+  };
+  const activeMeta = sectionMeta[activeSection];
+
   return (
     <div className="fitness-reference-shell" data-theme={theme}>
-      {themeToggleButton}
-      <main className="wrap fitness-redesign" id="operator-overview">
-        <Reveal>
-        <section className="fit-anchor-section" id="operator-today">
-          {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '32px 0 36px' }} />
+      {lowCelebrate ? (
+        <div className="op-lowburst-wrap" aria-hidden>
+          {['🌸','💗','🪻','🌷','💜','🌸','💗','🪻','🌸','💗','🪻','🌷'].map((e, i) => (
+            <span key={i} className="op-lowburst" style={{ left: `${8 + i * 7.4}%`, animationDelay: `${(i % 4) * 90}ms`, fontSize: 22 + (i % 3) * 6, ['--rot' as string]: `${(i % 2 ? 1 : -1) * (10 + i * 3)}deg` } as CSSProperties}>{e}</span>
+          ))}
+        </div>
+      ) : null}
+      <div className="fit-shell">
+        <OperatorSidebar
+          active={activeSection}
+          onSelect={selectSection}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onLogWeight={() => setCompose(true)}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+        <div className="fit-content">
+          <div className="fit-mobile-bar">
+            <button type="button" className="fit-mobile-bar-btn" onClick={() => setSidebarOpen(true)}>
+              <Menu aria-hidden size={15} /> Menu
+            </button>
+            <span className="fit-kicker fit-kicker-ink">{activeMeta.title}</span>
+          </div>
+          <main className="wrap fitness-redesign" id="operator-overview">
+            <PageHeader emoji={SECTION_EMOJI[activeSection]} title={activeMeta.title} note={activeMeta.note} />
 
-          <section className="fit-today">
-            <div className="fit-today-head">
-              <div>
-                <span className="fit-today-label">Today at a glance</span>
-                <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
-              </div>
-              <span className="muted">{formatReferenceDate(todayIso)}</span>
-            </div>
-
+            {activeSection === 'today' ? (
+            <Reveal>
+            <section className="fit-today">
             {(() => {
               const read = buildTodayRead(todaySnap);
               const tone: 'good' | 'neutral' | 'warn' = read.lines.some((line) => line.tone === 'warn')
@@ -7510,17 +7309,17 @@ export default function OperatorDashboardClient() {
                 : read.lines.every((line) => line.tone === 'good')
                   ? 'good'
                   : 'neutral';
+              const emoji = tone === 'warn' ? '💗' : tone === 'good' ? '🌷' : '🌸';
               const note = read.lines[0]?.text ?? '';
               return (
-                <div className="fit-today-signals">
-                  <div className="fit-today-signals-head">
-                    <span className={`fit-today-track-pill is-${tone}`}>{read.headline}</span>
-                    <p className="fit-today-track-note">{note}</p>
-                  </div>
-                  <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
-                </div>
+                <Callout tone={tone === 'good' ? 'good' : tone === 'warn' ? 'warn' : 'brass'} emoji={emoji}>
+                  <strong>{read.headline}</strong>
+                  <div style={{ marginTop: 2 }}>{note}</div>
+                </Callout>
               );
             })()}
+
+            <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
 
             <section className="fit-weight-feature">
               <div className="fit-weight-spotlight">
@@ -7577,23 +7376,19 @@ export default function OperatorDashboardClient() {
             </section>
 
           </section>
-        </section>
-        </Reveal>
+            </Reveal>
+            ) : null}
 
-        <Reveal delay={0.08}>
-        <section className="fit-anchor-section" id="operator-trajectory">
-          <DashboardBandHeader
-            kicker="Trajectory"
-            title="Weight trend and consistency"
-            note="Read the slope, watch for plateaus, and compare the latest week against the longer line."
-          />
+            {activeSection === 'trajectory' ? (
+            <Reveal>
+            <section>
           <section className="fit-editorial-chart" style={{ marginBottom: 28 }}>
             <FitnessLineChart
               title={<>Weight trend</>}
               subtitle="Daily readings, phase markers, and goal checkpoints across the selected window."
               points={buildWeightSeries(dashboardSource)}
-              color={theme === 'dark' ? '#d48a95' : '#b76e79'}
-              barColor={theme === 'dark' ? '#c8b3e8' : '#aa92d3'}
+              color={theme === 'dark' ? '#e6a8c0' : '#c4708a'}
+              barColor={theme === 'dark' ? '#c1b3df' : '#8c75b3'}
               minY={chartBounds.min}
               maxY={chartBounds.max}
               annotations={[
@@ -7625,41 +7420,18 @@ export default function OperatorDashboardClient() {
               dashboardSource.map((r) => ({ date: r.date, weight: r.weight })),
             );
             if (!plateau) return null;
-            const tone = T.gold;
             return (
-              <aside style={{
-                marginBottom: 24,
-                padding: '20px 24px',
-                borderLeft: `2px solid ${tone}`,
-                background: `${tone}10`,
-                display: 'grid',
-                gridTemplateColumns: 'minmax(0, 1fr) auto',
-                gap: 24,
-                alignItems: 'baseline',
-              }}>
-                <div>
-                  <Kicker style={{ color: tone, marginBottom: 6 }}>
-                    Plateau · {plateau.days} days · slope {plateau.slopePerWeek >= 0 ? '+' : ''}{plateau.slopePerWeek.toFixed(2)} kg/wk
-                  </Kicker>
-                  <p style={{
-                    margin: 0,
-                    fontFamily: T.sans,
-                    fontSize: 13,
-                    color: T.body,
-                    lineHeight: 1.6,
-                    maxWidth: '62ch',
-                    fontWeight: 300,
-                  }}>
-                    {plateauSuggestion(plateau, nutrition.intake, nutrition.activeTdee)}
-                  </p>
+              <Callout tone="brass" emoji="🔮">
+                <strong>
+                  Plateau · {plateau.days} days · slope {plateau.slopePerWeek >= 0 ? '+' : ''}{plateau.slopePerWeek.toFixed(2)} kg/wk
+                </strong>
+                <div style={{ marginTop: 4 }}>
+                  {plateauSuggestion(plateau, nutrition.intake, nutrition.activeTdee)}
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <Kicker style={{ marginBottom: 4 }}>Window mean</Kicker>
-                  <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, letterSpacing: '-0.015em' }}>
-                    {plateau.meanWeight.toFixed(1)} kg
-                  </div>
+                <div style={{ marginTop: 8, fontSize: 11, color: 'var(--ink-mute)' }}>
+                  Window mean {plateau.meanWeight.toFixed(1)} kg
                 </div>
-              </aside>
+              </Callout>
             );
           })()}
 
@@ -7675,16 +7447,14 @@ export default function OperatorDashboardClient() {
               onActiveChange={setActiveTrajectoryIso}
             />
           </div>
-        </section>
-        </Reveal>
+            </section>
+            </Reveal>
+            ) : null}
 
-        {secondaryReady ? (
-          <>
-        <CollapsibleSection eyebrow="History" note="Phase changes, progress markers, and comparison panels." defaultOpen>
-        <Reveal>
-        <section className="fit-anchor-section" id="operator-story">
-          <div className="fit-story-shell">
-            {/* ───────────────────────── STORY ─────────────────────────── */}
+            {activeSection === 'history' ? (
+            <>
+            <Reveal>
+            <div className="fit-story-shell">
             <section className="fit-grid">
               <div className="fit-main">
                 <div className="fit-panel">
@@ -7741,52 +7511,54 @@ export default function OperatorDashboardClient() {
                 </div>
               </aside>
             </section>
-          </div>
-        </section>
-        </Reveal>
-
-        <Reveal>
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
-        </Reveal>
-        <Reveal delay={0.05}>
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
-        </Reveal>
-
-        </CollapsibleSection>
-
-        <Reveal delay={0.1}>
-        <div className="fit-panel" style={{ marginBottom: 28 }}>
-          <div className="fit-panel-head">
-            <div>
-              <h3>Weekly <em>board</em></h3>
-              <div className="meta">Monday through Sunday: weigh-ins, deltas, and body-state context</div>
             </div>
-          </div>
-          <div className="week-grid">
-            {weekRows.map((row) => (
-              <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
-                <div className="dow">{row.day}</div>
-                <div className="date">{row.date}</div>
-                <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
-                <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
-                <div className="icons"><span>{row.detail}</span></div>
-              </div>
-            ))}
-          </div>
-        </div>
-        </Reveal>
+            </Reveal>
 
-        <Reveal delay={0.18}>
-        <section className="fit-anchor-section" id="operator-food">
+            <Reveal>
+            <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
+            </Reveal>
+            <Reveal>
+            <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
+            </Reveal>
+
+            <Reveal>
+            <div className="fit-panel" style={{ margin: '28px 0' }}>
+              <div className="fit-panel-head">
+                <div>
+                  <h3>Weekly <em>board</em></h3>
+                  <div className="meta">Monday through Sunday: weigh-ins, deltas, and body-state context</div>
+                </div>
+              </div>
+              <div className="week-grid">
+                {weekRows.map((row) => (
+                  <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                    <div className="dow">{row.day}</div>
+                    <div className="date">{row.date}</div>
+                    <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                    <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                    <div className="icons"><span>{row.detail}</span></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            </Reveal>
+            </>
+            ) : null}
+
+            {activeSection === 'nutrition' ? (
+            <Reveal>
+            <section>
           <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
           <MaintenanceCard snap={todaySnap} activeKcalToday={activeKcalToday} />
           <FoodBreakdownSection snap={todaySnap} />
-        </section>
-        </Reveal>
+            </section>
+            </Reveal>
+            ) : null}
 
-        <CollapsibleSection eyebrow="Insights" note="Trend direction, recovery signal, and the context behind the latest movement." defaultOpen>
-        <Reveal>
-        <section className="fit-anchor-section" id="operator-health-stream">
+            {activeSection === 'insights' ? (
+            <>
+            <Reveal>
+            <section>
           {/* ───────────────────────── TRENDS ────────────────────────── */}
           <AnalyticsSection
             latest={latest}
@@ -7823,11 +7595,22 @@ export default function OperatorDashboardClient() {
         <Reveal>
         <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
         </Reveal>
-        </CollapsibleSection>
+            </>
+            ) : null}
 
-        <CollapsibleSection eyebrow="Plan" note="Today&apos;s intake, recovery, and training priorities." defaultOpen>
-        <Reveal>
-        <section className="fit-anchor-section" id="operator-action">
+            {activeSection === 'plan' ? (
+            <Reveal>
+            <section>
+          {(() => {
+            const planNutrition = nutritionTargets(latest, pace.weeklyLossKg);
+            return (
+              <EatingPlan
+                proteinTargetG={planNutrition.protein}
+                intakeKcal={planNutrition.intake}
+                todayIso={todayIso}
+              />
+            );
+          })()}
           {/* Action block — promise + readiness folded into trends scroll. */}
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
@@ -7853,20 +7636,13 @@ export default function OperatorDashboardClient() {
               />
             );
           })()}
-          <WorkoutStudio workouts={healthStream.workouts} />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>
-        </Reveal>
-        </CollapsibleSection>
-          </>
-        ) : (
-          <section className="fit-deferred-note" aria-live="polite">
-            <div className="fit-deferred-note-kicker">Loading supporting panels</div>
-            <p>The summary board lands first. The heavier comparison, recovery, and studio panels mount a beat later so the page feels faster on entry.</p>
-          </section>
-        )}
-
-      </main>
+            </Reveal>
+            ) : null}
+          </main>
+        </div>
+      </div>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />
     </div>

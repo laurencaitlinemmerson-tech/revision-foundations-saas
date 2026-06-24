@@ -381,7 +381,7 @@ function SleepNights({ days }: { days: DailyMetrics[] }) {
           { key: 'deep', value: d.sleep.deepMin ?? 0, color: '#3a4a6b' },
           { key: 'core', value: d.sleep.coreMin ?? 0, color: '#a8b3c5' },
           { key: 'rem', value: d.sleep.remMin ?? 0, color: '#6b7a99' },
-          { key: 'awake', value: d.sleep.awakeMin ?? 0, color: '#d4c8b8' },
+          { key: 'awake', value: d.sleep.awakeMin ?? 0, color: '#e6c0d5' },
         ];
         const isLast = i === nights.length - 1;
         return (
@@ -1252,7 +1252,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
                 marginRight: 8,
                 padding: '4px 10px',
                 border: `0.5px solid ${todayPromise === kind ? 'var(--ink)' : 'var(--rule)'}`,
-                background: todayPromise === kind ? 'rgba(196,135,47,0.12)' : 'transparent',
+                background: todayPromise === kind ? 'rgba(140,117,179,0.12)' : 'transparent',
                 fontFamily: 'inherit',
                 fontSize: 11,
                 letterSpacing: '0.08em',
@@ -1411,7 +1411,7 @@ export default function HealthMetricsSection({ opPw, readings, injected, slot = 
             <li><span className="op-sleep-dot" style={{ background: '#3a4a6b' }} />Deep</li>
             <li><span className="op-sleep-dot" style={{ background: '#6b7a99' }} />REM</li>
             <li><span className="op-sleep-dot" style={{ background: '#a8b3c5' }} />Core</li>
-            <li><span className="op-sleep-dot" style={{ background: '#d4c8b8' }} />Awake</li>
+            <li><span className="op-sleep-dot" style={{ background: '#e6c0d5' }} />Awake</li>
           </ul>
         </article>
 
@@ -1712,7 +1712,7 @@ function Heatmap({ days, goal }: { days: DailyMetrics[]; goal: number }) {
             <div
               key={idx}
               className={`op-heatmap-cell ${isToday ? 'is-today' : ''} ${steps === null ? 'is-missing' : ''}`}
-              style={pct !== null ? { background: `rgba(196,135,47,${0.12 + pct * 0.68})` } : undefined}
+              style={pct !== null ? { background: `rgba(140,117,179,${0.12 + pct * 0.68})` } : undefined}
               title={d ? `${d.date}: ${steps !== null ? Math.round(steps).toLocaleString('en-GB') + ' steps' : 'no data'}` : 'missing'}
             />
           );
@@ -1721,7 +1721,7 @@ function Heatmap({ days, goal }: { days: DailyMetrics[]; goal: number }) {
       <div className="op-heatmap-legend">
         <span className="muted">Less</span>
         {[0.15, 0.35, 0.55, 0.75, 0.95].map((s) => (
-          <span key={s} className="op-heatmap-swatch" style={{ background: `rgba(196,135,47,${0.12 + s * 0.68})` }} />
+          <span key={s} className="op-heatmap-swatch" style={{ background: `rgba(140,117,179,${0.12 + s * 0.68})` }} />
         ))}
         <span className="muted">Goal {goal.toLocaleString('en-GB')}</span>
         <span className="op-heatmap-spacer" />

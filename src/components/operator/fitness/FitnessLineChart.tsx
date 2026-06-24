@@ -361,8 +361,6 @@ export default function FitnessLineChart({
   const weekAverage = mean(recentWeekPoints.map((point) => point.value))
   const thirtyDayAnchor = latestTime === null ? null : findPointAtOrBefore(filteredPoints, latestTime - 30 * dayMs)
   const thirtyDayDelta = latestPoint && thirtyDayAnchor ? latestPoint.value - thirtyDayAnchor.value : null
-  const rangeSpan = values.length > 0 ? Math.max(...values) - Math.min(...values) : null
-  const currentTargetGap = latestPoint && targetWeight !== undefined ? latestPoint.value - targetWeight : null
   const visibleAnnotations = annotations.filter((annotation) => {
     const time = new Date(annotation.date).getTime()
     const isLatestEcho = latestPoint
@@ -448,24 +446,6 @@ export default function FitnessLineChart({
       value: formatSignedKg(thirtyDayDelta) ?? '—',
       note: thirtyDayDelta === null ? 'Need at least one month of history' : 'vs 30 days earlier',
       tone: thirtyDayDelta === null ? 'neutral' : thirtyDayDelta < 0 ? 'down' : thirtyDayDelta > 0 ? 'up' : 'neutral',
-    },
-    {
-      label: targetWeight !== undefined ? 'To target' : 'Window span',
-      value: targetWeight !== undefined
-        ? currentTargetGap === null
-          ? '—'
-          : `${Math.abs(currentTargetGap).toFixed(1)} kg`
-        : rangeSpan === null
-          ? '—'
-          : `${rangeSpan.toFixed(1)} kg`,
-      note: targetWeight !== undefined
-        ? currentTargetGap === null
-          ? 'No active target'
-          : currentTargetGap <= 0
-            ? 'At or below target'
-            : 'Current gap to goal'
-        : 'High to low across the selected window',
-      tone: targetWeight !== undefined && currentTargetGap !== null && currentTargetGap <= 0 ? 'down' : 'neutral',
     },
   ] as const
   const phaseBands = phases.flatMap((phase) => {
@@ -556,7 +536,7 @@ export default function FitnessLineChart({
       <div className="bc-chart-wrap">
         <svg viewBox={`0 0 ${w} ${h}`} className="fitness-chart" role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
           <rect x="0" y="0" width={w} height={h} fill="transparent" />
-          <rect x={pad.l} y={pad.t} width={innerW} height={innerH} rx="10" className="bc-plot-bg" />
+          <rect x={pad.l} y={pad.t} width={innerW} height={innerH} rx="6" className="bc-plot-bg" />
           {Array.from({ length: yTicks }).map((_, index) => {
             const ratio = index / (yTicks - 1)
             const value = high - (high - low) * ratio
@@ -579,7 +559,7 @@ export default function FitnessLineChart({
           })}
           {phaseLabels.map((label) => (
             <g key={`phase-label-${label.id}`}>
-              <rect x={label.x} y={pad.t + 8} width={label.width} height={18} rx="9" className={`bc-phase-pill ${label.className}`} />
+              <rect x={label.x} y={pad.t + 8} width={label.width} height={18} rx="4" className={`bc-phase-pill ${label.className}`} />
               <text x={label.x + label.width / 2} y={pad.t + 20} textAnchor="middle" className="bc-phase-label">{label.label}</text>
             </g>
           ))}

@@ -30,7 +30,7 @@ export function EnergyLedger({ days, targetDeficit = 1100 }: { days: LedgerDay[]
     <div style={{ marginTop: 16 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
         <span style={kicker}>14-day energy ledger</span>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 14, color: 'var(--ink-soft)' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--ink-soft)' }}>
           Net <strong style={{ color: totalDelta > 0 ? 'var(--rose)' : 'var(--green)' }}>{totalDelta >= 0 ? '+' : ''}{totalDelta.toLocaleString()}</strong> kcal · target <strong style={{ color: 'var(--ink)' }}>−{(targetDeficit * 2).toLocaleString()}</strong>
         </span>
       </div>
