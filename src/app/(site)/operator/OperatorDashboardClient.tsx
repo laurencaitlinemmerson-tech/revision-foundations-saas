@@ -4,7 +4,7 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
 import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
-import { Moon, Sun, Menu } from 'lucide-react';
+import { Moon, Sun, Menu, Type, Calendar, Sigma, Filter, ArrowUpDown, Search } from 'lucide-react';
 import OperatorSidebar, { type OperatorSection, SECTION_EMOJI } from './OperatorSidebar';
 import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
 import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
@@ -387,11 +387,15 @@ function HeadlineSparkline({
 
 function PageHeader({ emoji, title, note }: { emoji: string; title: string; note?: string }) {
   return (
-    <div className="fit-page-header">
-      <span className="fit-page-header-emoji" aria-hidden>{emoji}</span>
-      <h1 className="fit-page-header-title">{title}</h1>
-      {note ? <p className="fit-page-header-note">{note}</p> : null}
-    </div>
+    <>
+      <div className="fit-page-cover">
+        <span className="fit-page-cover-emoji" aria-hidden>{emoji}</span>
+      </div>
+      <div className="fit-page-header">
+        <h1 className="fit-page-header-title">{title}</h1>
+        {note ? <p className="fit-page-header-note">{note}</p> : null}
+      </div>
+    </>
   );
 }
 
@@ -404,6 +408,19 @@ function Callout({ tone = 'neutral', emoji, children }: {
     <div className={`fit-callout${tone !== 'neutral' ? ` is-${tone}` : ''}`}>
       {emoji ? <span className="fit-callout-emoji" aria-hidden>{emoji}</span> : null}
       <div className="fit-callout-body">{children}</div>
+    </div>
+  );
+}
+
+// Decorative database-toolbar chrome — purely visual, evokes a Notion
+// collection view header (filter / sort / search + a primary "New" action).
+function NotionToolbar() {
+  return (
+    <div className="fit-notion-toolbar" aria-hidden>
+      <Filter aria-hidden size={13} />
+      <ArrowUpDown aria-hidden size={13} />
+      <Search aria-hidden size={13} />
+      <button type="button" className="fit-notion-new-btn" tabIndex={-1}>New</button>
     </div>
   );
 }
@@ -7463,8 +7480,17 @@ export default function OperatorDashboardClient() {
                       <h3>Phase <em>history</em></h3>
                       <div className="meta">Cycle changes, durations, and delta across the full log</div>
                     </div>
+                    <NotionToolbar />
                   </div>
                   <div className="phase-log">
+                    <div className="phase-row phase-row-head" aria-hidden>
+                      <div />
+                      <div className="th"><Type aria-hidden size={11} /> Phase</div>
+                      <div className="th"><Sigma aria-hidden size={11} /> Duration</div>
+                      <div className="th"><Calendar aria-hidden size={11} /> Start</div>
+                      <div className="th"><Calendar aria-hidden size={11} /> End</div>
+                      <div className="th"><Sigma aria-hidden size={11} /> Delta</div>
+                    </div>
                     {phaseRows.map((row) => (
                       <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
                         <div className={`swatch ${row.swatch}`} />
@@ -7484,6 +7510,7 @@ export default function OperatorDashboardClient() {
                       <h3>Progress <em>photos</em></h3>
                       <div className="meta">Date-stamped comparison slots tied to the same timeline</div>
                     </div>
+                    <NotionToolbar />
                   </div>
                   <PhotoTimeline items={photoMilestones} />
                 </div>
@@ -7528,6 +7555,7 @@ export default function OperatorDashboardClient() {
                   <h3>Weekly <em>board</em></h3>
                   <div className="meta">Monday through Sunday: weigh-ins, deltas, and body-state context</div>
                 </div>
+                <NotionToolbar />
               </div>
               <div className="week-grid">
                 {weekRows.map((row) => (

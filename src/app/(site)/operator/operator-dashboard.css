@@ -24,7 +24,7 @@
   --warn: #c4708a;
   --brass: #8c75b3;
   --brass-deep: #6f5894;
-  --brass-haze: rgba(140, 117, 179, 0.08);
+  --brass-haze: rgba(55, 53, 47, 0.045);
   --accent: #c4708a;
   --accent-soft: rgba(196, 112, 138, 0.32);
   --accent-haze: rgba(196, 112, 138, 0.14);
@@ -82,7 +82,7 @@
   --warn: #e6a8c0;
   --brass: #c1b3df;
   --brass-deep: #b39ed1;
-  --brass-haze: rgba(193, 179, 223, 0.12);
+  --brass-haze: rgba(255, 255, 255, 0.06);
   --accent: #e6a8c0;
   --accent-soft: rgba(230, 168, 192, 0.32);
   --accent-haze: rgba(230, 168, 192, 0.14);
@@ -116,7 +116,7 @@
   padding: 40px 40px 72px;
 }
 
-.op-theme-toggle {
+.fitness-reference-shell .op-theme-toggle {
   width: 100%;
   display: inline-flex;
   align-items: center;
@@ -226,14 +226,6 @@
   transition: background-color 120ms ease, color 120ms ease;
 }
 
-.fit-sidebar-nav-item svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  color: var(--ink-mute);
-  transition: color 120ms ease;
-}
-
 .fit-sidebar-nav-item:hover {
   background: var(--bone);
   color: var(--ink);
@@ -245,11 +237,7 @@
   font-weight: 600;
 }
 
-.fit-sidebar-nav-item.is-active svg {
-  color: var(--brass-deep);
-}
-
-.fit-sidebar-log-btn {
+.fitness-reference-shell .fit-sidebar-log-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -326,7 +314,7 @@
     top: 0;
     z-index: 120;
   }
-  .fit-mobile-bar-btn {
+  .fitness-reference-shell .fit-mobile-bar-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -357,49 +345,65 @@
 }
 
 /* ── Notion-style page header (replaces the editorial masthead) ──────── */
-.fit-page-header {
-  display: block;
-  margin: 8px 0 30px;
+/* ── Notion-style page cover: gradient banner + floating emoji ────── */
+.fit-page-cover {
+  position: relative;
+  margin: -8px -1px 0;
+  height: 124px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  overflow: visible;
+  background: linear-gradient(135deg, #f3d9e6 0%, #e3d6f0 45%, #cfe0f2 100%);
 }
 
-.fit-page-header-emoji {
-  display: block;
-  font-size: 46px;
+.fitness-reference-shell[data-theme="dark"] .fit-page-cover {
+  background: linear-gradient(135deg, #3a2c38 0%, #2f2a3e 45%, #243044 100%);
+}
+
+.fit-page-cover-emoji {
+  position: absolute;
+  left: 8px;
+  bottom: -28px;
+  font-size: 52px;
   line-height: 1;
-  margin-bottom: 12px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.12));
+}
+
+.fit-page-header {
+  display: block;
+  margin: 44px 0 30px;
 }
 
 .fit-page-header-title {
   margin: 0;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   color: var(--ink);
 }
 
 .fit-page-header-note {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   max-width: 68ch;
   font-size: 14px;
   line-height: 1.55;
   color: var(--ink-mute);
 }
 
-/* ── Notion-style callout block ───────────────────────────────────── */
+/* ── Notion-style callout block: plain neutral bg, emoji carries colour ── */
 .fit-callout {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-start;
   margin: 0 0 24px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-radius: var(--radius-sm);
   background: var(--bone);
-  border: 0.5px solid var(--rule-soft);
+  border: none;
 }
 
 .fit-callout-emoji {
   flex-shrink: 0;
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.5;
 }
 
@@ -414,22 +418,6 @@
   display: block;
   color: var(--ink);
   font-weight: 600;
-}
-
-.fit-callout.is-warn {
-  background: color-mix(in srgb, var(--warn) 12%, var(--paper));
-}
-
-.fit-callout.is-good {
-  background: color-mix(in srgb, var(--good) 12%, var(--paper));
-}
-
-.fit-callout.is-brass {
-  background: color-mix(in srgb, var(--brass) 12%, var(--paper));
-}
-
-.fit-callout.is-brass .fit-callout-icon {
-  color: var(--brass-deep);
 }
 
 .fitness-reference-shell button,
@@ -1174,12 +1162,13 @@
 
 .fit-weight-spotlight {
   position: relative;
-  border: 0.5px solid var(--rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-deep);
+  border: none;
+  border-top: 1px solid var(--rule-soft);
+  border-radius: 0;
+  background: none;
   box-shadow: none;
   overflow: visible;
-  padding: 20px 22px;
+  padding: 18px 0 0;
   display: grid;
   grid-template-columns: minmax(0, 1.32fr) minmax(260px, 0.78fr);
   gap: clamp(24px, 3vw, 44px);
@@ -1265,16 +1254,27 @@
   color: var(--ink);
 }
 
-.fit-weight-spotlight-fact-value.is-good {
-  color: var(--good);
+.fit-weight-spotlight-fact-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.fit-weight-spotlight-fact-value.is-neutral {
-  color: var(--brass-deep);
+.fit-weight-spotlight-fact-meta::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-mute);
 }
 
-.fit-weight-spotlight-fact-value.is-warn {
-  color: var(--warn);
+.fit-weight-spotlight-fact-value.is-good + .fit-weight-spotlight-fact-meta::before {
+  background: var(--good);
+}
+
+.fit-weight-spotlight-fact-value.is-warn + .fit-weight-spotlight-fact-meta::before {
+  background: var(--warn);
 }
 
 .fit-weight-spotlight-fact-meta {
@@ -2943,10 +2943,10 @@
 }
 
 .fit-panel {
-  background: var(--paper);
-  border: 0.5px solid var(--rule-soft);
-  border-radius: 10px;
-  overflow: hidden;
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
 }
 
 .fit-panel-head {
@@ -2954,16 +2954,16 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
-  padding: 14px 20px;
-  border-bottom: 0.5px solid var(--rule-soft);
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--rule-soft);
   flex-wrap: wrap;
 }
 
 .fit-panel-head h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 600;
   letter-spacing: -0.005em;
 }
 
@@ -2979,22 +2979,22 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 3px;
-  border: 0.5px solid var(--rule);
-  border-radius: 999px;
-  background: var(--paper);
+  padding: 2px;
+  border: none;
+  border-radius: 6px;
+  background: var(--bone);
 }
 
 .bc-range-toggle button {
-  padding: 6px 12px;
+  padding: 5px 10px;
   cursor: pointer;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--ink-mute);
+  letter-spacing: 0;
+  color: var(--ink-soft);
   border: none;
-  border-radius: 999px;
+  border-radius: 4px;
   background: transparent;
   transition:
     color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
@@ -3003,12 +3003,39 @@
 
 .bc-range-toggle button:hover {
   color: var(--ink);
-  background: var(--rule-soft);
 }
 
 .bc-range-toggle button.active {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Decorative database-toolbar chrome (filter/sort/search + New) ──── */
+.fit-notion-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-mute);
+}
+
+.fit-notion-toolbar svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.75;
+}
+
+.fitness-reference-shell .fit-notion-new-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: #2f7bf0;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: default;
 }
 
 .bc-chart-wrap {
@@ -3523,6 +3550,27 @@
   flex-direction: column;
 }
 
+.phase-row-head {
+  padding: 0 18px 8px !important;
+  background: none !important;
+}
+
+.phase-row-head .th {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.phase-row-head .th svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
 .phase-row {
   display: grid;
   grid-template-columns: 8px minmax(190px, 1.4fr) repeat(4, minmax(78px, 0.6fr));
@@ -3587,10 +3635,11 @@
 }
 
 .goal-card {
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  padding: 16px 18px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--rule-soft);
+  border-radius: 0;
+  padding: 16px 0 0;
 }
 
 .goal-card .head {
