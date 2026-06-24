@@ -41,11 +41,14 @@ export default function OperatorSidebar({
       <aside className={`fit-sidebar${isOpen ? ' is-open' : ''}`}>
         <div className="fit-sidebar-brand">
           <span className="fit-sidebar-brand-icon" aria-hidden>🌸</span>
-          Operator
+          <div className="fit-sidebar-brand-copy">
+            <strong>Operator</strong>
+            <span>Fitness dashboard</span>
+          </div>
         </div>
 
         <button type="button" className="fit-sidebar-log-btn" onClick={onLogWeight}>
-          <Plus aria-hidden size={14} /> Log weigh-in
+          <Plus aria-hidden size={14} /> New reading
         </button>
 
         <nav className="fit-sidebar-nav" aria-label="Dashboard sections">

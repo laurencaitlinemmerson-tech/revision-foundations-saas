@@ -4,19 +4,14 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
 import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
-import { Moon, Sun, Menu, Type, Calendar, Sigma, Filter, ArrowUpDown, Search } from 'lucide-react';
-import OperatorSidebar, { type OperatorSection, SECTION_EMOJI } from './OperatorSidebar';
-import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
-import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
-import { EnergyLedger } from '@/components/operator/fitness/EnergyLedger';
-import { ProteinRecovery } from '@/components/operator/fitness/ProteinRecovery';
-import EatingPlan from '@/components/operator/fitness/EatingPlan';
-import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
+import { Moon, Sun, Filter, ArrowUpDown, Search } from 'lucide-react';
+import { type OperatorSection, SECTION_EMOJI } from './OperatorSidebar';
+import type { FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
+import { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 import { computeTdee } from '@/lib/fitness/tdee';
-import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
 import { T } from '@/components/operator/theme';
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
@@ -28,13 +23,14 @@ function Reveal({ children, delay = 0, y = 14, className, id }: { children: Reac
   const inView = useInView(ref, { once: true, margin: '0px 0px -80px 0px' });
   const reduce = useReducedMotion();
   if (reduce) {
-    return <div ref={ref} id={id} className={className}>{children}</div>;
+    return <div ref={ref} id={id} className={className} data-section>{children}</div>;
   }
   return (
     <motion.div
       ref={ref}
       id={id}
       className={className}
+      data-section
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
       transition={{ duration: 0.7, ease: EASE_OUT, delay }}
@@ -90,6 +86,12 @@ function parseLocalDateInput(value: string): Date {
   }
 
   return new Date(value);
+}
+
+function addDaysToIso(baseIso: string, days: number): string {
+  const next = parseLocalDateInput(baseIso);
+  next.setDate(next.getDate() + days);
+  return localIsoDate(next);
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -343,6 +345,13 @@ function DateStamp({ iso, style }: { iso: string; style?: CSSProperties }) {
   );
 }
 
+interface PageHeaderStat {
+  label: string;
+  value: string;
+  note: string;
+  tone?: 'neutral' | 'good' | 'warn' | 'brass';
+}
+
 // Full-width editorial section divider with an eyebrow.
 function HeadlineSparkline({
   readings,
@@ -385,15 +394,69 @@ function HeadlineSparkline({
   );
 }
 
-function PageHeader({ emoji, title, note }: { emoji: string; title: string; note?: string }) {
+function PageHeader({
+  section,
+  emoji,
+  title,
+  note,
+  stampIso,
+  views,
+  stats,
+}: {
+  section: OperatorSection;
+  emoji: string;
+  title: string;
+  note?: string;
+  stampIso: string;
+  views: string[];
+  stats: PageHeaderStat[];
+}) {
   return (
     <>
-      <div className="fit-page-cover">
+      <div className={`fit-page-cover fit-page-cover--${section}`}>
+        <div className="fit-page-cover-topline">
+          <span className="fit-page-cover-chip">Operator dashboard</span>
+          <DateStamp iso={stampIso} />
+        </div>
         <span className="fit-page-cover-emoji" aria-hidden>{emoji}</span>
       </div>
       <div className="fit-page-header">
-        <h1 className="fit-page-header-title">{title}</h1>
-        {note ? <p className="fit-page-header-note">{note}</p> : null}
+        <div className="fit-page-header-main">
+          <div className="fit-page-header-copy">
+            <div className="fit-page-header-topline">
+              <span className="fit-page-header-kicker">Notion-style operator workspace</span>
+            </div>
+            <h1 className="fit-page-header-title">{title}</h1>
+            {note ? <p className="fit-page-header-note">{note}</p> : null}
+          </div>
+          <div className="fit-page-header-controls" aria-hidden>
+            <div className="fit-page-view-switch">
+              {views.map((view, index) => (
+                <span
+                  key={view}
+                  className={`fit-page-view-chip${index === 0 ? ' is-active' : ''}`}
+                >
+                  {view}
+                </span>
+              ))}
+            </div>
+            <NotionToolbar />
+          </div>
+        </div>
+
+        <div className="fit-page-summary-grid">
+          {stats.map((stat) => (
+            <article
+              key={stat.label}
+              className={`fit-page-summary-card${stat.tone ? ` is-${stat.tone}` : ''}`}
+              data-card
+            >
+              <span className="fit-page-summary-label">{stat.label}</span>
+              <strong className="fit-page-summary-value">{stat.value}</strong>
+              <span className="fit-page-summary-note">{stat.note}</span>
+            </article>
+          ))}
+        </div>
       </div>
     </>
   );
@@ -422,6 +485,266 @@ function NotionToolbar() {
       <Search aria-hidden size={13} />
       <button type="button" className="fit-notion-new-btn" tabIndex={-1}>New</button>
     </div>
+  );
+}
+
+function ProgressHearts({ filled, total = 12 }: { filled: number; total?: number }) {
+  return (
+    <span className="operator-hearts" aria-hidden>
+      {Array.from({ length: total }).map((_, index) => (
+        <span
+          key={index}
+          className={`operator-heart${index < filled ? ' is-filled' : ''}`}
+        >
+          ♥
+        </span>
+      ))}
+    </span>
+  );
+}
+
+type ReferenceArtKind =
+  | 'water'
+  | 'haze'
+  | 'motivation'
+  | 'lagoon'
+  | 'sunrise'
+  | 'shore'
+  | 'bulb'
+  | 'piggy';
+
+function ReferenceArt({ art }: { art: ReferenceArtKind }) {
+  if (art === 'motivation') {
+    return (
+      <div className="operator-art operator-art--motivation">
+        <div className="operator-art-copy">
+          {['K', 'E', 'E', 'P', 'G', 'O', 'I', 'N', 'G'].map((letter, index) => (
+            <span key={`${letter}-${index}`} className="operator-art-letter">{letter}</span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (art === 'bulb') {
+    return (
+      <div className="operator-art operator-art--bulb">
+        <div className="operator-art-orb">
+          <span className="operator-art-emoji" aria-hidden>💡</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (art === 'piggy') {
+    return (
+      <div className="operator-art operator-art--piggy">
+        <div className="operator-art-orb">
+          <span className="operator-art-emoji" aria-hidden>🐷</span>
+        </div>
+      </div>
+    );
+  }
+
+  return <div className={`operator-art operator-art--${art}`} />;
+}
+
+const OPERATOR_CHART_RANGES: { key: FitnessChartRange; label: string }[] = [
+  { key: '30d', label: '30d' },
+  { key: '6m', label: '6m' },
+  { key: '1y', label: '1y' },
+  { key: 'all', label: 'All' },
+];
+
+function OperatorNotionChart({
+  readings,
+  goal,
+  range,
+  activeIso,
+  onRangeChange,
+  onActiveIsoChange,
+}: {
+  readings: FitnessReading[];
+  goal: number;
+  range: FitnessChartRange;
+  activeIso: string | null;
+  onRangeChange: (range: FitnessChartRange) => void;
+  onActiveIsoChange: (iso: string | null) => void;
+}) {
+  const visibleReadings = useMemo(
+    () => filterRowsForTrajectoryRange(readings, range),
+    [readings, range],
+  );
+  const plotReadings = visibleReadings.length > 0 ? visibleReadings : readings;
+  const activeReading = plotReadings.find((reading) => isoDay(reading.date) === activeIso) ?? plotReadings[plotReadings.length - 1];
+  const activeIndex = Math.max(0, readings.findIndex((reading) => isoDay(reading.date) === isoDay(activeReading.date)));
+  const previousReading = readings[activeIndex - 1] ?? null;
+  const activeDelta = previousReading ? activeReading.weight - previousReading.weight : 0;
+  const rangeDelta = plotReadings.length > 1
+    ? plotReadings[plotReadings.length - 1].weight - plotReadings[0].weight
+    : 0;
+  const lowest = plotReadings.reduce((best, reading) => (reading.weight < best.weight ? reading : best), plotReadings[0]);
+  const highest = plotReadings.reduce((best, reading) => (reading.weight > best.weight ? reading : best), plotReadings[0]);
+  const yValues = [...plotReadings.map((reading) => reading.weight), goal];
+  const yMin = Math.floor((Math.min(...yValues) - 1) * 2) / 2;
+  const yMax = Math.ceil((Math.max(...yValues) + 1) * 2) / 2;
+  const span = Math.max(yMax - yMin, 1);
+  const width = 760;
+  const height = 330;
+  const pad = { top: 30, right: 28, bottom: 42, left: 54 };
+  const innerWidth = width - pad.left - pad.right;
+  const innerHeight = height - pad.top - pad.bottom;
+  const pointCount = Math.max(plotReadings.length - 1, 1);
+  const xFor = (index: number) => pad.left + (index / pointCount) * innerWidth;
+  const yFor = (value: number) => pad.top + (1 - ((value - yMin) / span)) * innerHeight;
+  const coords = plotReadings.map((reading, index) => ({
+    reading,
+    x: xFor(index),
+    y: yFor(reading.weight),
+  }));
+  const linePath = coords.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const areaPath = coords.length > 0
+    ? `${linePath} L ${coords[coords.length - 1].x.toFixed(1)} ${height - pad.bottom} L ${coords[0].x.toFixed(1)} ${height - pad.bottom} Z`
+    : '';
+  const activeCoord = coords.find((point) => isoDay(point.reading.date) === isoDay(activeReading.date)) ?? coords[coords.length - 1];
+  const gridValues = [yMax, yMin + span * 0.66, yMin + span * 0.33, yMin];
+  const sampledBars = coords.filter((_, index) => {
+    const step = Math.max(1, Math.ceil(coords.length / 44));
+    return index % step === 0 || index === coords.length - 1;
+  });
+  const tickIndexes = [0, Math.floor(pointCount / 2), pointCount].filter((value, index, arr) => arr.indexOf(value) === index);
+
+  return (
+    <article className="operator-notion-chart-card" data-card>
+      <div className="operator-notion-chart-top">
+        <div>
+          <span className="operator-card-kicker">📊 Chart view</span>
+          <h3 className="operator-notion-chart-title">Weight trend</h3>
+          <p className="operator-card-meta">
+            {trajectoryRangeHeadline(range)} · {plotReadings.length} readings · goal {goal.toFixed(1)} kg
+          </p>
+        </div>
+        <div className="operator-notion-range-tabs" role="tablist" aria-label="Chart range">
+          {OPERATOR_CHART_RANGES.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              role="tab"
+              aria-selected={range === option.key}
+              className={`operator-notion-range-tab${range === option.key ? ' is-active' : ''}`}
+              onClick={() => onRangeChange(option.key)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="operator-notion-chart-layout">
+        <div className="operator-notion-chart-visual">
+          <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Weight trend for ${trajectoryRangeHeadline(range).toLowerCase()}`}>
+            <defs>
+              <linearGradient id="operatorChartArea" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#f4a9c8" stopOpacity="0.34" />
+                <stop offset="100%" stopColor="#b7e4e8" stopOpacity="0.04" />
+              </linearGradient>
+              <linearGradient id="operatorChartLine" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor="#59c7d6" />
+                <stop offset="55%" stopColor="#d96aa1" />
+                <stop offset="100%" stopColor="#8d76bd" />
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width={width} height={height} rx="8" className="operator-chart-bg" />
+            {gridValues.map((value) => (
+              <g key={value.toFixed(2)}>
+                <line x1={pad.left} x2={width - pad.right} y1={yFor(value)} y2={yFor(value)} className="operator-chart-grid-line" />
+                <text x={18} y={yFor(value) + 4} className="operator-chart-axis-label">{value.toFixed(1)}</text>
+              </g>
+            ))}
+            <line x1={pad.left} x2={width - pad.right} y1={yFor(goal)} y2={yFor(goal)} className="operator-chart-goal-line" />
+            <text x={width - pad.right - 58} y={yFor(goal) - 8} className="operator-chart-goal-label">goal</text>
+            {sampledBars.map((point) => {
+              const barHeight = Math.max(5, height - pad.bottom - point.y);
+              return (
+                <rect
+                  key={`bar-${point.reading.id}`}
+                  x={point.x - 2}
+                  y={height - pad.bottom - barHeight}
+                  width="4"
+                  height={barHeight}
+                  rx="2"
+                  className="operator-chart-bar"
+                />
+              );
+            })}
+            {areaPath ? <path d={areaPath} className="operator-chart-area" /> : null}
+            {linePath ? <path d={linePath} className="operator-chart-line" /> : null}
+            {activeCoord ? (
+              <>
+                <line x1={activeCoord.x} x2={activeCoord.x} y1={pad.top} y2={height - pad.bottom} className="operator-chart-active-line" />
+                <circle cx={activeCoord.x} cy={activeCoord.y} r="8" className="operator-chart-active-halo" />
+              </>
+            ) : null}
+            {coords.map((point) => {
+              const isActive = isoDay(point.reading.date) === isoDay(activeReading.date);
+              return (
+                <circle
+                  key={point.reading.id}
+                  cx={point.x}
+                  cy={point.y}
+                  r={isActive ? 5.4 : 3.4}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${fmtDate(point.reading.date)} ${point.reading.weight.toFixed(1)} kg`}
+                  className={`operator-chart-point${isActive ? ' is-active' : ''}`}
+                  onMouseEnter={() => onActiveIsoChange(isoDay(point.reading.date))}
+                  onFocus={() => onActiveIsoChange(isoDay(point.reading.date))}
+                  onClick={() => onActiveIsoChange(isoDay(point.reading.date))}
+                />
+              );
+            })}
+            {tickIndexes.map((index) => {
+              const point = coords[index];
+              if (!point) return null;
+              return (
+                <text key={`tick-${point.reading.id}`} x={point.x} y={height - 14} className="operator-chart-date-label">
+                  {formatReferenceMonth(point.reading.date)}
+                </text>
+              );
+            })}
+          </svg>
+        </div>
+
+        <aside className="operator-notion-chart-inspector">
+          <span className="operator-snapshot-label">Selected reading</span>
+          <strong className="operator-chart-inspector-value">{activeReading.weight.toFixed(1)} kg</strong>
+          <span className="operator-chart-inspector-date">{fmtDate(activeReading.date, { long: true })}</span>
+          <div className="operator-chart-inspector-list">
+            <div>
+              <span>Previous reading</span>
+              <strong>{previousReading ? formatWeightDelta(activeDelta) : 'First log'}</strong>
+            </div>
+            <div>
+              <span>Range movement</span>
+              <strong>{formatWeightDelta(rangeDelta)}</strong>
+            </div>
+            <div>
+              <span>Lowest in view</span>
+              <strong>{lowest.weight.toFixed(1)} kg</strong>
+            </div>
+            <div>
+              <span>Highest in view</span>
+              <strong>{highest.weight.toFixed(1)} kg</strong>
+            </div>
+          </div>
+          <div className="operator-board-tags">
+            <span className="operator-board-tag">BMI {activeReading.bmi.toFixed(1)}</span>
+            <span className="operator-board-tag">{activeReading.bodyFat.toFixed(1)}% fat</span>
+            <span className="operator-board-tag">{trajectoryRangeLabel(range)}</span>
+          </div>
+        </aside>
+      </div>
+    </article>
   );
 }
 
@@ -484,6 +807,13 @@ function fmtDate(iso: string, opts: { long?: boolean } = {}) {
 
 function fmtDateObj(d: Date) {
   return d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function startCase(value: string) {
+  return value
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
@@ -4963,10 +5293,6 @@ function loggingCadence(sorted: FitnessReading[], windowDays = 14) {
   };
 }
 
-function buildWeightSeries(sorted: FitnessReading[]) {
-  return sorted.map((row) => ({ date: row.date, value: row.weight }));
-}
-
 // Derive phases from the actual weight line, not from index buckets.
 //
 // 1. Bin readings into 28-day windows and average the weight in each.
@@ -6852,18 +7178,21 @@ export default function OperatorDashboardClient() {
   const [lowCelebrate, setLowCelebrate] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
-  const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('3y');
+  const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('1y');
   const [activeTrajectoryIso, setActiveTrajectoryIso] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [activeSection, setActiveSection] = useState<OperatorSection>('today');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  useEffect(() => {
-    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('operator-section') : null;
-    if (stored) setActiveSection(stored as OperatorSection);
-  }, []);
+  const [boardView, setBoardView] = useState<'progress' | 'table' | 'chart'>('progress');
   const selectSection = useCallback((section: OperatorSection) => {
     setActiveSection(section);
-    if (typeof window !== 'undefined') window.localStorage.setItem('operator-section', section);
+    if (typeof window !== 'undefined') {
+      const target = document.querySelector<HTMLElement>(`[data-operator-section="${section}"]`);
+      if (target) {
+        target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
   }, []);
   // Resolve initial theme on the client only — localStorage takes precedence,
   // otherwise honour the OS preference. Stays out of SSR to avoid hydration mismatch.
@@ -6881,6 +7210,37 @@ export default function OperatorDashboardClient() {
       return next;
     });
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !authed) return;
+
+    const root = document.documentElement;
+    const updateScrollProgress = () => {
+      const total = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      const pct = Math.min(100, Math.max(0, (window.scrollY / total) * 100));
+      root.style.setProperty('--scroll-progress', `${pct.toFixed(2)}%`);
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('in-view', entry.isIntersecting);
+      });
+    }, { threshold: 0.18, rootMargin: '0px 0px -10% 0px' });
+
+    const observed = Array.from(document.querySelectorAll<HTMLElement>('[data-section], [data-hero-num]'));
+    observed.forEach((node) => observer.observe(node));
+
+    updateScrollProgress();
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    window.addEventListener('resize', updateScrollProgress);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', updateScrollProgress);
+      window.removeEventListener('resize', updateScrollProgress);
+      root.style.removeProperty('--scroll-progress');
+    };
+  }, [authed, activeSection]);
 
   const saveLocal = useCallback((rs:FitnessReading[]) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(rs)); }, []);
 
@@ -6990,37 +7350,15 @@ export default function OperatorDashboardClient() {
   const reg      = useMemo(() => regress(derivedSource), [derivedSource]);
   const latest   = dashboardSource[dashboardSource.length - 1];
   const latestIsToday = latest ? isoDay(latest.date) === todayIso : false;
-  const weightLabel = latestIsToday ? 'Today' : 'Latest';
   const pace = findPaceOption(paceKey);
   const state    = useMemo(() => (
     dashboardSource.length > 0 ? assessState(dashboardSource, goal, todayIso, pace.weeklyLossKg) : null
   ), [dashboardSource, goal, todayIso, pace.weeklyLossKg]);
-  const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(derivedSource), [derivedSource]);
   const phaseRows = useMemo(() => buildReferencePhaseRows(derivedSource), [derivedSource]);
-  const photoMilestones = useMemo(() => buildPhotoMilestones(derivedSource), [derivedSource]);
-  const weekRows = useMemo(() => buildWeekRows(derivedSource, todayIso), [derivedSource, todayIso]);
-  const chartBounds = useMemo(() => {
-    const chartSource = dashboardSource.length > 0 ? dashboardSource : derivedSource;
-    const weights = chartSource.map((row) => row.weight);
-    const observedMin = Math.min(...weights);
-    const observedMax = Math.max(...weights);
-    const observedSpan = Math.max(2.5, observedMax - observedMin);
-    const lowerPad = Math.max(0.9, observedSpan * 0.22);
-    const upperPad = Math.min(1.4, Math.max(0.8, observedSpan * 0.12));
-    const goalIsCloseEnoughToPlot = goal >= observedMin - Math.max(3.5, observedSpan * 0.38);
-    const min = goalIsCloseEnoughToPlot
-      ? Math.floor(Math.min(observedMin - lowerPad, goal - 1) * 2) / 2
-      : Math.floor((observedMin - lowerPad) * 2) / 2;
-    // Pin the ceiling to at least 100kg so the trajectory sits centered
-    // rather than hugging the top edge.
-    const max = Math.max(100, Math.ceil(observedMax + upperPad));
-    return { min, max };
-  }, [dashboardSource, derivedSource, goal]);
 
   // Lift the Apple Health fetch so multiple slot renders share one network call.
   const healthStream = useHealthStream(authed ? opPw : '');
   const healthDays = healthStream.days;
-  const trajectoryAnchorIso = latest ? isoDay(latest.date) : todayIso;
 
   const themeToggleButton = (
     <button
@@ -7038,7 +7376,7 @@ export default function OperatorDashboardClient() {
 
   if (!authed) {
     return (
-      <div className="fitness-reference-shell" data-theme={theme}>
+      <div className="fitness-reference-shell" data-theme={theme} data-active-section={activeSection}>
         {themeToggleButton}
         <Lock onUnlock={() => {
           // auth state was set in Lock before calling onUnlock
@@ -7061,7 +7399,7 @@ export default function OperatorDashboardClient() {
       : 'If you weighed in this morning on 18 May 2026 and it is not showing here yet, the reading has not been synced into the fitness ledger.';
 
     return (
-      <div className="fitness-reference-shell" data-theme={theme}>
+      <div className="fitness-reference-shell" data-theme={theme} data-active-section={activeSection}>
         {themeToggleButton}
         <main className="wrap fitness-redesign" id="operator-overview">
           <section style={{
@@ -7259,6 +7597,7 @@ export default function OperatorDashboardClient() {
     exerciseToday,
     sevenDayDelta,
   };
+  const sleepToday = todayHealth?.sleep?.totalMin ?? null;
   const sectionMeta: Record<OperatorSection, { title: string; note: string }> = {
     today: {
       title: 'Today',
@@ -7285,10 +7624,200 @@ export default function OperatorDashboardClient() {
       note: "The full eating plan, today's intake, recovery, and training priorities.",
     },
   };
-  const activeMeta = sectionMeta[activeSection];
+  const directionLabel = startCase(state.direction);
+  const firstLogged = dashboardSource[0];
+  const lightestLogged = dashboardSource.reduce(
+    (best, row) => (row.weight < best.weight ? row : best),
+    dashboardSource[0],
+  );
+  const todayRead = buildTodayRead(todaySnap);
+  const sectionOrder: OperatorSection[] = ['today', 'history', 'trajectory', 'insights', 'plan', 'nutrition'];
+  const sectionArt: Record<OperatorSection, ReferenceArtKind> = {
+    today: 'lagoon',
+    history: 'sunrise',
+    trajectory: 'shore',
+    insights: 'bulb',
+    plan: 'piggy',
+    nutrition: 'water',
+  };
+  const overallProgressPct = Math.max(0, Math.min(100, progress));
+  const overallHeartCount = Math.max(0, Math.min(12, Math.round((overallProgressPct / 100) * 12)));
+  const paceProgressPct = pace.weeklyLossKg > 0
+    ? Math.max(0, Math.min(100, (Math.abs(Math.min(state.trendKgPerWeek, 0)) / pace.weeklyLossKg) * 100))
+    : 100;
+  const cadenceProgressPct = Math.max(0, Math.min(100, cadence.score));
+  const cadenceHeartCount = Math.max(0, Math.min(12, Math.round((cadenceProgressPct / 100) * 12)));
+  const paceHeartCount = Math.max(0, Math.min(12, Math.round((paceProgressPct / 100) * 12)));
+  const recentReadings = dashboardSource
+    .slice(-6)
+    .map((reading, index, windowRows) => {
+      const originalIndex = dashboardSource.length - windowRows.length + index;
+      const previous = dashboardSource[originalIndex - 1];
+      const delta = previous ? reading.weight - previous.weight : 0;
+      return {
+        date: fmtDate(reading.date),
+        weight: `${reading.weight.toFixed(1)} kg`,
+        bmi: reading.bmi.toFixed(1),
+        delta: previous ? formatWeightDelta(delta) : '—',
+      };
+    })
+    .reverse();
+  const snapshotRows = [
+    {
+      label: 'Current pace',
+      value: `${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk`,
+      sub: `Focused line · ${directionLabel}`,
+    },
+    {
+      label: 'Best reading',
+      value: `${lightestLogged.weight.toFixed(1)} kg`,
+      sub: `Logged ${fmtDate(lightestLogged.date)}`,
+    },
+    {
+      label: 'Goal date',
+      value: projectedGoal ? fmtDateObj(projectedGoal) : 'Watching the line',
+      sub: projectedGoal ? 'Projected from the current slope' : 'Projection appears once the line trends down',
+    },
+    {
+      label: 'Cloud mode',
+      value: syncSummary,
+      sub: cloudOk ? 'Local and cloud data agree' : cloudOk === false ? 'Local backup only right now' : 'Sync still checking',
+    },
+  ];
+  const projectionCards = PACE_OPTIONS
+    .filter((option) => option.key !== 'maintenance')
+    .map((option) => {
+      const scenarioNutrition = nutritionTargets(latest, option.weeklyLossKg);
+      const remaining = Math.max(0, latest.weight - goal);
+      const weeks = option.weeklyLossKg > 0 ? Math.ceil(remaining / option.weeklyLossKg) : null;
+      const projectedIso = weeks !== null ? addDaysToIso(latest.date, weeks * 7) : null;
+      const tone: 'good' | 'warn' | 'brass' = option.key === paceKey
+        ? 'good'
+        : option.weeklyLossKg > 0.8
+          ? 'warn'
+          : 'brass';
+      return {
+        label: option.shortLabel,
+        title: option.label,
+        note: option.note,
+        intake: `${scenarioNutrition.intake.toLocaleString('en-GB')} kcal`,
+        projectedDate: projectedIso ? fmtDate(projectedIso, { long: true }) : 'Maintenance line',
+        weeksLabel: weeks !== null ? `${weeks} weeks` : 'Hold',
+        tone,
+        pct: Math.round((option.weeklyLossKg / 1) * 100),
+      };
+    });
+  const checkInRows = [
+    {
+      label: 'Latest weigh-in',
+      dates: latestIsToday ? fmtDate(latest.date, { long: true }) : `${fmtDate(latest.date, { long: true })} to today`,
+      stage: latestIsToday ? 'Complete' : state.weighInStatus === 'overdue' ? 'Overdue' : 'Due soon',
+      tone: latestIsToday ? 'good' : state.weighInStatus === 'overdue' ? 'warn' : 'brass',
+      context: `${latest.weight.toFixed(1)} kg logged`,
+    },
+    {
+      label: '7-day reset',
+      dates: `${fmtDate(latest.date)} to ${fmtDate(addDaysToIso(latest.date, 7))}`,
+      stage: 'Upcoming',
+      tone: 'brass',
+      context: `${state.thisWeekTarget.toFixed(1)} kg target`,
+    },
+    {
+      label: '30-day checkpoint',
+      dates: `${fmtDate(latest.date)} to ${fmtDate(goalCheckpoints[0].date)}`,
+      stage: 'Upcoming',
+      tone: 'brass',
+      context: `${goalCheckpoints[0].value.toFixed(1)} kg projected`,
+    },
+    {
+      label: '90-day checkpoint',
+      dates: `${fmtDate(latest.date)} to ${fmtDate(goalCheckpoints[1].date)}`,
+      stage: 'Upcoming',
+      tone: 'brass',
+      context: `${goalCheckpoints[1].value.toFixed(1)} kg projected`,
+    },
+  ] as const;
+  const planCards = [
+    {
+      emoji: '🍽️',
+      title: 'Calories and deficit',
+      meta: caloriesInToday !== null ? `${Math.round(caloriesInToday).toLocaleString('en-GB')} kcal logged today` : 'Waiting for a food log today',
+      status: deficitSub,
+      tone: deficitTone === 'good' ? 'good' : deficitTone === 'warn' ? 'warn' : 'brass',
+      pct: actualDeficitToday !== null && targetDeficit > 0
+        ? Math.max(0, Math.min(100, (actualDeficitToday / targetDeficit) * 100))
+        : 0,
+      tags: [pace.label, `${nutrition.intake.toLocaleString('en-GB')} kcal target`],
+    },
+    {
+      emoji: '🥛',
+      title: 'Protein anchor',
+      meta: todaySnap.proteinG !== null ? `${Math.round(todaySnap.proteinG)}g logged against ${nutrition.protein}g` : 'Awaiting protein data from Apple Health',
+      status: todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein
+        ? 'Target met'
+        : todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein * 0.75
+          ? 'Close to target'
+          : 'Needs another protein feed',
+      tone: todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein
+        ? 'good'
+        : todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein * 0.75
+          ? 'brass'
+          : 'warn',
+      pct: todaySnap.proteinG !== null ? Math.max(0, Math.min(100, (todaySnap.proteinG / nutrition.protein) * 100)) : 0,
+      tags: ['Recovery', `${nutrition.protein}g target`],
+    },
+    {
+      emoji: '🚶',
+      title: 'Movement target',
+      meta: stepsToday !== null ? `${Math.round(stepsToday).toLocaleString('en-GB')} steps so far` : 'No step data synced today',
+      status: stepsToday !== null && stepsToday >= 10000
+        ? 'Steps target hit'
+        : exerciseToday !== null && exerciseToday >= 30
+          ? 'Exercise minutes secured'
+          : 'Movement still pending',
+      tone: stepsToday !== null && stepsToday >= 10000
+        ? 'good'
+        : stepsToday !== null && stepsToday >= 7000
+          ? 'brass'
+          : 'warn',
+      pct: stepsToday !== null ? Math.max(0, Math.min(100, (stepsToday / 10000) * 100)) : 0,
+      tags: ['10,000 steps', '30 min exercise'],
+    },
+    {
+      emoji: '🌙',
+      title: 'Recovery floor',
+      meta: sleepToday !== null ? `${Math.round(sleepToday / 60)}h ${Math.round(sleepToday % 60)}m sleep logged` : 'Sleep has not synced yet',
+      status: sleepToday !== null && sleepToday >= 480
+        ? 'Sleep target met'
+        : sleepToday !== null && sleepToday >= 384
+          ? 'Close to target'
+          : 'Early night needed',
+      tone: sleepToday !== null && sleepToday >= 480
+        ? 'good'
+        : sleepToday !== null && sleepToday >= 384
+          ? 'brass'
+          : 'warn',
+      pct: sleepToday !== null ? Math.max(0, Math.min(100, (sleepToday / 480) * 100)) : 0,
+      tags: ['Sleep', 'Recovery'],
+    },
+  ] as const;
+  const quickLinks = sectionOrder.map((section) => ({
+    key: section,
+    emoji: SECTION_EMOJI[section],
+    title: sectionMeta[section].title,
+    note: sectionMeta[section].note,
+    art: sectionArt[section],
+  }));
+  const toneToPillClass = (tone: string) => (
+    tone === 'good'
+      ? 'operator-pill operator-pill--good'
+      : tone === 'warn'
+        ? 'operator-pill operator-pill--warn'
+        : 'operator-pill operator-pill--brass'
+  );
 
   return (
-    <div className="fitness-reference-shell" data-theme={theme}>
+    <div className="fitness-reference-shell" data-theme={theme} data-active-section={activeSection}>
       {lowCelebrate ? (
         <div className="op-lowburst-wrap" aria-hidden>
           {['🌸','💗','🪻','🌷','💜','🌸','💗','🪻','🌸','💗','🪻','🌷'].map((e, i) => (
@@ -7296,381 +7825,475 @@ export default function OperatorDashboardClient() {
           ))}
         </div>
       ) : null}
-      <div className="fit-shell">
-        <OperatorSidebar
-          active={activeSection}
-          onSelect={selectSection}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          onLogWeight={() => setCompose(true)}
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
-        <div className="fit-content">
-          <div className="fit-mobile-bar">
-            <button type="button" className="fit-mobile-bar-btn" onClick={() => setSidebarOpen(true)}>
-              <Menu aria-hidden size={15} /> Menu
-            </button>
-            <span className="fit-kicker fit-kicker-ink">{activeMeta.title}</span>
-          </div>
-          <main className="wrap fitness-redesign" id="operator-overview">
-            <PageHeader emoji={SECTION_EMOJI[activeSection]} title={activeMeta.title} note={activeMeta.note} />
+      <main className="operator-reference-page" id="operator-overview">
+        <section className="operator-reference-cover" aria-hidden />
+        <div className="operator-reference-sheet">
+          <span className="operator-reference-emoji" aria-hidden>💜</span>
 
-            {activeSection === 'today' ? (
-            <Reveal>
-            <section className="fit-today">
-            {(() => {
-              const read = buildTodayRead(todaySnap);
-              const tone: 'good' | 'neutral' | 'warn' = read.lines.some((line) => line.tone === 'warn')
-                ? 'warn'
-                : read.lines.every((line) => line.tone === 'good')
-                  ? 'good'
-                  : 'neutral';
-              const emoji = tone === 'warn' ? '💗' : tone === 'good' ? '🌷' : '🌸';
-              const note = read.lines[0]?.text ?? '';
-              return (
-                <Callout tone={tone === 'good' ? 'good' : tone === 'warn' ? 'warn' : 'brass'} emoji={emoji}>
-                  <strong>{read.headline}</strong>
-                  <div style={{ marginTop: 2 }}>{note}</div>
-                </Callout>
-              );
-            })()}
-
-            <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
-
-            <section className="fit-weight-feature">
-              <div className="fit-weight-spotlight">
-                <div className="fit-weight-spotlight-figure">
-                  <div className="fit-weight-spotlight-copy">
-                    <div className="fit-weight-spotlight-facts">
-                      <div className="fit-weight-spotlight-fact">
-                        <span className="fit-weight-spotlight-fact-label">Goal gap</span>
-                        <span className={`fit-weight-spotlight-fact-value is-${goalGapTone}`}>
-                          {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)} kg`}
-                        </span>
-                        <span className="fit-weight-spotlight-fact-meta">
-                          {targetDelta <= 0 ? 'working line met' : `${goal.toFixed(1)} kg target`}
-                        </span>
-                      </div>
-                      <div className="fit-weight-spotlight-fact">
-                        <span className="fit-weight-spotlight-fact-label">Body fat</span>
-                        <span className={`fit-weight-spotlight-fact-value is-${bodyFatTone}`}>
-                          {latest.bodyFat.toFixed(1)}%
-                        </span>
-                        <span className="fit-weight-spotlight-fact-meta">{fatStatus(latest.bodyFat)[0]}</span>
-                      </div>
-                      <div className="fit-weight-spotlight-fact">
-                        <span className="fit-weight-spotlight-fact-label">Cadence</span>
-                        <span className={`fit-weight-spotlight-fact-value is-${cadenceTone}`}>
-                          {cadence.score}/100
-                        </span>
-                        <span className="fit-weight-spotlight-fact-meta">{cadence.count} days logged</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="fit-weight-spotlight-meta">
-                  <div className="fit-weight-spotlight-meta-head">
-                    <div className="fit-kicker">Current checkpoint · {fmtDate(latest.date, { long: true })}</div>
-                    <div className="fit-weight-spotlight-meta-value">
-                      <span className="value" data-hero-num><AnimatedNumber value={latest.weight} decimals={1} /></span>
-                      <span className="unit">kg</span>
-                    </div>
-                  </div>
-                  <div className="fit-weight-spotlight-spark fit-weight-spotlight-spark-meta">
-                    <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
-                  </div>
-                  <div className="fit-weight-feature-meta">
-                    <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
-                      {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)}{' '}kg · vs 7d marker
-                    </span>
-                    <span className="fit-weight-feature-note">
-                      {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
-                    </span>
-                  </div>
-                </div>
+          <div className="operator-reference-inner">
+            <header className="operator-reference-head">
+              <div className="operator-reference-title-wrap">
+                <h1 className="operator-reference-title">Operator Dashboard</h1>
+                <p className="operator-reference-subtitle">Progress Bar</p>
+                <p className="operator-reference-note">
+                  {todayRead.headline}. Read the line, tighten cadence, and use the sections below to steer the week without the old clutter.
+                </p>
               </div>
-            </section>
 
-          </section>
-            </Reveal>
-            ) : null}
+              <div className="operator-reference-head-actions">
+                <button
+                  type="button"
+                  className="operator-reference-primary-btn"
+                  onClick={() => setCompose(true)}
+                >
+                  New
+                </button>
+              </div>
+            </header>
 
-            {activeSection === 'trajectory' ? (
+            <div className="operator-reference-jumps">
+              {sectionOrder.map((section) => (
+                <button
+                  key={section}
+                  type="button"
+                  className={`operator-reference-jump${activeSection === section ? ' is-active' : ''}`}
+                  onClick={() => selectSection(section)}
+                >
+                  <span aria-hidden>{SECTION_EMOJI[section]}</span>
+                  {sectionMeta[section].title}
+                </button>
+              ))}
+            </div>
+
             <Reveal>
-            <section>
-          <section className="fit-editorial-chart" style={{ marginBottom: 28 }}>
-            <FitnessLineChart
-              title={<>Weight trend</>}
-              subtitle="Daily readings, phase markers, and goal checkpoints across the selected window."
-              points={buildWeightSeries(dashboardSource)}
-              color={theme === 'dark' ? '#e6a8c0' : '#c4708a'}
-              barColor={theme === 'dark' ? '#c1b3df' : '#8c75b3'}
-              minY={chartBounds.min}
-              maxY={chartBounds.max}
-              annotations={[
-                {
-                  date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
-                  value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
-                  title: 'Leanest point',
-                },
-                {
-                  date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
-                  value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
-                  title: 'Peak weight',
-                },
-                { date: latest.date, value: latest.weight, title: weightLabel },
-              ]}
-              phases={phaseMarkers}
-              checkpointMarkers={goalCheckpoints}
-              range={trajectoryRange}
-              onRangeChange={setTrajectoryRange}
-              targetWeight={goal}
-              showRangeToggle
-              activeIso={activeTrajectoryIso}
-              onActiveChange={setActiveTrajectoryIso}
-            />
-          </section>
-
-          {(() => {
-            const plateau = detectPlateau(
-              dashboardSource.map((r) => ({ date: r.date, weight: r.weight })),
-            );
-            if (!plateau) return null;
-            return (
-              <Callout tone="brass" emoji="🔮">
-                <strong>
-                  Plateau · {plateau.days} days · slope {plateau.slopePerWeek >= 0 ? '+' : ''}{plateau.slopePerWeek.toFixed(2)} kg/wk
-                </strong>
-                <div style={{ marginTop: 4 }}>
-                  {plateauSuggestion(plateau, nutrition.intake, nutrition.activeTdee)}
-                </div>
-                <div style={{ marginTop: 8, fontSize: 11, color: 'var(--ink-mute)' }}>
-                  Window mean {plateau.meanWeight.toFixed(1)} kg
-                </div>
-              </Callout>
-            );
-          })()}
-
-          <div className="fit-trajectory-support">
-            <TrajectoryReadCard readings={dashboardSource} goal={goal} />
-            <ConsistencyHeatmapCard
-              anchorIso={trajectoryAnchorIso}
-              range={trajectoryRange}
-              healthDays={healthDays}
-              readings={dashboardSource}
-              calorieTarget={todaySnap.nutrition.intake}
-              activeIso={activeTrajectoryIso}
-              onActiveChange={setActiveTrajectoryIso}
-            />
-          </div>
-            </section>
-            </Reveal>
-            ) : null}
-
-            {activeSection === 'history' ? (
-            <>
-            <Reveal>
-            <div className="fit-story-shell">
-            <section className="fit-grid">
-              <div className="fit-main">
-                <div className="fit-panel">
-                  <div className="fit-panel-head">
-                    <div>
-                      <h3>Phase <em>history</em></h3>
-                      <div className="meta">Cycle changes, durations, and delta across the full log</div>
+              <section className="operator-reference-section" data-section data-operator-section="today">
+                <div className="operator-reference-section-head">
+                  <div className="operator-reference-section-copy">
+                    <h2 className="operator-reference-section-title">💞 Progress Board</h2>
+                    <p className="operator-reference-section-note">
+                      The gallery view for the current line, pace, and cadence.
+                    </p>
+                  </div>
+                  <div className="operator-reference-section-actions">
+                    <div className="operator-reference-view-tabs" role="tablist" aria-label="Progress views">
+                      {(['progress', 'table', 'chart'] as const).map((view) => (
+                        <button
+                          key={view}
+                          type="button"
+                          role="tab"
+                          aria-selected={boardView === view}
+                          className={`operator-reference-view-tab${boardView === view ? ' is-active' : ''}`}
+                          onClick={() => setBoardView(view)}
+                        >
+                          {startCase(view)}
+                        </button>
+                      ))}
                     </div>
                     <NotionToolbar />
                   </div>
-                  <div className="phase-log">
-                    <div className="phase-row phase-row-head" aria-hidden>
-                      <div />
-                      <div className="th"><Type aria-hidden size={11} /> Phase</div>
-                      <div className="th"><Sigma aria-hidden size={11} /> Duration</div>
-                      <div className="th"><Calendar aria-hidden size={11} /> Start</div>
-                      <div className="th"><Calendar aria-hidden size={11} /> End</div>
-                      <div className="th"><Sigma aria-hidden size={11} /> Delta</div>
-                    </div>
-                    {phaseRows.map((row) => (
-                      <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
-                        <div className={`swatch ${row.swatch}`} />
-                        <div className="name">{row.name} <em>{row.emphasis}</em><span className="when">{row.when}</span></div>
-                        <div className="duration">{row.duration}</div>
-                        <div className="start">{row.start}</div>
-                        <div className="end">{row.end}</div>
-                        <div className={`delta ${row.deltaClass}`}>{row.delta}</div>
-                      </div>
+                </div>
+
+                {boardView === 'progress' ? (
+                  <div className="operator-gallery-grid">
+                    {[
+                      {
+                        art: 'water' as ReferenceArtKind,
+                        kicker: '🌊 Current line',
+                        title: targetDelta <= 0 ? `${latest.weight.toFixed(1)} kg · at goal` : `${latest.weight.toFixed(1)} kg right now`,
+                        meta: latestIsToday ? `Logged today · ${fmtDate(latest.date, { long: true })}` : `Latest reading · ${fmtDate(latest.date, { long: true })}`,
+                        hearts: overallHeartCount,
+                        score: `${overallProgressPct.toFixed(0)}%`,
+                        pill: targetDelta <= 0 ? 'Goal line met' : `${targetDelta.toFixed(1)} kg to go`,
+                        tone: goalGapTone === 'good' ? 'good' : goalGapTone === 'warn' ? 'warn' : 'brass',
+                        ringPct: overallProgressPct,
+                        ringColor: 'var(--blue)',
+                      },
+                      {
+                        art: 'haze' as ReferenceArtKind,
+                        kicker: '🌤 Pace check',
+                        title: `${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk`,
+                        meta: `${pace.label} pace · ${state.weeksAtCurrent} weeks in the current rhythm`,
+                        hearts: paceHeartCount,
+                        score: `${paceProgressPct.toFixed(0)}%`,
+                        pill: sevenDayDelta <= 0 ? 'Moving closer' : 'Watch this week',
+                        tone: sevenDayDelta <= 0 ? 'good' : 'warn',
+                        ringPct: paceProgressPct,
+                        ringColor: 'var(--lavender)',
+                      },
+                      {
+                        art: 'motivation' as ReferenceArtKind,
+                        kicker: '💗 Consistency',
+                        title: `${cadence.score}/100 cadence`,
+                        meta: `${cadence.count} check-ins across the current window`,
+                        hearts: cadenceHeartCount,
+                        score: `${cadenceProgressPct.toFixed(0)}%`,
+                        pill: cadence.score >= 80 ? 'Locked in' : cadence.score >= 60 ? 'Building' : 'Needs tightening',
+                        tone: cadenceTone === 'good' ? 'good' : cadenceTone === 'warn' ? 'warn' : 'brass',
+                        ringPct: cadenceProgressPct,
+                        ringColor: 'var(--pink)',
+                      },
+                    ].map((card) => (
+                      <article key={card.title} className="operator-gallery-card" data-card>
+                        <div className="operator-card-media">
+                          <ReferenceArt art={card.art} />
+                        </div>
+                        <div className="operator-gallery-body">
+                          <span className="operator-gallery-kicker">{card.kicker}</span>
+                          <h3 className="operator-gallery-title">{card.title}</h3>
+                          <p className="operator-gallery-meta">{card.meta}</p>
+                          <div className="operator-hearts-row">
+                            <div>
+                              <ProgressHearts filled={card.hearts} />
+                            </div>
+                            <span className="operator-hearts-value">{card.score}</span>
+                          </div>
+                          <div className="operator-card-footer">
+                            <span className={toneToPillClass(card.tone)}>{card.pill}</span>
+                            <span
+                              className="operator-progress-ring"
+                              style={{
+                                ['--operator-ring-fill' as string]: `${card.ringPct}%`,
+                                ['--operator-ring-color' as string]: card.ringColor,
+                              } as CSSProperties}
+                            >
+                              <span>{Math.round(card.ringPct)}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </article>
                     ))}
+                    <article className="operator-gallery-card operator-gallery-card--blank" aria-hidden>
+                      + New page
+                    </article>
                   </div>
-                </div>
+                ) : null}
 
-                <div className="fit-panel fit-photo-panel">
-                  <div className="fit-panel-head">
-                    <div>
-                      <h3>Progress <em>photos</em></h3>
-                      <div className="meta">Date-stamped comparison slots tied to the same timeline</div>
+                {boardView === 'table' ? (
+                  <div className="operator-table-grid">
+                    <article className="operator-table-card" data-card>
+                      <div className="operator-table-head">
+                        <div>
+                          <h3 className="operator-table-title">Recent readings</h3>
+                          <p className="operator-table-note">Latest weigh-ins, BMI, and step-to-step movement.</p>
+                        </div>
+                        <NotionToolbar />
+                      </div>
+                      <table className="operator-table">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Weight</th>
+                            <th>BMI</th>
+                            <th>Move</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {recentReadings.map((row) => (
+                            <tr key={`${row.date}-${row.weight}`}>
+                              <td className="operator-td-strong">{row.date}</td>
+                              <td>{row.weight}</td>
+                              <td>{row.bmi}</td>
+                              <td>{row.delta}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </article>
+
+                    <article className="operator-snapshot-card" data-card>
+                      <div className="operator-table-head">
+                        <div>
+                          <h3 className="operator-table-title">Trend snapshot</h3>
+                          <p className="operator-table-note">The clearest four numbers underneath the gallery.</p>
+                        </div>
+                        <NotionToolbar />
+                      </div>
+                      <div className="operator-snapshot-list">
+                        {snapshotRows.map((row) => (
+                          <div key={row.label} className="operator-snapshot-row">
+                            <div>
+                              <span className="operator-snapshot-label">{row.label}</span>
+                              <div className="operator-snapshot-value">{row.value}</div>
+                            </div>
+                            <div className="operator-snapshot-sub">{row.sub}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+                  </div>
+                ) : null}
+
+                {boardView === 'chart' ? (
+                  <OperatorNotionChart
+                    readings={dashboardSource}
+                    goal={goal}
+                    range={trajectoryRange}
+                    onRangeChange={setTrajectoryRange}
+                    activeIso={activeTrajectoryIso}
+                    onActiveIsoChange={setActiveTrajectoryIso}
+                  />
+                ) : null}
+              </section>
+            </Reveal>
+
+            <div className="operator-two-column">
+              <Reveal>
+                <section className="operator-reference-section" data-section data-operator-section="history">
+                  <div className="operator-reference-section-head">
+                    <div className="operator-reference-section-copy">
+                      <h2 className="operator-reference-section-title">🎓 Progress Ledger</h2>
+                      <p className="operator-reference-section-note">Phase changes, duration, and how each block moved the line.</p>
                     </div>
+                    <div className="operator-reference-section-actions">
+                      <NotionToolbar />
+                    </div>
+                  </div>
+
+                  <article className="operator-table-card" data-card>
+                    <table className="operator-table">
+                      <thead>
+                        <tr>
+                          <th>Phase</th>
+                          <th>Duration</th>
+                          <th>Start</th>
+                          <th>End</th>
+                          <th>Delta</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {phaseRows.slice(0, 5).map((row) => (
+                          <tr key={row.id}>
+                            <td className="operator-td-strong">{row.name} {row.emphasis}</td>
+                            <td>{row.duration}</td>
+                            <td>{row.start}</td>
+                            <td>{row.end}</td>
+                            <td>{row.delta}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </article>
+                </section>
+              </Reveal>
+
+              <Reveal>
+                <section className="operator-reference-section" data-section data-operator-section="trajectory">
+                  <div className="operator-reference-section-head">
+                    <div className="operator-reference-section-copy">
+                      <h2 className="operator-reference-section-title">📈 Trend Snapshot</h2>
+                      <p className="operator-reference-section-note">A tight read on the current direction, best reading, and projection.</p>
+                    </div>
+                    <div className="operator-reference-section-actions">
+                      <NotionToolbar />
+                    </div>
+                  </div>
+
+                  <article className="operator-snapshot-card" data-card>
+                    <div className="operator-snapshot-list">
+                      {[
+                        {
+                          label: 'First log',
+                          value: `${firstLogged.weight.toFixed(1)} kg`,
+                          sub: fmtDate(firstLogged.date, { long: true }),
+                        },
+                        {
+                          label: 'Best reading',
+                          value: `${lightestLogged.weight.toFixed(1)} kg`,
+                          sub: fmtDate(lightestLogged.date, { long: true }),
+                        },
+                        {
+                          label: 'Seven-day move',
+                          value: formatWeightDelta(sevenDayDelta),
+                          sub: sevenDayDelta <= 0 ? 'The gap is shrinking' : 'The gap widened this week',
+                        },
+                        {
+                          label: 'Current phase',
+                          value: directionLabel,
+                          sub: `${state.weeksAtCurrent} weeks in this rhythm`,
+                        },
+                      ].map((row) => (
+                        <div key={row.label} className="operator-snapshot-row">
+                          <div>
+                            <span className="operator-snapshot-label">{row.label}</span>
+                            <div className="operator-snapshot-value">{row.value}</div>
+                          </div>
+                          <div className="operator-snapshot-sub">{row.sub}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                </section>
+              </Reveal>
+            </div>
+
+            <Reveal>
+              <section className="operator-reference-section" data-section data-operator-section="insights">
+                <div className="operator-reference-section-head">
+                  <div className="operator-reference-section-copy">
+                    <h2 className="operator-reference-section-title">🎯 Goal Projection</h2>
+                    <p className="operator-reference-section-note">Three pacing scenarios so the current cut reads like a plan, not a guess.</p>
+                  </div>
+                  <div className="operator-reference-section-actions">
                     <NotionToolbar />
                   </div>
-                  <PhotoTimeline items={photoMilestones} />
                 </div>
-              </div>
 
-              <aside className="fit-side">
-                <div className="goal-card">
-                  <div className="head"><span>Current goal</span><span className="pill brass">{targetDelta <= 0 ? 'On target' : 'Active cut'}</span></div>
-                  <div className="target">{goal.toFixed(1)}kg <em>working line</em></div>
-                  <div className="by">
-                    {projectedGoal
-                      ? `Projected from current slope - ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                      : 'Projection appears once the trend line starts moving down'}
-                  </div>
-                  <div className="bar">
-                    <span className="fill" style={{ width: `${progress}%` }} />
-                    <span className="marker" style={{ left: '100%' }} />
-                  </div>
-                  <div className="stats">
-                    <div><div className="lbl">To goal</div><div className="v">{targetDelta.toFixed(1)}kg</div></div>
-                    <div><div className="lbl">7-day move</div><div className="v">{formatWeightDelta(sevenDayDelta)}</div></div>
-                    <div><div className="lbl">Intake plan</div><div className="v">{nutrition.intake.toLocaleString()} kcal</div></div>
-                    <div><div className="lbl">BMR estimate</div><div className="v">{nutrition.bmr.toLocaleString()} kcal</div></div>
-                  </div>
+                <div className="operator-projection-grid">
+                  {projectionCards.map((card) => (
+                    <article key={card.title} className="operator-projection-card" data-card>
+                      <div className="operator-projection-top">
+                        <span className={toneToPillClass(card.tone)}>{card.label}</span>
+                        <span
+                          className="operator-progress-ring"
+                          style={{
+                            ['--operator-ring-fill' as string]: `${card.pct}%`,
+                            ['--operator-ring-color' as string]: card.tone === 'good' ? 'var(--blue)' : card.tone === 'warn' ? 'var(--pink)' : 'var(--lavender)',
+                          } as CSSProperties}
+                        >
+                          <span>{card.pct}</span>
+                        </span>
+                      </div>
+                      <h3 className="operator-card-title">{card.title}</h3>
+                      <p className="operator-card-meta">{card.note}</p>
+                      <div className="operator-projection-stat">
+                        <strong>{card.intake}</strong>
+                        <span>daily intake</span>
+                      </div>
+                      <div className="operator-card-footer">
+                        <span className="operator-pill">{card.weeksLabel}</span>
+                        <span className="operator-hearts-value">{card.projectedDate}</span>
+                      </div>
+                    </article>
+                  ))}
                 </div>
-              </aside>
-            </section>
+              </section>
+            </Reveal>
+
+            <div className="operator-two-column">
+              <Reveal>
+                <div className="operator-board-stack">
+                  <section className="operator-reference-section" data-section data-operator-section="plan">
+                    <div className="operator-reference-section-head">
+                      <div className="operator-reference-section-copy">
+                        <h2 className="operator-reference-section-title">📅 Check-ins</h2>
+                        <p className="operator-reference-section-note">Upcoming review windows and the next checkpoints already on the board.</p>
+                      </div>
+                      <div className="operator-reference-section-actions">
+                        <NotionToolbar />
+                      </div>
+                    </div>
+
+                    <article className="operator-table-card" data-card>
+                      <table className="operator-table">
+                        <thead>
+                          <tr>
+                            <th>Check-in</th>
+                            <th>Dates</th>
+                            <th>Stage</th>
+                            <th>Context</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {checkInRows.map((row) => (
+                            <tr key={row.label}>
+                              <td className="operator-td-strong">{row.label}</td>
+                              <td>{row.dates}</td>
+                              <td><span className={toneToPillClass(row.tone)}>{row.stage}</span></td>
+                              <td>{row.context}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </article>
+                  </section>
+
+                  <section className="operator-reference-section" data-section data-operator-section="nutrition">
+                    <div className="operator-reference-section-head">
+                      <div className="operator-reference-section-copy">
+                        <h2 className="operator-reference-section-title">📝 Master Plan</h2>
+                        <p className="operator-reference-section-note">The daily plan cards for intake, protein, movement, and recovery.</p>
+                      </div>
+                      <div className="operator-reference-section-actions">
+                        <div className="operator-reference-view-tabs" aria-hidden>
+                          <span className="operator-reference-view-tab is-active">Today</span>
+                          <span className="operator-reference-view-tab">Targets</span>
+                          <span className="operator-reference-view-tab">Recovery</span>
+                        </div>
+                        <NotionToolbar />
+                      </div>
+                    </div>
+
+                    <div className="operator-board-grid">
+                      {planCards.map((card) => (
+                        <article key={card.title} className="operator-board-card" data-card>
+                          <span className="operator-card-kicker">{card.emoji} Focus</span>
+                          <h3 className="operator-card-title">{card.title}</h3>
+                          <p className="operator-card-meta">{card.meta}</p>
+                          <div className="operator-card-footer">
+                            <span className={toneToPillClass(card.tone)}>{card.status}</span>
+                            <span
+                              className="operator-progress-ring"
+                              style={{
+                                ['--operator-ring-fill' as string]: `${card.pct}%`,
+                                ['--operator-ring-color' as string]: card.tone === 'good' ? 'var(--blue)' : card.tone === 'warn' ? 'var(--pink)' : 'var(--lavender)',
+                              } as CSSProperties}
+                            >
+                              <span>{Math.round(card.pct)}</span>
+                            </span>
+                          </div>
+                          <div className="operator-board-tags">
+                            {card.tags.map((tag) => (
+                              <span key={tag} className="operator-board-tag">{tag}</span>
+                            ))}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+              </Reveal>
+
+              <Reveal>
+                <section className="operator-reference-section">
+                  <div className="operator-reference-section-head">
+                    <div className="operator-reference-section-copy">
+                      <h2 className="operator-reference-section-title">🔗 Quick Links</h2>
+                      <p className="operator-reference-section-note">Jump to the exact workspace you want without leaving the dashboard page.</p>
+                    </div>
+                    <div className="operator-reference-section-actions">
+                      <NotionToolbar />
+                    </div>
+                  </div>
+
+                  <div className="operator-link-grid">
+                    {quickLinks.map((item) => (
+                      <button
+                        key={item.key}
+                        type="button"
+                        className={`operator-link-card${activeSection === item.key ? ' is-active' : ''}`}
+                        onClick={() => selectSection(item.key)}
+                      >
+                        <div className="operator-card-media">
+                          <ReferenceArt art={item.art} />
+                        </div>
+                        <div className="operator-card-body">
+                          <span className="operator-card-kicker">{item.emoji} Workspace</span>
+                          <h3 className="operator-card-title">{item.title}</h3>
+                          <p className="operator-card-meta">{item.note}</p>
+                          <span className="operator-pill">Open section</span>
+                        </div>
+                      </button>
+                    ))}
+                    <article className="operator-link-card operator-link-card--blank" aria-hidden>
+                      + New page
+                    </article>
+                  </div>
+                </section>
+              </Reveal>
             </div>
-            </Reveal>
-
-            <Reveal>
-            <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
-            </Reveal>
-            <Reveal>
-            <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
-            </Reveal>
-
-            <Reveal>
-            <div className="fit-panel" style={{ margin: '28px 0' }}>
-              <div className="fit-panel-head">
-                <div>
-                  <h3>Weekly <em>board</em></h3>
-                  <div className="meta">Monday through Sunday: weigh-ins, deltas, and body-state context</div>
-                </div>
-                <NotionToolbar />
-              </div>
-              <div className="week-grid">
-                {weekRows.map((row) => (
-                  <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
-                    <div className="dow">{row.day}</div>
-                    <div className="date">{row.date}</div>
-                    <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
-                    <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
-                    <div className="icons"><span>{row.detail}</span></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            </Reveal>
-            </>
-            ) : null}
-
-            {activeSection === 'nutrition' ? (
-            <Reveal>
-            <section>
-          <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
-          <MaintenanceCard snap={todaySnap} activeKcalToday={activeKcalToday} />
-          <FoodBreakdownSection snap={todaySnap} />
-            </section>
-            </Reveal>
-            ) : null}
-
-            {activeSection === 'insights' ? (
-            <>
-            <Reveal>
-            <section>
-          {/* ───────────────────────── TRENDS ────────────────────────── */}
-          <AnalyticsSection
-            latest={latest}
-            sorted={dashboardSource}
-            goal={goal}
-            nutrition={nutrition}
-            state={state}
-            healthStream={healthStream}
-            targetWeeklyLossKg={pace.weeklyLossKg}
-          />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
-        </section>
-        </Reveal>
-
-        <Reveal>
-          {(() => {
-            const last14 = healthDays.slice(-14);
-            if (last14.length === 0) return null;
-            const ledgerDays = last14.map((d) => {
-              const active = d.activity?.activeEnergyKcal ?? 0;
-              const intake = d.nutrition?.dietaryEnergyKcal ?? null;
-              const tef = intake !== null ? intake * 0.1 : (nutrition.bmr + nutrition.neat + active) * 0.1;
-              return {
-                date: isoDay(d.date),
-                intake,
-                tdee: Math.round(nutrition.bmr + nutrition.neat + active + tef),
-              };
-            });
-            return <EnergyLedger days={ledgerDays} targetDeficit={Math.round((7700 * pace.weeklyLossKg) / 7)} />;
-          })()}
-        </Reveal>
-
-        <Reveal>
-        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
-        </Reveal>
-            </>
-            ) : null}
-
-            {activeSection === 'plan' ? (
-            <Reveal>
-            <section>
-          {(() => {
-            const planNutrition = nutritionTargets(latest, pace.weeklyLossKg);
-            return (
-              <EatingPlan
-                proteinTargetG={planNutrition.protein}
-                intakeKcal={planNutrition.intake}
-                todayIso={todayIso}
-              />
-            );
-          })()}
-          {/* Action block — promise + readiness folded into trends scroll. */}
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
-          {(() => {
-            const last7Health = healthDays.slice(-7);
-            const avg = (vals: (number | null | undefined)[]) => {
-              const ns = vals.filter((v): v is number => v !== null && v !== undefined && Number.isFinite(v));
-              return ns.length > 0 ? ns.reduce((a, b) => a + b, 0) / ns.length : null;
-            };
-            const rhrWeekAvg = avg(last7Health.map((d) => d.heart?.restingHr ?? null));
-            const hrvWeekAvg = avg(last7Health.map((d) => d.heart?.hrvMs ?? null));
-            const load7 = last7Health.map((d) => d.activity?.activeEnergyKcal ?? null);
-            const trainingLoad7Day = avg(load7) ?? 0;
-            const trainingLoadYesterday = load7[load7.length - 2] ?? 0;
-            return (
-              <ProteinRecovery
-                proteinTodayG={todayProteinG}
-                proteinTargetG={Math.round(latest.weight * 1.8)}
-                rhrWeekAvg={rhrWeekAvg}
-                hrvWeekAvg={hrvWeekAvg}
-                trainingLoad7Day={trainingLoad7Day}
-                trainingLoadYesterday={trainingLoadYesterday}
-              />
-            );
-          })()}
-          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
-        </section>
-            </Reveal>
-            ) : null}
-          </main>
+          </div>
         </div>
-      </div>
+      </main>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />
     </div>
