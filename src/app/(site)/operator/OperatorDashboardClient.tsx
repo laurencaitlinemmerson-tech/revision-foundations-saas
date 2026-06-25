@@ -4,15 +4,18 @@ import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
 import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
-import { Moon, Sun, Filter, ArrowUpDown, Search } from 'lucide-react';
-import { type OperatorSection, SECTION_EMOJI } from './OperatorSidebar';
-import type { FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
-import { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
+import { Moon, Sun } from 'lucide-react';
+import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
+import PhotoTimeline from '@/components/operator/fitness/PhotoTimeline';
+import WorkoutStudio from '@/components/operator/fitness/WorkoutStudio';
+import { EnergyLedger } from '@/components/operator/fitness/EnergyLedger';
+import { ProteinRecovery } from '@/components/operator/fitness/ProteinRecovery';
+import HealthMetricsSection, { useHealthStream } from '@/components/operator/health/HealthMetricsSection';
 import type { HealthStreamFetch } from '@/components/operator/health/HealthMetricsSection';
 import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 import { computeTdee } from '@/lib/fitness/tdee';
-import { T } from '@/components/operator/theme';
+import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
 
@@ -23,14 +26,13 @@ function Reveal({ children, delay = 0, y = 14, className, id }: { children: Reac
   const inView = useInView(ref, { once: true, margin: '0px 0px -80px 0px' });
   const reduce = useReducedMotion();
   if (reduce) {
-    return <div ref={ref} id={id} className={className} data-section>{children}</div>;
+    return <div ref={ref} id={id} className={className}>{children}</div>;
   }
   return (
     <motion.div
       ref={ref}
       id={id}
       className={className}
-      data-section
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
       transition={{ duration: 0.7, ease: EASE_OUT, delay }}
@@ -88,11 +90,23 @@ function parseLocalDateInput(value: string): Date {
   return new Date(value);
 }
 
-function addDaysToIso(baseIso: string, days: number): string {
-  const next = parseLocalDateInput(baseIso);
-  next.setDate(next.getDate() + days);
-  return localIsoDate(next);
-}
+// ─── Design tokens ────────────────────────────────────────────────────────────
+
+// All colour fields are CSS variables defined in operator-dashboard.css under
+// .fitness-reference-shell (light) and .fitness-reference-shell[data-theme="dark"].
+// Pointing T at the vars makes every inline style that consumes T.* theme-aware
+// without touching the ~657 call sites.
+const T = {
+  paper:    'var(--paper)', surface: 'var(--surface)',
+  ink:      'var(--ink)',   body:    'var(--body)',   muted: 'var(--muted)',
+  line:     'var(--line)',  softLine: 'var(--soft-line)',
+  blue:     'var(--blue)',  blueSoft:  'var(--blue-soft)',
+  green:    'var(--green)', greenSoft: 'var(--green-soft)',
+  gold:     'var(--gold)',  goldSoft:  'var(--gold-soft)',
+  rose:     'var(--rose)',  roseSoft:  'var(--rose-soft)',
+  display:  'var(--font-body)',
+  sans:     "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+} as const;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -345,13 +359,6 @@ function DateStamp({ iso, style }: { iso: string; style?: CSSProperties }) {
   );
 }
 
-interface PageHeaderStat {
-  label: string;
-  value: string;
-  note: string;
-  tone?: 'neutral' | 'good' | 'warn' | 'brass';
-}
-
 // Full-width editorial section divider with an eyebrow.
 function HeadlineSparkline({
   readings,
@@ -394,357 +401,315 @@ function HeadlineSparkline({
   );
 }
 
-function PageHeader({
-  section,
-  emoji,
+// Compact donut gauge for the overview tiles. Editorial: thin ring, serif-less
+// numeral, hairline track. tone maps to a CSS accent var.
+function MiniRing({ pct, tone = 'ink' }: { pct: number; tone?: 'ink' | 'rose' | 'gold' | 'blue' | 'green' }) {
+  const p = Math.max(0, Math.min(100, pct));
+  const r = 16;
+  const circ = 2 * Math.PI * r;
+  const dash = (p / 100) * circ;
+  const stroke = tone === 'ink' ? 'var(--ink)' : `var(--${tone})`;
+  return (
+    <svg className="op-tile-gauge" width="46" height="46" viewBox="0 0 46 46" aria-hidden>
+      <circle cx="23" cy="23" r={r} fill="none" stroke="var(--rule)" strokeWidth="2.5" />
+      <circle
+        cx="23" cy="23" r={r} fill="none" stroke={stroke} strokeWidth="2.5"
+        strokeDasharray={`${dash.toFixed(2)} ${(circ - dash).toFixed(2)}`}
+        strokeLinecap="round" transform="rotate(-90 23 23)"
+      />
+      <text x="23" y="23" textAnchor="middle" dominantBaseline="central" className="op-tile-gauge-num">{Math.round(p)}</text>
+    </svg>
+  );
+}
+
+// Tiny axis-less trend line for the overview tiles.
+function MiniSparkline({ values }: { values: number[] }) {
+  if (values.length < 2) return null;
+  const w = 64;
+  const h = 40;
+  const pad = 5;
+  const yMin = Math.min(...values);
+  const yMax = Math.max(...values);
+  const span = Math.max(yMax - yMin, 0.1);
+  const xs = values.map((_, i) => pad + (i / (values.length - 1)) * (w - pad * 2));
+  const yp = values.map((v) => pad + (1 - (v - yMin) / span) * (h - pad * 2));
+  const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${yp[i].toFixed(1)}`).join(' ');
+  return (
+    <svg className="op-tile-spark" width="64" height="40" viewBox="0 0 64 40" aria-hidden>
+      <path d={d} fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={xs[xs.length - 1]} cy={yp[yp.length - 1]} r="2.4" fill="var(--accent)" />
+    </svg>
+  );
+}
+
+// ─── Overview graphs ────────────────────────────────────────────────────────
+// Compact charts for the dashboard home. Editorial, flat, Inter.
+
+function OverviewLineChart({ values, color = 'var(--accent)' }: { values: number[]; color?: string }) {
+  if (values.length < 2) return <div className="op-graph-empty">Not enough data yet</div>;
+  const w = 300, h = 120, padX = 6, padTop = 10, padBot = 12;
+  const yMin = Math.min(...values);
+  const yMax = Math.max(...values);
+  const span = Math.max(yMax - yMin, 0.1);
+  const xs = values.map((_, i) => padX + (i / (values.length - 1)) * (w - padX * 2));
+  const yp = values.map((v) => padTop + (1 - (v - yMin) / span) * (h - padTop - padBot));
+  const line = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${yp[i].toFixed(1)}`).join(' ');
+  const area = `${line} L${xs[xs.length - 1].toFixed(1)},${h - padBot} L${xs[0].toFixed(1)},${h - padBot} Z`;
+  return (
+    <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
+      <path d={area} fill={color} opacity="0.07" />
+      <path d={line} fill="none" stroke={color} strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={xs[xs.length - 1]} cy={yp[yp.length - 1]} r="3" fill={color} />
+    </svg>
+  );
+}
+
+function OverviewBarChart({ values, color = 'var(--accent)', baseline = false }: { values: number[]; color?: string; baseline?: boolean }) {
+  if (values.length === 0) return <div className="op-graph-empty">Not enough data yet</div>;
+  const w = 300, h = 120, padTop = 10, padBot = 12, gap = 3;
+  const n = values.length;
+  const bw = (w - gap * (n - 1)) / n;
+  if (baseline) {
+    const maxAbs = Math.max(...values.map((v) => Math.abs(v)), 1);
+    const mid = padTop + (h - padTop - padBot) / 2;
+    const half = (h - padTop - padBot) / 2;
+    return (
+      <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`} aria-hidden>
+        <line x1="0" y1={mid} x2={w} y2={mid} stroke="var(--rule)" strokeWidth="0.5" />
+        {values.map((v, i) => {
+          const x = i * (bw + gap);
+          const bh = (Math.abs(v) / maxAbs) * half;
+          const y = v >= 0 ? mid - bh : mid;
+          return <rect key={i} x={x.toFixed(1)} y={y.toFixed(1)} width={bw.toFixed(1)} height={Math.max(bh, 0.5).toFixed(1)} rx="1" fill={v >= 0 ? 'var(--good)' : 'var(--warn)'} opacity="0.75" />;
+        })}
+      </svg>
+    );
+  }
+  const maxV = Math.max(...values, 1);
+  return (
+    <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`} aria-hidden>
+      {values.map((v, i) => {
+        const x = i * (bw + gap);
+        const bh = (v / maxV) * (h - padTop - padBot);
+        return <rect key={i} x={x.toFixed(1)} y={(h - padBot - bh).toFixed(1)} width={bw.toFixed(1)} height={Math.max(bh, 0.5).toFixed(1)} rx="1" fill={color} opacity="0.75" />;
+      })}
+    </svg>
+  );
+}
+
+function OverviewGraphCard({ title, value, sub, children }: { title: string; value: string; sub: string; children: ReactNode }) {
+  return (
+    <article className="op-graph-card">
+      <div className="op-graph-card-head">
+        <span className="op-graph-card-title">{title}</span>
+        <span className="op-graph-card-value">{value}</span>
+      </div>
+      <div className="op-graph-card-chart">{children}</div>
+      <span className="op-graph-card-sub">{sub}</span>
+    </article>
+  );
+}
+
+function EditorialDivider({ eyebrow, note, style, bold = false }: { eyebrow: string; note?: string; style?: CSSProperties; bold?: boolean }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'auto 1fr auto',
+      alignItems: 'center',
+      gap: 18,
+      margin: '40px 0 22px',
+      ...style,
+    }}>
+      <span style={{
+        fontFamily: T.sans,
+        fontSize: 9.5,
+        letterSpacing: '0.32em',
+        textTransform: 'uppercase',
+        fontWeight: 600,
+        color: T.ink,
+      }}>{eyebrow}</span>
+      <span style={{ height: bold ? 2 : 0.5, background: bold ? T.ink : T.line, display: 'block' }} />
+      {note ? (
+        <span style={{
+          fontFamily: T.display,
+          fontStyle: 'italic',
+          fontSize: 13,
+          color: T.muted,
+        }}>{note}</span>
+      ) : <span />}
+    </div>
+  );
+}
+
+function CollapsibleSection({ eyebrow, note, children, defaultOpen = false }: {
+  eyebrow: string;
+  note?: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const contentId = `op-collapsible-${eyebrow.toLowerCase().replace(/\s+/g, '-')}`;
+
+  return (
+    <section className={`fit-dashboard-section-shell ${open ? 'is-open' : 'is-closed'}`}>
+      <div className="fit-dashboard-section-bar" data-section>
+        <div className="fit-dashboard-section-heading">
+          <span className="fit-dashboard-section-kicker">{eyebrow}</span>
+          {note ? <p className="fit-dashboard-section-note">{note}</p> : null}
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls={contentId}
+          className="fit-dashboard-section-toggle"
+        >
+          <span>{open ? 'Collapse' : 'Expand'}</span>
+          <span
+            className="fit-dashboard-section-toggle-icon"
+            aria-hidden
+          >
+            ▾
+          </span>
+        </button>
+      </div>
+      <div id={contentId} hidden={!open} className="fit-dashboard-section-body">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function toneClass(tone: ReferenceMetricTone) {
+  if (tone === 'good') return 'is-good';
+  if (tone === 'warn') return 'is-warn';
+  if (tone === 'brass') return 'is-brass';
+  return 'is-neutral';
+}
+
+function OperatorCommandDeck({
+  latest,
+  pace,
+  syncSummary,
+  targetDelta,
+  projectedGoal,
+  heroMetrics,
+  sideMetrics,
+  onLog,
+  onRefresh,
+  syncing,
+}: {
+  latest: FitnessReading;
+  pace: PaceOption;
+  syncSummary: string;
+  targetDelta: number;
+  projectedGoal: Date | null;
+  heroMetrics: ReferenceMetric[];
+  sideMetrics: ReferenceMetric[];
+  onLog: () => void;
+  onRefresh: () => void;
+  syncing: boolean;
+}) {
+  const jumpLinks = [
+    { href: '#operator-today', label: 'Today' },
+    { href: '#operator-trajectory', label: 'Trajectory' },
+    { href: '#operator-story', label: 'History' },
+    { href: '#operator-food', label: 'Fuel' },
+    { href: '#operator-health-stream', label: 'Insights' },
+    { href: '#operator-action', label: 'Plan' },
+  ];
+
+  return (
+    <section className="fit-command-deck">
+      <div className="fit-command-deck-top">
+        <div className="fit-command-deck-copy">
+          <span className="fit-command-deck-kicker">Operator dashboard</span>
+          <h1>Weight, nutrition, recovery, and pace in one board.</h1>
+          <p>
+            Check the current state, spot the risks, and jump straight to the section that needs attention.
+          </p>
+          <div className="fit-command-deck-pills">
+            <span className="fit-command-pill is-neutral">{syncSummary}</span>
+            <span className="fit-command-pill is-brass">{pace.label}</span>
+            <span className={`fit-command-pill ${targetDelta <= 0 ? 'is-good' : 'is-neutral'}`}>
+              {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)}kg to goal`}
+            </span>
+            <span className="fit-command-pill is-neutral">
+              {projectedGoal
+                ? `ETA ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+                : 'ETA pending trend'}
+            </span>
+          </div>
+        </div>
+
+        <div className="fit-command-deck-aside">
+          <div className="fit-command-deck-current">
+            <span className="label">Current reading</span>
+            <span className="value">{latest.weight.toFixed(1)}kg</span>
+            <span className="meta">{fmtDate(latest.date, { long: true })}</span>
+          </div>
+          <div className="fit-command-deck-actions">
+            <button type="button" className="fit-dashboard-btn is-primary" onClick={onLog}>
+              Log reading
+            </button>
+            <button type="button" className="fit-dashboard-btn" onClick={onRefresh}>
+              {syncing ? 'Refreshing...' : 'Refresh sync'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="fit-command-deck-grid">
+        {heroMetrics.map((metric) => (
+          <article key={metric.label} className={`fit-command-stat ${toneClass(metric.tone)}`}>
+            <span className="fit-command-stat-label">{metric.label}</span>
+            <strong className="fit-command-stat-value">{metric.value}</strong>
+            <span className="fit-command-stat-meta">{metric.status}</span>
+          </article>
+        ))}
+      </div>
+
+      <div className="fit-command-deck-grid is-secondary">
+        {sideMetrics.slice(0, 4).map((metric) => (
+          <article key={metric.label} className={`fit-command-stat is-secondary ${toneClass(metric.tone)}`}>
+            <span className="fit-command-stat-label">{metric.label}</span>
+            <strong className="fit-command-stat-value">{metric.value}</strong>
+            <span className="fit-command-stat-meta">{metric.status}</span>
+          </article>
+        ))}
+      </div>
+
+      <nav className="fit-dashboard-nav" aria-label="Operator sections">
+        {jumpLinks.map((link) => (
+          <a key={link.href} href={link.href} className="fit-dashboard-nav-link">
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    </section>
+  );
+}
+
+function DashboardBandHeader({
+  kicker,
   title,
   note,
-  stampIso,
-  views,
-  stats,
+  meta,
 }: {
-  section: OperatorSection;
-  emoji: string;
+  kicker: string;
   title: string;
-  note?: string;
-  stampIso: string;
-  views: string[];
-  stats: PageHeaderStat[];
+  note: string;
+  meta?: string;
 }) {
   return (
-    <>
-      <div className={`fit-page-cover fit-page-cover--${section}`}>
-        <div className="fit-page-cover-topline">
-          <span className="fit-page-cover-chip">Operator dashboard</span>
-          <DateStamp iso={stampIso} />
-        </div>
-        <span className="fit-page-cover-emoji" aria-hidden>{emoji}</span>
+    <div className="fit-dashboard-band-head" data-section>
+      <div className="fit-dashboard-band-copy">
+        <span className="fit-dashboard-band-kicker">{kicker}</span>
+        <h2 className="fit-dashboard-band-title">{title}</h2>
+        <p className="fit-dashboard-band-note">{note}</p>
       </div>
-      <div className="fit-page-header">
-        <div className="fit-page-header-main">
-          <div className="fit-page-header-copy">
-            <div className="fit-page-header-topline">
-              <span className="fit-page-header-kicker">Notion-style operator workspace</span>
-            </div>
-            <h1 className="fit-page-header-title">{title}</h1>
-            {note ? <p className="fit-page-header-note">{note}</p> : null}
-          </div>
-          <div className="fit-page-header-controls" aria-hidden>
-            <div className="fit-page-view-switch">
-              {views.map((view, index) => (
-                <span
-                  key={view}
-                  className={`fit-page-view-chip${index === 0 ? ' is-active' : ''}`}
-                >
-                  {view}
-                </span>
-              ))}
-            </div>
-            <NotionToolbar />
-          </div>
-        </div>
-
-        <div className="fit-page-summary-grid">
-          {stats.map((stat) => (
-            <article
-              key={stat.label}
-              className={`fit-page-summary-card${stat.tone ? ` is-${stat.tone}` : ''}`}
-              data-card
-            >
-              <span className="fit-page-summary-label">{stat.label}</span>
-              <strong className="fit-page-summary-value">{stat.value}</strong>
-              <span className="fit-page-summary-note">{stat.note}</span>
-            </article>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
-
-function Callout({ tone = 'neutral', emoji, children }: {
-  tone?: 'neutral' | 'good' | 'warn' | 'brass';
-  emoji?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className={`fit-callout${tone !== 'neutral' ? ` is-${tone}` : ''}`}>
-      {emoji ? <span className="fit-callout-emoji" aria-hidden>{emoji}</span> : null}
-      <div className="fit-callout-body">{children}</div>
+      {meta ? <span className="fit-dashboard-band-meta">{meta}</span> : null}
     </div>
-  );
-}
-
-// Decorative database-toolbar chrome — purely visual, evokes a Notion
-// collection view header (filter / sort / search + a primary "New" action).
-function NotionToolbar() {
-  return (
-    <div className="fit-notion-toolbar" aria-hidden>
-      <Filter aria-hidden size={13} />
-      <ArrowUpDown aria-hidden size={13} />
-      <Search aria-hidden size={13} />
-      <button type="button" className="fit-notion-new-btn" tabIndex={-1}>New</button>
-    </div>
-  );
-}
-
-function ProgressHearts({ filled, total = 12 }: { filled: number; total?: number }) {
-  return (
-    <span className="operator-hearts" aria-hidden>
-      {Array.from({ length: total }).map((_, index) => (
-        <span
-          key={index}
-          className={`operator-heart${index < filled ? ' is-filled' : ''}`}
-        >
-          ♥
-        </span>
-      ))}
-    </span>
-  );
-}
-
-type ReferenceArtKind =
-  | 'water'
-  | 'haze'
-  | 'motivation'
-  | 'lagoon'
-  | 'sunrise'
-  | 'shore'
-  | 'bulb'
-  | 'piggy';
-
-function ReferenceArt({ art }: { art: ReferenceArtKind }) {
-  if (art === 'motivation') {
-    return (
-      <div className="operator-art operator-art--motivation">
-        <div className="operator-art-copy">
-          {['K', 'E', 'E', 'P', 'G', 'O', 'I', 'N', 'G'].map((letter, index) => (
-            <span key={`${letter}-${index}`} className="operator-art-letter">{letter}</span>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (art === 'bulb') {
-    return (
-      <div className="operator-art operator-art--bulb">
-        <div className="operator-art-orb">
-          <span className="operator-art-emoji" aria-hidden>💡</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (art === 'piggy') {
-    return (
-      <div className="operator-art operator-art--piggy">
-        <div className="operator-art-orb">
-          <span className="operator-art-emoji" aria-hidden>🐷</span>
-        </div>
-      </div>
-    );
-  }
-
-  return <div className={`operator-art operator-art--${art}`} />;
-}
-
-const OPERATOR_CHART_RANGES: { key: FitnessChartRange; label: string }[] = [
-  { key: '30d', label: '30d' },
-  { key: '6m', label: '6m' },
-  { key: '1y', label: '1y' },
-  { key: 'all', label: 'All' },
-];
-
-function OperatorNotionChart({
-  readings,
-  goal,
-  range,
-  activeIso,
-  onRangeChange,
-  onActiveIsoChange,
-}: {
-  readings: FitnessReading[];
-  goal: number;
-  range: FitnessChartRange;
-  activeIso: string | null;
-  onRangeChange: (range: FitnessChartRange) => void;
-  onActiveIsoChange: (iso: string | null) => void;
-}) {
-  const visibleReadings = useMemo(
-    () => filterRowsForTrajectoryRange(readings, range),
-    [readings, range],
-  );
-  const plotReadings = visibleReadings.length > 0 ? visibleReadings : readings;
-  const activeReading = plotReadings.find((reading) => isoDay(reading.date) === activeIso) ?? plotReadings[plotReadings.length - 1];
-  const activeIndex = Math.max(0, readings.findIndex((reading) => isoDay(reading.date) === isoDay(activeReading.date)));
-  const previousReading = readings[activeIndex - 1] ?? null;
-  const activeDelta = previousReading ? activeReading.weight - previousReading.weight : 0;
-  const rangeDelta = plotReadings.length > 1
-    ? plotReadings[plotReadings.length - 1].weight - plotReadings[0].weight
-    : 0;
-  const lowest = plotReadings.reduce((best, reading) => (reading.weight < best.weight ? reading : best), plotReadings[0]);
-  const highest = plotReadings.reduce((best, reading) => (reading.weight > best.weight ? reading : best), plotReadings[0]);
-  const yValues = [...plotReadings.map((reading) => reading.weight), goal];
-  const yMin = Math.floor((Math.min(...yValues) - 1) * 2) / 2;
-  const yMax = Math.ceil((Math.max(...yValues) + 1) * 2) / 2;
-  const span = Math.max(yMax - yMin, 1);
-  const width = 760;
-  const height = 330;
-  const pad = { top: 30, right: 28, bottom: 42, left: 54 };
-  const innerWidth = width - pad.left - pad.right;
-  const innerHeight = height - pad.top - pad.bottom;
-  const pointCount = Math.max(plotReadings.length - 1, 1);
-  const xFor = (index: number) => pad.left + (index / pointCount) * innerWidth;
-  const yFor = (value: number) => pad.top + (1 - ((value - yMin) / span)) * innerHeight;
-  const coords = plotReadings.map((reading, index) => ({
-    reading,
-    x: xFor(index),
-    y: yFor(reading.weight),
-  }));
-  const linePath = coords.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
-  const areaPath = coords.length > 0
-    ? `${linePath} L ${coords[coords.length - 1].x.toFixed(1)} ${height - pad.bottom} L ${coords[0].x.toFixed(1)} ${height - pad.bottom} Z`
-    : '';
-  const activeCoord = coords.find((point) => isoDay(point.reading.date) === isoDay(activeReading.date)) ?? coords[coords.length - 1];
-  const gridValues = [yMax, yMin + span * 0.66, yMin + span * 0.33, yMin];
-  const sampledBars = coords.filter((_, index) => {
-    const step = Math.max(1, Math.ceil(coords.length / 44));
-    return index % step === 0 || index === coords.length - 1;
-  });
-  const tickIndexes = [0, Math.floor(pointCount / 2), pointCount].filter((value, index, arr) => arr.indexOf(value) === index);
-
-  return (
-    <article className="operator-notion-chart-card" data-card>
-      <div className="operator-notion-chart-top">
-        <div>
-          <span className="operator-card-kicker">📊 Chart view</span>
-          <h3 className="operator-notion-chart-title">Weight trend</h3>
-          <p className="operator-card-meta">
-            {trajectoryRangeHeadline(range)} · {plotReadings.length} readings · goal {goal.toFixed(1)} kg
-          </p>
-        </div>
-        <div className="operator-notion-range-tabs" role="tablist" aria-label="Chart range">
-          {OPERATOR_CHART_RANGES.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              role="tab"
-              aria-selected={range === option.key}
-              className={`operator-notion-range-tab${range === option.key ? ' is-active' : ''}`}
-              onClick={() => onRangeChange(option.key)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="operator-notion-chart-layout">
-        <div className="operator-notion-chart-visual">
-          <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Weight trend for ${trajectoryRangeHeadline(range).toLowerCase()}`}>
-            <defs>
-              <linearGradient id="operatorChartArea" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#f4a9c8" stopOpacity="0.34" />
-                <stop offset="100%" stopColor="#b7e4e8" stopOpacity="0.04" />
-              </linearGradient>
-              <linearGradient id="operatorChartLine" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="#59c7d6" />
-                <stop offset="55%" stopColor="#d96aa1" />
-                <stop offset="100%" stopColor="#8d76bd" />
-              </linearGradient>
-            </defs>
-            <rect x="0" y="0" width={width} height={height} rx="8" className="operator-chart-bg" />
-            {gridValues.map((value) => (
-              <g key={value.toFixed(2)}>
-                <line x1={pad.left} x2={width - pad.right} y1={yFor(value)} y2={yFor(value)} className="operator-chart-grid-line" />
-                <text x={18} y={yFor(value) + 4} className="operator-chart-axis-label">{value.toFixed(1)}</text>
-              </g>
-            ))}
-            <line x1={pad.left} x2={width - pad.right} y1={yFor(goal)} y2={yFor(goal)} className="operator-chart-goal-line" />
-            <text x={width - pad.right - 58} y={yFor(goal) - 8} className="operator-chart-goal-label">goal</text>
-            {sampledBars.map((point) => {
-              const barHeight = Math.max(5, height - pad.bottom - point.y);
-              return (
-                <rect
-                  key={`bar-${point.reading.id}`}
-                  x={point.x - 2}
-                  y={height - pad.bottom - barHeight}
-                  width="4"
-                  height={barHeight}
-                  rx="2"
-                  className="operator-chart-bar"
-                />
-              );
-            })}
-            {areaPath ? <path d={areaPath} className="operator-chart-area" /> : null}
-            {linePath ? <path d={linePath} className="operator-chart-line" /> : null}
-            {activeCoord ? (
-              <>
-                <line x1={activeCoord.x} x2={activeCoord.x} y1={pad.top} y2={height - pad.bottom} className="operator-chart-active-line" />
-                <circle cx={activeCoord.x} cy={activeCoord.y} r="8" className="operator-chart-active-halo" />
-              </>
-            ) : null}
-            {coords.map((point) => {
-              const isActive = isoDay(point.reading.date) === isoDay(activeReading.date);
-              return (
-                <circle
-                  key={point.reading.id}
-                  cx={point.x}
-                  cy={point.y}
-                  r={isActive ? 5.4 : 3.4}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`${fmtDate(point.reading.date)} ${point.reading.weight.toFixed(1)} kg`}
-                  className={`operator-chart-point${isActive ? ' is-active' : ''}`}
-                  onMouseEnter={() => onActiveIsoChange(isoDay(point.reading.date))}
-                  onFocus={() => onActiveIsoChange(isoDay(point.reading.date))}
-                  onClick={() => onActiveIsoChange(isoDay(point.reading.date))}
-                />
-              );
-            })}
-            {tickIndexes.map((index) => {
-              const point = coords[index];
-              if (!point) return null;
-              return (
-                <text key={`tick-${point.reading.id}`} x={point.x} y={height - 14} className="operator-chart-date-label">
-                  {formatReferenceMonth(point.reading.date)}
-                </text>
-              );
-            })}
-          </svg>
-        </div>
-
-        <aside className="operator-notion-chart-inspector">
-          <span className="operator-snapshot-label">Selected reading</span>
-          <strong className="operator-chart-inspector-value">{activeReading.weight.toFixed(1)} kg</strong>
-          <span className="operator-chart-inspector-date">{fmtDate(activeReading.date, { long: true })}</span>
-          <div className="operator-chart-inspector-list">
-            <div>
-              <span>Previous reading</span>
-              <strong>{previousReading ? formatWeightDelta(activeDelta) : 'First log'}</strong>
-            </div>
-            <div>
-              <span>Range movement</span>
-              <strong>{formatWeightDelta(rangeDelta)}</strong>
-            </div>
-            <div>
-              <span>Lowest in view</span>
-              <strong>{lowest.weight.toFixed(1)} kg</strong>
-            </div>
-            <div>
-              <span>Highest in view</span>
-              <strong>{highest.weight.toFixed(1)} kg</strong>
-            </div>
-          </div>
-          <div className="operator-board-tags">
-            <span className="operator-board-tag">BMI {activeReading.bmi.toFixed(1)}</span>
-            <span className="operator-board-tag">{activeReading.bodyFat.toFixed(1)}% fat</span>
-            <span className="operator-board-tag">{trajectoryRangeLabel(range)}</span>
-          </div>
-        </aside>
-      </div>
-    </article>
   );
 }
 
@@ -786,7 +751,7 @@ function HeroIntention({ state, latest, goal }: { state: State; latest: FitnessR
   return (
     <p style={{
       fontFamily: T.display,
-      fontStyle: 'normal',
+      fontStyle: 'italic',
       fontSize: 17,
       lineHeight: 1.45,
       color: T.ink,
@@ -807,13 +772,6 @@ function fmtDate(iso: string, opts: { long?: boolean } = {}) {
 
 function fmtDateObj(d: Date) {
   return d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
-}
-
-function startCase(value: string) {
-  return value
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
 }
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
@@ -934,7 +892,7 @@ function AccordionPanel({
     >
       <summary style={{ cursor: 'pointer', padding: '18px 0 16px' }}>
         <Kicker style={{ marginBottom: 8 }}>{kicker}</Kicker>
-        <div style={{ fontFamily: T.display, fontStyle: 'normal', fontSize: 18, color: T.ink, marginBottom: 6 }}>
+        <div style={{ fontFamily: T.display, fontStyle: 'italic', fontSize: 18, color: T.ink, marginBottom: 6 }}>
           {title}
         </div>
         <p style={{ fontFamily: T.sans, fontSize: 12, color: T.body, fontWeight: 300, lineHeight: 1.6, margin: 0, maxWidth: '52ch' }}>
@@ -1601,7 +1559,7 @@ function TdeeBreakdown({
             letterSpacing: '-0.02em',
             lineHeight: 1.05,
           }}>
-            TDEE <em style={{ fontStyle: 'normal', fontWeight: 400 }}>breakdown</em>
+            TDEE <em style={{ fontStyle: 'italic', fontWeight: 400 }}>breakdown</em>
           </h4>
           <p style={{
             margin: '12px 0 0',
@@ -1756,7 +1714,7 @@ function TdeeBreakdown({
                 }}>{row.acronym}</span>
                 <span style={{
                   fontFamily: T.display,
-                  fontStyle: 'normal',
+                  fontStyle: 'italic',
                   fontSize: 14,
                   color: T.body,
                   fontWeight: 400,
@@ -1808,7 +1766,7 @@ function TdeeBreakdown({
       <p style={{
         margin: '22px 0 0',
         fontFamily: T.display,
-        fontStyle: 'normal',
+        fontStyle: 'italic',
         fontSize: 13,
         color: T.muted,
         lineHeight: 1.65,
@@ -1948,7 +1906,7 @@ function CommandDeck({ state, latest, goal, reg, cloudOk, syncing, setCompose, s
             <span style={{ width:8, height:8, borderRadius:'50%', background:focus.color }} />
             <span style={{ fontFamily:T.sans, fontSize:10, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase' }}>{focus.label}</span>
           </div>
-          <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:24, color:T.ink, lineHeight:1.25, margin:'0 0 12px', maxWidth:'16ch' }}>
+          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.ink, lineHeight:1.25, margin:'0 0 12px', maxWidth:'16ch' }}>
             See the signal first, then act on it.
           </p>
           <p style={{ fontFamily:T.sans, fontSize:14, fontWeight:300, color:T.body, lineHeight:1.7, margin:0, maxWidth:'58ch' }}>
@@ -2080,7 +2038,7 @@ function ThisWeek({ state, latest, setCompose, setTab }: {
         <div style={{ padding:'14px 16px', border:`0.5px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:6 }}>Today&apos;s priority</Kicker>
           <button onClick={() => setTab('Plan')} style={{ background:'none', border:'none', cursor:'pointer', padding:0, textAlign:'left' }}>
-            <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.ink, lineHeight:1.3, marginBottom:2 }}>
+            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.ink, lineHeight:1.3, marginBottom:2 }}>
               See the plan →
             </div>
             <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted, fontWeight:500, letterSpacing:'0.05em' }}>
@@ -2134,7 +2092,7 @@ function JourneyStory({ sorted, state, showHeader = true }: { sorted: FitnessRea
           <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:22, letterSpacing:'-0.01em', lineHeight:1.1, color:T.ink, margin:'0 0 4px' }}>
             {totalWeeks} weeks observed.
           </h2>
-          <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:13, color:T.muted, margin:'0 0 0' }}>
+          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'0 0 0' }}>
             Four key moments.
           </p>
           <Rule style={{ margin: '14px 0 0' }} />
@@ -2149,7 +2107,7 @@ function JourneyStory({ sorted, state, showHeader = true }: { sorted: FitnessRea
           }}>
             <Kicker color={i === events.length - 1 ? T.gold : T.muted}>{e.kicker}</Kicker>
             <div>
-              <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color: i === events.length - 1 ? T.gold : T.ink, marginBottom:4 }}>
+              <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: i === events.length - 1 ? T.gold : T.ink, marginBottom:4 }}>
                 {e.title}
               </div>
               <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, lineHeight:1.5, margin:0, maxWidth:'50ch' }}>{e.copy}</p>
@@ -2211,7 +2169,7 @@ function PlanOpener({ state, sorted, setTab }: { state: State; sorted: FitnessRe
         </p>
         <div style={{ display:'flex', alignItems:'center', gap:10, paddingTop:10, borderTop:`0.5px solid ${b.color}33` }}>
           <Kicker color={b.color}>Action:</Kicker>
-          <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:14, color:T.ink }}>{b.action}</span>
+          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.ink }}>{b.action}</span>
         </div>
       </div>
 
@@ -2491,7 +2449,7 @@ function GoalCard({ state, latest, goal }: { state: State; latest: FitnessReadin
       </div>
 
       <div style={{ fontFamily:T.display, fontSize:30, color:T.ink, letterSpacing:'-0.02em', lineHeight:1, marginBottom:4 }}>
-        {goal.toFixed(1)}kg <em style={{ color:T.gold, fontStyle: 'normal', fontSize:24 }}>working line</em>
+        {goal.toFixed(1)}kg <em style={{ color:T.gold, fontStyle:'italic', fontSize:24 }}>working line</em>
       </div>
       <div style={{ fontFamily:T.sans, fontSize:11.5, color:T.muted, letterSpacing:'0.02em', marginBottom:14 }}>
         1 kg/wk ETA · {projectedGoalDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
@@ -2604,7 +2562,7 @@ function ThisWeekGrid({ sorted, state, showHeader = true }: { sorted: FitnessRea
                 </>
               ) : (
                 <>
-                  <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:22, color:T.muted }}>—</div>
+                  <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.muted }}>—</div>
                   <div style={{ fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:10, color:T.muted, marginTop:8 }}>{d.isFuture ? 'to come' : 'no log'}</div>
                 </>
               )}
@@ -2657,7 +2615,7 @@ function PhaseLog({ sorted, showHeader = true }: { sorted: FitnessReading[]; sho
       {showHeader && (
         <>
           <Kicker style={{ marginBottom:10 }}>Phase log</Kicker>
-          <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:24, fontStyle: 'normal', color:T.ink, margin:'0 0 6px' }}>
+          <h3 style={{ fontFamily:T.display, fontWeight:400, fontSize:24, fontStyle:'italic', color:T.ink, margin:'0 0 6px' }}>
             The story: rise, collapse, rebuild, discipline.
           </h3>
           <ThickRule style={{ margin:'18px 0 0' }} />
@@ -2742,7 +2700,7 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
   return (
     <div style={{ marginTop:48, padding:'24px 28px', background:T.surface, border:`0.5px solid ${T.line}` }}>
       <Kicker style={{ marginBottom:12 }}>Data sources · Apple Health</Kicker>
-      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, margin:'0 0 12px' }}>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 12px' }}>
         Apple Health now has a working import path here.
       </p>
       <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.7, margin:'0 0 12px' }}>
@@ -2768,7 +2726,7 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
 
         <div style={{ padding:'16px 18px', border:`1px solid ${T.line}`, background:T.paper }}>
           <Kicker style={{ marginBottom:8 }}>Import status</Kicker>
-          <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, margin:'0 0 8px' }}>
+          <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 8px' }}>
             {file ? file.name : 'No file selected yet.'}
           </p>
           <button
@@ -2801,15 +2759,15 @@ function ImportNote({ opPw, onImported }: { opPw: string; onImported: () => Prom
 
       <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:10 }}>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
-          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle: 'normal' }}>i.</span>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>i.</span>
           <strong style={{ color:T.ink, fontWeight:500 }}>Apple Health export.</strong> In the Health app, open your profile and choose <em>Export All Health Data</em>. This importer reads body weight, BMI, body fat, lean mass, body water mass, and bone mass when those samples exist, then derives the dashboard-friendly fields it can.
         </li>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
-          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle: 'normal' }}>ii.</span>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>ii.</span>
           <strong style={{ color:T.ink, fontWeight:500 }}>Automatic sync is now ready.</strong> Your site can now accept push updates at <code>/api/operator/fitness/auto-sync</code>. It supports both the simple JSON payload I showed earlier and Health Auto Export&apos;s native REST API JSON structure.
         </li>
         <li style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, paddingLeft:20, position:'relative' }}>
-          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle: 'normal' }}>iii.</span>
+          <span style={{ position:'absolute', left:0, color:T.gold, fontFamily:T.display, fontStyle:'italic' }}>iii.</span>
           <strong style={{ color:T.ink, fontWeight:500 }}>What to send.</strong> Send JSON with <code>date</code>, <code>weight</code>, and any of <code>bmi</code>, <code>bodyFat</code>, <code>water</code>, <code>waterMassKg</code>, <code>leanMassKg</code>, or <code>boneMassKg</code>. The route updates the existing day if it already exists, so repeated syncs don&apos;t create duplicate rows.
         </li>
       </ul>
@@ -3145,7 +3103,7 @@ function DashboardHero({
               <FitPill color={syncColor} background={`${syncColor}12`}>{state.daysSinceWeighIn === 0 ? 'Logged today' : `Logged ${state.daysSinceWeighIn}d ago`}</FitPill>
             </div>
             <h1 style={{ fontFamily:T.display, fontSize:'clamp(34px, 4.8vw, 52px)', fontWeight:400, letterSpacing:'-0.02em', lineHeight:0.96, color:T.ink, margin:'0 0 10px', maxWidth:'11ch' }}>
-              Body composition <em style={{ color:T.gold, fontStyle: 'normal' }}>timeline</em>
+              Body composition <em style={{ color:T.gold, fontStyle:'italic' }}>timeline</em>
             </h1>
             <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', fontFamily:T.sans, fontSize:13, color:T.body }}>
               <span>{fmtDate(sorted[0].date, { long:true })} start</span>
@@ -3372,10 +3330,10 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
     <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(145deg, ${T.paper} 0%, ${T.surface} 60%, ${T.goldSoft} 100%)`, padding:24 }}>
       <form onSubmit={submit} style={{ width:'100%', maxWidth:400, textAlign:'center', padding:'32px 28px 36px', border:`1px solid ${T.line}`, background:T.paper, boxShadow:CARD_SHADOW, backdropFilter:'blur(8px)' }}>
         <Kicker style={{ marginBottom:20 }}>Vol. 01 · Restricted Access</Kicker>
-        <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle: 'normal', fontSize: 24, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
+        <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize: 24, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
           Operator.
         </h1>
-        <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color:T.muted, margin:'0 0 40px' }}>a private weighing log.</p>
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.muted, margin:'0 0 40px' }}>a private weighing log.</p>
         <ThickRule style={{ marginBottom:32 }} />
         <div style={{ borderBottom:`0.5px solid ${err ? T.rose : T.line}`, marginBottom:24, transition:'border-color 0.2s' }}>
           <input
@@ -3386,7 +3344,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
             onChange={e => setPw(e.target.value)}
             style={{
               width:'100%', background:'transparent', border:'none', outline:'none',
-              fontFamily:T.display, fontStyle: 'normal', fontSize:20, color:T.ink,
+              fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink,
               padding:'4px 0 10px', textAlign:'center',
             }}
           />
@@ -3424,7 +3382,7 @@ function HeroReading({ latest, previous, sorted }: { latest:FitnessReading; prev
           <span data-hero-num style={{ fontFamily:T.display, fontWeight:400, fontSize: 32, letterSpacing:'-0.04em', lineHeight:0.85, color:T.ink }}>
             {latest.weight.toFixed(1)}
           </span>
-          <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:28, color:T.muted }}>kg</span>
+          <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:28, color:T.muted }}>kg</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:20 }}>
           <span style={{
@@ -3483,7 +3441,7 @@ function DetailLaunchpad({ setCompose, setTab }: { setCompose: (open: boolean) =
             textAlign:'left',
             cursor:'pointer',
           }}>
-            <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, marginBottom:6 }}>{item.label}</div>
+            <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, marginBottom:6 }}>{item.label}</div>
             <span style={{ fontFamily:T.sans, fontSize:11, color:T.body, lineHeight:1.5 }}>{item.sub}</span>
           </button>
         ))}
@@ -3689,7 +3647,7 @@ function Milestones({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|nu
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         Waypoints <em>on the route home</em>.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         {reg && reg.slope < 0 ? 'Estimated at your current rate of loss.' : 'Requires a trend reversal — current direction is away from goal.'}
       </p>
       <ThickRule style={{ margin:'18px 0 0' }} />
@@ -3715,7 +3673,7 @@ function Milestones({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|nu
                 padding:'18px 0', borderBottom: i < steps.length-1 ? `0.5px solid ${T.softLine}` : 'none',
                 alignItems:'baseline',
               }}>
-                <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:20, color: isGoal ? T.gold : T.ink }}>
+                <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color: isGoal ? T.gold : T.ink }}>
                   {isGoal ? 'Goal ★' : `−${(latest.weight-kg).toFixed(1)} kg waypoint`}
                 </div>
                 <div style={{ fontFamily:T.display, fontSize:26, color: isGoal ? T.gold : T.ink, textAlign:'right', letterSpacing:'-0.01em' }}>
@@ -3798,7 +3756,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         Should you cut? <em>Yes. Here is how.</em>
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         Four strategies, their trade-offs, and what each means for your goal date.
       </p>
       <ThickRule style={{ margin:'18px 0 0' }} />
@@ -3836,7 +3794,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
             </div>
           ))}
         </div>
-        <p style={{ fontFamily:T.sans, fontSize:11, color:T.muted, fontWeight:300, margin:'12px 20px 0', fontStyle: 'normal' }}>
+        <p style={{ fontFamily:T.sans, fontSize:11, color:T.muted, fontWeight:300, margin:'12px 20px 0', fontStyle:'italic' }}>
           Estimate only. Verify with a full TDEE calculator using your actual age and activity level.
         </p>
       </div>
@@ -3864,7 +3822,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
               }}>
                 <div>
                   <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color: isRec?T.gold:T.ink }}>{s.name}</span>
+                    <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color: isRec?T.gold:T.ink }}>{s.name}</span>
                     {isRec && <span style={{ fontFamily:T.sans, fontSize:8, fontWeight:600, letterSpacing:'0.2em', color:T.gold, padding:'2px 7px', border:`0.5px solid ${T.gold}` }}>RECOMMENDED</span>}
                   </div>
                   <p style={{ fontFamily:T.sans, fontSize:12, fontWeight:300, color:T.body, margin:'6px 0 0', lineHeight:1.5, maxWidth:'28ch' }}>{s.note}</p>
@@ -3882,7 +3840,7 @@ function CutStrategies({ sorted, goal }: { sorted:FitnessReading[]; goal:number 
                   <span style={{ fontFamily:T.sans, fontSize:11, color:T.muted }}> kg/wk</span>
                 </div>
                 <div style={{ textAlign:'right' }}>
-                  <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color: isRec?T.gold:T.body }}>
+                  <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color: isRec?T.gold:T.body }}>
                     {fmtDateObj(gDate)}
                   </span>
                 </div>
@@ -4157,7 +4115,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         When to cut, when to rest, <em>when to build</em>.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         Seven phases from today to goal and beyond — triggered by body fat, not just scale weight.
       </p>
 
@@ -4215,7 +4173,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
                     {ph.name}
                   </span>
                 </div>
-                <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:14, color:T.body, margin:'0 0 16px', lineHeight:1.5 }}>
+                <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:14, color:T.body, margin:'0 0 16px', lineHeight:1.5 }}>
                   {ph.tagline}
                 </p>
 
@@ -4268,7 +4226,7 @@ function Phases({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: number;
             return (
               <div key={ph.id} style={{ flex, padding:'14px 10px', borderRight:`0.5px solid ${T.line}`, background: ph.current ? T.goldSoft : 'transparent', minWidth:0 }}>
                 <span style={{ display:'block', fontFamily:T.sans, fontSize:8, fontWeight:700, letterSpacing:'0.2em', color:ts.color, marginBottom:5 }}>{ts.label}</span>
-                <span style={{ display:'block', fontFamily:T.display, fontStyle: 'normal', fontSize:11, color:T.ink, lineHeight:1.2, marginBottom:4 }}>
+                <span style={{ display:'block', fontFamily:T.display, fontStyle:'italic', fontSize:11, color:T.ink, lineHeight:1.2, marginBottom:4 }}>
                   {ph.endWeight === ph.startWeight ? `${ph.startWeight.toFixed(0)} kg` : `${ph.startWeight.toFixed(0)}→${ph.endWeight.toFixed(0)} kg`}
                 </span>
                 {ph.durationWeeks > 0 && <Kicker style={{ fontSize:8 }}>{ph.durationWeeks}wk</Kicker>}
@@ -4328,7 +4286,7 @@ function Insights({ sorted, reg, goal }: { sorted:FitnessReading[]; reg:Reg|null
       <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize: 20, letterSpacing:'-0.01em', lineHeight:1.06, color:T.ink, margin:'0 0 6px' }}>
         What the numbers <em>are saying</em>.
       </h2>
-      <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:15, color:T.muted, margin:'0 0 0' }}>
+      <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:15, color:T.muted, margin:'0 0 0' }}>
         Practical context behind each figure.
       </p>
       <ThickRule style={{ margin:'18px 0 0' }} />
@@ -4534,7 +4492,7 @@ function PieComposition({ latest, goal, weightLabel }: { latest: FitnessReading;
           </text>
           <text x={cx} y={cy+17} textAnchor="middle" fontFamily={T.sans} fontSize="10" fill={T.muted} letterSpacing="0.18em">KG TOTAL</text>
         </svg>
-        <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:13, color:T.muted, margin:'8px 0 0' }}>{sub}</p>
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:13, color:T.muted, margin:'8px 0 0' }}>{sub}</p>
       </div>
     );
   };
@@ -4696,7 +4654,7 @@ function HealthTab({ sorted, goal, reg }: { sorted: FitnessReading[]; goal: numb
                 <FitPill color={T.gold} background={`${T.gold}12`}>All graphs live here</FitPill>
               </div>
               <h2 style={{ fontFamily:T.display, fontWeight:400, fontSize:36, letterSpacing:'-0.03em', lineHeight:0.94, color:T.ink, margin:'0 0 10px', maxWidth:'12ch' }}>
-                Health, trend and <em style={{ color:T.gold, fontStyle: 'normal' }}>composition</em>.
+                Health, trend and <em style={{ color:T.gold, fontStyle:'italic' }}>composition</em>.
               </h2>
               <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.75, margin:'0 0 12px', maxWidth:'60ch' }}>
                 This section now keeps the visual story in one place: the weight timeline, the longer-term line, the monthly pattern, and the composition changes that explain what the scale is doing.
@@ -4938,14 +4896,14 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             <div style={{ fontFamily:T.display, fontSize: 24, color:T.rose, letterSpacing:'-0.02em', lineHeight:1 }}>{latest.weight}</div>
             <Kicker color={T.muted} style={{ marginTop:6 }}>FROM (kg)</Kicker>
           </div>
-          <div style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:24, color:T.muted, textAlign:'center' }}>→</div>
+          <div style={{ fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.muted, textAlign:'center' }}>→</div>
           <div style={{ textAlign:'right' }}>
             <div style={{ fontFamily:T.display, fontSize: 24, color:T.gold, letterSpacing:'-0.02em', lineHeight:1 }}>{goal.toFixed(0)}</div>
             <Kicker color={T.muted} style={{ marginTop:6 }}>TO (kg)</Kicker>
           </div>
         </div>
         <Rule style={{ margin:'24px 0' }} />
-        <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:20, color:T.ink, margin:0, lineHeight:1.5 }}>
+        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink, margin:0, lineHeight:1.5 }}>
           {(latest.weight-goal).toFixed(1)} kilograms in roughly{' '}
           <em style={{ color:T.gold }}>{goalDate.toLocaleDateString('en-GB',{month:'long', year:'numeric'})}</em>.
           Aggressive pace. Tight tracking, protein and recovery only.
@@ -4967,7 +4925,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
           {n:'05', r:'Log every reading, every meal, every session',                         d:'Even the bad weeks. Especially the bad weeks. Data with gaps cannot be analysed.'},
         ].map(rule => (
           <div key={rule.n} style={{ display:'grid', gridTemplateColumns:'56px 1fr', padding:'22px 0', borderBottom:`0.5px solid ${T.softLine}`, alignItems:'baseline', gap:16 }}>
-            <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize: 20, color:T.gold, lineHeight:1 }}>{rule.n}</span>
+            <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize: 20, color:T.gold, lineHeight:1 }}>{rule.n}</span>
             <div>
               <p style={{ fontFamily:T.display, fontSize:19, color:T.ink, margin:'0 0 4px', fontWeight:400, lineHeight:1.4 }}>{rule.r}</p>
               <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }}>{rule.d}</p>
@@ -4993,7 +4951,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             ].map((meal,i,arr)=>(
               <div key={i} style={{ display:'grid', gridTemplateColumns:'60px 100px 1fr 80px 80px', padding:'18px 0', borderBottom: i<arr.length-1?`0.5px solid ${T.softLine}`:'none', alignItems:'baseline', gap:16 }}>
                 <Kicker color={T.gold}>{meal.t}</Kicker>
-                <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:17, color:T.ink }}>{meal.m}</span>
+                <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:17, color:T.ink }}>{meal.m}</span>
                 <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.5, margin:0 }}>{meal.f}</p>
                 <span style={{ fontFamily:T.display, fontSize:18, color:T.ink, textAlign:'right' }}>{meal.kcal} <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>kcal</span></span>
                 <span style={{ fontFamily:T.display, fontSize:18, color:T.green, textAlign:'right' }}>{meal.p}g <span style={{ fontFamily:T.sans, fontSize:10, color:T.muted }}>P</span></span>
@@ -5024,7 +4982,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
           ].map((d,i)=>(
             <div key={i} style={{ padding:'22px 22px', borderRight: i<2?`0.5px solid ${T.line}`:'none' }}>
               <Kicker color={T.gold} style={{ marginBottom:8 }}>{d.day}</Kicker>
-              <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:18, color:T.ink, margin:'0 0 14px' }}>{d.focus}</p>
+              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:18, color:T.ink, margin:'0 0 14px' }}>{d.focus}</p>
               <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:6 }}>
                 {d.exs.map((e,j)=>(
                   <li key={j} style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, padding:'6px 0', borderBottom:`0.5px solid ${T.softLine}` }}>{e}</li>
@@ -5033,7 +4991,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             </div>
           ))}
         </div>
-        <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'14px 0 0', fontStyle: 'normal' }}>
+        <p style={{ fontFamily:T.sans, fontSize:12, color:T.muted, fontWeight:300, margin:'14px 0 0', fontStyle:'italic' }}>
           Add a 30-minute walk on rest days. Aim for 8,000 steps daily. Movement is the multiplier.
         </p>
       </AccordionPanel>
@@ -5054,7 +5012,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             'Write one sentence answering: what worked, what didn&apos;t, what to change.',
           ].map((s,i)=>(
             <li key={i} style={{ display:'grid', gridTemplateColumns:'40px 1fr', padding:'16px 0', borderBottom:`0.5px solid ${T.softLine}`, gap:12 }}>
-              <span style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:22, color:T.gold }}>{(i+1).toString().padStart(2,'0')}</span>
+              <span style={{ fontFamily:T.display, fontStyle:'italic', fontSize:22, color:T.gold }}>{(i+1).toString().padStart(2,'0')}</span>
               <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }} dangerouslySetInnerHTML={{ __html: s }} />
             </li>
           ))}
@@ -5077,7 +5035,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
             { p:'Friends/family ask why you&apos;re being strange about food', d:'Brief answer: "I&apos;m working on something." You owe nobody a long explanation. Track quietly.' },
           ].map((t, i) => (
             <div key={i} style={{ padding:'20px 22px', borderRight: i%2===0?`0.5px solid ${T.line}`:'none', borderBottom: i<4?`0.5px solid ${T.line}`:'none' }}>
-              <p style={{ fontFamily:T.display, fontStyle: 'normal', fontSize:16, color:T.rose, margin:'0 0 8px', lineHeight:1.4 }} dangerouslySetInnerHTML={{ __html: t.p }} />
+              <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.rose, margin:'0 0 8px', lineHeight:1.4 }} dangerouslySetInnerHTML={{ __html: t.p }} />
               <p style={{ fontFamily:T.sans, fontSize:13, color:T.body, fontWeight:300, lineHeight:1.6, margin:0 }} dangerouslySetInnerHTML={{ __html: t.d }} />
             </div>
           ))}
@@ -5086,7 +5044,7 @@ function PlanTab({ sorted, goal, state, setTab }: { sorted: FitnessReading[]; go
 
       <div style={{ ...sectionGap, padding:'28px 30px', background:T.goldSoft, borderLeft:`3px solid ${T.gold}` }}>
         <Kicker color={T.gold} style={{ marginBottom:12 }}>The Closing Thought</Kicker>
-        <p style={{ fontFamily:T.display, fontWeight:400, fontStyle: 'normal', fontSize:22, color:T.ink, lineHeight:1.4, margin:'0 0 10px' }}>
+        <p style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:22, color:T.ink, lineHeight:1.4, margin:'0 0 10px' }}>
           {sorted.length} readings show that you can lose weight; you have done it before, from {Math.max(...sorted.map(r=>r.weight))} kg down to {Math.min(...sorted.map(r=>r.weight))} kg.
         </p>
         <p style={{ fontFamily:T.sans, fontSize:14, color:T.body, fontWeight:300, lineHeight:1.7, margin:0, maxWidth:'62ch' }}>
@@ -5129,7 +5087,7 @@ function Compose({ open, onClose, onSubmit }: {
           value={form[key as keyof typeof form]}
           onChange={set(key)}
           required={key==='weight'}
-          style={{ flex:1, background:'transparent', border:'none', outline:'none', fontFamily:T.display, fontStyle: 'normal', fontSize:24, color:T.ink, padding:'4px 0' }}
+          style={{ flex:1, background:'transparent', border:'none', outline:'none', fontFamily:T.display, fontStyle:'italic', fontSize:24, color:T.ink, padding:'4px 0' }}
         />
         {unit && <span style={{ fontFamily:T.sans, fontSize:12, color:T.muted }}>{unit}</span>}
       </div>
@@ -5143,7 +5101,7 @@ function Compose({ open, onClose, onSubmit }: {
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:28 }}>
           <div>
             <Kicker style={{ marginBottom:8 }}>Compose new reading</Kicker>
-            <h2 style={{ fontFamily:T.display, fontWeight:400, fontStyle: 'normal', fontSize:28, color:T.ink, margin:0 }}>File a weigh-in.</h2>
+            <h2 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize:28, color:T.ink, margin:0 }}>File a weigh-in.</h2>
           </div>
           <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:T.sans, fontSize:10, letterSpacing:'0.2em', color:T.muted }}>CLOSE</button>
         </div>
@@ -5217,6 +5175,15 @@ async function apiImportAppleHealth(pw:string, file: File) {
   }
 }
 
+type ReferenceMetricTone = 'good' | 'warn' | 'brass' | 'neutral';
+
+interface ReferenceMetric {
+  label: string;
+  value: string;
+  status: string;
+  tone: ReferenceMetricTone;
+}
+
 interface ReferencePhaseMarker {
   id: string;
   label: string;
@@ -5248,6 +5215,15 @@ interface ReferenceWeekRow {
 }
 
 const REFERENCE_DAY = 24 * 60 * 60 * 1000;
+
+function referenceMetric(
+  label: string,
+  value: string,
+  status: string,
+  tone: ReferenceMetricTone = 'neutral',
+): ReferenceMetric {
+  return { label, value, status, tone };
+}
 
 function formatReferenceDate(iso: string) {
   return parseLocalDateInput(iso).toLocaleDateString('en-GB', {
@@ -5291,6 +5267,10 @@ function loggingCadence(sorted: FitnessReading[], windowDays = 14) {
     count: uniqueDays,
     score: Math.min(100, Math.round((uniqueDays / windowDays) * 100)),
   };
+}
+
+function buildWeightSeries(sorted: FitnessReading[]) {
+  return sorted.map((row) => ({ date: row.date, value: row.weight }));
 }
 
 // Derive phases from the actual weight line, not from index buckets.
@@ -5495,6 +5475,44 @@ function buildWeekRows(sorted: FitnessReading[], todayIso: string = localIsoDate
       isToday: isoDate === todayIso,
     };
   });
+}
+
+function buildHeroMetrics(sorted: FitnessReading[]) {
+  const latest = sorted[sorted.length - 1];
+  const monthAgo = nearestReadingByDays(sorted, latest, 30);
+  const discipline = loggingCadence(sorted);
+  const bodyFatDelta = latest.bodyFat - monthAgo.bodyFat;
+  const muscleDelta = latest.muscleMass - monthAgo.muscleMass;
+  const boneDelta = latest.boneMass - monthAgo.boneMass;
+  const bmiLabel = bmiStatus(latest.bmi)[0];
+  const waterLabel = waterStatus(latest.water)[0];
+
+  // Surface the four metrics worth scanning at a glance — body fat / muscle
+  // get the 30-day delta, BMI shows status, discipline rolls up logging.
+  // Water + bone live in the deeper Health section.
+  void waterLabel; void boneDelta;
+  return [
+    referenceMetric('Body fat', `${latest.bodyFat.toFixed(1)}%`, `${bodyFatDelta > 0 ? '+' : ''}${bodyFatDelta.toFixed(1)} in 30d`, bodyFatDelta <= 0 ? 'good' : 'warn'),
+    referenceMetric('Muscle mass', `${latest.muscleMass.toFixed(1)}%`, `${muscleDelta > 0 ? '+' : ''}${muscleDelta.toFixed(1)} in 30d`, muscleDelta >= 0 ? 'good' : 'warn'),
+    referenceMetric('BMI', latest.bmi.toFixed(1), bmiLabel, latest.bmi < 30 ? 'good' : 'warn'),
+    referenceMetric('Discipline', `${discipline.score}/100`, `${discipline.count}/14 days logged`, discipline.score >= 80 ? 'brass' : discipline.score >= 60 ? 'neutral' : 'warn'),
+  ];
+}
+
+function buildSideMetrics(sorted: FitnessReading[], goal: number, reg: Reg | null) {
+  const latest = sorted[sorted.length - 1];
+  const monthAgo = nearestReadingByDays(sorted, latest, 30);
+  const monthlyDelta = latest.weight - monthAgo.weight;
+  const weeklyRate = reg ? reg.slope * 7 : 0;
+
+  return [
+    referenceMetric('Weight', `${latest.weight.toFixed(1)}kg`, latest.weight <= goal ? 'At goal' : `${(latest.weight - goal).toFixed(1)}kg to goal`, latest.weight <= goal ? 'good' : 'warn'),
+    referenceMetric('BMI', latest.bmi.toFixed(1), bmiStatus(latest.bmi)[0], latest.bmi < 30 ? 'good' : 'warn'),
+    referenceMetric('Body fat', `${latest.bodyFat.toFixed(1)}%`, fatStatus(latest.bodyFat)[0], latest.bodyFat < 39 ? 'good' : 'warn'),
+    referenceMetric('Water', `${latest.water.toFixed(1)}%`, waterStatus(latest.water)[0], latest.water >= 40 ? 'good' : 'warn'),
+    referenceMetric('Monthly delta', formatWeightDelta(monthlyDelta), monthlyDelta <= 0 ? 'Moving lower' : 'Moving higher', monthlyDelta <= 0 ? 'good' : 'warn'),
+    referenceMetric('Trend rate', reg ? `${weeklyRate > 0 ? '+' : ''}${weeklyRate.toFixed(2)}kg/wk` : 'Need more data', reg ? (weeklyRate < 0 ? 'Regression line down' : 'Regression line up') : 'Awaiting trend', reg ? (weeklyRate < 0 ? 'good' : 'warn') : 'neutral'),
+  ];
 }
 
 // ─── Today's Read · Next best action · Food breakdown ───────────────────────
@@ -7166,6 +7184,63 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
   );
 }
 
+// ─── Sub-page navigation ────────────────────────────────────────────────────
+// The dashboard reads as a compact overview; each tile opens its own full page.
+type OperatorPage = 'overview' | 'today' | 'trajectory' | 'history' | 'fuel' | 'insights' | 'plan';
+
+interface OperatorPageDef {
+  id: Exclude<OperatorPage, 'overview'>;
+  emoji: string;
+  label: string;
+  blurb: string;
+}
+
+const OPERATOR_PAGES: OperatorPageDef[] = [
+  { id: 'today', emoji: '🌸', label: 'Today', blurb: 'Where the body is right now' },
+  { id: 'trajectory', emoji: '📈', label: 'Trajectory', blurb: 'Weight trend and consistency' },
+  { id: 'history', emoji: '🗓️', label: 'History', blurb: 'Phases, photos, and the weekly board' },
+  { id: 'fuel', emoji: '🍓', label: 'Fuel', blurb: "Today's intake and maintenance" },
+  { id: 'insights', emoji: '🔮', label: 'Insights', blurb: 'Trend signal and recovery' },
+  { id: 'plan', emoji: '🎀', label: 'Plan', blurb: 'Readiness and training priorities' },
+];
+
+// ─── Apple Health → cutting guidance ────────────────────────────────────────
+// Reads maintenance TDEE (from active energy), body fat, logging cadence, and
+// daily steps to recommend a sustainable cut: a pace, a daily intake, and the
+// single lever most worth pulling first.
+interface CutRecommendation {
+  method: string;
+  pace: number;
+  intake: number;
+  deficit: number;
+  lever: string;
+  note: string;
+}
+
+function recommendCut(input: {
+  maintenance: number;
+  bodyFat: number;
+  cadenceScore: number;
+  avgSteps: number;
+}): CutRecommendation {
+  const { maintenance, bodyFat, cadenceScore, avgSteps } = input;
+  // Base the pace on how much fat there is to lose.
+  let pace = bodyFat >= 35 ? 0.75 : bodyFat >= 28 ? 0.6 : 0.5;
+  // Consistency gate: if logging is patchy, ease off and build the habit first.
+  if (cadenceScore < 50) pace = Math.min(pace, 0.5);
+  const method = pace >= 0.75 ? 'Moderate cut' : pace >= 0.6 ? 'Steady cut' : 'Gentle cut';
+  const deficit = Math.round((7700 * pace) / 7);
+  const intake = Math.max(1200, Math.round((maintenance - deficit) / 10) * 10);
+  const stepTarget = avgSteps < 6000 ? 8000 : 10000;
+  const lever = avgSteps < 7000
+    ? `Lift daily steps toward ${stepTarget.toLocaleString()} — NEAT has room before cutting calories harder.`
+    : 'Steps are solid — hold them and keep intake tight with protein high.';
+  const note = cadenceScore < 50
+    ? 'Logging is patchy, so this stays gentle — lock in daily weigh-ins, then push the deficit.'
+    : `Body fat near ${bodyFat.toFixed(0)}% supports this pace at your current activity level.`;
+  return { method, pace, intake, deficit, lever, note };
+}
+
 // ─── Main app ─────────────────────────────────────────────────────────────────
 
 export default function OperatorDashboardClient() {
@@ -7175,25 +7250,12 @@ export default function OperatorDashboardClient() {
   const [goal, setGoal]       = useState(60.0);
   const [paceKey, setPaceKey] = useState<PaceKey>('aggressive');
   const [compose, setCompose] = useState(false);
-  const [lowCelebrate, setLowCelebrate] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [cloudOk, setCloudOk] = useState<boolean|null>(null);
-  const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('1y');
+  const [trajectoryRange, setTrajectoryRange] = useState<FitnessChartRange>('3y');
   const [activeTrajectoryIso, setActiveTrajectoryIso] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [activeSection, setActiveSection] = useState<OperatorSection>('today');
-  const [boardView, setBoardView] = useState<'progress' | 'table' | 'chart'>('progress');
-  const selectSection = useCallback((section: OperatorSection) => {
-    setActiveSection(section);
-    if (typeof window !== 'undefined') {
-      const target = document.querySelector<HTMLElement>(`[data-operator-section="${section}"]`);
-      if (target) {
-        target.scrollIntoView({ block: 'start', behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }
-  }, []);
+  const [secondaryReady, setSecondaryReady] = useState(false);
   // Resolve initial theme on the client only — localStorage takes precedence,
   // otherwise honour the OS preference. Stays out of SSR to avoid hydration mismatch.
   useEffect(() => {
@@ -7211,36 +7273,14 @@ export default function OperatorDashboardClient() {
     });
   }, []);
 
-  useEffect(() => {
-    if (typeof window === 'undefined' || !authed) return;
-
-    const root = document.documentElement;
-    const updateScrollProgress = () => {
-      const total = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      const pct = Math.min(100, Math.max(0, (window.scrollY / total) * 100));
-      root.style.setProperty('--scroll-progress', `${pct.toFixed(2)}%`);
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.target.classList.toggle('in-view', entry.isIntersecting);
-      });
-    }, { threshold: 0.18, rootMargin: '0px 0px -10% 0px' });
-
-    const observed = Array.from(document.querySelectorAll<HTMLElement>('[data-section], [data-hero-num]'));
-    observed.forEach((node) => observer.observe(node));
-
-    updateScrollProgress();
-    window.addEventListener('scroll', updateScrollProgress, { passive: true });
-    window.addEventListener('resize', updateScrollProgress);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', updateScrollProgress);
-      window.removeEventListener('resize', updateScrollProgress);
-      root.style.removeProperty('--scroll-progress');
-    };
-  }, [authed, activeSection]);
+  // Sub-page navigation. Pages stay mounted and toggle via CSS (charts use a
+  // fixed viewBox, so hide/show never breaks their layout), giving instant nav.
+  // Always lands on the overview; navigation is in-memory for the session.
+  const [activePage, setActivePage] = useState<OperatorPage>('overview');
+  const goToPage = useCallback((page: OperatorPage) => {
+    setActivePage(page);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const saveLocal = useCallback((rs:FitnessReading[]) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(rs)); }, []);
 
@@ -7313,6 +7353,12 @@ export default function OperatorDashboardClient() {
     window.localStorage.setItem(PACE_KEY, paceKey);
   }, [paceKey]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const id = window.setTimeout(() => setSecondaryReady(true), 180);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const handleUnlock = useCallback(async () => {
     const stored = localStorage.getItem(AUTH_KEY);
     if (stored) {
@@ -7322,15 +7368,8 @@ export default function OperatorDashboardClient() {
   }, [loadData]);
 
   const handleAdd = useCallback(async (r:FitnessReading) => {
-    const priorPlausible = readings.filter(x => isPlausibleWeightKg(x.weight));
-    const priorMin = priorPlausible.length > 0 ? Math.min(...priorPlausible.map(x => x.weight)) : Infinity;
     const next = [...readings, r].sort((a,b)=>a.date.localeCompare(b.date));
     setReadings(next); saveLocal(next);
-    // New all-time low weigh-in — brief pink/purple celebration.
-    if (isPlausibleWeightKg(r.weight) && priorPlausible.length > 0 && r.weight < priorMin) {
-      setLowCelebrate(true);
-      window.setTimeout(() => setLowCelebrate(false), 1600);
-    }
     if (opPw) { const nid = await apiSave(opPw, r); if (nid&&nid!==r.id) { const u=next.map(x=>x.id===r.id?{...x,id:nid}:x); setReadings(u); saveLocal(u); } }
   }, [readings, opPw, saveLocal]);
 
@@ -7350,20 +7389,44 @@ export default function OperatorDashboardClient() {
   const reg      = useMemo(() => regress(derivedSource), [derivedSource]);
   const latest   = dashboardSource[dashboardSource.length - 1];
   const latestIsToday = latest ? isoDay(latest.date) === todayIso : false;
+  const weightLabel = latestIsToday ? 'Today' : 'Latest';
   const pace = findPaceOption(paceKey);
   const state    = useMemo(() => (
     dashboardSource.length > 0 ? assessState(dashboardSource, goal, todayIso, pace.weeklyLossKg) : null
   ), [dashboardSource, goal, todayIso, pace.weeklyLossKg]);
+  const phaseMarkers = useMemo(() => buildReferencePhaseMarkers(derivedSource), [derivedSource]);
   const phaseRows = useMemo(() => buildReferencePhaseRows(derivedSource), [derivedSource]);
+  const photoMilestones = useMemo(() => buildPhotoMilestones(derivedSource), [derivedSource]);
+  const heroMetrics = useMemo(() => buildHeroMetrics(derivedSource), [derivedSource]);
+  const sideMetrics = useMemo(() => buildSideMetrics(derivedSource, goal, reg), [derivedSource, goal, reg]);
+  const weekRows = useMemo(() => buildWeekRows(derivedSource, todayIso), [derivedSource, todayIso]);
+  const chartBounds = useMemo(() => {
+    const chartSource = dashboardSource.length > 0 ? dashboardSource : derivedSource;
+    const weights = chartSource.map((row) => row.weight);
+    const observedMin = Math.min(...weights);
+    const observedMax = Math.max(...weights);
+    const observedSpan = Math.max(2.5, observedMax - observedMin);
+    const lowerPad = Math.max(0.9, observedSpan * 0.22);
+    const upperPad = Math.min(1.4, Math.max(0.8, observedSpan * 0.12));
+    const goalIsCloseEnoughToPlot = goal >= observedMin - Math.max(3.5, observedSpan * 0.38);
+    const min = goalIsCloseEnoughToPlot
+      ? Math.floor(Math.min(observedMin - lowerPad, goal - 1) * 2) / 2
+      : Math.floor((observedMin - lowerPad) * 2) / 2;
+    // Pin the ceiling to at least 100kg so the trajectory sits centered
+    // rather than hugging the top edge.
+    const max = Math.max(100, Math.ceil(observedMax + upperPad));
+    return { min, max };
+  }, [dashboardSource, derivedSource, goal]);
 
   // Lift the Apple Health fetch so multiple slot renders share one network call.
   const healthStream = useHealthStream(authed ? opPw : '');
   const healthDays = healthStream.days;
+  const trajectoryAnchorIso = latest ? isoDay(latest.date) : todayIso;
 
   const themeToggleButton = (
     <button
       type="button"
-      className="op-theme-toggle is-floating"
+      className="op-theme-toggle"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
@@ -7376,7 +7439,7 @@ export default function OperatorDashboardClient() {
 
   if (!authed) {
     return (
-      <div className="fitness-reference-shell" data-theme={theme} data-active-section={activeSection}>
+      <div className="fitness-reference-shell" data-theme={theme}>
         {themeToggleButton}
         <Lock onUnlock={() => {
           // auth state was set in Lock before calling onUnlock
@@ -7399,7 +7462,7 @@ export default function OperatorDashboardClient() {
       : 'If you weighed in this morning on 18 May 2026 and it is not showing here yet, the reading has not been synced into the fitness ledger.';
 
     return (
-      <div className="fitness-reference-shell" data-theme={theme} data-active-section={activeSection}>
+      <div className="fitness-reference-shell" data-theme={theme}>
         {themeToggleButton}
         <main className="wrap fitness-redesign" id="operator-overview">
           <section style={{
@@ -7597,702 +7660,514 @@ export default function OperatorDashboardClient() {
     exerciseToday,
     sevenDayDelta,
   };
-  const sleepToday = todayHealth?.sleep?.totalMin ?? null;
-  const sectionMeta: Record<OperatorSection, { title: string; note: string }> = {
-    today: {
-      title: 'Today',
-      note: "Calories in, calories out, deficit, weight, and the quality of today's tracking.",
-    },
-    trajectory: {
-      title: 'Trajectory',
-      note: 'Read the slope, watch for plateaus, and compare the latest week against the longer line.',
-    },
-    history: {
-      title: 'History',
-      note: 'Phase changes, progress markers, the weekly board, and comparison panels.',
-    },
-    nutrition: {
-      title: 'Nutrition',
-      note: "Today's targets, maintenance, and the food breakdown.",
-    },
-    insights: {
-      title: 'Insights',
-      note: 'Trend direction, recovery signal, and the context behind the latest movement.',
-    },
-    plan: {
-      title: 'Plan',
-      note: "The full eating plan, today's intake, recovery, and training priorities.",
-    },
-  };
-  const directionLabel = startCase(state.direction);
-  const firstLogged = dashboardSource[0];
-  const lightestLogged = dashboardSource.reduce(
-    (best, row) => (row.weight < best.weight ? row : best),
-    dashboardSource[0],
-  );
-  const todayRead = buildTodayRead(todaySnap);
-  const sectionOrder: OperatorSection[] = ['today', 'history', 'trajectory', 'insights', 'plan', 'nutrition'];
-  const sectionArt: Record<OperatorSection, ReferenceArtKind> = {
-    today: 'lagoon',
-    history: 'sunrise',
-    trajectory: 'shore',
-    insights: 'bulb',
-    plan: 'piggy',
-    nutrition: 'water',
-  };
-  const overallProgressPct = Math.max(0, Math.min(100, progress));
-  const overallHeartCount = Math.max(0, Math.min(12, Math.round((overallProgressPct / 100) * 12)));
-  const paceProgressPct = pace.weeklyLossKg > 0
-    ? Math.max(0, Math.min(100, (Math.abs(Math.min(state.trendKgPerWeek, 0)) / pace.weeklyLossKg) * 100))
-    : 100;
-  const cadenceProgressPct = Math.max(0, Math.min(100, cadence.score));
-  const cadenceHeartCount = Math.max(0, Math.min(12, Math.round((cadenceProgressPct / 100) * 12)));
-  const paceHeartCount = Math.max(0, Math.min(12, Math.round((paceProgressPct / 100) * 12)));
-  const recentReadings = dashboardSource
-    .slice(-6)
-    .map((reading, index, windowRows) => {
-      const originalIndex = dashboardSource.length - windowRows.length + index;
-      const previous = dashboardSource[originalIndex - 1];
-      const delta = previous ? reading.weight - previous.weight : 0;
-      return {
-        date: fmtDate(reading.date),
-        weight: `${reading.weight.toFixed(1)} kg`,
-        bmi: reading.bmi.toFixed(1),
-        delta: previous ? formatWeightDelta(delta) : '—',
-      };
-    })
-    .reverse();
-  const snapshotRows = [
-    {
-      label: 'Current pace',
-      value: `${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk`,
-      sub: `Focused line · ${directionLabel}`,
-    },
-    {
-      label: 'Best reading',
-      value: `${lightestLogged.weight.toFixed(1)} kg`,
-      sub: `Logged ${fmtDate(lightestLogged.date)}`,
-    },
-    {
-      label: 'Goal date',
-      value: projectedGoal ? fmtDateObj(projectedGoal) : 'Watching the line',
-      sub: projectedGoal ? 'Projected from the current slope' : 'Projection appears once the line trends down',
-    },
-    {
-      label: 'Cloud mode',
-      value: syncSummary,
-      sub: cloudOk ? 'Local and cloud data agree' : cloudOk === false ? 'Local backup only right now' : 'Sync still checking',
-    },
-  ];
-  const projectionCards = PACE_OPTIONS
-    .filter((option) => option.key !== 'maintenance')
-    .map((option) => {
-      const scenarioNutrition = nutritionTargets(latest, option.weeklyLossKg);
-      const remaining = Math.max(0, latest.weight - goal);
-      const weeks = option.weeklyLossKg > 0 ? Math.ceil(remaining / option.weeklyLossKg) : null;
-      const projectedIso = weeks !== null ? addDaysToIso(latest.date, weeks * 7) : null;
-      const tone: 'good' | 'warn' | 'brass' = option.key === paceKey
-        ? 'good'
-        : option.weeklyLossKg > 0.8
-          ? 'warn'
-          : 'brass';
-      return {
-        label: option.shortLabel,
-        title: option.label,
-        note: option.note,
-        intake: `${scenarioNutrition.intake.toLocaleString('en-GB')} kcal`,
-        projectedDate: projectedIso ? fmtDate(projectedIso, { long: true }) : 'Maintenance line',
-        weeksLabel: weeks !== null ? `${weeks} weeks` : 'Hold',
-        tone,
-        pct: Math.round((option.weeklyLossKg / 1) * 100),
-      };
-    });
-  const checkInRows = [
-    {
-      label: 'Latest weigh-in',
-      dates: latestIsToday ? fmtDate(latest.date, { long: true }) : `${fmtDate(latest.date, { long: true })} to today`,
-      stage: latestIsToday ? 'Complete' : state.weighInStatus === 'overdue' ? 'Overdue' : 'Due soon',
-      tone: latestIsToday ? 'good' : state.weighInStatus === 'overdue' ? 'warn' : 'brass',
-      context: `${latest.weight.toFixed(1)} kg logged`,
-    },
-    {
-      label: '7-day reset',
-      dates: `${fmtDate(latest.date)} to ${fmtDate(addDaysToIso(latest.date, 7))}`,
-      stage: 'Upcoming',
-      tone: 'brass',
-      context: `${state.thisWeekTarget.toFixed(1)} kg target`,
-    },
-    {
-      label: '30-day checkpoint',
-      dates: `${fmtDate(latest.date)} to ${fmtDate(goalCheckpoints[0].date)}`,
-      stage: 'Upcoming',
-      tone: 'brass',
-      context: `${goalCheckpoints[0].value.toFixed(1)} kg projected`,
-    },
-    {
-      label: '90-day checkpoint',
-      dates: `${fmtDate(latest.date)} to ${fmtDate(goalCheckpoints[1].date)}`,
-      stage: 'Upcoming',
-      tone: 'brass',
-      context: `${goalCheckpoints[1].value.toFixed(1)} kg projected`,
-    },
-  ] as const;
-  const planCards = [
-    {
-      emoji: '🍽️',
-      title: 'Calories and deficit',
-      meta: caloriesInToday !== null ? `${Math.round(caloriesInToday).toLocaleString('en-GB')} kcal logged today` : 'Waiting for a food log today',
-      status: deficitSub,
-      tone: deficitTone === 'good' ? 'good' : deficitTone === 'warn' ? 'warn' : 'brass',
-      pct: actualDeficitToday !== null && targetDeficit > 0
-        ? Math.max(0, Math.min(100, (actualDeficitToday / targetDeficit) * 100))
-        : 0,
-      tags: [pace.label, `${nutrition.intake.toLocaleString('en-GB')} kcal target`],
-    },
-    {
-      emoji: '🥛',
-      title: 'Protein anchor',
-      meta: todaySnap.proteinG !== null ? `${Math.round(todaySnap.proteinG)}g logged against ${nutrition.protein}g` : 'Awaiting protein data from Apple Health',
-      status: todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein
-        ? 'Target met'
-        : todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein * 0.75
-          ? 'Close to target'
-          : 'Needs another protein feed',
-      tone: todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein
-        ? 'good'
-        : todaySnap.proteinG !== null && todaySnap.proteinG >= nutrition.protein * 0.75
-          ? 'brass'
-          : 'warn',
-      pct: todaySnap.proteinG !== null ? Math.max(0, Math.min(100, (todaySnap.proteinG / nutrition.protein) * 100)) : 0,
-      tags: ['Recovery', `${nutrition.protein}g target`],
-    },
-    {
-      emoji: '🚶',
-      title: 'Movement target',
-      meta: stepsToday !== null ? `${Math.round(stepsToday).toLocaleString('en-GB')} steps so far` : 'No step data synced today',
-      status: stepsToday !== null && stepsToday >= 10000
-        ? 'Steps target hit'
-        : exerciseToday !== null && exerciseToday >= 30
-          ? 'Exercise minutes secured'
-          : 'Movement still pending',
-      tone: stepsToday !== null && stepsToday >= 10000
-        ? 'good'
-        : stepsToday !== null && stepsToday >= 7000
-          ? 'brass'
-          : 'warn',
-      pct: stepsToday !== null ? Math.max(0, Math.min(100, (stepsToday / 10000) * 100)) : 0,
-      tags: ['10,000 steps', '30 min exercise'],
-    },
-    {
-      emoji: '🌙',
-      title: 'Recovery floor',
-      meta: sleepToday !== null ? `${Math.round(sleepToday / 60)}h ${Math.round(sleepToday % 60)}m sleep logged` : 'Sleep has not synced yet',
-      status: sleepToday !== null && sleepToday >= 480
-        ? 'Sleep target met'
-        : sleepToday !== null && sleepToday >= 384
-          ? 'Close to target'
-          : 'Early night needed',
-      tone: sleepToday !== null && sleepToday >= 480
-        ? 'good'
-        : sleepToday !== null && sleepToday >= 384
-          ? 'brass'
-          : 'warn',
-      pct: sleepToday !== null ? Math.max(0, Math.min(100, (sleepToday / 480) * 100)) : 0,
-      tags: ['Sleep', 'Recovery'],
-    },
-  ] as const;
-  const quickLinks = sectionOrder.map((section) => ({
-    key: section,
-    emoji: SECTION_EMOJI[section],
-    title: sectionMeta[section].title,
-    note: sectionMeta[section].note,
-    art: sectionArt[section],
-  }));
-  const toneToPillClass = (tone: string) => (
-    tone === 'good'
-      ? 'operator-pill operator-pill--good'
-      : tone === 'warn'
-        ? 'operator-pill operator-pill--warn'
-        : 'operator-pill operator-pill--brass'
-  );
-
   return (
-    <div className="fitness-reference-shell" data-theme={theme} data-active-section={activeSection}>
-      {lowCelebrate ? (
-        <div className="op-lowburst-wrap" aria-hidden>
-          {['🌸','💗','🪻','🌷','💜','🌸','💗','🪻','🌸','💗','🪻','🌷'].map((e, i) => (
-            <span key={i} className="op-lowburst" style={{ left: `${8 + i * 7.4}%`, animationDelay: `${(i % 4) * 90}ms`, fontSize: 22 + (i % 3) * 6, ['--rot' as string]: `${(i % 2 ? 1 : -1) * (10 + i * 3)}deg` } as CSSProperties}>{e}</span>
-          ))}
-        </div>
-      ) : null}
-      <main className="operator-reference-page" id="operator-overview">
-        <section className="operator-reference-cover" aria-hidden />
-        <div className="operator-reference-sheet">
-          <span className="operator-reference-emoji" aria-hidden>💜</span>
+    <div className="fitness-reference-shell" data-theme={theme}>
+      {themeToggleButton}
+      <main className="wrap fitness-redesign" id="operator-overview" data-active-page={activePage}>
+        {activePage === 'overview' && (() => {
+          // Per-tile mini-viz: progress rings where a 0–100% reads naturally,
+          // trend sparklines where the shape of the data matters.
+          const clampPct = (n: number) => Math.max(0, Math.min(100, n));
+          const peakW = Math.max(...dashboardSource.map((r) => r.weight));
+          const goalProgress = peakW > goal ? clampPct(((peakW - latest.weight) / (peakW - goal)) * 100) : 0;
+          const intakeAdherence = caloriesInToday ? clampPct((caloriesInToday / nutrition.intake) * 100) : 0;
+          const vizById: Record<string, React.ReactNode> = {
+            today: <MiniRing pct={goalProgress} tone="rose" />,
+            trajectory: <MiniSparkline values={dashboardSource.slice(-12).map((r) => r.weight)} />,
+            history: <MiniSparkline values={dashboardSource.map((r) => r.weight)} />,
+            fuel: <MiniRing pct={intakeAdherence} tone="gold" />,
+            insights: <MiniSparkline values={dashboardSource.slice(-12).map((r) => r.bodyFat)} />,
+            plan: <MiniRing pct={clampPct(cadence.score)} tone="ink" />,
+          };
 
-          <div className="operator-reference-inner">
-            <header className="operator-reference-head">
-              <div className="operator-reference-title-wrap">
-                <h1 className="operator-reference-title">Operator Dashboard</h1>
-                <p className="operator-reference-subtitle">Progress Bar</p>
-                <p className="operator-reference-note">
-                  {todayRead.headline}. Read the line, tighten cadence, and use the sections below to steer the week without the old clutter.
-                </p>
+          // Dashboard graphs — a quick read on the last few weeks.
+          const last14 = (healthDays ?? []).slice(-14);
+          const weightSeries = dashboardSource.slice(-40).map((r) => r.weight);
+          const bodyFatSeries = dashboardSource.slice(-40).map((r) => r.bodyFat);
+          const stepSeries = last14.map((d) => d.activity?.steps ?? 0);
+          const deficitSeries = last14.map((d) => {
+            const active = d.activity?.activeEnergyKcal ?? 0;
+            const intake = d.nutrition?.dietaryEnergyKcal ?? null;
+            if (intake === null) return 0;
+            const tef = intake * 0.1;
+            return Math.round(nutrition.bmr + nutrition.neat + active + tef - intake);
+          });
+          const meanOf = (arr: number[]) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+          const weightChange = weightSeries.length > 1 ? weightSeries[weightSeries.length - 1] - weightSeries[0] : 0;
+          const bodyFatChange = bodyFatSeries.length > 1 ? bodyFatSeries[bodyFatSeries.length - 1] - bodyFatSeries[0] : 0;
+          const nonZeroDef = deficitSeries.filter((v) => v !== 0);
+          const avgDeficit = Math.round(meanOf(nonZeroDef.length ? nonZeroDef : deficitSeries));
+          const nonZeroSteps = stepSeries.filter((v) => v > 0);
+          const avgSteps = Math.round(meanOf(nonZeroSteps.length ? nonZeroSteps : stepSeries));
+
+          const maintenanceKcal = nutrition.maintenance ?? nutrition.activeTdee ?? (nutrition.bmr + (nutrition.neat ?? 0));
+          const reco = recommendCut({ maintenance: maintenanceKcal, bodyFat: latest.bodyFat, cadenceScore: cadence.score, avgSteps });
+
+          return (
+          <div className="op-overview">
+            <EditorialDivider eyebrow="Operator" note="Open a section to go deeper." style={{ margin: '32px 0 28px' }} bold />
+
+            <aside className="op-reco" aria-label="Recommended cut">
+              <div className="op-reco-main">
+                <span className="op-reco-eyebrow">🎯 Recommended cut · from Apple Health</span>
+                <h2 className="op-reco-headline">{reco.method} · {reco.pace} kg/wk</h2>
+                <p className="op-reco-lever">{reco.lever}</p>
+                <p className="op-reco-note">{reco.note}</p>
               </div>
-
-              <div className="operator-reference-head-actions">
-                <button
-                  type="button"
-                  className="operator-reference-primary-btn"
-                  onClick={() => setCompose(true)}
-                >
-                  New
-                </button>
+              <div className="op-reco-figure">
+                <span className="op-reco-intake">{reco.intake.toLocaleString()}</span>
+                <span className="op-reco-unit">kcal / day</span>
+                <span className="op-reco-maint">−{reco.deficit.toLocaleString()} on ~{maintenanceKcal.toLocaleString()} maintenance</span>
               </div>
-            </header>
+            </aside>
 
-            <div className="operator-reference-jumps">
-              {sectionOrder.map((section) => (
-                <button
-                  key={section}
-                  type="button"
-                  className={`operator-reference-jump${activeSection === section ? ' is-active' : ''}`}
-                  onClick={() => selectSection(section)}
-                >
-                  <span aria-hidden>{SECTION_EMOJI[section]}</span>
-                  {sectionMeta[section].title}
-                </button>
-              ))}
+            <div className="op-overview-grid">
+              {([
+                { id: 'today' as const, value: latest.weight.toFixed(1), unit: 'kg', stat: 'Current weight' },
+                { id: 'trajectory' as const, value: `${sevenDayDelta >= 0 ? '+' : ''}${sevenDayDelta.toFixed(1)}`, unit: 'kg', stat: '7-day move' },
+                { id: 'history' as const, value: String(phaseRows.length), unit: '', stat: 'Logged phases' },
+                { id: 'fuel' as const, value: nutrition.intake.toLocaleString(), unit: 'kcal', stat: 'Intake plan' },
+                { id: 'insights' as const, value: latest.bodyFat.toFixed(1), unit: '%', stat: 'Body fat' },
+                { id: 'plan' as const, value: String(cadence.score), unit: '/100', stat: 'Cadence' },
+              ]).map((card) => {
+                const def = OPERATOR_PAGES.find((p) => p.id === card.id)!;
+                return (
+                  <button type="button" key={card.id} className="op-overview-card" onClick={() => goToPage(card.id)}>
+                    <span className="op-overview-card-top">
+                      <span className="op-overview-card-emoji" aria-hidden>{def.emoji}</span>
+                      <span className="op-overview-card-viz">{vizById[card.id]}</span>
+                    </span>
+                    <span className="op-overview-card-value">{card.value}{card.unit ? <small>{card.unit}</small> : null}</span>
+                    <span className="op-overview-card-stat">{card.stat}</span>
+                    <span className="op-overview-card-label">{def.label}</span>
+                    <span className="op-overview-card-blurb">{def.blurb}</span>
+                    <span className="op-overview-card-go" aria-hidden>Open →</span>
+                  </button>
+                );
+              })}
             </div>
 
-            <Reveal>
-              <section className="operator-reference-section" data-section data-operator-section="today">
-                <div className="operator-reference-section-head">
-                  <div className="operator-reference-section-copy">
-                    <h2 className="operator-reference-section-title">💞 Progress Board</h2>
-                    <p className="operator-reference-section-note">
-                      The gallery view for the current line, pace, and cadence.
-                    </p>
-                  </div>
-                  <div className="operator-reference-section-actions">
-                    <div className="operator-reference-view-tabs" role="tablist" aria-label="Progress views">
-                      {(['progress', 'table', 'chart'] as const).map((view) => (
-                        <button
-                          key={view}
-                          type="button"
-                          role="tab"
-                          aria-selected={boardView === view}
-                          className={`operator-reference-view-tab${boardView === view ? ' is-active' : ''}`}
-                          onClick={() => setBoardView(view)}
-                        >
-                          {startCase(view)}
-                        </button>
-                      ))}
-                    </div>
-                    <NotionToolbar />
-                  </div>
-                </div>
-
-                {boardView === 'progress' ? (
-                  <div className="operator-gallery-grid">
-                    {[
-                      {
-                        art: 'water' as ReferenceArtKind,
-                        kicker: '🌊 Current line',
-                        title: targetDelta <= 0 ? `${latest.weight.toFixed(1)} kg · at goal` : `${latest.weight.toFixed(1)} kg right now`,
-                        meta: latestIsToday ? `Logged today · ${fmtDate(latest.date, { long: true })}` : `Latest reading · ${fmtDate(latest.date, { long: true })}`,
-                        hearts: overallHeartCount,
-                        score: `${overallProgressPct.toFixed(0)}%`,
-                        pill: targetDelta <= 0 ? 'Goal line met' : `${targetDelta.toFixed(1)} kg to go`,
-                        tone: goalGapTone === 'good' ? 'good' : goalGapTone === 'warn' ? 'warn' : 'brass',
-                        ringPct: overallProgressPct,
-                        ringColor: 'var(--blue)',
-                      },
-                      {
-                        art: 'haze' as ReferenceArtKind,
-                        kicker: '🌤 Pace check',
-                        title: `${state.trendKgPerWeek >= 0 ? '+' : ''}${state.trendKgPerWeek.toFixed(2)} kg/wk`,
-                        meta: `${pace.label} pace · ${state.weeksAtCurrent} weeks in the current rhythm`,
-                        hearts: paceHeartCount,
-                        score: `${paceProgressPct.toFixed(0)}%`,
-                        pill: sevenDayDelta <= 0 ? 'Moving closer' : 'Watch this week',
-                        tone: sevenDayDelta <= 0 ? 'good' : 'warn',
-                        ringPct: paceProgressPct,
-                        ringColor: 'var(--lavender)',
-                      },
-                      {
-                        art: 'motivation' as ReferenceArtKind,
-                        kicker: '💗 Consistency',
-                        title: `${cadence.score}/100 cadence`,
-                        meta: `${cadence.count} check-ins across the current window`,
-                        hearts: cadenceHeartCount,
-                        score: `${cadenceProgressPct.toFixed(0)}%`,
-                        pill: cadence.score >= 80 ? 'Locked in' : cadence.score >= 60 ? 'Building' : 'Needs tightening',
-                        tone: cadenceTone === 'good' ? 'good' : cadenceTone === 'warn' ? 'warn' : 'brass',
-                        ringPct: cadenceProgressPct,
-                        ringColor: 'var(--pink)',
-                      },
-                    ].map((card) => (
-                      <article key={card.title} className="operator-gallery-card" data-card>
-                        <div className="operator-card-media">
-                          <ReferenceArt art={card.art} />
-                        </div>
-                        <div className="operator-gallery-body">
-                          <span className="operator-gallery-kicker">{card.kicker}</span>
-                          <h3 className="operator-gallery-title">{card.title}</h3>
-                          <p className="operator-gallery-meta">{card.meta}</p>
-                          <div className="operator-hearts-row">
-                            <div>
-                              <ProgressHearts filled={card.hearts} />
-                            </div>
-                            <span className="operator-hearts-value">{card.score}</span>
-                          </div>
-                          <div className="operator-card-footer">
-                            <span className={toneToPillClass(card.tone)}>{card.pill}</span>
-                            <span
-                              className="operator-progress-ring"
-                              style={{
-                                ['--operator-ring-fill' as string]: `${card.ringPct}%`,
-                                ['--operator-ring-color' as string]: card.ringColor,
-                              } as CSSProperties}
-                            >
-                              <span>{Math.round(card.ringPct)}</span>
-                            </span>
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                    <article className="operator-gallery-card operator-gallery-card--blank" aria-hidden>
-                      + New page
-                    </article>
-                  </div>
-                ) : null}
-
-                {boardView === 'table' ? (
-                  <div className="operator-table-grid">
-                    <article className="operator-table-card" data-card>
-                      <div className="operator-table-head">
-                        <div>
-                          <h3 className="operator-table-title">Recent readings</h3>
-                          <p className="operator-table-note">Latest weigh-ins, BMI, and step-to-step movement.</p>
-                        </div>
-                        <NotionToolbar />
-                      </div>
-                      <table className="operator-table">
-                        <thead>
-                          <tr>
-                            <th>Date</th>
-                            <th>Weight</th>
-                            <th>BMI</th>
-                            <th>Move</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {recentReadings.map((row) => (
-                            <tr key={`${row.date}-${row.weight}`}>
-                              <td className="operator-td-strong">{row.date}</td>
-                              <td>{row.weight}</td>
-                              <td>{row.bmi}</td>
-                              <td>{row.delta}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </article>
-
-                    <article className="operator-snapshot-card" data-card>
-                      <div className="operator-table-head">
-                        <div>
-                          <h3 className="operator-table-title">Trend snapshot</h3>
-                          <p className="operator-table-note">The clearest four numbers underneath the gallery.</p>
-                        </div>
-                        <NotionToolbar />
-                      </div>
-                      <div className="operator-snapshot-list">
-                        {snapshotRows.map((row) => (
-                          <div key={row.label} className="operator-snapshot-row">
-                            <div>
-                              <span className="operator-snapshot-label">{row.label}</span>
-                              <div className="operator-snapshot-value">{row.value}</div>
-                            </div>
-                            <div className="operator-snapshot-sub">{row.sub}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </article>
-                  </div>
-                ) : null}
-
-                {boardView === 'chart' ? (
-                  <OperatorNotionChart
-                    readings={dashboardSource}
-                    goal={goal}
-                    range={trajectoryRange}
-                    onRangeChange={setTrajectoryRange}
-                    activeIso={activeTrajectoryIso}
-                    onActiveIsoChange={setActiveTrajectoryIso}
-                  />
-                ) : null}
-              </section>
-            </Reveal>
-
-            <div className="operator-two-column">
-              <Reveal>
-                <section className="operator-reference-section" data-section data-operator-section="history">
-                  <div className="operator-reference-section-head">
-                    <div className="operator-reference-section-copy">
-                      <h2 className="operator-reference-section-title">🎓 Progress Ledger</h2>
-                      <p className="operator-reference-section-note">Phase changes, duration, and how each block moved the line.</p>
-                    </div>
-                    <div className="operator-reference-section-actions">
-                      <NotionToolbar />
-                    </div>
-                  </div>
-
-                  <article className="operator-table-card" data-card>
-                    <table className="operator-table">
-                      <thead>
-                        <tr>
-                          <th>Phase</th>
-                          <th>Duration</th>
-                          <th>Start</th>
-                          <th>End</th>
-                          <th>Delta</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {phaseRows.slice(0, 5).map((row) => (
-                          <tr key={row.id}>
-                            <td className="operator-td-strong">{row.name} {row.emphasis}</td>
-                            <td>{row.duration}</td>
-                            <td>{row.start}</td>
-                            <td>{row.end}</td>
-                            <td>{row.delta}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </article>
-                </section>
-              </Reveal>
-
-              <Reveal>
-                <section className="operator-reference-section" data-section data-operator-section="trajectory">
-                  <div className="operator-reference-section-head">
-                    <div className="operator-reference-section-copy">
-                      <h2 className="operator-reference-section-title">📈 Trend Snapshot</h2>
-                      <p className="operator-reference-section-note">A tight read on the current direction, best reading, and projection.</p>
-                    </div>
-                    <div className="operator-reference-section-actions">
-                      <NotionToolbar />
-                    </div>
-                  </div>
-
-                  <article className="operator-snapshot-card" data-card>
-                    <div className="operator-snapshot-list">
-                      {[
-                        {
-                          label: 'First log',
-                          value: `${firstLogged.weight.toFixed(1)} kg`,
-                          sub: fmtDate(firstLogged.date, { long: true }),
-                        },
-                        {
-                          label: 'Best reading',
-                          value: `${lightestLogged.weight.toFixed(1)} kg`,
-                          sub: fmtDate(lightestLogged.date, { long: true }),
-                        },
-                        {
-                          label: 'Seven-day move',
-                          value: formatWeightDelta(sevenDayDelta),
-                          sub: sevenDayDelta <= 0 ? 'The gap is shrinking' : 'The gap widened this week',
-                        },
-                        {
-                          label: 'Current phase',
-                          value: directionLabel,
-                          sub: `${state.weeksAtCurrent} weeks in this rhythm`,
-                        },
-                      ].map((row) => (
-                        <div key={row.label} className="operator-snapshot-row">
-                          <div>
-                            <span className="operator-snapshot-label">{row.label}</span>
-                            <div className="operator-snapshot-value">{row.value}</div>
-                          </div>
-                          <div className="operator-snapshot-sub">{row.sub}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </article>
-                </section>
-              </Reveal>
-            </div>
-
-            <Reveal>
-              <section className="operator-reference-section" data-section data-operator-section="insights">
-                <div className="operator-reference-section-head">
-                  <div className="operator-reference-section-copy">
-                    <h2 className="operator-reference-section-title">🎯 Goal Projection</h2>
-                    <p className="operator-reference-section-note">Three pacing scenarios so the current cut reads like a plan, not a guess.</p>
-                  </div>
-                  <div className="operator-reference-section-actions">
-                    <NotionToolbar />
-                  </div>
-                </div>
-
-                <div className="operator-projection-grid">
-                  {projectionCards.map((card) => (
-                    <article key={card.title} className="operator-projection-card" data-card>
-                      <div className="operator-projection-top">
-                        <span className={toneToPillClass(card.tone)}>{card.label}</span>
-                        <span
-                          className="operator-progress-ring"
-                          style={{
-                            ['--operator-ring-fill' as string]: `${card.pct}%`,
-                            ['--operator-ring-color' as string]: card.tone === 'good' ? 'var(--blue)' : card.tone === 'warn' ? 'var(--pink)' : 'var(--lavender)',
-                          } as CSSProperties}
-                        >
-                          <span>{card.pct}</span>
-                        </span>
-                      </div>
-                      <h3 className="operator-card-title">{card.title}</h3>
-                      <p className="operator-card-meta">{card.note}</p>
-                      <div className="operator-projection-stat">
-                        <strong>{card.intake}</strong>
-                        <span>daily intake</span>
-                      </div>
-                      <div className="operator-card-footer">
-                        <span className="operator-pill">{card.weeksLabel}</span>
-                        <span className="operator-hearts-value">{card.projectedDate}</span>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            </Reveal>
-
-            <div className="operator-two-column">
-              <Reveal>
-                <div className="operator-board-stack">
-                  <section className="operator-reference-section" data-section data-operator-section="plan">
-                    <div className="operator-reference-section-head">
-                      <div className="operator-reference-section-copy">
-                        <h2 className="operator-reference-section-title">📅 Check-ins</h2>
-                        <p className="operator-reference-section-note">Upcoming review windows and the next checkpoints already on the board.</p>
-                      </div>
-                      <div className="operator-reference-section-actions">
-                        <NotionToolbar />
-                      </div>
-                    </div>
-
-                    <article className="operator-table-card" data-card>
-                      <table className="operator-table">
-                        <thead>
-                          <tr>
-                            <th>Check-in</th>
-                            <th>Dates</th>
-                            <th>Stage</th>
-                            <th>Context</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {checkInRows.map((row) => (
-                            <tr key={row.label}>
-                              <td className="operator-td-strong">{row.label}</td>
-                              <td>{row.dates}</td>
-                              <td><span className={toneToPillClass(row.tone)}>{row.stage}</span></td>
-                              <td>{row.context}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </article>
-                  </section>
-
-                  <section className="operator-reference-section" data-section data-operator-section="nutrition">
-                    <div className="operator-reference-section-head">
-                      <div className="operator-reference-section-copy">
-                        <h2 className="operator-reference-section-title">📝 Master Plan</h2>
-                        <p className="operator-reference-section-note">The daily plan cards for intake, protein, movement, and recovery.</p>
-                      </div>
-                      <div className="operator-reference-section-actions">
-                        <div className="operator-reference-view-tabs" aria-hidden>
-                          <span className="operator-reference-view-tab is-active">Today</span>
-                          <span className="operator-reference-view-tab">Targets</span>
-                          <span className="operator-reference-view-tab">Recovery</span>
-                        </div>
-                        <NotionToolbar />
-                      </div>
-                    </div>
-
-                    <div className="operator-board-grid">
-                      {planCards.map((card) => (
-                        <article key={card.title} className="operator-board-card" data-card>
-                          <span className="operator-card-kicker">{card.emoji} Focus</span>
-                          <h3 className="operator-card-title">{card.title}</h3>
-                          <p className="operator-card-meta">{card.meta}</p>
-                          <div className="operator-card-footer">
-                            <span className={toneToPillClass(card.tone)}>{card.status}</span>
-                            <span
-                              className="operator-progress-ring"
-                              style={{
-                                ['--operator-ring-fill' as string]: `${card.pct}%`,
-                                ['--operator-ring-color' as string]: card.tone === 'good' ? 'var(--blue)' : card.tone === 'warn' ? 'var(--pink)' : 'var(--lavender)',
-                              } as CSSProperties}
-                            >
-                              <span>{Math.round(card.pct)}</span>
-                            </span>
-                          </div>
-                          <div className="operator-board-tags">
-                            {card.tags.map((tag) => (
-                              <span key={tag} className="operator-board-tag">{tag}</span>
-                            ))}
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-                </div>
-              </Reveal>
-
-              <Reveal>
-                <section className="operator-reference-section">
-                  <div className="operator-reference-section-head">
-                    <div className="operator-reference-section-copy">
-                      <h2 className="operator-reference-section-title">🔗 Quick Links</h2>
-                      <p className="operator-reference-section-note">Jump to the exact workspace you want without leaving the dashboard page.</p>
-                    </div>
-                    <div className="operator-reference-section-actions">
-                      <NotionToolbar />
-                    </div>
-                  </div>
-
-                  <div className="operator-link-grid">
-                    {quickLinks.map((item) => (
-                      <button
-                        key={item.key}
-                        type="button"
-                        className={`operator-link-card${activeSection === item.key ? ' is-active' : ''}`}
-                        onClick={() => selectSection(item.key)}
-                      >
-                        <div className="operator-card-media">
-                          <ReferenceArt art={item.art} />
-                        </div>
-                        <div className="operator-card-body">
-                          <span className="operator-card-kicker">{item.emoji} Workspace</span>
-                          <h3 className="operator-card-title">{item.title}</h3>
-                          <p className="operator-card-meta">{item.note}</p>
-                          <span className="operator-pill">Open section</span>
-                        </div>
-                      </button>
-                    ))}
-                    <article className="operator-link-card operator-link-card--blank" aria-hidden>
-                      + New page
-                    </article>
-                  </div>
-                </section>
-              </Reveal>
+            <div className="op-graphs">
+              <div className="op-graphs-head">
+                <h2 className="op-graphs-title">Charts</h2>
+                <span className="op-graphs-note">A quick read on the last few weeks.</span>
+              </div>
+              <div className="op-graphs-grid">
+                <OverviewGraphCard title="Weight" value={`${latest.weight.toFixed(1)} kg`} sub={`Last ${weightSeries.length} readings · ${weightChange >= 0 ? '+' : ''}${weightChange.toFixed(1)} kg`}>
+                  <OverviewLineChart values={weightSeries} color="var(--accent)" />
+                </OverviewGraphCard>
+                <OverviewGraphCard title="Calories in / out" value={`${Math.abs(avgDeficit).toLocaleString()} kcal`} sub={`${avgDeficit >= 0 ? 'Avg deficit' : 'Avg surplus'} · last 14 days`}>
+                  <OverviewBarChart values={deficitSeries} baseline />
+                </OverviewGraphCard>
+                <OverviewGraphCard title="Activity" value={`${avgSteps.toLocaleString()} steps`} sub="Avg daily steps · last 14 days">
+                  <OverviewBarChart values={stepSeries} color="var(--blue)" />
+                </OverviewGraphCard>
+                <OverviewGraphCard title="Body composition" value={`${latest.bodyFat.toFixed(1)}%`} sub={`Body fat · ${bodyFatChange >= 0 ? '+' : ''}${bodyFatChange.toFixed(1)} pt`}>
+                  <OverviewLineChart values={bodyFatSeries} color="var(--gold)" />
+                </OverviewGraphCard>
+              </div>
             </div>
           </div>
+          );
+        })()}
+        {activePage !== 'overview' && (
+          <div className="op-back-bar">
+            <button type="button" className="op-back-btn" onClick={() => goToPage('overview')}>← All sections</button>
+            <span className="op-back-title">
+              {OPERATOR_PAGES.find((p) => p.id === activePage)?.emoji} {OPERATOR_PAGES.find((p) => p.id === activePage)?.label}
+            </span>
+          </div>
+        )}
+
+        <div className={`op-page ${activePage === 'today' ? 'is-active' : ''}`} data-page="today">
+        <Reveal>
+        <section className="fit-anchor-section" id="operator-today">
+          {/* ───────────────────────── TODAY ─────────────────────────── */}
+          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '32px 0 36px' }} />
+
+          <section className="fit-today">
+            <div className="fit-today-head">
+              <div>
+                <span className="fit-today-label">Today at a glance</span>
+                <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
+              </div>
+              <span className="muted">{formatReferenceDate(todayIso)}</span>
+            </div>
+
+            {(() => {
+              const read = buildTodayRead(todaySnap);
+              const tone: 'good' | 'neutral' | 'warn' = read.lines.some((line) => line.tone === 'warn')
+                ? 'warn'
+                : read.lines.every((line) => line.tone === 'good')
+                  ? 'good'
+                  : 'neutral';
+              const note = read.lines[0]?.text ?? '';
+              return (
+                <div className="fit-today-signals">
+                  <div className="fit-today-signals-head">
+                    <span className={`fit-today-track-pill is-${tone}`}>{read.headline}</span>
+                    <p className="fit-today-track-note">{note}</p>
+                  </div>
+                  <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
+                </div>
+              );
+            })()}
+
+            <section className="fit-weight-feature">
+              <div className="fit-weight-spotlight">
+                <div className="fit-weight-spotlight-figure">
+                  <div className="fit-weight-spotlight-copy">
+                    <div className="fit-weight-spotlight-facts">
+                      <div className="fit-weight-spotlight-fact">
+                        <span className="fit-weight-spotlight-fact-label">Goal gap</span>
+                        <span className={`fit-weight-spotlight-fact-value is-${goalGapTone}`}>
+                          {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)} kg`}
+                        </span>
+                        <span className="fit-weight-spotlight-fact-meta">
+                          {targetDelta <= 0 ? 'working line met' : `${goal.toFixed(1)} kg target`}
+                        </span>
+                      </div>
+                      <div className="fit-weight-spotlight-fact">
+                        <span className="fit-weight-spotlight-fact-label">Body fat</span>
+                        <span className={`fit-weight-spotlight-fact-value is-${bodyFatTone}`}>
+                          {latest.bodyFat.toFixed(1)}%
+                        </span>
+                        <span className="fit-weight-spotlight-fact-meta">{fatStatus(latest.bodyFat)[0]}</span>
+                      </div>
+                      <div className="fit-weight-spotlight-fact">
+                        <span className="fit-weight-spotlight-fact-label">Cadence</span>
+                        <span className={`fit-weight-spotlight-fact-value is-${cadenceTone}`}>
+                          {cadence.score}/100
+                        </span>
+                        <span className="fit-weight-spotlight-fact-meta">{cadence.count} days logged</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="fit-weight-spotlight-meta">
+                  <div className="fit-weight-spotlight-meta-head">
+                    <div className="fit-kicker">Current checkpoint · {fmtDate(latest.date, { long: true })}</div>
+                    <div className="fit-weight-spotlight-meta-value">
+                      <span className="value" data-hero-num><AnimatedNumber value={latest.weight} decimals={1} /></span>
+                      <span className="unit">kg</span>
+                    </div>
+                  </div>
+                  <div className="fit-weight-spotlight-spark fit-weight-spotlight-spark-meta">
+                    <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
+                  </div>
+                  <div className="fit-weight-feature-meta">
+                    <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
+                      {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)}{' '}kg · vs 7d marker
+                    </span>
+                    <span className="fit-weight-feature-note">
+                      {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+          </section>
+        </section>
+        </Reveal>
         </div>
+
+        <div className={`op-page ${activePage === 'trajectory' ? 'is-active' : ''}`} data-page="trajectory">
+        <Reveal delay={0.08}>
+        <section className="fit-anchor-section" id="operator-trajectory">
+          <DashboardBandHeader
+            kicker="Trajectory"
+            title="Weight trend and consistency"
+            note="Read the slope, watch for plateaus, and compare the latest week against the longer line."
+          />
+          <section className="fit-editorial-chart" style={{ marginBottom: 28 }}>
+            <FitnessLineChart
+              title={<>Weight trend</>}
+              subtitle="Daily readings, phase markers, and goal checkpoints across the selected window."
+              points={buildWeightSeries(dashboardSource)}
+              color={theme === 'dark' ? '#d48a95' : '#b76e79'}
+              barColor={theme === 'dark' ? '#c8b3e8' : '#aa92d3'}
+              minY={chartBounds.min}
+              maxY={chartBounds.max}
+              annotations={[
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight < best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Leanest point',
+                },
+                {
+                  date: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).date,
+                  value: dashboardSource.reduce((best, row) => (row.weight > best.weight ? row : best), dashboardSource[0]).weight,
+                  title: 'Peak weight',
+                },
+                { date: latest.date, value: latest.weight, title: weightLabel },
+              ]}
+              phases={phaseMarkers}
+              checkpointMarkers={goalCheckpoints}
+              range={trajectoryRange}
+              onRangeChange={setTrajectoryRange}
+              targetWeight={goal}
+              showRangeToggle
+              activeIso={activeTrajectoryIso}
+              onActiveChange={setActiveTrajectoryIso}
+            />
+          </section>
+
+          {(() => {
+            const plateau = detectPlateau(
+              dashboardSource.map((r) => ({ date: r.date, weight: r.weight })),
+            );
+            if (!plateau) return null;
+            const tone = T.gold;
+            return (
+              <aside style={{
+                marginBottom: 24,
+                padding: '20px 24px',
+                borderLeft: `2px solid ${tone}`,
+                background: `${tone}10`,
+                display: 'grid',
+                gridTemplateColumns: 'minmax(0, 1fr) auto',
+                gap: 24,
+                alignItems: 'baseline',
+              }}>
+                <div>
+                  <Kicker style={{ color: tone, marginBottom: 6 }}>
+                    Plateau · {plateau.days} days · slope {plateau.slopePerWeek >= 0 ? '+' : ''}{plateau.slopePerWeek.toFixed(2)} kg/wk
+                  </Kicker>
+                  <p style={{
+                    margin: 0,
+                    fontFamily: T.sans,
+                    fontSize: 13,
+                    color: T.body,
+                    lineHeight: 1.6,
+                    maxWidth: '62ch',
+                    fontWeight: 300,
+                  }}>
+                    {plateauSuggestion(plateau, nutrition.intake, nutrition.activeTdee)}
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <Kicker style={{ marginBottom: 4 }}>Window mean</Kicker>
+                  <div style={{ fontFamily: T.display, fontSize: 22, color: T.ink, letterSpacing: '-0.015em' }}>
+                    {plateau.meanWeight.toFixed(1)} kg
+                  </div>
+                </div>
+              </aside>
+            );
+          })()}
+
+          <div className="fit-trajectory-support">
+            <TrajectoryReadCard readings={dashboardSource} goal={goal} />
+            <ConsistencyHeatmapCard
+              anchorIso={trajectoryAnchorIso}
+              range={trajectoryRange}
+              healthDays={healthDays}
+              readings={dashboardSource}
+              calorieTarget={todaySnap.nutrition.intake}
+              activeIso={activeTrajectoryIso}
+              onActiveChange={setActiveTrajectoryIso}
+            />
+          </div>
+        </section>
+        </Reveal>
+        </div>
+
+        {secondaryReady ? (
+          <>
+        <div className={`op-page ${activePage === 'history' ? 'is-active' : ''}`} data-page="history">
+        <CollapsibleSection eyebrow="History" note="Phase changes, progress markers, and comparison panels." defaultOpen>
+        <Reveal>
+        <section className="fit-anchor-section" id="operator-story">
+          <div className="fit-story-shell">
+            {/* ───────────────────────── STORY ─────────────────────────── */}
+            <section className="fit-grid">
+              <div className="fit-main">
+                <div className="fit-panel">
+                  <div className="fit-panel-head">
+                    <div>
+                      <h3>Phase <em>history</em></h3>
+                      <div className="meta">Cycle changes, durations, and delta across the full log</div>
+                    </div>
+                  </div>
+                  <div className="phase-log">
+                    {phaseRows.map((row) => (
+                      <div className={`phase-row ${row.current ? 'current' : ''}`} key={row.id}>
+                        <div className={`swatch ${row.swatch}`} />
+                        <div className="name">{row.name} <em>{row.emphasis}</em><span className="when">{row.when}</span></div>
+                        <div className="duration">{row.duration}</div>
+                        <div className="start">{row.start}</div>
+                        <div className="end">{row.end}</div>
+                        <div className={`delta ${row.deltaClass}`}>{row.delta}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="fit-panel fit-photo-panel">
+                  <div className="fit-panel-head">
+                    <div>
+                      <h3>Progress <em>photos</em></h3>
+                      <div className="meta">Date-stamped comparison slots tied to the same timeline</div>
+                    </div>
+                  </div>
+                  <PhotoTimeline items={photoMilestones} />
+                </div>
+              </div>
+
+              <aside className="fit-side">
+                <div className="goal-card">
+                  <div className="head"><span>Current goal</span><span className="pill brass">{targetDelta <= 0 ? 'On target' : 'Active cut'}</span></div>
+                  <div className="target">{goal.toFixed(1)}kg <em>working line</em></div>
+                  <div className="by">
+                    {projectedGoal
+                      ? `Projected from current slope - ${projectedGoal.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                      : 'Projection appears once the trend line starts moving down'}
+                  </div>
+                  <div className="bar">
+                    <span className="fill" style={{ width: `${progress}%` }} />
+                    <span className="marker" style={{ left: '100%' }} />
+                  </div>
+                  <div className="stats">
+                    <div><div className="lbl">To goal</div><div className="v">{targetDelta.toFixed(1)}kg</div></div>
+                    <div><div className="lbl">7-day move</div><div className="v">{formatWeightDelta(sevenDayDelta)}</div></div>
+                    <div><div className="lbl">Intake plan</div><div className="v">{nutrition.intake.toLocaleString()} kcal</div></div>
+                    <div><div className="lbl">BMR estimate</div><div className="v">{nutrition.bmr.toLocaleString()} kcal</div></div>
+                  </div>
+                </div>
+              </aside>
+            </section>
+          </div>
+        </section>
+        </Reveal>
+
+        <Reveal>
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="compare" />
+        </Reveal>
+        <Reveal delay={0.05}>
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="prs" />
+        </Reveal>
+
+        </CollapsibleSection>
+
+        <Reveal delay={0.1}>
+        <div className="fit-panel" style={{ marginBottom: 28 }}>
+          <div className="fit-panel-head">
+            <div>
+              <h3>Weekly <em>board</em></h3>
+              <div className="meta">Monday through Sunday: weigh-ins, deltas, and body-state context</div>
+            </div>
+          </div>
+          <div className="week-grid">
+            {weekRows.map((row) => (
+              <div className={`week-cell ${row.weight === null ? 'missed' : ''} ${row.isToday ? 'today' : ''}`} key={`${row.day}-${row.date}`}>
+                <div className="dow">{row.day}</div>
+                <div className="date">{row.date}</div>
+                <div className="w">{row.weight !== null ? <>{row.weight.toFixed(1)}<small>kg</small></> : '-'}</div>
+                <div className={`delta ${row.delta.startsWith('+') ? 'up' : row.delta.startsWith('-') ? 'down' : 'flat'}`}>{row.delta}</div>
+                <div className="icons"><span>{row.detail}</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        </Reveal>
+        </div>
+
+        <div className={`op-page ${activePage === 'fuel' ? 'is-active' : ''}`} data-page="fuel">
+        <Reveal delay={0.18}>
+        <section className="fit-anchor-section" id="operator-food">
+          <TopNutritionCaloriesCard snap={todaySnap} healthDays={healthDays} activeKcalToday={activeKcalToday} />
+          <MaintenanceCard snap={todaySnap} activeKcalToday={activeKcalToday} />
+          <FoodBreakdownSection snap={todaySnap} />
+        </section>
+        </Reveal>
+        </div>
+
+        <div className={`op-page ${activePage === 'insights' ? 'is-active' : ''}`} data-page="insights">
+        <CollapsibleSection eyebrow="Insights" note="Trend direction, recovery signal, and the context behind the latest movement." defaultOpen>
+        <Reveal>
+        <section className="fit-anchor-section" id="operator-health-stream">
+          {/* ───────────────────────── TRENDS ────────────────────────── */}
+          <AnalyticsSection
+            latest={latest}
+            sorted={dashboardSource}
+            goal={goal}
+            nutrition={nutrition}
+            state={state}
+            healthStream={healthStream}
+            targetWeeklyLossKg={pace.weeklyLossKg}
+          />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="mainGrid" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="correlations" />
+        </section>
+        </Reveal>
+
+        <Reveal>
+          {(() => {
+            const last14 = healthDays.slice(-14);
+            if (last14.length === 0) return null;
+            const ledgerDays = last14.map((d) => {
+              const active = d.activity?.activeEnergyKcal ?? 0;
+              const intake = d.nutrition?.dietaryEnergyKcal ?? null;
+              const tef = intake !== null ? intake * 0.1 : (nutrition.bmr + nutrition.neat + active) * 0.1;
+              return {
+                date: isoDay(d.date),
+                intake,
+                tdee: Math.round(nutrition.bmr + nutrition.neat + active + tef),
+              };
+            });
+            return <EnergyLedger days={ledgerDays} targetDeficit={Math.round((7700 * pace.weeklyLossKg) / 7)} />;
+          })()}
+        </Reveal>
+
+        <Reveal>
+        <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="lifestyle" />
+        </Reveal>
+        </CollapsibleSection>
+        </div>
+
+        <div className={`op-page ${activePage === 'plan' ? 'is-active' : ''}`} data-page="plan">
+        <CollapsibleSection eyebrow="Plan" note="Today&apos;s intake, recovery, and training priorities." defaultOpen>
+        <Reveal>
+        <section className="fit-anchor-section" id="operator-action">
+          {/* Action block — promise + readiness folded into trends scroll. */}
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
+          {(() => {
+            const last7Health = healthDays.slice(-7);
+            const avg = (vals: (number | null | undefined)[]) => {
+              const ns = vals.filter((v): v is number => v !== null && v !== undefined && Number.isFinite(v));
+              return ns.length > 0 ? ns.reduce((a, b) => a + b, 0) / ns.length : null;
+            };
+            const rhrWeekAvg = avg(last7Health.map((d) => d.heart?.restingHr ?? null));
+            const hrvWeekAvg = avg(last7Health.map((d) => d.heart?.hrvMs ?? null));
+            const load7 = last7Health.map((d) => d.activity?.activeEnergyKcal ?? null);
+            const trainingLoad7Day = avg(load7) ?? 0;
+            const trainingLoadYesterday = load7[load7.length - 2] ?? 0;
+            return (
+              <ProteinRecovery
+                proteinTodayG={todayProteinG}
+                proteinTargetG={Math.round(latest.weight * 1.8)}
+                rhrWeekAvg={rhrWeekAvg}
+                hrvWeekAvg={hrvWeekAvg}
+                trainingLoad7Day={trainingLoad7Day}
+                trainingLoadYesterday={trainingLoadYesterday}
+              />
+            );
+          })()}
+          <WorkoutStudio workouts={healthStream.workouts} />
+          <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
+        </section>
+        </Reveal>
+        </CollapsibleSection>
+        </div>
+          </>
+        ) : activePage !== 'overview' && activePage !== 'today' && activePage !== 'trajectory' ? (
+          <section className="fit-deferred-note" aria-live="polite">
+            <div className="fit-deferred-note-kicker">Loading supporting panels</div>
+            <p>The summary board lands first. The heavier comparison, recovery, and studio panels mount a beat later so the page feels faster on entry.</p>
+          </section>
+        ) : null}
+
       </main>
 
       <Compose open={compose} onClose={()=>setCompose(false)} onSubmit={handleAdd} />

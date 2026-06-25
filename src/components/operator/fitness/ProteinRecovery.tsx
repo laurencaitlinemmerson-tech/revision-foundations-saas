@@ -31,11 +31,11 @@ export function ProteinRecovery({ proteinTodayG, proteinTargetG, rhrWeekAvg, hrv
       <div style={{ padding: '28px 32px 24px', borderRight: '0.5px solid var(--rule)' }}>
         <span style={kicker}>Protein · today</span>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 12 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 44, color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 44, color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
             {proteinTodayG !== null ? Math.round(proteinTodayG) : '—'}
           </span>
           <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: 'var(--ink-mute)' }}>g</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--ink-mute)', marginLeft: 8 }}>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 16, color: 'var(--ink-mute)', marginLeft: 8 }}>
             of {Math.round(proteinTargetG)} g target
           </span>
         </div>
@@ -44,7 +44,7 @@ export function ProteinRecovery({ proteinTodayG, proteinTargetG, rhrWeekAvg, hrv
         <div style={{ height: 2, background: 'var(--rule-soft)', marginTop: 16, position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0, width: `${proteinPct}%`, background: proteinPct >= 100 ? 'var(--green)' : 'var(--ink)' }} />
         </div>
-        <p style={{ marginTop: 12, fontFamily: 'var(--font-display)', fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.5 }}>
+        <p style={{ marginTop: 12, fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.5 }}>
           {proteinShort === null
             ? 'Log a meal to track protein against the daily target.'
             : proteinShort <= 0
@@ -61,7 +61,7 @@ export function ProteinRecovery({ proteinTodayG, proteinTargetG, rhrWeekAvg, hrv
           <Mini label="HRV" value={hrvWeekAvg !== null ? Math.round(hrvWeekAvg) : '—'} unit="ms" />
           <Mini label="Load 7-d" value={Math.round(trainingLoad7Day)} unit="kcal/d" />
         </div>
-        <p style={{ marginTop: 16, fontFamily: 'var(--font-display)', fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.5 }}>
+        <p style={{ marginTop: 16, fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.5 }}>
           {recovered === null
             ? 'Not enough Apple Health data to assess recovery — connect HRV and RHR streams.'
             : recovered
@@ -77,7 +77,7 @@ function Mini({ label, value, unit }: { label: string; value: number | string; u
   return (
     <div>
       <span style={kicker}>{label}</span>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--ink)', letterSpacing: '-0.01em', marginTop: 4, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: 'var(--ink)', letterSpacing: '-0.01em', marginTop: 4, lineHeight: 1 }}>{value}</div>
       <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>{unit}</span>
     </div>
   );

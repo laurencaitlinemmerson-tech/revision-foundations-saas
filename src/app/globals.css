@@ -27,8 +27,9 @@ html.lenis, html.lenis body {
    ============================================= */
 :root {
   color-scheme: light;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  /* Notion-flat: display type now uses the same Inter stack as body. */
+  --font-display: var(--font-body);
   --font-body-dyslexic: 'Atkinson Hyperlegible', 'Arial', sans-serif;
 
   /* Primary Palette - Editorial Paper */

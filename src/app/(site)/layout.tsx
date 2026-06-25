@@ -10,10 +10,11 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  // The operator dashboard is a standalone app surface — no marketing chrome.
   const isChromeless = pathname?.startsWith('/operator');
 
   if (isChromeless) {
-    return children;
+    return <>{children}</>;
   }
 
   return (
