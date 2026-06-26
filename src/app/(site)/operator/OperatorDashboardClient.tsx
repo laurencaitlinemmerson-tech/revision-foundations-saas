@@ -445,7 +445,30 @@ function MiniSparkline({ values }: { values: number[] }) {
 // ─── Overview graphs ────────────────────────────────────────────────────────
 // Compact charts for the dashboard home. Editorial, flat, Inter.
 
-function OverviewLineChart({ values, color = 'var(--accent)' }: { values: number[]; color?: string }) {
+function fmtGraphDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+// Shared hover tooltip, positioned in the chart's own viewBox coordinates so
+// it never needs a DOM measurement pass — same trick as the big Trajectory
+// chart's overlay-rect + nearest-point pattern, just sized for a mini card.
+function GraphTooltip({ x, w, date, valueLabel }: { x: number; w: number; date?: string; valueLabel: string }) {
+  const tipWidth = 70;
+  const tipHeight = date ? 32 : 18;
+  const cx = Math.min(w - tipWidth / 2 - 4, Math.max(tipWidth / 2 + 4, x));
+  return (
+    <g className="op-graph-tip">
+      <rect x={cx - tipWidth / 2} y={2} width={tipWidth} height={tipHeight} rx="3" className="op-graph-tip-box" />
+      {date && <text x={cx} y={14} textAnchor="middle" className="op-graph-tip-date">{fmtGraphDate(date)}</text>}
+      <text x={cx} y={date ? 27 : 14} textAnchor="middle" className="op-graph-tip-value">{valueLabel}</text>
+    </g>
+  );
+}
+
+function OverviewLineChart({ values, dates, color = 'var(--accent)', unit = '' }: { values: number[]; dates?: string[]; color?: string; unit?: string }) {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   if (values.length < 2) return <div className="op-graph-empty">Not enough data yet</div>;
   const w = 300, h = 120, padX = 6, padTop = 10, padBot = 12;
   const yMin = Math.min(...values);
@@ -455,57 +478,115 @@ function OverviewLineChart({ values, color = 'var(--accent)' }: { values: number
   const yp = values.map((v) => padTop + (1 - (v - yMin) / span) * (h - padTop - padBot));
   const line = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${yp[i].toFixed(1)}`).join(' ');
   const area = `${line} L${xs[xs.length - 1].toFixed(1)},${h - padBot} L${xs[0].toFixed(1)},${h - padBot} Z`;
+
+  const trackHover = (clientX: number, rect: DOMRect) => {
+    if (rect.width === 0) return;
+    const fraction = (clientX - rect.left) / rect.width;
+    setHoverIndex(Math.max(0, Math.min(values.length - 1, Math.round(fraction * (values.length - 1)))));
+  };
+
   return (
-    <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
+    <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet">
       <path d={area} fill={color} opacity="0.07" />
       <path d={line} fill="none" stroke={color} strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
       <circle cx={xs[xs.length - 1]} cy={yp[yp.length - 1]} r="3" fill={color} />
+      {hoverIndex !== null && (
+        <g>
+          <line x1={xs[hoverIndex]} y1={padTop} x2={xs[hoverIndex]} y2={h - padBot} className="op-graph-hover-line" />
+          <circle cx={xs[hoverIndex]} cy={yp[hoverIndex]} r="3.5" fill={color} stroke="var(--paper)" strokeWidth="1.5" />
+          <GraphTooltip x={xs[hoverIndex]} w={w} date={dates?.[hoverIndex]} valueLabel={`${values[hoverIndex].toFixed(1)}${unit}`} />
+        </g>
+      )}
+      <rect
+        x="0" y="0" width={w} height={h} fill="transparent"
+        onMouseMove={(e) => trackHover(e.clientX, e.currentTarget.getBoundingClientRect())}
+        onMouseLeave={() => setHoverIndex(null)}
+        onTouchMove={(e) => { const t = e.touches[0]; if (t) trackHover(t.clientX, e.currentTarget.getBoundingClientRect()); }}
+        onTouchEnd={() => setHoverIndex(null)}
+        style={{ cursor: 'pointer' }}
+      />
     </svg>
   );
 }
 
-function OverviewBarChart({ values, color = 'var(--accent)', baseline = false }: { values: number[]; color?: string; baseline?: boolean }) {
+function OverviewBarChart({ values, dates, color = 'var(--accent)', baseline = false, unit = '' }: { values: number[]; dates?: string[]; color?: string; baseline?: boolean; unit?: string }) {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   if (values.length === 0) return <div className="op-graph-empty">Not enough data yet</div>;
   const w = 300, h = 120, padTop = 10, padBot = 12, gap = 3;
   const n = values.length;
   const bw = (w - gap * (n - 1)) / n;
+  const centerOf = (i: number) => i * (bw + gap) + bw / 2;
+
+  const trackHover = (clientX: number, rect: DOMRect) => {
+    if (rect.width === 0) return;
+    const fraction = (clientX - rect.left) / rect.width;
+    setHoverIndex(Math.max(0, Math.min(n - 1, Math.floor(fraction * n))));
+  };
+  const overlay = (
+    <rect
+      x="0" y="0" width={w} height={h} fill="transparent"
+      onMouseMove={(e) => trackHover(e.clientX, e.currentTarget.getBoundingClientRect())}
+      onMouseLeave={() => setHoverIndex(null)}
+      onTouchMove={(e) => { const t = e.touches[0]; if (t) trackHover(t.clientX, e.currentTarget.getBoundingClientRect()); }}
+      onTouchEnd={() => setHoverIndex(null)}
+      style={{ cursor: 'pointer' }}
+    />
+  );
+
   if (baseline) {
     const maxAbs = Math.max(...values.map((v) => Math.abs(v)), 1);
     const mid = padTop + (h - padTop - padBot) / 2;
     const half = (h - padTop - padBot) / 2;
     return (
-      <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`} aria-hidden>
+      <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`}>
         <line x1="0" y1={mid} x2={w} y2={mid} stroke="var(--rule)" strokeWidth="0.5" />
         {values.map((v, i) => {
           const x = i * (bw + gap);
           const bh = (Math.abs(v) / maxAbs) * half;
           const y = v >= 0 ? mid - bh : mid;
-          return <rect key={i} x={x.toFixed(1)} y={y.toFixed(1)} width={bw.toFixed(1)} height={Math.max(bh, 0.5).toFixed(1)} rx="1" fill={v >= 0 ? 'var(--good)' : 'var(--warn)'} opacity="0.75" />;
+          return <rect key={i} x={x.toFixed(1)} y={y.toFixed(1)} width={bw.toFixed(1)} height={Math.max(bh, 0.5).toFixed(1)} rx="1" fill={v >= 0 ? 'var(--good)' : 'var(--warn)'} opacity={hoverIndex === i ? 1 : 0.75} />;
         })}
+        {hoverIndex !== null && (
+          <GraphTooltip x={centerOf(hoverIndex)} w={w} date={dates?.[hoverIndex]} valueLabel={`${values[hoverIndex] >= 0 ? '+' : ''}${Math.round(values[hoverIndex]).toLocaleString()}${unit}`} />
+        )}
+        {overlay}
       </svg>
     );
   }
   const maxV = Math.max(...values, 1);
   return (
-    <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`} aria-hidden>
+    <svg className="op-graph-svg" viewBox={`0 0 ${w} ${h}`}>
       {values.map((v, i) => {
         const x = i * (bw + gap);
         const bh = (v / maxV) * (h - padTop - padBot);
-        return <rect key={i} x={x.toFixed(1)} y={(h - padBot - bh).toFixed(1)} width={bw.toFixed(1)} height={Math.max(bh, 0.5).toFixed(1)} rx="1" fill={color} opacity="0.75" />;
+        return <rect key={i} x={x.toFixed(1)} y={(h - padBot - bh).toFixed(1)} width={bw.toFixed(1)} height={Math.max(bh, 0.5).toFixed(1)} rx="1" fill={color} opacity={hoverIndex === i ? 1 : 0.75} />;
       })}
+      {hoverIndex !== null && (
+        <GraphTooltip x={centerOf(hoverIndex)} w={w} date={dates?.[hoverIndex]} valueLabel={`${Math.round(values[hoverIndex]).toLocaleString()}${unit}`} />
+      )}
+      {overlay}
     </svg>
   );
 }
 
-function OverviewGraphCard({ title, value, sub, children }: { title: string; value: string; sub: string; children: ReactNode }) {
+function OverviewGraphCard({ title, value, sub, onOpen, openLabel, children }: { title: string; value: string; sub: string; onOpen?: () => void; openLabel?: string; children: ReactNode }) {
   return (
-    <article className="op-graph-card">
+    <article
+      className={`op-graph-card${onOpen ? ' is-linked' : ''}`}
+      onClick={onOpen}
+      role={onOpen ? 'button' : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      onKeyDown={onOpen ? (e) => { if (e.key === 'Enter' || e.key === ' ') onOpen(); } : undefined}
+    >
       <div className="op-graph-card-head">
         <span className="op-graph-card-title">{title}</span>
         <span className="op-graph-card-value">{value}</span>
       </div>
       <div className="op-graph-card-chart">{children}</div>
-      <span className="op-graph-card-sub">{sub}</span>
+      <div className="op-graph-card-foot">
+        <span className="op-graph-card-sub">{sub}</span>
+        {onOpen && openLabel && <span className="op-graph-card-go" aria-hidden>{openLabel}</span>}
+      </div>
     </article>
   );
 }
@@ -7186,7 +7267,7 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
 
 // ─── Sub-page navigation ────────────────────────────────────────────────────
 // The dashboard reads as a compact overview; each tile opens its own full page.
-type OperatorPage = 'overview' | 'today' | 'trajectory' | 'history' | 'fuel' | 'insights' | 'plan';
+type OperatorPage = 'overview' | 'trajectory' | 'history' | 'fuel' | 'insights' | 'plan';
 
 interface OperatorPageDef {
   id: Exclude<OperatorPage, 'overview'>;
@@ -7196,7 +7277,6 @@ interface OperatorPageDef {
 }
 
 const OPERATOR_PAGES: OperatorPageDef[] = [
-  { id: 'today', emoji: '🌸', label: 'Today', blurb: 'Where the body is right now' },
   { id: 'trajectory', emoji: '📈', label: 'Trajectory', blurb: 'Weight trend and consistency' },
   { id: 'history', emoji: '🗓️', label: 'History', blurb: 'Phases, photos, and the weekly board' },
   { id: 'fuel', emoji: '🍓', label: 'Fuel', blurb: "Today's intake and maintenance" },
@@ -7668,11 +7748,8 @@ export default function OperatorDashboardClient() {
           // Per-tile mini-viz: progress rings where a 0–100% reads naturally,
           // trend sparklines where the shape of the data matters.
           const clampPct = (n: number) => Math.max(0, Math.min(100, n));
-          const peakW = Math.max(...dashboardSource.map((r) => r.weight));
-          const goalProgress = peakW > goal ? clampPct(((peakW - latest.weight) / (peakW - goal)) * 100) : 0;
           const intakeAdherence = caloriesInToday ? clampPct((caloriesInToday / nutrition.intake) * 100) : 0;
           const vizById: Record<string, React.ReactNode> = {
-            today: <MiniRing pct={goalProgress} tone="rose" />,
             trajectory: <MiniSparkline values={dashboardSource.slice(-12).map((r) => r.weight)} />,
             history: <MiniSparkline values={dashboardSource.map((r) => r.weight)} />,
             fuel: <MiniRing pct={intakeAdherence} tone="gold" />,
@@ -7682,8 +7759,11 @@ export default function OperatorDashboardClient() {
 
           // Dashboard graphs — a quick read on the last few weeks.
           const last14 = (healthDays ?? []).slice(-14);
-          const weightSeries = dashboardSource.slice(-40).map((r) => r.weight);
-          const bodyFatSeries = dashboardSource.slice(-40).map((r) => r.bodyFat);
+          const recentReadings40 = dashboardSource.slice(-40);
+          const weightSeries = recentReadings40.map((r) => r.weight);
+          const bodyFatSeries = recentReadings40.map((r) => r.bodyFat);
+          const recentDates = recentReadings40.map((r) => r.date);
+          const last14Dates = last14.map((d) => isoDay(d.date));
           const stepSeries = last14.map((d) => d.activity?.steps ?? 0);
           const deficitSeries = last14.map((d) => {
             const active = d.activity?.activeEnergyKcal ?? 0;
@@ -7705,9 +7785,16 @@ export default function OperatorDashboardClient() {
 
           return (
           <div className="op-overview">
-            <EditorialDivider eyebrow="Operator" note="Open a section to go deeper." style={{ margin: '32px 0 28px' }} bold />
+            <EditorialDivider eyebrow="Operator" note="Today's read, the cut, and five sections to open." style={{ margin: '32px 0 28px' }} bold />
 
-            <aside className="op-reco" aria-label="Recommended cut">
+            <aside
+              className="op-reco is-linked"
+              aria-label="Recommended cut — open Fuel"
+              onClick={() => goToPage('fuel')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToPage('fuel'); }}
+            >
               <div className="op-reco-main">
                 <span className="op-reco-eyebrow">🎯 Recommended cut · from Apple Health</span>
                 <h2 className="op-reco-headline">{reco.method} · {reco.pace} kg/wk</h2>
@@ -7718,12 +7805,107 @@ export default function OperatorDashboardClient() {
                 <span className="op-reco-intake">{reco.intake.toLocaleString()}</span>
                 <span className="op-reco-unit">kcal / day</span>
                 <span className="op-reco-maint">−{reco.deficit.toLocaleString()} on ~{maintenanceKcal.toLocaleString()} maintenance</span>
+                <span className="op-reco-go" aria-hidden>Open Fuel →</span>
               </div>
             </aside>
 
+            <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '8px 0 24px' }} />
+
+            <section className="fit-today">
+              <div className="fit-today-head">
+                <div>
+                  <span className="fit-today-label">Today at a glance</span>
+                  <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
+                </div>
+                <span className="muted">{formatReferenceDate(todayIso)}</span>
+              </div>
+
+              {(() => {
+                const read = buildTodayRead(todaySnap);
+                const tone: 'good' | 'neutral' | 'warn' = read.lines.some((line) => line.tone === 'warn')
+                  ? 'warn'
+                  : read.lines.every((line) => line.tone === 'good')
+                    ? 'good'
+                    : 'neutral';
+                const note = read.lines[0]?.text ?? '';
+                return (
+                  <div className="fit-today-signals">
+                    <div className="fit-today-signals-head">
+                      <span className={`fit-today-track-pill is-${tone}`}>{read.headline}</span>
+                      <p className="fit-today-track-note">{note}</p>
+                    </div>
+                    <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
+                  </div>
+                );
+              })()}
+
+              <section className="fit-weight-feature">
+                <div
+                  className="fit-weight-spotlight is-linked"
+                  onClick={() => goToPage('trajectory')}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Open Trajectory"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToPage('trajectory'); }}
+                >
+                  <div className="fit-weight-spotlight-figure">
+                    <div className="fit-weight-spotlight-copy">
+                      <div className="fit-weight-spotlight-facts">
+                        <div className="fit-weight-spotlight-fact">
+                          <span className="fit-weight-spotlight-fact-label">Goal gap</span>
+                          <span className={`fit-weight-spotlight-fact-value is-${goalGapTone}`}>
+                            {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)} kg`}
+                          </span>
+                          <span className="fit-weight-spotlight-fact-meta">
+                            {targetDelta <= 0 ? 'working line met' : `${goal.toFixed(1)} kg target`}
+                          </span>
+                        </div>
+                        <div className="fit-weight-spotlight-fact">
+                          <span className="fit-weight-spotlight-fact-label">Body fat</span>
+                          <span className={`fit-weight-spotlight-fact-value is-${bodyFatTone}`}>
+                            {latest.bodyFat.toFixed(1)}%
+                          </span>
+                          <span className="fit-weight-spotlight-fact-meta">{fatStatus(latest.bodyFat)[0]}</span>
+                        </div>
+                        <div className="fit-weight-spotlight-fact">
+                          <span className="fit-weight-spotlight-fact-label">Cadence</span>
+                          <span className={`fit-weight-spotlight-fact-value is-${cadenceTone}`}>
+                            {cadence.score}/100
+                          </span>
+                          <span className="fit-weight-spotlight-fact-meta">{cadence.count} days logged</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="fit-weight-spotlight-meta">
+                    <div className="fit-weight-spotlight-meta-head">
+                      <div className="fit-kicker">Current checkpoint · {fmtDate(latest.date, { long: true })}</div>
+                      <div className="fit-weight-spotlight-meta-value">
+                        <span className="value" data-hero-num><AnimatedNumber value={latest.weight} decimals={1} /></span>
+                        <span className="unit">kg</span>
+                      </div>
+                    </div>
+                    <div className="fit-weight-spotlight-spark fit-weight-spotlight-spark-meta">
+                      <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
+                    </div>
+                    <div className="fit-weight-feature-meta">
+                      <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
+                        {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)}{' '}kg · vs 7d marker
+                      </span>
+                      <span className="fit-weight-feature-note">
+                        {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
+                      </span>
+                    </div>
+                    <span className="fit-weight-spotlight-go" aria-hidden>Open Trajectory →</span>
+                  </div>
+                </div>
+              </section>
+            </section>
+
+            <EditorialDivider eyebrow="Sections" note="Open one to go deeper." style={{ margin: '40px 0 22px' }} />
+
             <div className="op-overview-grid">
               {([
-                { id: 'today' as const, value: latest.weight.toFixed(1), unit: 'kg', stat: 'Current weight' },
                 { id: 'trajectory' as const, value: `${sevenDayDelta >= 0 ? '+' : ''}${sevenDayDelta.toFixed(1)}`, unit: 'kg', stat: '7-day move' },
                 { id: 'history' as const, value: String(phaseRows.length), unit: '', stat: 'Logged phases' },
                 { id: 'fuel' as const, value: nutrition.intake.toLocaleString(), unit: 'kcal', stat: 'Intake plan' },
@@ -7748,22 +7930,19 @@ export default function OperatorDashboardClient() {
             </div>
 
             <div className="op-graphs">
-              <div className="op-graphs-head">
-                <h2 className="op-graphs-title">Charts</h2>
-                <span className="op-graphs-note">A quick read on the last few weeks.</span>
-              </div>
+              <EditorialDivider eyebrow="Charts" note="A quick read on the last few weeks." style={{ margin: '0 0 20px' }} />
               <div className="op-graphs-grid">
-                <OverviewGraphCard title="Weight" value={`${latest.weight.toFixed(1)} kg`} sub={`Last ${weightSeries.length} readings · ${weightChange >= 0 ? '+' : ''}${weightChange.toFixed(1)} kg`}>
-                  <OverviewLineChart values={weightSeries} color="var(--accent)" />
+                <OverviewGraphCard title="Weight" value={`${latest.weight.toFixed(1)} kg`} sub={`Last ${weightSeries.length} readings · ${weightChange >= 0 ? '+' : ''}${weightChange.toFixed(1)} kg`} onOpen={() => goToPage('trajectory')} openLabel="Open Trajectory →">
+                  <OverviewLineChart values={weightSeries} dates={recentDates} color="var(--accent)" unit=" kg" />
                 </OverviewGraphCard>
-                <OverviewGraphCard title="Calories in / out" value={`${Math.abs(avgDeficit).toLocaleString()} kcal`} sub={`${avgDeficit >= 0 ? 'Avg deficit' : 'Avg surplus'} · last 14 days`}>
-                  <OverviewBarChart values={deficitSeries} baseline />
+                <OverviewGraphCard title="Calories in / out" value={`${Math.abs(avgDeficit).toLocaleString()} kcal`} sub={`${avgDeficit >= 0 ? 'Avg deficit' : 'Avg surplus'} · last 14 days`} onOpen={() => goToPage('fuel')} openLabel="Open Fuel →">
+                  <OverviewBarChart values={deficitSeries} dates={last14Dates} baseline unit=" kcal" />
                 </OverviewGraphCard>
-                <OverviewGraphCard title="Activity" value={`${avgSteps.toLocaleString()} steps`} sub="Avg daily steps · last 14 days">
-                  <OverviewBarChart values={stepSeries} color="var(--blue)" />
+                <OverviewGraphCard title="Activity" value={`${avgSteps.toLocaleString()} steps`} sub="Avg daily steps · last 14 days" onOpen={() => goToPage('insights')} openLabel="Open Insights →">
+                  <OverviewBarChart values={stepSeries} dates={last14Dates} color="var(--blue)" unit=" steps" />
                 </OverviewGraphCard>
-                <OverviewGraphCard title="Body composition" value={`${latest.bodyFat.toFixed(1)}%`} sub={`Body fat · ${bodyFatChange >= 0 ? '+' : ''}${bodyFatChange.toFixed(1)} pt`}>
-                  <OverviewLineChart values={bodyFatSeries} color="var(--gold)" />
+                <OverviewGraphCard title="Body composition" value={`${latest.bodyFat.toFixed(1)}%`} sub={`Body fat · ${bodyFatChange >= 0 ? '+' : ''}${bodyFatChange.toFixed(1)} pt`} onOpen={() => goToPage('insights')} openLabel="Open Insights →">
+                  <OverviewLineChart values={bodyFatSeries} dates={recentDates} color="var(--gold)" unit="%" />
                 </OverviewGraphCard>
               </div>
             </div>
@@ -7778,99 +7957,6 @@ export default function OperatorDashboardClient() {
             </span>
           </div>
         )}
-
-        <div className={`op-page ${activePage === 'today' ? 'is-active' : ''}`} data-page="today">
-        <Reveal>
-        <section className="fit-anchor-section" id="operator-today">
-          {/* ───────────────────────── TODAY ─────────────────────────── */}
-          <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '32px 0 36px' }} />
-
-          <section className="fit-today">
-            <div className="fit-today-head">
-              <div>
-                <span className="fit-today-label">Today at a glance</span>
-                <div className="fit-today-copy">Calories in, calories out, deficit, weight, and the quality of today&apos;s tracking.</div>
-              </div>
-              <span className="muted">{formatReferenceDate(todayIso)}</span>
-            </div>
-
-            {(() => {
-              const read = buildTodayRead(todaySnap);
-              const tone: 'good' | 'neutral' | 'warn' = read.lines.some((line) => line.tone === 'warn')
-                ? 'warn'
-                : read.lines.every((line) => line.tone === 'good')
-                  ? 'good'
-                  : 'neutral';
-              const note = read.lines[0]?.text ?? '';
-              return (
-                <div className="fit-today-signals">
-                  <div className="fit-today-signals-head">
-                    <span className={`fit-today-track-pill is-${tone}`}>{read.headline}</span>
-                    <p className="fit-today-track-note">{note}</p>
-                  </div>
-                  <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="todayStrip" />
-                </div>
-              );
-            })()}
-
-            <section className="fit-weight-feature">
-              <div className="fit-weight-spotlight">
-                <div className="fit-weight-spotlight-figure">
-                  <div className="fit-weight-spotlight-copy">
-                    <div className="fit-weight-spotlight-facts">
-                      <div className="fit-weight-spotlight-fact">
-                        <span className="fit-weight-spotlight-fact-label">Goal gap</span>
-                        <span className={`fit-weight-spotlight-fact-value is-${goalGapTone}`}>
-                          {targetDelta <= 0 ? 'At goal' : `${targetDelta.toFixed(1)} kg`}
-                        </span>
-                        <span className="fit-weight-spotlight-fact-meta">
-                          {targetDelta <= 0 ? 'working line met' : `${goal.toFixed(1)} kg target`}
-                        </span>
-                      </div>
-                      <div className="fit-weight-spotlight-fact">
-                        <span className="fit-weight-spotlight-fact-label">Body fat</span>
-                        <span className={`fit-weight-spotlight-fact-value is-${bodyFatTone}`}>
-                          {latest.bodyFat.toFixed(1)}%
-                        </span>
-                        <span className="fit-weight-spotlight-fact-meta">{fatStatus(latest.bodyFat)[0]}</span>
-                      </div>
-                      <div className="fit-weight-spotlight-fact">
-                        <span className="fit-weight-spotlight-fact-label">Cadence</span>
-                        <span className={`fit-weight-spotlight-fact-value is-${cadenceTone}`}>
-                          {cadence.score}/100
-                        </span>
-                        <span className="fit-weight-spotlight-fact-meta">{cadence.count} days logged</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="fit-weight-spotlight-meta">
-                  <div className="fit-weight-spotlight-meta-head">
-                    <div className="fit-kicker">Current checkpoint · {fmtDate(latest.date, { long: true })}</div>
-                    <div className="fit-weight-spotlight-meta-value">
-                      <span className="value" data-hero-num><AnimatedNumber value={latest.weight} decimals={1} /></span>
-                      <span className="unit">kg</span>
-                    </div>
-                  </div>
-                  <div className="fit-weight-spotlight-spark fit-weight-spotlight-spark-meta">
-                    <HeadlineSparkline readings={dashboardSource.slice(-4)} variant="wide" />
-                  </div>
-                  <div className="fit-weight-feature-meta">
-                    <span className={`fit-delta-pill ${sevenDayDelta >= 0 ? 'up' : 'down'}`}>
-                      {sevenDayDelta >= 0 ? '↑' : '↓'} {Math.abs(sevenDayDelta).toFixed(1)}{' '}kg · vs 7d marker
-                    </span>
-                    <span className="fit-weight-feature-note">
-                      {sevenDayDelta > 0 ? 'climbing further from goal' : sevenDayDelta < 0 ? 'closing the gap' : 'holding the line'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-          </section>
-        </section>
-        </Reveal>
-        </div>
 
         <div className={`op-page ${activePage === 'trajectory' ? 'is-active' : ''}`} data-page="trajectory">
         <Reveal delay={0.08}>
@@ -8161,7 +8247,7 @@ export default function OperatorDashboardClient() {
         </CollapsibleSection>
         </div>
           </>
-        ) : activePage !== 'overview' && activePage !== 'today' && activePage !== 'trajectory' ? (
+        ) : activePage !== 'overview' && activePage !== 'trajectory' ? (
           <section className="fit-deferred-note" aria-live="polite">
             <div className="fit-deferred-note-kicker">Loading supporting panels</div>
             <p>The summary board lands first. The heavier comparison, recovery, and studio panels mount a beat later so the page feels faster on entry.</p>
