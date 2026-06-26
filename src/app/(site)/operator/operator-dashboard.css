@@ -893,14 +893,14 @@
   gap: 6px;
 }
 
-.fit-dashboard-section-toggle {
+.fitness-reference-shell .fit-dashboard-section-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   min-height: 34px;
-  padding: 8px 12px;
+  padding: 8px 13px;
   border: 0.5px solid var(--rule);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--paper-deep);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -910,16 +910,16 @@
   transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 
-.fit-dashboard-section-toggle:hover {
-  background: rgba(255, 255, 255, 0.98);
+.fitness-reference-shell .fit-dashboard-section-toggle:hover {
+  background: #ffffff;
   color: var(--ink);
-  border-color: rgba(26, 24, 21, 0.22);
+  border-color: var(--ink-soft);
 }
 
-.fit-dashboard-section-toggle-icon {
-  display: inline-block;
-  font-size: 11px;
-  line-height: 1;
+.fitness-reference-shell .fit-dashboard-section-toggle-icon {
+  display: inline-flex;
+  width: 9px;
+  height: 9px;
   transition: transform 180ms ease;
 }
 
@@ -7822,7 +7822,10 @@
 }
 .fitness-reference-shell .op-back-btn {
   appearance: none;
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--paper-deep);
   border: 0.5px solid var(--rule);
   border-radius: 0;
   padding: 9px 14px;

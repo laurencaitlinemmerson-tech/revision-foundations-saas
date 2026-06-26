@@ -646,12 +646,9 @@ function CollapsibleSection({ eyebrow, note, children, defaultOpen = false }: {
           className="fit-dashboard-section-toggle"
         >
           <span>{open ? 'Collapse' : 'Expand'}</span>
-          <span
-            className="fit-dashboard-section-toggle-icon"
-            aria-hidden
-          >
-            ▾
-          </span>
+          <svg className="fit-dashboard-section-toggle-icon" viewBox="0 0 9 9" fill="none" aria-hidden>
+            <path d="M1.5 3 L4.5 6 L7.5 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
       <div id={contentId} hidden={!open} className="fit-dashboard-section-body">
@@ -7951,7 +7948,12 @@ export default function OperatorDashboardClient() {
         })()}
         {activePage !== 'overview' && (
           <div className="op-back-bar">
-            <button type="button" className="op-back-btn" onClick={() => goToPage('overview')}>← All sections</button>
+            <button type="button" className="op-back-btn" onClick={() => goToPage('overview')}>
+              <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
+                <path d="M6 1.5 L3 4.5 L6 7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              All sections
+            </button>
             <span className="op-back-title">
               {OPERATOR_PAGES.find((p) => p.id === activePage)?.emoji} {OPERATOR_PAGES.find((p) => p.id === activePage)?.label}
             </span>
