@@ -19,7 +19,10 @@ function escapeHtml(value: string) {
 export async function sendPipSummary(input: PipSubmission) {
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.PIP_NOTIFICATION_TO || PIP_NOTIFICATION_TO;
-  const from = process.env.CONTACT_FROM_EMAIL || 'The Nurse Lab <lauren@nurselab.co.uk>';
+  const from =
+    process.env.PIP_FROM_EMAIL ||
+    process.env.CONTACT_FROM_EMAIL ||
+    'The Nurse Lab <onboarding@resend.dev>';
 
   if (!apiKey) {
     return { delivered: false, reason: 'missing_resend_api_key' as const };
