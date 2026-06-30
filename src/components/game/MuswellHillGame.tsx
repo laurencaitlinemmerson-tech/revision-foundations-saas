@@ -232,7 +232,10 @@ function loadState(): SaveState {
 /* ================================ Component =============================== */
 
 export default function MuswellHillGame() {
-  const [board, setBoard] = useState<Board>(() => createBoard());
+  // Start from a deterministic empty grid so server and client markup match;
+  // the random board is generated on mount (client only) to avoid a hydration
+  // mismatch from Math.random().
+  const [board, setBoard] = useState<Board>(() => new Array(SIZE).fill(-1));
   const [selected, setSelected] = useState<number | null>(null);
   const [clearing, setClearing] = useState<Set<number>>(new Set());
   const [score, setScore] = useState(0);
@@ -253,13 +256,17 @@ export default function MuswellHillGame() {
   const target = targetForLevel(level);
   const doneSet = useMemo(() => new Set(done), [done]);
 
-  /* ---- load persisted meta progress once on mount ---- */
+  /* ---- load persisted meta progress + build the first board on mount ---- */
   useEffect(() => {
     const s = loadState();
     setStars(s.stars);
     setDone(s.done);
     setLevel(s.level);
     setBest(s.best);
+    let b = createBoard();
+    let guard = 0;
+    while (!hasPossibleMove(b) && guard++ < 20) b = createBoard();
+    setBoard(b);
     setHydrated(true);
   }, []);
 
