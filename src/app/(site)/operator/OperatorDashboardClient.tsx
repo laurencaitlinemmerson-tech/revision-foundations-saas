@@ -109,7 +109,7 @@ const T = {
   green:    'var(--green)', greenSoft: 'var(--green-soft)',
   gold:     'var(--gold)',  goldSoft:  'var(--gold-soft)',
   rose:     'var(--rose)',  roseSoft:  'var(--rose-soft)',
-  display:  'var(--font-body)',
+  display:  "'Playfair Display', Georgia, serif",
   sans:     "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
 } as const;
 
@@ -7309,7 +7309,7 @@ const OPERATOR_PAGES: OperatorPageDef[] = [
   { id: 'fuel', emoji: '🍓', label: 'Fuel', blurb: "Today's intake and maintenance" },
   { id: 'insights', emoji: '🔮', label: 'Insights', blurb: 'Trend signal and recovery' },
   { id: 'plan', emoji: '🎀', label: 'Plan', blurb: 'Readiness and training priorities' },
-  { id: 'arcade', emoji: '🕹️', label: 'Arcade', blurb: 'A paeds ward shift in eight bits' },
+  { id: 'arcade', emoji: '🕹️', label: 'Arcade', blurb: 'Two paeds ward cabinets in eight bits' },
 ];
 
 // ─── Apple Health → cutting guidance ────────────────────────────────────────
@@ -7870,6 +7870,15 @@ export default function OperatorDashboardClient() {
     <div className="fitness-reference-shell" data-theme={theme}>
       {themeToggleButton}
       <main className="wrap fitness-redesign" id="operator-overview" data-active-page={activePage}>
+        <div className="op-topline">
+          <span className="op-crumb">Operator&nbsp;·&nbsp;<b>{activePage === 'overview' ? 'Dashboard' : OPERATOR_PAGES.find((p) => p.id === activePage)?.label}</b></span>
+        </div>
+        <nav className="op-tabs" role="tablist" aria-label="Dashboard sections">
+          <button type="button" className={activePage === 'overview' ? 'on' : ''} aria-selected={activePage === 'overview'} role="tab" onClick={() => goToPage('overview')}>Dashboard</button>
+          {OPERATOR_PAGES.map((p) => (
+            <button type="button" key={p.id} className={activePage === p.id ? 'on' : ''} aria-selected={activePage === p.id} role="tab" onClick={() => goToPage(p.id)}>{p.label}</button>
+          ))}
+        </nav>
         {activePage === 'overview' && (() => {
           // Per-tile mini-viz: progress rings where a 0–100% reads naturally,
           // trend sparklines where the shape of the data matters.
@@ -7877,7 +7886,13 @@ export default function OperatorDashboardClient() {
           const intakeAdherence = caloriesInToday ? clampPct((caloriesInToday / nutrition.intake) * 100) : 0;
           // Overview only renders client-side after auth, so localStorage is safe here.
           let arcadeBest = 0;
-          try { arcadeBest = Number(window.localStorage.getItem('op-arcade-best') ?? '0') || 0; } catch { arcadeBest = 0; }
+          try {
+            // Best across both cabinets: Ward Run and Supply Drop.
+            arcadeBest = Math.max(
+              Number(window.localStorage.getItem('op-arcade-best') ?? '0') || 0,
+              Number(window.localStorage.getItem('op-arcade-supply-best') ?? '0') || 0,
+            );
+          } catch { arcadeBest = 0; }
           const vizById: Record<string, React.ReactNode> = {
             nursing: <MiniRing pct={33} tone="rose" />,
             trajectory: <MiniSparkline values={dashboardSource.slice(-12).map((r) => r.weight)} />,
@@ -8491,7 +8506,7 @@ export default function OperatorDashboardClient() {
         </div>
 
         <div className={`op-page ${activePage === 'arcade' ? 'is-active' : ''}`} data-page="arcade">
-        <CollapsibleSection eyebrow="Arcade" note="An eight-bit break — run the paeds ward from the doors to handover." defaultOpen>
+        <CollapsibleSection eyebrow="Arcade" note="An eight-bit break — two cabinets: run the ward to handover, or steer the trolley through the supply drop." defaultOpen>
         <Reveal>
           <ArcadeGame active={activePage === 'arcade'} />
         </Reveal>

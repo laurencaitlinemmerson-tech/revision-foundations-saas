@@ -1,26 +1,26 @@
 .fitness-reference-shell {
-  --paper: #fafaf8;
-  --paper-deep: #f5f3ef;
-  --surface: #fbf8f3;
-  --bone: #f3efe8;
-  --ink: #1a1815;
+  --paper: #FDFDFB;
+  --paper-deep: #F6F4EF;
+  --surface: #FFFFFF;
+  --bone: #F6F4EF;
+  --ink: #1E1E1C;
   --ink-soft: #5a5750;
-  --ink-mute: #9a948c;
-  --ink-dim: rgba(26, 24, 21, 0.35);
+  --ink-mute: #8B8983;
+  --ink-dim: rgba(30, 30, 28, 0.35);
   --body: #5a5750;
-  --muted: #9a948c;
-  --rule: rgba(26, 24, 21, 0.12);
-  --rule-soft: rgba(26, 24, 21, 0.08);
-  --line: rgba(26, 24, 21, 0.11);
-  --soft-line: rgba(26, 24, 21, 0.07);
+  --muted: #8B8983;
+  --rule: #E7E4DD;
+  --rule-soft: #F0EEE8;
+  --line: #E7E4DD;
+  --soft-line: #F0EEE8;
   --good: #1c7a67;
   --warn: #a14a57;
   --brass: #c4872f;
   --brass-deep: #7d4c0d;
   --brass-haze: rgba(196, 135, 47, 0.08);
-  --accent: #b76e79;
-  --accent-soft: rgba(183, 110, 121, 0.32);
-  --accent-haze: rgba(183, 110, 121, 0.14);
+  --accent: #A6906B;
+  --accent-soft: rgba(166, 144, 107, 0.32);
+  --accent-haze: rgba(166, 144, 107, 0.14);
   --cell-good: rgba(28, 122, 103, 0.78);
   --cell-brass: rgba(196, 135, 47, 0.62);
   --cell-warn: rgba(161, 74, 87, 0.62);
@@ -28,8 +28,8 @@
   --blue-soft: #eaf1fa;
   --green: #1c7a67;
   --green-soft: #e4f2ec;
-  --gold: #633806;
-  --gold-soft: #faeeda;
+  --gold: #8F7A54;
+  --gold-soft: #F6F0E4;
   --rose: #a14a57;
   --rose-soft: #f9e8eb;
   --card-shadow: 0 24px 60px rgba(26, 24, 21, 0.05);
@@ -40,28 +40,28 @@
 }
 
 .fitness-reference-shell[data-theme="dark"] {
-  --paper: #1c1916;
-  --paper-deep: #14110f;
-  --surface: #221e1a;
-  --bone: #232019;
-  --ink: #ebe5dc;
+  --paper: #171614;
+  --paper-deep: #121110;
+  --surface: #1F1E1B;
+  --bone: #242220;
+  --ink: #ECEAE4;
   --ink-soft: #b7afa3;
-  --ink-mute: #7d756a;
-  --ink-dim: rgba(235, 229, 220, 0.40);
+  --ink-mute: #9A978E;
+  --ink-dim: rgba(236, 234, 228, 0.40);
   --body: #b7afa3;
-  --muted: #7d756a;
-  --rule: rgba(235, 229, 220, 0.14);
-  --rule-soft: rgba(235, 229, 220, 0.08);
-  --line: rgba(235, 229, 220, 0.16);
-  --soft-line: rgba(235, 229, 220, 0.08);
+  --muted: #9A978E;
+  --rule: #2E2C28;
+  --rule-soft: #232120;
+  --line: #2E2C28;
+  --soft-line: #232120;
   --good: #4cc1a7;
   --warn: #d68a96;
   --brass: #e4a85d;
   --brass-deep: #c4872f;
   --brass-haze: rgba(228, 168, 93, 0.10);
-  --accent: #d48a95;
-  --accent-soft: rgba(212, 138, 149, 0.32);
-  --accent-haze: rgba(212, 138, 149, 0.14);
+  --accent: #C0A87E;
+  --accent-soft: rgba(192, 168, 126, 0.32);
+  --accent-haze: rgba(192, 168, 126, 0.14);
   --cell-good: rgba(76, 193, 167, 0.62);
   --cell-brass: rgba(228, 168, 93, 0.52);
   --cell-warn: rgba(214, 138, 150, 0.55);
@@ -69,8 +69,8 @@
   --blue-soft: rgba(122, 168, 214, 0.14);
   --green: #4cc1a7;
   --green-soft: rgba(76, 193, 167, 0.14);
-  --gold: #e4a85d;
-  --gold-soft: rgba(228, 168, 93, 0.14);
+  --gold: #C0A87E;
+  --gold-soft: rgba(192, 168, 126, 0.16);
   --rose: #d68a96;
   --rose-soft: rgba(214, 138, 150, 0.14);
   --card-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
@@ -8268,6 +8268,44 @@
   max-width: 780px;
   margin: 0 auto;
 }
+.fitness-redesign .op-arcade-tabs {
+  display: flex;
+  border: 0.5px solid var(--rule);
+  border-bottom: none;
+  background: var(--paper);
+}
+.fitness-redesign .op-arcade-tab {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.fitness-redesign .op-arcade-tab + .op-arcade-tab {
+  border-left: 0.5px solid var(--rule);
+}
+.fitness-redesign .op-arcade-tab.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+.fitness-redesign .op-arcade-tab-hint {
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
 .fitness-redesign .op-arcade-frame {
   background: var(--paper);
   border: 0.5px solid var(--rule);
@@ -8288,6 +8326,27 @@
 .fitness-redesign .op-arcade-best {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.fitness-redesign .op-arcade-head-right {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.fitness-redesign .op-arcade-sound {
+  border: none;
+  border-bottom: 0.5px solid var(--rule);
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.fitness-redesign .op-arcade-sound[aria-pressed='true'] {
   color: var(--ink);
 }
 .fitness-redesign .op-arcade-canvas {
@@ -8657,3 +8716,90 @@
   .fitness-redesign .nurse-mod-title { grid-column: 1 / -1; white-space: normal; }
   .fitness-redesign .nurse-mod-credits { grid-column: 1 / -1; }
 }
+
+/* ── Warm-editorial rounding (social-hub vibe) ────────────────────────────────
+   Operator was deliberately sharp; round the genuine card/panel/control
+   surfaces to match the portal's rounded look. Progress bars, dots, rings and
+   checkboxes are left alone on purpose. */
+.fitness-reference-shell .fit-command-card,
+.fitness-reference-shell .fit-command-deck,
+.fitness-reference-shell .fit-command-stat,
+.fitness-reference-shell .fit-food-card,
+.fitness-reference-shell .fit-food-pie-card,
+.fitness-reference-shell .fit-top-nutrition-card,
+.fitness-reference-shell .fit-consistency-card,
+.fitness-reference-shell .fit-headline-stat,
+.fitness-reference-shell .fit-stat-strip,
+.fitness-reference-shell .fit-panel,
+.fitness-reference-shell .fitness-chart-panel,
+.fitness-reference-shell .op-overview-card,
+.fitness-reference-shell .op-health-card,
+.fitness-reference-shell .op-insight-card,
+.fitness-reference-shell .op-insight-stat,
+.fitness-reference-shell .op-card-wide,
+.fitness-reference-shell .op-nutri-target-card,
+.fitness-reference-shell .op-nutri-weekly-card,
+.fitness-reference-shell .op-nutri-hero-status,
+.fitness-reference-shell .op-day-inspector-hero-status,
+.fitness-reference-shell .op-workout-empty-state,
+.fitness-reference-shell .op-workout-studio-item,
+.fitness-reference-shell .op-reco {
+  border-radius: 8px;
+}
+.fitness-reference-shell .fit-dashboard-btn,
+.fitness-reference-shell .fit-pace-switch-btn,
+.fitness-reference-shell .op-lifestyle-btn,
+.fitness-reference-shell .op-lifestyle-causal-input,
+.fitness-reference-shell .op-back-btn {
+  border-radius: 6px;
+}
+/* Nurse composite containers — round the outer shell and clip inner hairlines */
+.fitness-reference-shell .nurse-stats,
+.fitness-reference-shell .nurse-next,
+.fitness-reference-shell .nurse-year,
+.fitness-reference-shell .nurse-placements {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ── Reference tab-bar chrome (social-hub .topline + .tabs) ───────────────────
+   Persistent gold-underline tabs driving activePage; back-bar hidden since the
+   tabs now carry navigation. */
+.fitness-redesign .op-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fitness-redesign .op-crumb b { color: var(--ink); font-weight: 600; }
+.fitness-redesign .op-tabs {
+  display: flex;
+  gap: 26px;
+  border-bottom: 1px solid var(--rule);
+  margin: 14px 0 10px;
+  overflow-x: auto;
+}
+.fitness-reference-shell .op-tabs button {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 10px 2px 12px;
+  border-bottom: 2px solid transparent;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.fitness-reference-shell .op-tabs button:hover { color: var(--ink); }
+.fitness-reference-shell .op-tabs button.on {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+.fitness-redesign .op-back-bar { display: none; }
