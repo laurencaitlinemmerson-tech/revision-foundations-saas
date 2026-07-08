@@ -3,6 +3,7 @@
 import React, {
   useState, useEffect, useCallback, useMemo, FormEvent, useRef, CSSProperties, ReactNode,
 } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, useInView, useReducedMotion, useMotionValue, animate, useTransform } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import FitnessLineChart, { type FitnessChartRange } from '@/components/operator/fitness/FitnessLineChart';
@@ -16,6 +17,10 @@ import type { FitnessPhotoMilestone } from '@/lib/fitness/types';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 import { computeTdee } from '@/lib/fitness/tdee';
 import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
+
+// Canvas game only ever runs client-side; keep it out of the main bundle.
+const ArcadeGame = dynamic(() => import('./ArcadeGame'), { ssr: false });
+const NursingSection = dynamic(() => import('./NursingSection'), { ssr: false });
 
 // ─── Motion helpers ───────────────────────────────────────────────────────────
 
@@ -407,17 +412,28 @@ function MiniRing({ pct, tone = 'ink' }: { pct: number; tone?: 'ink' | 'rose' | 
   const p = Math.max(0, Math.min(100, pct));
   const r = 16;
   const circ = 2 * Math.PI * r;
-  const dash = (p / 100) * circ;
   const stroke = tone === 'ink' ? 'var(--ink)' : `var(--${tone})`;
+  const reduce = useReducedMotion();
+  const motionPct = useMotionValue(reduce ? p : 0);
+  const dashArray = useTransform(motionPct, (v) => {
+    const d = (v / 100) * circ;
+    return `${d.toFixed(2)} ${(circ - d).toFixed(2)}`;
+  });
+  const displayNum = useTransform(motionPct, (v) => Math.round(v));
+  useEffect(() => {
+    if (reduce) { motionPct.set(p); return; }
+    const controls = animate(motionPct, p, { duration: 0.9, ease: EASE_OUT });
+    return controls.stop;
+  }, [p, reduce, motionPct]);
   return (
     <svg className="op-tile-gauge" width="46" height="46" viewBox="0 0 46 46" aria-hidden>
       <circle cx="23" cy="23" r={r} fill="none" stroke="var(--rule)" strokeWidth="2.5" />
-      <circle
+      <motion.circle
         cx="23" cy="23" r={r} fill="none" stroke={stroke} strokeWidth="2.5"
-        strokeDasharray={`${dash.toFixed(2)} ${(circ - dash).toFixed(2)}`}
+        style={{ strokeDasharray: dashArray }}
         strokeLinecap="round" transform="rotate(-90 23 23)"
       />
-      <text x="23" y="23" textAnchor="middle" dominantBaseline="central" className="op-tile-gauge-num">{Math.round(p)}</text>
+      <motion.text x="23" y="23" textAnchor="middle" dominantBaseline="central" className="op-tile-gauge-num">{displayNum}</motion.text>
     </svg>
   );
 }
@@ -467,9 +483,22 @@ function GraphTooltip({ x, w, date, valueLabel }: { x: number; w: number; date?:
   );
 }
 
+// A still-designed placeholder for charts without enough data yet — a faint
+// ghost trendline rather than bare text, so the empty state isn't a dead end.
+function GraphEmptyState({ label = 'Not enough data yet' }: { label?: string }) {
+  return (
+    <div className="op-graph-empty">
+      <svg className="op-graph-empty-mark" viewBox="0 0 80 28" fill="none" aria-hidden>
+        <path d="M2 21 L18 12 L32 17 L48 7 L64 14 L78 5" stroke="currentColor" strokeWidth="1.3" strokeDasharray="3 3.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span>{label}</span>
+    </div>
+  );
+}
+
 function OverviewLineChart({ values, dates, color = 'var(--accent)', unit = '' }: { values: number[]; dates?: string[]; color?: string; unit?: string }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  if (values.length < 2) return <div className="op-graph-empty">Not enough data yet</div>;
+  if (values.length < 2) return <GraphEmptyState />;
   const w = 300, h = 120, padX = 6, padTop = 10, padBot = 12;
   const yMin = Math.min(...values);
   const yMax = Math.max(...values);
@@ -511,7 +540,7 @@ function OverviewLineChart({ values, dates, color = 'var(--accent)', unit = '' }
 
 function OverviewBarChart({ values, dates, color = 'var(--accent)', baseline = false, unit = '' }: { values: number[]; dates?: string[]; color?: string; baseline?: boolean; unit?: string }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  if (values.length === 0) return <div className="op-graph-empty">Not enough data yet</div>;
+  if (values.length === 0) return <GraphEmptyState />;
   const w = 300, h = 120, padTop = 10, padBot = 12, gap = 3;
   const n = values.length;
   const bw = (w - gap * (n - 1)) / n;
@@ -7264,7 +7293,7 @@ function FoodBreakdownSection({ snap }: { snap: TodaySnapshot }) {
 
 // ─── Sub-page navigation ────────────────────────────────────────────────────
 // The dashboard reads as a compact overview; each tile opens its own full page.
-type OperatorPage = 'overview' | 'trajectory' | 'history' | 'fuel' | 'insights' | 'plan';
+type OperatorPage = 'overview' | 'nursing' | 'trajectory' | 'history' | 'fuel' | 'insights' | 'plan' | 'arcade';
 
 interface OperatorPageDef {
   id: Exclude<OperatorPage, 'overview'>;
@@ -7274,11 +7303,13 @@ interface OperatorPageDef {
 }
 
 const OPERATOR_PAGES: OperatorPageDef[] = [
+  { id: 'nursing', emoji: '🩺', label: 'Nursing', blurb: 'Degree progress and placements' },
   { id: 'trajectory', emoji: '📈', label: 'Trajectory', blurb: 'Weight trend and consistency' },
   { id: 'history', emoji: '🗓️', label: 'History', blurb: 'Phases, photos, and the weekly board' },
   { id: 'fuel', emoji: '🍓', label: 'Fuel', blurb: "Today's intake and maintenance" },
   { id: 'insights', emoji: '🔮', label: 'Insights', blurb: 'Trend signal and recovery' },
   { id: 'plan', emoji: '🎀', label: 'Plan', blurb: 'Readiness and training priorities' },
+  { id: 'arcade', emoji: '🕹️', label: 'Arcade', blurb: 'A paeds ward shift in eight bits' },
 ];
 
 // ─── Apple Health → cutting guidance ────────────────────────────────────────
@@ -7316,6 +7347,104 @@ function recommendCut(input: {
     ? 'Logging is patchy, so this stays gentle — lock in daily weigh-ins, then push the deficit.'
     : `Body fat near ${bodyFat.toFixed(0)}% supports this pace at your current activity level.`;
   return { method, pace, intake, deficit, lever, note };
+}
+
+// ─── "What this means" coaching panel ───────────────────────────────────────
+// Translates raw numbers into the specific calls a coach would make. Each
+// scenario is independent — zero, one, or several can fire on a given day.
+interface CoachingInsight {
+  tone: 'good' | 'warn' | 'neutral';
+  title: string;
+  text: string;
+}
+
+function buildWhatThisMeans(input: {
+  proteinToday: number | null;
+  proteinTarget: number;
+  avgSteps: number;
+  weightChange7d: number;
+  avgDeficit: number;
+  cadenceScore: number;
+}): CoachingInsight[] {
+  const { proteinToday, proteinTarget, avgSteps, weightChange7d, avgDeficit, cadenceScore } = input;
+  const insights: CoachingInsight[] = [];
+
+  if (proteinToday !== null && proteinToday < proteinTarget * 0.75) {
+    const gap = Math.round(proteinTarget - proteinToday);
+    insights.push({
+      tone: 'warn',
+      title: 'Protein is light today',
+      text: `${gap}g short of target. Simple fix: a shake or ~150g of chicken/tofu at the next meal — it's the easiest lever to close before touching calories.`,
+    });
+  }
+
+  if (avgSteps > 0 && avgSteps < 7000) {
+    const walkTarget = Math.min(10000, Math.round((avgSteps + 3000) / 500) * 500);
+    insights.push({
+      tone: 'warn',
+      title: 'Steps have room',
+      text: `Averaging ${Math.round(avgSteps).toLocaleString()}/day. A realistic next target is ${walkTarget.toLocaleString()} — one 20-minute walk after a meal gets most of the way there.`,
+    });
+  }
+
+  if (weightChange7d > 0 && avgDeficit > 0) {
+    insights.push({
+      tone: 'neutral',
+      title: 'Weight up, but the deficit is real',
+      text: `The scale moved up while the average deficit held at ${Math.round(avgDeficit).toLocaleString()} kcal/day — that reads as water and food volume, not fat. Sodium, carbs, and cycle timing all swing this 1–2kg. Trust the week, not the day.`,
+    });
+  }
+
+  if (cadenceScore >= 80) {
+    insights.push({
+      tone: 'good',
+      title: 'Logging is locked in',
+      text: `${cadenceScore}/100 cadence — this is exactly the consistency that makes every other number on this page trustworthy. Nothing to change here.`,
+    });
+  }
+
+  return insights;
+}
+
+// ─── Weekly reflection ───────────────────────────────────────────────────────
+// A journal entry, not a report: what went well, what needs attention, and
+// the single thing worth focusing on next — picked by biggest-lever-first.
+interface WeeklyReflection {
+  wins: string[];
+  attention: string[];
+  focus: string;
+}
+
+function buildWeeklyReflection(input: {
+  cadenceScore: number;
+  cadenceCount: number;
+  avgSteps: number;
+  avgDeficit: number;
+  proteinToday: number | null;
+  proteinTarget: number;
+}): WeeklyReflection {
+  const { cadenceScore, cadenceCount, avgSteps, avgDeficit, proteinToday, proteinTarget } = input;
+  const wins: string[] = [];
+  const attention: string[] = [];
+
+  if (cadenceScore >= 70) wins.push(`Logged ${cadenceCount}/14 days — the trend this week is trustworthy.`);
+  else attention.push(`Only ${cadenceCount}/14 days logged — the trend is a guess until this improves.`);
+
+  if (avgSteps >= 8000) wins.push(`Averaged ${Math.round(avgSteps).toLocaleString()} steps/day — activity is doing real work.`);
+  else if (avgSteps > 0) attention.push(`Steps averaged ${Math.round(avgSteps).toLocaleString()}/day — room to move before calories need to.`);
+
+  if (avgDeficit > 0) wins.push(`Held an average deficit of ${Math.round(avgDeficit).toLocaleString()} kcal/day.`);
+  else if (avgDeficit < 0) attention.push(`Running a ${Math.abs(Math.round(avgDeficit)).toLocaleString()} kcal/day surplus on average.`);
+
+  if (proteinToday !== null && proteinToday >= proteinTarget * 0.9) wins.push(`Protein on target — ${Math.round(proteinToday)}g logged today.`);
+  else if (proteinToday !== null) attention.push(`Protein sat ${Math.round(proteinTarget - proteinToday)}g under target today.`);
+
+  let focus = 'Keep the current rhythm — nothing here needs a big swing.';
+  if (cadenceScore < 70) focus = 'Log every day, even the messy ones — consistency unlocks every other decision.';
+  else if (avgSteps < 7000) focus = 'Build steps toward 8,000–10,000/day before touching intake again.';
+  else if (proteinToday !== null && proteinToday < proteinTarget * 0.85) focus = 'Front-load protein earlier in the day so it is easier to hit by dinner.';
+
+  return { wins, attention, focus };
 }
 
 // ─── Main app ─────────────────────────────────────────────────────────────────
@@ -7746,12 +7875,26 @@ export default function OperatorDashboardClient() {
           // trend sparklines where the shape of the data matters.
           const clampPct = (n: number) => Math.max(0, Math.min(100, n));
           const intakeAdherence = caloriesInToday ? clampPct((caloriesInToday / nutrition.intake) * 100) : 0;
+          // Overview only renders client-side after auth, so localStorage is safe here.
+          let arcadeBest = 0;
+          try { arcadeBest = Number(window.localStorage.getItem('op-arcade-best') ?? '0') || 0; } catch { arcadeBest = 0; }
           const vizById: Record<string, React.ReactNode> = {
+            nursing: <MiniRing pct={33} tone="rose" />,
             trajectory: <MiniSparkline values={dashboardSource.slice(-12).map((r) => r.weight)} />,
             history: <MiniSparkline values={dashboardSource.map((r) => r.weight)} />,
             fuel: <MiniRing pct={intakeAdherence} tone="gold" />,
             insights: <MiniSparkline values={dashboardSource.slice(-12).map((r) => r.bodyFat)} />,
             plan: <MiniRing pct={clampPct(cadence.score)} tone="ink" />,
+            arcade: (
+              <svg className="op-tile-spark" width="30" height="26" viewBox="0 0 7 6" shapeRendering="crispEdges" aria-hidden>
+                <rect x="1" y="0" width="2" height="1" fill="var(--accent)" />
+                <rect x="4" y="0" width="2" height="1" fill="var(--accent)" />
+                <rect x="0" y="1" width="7" height="2" fill="var(--accent)" />
+                <rect x="1" y="3" width="5" height="1" fill="var(--accent)" />
+                <rect x="2" y="4" width="3" height="1" fill="var(--accent)" />
+                <rect x="3" y="5" width="1" height="1" fill="var(--accent)" />
+              </svg>
+            ),
           };
 
           // Dashboard graphs — a quick read on the last few weeks.
@@ -7779,6 +7922,25 @@ export default function OperatorDashboardClient() {
 
           const maintenanceKcal = nutrition.maintenance ?? nutrition.activeTdee ?? (nutrition.bmr + (nutrition.neat ?? 0));
           const reco = recommendCut({ maintenance: maintenanceKcal, bodyFat: latest.bodyFat, cadenceScore: cadence.score, avgSteps });
+
+          const proteinTarget = Math.round(latest.weight * 1.8);
+          const proteinPct = todayProteinG !== null ? Math.min(1.15, todayProteinG / proteinTarget) : 0;
+          const whatThisMeans = buildWhatThisMeans({
+            proteinToday: todayProteinG,
+            proteinTarget,
+            avgSteps,
+            weightChange7d: sevenDayDelta,
+            avgDeficit,
+            cadenceScore: cadence.score,
+          });
+          const reflection = buildWeeklyReflection({
+            cadenceScore: cadence.score,
+            cadenceCount: cadence.count,
+            avgSteps,
+            avgDeficit,
+            proteinToday: todayProteinG,
+            proteinTarget,
+          });
 
           return (
           <div className="op-overview">
@@ -7835,6 +7997,47 @@ export default function OperatorDashboardClient() {
                   </div>
                 );
               })()}
+
+              <div
+                className="op-protein-card is-linked"
+                onClick={() => goToPage('fuel')}
+                role="button"
+                tabIndex={0}
+                aria-label="Open Fuel"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToPage('fuel'); }}
+              >
+                <div className="op-protein-card-head">
+                  <span className="op-protein-card-label">Protein</span>
+                  <span className="op-protein-card-value">
+                    {todayProteinG !== null ? Math.round(todayProteinG) : '—'}
+                    <small> / {proteinTarget}g</small>
+                  </span>
+                </div>
+                <div className="op-protein-bar-track">
+                  <div className="op-protein-bar-fill" style={{ width: `${Math.min(100, proteinPct * 100)}%` }} />
+                </div>
+                <span className="op-protein-card-insight">
+                  {todayProteinG === null
+                    ? 'Not logged yet today.'
+                    : proteinPct >= 0.9
+                      ? 'On target — good base for recovery.'
+                      : `${Math.round(proteinTarget - todayProteinG)}g short of target.`}
+                </span>
+              </div>
+
+              {whatThisMeans.length > 0 && (
+                <aside className="op-wtm" aria-label="What this means">
+                  <span className="op-wtm-eyebrow">🧭 What this means</span>
+                  <div className="op-wtm-grid">
+                    {whatThisMeans.map((insight) => (
+                      <div key={insight.title} className={`op-wtm-item is-${insight.tone}`}>
+                        <span className="op-wtm-item-title">{insight.title}</span>
+                        <p className="op-wtm-item-text">{insight.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </aside>
+              )}
 
               <section className="fit-weight-feature">
                 <div
@@ -7903,11 +8106,13 @@ export default function OperatorDashboardClient() {
 
             <div className="op-overview-grid">
               {([
+                { id: 'nursing' as const, value: '1st', unit: '', stat: 'Projected class' },
                 { id: 'trajectory' as const, value: `${sevenDayDelta >= 0 ? '+' : ''}${sevenDayDelta.toFixed(1)}`, unit: 'kg', stat: '7-day move' },
                 { id: 'history' as const, value: String(phaseRows.length), unit: '', stat: 'Logged phases' },
                 { id: 'fuel' as const, value: nutrition.intake.toLocaleString(), unit: 'kcal', stat: 'Intake plan' },
                 { id: 'insights' as const, value: latest.bodyFat.toFixed(1), unit: '%', stat: 'Body fat' },
                 { id: 'plan' as const, value: String(cadence.score), unit: '/100', stat: 'Cadence' },
+                { id: 'arcade' as const, value: arcadeBest > 0 ? arcadeBest.toLocaleString() : 'NEW', unit: arcadeBest > 0 ? 'pts' : '', stat: arcadeBest > 0 ? 'High score' : 'Insert coin' },
               ]).map((card) => {
                 const def = OPERATOR_PAGES.find((p) => p.id === card.id)!;
                 return (
@@ -7941,6 +8146,36 @@ export default function OperatorDashboardClient() {
                 <OverviewGraphCard title="Body composition" value={`${latest.bodyFat.toFixed(1)}%`} sub={`Body fat · ${bodyFatChange >= 0 ? '+' : ''}${bodyFatChange.toFixed(1)} pt`} onOpen={() => goToPage('insights')} openLabel="Open Insights →">
                   <OverviewLineChart values={bodyFatSeries} dates={recentDates} color="var(--gold)" unit="%" />
                 </OverviewGraphCard>
+              </div>
+            </div>
+
+            <div className="op-reflection">
+              <EditorialDivider eyebrow="Weekly reflection" note="A journal entry, not a report card." style={{ margin: '0 0 20px' }} />
+              <div className="op-reflection-grid">
+                <div className="op-reflection-col">
+                  <span className="op-reflection-col-label">Wins this week</span>
+                  {reflection.wins.length > 0 ? (
+                    <ul className="op-reflection-list">
+                      {reflection.wins.map((w) => <li key={w}>{w}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="op-reflection-empty">Nothing standing out yet — give it a few more logged days.</p>
+                  )}
+                </div>
+                <div className="op-reflection-col">
+                  <span className="op-reflection-col-label">Needs attention</span>
+                  {reflection.attention.length > 0 ? (
+                    <ul className="op-reflection-list">
+                      {reflection.attention.map((a) => <li key={a}>{a}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="op-reflection-empty">Nothing flagged — this week is clean.</p>
+                  )}
+                </div>
+                <div className="op-reflection-col op-reflection-focus">
+                  <span className="op-reflection-col-label">Suggested focus, next week</span>
+                  <p className="op-reflection-focus-text">{reflection.focus}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -8057,6 +8292,12 @@ export default function OperatorDashboardClient() {
             />
           </div>
         </section>
+        </Reveal>
+        </div>
+
+        <div className={`op-page ${activePage === 'nursing' ? 'is-active' : ''}`} data-page="nursing">
+        <Reveal delay={0.08}>
+          <NursingSection />
         </Reveal>
         </div>
 
@@ -8248,8 +8489,16 @@ export default function OperatorDashboardClient() {
         </Reveal>
         </CollapsibleSection>
         </div>
+
+        <div className={`op-page ${activePage === 'arcade' ? 'is-active' : ''}`} data-page="arcade">
+        <CollapsibleSection eyebrow="Arcade" note="An eight-bit break — run the paeds ward from the doors to handover." defaultOpen>
+        <Reveal>
+          <ArcadeGame active={activePage === 'arcade'} />
+        </Reveal>
+        </CollapsibleSection>
+        </div>
           </>
-        ) : activePage !== 'overview' && activePage !== 'trajectory' ? (
+        ) : activePage !== 'overview' && activePage !== 'trajectory' && activePage !== 'nursing' ? (
           <section className="fit-deferred-note" aria-live="polite">
             <div className="fit-deferred-note-kicker">Loading supporting panels</div>
             <p>The summary board lands first. The heavier comparison, recovery, and studio panels mount a beat later so the page feels faster on entry.</p>

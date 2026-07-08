@@ -7924,12 +7924,14 @@
    their matching section. Same hover language as .op-overview-card. */
 .fitness-reference-shell .op-reco.is-linked,
 .fitness-reference-shell .op-graph-card.is-linked,
+.fitness-reference-shell .op-protein-card.is-linked,
 .fitness-reference-shell .fit-weight-spotlight.is-linked {
   cursor: pointer;
   transition: border-color 200ms ease, background-color 200ms ease, transform 200ms ease;
 }
 .fitness-reference-shell .op-reco.is-linked:hover,
 .fitness-reference-shell .op-graph-card.is-linked:hover,
+.fitness-reference-shell .op-protein-card.is-linked:hover,
 .fitness-reference-shell .fit-weight-spotlight.is-linked:hover {
   border-color: var(--ink-soft);
   background: #ffffff;
@@ -7939,6 +7941,7 @@
 }
 .fitness-reference-shell .op-reco.is-linked:focus-visible,
 .fitness-reference-shell .op-graph-card.is-linked:focus-visible,
+.fitness-reference-shell .op-protein-card.is-linked:focus-visible,
 .fitness-reference-shell .fit-weight-spotlight.is-linked:focus-visible {
   outline: 1.5px solid var(--ink-soft);
   outline-offset: 2px;
@@ -8083,9 +8086,574 @@
 }
 .fitness-redesign .op-graph-empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   height: 100%;
   font-size: 12px;
   color: var(--ink-mute);
+}
+.fitness-redesign .op-graph-empty-mark {
+  width: 64px;
+  height: auto;
+  color: var(--ink-mute);
+  opacity: 0.5;
+}
+
+/* ── Protein card ─────────────────────────────────────────────────────────── */
+.fitness-reference-shell .op-protein-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+}
+.fitness-redesign .op-protein-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.fitness-redesign .op-protein-card-label {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.fitness-redesign .op-protein-card-value {
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.fitness-redesign .op-protein-card-value small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-mute);
+}
+.fitness-redesign .op-protein-bar-track {
+  height: 4px;
+  background: var(--rule-soft);
+  overflow: hidden;
+}
+.fitness-redesign .op-protein-bar-fill {
+  height: 100%;
+  background: var(--good);
+  transition: width 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fitness-redesign .op-protein-card-insight {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* ── What this means (coaching insight panel) ────────────────────────────── */
+.fitness-redesign .op-wtm {
+  margin-top: 20px;
+  padding: 20px 22px;
+  background: var(--paper-deep);
+  border: 0.5px solid var(--rule);
+}
+.fitness-redesign .op-wtm-eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.fitness-redesign .op-wtm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.fitness-redesign .op-wtm-item {
+  padding-left: 14px;
+  border-left: 2px solid var(--rule);
+}
+.fitness-redesign .op-wtm-item.is-good { border-left-color: var(--good); }
+.fitness-redesign .op-wtm-item.is-warn { border-left-color: var(--warn); }
+.fitness-redesign .op-wtm-item.is-neutral { border-left-color: var(--brass); }
+.fitness-redesign .op-wtm-item-title {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.fitness-redesign .op-wtm-item-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ── Weekly reflection ────────────────────────────────────────────────────── */
+.fitness-redesign .op-reflection { margin-top: 40px; }
+.fitness-redesign .op-reflection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+.fitness-redesign .op-reflection-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fitness-redesign .op-reflection-col-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--rule);
+}
+.fitness-redesign .op-reflection-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fitness-redesign .op-reflection-list li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.fitness-redesign .op-reflection-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 5px;
+  height: 0.5px;
+  background: var(--ink-mute);
+}
+.fitness-redesign .op-reflection-empty {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-mute);
+}
+.fitness-redesign .op-reflection-focus-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .fitness-redesign .op-reflection-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .fitness-redesign .op-wtm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Ward arcade ──────────────────────────────────────────────────────────
+   The game canvas is deliberately not editorial — it's an 8-bit screen —
+   but the frame around it follows the system: paper, hairlines, no radius. */
+.fitness-redesign .op-arcade {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.fitness-redesign .op-arcade-frame {
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 16px 16px 14px;
+}
+.fitness-redesign .op-arcade-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+.fitness-redesign .op-arcade-kicker {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.fitness-redesign .op-arcade-best {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.fitness-redesign .op-arcade-canvas {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
+  border: 0.5px solid var(--rule);
+  background: #101a2c;
+  cursor: pointer;
+  outline-offset: 2px;
+  touch-action: manipulation;
+}
+.fitness-redesign .op-arcade-note {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ── Nursing dashboard ────────────────────────────────────────────────────── */
+.fitness-redesign .nurse {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  color: var(--ink);
+}
+.fitness-redesign .nurse-head { margin-bottom: 26px; }
+.fitness-redesign .nurse-kicker {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.fitness-redesign .nurse-title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-note {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* Headline stats */
+.fitness-redesign .nurse-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0;
+  border: 0.5px solid var(--rule);
+  margin-bottom: 24px;
+}
+.fitness-redesign .nurse-stat {
+  padding: 18px 20px;
+  border-right: 0.5px solid var(--rule);
+  background: var(--paper);
+}
+.fitness-redesign .nurse-stat:last-child { border-right: none; }
+.fitness-redesign .nurse-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-stat-value small {
+  font-size: 13px;
+  margin-left: 5px;
+  color: var(--ink-mute);
+  letter-spacing: 0;
+}
+.fitness-redesign .nurse-stat-accent { color: var(--accent); }
+.fitness-redesign .nurse-stat-label {
+  display: block;
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* Next placement callout */
+.fitness-redesign .nurse-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  margin-bottom: 36px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  border-left: 2px solid var(--accent);
+}
+.fitness-redesign .nurse-next-kicker {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.fitness-redesign .nurse-next-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-next-spec { color: var(--ink-soft); }
+.fitness-redesign .nurse-next-dates {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.fitness-redesign .nurse-next-count {
+  text-align: right;
+  flex-shrink: 0;
+}
+.fitness-redesign .nurse-next-count-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+.fitness-redesign .nurse-next-count-unit {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* Section heads */
+.fitness-redesign .nurse-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+.fitness-redesign .nurse-eyebrow {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-eyebrow-note {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.02em;
+}
+
+/* Year progress cards */
+.fitness-redesign .nurse-years {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 40px;
+}
+.fitness-redesign .nurse-year {
+  padding: 18px 20px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+}
+.fitness-redesign .nurse-year--current { border-color: var(--ink-soft); }
+.fitness-redesign .nurse-year-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.fitness-redesign .nurse-year-label {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-year-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-mute);
+  margin-bottom: 14px;
+}
+.fitness-redesign .nurse-year-bar {
+  height: 4px;
+  background: var(--rule);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.fitness-redesign .nurse-year-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.fitness-redesign .nurse-year--upcoming .nurse-year-bar-fill { background: var(--ink-mute); }
+.fitness-redesign .nurse-year-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.fitness-redesign .nurse-year-avg {
+  font-weight: 600;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-year-avg--muted {
+  font-weight: 400;
+  color: var(--ink-mute);
+}
+
+/* Badges */
+.fitness-redesign .nurse-badge {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 0.5px solid var(--rule);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.fitness-redesign .nurse-badge--complete,
+.fitness-redesign .nurse-badge--current { color: var(--green); border-color: var(--green); }
+.fitness-redesign .nurse-badge--upcoming { color: var(--ink-mute); }
+
+/* Placements timeline */
+.fitness-redesign .nurse-placements {
+  list-style: none;
+  margin: 0 0 40px;
+  padding: 0;
+  border: 0.5px solid var(--rule);
+  background: var(--paper);
+}
+.fitness-redesign .nurse-place {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 0.5px solid var(--rule);
+}
+.fitness-redesign .nurse-place:last-child { border-bottom: none; }
+.fitness-redesign .nurse-place-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-mute);
+}
+.fitness-redesign .nurse-place--done .nurse-place-dot { background: var(--green); }
+.fitness-redesign .nurse-place--next .nurse-place-dot { background: var(--accent); }
+.fitness-redesign .nurse-place-emoji { font-size: 17px; line-height: 1; flex-shrink: 0; }
+.fitness-redesign .nurse-place-main { flex: 1; min-width: 0; }
+.fitness-redesign .nurse-place-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-place-spec { font-weight: 400; color: var(--ink-soft); }
+.fitness-redesign .nurse-place-dates {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--ink-mute);
+}
+
+/* Modules */
+.fitness-redesign .nurse-modules {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+.fitness-redesign .nurse-mod-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.fitness-redesign .nurse-mod-group-year {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink);
+}
+.fitness-redesign .nurse-mod-group-sub {
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+.fitness-redesign .nurse-mod-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 0.5px solid var(--rule);
+}
+.fitness-redesign .nurse-mod {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 4px;
+  border-bottom: 0.5px solid var(--rule);
+}
+.fitness-redesign .nurse-mod-code {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+.fitness-redesign .nurse-mod-title {
+  font-size: 13px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fitness-redesign .nurse-mod-credits {
+  font-size: 11px;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+.fitness-redesign .nurse-mod-grade {
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+  min-width: 66px;
+}
+.fitness-redesign .nurse-mod-grade--gold { color: var(--gold); }
+.fitness-redesign .nurse-mod-grade--green { color: var(--green); }
+.fitness-redesign .nurse-mod-grade--blue { color: var(--blue); }
+.fitness-redesign .nurse-mod-grade--rose { color: var(--rose); }
+.fitness-redesign .nurse-mod-grade--pass { color: var(--green); }
+.fitness-redesign .nurse-mod-grade--pending { color: var(--ink-mute); font-weight: 400; }
+
+@media (max-width: 560px) {
+  .fitness-redesign .nurse-next { flex-direction: column; align-items: flex-start; }
+  .fitness-redesign .nurse-next-count { text-align: left; }
+  .fitness-redesign .nurse-mod {
+    grid-template-columns: 1fr auto;
+    row-gap: 3px;
+  }
+  .fitness-redesign .nurse-mod-code { grid-column: 1; }
+  .fitness-redesign .nurse-mod-grade { grid-column: 2; grid-row: 1; }
+  .fitness-redesign .nurse-mod-title { grid-column: 1 / -1; white-space: normal; }
+  .fitness-redesign .nurse-mod-credits { grid-column: 1 / -1; }
 }
