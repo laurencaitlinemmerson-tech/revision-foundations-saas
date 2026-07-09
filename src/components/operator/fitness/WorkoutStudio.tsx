@@ -666,7 +666,7 @@ export default function WorkoutStudio({ workouts }: { workouts: WorkoutStudioWor
       <div className="fit-panel-head op-workout-studio-head">
         <div>
           <h3>Workout <em>studio</em></h3>
-          <div className="meta">Tracker logic from the standalone file, folded into the dashboard instead of split away from it.</div>
+          <div className="meta">Pick a split, run the session timer, and tick off blocks as you go.</div>
         </div>
         <div className="op-workout-studio-headside">
           <span className="pill neutral">{plan.eyebrow}</span>

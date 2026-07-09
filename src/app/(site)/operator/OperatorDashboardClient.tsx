@@ -1412,19 +1412,6 @@ function AnalyticsSection({
 
         </div>
 
-        {/* ── TDEE breakdown · how maintenance is calculated ─────────────── */}
-        <TdeeBreakdown
-          bmr={tdeeBmr}
-          neat={tdeeNeat}
-          exercise={tdeeExercise}
-          total={tdeeTotal}
-          tefEstimate={tefEstimate}
-          intake={nutrition.intake}
-          active7Avg={active7Avg}
-          measuredCompare={measuredCompare}
-          exerciseSource={exerciseSource}
-          confidence={confidence}
-        />
       </div>
     </section>
   );
@@ -3434,33 +3421,33 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
   };
 
   return (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(145deg, ${T.paper} 0%, ${T.surface} 60%, ${T.goldSoft} 100%)`, padding:24 }}>
-      <form onSubmit={submit} style={{ width:'100%', maxWidth:400, textAlign:'center', padding:'32px 28px 36px', border:`1px solid ${T.line}`, background:T.paper, boxShadow:CARD_SHADOW, backdropFilter:'blur(8px)' }}>
-        <Kicker style={{ marginBottom:20 }}>Vol. 01 · Restricted Access</Kicker>
-        <h1 style={{ fontFamily:T.display, fontWeight:400, fontStyle:'italic', fontSize: 24, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
-          Operator.
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:T.paper, padding:24 }}>
+      <form onSubmit={submit} style={{ width:'100%', maxWidth:400, textAlign:'left', padding:'30px 30px 32px', border:`1px solid ${T.line}`, borderRadius:12, background:T.surface }}>
+        <div style={{ fontFamily:T.sans, fontSize:10.5, fontWeight:500, letterSpacing:'0.22em', textTransform:'uppercase', color:T.muted, marginBottom:10 }}>Operator · Restricted</div>
+        <h1 style={{ fontFamily:T.display, fontWeight:500, fontSize:30, lineHeight:1.1, color:T.ink, margin:'0 0 8px', letterSpacing:'-0.01em' }}>
+          The Operator <em style={{ fontStyle:'italic', color:T.gold }}>Log</em>
         </h1>
-        <p style={{ fontFamily:T.display, fontStyle:'italic', fontSize:16, color:T.muted, margin:'0 0 40px' }}>a private weighing log.</p>
-        <ThickRule style={{ marginBottom:32 }} />
-        <div style={{ borderBottom:`0.5px solid ${err ? T.rose : T.line}`, marginBottom:24, transition:'border-color 0.2s' }}>
-          <input
-            ref={ref}
-            type="password"
-            placeholder="enter password"
-            value={pw}
-            onChange={e => setPw(e.target.value)}
-            style={{
-              width:'100%', background:'transparent', border:'none', outline:'none',
-              fontFamily:T.display, fontStyle:'italic', fontSize:20, color:T.ink,
-              padding:'4px 0 10px', textAlign:'center',
-            }}
-          />
-        </div>
-        {err && <p style={{ fontFamily:T.sans, fontSize:10, letterSpacing:'0.2em', color:T.rose, marginBottom:12 }}>INCORRECT PASSWORD</p>}
+        <p style={{ fontFamily:T.sans, fontSize:13, color:T.muted, margin:'0 0 24px', lineHeight:1.55 }}>A private fitness &amp; nursing log. Enter your password to continue.</p>
+        <label htmlFor="op-pw" style={{ display:'block', fontFamily:T.sans, fontSize:10.5, fontWeight:500, letterSpacing:'0.16em', textTransform:'uppercase', color:T.muted, marginBottom:6 }}>Password</label>
+        <input
+          id="op-pw"
+          ref={ref}
+          type="password"
+          placeholder="enter password"
+          value={pw}
+          onChange={e => setPw(e.target.value)}
+          style={{
+            width:'100%', background:T.paper, outline:'none',
+            border:`1px solid ${err ? T.rose : T.line}`, borderRadius:6,
+            fontFamily:T.sans, fontSize:14, color:T.ink,
+            padding:'10px 12px', marginBottom: err ? 8 : 20, transition:'border-color 0.2s',
+          }}
+        />
+        {err && <p style={{ fontFamily:T.sans, fontSize:11, color:T.rose, margin:'0 0 16px' }}>Incorrect password. Try again.</p>}
         <button type="submit" disabled={loading} style={{
-          background:T.ink, color:T.paper, border:0, cursor:'pointer',
-          padding:'14px 36px', fontFamily:T.sans, fontSize:10, fontWeight:500,
-          letterSpacing:'0.24em', textTransform:'uppercase', opacity: loading ? 0.6 : 1,
+          width:'100%', background:T.ink, color:T.paper, border:0, borderRadius:6, cursor:'pointer',
+          padding:'12px 20px', fontFamily:T.sans, fontSize:12, fontWeight:600,
+          letterSpacing:'0.08em', textTransform:'uppercase', opacity: loading ? 0.6 : 1,
         }}>
           {loading ? 'Verifying…' : 'Enter →'}
         </button>
@@ -7959,31 +7946,57 @@ export default function OperatorDashboardClient() {
 
           return (
           <div className="op-overview">
-            <EditorialDivider eyebrow="Operator" note="Today's read, the cut, and five sections to open." style={{ margin: '32px 0 28px' }} bold />
+            <div className="op-pagehead">
+              <div className="op-eyebrow">Fitness &amp; Nursing</div>
+              <h1 className="op-h1">Operator <em>Dashboard</em></h1>
+            </div>
 
-            <aside
-              className="op-reco is-linked"
-              aria-label="Recommended cut — open Fuel"
-              onClick={() => goToPage('fuel')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToPage('fuel'); }}
-            >
-              <div className="op-reco-main">
-                <span className="op-reco-eyebrow">🎯 Recommended cut · from Apple Health</span>
-                <h2 className="op-reco-headline">{reco.method} · {reco.pace} kg/wk</h2>
-                <p className="op-reco-lever">{reco.lever}</p>
-                <p className="op-reco-note">{reco.note}</p>
+            <div className="op-stats">
+              <div className="op-stat">
+                <div className="op-stat-lbl">Weight</div>
+                <div className="op-stat-val">{latest.weight.toFixed(1)}<small>kg</small></div>
+                <div className={`op-stat-sub${sevenDayDelta <= 0 ? ' up' : ''}`}>{sevenDayDelta >= 0 ? '+' : ''}{sevenDayDelta.toFixed(1)} kg · 7-day</div>
               </div>
-              <div className="op-reco-figure">
-                <span className="op-reco-intake">{reco.intake.toLocaleString()}</span>
-                <span className="op-reco-unit">kcal / day</span>
-                <span className="op-reco-maint">−{reco.deficit.toLocaleString()} on ~{maintenanceKcal.toLocaleString()} maintenance</span>
-                <span className="op-reco-go" aria-hidden>Open Fuel →</span>
+              <div className="op-stat">
+                <div className="op-stat-lbl">Body fat</div>
+                <div className="op-stat-val">{latest.bodyFat.toFixed(1)}<small>%</small></div>
+                <div className="op-stat-sub">composition</div>
               </div>
-            </aside>
+              <div className="op-stat">
+                <div className="op-stat-lbl">Projected class</div>
+                <div className="op-stat-val" style={{ color: 'var(--gold)' }}>1st</div>
+                <div className="op-stat-sub">Nursing · Year 1</div>
+              </div>
+              <div className="op-stat">
+                <div className="op-stat-lbl">Cadence</div>
+                <div className="op-stat-val">{cadence.score}<small>/100</small></div>
+                <div className="op-stat-sub">logging</div>
+              </div>
+              <div className="op-stat">
+                <div className="op-stat-lbl">Recommended</div>
+                <div className="op-stat-val">{reco.intake.toLocaleString()}</div>
+                <div className="op-stat-sub">kcal · {reco.method.toLowerCase()}</div>
+              </div>
+            </div>
 
-            <EditorialDivider eyebrow="Today" note="Where the body is right now." style={{ margin: '8px 0 24px' }} />
+            <div className="op-sectionhead"><h2 className="op-h2">Next up · <em>what&apos;s due</em></h2></div>
+            <div className="op-duecard">
+              <div className="op-dlitem"><span className="op-dl-when">Today</span><span className="op-dl-ttl">Log weigh-in &amp; protein</span><span className="op-dl-tag">Fitness</span></div>
+              <div className="op-dlitem"><span className="op-dl-when">in 5 days</span><span className="op-dl-ttl">Neurosurgery placement starts</span><span className="op-dl-who">Year 1</span><span className="op-dl-tag">Nursing</span></div>
+              <div className="op-dlitem"><span className="op-dl-when">this week</span><span className="op-dl-ttl">{reco.lever}</span><span className="op-dl-tag">Plan</span></div>
+            </div>
+
+            <div className="op-sectionhead"><h2 className="op-h2">Quick <em>launch</em></h2></div>
+            <div className="op-launch">
+              {OPERATOR_PAGES.map((p) => (
+                <button type="button" key={p.id} className="op-launch-a" onClick={() => goToPage(p.id)}>
+                  <div className="op-launch-name"><span className="op-launch-dot" aria-hidden>{p.emoji}</span>{p.label}</div>
+                  <div className="op-launch-desc">{p.blurb}</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="op-sectionhead"><h2 className="op-h2">Today at a <em>glance</em></h2></div>
 
             <section className="fit-today">
               <div className="fit-today-head">
@@ -8042,7 +8055,7 @@ export default function OperatorDashboardClient() {
 
               {whatThisMeans.length > 0 && (
                 <aside className="op-wtm" aria-label="What this means">
-                  <span className="op-wtm-eyebrow">🧭 What this means</span>
+                  <span className="op-wtm-eyebrow">What this means</span>
                   <div className="op-wtm-grid">
                     {whatThisMeans.map((insight) => (
                       <div key={insight.title} className={`op-wtm-item is-${insight.tone}`}>
@@ -8476,6 +8489,7 @@ export default function OperatorDashboardClient() {
           {/* Action block — promise + readiness folded into trends scroll. */}
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="readiness" />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="accountability" />
+          <EditorialDivider eyebrow="Recovery &amp; protein" note="How recovered you are today, and protein against target." style={{ margin: '44px 0 22px' }} />
           {(() => {
             const last7Health = healthDays.slice(-7);
             const avg = (vals: (number | null | undefined)[]) => {
@@ -8498,6 +8512,7 @@ export default function OperatorDashboardClient() {
               />
             );
           })()}
+          <EditorialDivider eyebrow="Training" note="Today's session — pick a split and run the timer." style={{ margin: '44px 0 22px' }} />
           <WorkoutStudio workouts={healthStream.workouts} />
           <HealthMetricsSection opPw={opPw} readings={dashboardSource} injected={healthStream} slot="promise" />
         </section>

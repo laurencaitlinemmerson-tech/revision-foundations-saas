@@ -933,14 +933,9 @@
 }
 
 .fit-today-label {
-  display: block;
-  font-family: var(--font-body);
-  font-size: clamp(36px, 4.2vw, 56px);
-  font-weight: 300;
-  letter-spacing: -0.03em;
-  line-height: 1.02;
-  color: var(--ink);
-  text-transform: none;
+  /* Hidden — the editorial .op-sectionhead above now carries this title.
+     Kept in the DOM for structure; the section's copy + date still show. */
+  display: none;
 }
 
 .fit-today-copy {
@@ -4098,7 +4093,7 @@
 }
 
 .fitness-reference-shell .op-health-num {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: 40px;
   line-height: 1;
   color: var(--ink);
@@ -5550,7 +5545,7 @@
   min-width: 90px;
 }
 .fitness-reference-shell .op-readiness-num {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: 44px;
   line-height: 1;
   color: var(--ink);
@@ -6703,46 +6698,45 @@
 }
 
 .fitness-reference-shell .op-workout-studio-planbar {
-  display: flex;
-  gap: 0;
+  display: inline-flex;
+  gap: 4px;
   flex-wrap: wrap;
   margin: 0 0 24px;
-  border-bottom: 0.5px solid var(--rule-soft);
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper-deep);
 }
 
 .fitness-reference-shell .op-workout-studio-tab {
   position: relative;
-  padding: 10px 18px 12px;
-  margin-bottom: -0.5px;
+  padding: 7px 14px;
   border: none;
-  border-bottom: 1px solid transparent;
-  border-radius: 0;
+  border-radius: 7px;
   color: var(--ink-mute);
   background: transparent;
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   text-transform: none;
   cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease;
+  transition: color 160ms ease, background-color 160ms ease;
 }
 
 .fitness-reference-shell .op-workout-studio-tab:first-child {
-  padding-left: 0;
+  padding-left: 14px;
 }
 
 .fitness-reference-shell .op-workout-studio-tab:hover {
-  color: var(--ink-soft);
-  border-color: transparent;
+  color: var(--ink);
   transform: none;
 }
 
 .fitness-reference-shell .op-workout-studio-tab.is-active {
   color: var(--ink);
-  background: transparent;
-  border-color: transparent;
-  border-bottom-color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(26, 24, 21, 0.06);
 }
 
 .fitness-reference-shell .op-workout-studio-intro {
@@ -7514,54 +7508,46 @@
 }
 
 .fitness-reference-shell .op-maintenance-modes {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 0;
-  padding-top: 6px;
-  padding-bottom: 18px;
-  border-bottom: 0.5px solid var(--rule-soft);
+  gap: 4px;
+  margin: 6px 0 18px;
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper-deep);
 }
 
 .fitness-reference-shell .op-maintenance-mode {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   background: transparent;
   border: none;
-  border-right: 0.5px solid var(--rule-soft);
-  padding: 12px 16px;
+  border-radius: 7px;
+  padding: 7px 14px;
   font-family: var(--font-body);
-  font-style: italic;
-  font-size: 15px;
-  font-weight: 400;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--ink-mute);
   cursor: pointer;
-  transition: color 160ms ease;
+  transition: color 160ms ease, background-color 160ms ease;
   text-align: center;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
   line-height: 1.2;
 }
 
-.fitness-reference-shell .op-maintenance-mode:last-child {
-  border-right: none;
-}
-
 .fitness-reference-shell .op-maintenance-mode:hover {
-  color: var(--ink-soft);
+  color: var(--ink);
 }
 
 .fitness-reference-shell .op-maintenance-mode.is-active {
   color: var(--ink);
-  font-style: italic;
-  position: relative;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(26, 24, 21, 0.06);
 }
 
 .fitness-reference-shell .op-maintenance-mode.is-active::after {
-  content: '';
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: -19px;
-  height: 1px;
-  background: var(--ink);
+  content: none;
 }
 
 .fitness-reference-shell .op-maintenance-headline {
@@ -8803,3 +8789,141 @@
   border-bottom-color: var(--accent);
 }
 .fitness-redesign .op-back-bar { display: none; }
+
+/* ── Social-hub Dashboard pane (pagehead + stats + due + launch) ──────────────
+   Ported component styling so the overview reads exactly like the reference. */
+.fitness-redesign .op-pagehead { padding: 26px 0 4px; }
+.fitness-redesign .op-eyebrow {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.fitness-redesign .op-h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(26px, 4vw, 38px);
+  line-height: 1.1;
+  color: var(--ink);
+}
+.fitness-redesign .op-h1 em,
+.fitness-redesign .op-h2 em { font-style: italic; color: var(--gold); }
+.fitness-redesign .op-h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 20px;
+  color: var(--ink);
+}
+.fitness-redesign .op-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+.fitness-reference-shell .op-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 15px 16px 13px;
+}
+.fitness-redesign .op-stat-lbl {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fitness-redesign .op-stat-val {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  margin-top: 4px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.fitness-redesign .op-stat-val small { font-size: 13px; color: var(--muted); margin-left: 4px; }
+.fitness-redesign .op-stat-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.fitness-redesign .op-stat-sub.up { color: var(--good); }
+.fitness-redesign .op-sectionhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 30px 0 14px;
+}
+.fitness-redesign .op-sectionhead-meta {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fitness-reference-shell .op-duecard {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 4px 20px;
+}
+.fitness-redesign .op-dlitem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--rule);
+}
+.fitness-redesign .op-dlitem:last-child { border-bottom: none; }
+.fitness-redesign .op-dl-when { min-width: 88px; color: var(--muted); font-size: 11.5px; }
+.fitness-redesign .op-dl-who {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--gold);
+  font-size: 12.5px;
+}
+.fitness-redesign .op-dl-tag {
+  margin-left: auto;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.fitness-redesign .op-launch {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.fitness-reference-shell .op-launch-a {
+  display: block;
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+.fitness-reference-shell .op-launch-a:hover { border-color: var(--accent); transform: translateY(-1px); }
+.fitness-redesign .op-launch-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fitness-redesign .op-launch-dot { font-size: 14px; line-height: 1; }
+.fitness-redesign .op-launch-desc { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+@media (max-width: 900px) {
+  .fitness-redesign .op-stats,
+  .fitness-redesign .op-launch { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .fitness-redesign .op-stats,
+  .fitness-redesign .op-launch { grid-template-columns: 1fr; }
+}
