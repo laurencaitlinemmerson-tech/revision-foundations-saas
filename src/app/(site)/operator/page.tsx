@@ -97,10 +97,60 @@ function ActionBadge({ count, label, href, color }: { count: number; label: stri
   );
 }
 
+// ── Setup screen ───────────────────────────────────────────────────────────────
+// Shown when LAUREN_CLERK_USER_ID has not been configured yet. Reveals only the
+// viewer's own Clerk ID and no platform data, so it is safe before lock-down.
+function SetupScreen({ userId }: { userId: string }) {
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ width: '100%', maxWidth: '560px', background: '#fff', border: '0.5px solid rgba(0,0,0,0.1)', padding: '44px 40px' }}>
+        <p style={{ fontFamily: serif, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: muted, marginBottom: '12px' }}>
+          Operator · Setup required
+        </p>
+        <h1 style={{ fontFamily: display, fontSize: '2rem', fontStyle: 'italic', color: ink, lineHeight: 1.1, marginBottom: '16px' }}>
+          One env var to go.
+        </h1>
+        <p style={{ fontFamily: serif, fontSize: '13px', fontWeight: 300, color: '#5A5750', lineHeight: 1.8, marginBottom: '26px' }}>
+          This dashboard is locked to your account only, but the{' '}
+          <code style={{ fontSize: '12px', background: 'rgba(0,0,0,0.05)', padding: '2px 5px' }}>LAUREN_CLERK_USER_ID</code>{' '}
+          environment variable isn&apos;t set, so it can&apos;t tell who you are yet. Add it in Vercel with the value below, redeploy, and this page will open.
+        </p>
+
+        <p style={{ fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: muted, marginBottom: '8px' }}>
+          Your Clerk user ID
+        </p>
+        <div style={{ background: ink, padding: '14px 16px', marginBottom: '26px', overflowX: 'auto' }}>
+          <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: '13px', color: '#fff', whiteSpace: 'nowrap' }}>
+            {userId}
+          </code>
+        </div>
+
+        <div style={{ borderTop: '0.5px solid rgba(0,0,0,0.08)', paddingTop: '18px' }}>
+          <p style={{ fontFamily: serif, fontSize: '11px', fontWeight: 300, color: muted, lineHeight: 1.8 }}>
+            Vercel → your project → Settings → Environment Variables. Name it{' '}
+            <code style={{ fontSize: '11px', background: 'rgba(0,0,0,0.05)', padding: '1px 4px' }}>LAUREN_CLERK_USER_ID</code>,
+            paste the value above, tick all environments, then redeploy. Setting it also
+            makes your answers in the community hub show as verified.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default async function OperatorPage() {
   const { userId } = await auth();
-  if (!userId || userId !== process.env.LAUREN_CLERK_USER_ID) redirect('/dashboard');
+  if (!userId) redirect('/sign-in');
+
+  // .trim() guards against a trailing newline or stray space pasted into Vercel
+  const operatorId = process.env.LAUREN_CLERK_USER_ID?.trim();
+
+  // Not configured yet — show the setup screen rather than silently redirecting
+  if (!operatorId) return <SetupScreen userId={userId} />;
+
+  // Configured and this isn't the operator — send them away
+  if (userId !== operatorId) redirect('/dashboard');
 
   const data  = await getOperatorData();
   const today = new Intl.DateTimeFormat('en-GB', {

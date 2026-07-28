@@ -12,7 +12,8 @@ type Product = (typeof VALID_PRODUCTS)[number];
 
 export async function POST() {
   const { userId } = await auth();
-  if (!userId || userId !== process.env.LAUREN_CLERK_USER_ID) {
+  const operatorId = process.env.LAUREN_CLERK_USER_ID?.trim();
+  if (!userId || !operatorId || userId !== operatorId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
