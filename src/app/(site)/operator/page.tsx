@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import TDEECalculator from '@/components/dashboard/TDEECalculator';
+import BackfillButton from '@/components/operator/BackfillButton';
 import { createServiceClient } from '@/lib/supabase';
 
 export const metadata: Metadata = {
@@ -256,6 +257,18 @@ export default async function OperatorPage() {
             ))}
           </div>
 
+        </div>
+
+        {/* ━━ Admin tools ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <Divider label="Admin tools" accent="#C89BB0" />
+        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.09)', padding: '20px 22px' }}>
+          <p style={{ fontFamily: serif, fontSize: '12px', color: ink, marginBottom: '4px' }}>
+            Backfill past purchases
+          </p>
+          <p style={{ fontFamily: serif, fontSize: '11px', fontWeight: 300, color: muted, marginBottom: '14px', lineHeight: 1.6 }}>
+            Replays all paid Stripe sessions. Creates missing entitlements for signed-in buyers and queues unclaimed purchase records for guests. Safe to run multiple times — skips sessions already processed.
+          </p>
+          <BackfillButton />
         </div>
 
         {/* ━━ Wellness ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
