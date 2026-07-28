@@ -364,7 +364,7 @@ async function getOperatorData() {
     supabase.from('study_sessions').select('id', { count: 'exact', head: true }).eq('study_date', todayStr),
     supabase.from('study_sessions').select('id', { count: 'exact', head: true }),
     supabase.from('questions').select('id', { count: 'exact', head: true }).eq('is_answered', false),
-    supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('approved', false).throwOnError().catch(() => ({ count: 0 })),
+    supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('approved', false),
     supabase.from('users')
       .select('full_name, email, created_at')
       .order('created_at', { ascending: false })
@@ -449,7 +449,7 @@ async function getOperatorData() {
     totalOsceAttempts,
     topTopics,
     unansweredQuestions:  unansweredRes.count ?? 0,
-    pendingReviews:       ('count' in pendingReviewsRes ? pendingReviewsRes.count : 0) ?? 0,
+    pendingReviews:       pendingReviewsRes.count ?? 0,
     recentUsers: (recentUsersRes.data ?? []) as Array<{
       full_name: string | null;
       email: string | null;

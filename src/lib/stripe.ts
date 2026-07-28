@@ -1,14 +1,31 @@
 import Stripe from 'stripe';
 
-// Validate Stripe configuration
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-if (!stripeSecretKey) {
-  console.error('STRIPE_SECRET_KEY environment variable is not set');
+// The Stripe client is created lazily on first use rather than at module load.
+// Next.js evaluates this module while collecting page data during the build,
+// where secrets may be absent — constructing eagerly would fail the build.
+let client: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (client) return client;
+
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+  }
+
+  client = new Stripe(stripeSecretKey, {
+    apiVersion: '2025-12-15.clover',
+    typescript: true,
+  });
+  return client;
 }
 
-export const stripe = new Stripe(stripeSecretKey || '', {
-  apiVersion: '2025-12-15.clover',
-  typescript: true,
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    const instance = getStripe();
+    const value = Reflect.get(instance, prop, instance);
+    return typeof value === 'function' ? value.bind(instance) : value;
+  },
 });
 
 
