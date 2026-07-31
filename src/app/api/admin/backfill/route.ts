@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createOrUpdateEntitlement } from '@/lib/entitlements';
 import { createServiceClient } from '@/lib/supabase';
+import { isOperator } from '@/lib/operator';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -12,8 +13,7 @@ type Product = (typeof VALID_PRODUCTS)[number];
 
 export async function POST() {
   const { userId } = await auth();
-  const operatorId = process.env.LAUREN_CLERK_USER_ID?.trim();
-  if (!userId || !operatorId || userId !== operatorId) {
+  if (!(await isOperator(userId))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
