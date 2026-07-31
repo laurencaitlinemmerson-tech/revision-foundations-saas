@@ -5,7 +5,7 @@ import Link from 'next/link';
 import TDEECalculator from '@/components/dashboard/TDEECalculator';
 import BackfillButton from '@/components/operator/BackfillButton';
 import { createServiceClient } from '@/lib/supabase';
-import { isOperator } from '@/lib/operator';
+import { getOperatorStatus, allowedEmails, type OperatorStatus } from '@/lib/operator';
 
 export const metadata: Metadata = {
   title: 'Operator',
@@ -98,11 +98,67 @@ function ActionBadge({ count, label, href, color }: { count: number; label: stri
   );
 }
 
+// ── Access denied ──────────────────────────────────────────────────────────────
+// Rendered instead of a silent redirect so a mismatch is self-diagnosing. Shows
+// only the viewer's own identity and no platform data. This lives behind an
+// unguessable path, so surfacing the signed-in address here is not a leak.
+function NoAccess({ status, userId }: { status: OperatorStatus; userId: string }) {
+  const explanation: Record<OperatorStatus['reason'], string> = {
+    'ok':            '',
+    'no-session':    'No signed-in session was found.',
+    'lookup-failed': 'Clerk could not be reached to read your account. Check that CLERK_SECRET_KEY is set for this deployment.',
+    'no-email':      'Your Clerk account has no email address attached.',
+    'unverified':    'Your email address is attached but Clerk has not marked it verified. Verify it in your account, then reload.',
+    'not-allowed':   'That address is not on the operator list.',
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ width: '100%', maxWidth: '560px', background: '#fff', border: '0.5px solid rgba(0,0,0,0.1)', padding: '40px' }}>
+        <p style={{ fontFamily: serif, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: muted, marginBottom: '12px' }}>
+          Operator · Access denied
+        </p>
+        <h1 style={{ fontFamily: display, fontSize: '1.8rem', fontStyle: 'italic', color: ink, lineHeight: 1.15, marginBottom: '14px' }}>
+          Not this account.
+        </h1>
+        <p style={{ fontFamily: serif, fontSize: '13px', fontWeight: 300, color: '#5A5750', lineHeight: 1.8, marginBottom: '24px' }}>
+          {explanation[status.reason]}
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+          {[
+            { k: 'Signed in as', v: status.email ?? '—' },
+            { k: 'Clerk user ID', v: userId },
+            { k: 'Allowed',       v: allowedEmails().join(', ') || '—' },
+          ].map(row => (
+            <div key={row.k}>
+              <p style={{ fontFamily: serif, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted, marginBottom: '4px' }}>
+                {row.k}
+              </p>
+              <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: '12px', color: ink, wordBreak: 'break-all' }}>
+                {row.v}
+              </code>
+            </div>
+          ))}
+        </div>
+
+        <p style={{ fontFamily: serif, fontSize: '11px', fontWeight: 300, color: muted, lineHeight: 1.8, borderTop: '0.5px solid rgba(0,0,0,0.08)', paddingTop: '16px' }}>
+          To grant this account access, set{' '}
+          <code style={{ fontSize: '11px', background: 'rgba(0,0,0,0.05)', padding: '1px 4px' }}>OPERATOR_EMAILS</code>{' '}
+          to the address above — or send it to me and I&apos;ll add it to the list in code.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default async function OperatorPage() {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in');
-  if (!(await isOperator(userId))) redirect('/dashboard');
+
+  const status = await getOperatorStatus(userId);
+  if (!status.allowed) return <NoAccess status={status} userId={userId} />;
 
   const data  = await getOperatorData();
   const today = new Intl.DateTimeFormat('en-GB', {
