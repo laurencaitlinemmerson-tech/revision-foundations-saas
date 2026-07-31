@@ -1,7 +1,7 @@
 import { clerkClient } from '@clerk/nextjs/server';
 
 /**
- * Accounts allowed into /operator and the admin APIs.
+ * Accounts allowed into the operator dashboard and the admin APIs.
  *
  * Access is granted by verified Clerk email so the dashboard works without any
  * deployment configuration. Set OPERATOR_EMAILS (comma-separated) to override
