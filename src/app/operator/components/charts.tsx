@@ -845,20 +845,9 @@ export function Rings({
         );
       })}
       {focus ? (
-        <>
-          <text
-            x={100}
-            y={97}
-            textAnchor="middle"
-            fill="var(--ink)"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 28 }}
-          >
-            {Math.round((focus.value / Math.max(1, focus.target)) * 100)}%
-          </text>
-          <text x={100} y={117} textAnchor="middle" className="op-tick" style={{ letterSpacing: 1.4 }}>
-            {focus.label}
-          </text>
-        </>
+        <text x={100} y={104} textAnchor="middle" className="op-tick" style={{ letterSpacing: 1.4 }}>
+          {focus.label}
+        </text>
       ) : null}
     </svg>
   );
