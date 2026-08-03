@@ -112,7 +112,78 @@ CONTACT_NOTIFICATION_TO=lauren@nurselab.co.uk
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Operator dashboard (private, link-only) — see section 4a
+OPERATOR_ACCESS_KEY=
 ```
+
+---
+
+## 4a. Operator Dashboard (private)
+
+`/operator` is a private dashboard for the studio owner: body composition,
+energy balance, training, recovery, and the business pulse. It is not linked
+from anywhere on the site, is excluded from the sitemap, is disallowed in
+`robots.txt`, and carries `noindex`.
+
+**Access is by secret link only — there is no login form.**
+
+1. Generate a key (32 bytes is plenty) and set it as `OPERATOR_ACCESS_KEY`
+   in `.env.local` and in Vercel:
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+   Keys shorter than 16 characters are rejected. If the variable is unset,
+   `/operator` returns 404 for everyone — a missing env var never means
+   "open to the world".
+
+2. Create the tables by running
+   `supabase/migrations/20260803_operator_dashboard.sql` in the Supabase SQL
+   editor. Row-level security is enabled with no policies, so the tables are
+   reachable only by the service role from the server. Until they exist the
+   dashboard renders clearly-labelled sample data.
+
+3. Open the dashboard once with the key in the URL:
+
+   ```
+   https://your-domain.com/operator?k=YOUR_OPERATOR_ACCESS_KEY
+   ```
+
+   Middleware swaps the key for a signed, HttpOnly, 30-day cookie and
+   redirects to a clean `/operator`, so the secret never lingers in browser
+   history, referrers or analytics. Bookmark the clean URL, not the one with
+   the key. "Sign out" in the masthead clears the cookie.
+
+### Feeding it data
+
+Body-composition readings (one row per day; posting the same date replaces it):
+
+```bash
+curl -X POST https://your-domain.com/api/operator/readings \
+  -H "Authorization: Bearer $OPERATOR_ACCESS_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"date":"2026-08-03","weight":71.9,"bodyFat":26.8,"muscleMass":39.1,"water":50.6}'
+```
+
+Daily Apple Health metrics and workouts, from a Shortcut or Health Auto
+Export. Only the fields you send are written, so a partial sync never blanks
+the rest of the day:
+
+```bash
+curl -X POST https://your-domain.com/api/operator/ingest \
+  -H "Authorization: Bearer $OPERATOR_ACCESS_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"days":[{"date":"2026-08-03","steps":9120,"activeEnergyKcal":529,
+        "dietaryEnergyKcal":2041,"proteinG":133,"sleepTotalMin":456}],
+       "workouts":[{"startedAt":"2026-08-03T18:15:00Z","type":"Strength",
+        "durationMin":52,"energyKcal":320,"avgHr":128}]}'
+```
+
+Targets and body profile (height, age, goal weight, weekly rate, protein and
+step targets) live in the single `operator_settings` row — edit it in the
+Supabase table editor.
 
 ---
 

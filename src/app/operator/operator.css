@@ -1,0 +1,1003 @@
+/* ============================================================
+   operator.css — private dashboard, editorial paper aesthetic
+   ============================================================
+   Everything is scoped under `.op` so none of it leaks into the
+   marketing site, which loads its own globals on the same layout.
+
+   Dark mode is a selected set of values, not an inversion: the
+   chart hues are re-stepped for the dark surface and validated
+   against it. The `data-op-theme` stamp wins over the OS setting
+   in both directions.
+   ============================================================ */
+
+.op {
+  color-scheme: light;
+
+  /* Surfaces */
+  --plane: #f5f2ec;
+  --surface: #fffdf9;
+  --surface-2: #faf7f1;
+  --surface-sunken: #f0ece4;
+
+  /* Ink */
+  --ink: #14120f;
+  --body: #55514a;
+  --muted: #8b857b;
+  --faint: #a9a29a;
+
+  /* Rules */
+  --line: rgba(20, 18, 15, 0.12);
+  --hairline: rgba(20, 18, 15, 0.07);
+  --grid: #e6e1d7;
+  --axis: #cbc5b9;
+
+  /* Categorical series — fixed order, never cycled.
+     Validated: adjacent CVD ΔE 9.1, normal-vision ΔE 19.6 on this surface. */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+
+  /* Diverging pair for signed values (deficit ↔ surplus):
+     warm/cool poles, neutral gray at the midpoint. */
+  --diverge-cool: #2a78d6;
+  --diverge-warm: #e34948;
+  --diverge-mid: #f0efec;
+
+  /* Status — reserved, never reused as a series */
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --good-ink: #006300;
+  --critical-ink: #a52c2c;
+
+  --shadow-sm: 0 1px 2px rgba(20, 18, 15, 0.04);
+  --shadow-md: 0 12px 32px -18px rgba(20, 18, 15, 0.35);
+
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+
+  font-family: var(--font-ui);
+  background: var(--plane);
+  color: var(--ink);
+  min-height: 100vh;
+  font-weight: 400;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-op-theme='light'])) .op {
+    color-scheme: dark;
+    --plane: #100f0d;
+    --surface: #171613;
+    --surface-2: #1d1b18;
+    --surface-sunken: #0c0b0a;
+    --ink: #f7f3ec;
+    --body: #b3ada3;
+    --muted: #857f76;
+    --faint: #6b655d;
+    --line: rgba(247, 243, 236, 0.14);
+    --hairline: rgba(247, 243, 236, 0.08);
+    --grid: #2b2925;
+    --axis: #3b3833;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --diverge-cool: #3987e5;
+    --diverge-warm: #e66767;
+    --diverge-mid: #383835;
+    --good-ink: #0ca30c;
+    --critical-ink: #e07070;
+    --shadow-md: 0 12px 32px -18px rgba(0, 0, 0, 0.8);
+  }
+}
+
+:root[data-op-theme='dark'] .op {
+  color-scheme: dark;
+  --plane: #100f0d;
+  --surface: #171613;
+  --surface-2: #1d1b18;
+  --surface-sunken: #0c0b0a;
+  --ink: #f7f3ec;
+  --body: #b3ada3;
+  --muted: #857f76;
+  --faint: #6b655d;
+  --line: rgba(247, 243, 236, 0.14);
+  --hairline: rgba(247, 243, 236, 0.08);
+  --grid: #2b2925;
+  --axis: #3b3833;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --diverge-cool: #3987e5;
+  --diverge-warm: #e66767;
+  --diverge-mid: #383835;
+  --good-ink: #0ca30c;
+  --critical-ink: #e07070;
+  --shadow-md: 0 12px 32px -18px rgba(0, 0, 0, 0.8);
+}
+
+.op *,
+.op *::before,
+.op *::after {
+  box-sizing: border-box;
+}
+
+.op-shell {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 28px 24px 96px;
+}
+
+@media (max-width: 640px) {
+  .op-shell {
+    padding: 20px 16px 72px;
+  }
+}
+
+/* ── Typography ─────────────────────────────────────────────── */
+
+/* globals.css sets `h1, h2, h3 { color: var(--espresso) }` — a fixed
+   dark brown that an element selector applies over any inherited
+   colour, which leaves headings invisible on the dark plane. Claim
+   them back for the theme tokens. */
+.op h1,
+.op h2,
+.op h3,
+.op h4 {
+  color: var(--ink);
+}
+
+.op-kicker {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.op-section-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.op-section-note {
+  font-size: 13px;
+  color: var(--body);
+  margin: 6px 0 0;
+  max-width: 62ch;
+}
+
+.op-num {
+  font-family: var(--font-ui);
+  font-feature-settings: 'ss01';
+}
+
+/* Columns of figures align; standalone display figures do not. */
+.op-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Masthead ───────────────────────────────────────────────── */
+
+.op-masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.op-masthead h1 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5vw, 42px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 10px 0 0;
+}
+
+.op-masthead-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.op-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.op-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--body);
+}
+
+.op-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--good);
+}
+
+.op-badge[data-tone='warning'] .op-badge-dot {
+  background: var(--warning);
+}
+
+/* ── Buttons & controls ─────────────────────────────────────── */
+
+.op-btn {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--body);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.op-btn:hover {
+  color: var(--ink);
+  border-color: var(--axis);
+}
+
+.op-btn:focus-visible,
+.op-seg button:focus-visible,
+.op a:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 2px;
+}
+
+.op-btn[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--surface);
+}
+
+/* Segmented range control — one row, above everything it scopes. */
+.op-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 22px 0 26px;
+}
+
+.op-seg {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+
+.op-seg button {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 13px;
+  min-height: 30px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.op-seg button:hover {
+  color: var(--ink);
+}
+
+.op-seg button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Layout primitives ──────────────────────────────────────── */
+
+.op-section {
+  margin-top: 52px;
+  scroll-margin-top: 24px;
+}
+
+.op-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.op-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.op-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.op-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.op-card-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 2px 0 16px;
+}
+
+.op-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.op-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.op-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.op-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.op-grid-hero {
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+@media (max-width: 960px) {
+  .op-grid-hero,
+  .op-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .op-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .op-grid-2,
+  .op-grid-3,
+  .op-grid-4,
+  .op-grid-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Hero figure — exactly one per view ─────────────────────── */
+
+.op-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.op-hero-value {
+  font-family: var(--font-ui);
+  font-size: clamp(52px, 9vw, 68px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  color: var(--ink);
+}
+
+.op-hero-unit {
+  font-size: 0.32em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  margin-left: 0.24em;
+}
+
+.op-hero-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.op-hero-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hairline);
+}
+
+.op-hero-row dt {
+  color: var(--muted);
+  margin: 0;
+}
+
+.op-hero-row dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Stat tiles ─────────────────────────────────────────────── */
+
+.op-stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 132px;
+}
+
+.op-stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.op-stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.op-stat-value small {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: 3px;
+}
+
+.op-stat-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.op-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--body);
+}
+
+/* Direction is carried by an arrow glyph as well as the colour. */
+.op-delta[data-tone='good'] {
+  color: var(--good-ink);
+}
+
+.op-delta[data-tone='bad'] {
+  color: var(--critical-ink);
+}
+
+/* ── Meter ──────────────────────────────────────────────────── */
+
+.op-meter {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.op-meter span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--series-1);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.op-meter[data-tone='over'] span {
+  background: var(--critical);
+}
+
+.op-meter[data-tone='near'] span {
+  background: var(--warning);
+}
+
+.op-meter[data-tone='hit'] span {
+  background: var(--good);
+}
+
+/* ── Charts ─────────────────────────────────────────────────── */
+
+.op-chart {
+  position: relative;
+  width: 100%;
+}
+
+.op-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.op-grid-line {
+  stroke: var(--grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.op-axis-line {
+  stroke: var(--axis);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.op-tick {
+  font-size: 10px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-ui);
+}
+
+.op-label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--ink);
+  font-family: var(--font-ui);
+}
+
+.op-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.op-band {
+  opacity: 0.1;
+}
+
+.op-dot-ring {
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.op-crosshair {
+  stroke: var(--axis);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.op-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.op-bar {
+  transition: opacity 0.12s ease;
+}
+
+.op-bar-group:hover .op-bar,
+.op-bar-group:focus-visible .op-bar {
+  opacity: 0.78;
+}
+
+.op-bar-group:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 1px;
+}
+
+/* Tooltip */
+.op-tooltip {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  min-width: 132px;
+  padding: 9px 11px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  font-size: 11px;
+  color: var(--body);
+  transform: translate(-50%, calc(-100% - 12px));
+}
+
+.op-tooltip-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+
+.op-tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 0;
+}
+
+.op-tooltip-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.op-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.op-swatch[data-shape='line'] {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* Legend — always present for two or more series. */
+.op-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--body);
+}
+
+.op-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Table view (every chart has one) ───────────────────────── */
+
+.op-tableview {
+  margin-top: 14px;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+
+.op-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.op-table caption {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.op-table th,
+.op-table td {
+  padding: 7px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+
+.op-table th:first-child,
+.op-table td:first-child {
+  text-align: left;
+}
+
+.op-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--body);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.op-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.op-table td {
+  color: var(--body);
+}
+
+.op-table td:first-child {
+  color: var(--ink);
+}
+
+/* Wide content scrolls inside its own container, never the page. */
+.op-scroll-x {
+  overflow-x: auto;
+}
+
+/* ── Ledger rows ────────────────────────────────────────────── */
+
+.op-ledger {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.op-ledger-row {
+  display: grid;
+  grid-template-columns: minmax(96px, 132px) minmax(0, 1fr) 74px;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.op-ledger-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--body);
+}
+
+/* Both are spans, so they need an explicit block box — otherwise the
+   height is ignored and the fill's percentage width resolves to zero. */
+.op-ledger-track {
+  display: block;
+  height: 12px;
+  background: var(--surface-sunken);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.op-ledger-fill {
+  display: block;
+  height: 100%;
+  /* Square at the baseline, rounded at the data end. */
+  border-radius: 0 4px 4px 0;
+}
+
+.op-ledger-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ── Day inspector ──────────────────────────────────────────── */
+
+.op-inspector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.op-inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 1px;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.op-inspector-cell {
+  background: var(--surface);
+  padding: 12px 14px;
+}
+
+.op-inspector-cell dt {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+
+.op-inspector-cell dd {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Notes & callouts ───────────────────────────────────────── */
+
+.op-note {
+  display: flex;
+  gap: 10px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--body);
+}
+
+.op-note strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.op-note-icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--muted);
+}
+
+.op-note[data-tone='warning'] .op-note-icon {
+  color: var(--warning);
+}
+
+.op-note[data-tone='good'] .op-note-icon {
+  color: var(--good);
+}
+
+/* ── Session list ───────────────────────────────────────────── */
+
+.op-sessions {
+  display: grid;
+  gap: 1px;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.op-session {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  font-size: 12px;
+}
+
+.op-session-type {
+  font-weight: 600;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.op-session-meta {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.op-session-stats {
+  text-align: right;
+  color: var(--body);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Empty state ────────────────────────────────────────────── */
+
+.op-empty {
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+
+.op-footer {
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.op-footer code {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 10.5px;
+  background: var(--surface-sunken);
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: var(--body);
+}
+
+/* ── Motion ─────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .op *,
+  .op *::before,
+  .op *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .op-filters,
+  .op-btn {
+    display: none !important;
+  }
+  .op-card,
+  .op-stat,
+  .op-hero {
+    break-inside: avoid;
+  }
+}
