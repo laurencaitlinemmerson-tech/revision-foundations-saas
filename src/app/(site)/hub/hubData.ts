@@ -58,6 +58,16 @@ export const hubItems: HubItem[] = [
     href: '/hub/resources/placement-survival',
     isRecommended: true,
   },
+  {
+    id: 'osce-survival',
+    title: 'How to Survive Your First OSCE',
+    description: 'The honest version of OSCE advice: the night before, the script to lean on when your brain blanks, and how to leave the day behind afterwards.',
+    tags: ['OSCE', 'Y1 Essentials', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/osce-survival',
+    isRecommended: true,
+  },
   // ===== CORE RESOURCES =====
   {
     id: '0',
@@ -293,7 +303,7 @@ export const pathways: HubPathway[] = [
     title: 'OSCE week',
     eyebrow: 'Start here',
     description: 'If you have got an OSCE coming up, start here for the pages people usually cram the night before.',
-    itemIds: ['ae-guide', '13', 'im-sc-injection', 'rec-1'],
+    itemIds: ['osce-survival', 'ae-guide', '13', 'im-sc-injection', 'rec-1'],
     icon: ClipboardCheck,
   },
   {
@@ -452,6 +462,16 @@ export const adultHubItems: HubItem[] = [
     difficulty: 'Quick Win',
     isLocked: false,
     href: '/hub/resources/placement-survival',
+  },
+  {
+    id: 'adult-osce-survival',
+    title: 'How to Survive Your First OSCE',
+    description: 'The honest version of OSCE advice: the night before, the script to lean on when your brain blanks, and how to leave the day behind afterwards.',
+    tags: ['Adult', 'OSCE', 'Y1 Essentials', 'Placement'],
+    difficulty: 'Quick Win',
+    isLocked: false,
+    href: '/hub/resources/osce-survival',
+    isRecommended: true,
   },
   {
     id: 'adult-glossary',

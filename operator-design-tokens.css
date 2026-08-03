@@ -1,0 +1,44 @@
+/* Operator dashboard — design tokens only, extracted for design-tool upload.
+   Full font stack (defined globally, applies everywhere):
+   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+   (Inter is used for everything — body text AND headings/numerals. No serif.)
+
+   Structural rules: no border-radius anywhere, no box-shadow on cards,
+   borders are 0.5px hairlines using --rule / --rule-soft. */
+
+.fitness-reference-shell {
+  --paper: #fafaf8;
+  --paper-deep: #f5f3ef;
+  --surface: #fbf8f3;
+  --bone: #f3efe8;
+  --ink: #1a1815;
+  --ink-soft: #5a5750;
+  --ink-mute: #9a948c;
+  --ink-dim: rgba(26, 24, 21, 0.35);
+  --body: #5a5750;
+  --muted: #9a948c;
+  --rule: rgba(26, 24, 21, 0.12);
+  --rule-soft: rgba(26, 24, 21, 0.08);
+  --line: rgba(26, 24, 21, 0.11);
+  --soft-line: rgba(26, 24, 21, 0.07);
+  --good: #1c7a67;
+  --warn: #a14a57;
+  --brass: #c4872f;
+  --brass-deep: #7d4c0d;
+  --brass-haze: rgba(196, 135, 47, 0.08);
+  --accent: #b76e79;
+  --accent-soft: rgba(183, 110, 121, 0.32);
+  --accent-haze: rgba(183, 110, 121, 0.14);
+  --cell-good: rgba(28, 122, 103, 0.78);
+  --cell-brass: rgba(196, 135, 47, 0.62);
+  --cell-warn: rgba(161, 74, 87, 0.62);
+  --blue: #185fa5;
+  --blue-soft: #eaf1fa;
+  --green: #1c7a67;
+  --green-soft: #e4f2ec;
+  --gold: #633806;
+  --gold-soft: #faeeda;
+  --rose: #a14a57;
+  --rose-soft: #f9e8eb;
+  --card-shadow: 0 24px 60px rgba(26, 24, 21, 0.05);
+}

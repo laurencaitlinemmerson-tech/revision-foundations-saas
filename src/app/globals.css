@@ -27,12 +27,13 @@ html.lenis, html.lenis body {
    ============================================= */
 :root {
   color-scheme: light;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  /* Warm-editorial (social-hub vibe): display type is Playfair Display serif. */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body-dyslexic: 'Atkinson Hyperlegible', 'Arial', sans-serif;
 
   /* Primary Palette - Editorial Paper */
-  --cream: #FAFAF8;
+  --cream: #FDFDFB;
   --cream-pink: #F7F4EF;
   --linen-light: #F5F3F0;
   --linen-deep: #D8D3CB;
@@ -54,6 +55,13 @@ html.lenis, html.lenis body {
   --amber: #C8700A;
   --amber-bg: #FDF3E3;
   --amber-text: #7A3F04;
+
+  /* Social-hub editorial: gold accent + warm neutrals (portal-wide vibe) */
+  --gold: #A6906B;
+  --gold-deep: #8F7A54;
+  --hairline: #E7E4DD;
+  --wash: #F6F4EF;
+  --ink: #1E1E1C;
 
   /* Keep these mapped for broad compatibility */
   --lavender: #EFCBB6;
@@ -166,6 +174,12 @@ h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
 h2 { font-size: clamp(1.6rem, 3.5vw, 2.25rem); }
 h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
 
+/* Signature editorial accent: italic gold inside a heading, e.g. Social <em>Hub</em> */
+h1 em, h2 em, h3 em, .brand-title em, .display-accent {
+  font-style: italic;
+  color: var(--gold-deep);
+}
+
 /* Brand Title */
 .brand-title {
   font-family: var(--font-display);
@@ -218,10 +232,11 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
    CARDS
    ============================================= */
 .card {
-  background: #fff;
+  background: var(--bg-card);
   padding: var(--space-xl);
   box-shadow: none;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
   transition: transform var(--transition-smooth),
               box-shadow var(--transition-smooth),
               border-color var(--transition-base),
@@ -231,7 +246,8 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
 
 @media (hover: hover) {
   .card:hover {
-    border-color: var(--linen-medium);
+    border-color: var(--gold);
+    transform: translateY(-1px);
   }
 }
 
@@ -246,7 +262,8 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
 
 .card-glass {
   background: var(--linen-light);
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
   padding: var(--space-xl);
 }
 
@@ -255,6 +272,7 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   background: var(--espresso);
   padding: var(--space-xl);
   border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-sm);
 }
 
 /* =============================================
@@ -273,12 +291,13 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   letter-spacing: 0.01em;
   padding: 0.7rem 1.5rem;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #3a2010;
+  background: var(--gold-deep);
 }
 
 .btn-primary:focus-visible {
@@ -304,13 +323,15 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   letter-spacing: 0.01em;
   padding: 0.7rem 1.5rem;
   border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: var(--linen-light);
-  border-color: rgba(0,0,0,0.16);
+  background: var(--wash);
+  border-color: var(--gold);
+  color: var(--gold-deep);
 }
 
 .btn-secondary:focus-visible {
@@ -361,8 +382,8 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 2px;
+  padding: 3px 10px;
+  border-radius: 20px;
 }
 
 /* Colour-coded badge variants — pair -50 bg with -800 text */
@@ -384,7 +405,7 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
   font-size: 13px;
   font-weight: 300;
   line-height: 1.65;
-  border-radius: 0;
+  border-radius: 6px;
   margin-bottom: 14px;
 }
 
