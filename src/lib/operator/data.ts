@@ -7,6 +7,7 @@ import {
   type DailyMetric,
   type OperatorSettings,
   type OperatorSnapshot,
+  type ProgressPhoto,
   type RevenuePoint,
   type Workout,
 } from './types';
@@ -202,6 +203,49 @@ async function readWorkouts(client: SupabaseClient, since: string) {
   }
 }
 
+export const PHOTO_BUCKET = 'operator-photos';
+
+/**
+ * Progress photos live in a private bucket. Rows carry only the object
+ * path; the URL is signed here, server-side, and expires in an hour —
+ * so an image is never publicly addressable and a shared screenshot of
+ * the page cannot leak a permanent link.
+ */
+async function readPhotos(client: SupabaseClient): Promise<ProgressPhoto[]> {
+  try {
+    const { data, error } = await client
+      .from('operator_photos')
+      .select('id, date, slot, path, weight_kg, note')
+      .order('date', { ascending: true });
+
+    if (error || !data) return [];
+
+    return await Promise.all(
+      data.map(async (raw): Promise<ProgressPhoto> => {
+        const row = raw as Row;
+        const path = String(row.path);
+        let url: string | null = null;
+        try {
+          const signed = await client.storage.from(PHOTO_BUCKET).createSignedUrl(path, 3600);
+          url = signed.data?.signedUrl ?? null;
+        } catch {
+          // Bucket missing or object gone — the frame renders empty.
+        }
+        return {
+          id: String(row.id),
+          date: isoDay(String(row.date)),
+          slot: String(row.slot),
+          url,
+          weightKg: num(row.weight_kg),
+          note: row.note ? String(row.note) : null,
+        };
+      }),
+    );
+  } catch {
+    return [];
+  }
+}
+
 async function readBusiness(client: SupabaseClient): Promise<BusinessPulse> {
   const pulse: BusinessPulse = { ...EMPTY_BUSINESS, byProduct: [], revenueByMonth: [] };
   const today = isoDay(new Date());
@@ -306,16 +350,17 @@ export async function loadOperatorSnapshot(): Promise<OperatorSnapshot> {
   const generatedAt = new Date().toISOString();
 
   if (!client) {
-    return { ...buildDemoSnapshot(), generatedAt, isDemo: true, setupRequired: true };
+    return { ...buildDemoSnapshot(), generatedAt, isDemo: true, setupRequired: true, photos: [] };
   }
 
   const since = addDays(isoDay(new Date()), -HISTORY_DAYS);
 
-  const [settings, readingResult, dailyResult, workoutResult, business] = await Promise.all([
+  const [settings, readingResult, dailyResult, workoutResult, photos, business] = await Promise.all([
     readSettings(client),
     readReadings(client, since),
     readDailies(client, since),
     readWorkouts(client, since),
+    readPhotos(client),
     readBusiness(client),
   ]);
 
@@ -327,7 +372,7 @@ export async function loadOperatorSnapshot(): Promise<OperatorSnapshot> {
 
   if (!hasFitnessData) {
     const demo = buildDemoSnapshot(settings);
-    return { ...demo, generatedAt, isDemo: true, setupRequired, business };
+    return { ...demo, generatedAt, isDemo: true, setupRequired, photos, business };
   }
 
   return {
@@ -338,6 +383,7 @@ export async function loadOperatorSnapshot(): Promise<OperatorSnapshot> {
     readings: readingResult.readings,
     dailies: dailyResult.dailies,
     workouts: workoutResult.workouts,
+    photos,
     business,
   };
 }

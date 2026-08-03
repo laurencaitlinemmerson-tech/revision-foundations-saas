@@ -78,6 +78,17 @@ export interface OperatorSettings {
   waterTargetMl: number;
 }
 
+export interface ProgressPhoto {
+  id: string;
+  date: string;
+  /** Frame the photo occupies, e.g. "start" or "week-8". */
+  slot: string;
+  /** Short-lived signed URL; null when the object could not be signed. */
+  url: string | null;
+  weightKg: number | null;
+  note: string | null;
+}
+
 export interface RevenuePoint {
   month: string;
   grossPence: number;
@@ -110,6 +121,7 @@ export interface OperatorSnapshot {
   readings: BodyReading[];
   dailies: DailyMetric[];
   workouts: Workout[];
+  photos: ProgressPhoto[];
   business: BusinessPulse;
 }
 

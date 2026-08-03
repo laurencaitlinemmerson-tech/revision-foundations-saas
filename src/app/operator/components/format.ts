@@ -1,5 +1,20 @@
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+/* Weight is stored in kilograms throughout; pounds are a display
+   choice only, applied at the edge so nothing downstream has to care. */
+export type Unit = 'kg' | 'lb';
+
+const KG_TO_LB = 2.2046226218;
+
+export function toUnit(kg: number | null | undefined, unit: Unit): number | null {
+  if (kg === null || kg === undefined || !Number.isFinite(kg)) return null;
+  return unit === 'lb' ? kg * KG_TO_LB : kg;
+}
+
+export function fromUnit(value: number, unit: Unit): number {
+  return unit === 'lb' ? value / KG_TO_LB : value;
+}
+
 export function fmtDate(iso: string): string {
   const date = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
   return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;

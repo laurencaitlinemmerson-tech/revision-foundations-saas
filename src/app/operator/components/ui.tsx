@@ -3,56 +3,28 @@
 import { useId, useState, type ReactNode } from 'react';
 import { Sparkline } from './charts';
 
-/* Small building blocks shared across the dashboard sections. */
-
-export function Section({
-  title,
-  kicker,
-  note,
-  action,
-  children,
-  id,
-}: {
-  title: string;
-  kicker?: string;
-  note?: string;
-  action?: ReactNode;
-  children: ReactNode;
-  id?: string;
-}) {
-  return (
-    <section className="op-section" id={id} aria-label={title}>
-      <div className="op-section-head">
-        <div>
-          {kicker ? <div className="op-kicker">{kicker}</div> : null}
-          <h2 className="op-section-title">{title}</h2>
-          {note ? <p className="op-section-note">{note}</p> : null}
-        </div>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
+/* Small building blocks shared across the dashboard tabs. */
 
 export function Card({
   title,
   sub,
   action,
+  soft,
   children,
-  className,
+  style,
 }: {
   title?: string;
   sub?: string;
   action?: ReactNode;
+  soft?: boolean;
   children: ReactNode;
-  className?: string;
+  style?: React.CSSProperties;
 }) {
   return (
-    <div className={className ? `op-card ${className}` : 'op-card'}>
-      {title ? (
+    <div className={soft ? 'op-card op-card-soft' : 'op-card'} style={style}>
+      {title || action ? (
         <div className="op-card-head">
-          <h3 className="op-card-title">{title}</h3>
+          {title ? <h2>{title}</h2> : <span />}
           {action}
         </div>
       ) : null}
@@ -66,113 +38,90 @@ export function Card({
  * A signed change. The arrow glyph carries direction alongside the
  * colour, so the meaning survives without hue.
  */
-export function Delta({
+export function Chip({
   value,
   suffix = '',
   digits = 1,
   goodDirection = 'down',
-  period,
+  label,
 }: {
   value: number | null;
   suffix?: string;
   digits?: number;
   goodDirection?: 'up' | 'down' | 'none';
-  period?: string;
+  label?: string;
 }) {
   if (value === null || !Number.isFinite(value)) {
-    return <span className="op-delta">— {period ? <span>{period}</span> : null}</span>;
+    return <span className="op-chip" data-tone="flat">{label ?? 'no data'}</span>;
   }
 
   const rising = value > 0;
   const flat = Math.abs(value) < 10 ** -digits / 2;
   const tone =
-    goodDirection === 'none' || flat
-      ? 'flat'
-      : (goodDirection === 'up') === rising
-        ? 'good'
-        : 'bad';
+    goodDirection === 'none' || flat ? 'flat' : (goodDirection === 'up') === rising ? 'good' : 'bad';
 
   return (
-    <span className="op-delta" data-tone={tone}>
+    <span className="op-chip" data-tone={tone}>
       <span aria-hidden="true">{flat ? '→' : rising ? '↑' : '↓'}</span>
       {`${flat ? '' : rising ? '+' : '−'}${Math.abs(value).toFixed(digits)}${suffix}`}
-      {period ? <span style={{ fontWeight: 400, color: 'var(--muted)' }}>{period}</span> : null}
+      {label ? ` ${label}` : ''}
     </span>
   );
 }
 
-export function Meter({
+export function Bar({
   value,
   target,
+  color = 'var(--series-1)',
   label,
-  /** Overshooting a calorie target is bad; overshooting protein is not. */
-  overIsBad = false,
 }: {
   value: number | null;
   target: number;
+  color?: string;
   label: string;
-  overIsBad?: boolean;
 }) {
-  const ratio = value === null || target <= 0 ? 0 : value / target;
-  const tone = overIsBad
-    ? ratio > 1.05
-      ? 'over'
-      : ratio > 0.95
-        ? 'near'
-        : 'under'
-    : ratio >= 1
-      ? 'hit'
-      : ratio >= 0.8
-        ? 'near'
-        : 'under';
-
+  const pct = value === null || target <= 0 ? 0 : Math.min(100, Math.max(0, (value / target) * 100));
   return (
     <span
-      className="op-meter"
-      data-tone={tone}
+      className="op-bar"
       role="meter"
       aria-valuenow={value ?? 0}
       aria-valuemin={0}
       aria-valuemax={target}
       aria-label={label}
     >
-      <span style={{ width: `${Math.min(100, Math.max(0, ratio * 100))}%` }} />
+      <span style={{ width: `${pct}%`, background: color }} />
     </span>
   );
 }
 
-export function StatTile({
+export function Kpi({
   label,
   value,
   unit,
-  foot,
-  delta,
+  chip,
   spark,
-  sparkColor,
-  meter,
+  color = 'var(--series-1)',
 }: {
   label: string;
   value: string;
   unit?: string;
-  foot?: ReactNode;
-  delta?: ReactNode;
+  chip?: ReactNode;
   spark?: (number | null)[];
-  sparkColor?: string;
-  meter?: { value: number | null; target: number; overIsBad?: boolean };
+  color?: string;
 }) {
   return (
-    <div className="op-stat">
-      <div className="op-stat-label">{label}</div>
-      <div className="op-stat-value">
-        {value}
-        {unit ? <small>{unit}</small> : null}
+    <div className="op-kpi">
+      <div className="op-kpi-top">
+        <span className="op-kpi-label">{label}</span>
+        {chip}
       </div>
-      {meter ? (
-        <Meter value={meter.value} target={meter.target} label={label} overIsBad={meter.overIsBad} />
-      ) : null}
-      <div className="op-stat-foot">
-        <span>{foot}</span>
-        {delta ?? (spark ? <Sparkline values={spark} color={sparkColor} label={`${label} trend`} /> : null)}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginTop: 12 }}>
+        <span className="op-kpi-value">{value}</span>
+        {unit ? <span className="op-kpi-unit">{unit}</span> : null}
+      </div>
+      <div style={{ marginTop: 10, minHeight: 24 }}>
+        {spark ? <Sparkline values={spark} color={color} label={`${label} trend`} /> : null}
       </div>
     </div>
   );
@@ -204,6 +153,7 @@ export function TableView({
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((current) => !current)}
+        style={{ marginTop: 14 }}
       >
         {open ? 'Hide table' : buttonLabel}
       </button>
@@ -215,9 +165,7 @@ export function TableView({
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column} scope="col">
-                    {column}
-                  </th>
+                  <th key={column} scope="col">{column}</th>
                 ))}
               </tr>
             </thead>
@@ -226,9 +174,7 @@ export function TableView({
                 <tr key={index}>
                   {row.map((cell, cellIndex) =>
                     cellIndex === 0 ? (
-                      <th key={cellIndex} scope="row">
-                        {cell}
-                      </th>
+                      <th key={cellIndex} scope="row">{cell}</th>
                     ) : (
                       <td key={cellIndex}>{cell}</td>
                     ),
@@ -243,21 +189,10 @@ export function TableView({
   );
 }
 
-export function Note({
-  tone = 'neutral',
-  icon = '◆',
-  children,
-}: {
-  tone?: 'neutral' | 'good' | 'warning';
-  icon?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="op-note" data-tone={tone}>
-      <span className="op-note-icon" aria-hidden="true">
-        {icon}
-      </span>
-      <p style={{ margin: 0 }}>{children}</p>
-    </div>
-  );
+export function Note({ children }: { children: ReactNode }) {
+  return <p className="op-note">{children}</p>;
+}
+
+export function FieldLabel({ children }: { children: ReactNode }) {
+  return <div className="op-field-label">{children}</div>;
 }

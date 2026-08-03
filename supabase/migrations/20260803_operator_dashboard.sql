@@ -103,3 +103,25 @@ ALTER TABLE operator_fitness_readings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE operator_daily_metrics    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE operator_workouts         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE operator_settings         ENABLE ROW LEVEL SECURITY;
+
+-- Progress photos ----------------------------------------------------
+-- Rows point at objects in the private `operator-photos` storage
+-- bucket; the dashboard mints short-lived signed URLs server-side, so
+-- the images are never publicly addressable.
+--
+-- Create the bucket once (Storage → New bucket → name: operator-photos,
+-- Public: OFF), then run this file.
+CREATE TABLE IF NOT EXISTS operator_photos (
+  id          uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
+  date        date         NOT NULL,
+  slot        text         NOT NULL,
+  path        text         NOT NULL,
+  weight_kg   numeric(5,2),
+  note        text,
+  created_at  timestamptz  NOT NULL DEFAULT now(),
+  UNIQUE (slot)
+);
+
+CREATE INDEX IF NOT EXISTS operator_photos_date_idx ON operator_photos (date DESC);
+
+ALTER TABLE operator_photos ENABLE ROW LEVEL SECURITY;

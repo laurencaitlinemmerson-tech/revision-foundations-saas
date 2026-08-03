@@ -169,6 +169,7 @@ export function buildDemoSnapshot(settings: OperatorSettings = DEFAULT_SETTINGS)
     readings,
     dailies,
     workouts,
+    photos: [],
     business,
   };
 }
