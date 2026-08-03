@@ -16,8 +16,12 @@ type HealthAutoExportMetric = {
 const DEFAULT_HEIGHT_M = 1.5748;
 
 function authed(req: NextRequest) {
-  const bearer = req.headers.get('authorization') ?? '';
+  const url = new URL(req.url);
+  const queryToken = url.searchParams.get('token') ?? '';
   const syncToken = process.env.OPERATOR_SYNC_TOKEN;
+  if (syncToken && queryToken === syncToken) return true;
+
+  const bearer = req.headers.get('authorization') ?? '';
   if (syncToken && bearer === `Bearer ${syncToken}`) return true;
 
   const pw = req.headers.get('x-operator-pw') ?? '';
