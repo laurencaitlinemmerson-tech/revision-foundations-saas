@@ -13,10 +13,13 @@ export const maxDuration = 30;
    ============================================================
    In the app: Automations → new REST API automation →
 
-     URL:     https://<your-domain>/api/operator/healthkit
-     Method:  POST
-     Header:  Authorization: Bearer <OPERATOR_ACCESS_KEY>
-     Body:    JSON (the app's default export format)
+     URL:    https://<your-domain>/api/operator/healthkit?k=<OPERATOR_ACCESS_KEY>
+     Method: POST
+     Body:   JSON (the app's default export format)
+
+   The key rides in the URL so nothing else needs configuring — no
+   custom header to add. (A header still works too: Authorization:
+   Bearer <OPERATOR_ACCESS_KEY>, for callers that prefer it.)
 
    Set it to run automatically (hourly is plenty) or trigger "Sync Now"
    for a manual test. See mapHealthAutoExport() for exactly which
@@ -25,7 +28,7 @@ export const maxDuration = 30;
    ============================================================ */
 
 export async function POST(request: NextRequest) {
-  if (!(await hasOperatorAccess())) {
+  if (!(await hasOperatorAccess(request))) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
 
@@ -71,8 +74,8 @@ export async function POST(request: NextRequest) {
 
 /** GET as a plain reachability check — hitting the URL in a browser
  *  should not need a real HealthKit export to confirm the route exists. */
-export async function GET() {
-  if (!(await hasOperatorAccess())) {
+export async function GET(request: NextRequest) {
+  if (!(await hasOperatorAccess(request))) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
   return NextResponse.json({ ok: true, message: 'POST a Health Auto Export payload here.' });

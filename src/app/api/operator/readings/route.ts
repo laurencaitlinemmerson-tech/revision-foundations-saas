@@ -6,8 +6,9 @@ import { hasOperatorAccess } from '@/lib/operator/guard';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/* Body-composition readings. Authorised by the dashboard cookie, or by
-   the access key as a bearer token so a phone shortcut can post here. */
+/* Body-composition readings. Authorised by the dashboard cookie, by the
+   access key as a bearer token, or by `?k=` in the URL — so a phone
+   shortcut or automation can post here without setting a header. */
 
 const readingSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD'),
@@ -27,8 +28,8 @@ function client() {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-export async function GET() {
-  if (!(await hasOperatorAccess())) {
+export async function GET(request: NextRequest) {
+  if (!(await hasOperatorAccess(request))) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
 
@@ -47,7 +48,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await hasOperatorAccess())) {
+  if (!(await hasOperatorAccess(request))) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
 
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!(await hasOperatorAccess())) {
+  if (!(await hasOperatorAccess(request))) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
 

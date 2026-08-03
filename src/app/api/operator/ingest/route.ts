@@ -10,9 +10,9 @@ export const dynamic = 'force-dynamic';
 /* ============================================================
    Daily metrics + workout ingest
    ============================================================
-   The endpoint an automation posts to — a Shortcut, or Health Auto
-   Export pointed at a normalising webhook. Authorise with the access
-   key as a bearer token:
+   The endpoint a hand-built automation posts to — a Shortcut, a
+   script. Authorise with the access key as a bearer token, or as a
+   `?k=` query param when the caller can't set custom headers:
 
      curl -X POST https://<site>/api/operator/ingest \
        -H "Authorization: Bearer $OPERATOR_ACCESS_KEY" \
@@ -74,7 +74,7 @@ const payloadSchema = z
   });
 
 export async function POST(request: NextRequest) {
-  if (!(await hasOperatorAccess())) {
+  if (!(await hasOperatorAccess(request))) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
 

@@ -186,15 +186,17 @@ the real sync: install [Health Auto Export – JSON+CSV](https://apps.apple.com/
 on the phone that carries your Health data, then in the app:
 
 1. **Automations → new automation → REST API**
-2. `URL`: `https://your-domain.com/api/operator/healthkit`
+2. `URL`: `https://your-domain.com/api/operator/healthkit?k=<OPERATOR_ACCESS_KEY>`
+   (the key rides in the URL, so there's no header to configure — paste
+   your key straight into the URL field. A header works too if you'd
+   rather: `Authorization: Bearer <OPERATOR_ACCESS_KEY>`.)
 3. `Method`: POST · `Body format`: JSON (the app's default export)
-4. Add a header: `Authorization: Bearer <OPERATOR_ACCESS_KEY>`
-5. Pick the metrics to include — steps, active energy, resting heart rate,
+4. Pick the metrics to include — steps, active energy, resting heart rate,
    HRV, VO2 max, sleep analysis, dietary energy/protein/carbs/fat/fibre/
    sugar/water, and workouts. (Body composition — weight, body fat, muscle,
    water — isn't part of this export; that still comes from a smart scale
    via `/api/operator/readings` above, or logged by hand on the Today tab.)
-6. Set it to run automatically (hourly is plenty), or tap **Sync Now** to
+5. Set it to run automatically (hourly is plenty), or tap **Sync Now** to
    test.
 
 The endpoint responds with `metricsSeen` and `unmatchedMetrics` so a naming
