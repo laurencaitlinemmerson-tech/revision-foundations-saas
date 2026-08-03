@@ -167,9 +167,9 @@ curl -X POST https://your-domain.com/api/operator/readings \
   -d '{"date":"2026-08-03","weight":71.9,"bodyFat":26.8,"muscleMass":39.1,"water":50.6}'
 ```
 
-Daily Apple Health metrics and workouts, from a Shortcut or Health Auto
-Export. Only the fields you send are written, so a partial sync never blanks
-the rest of the day:
+Daily Apple Health metrics and workouts, hand-built JSON (a Shortcut, a
+script). Only the fields you send are written, so a partial sync never
+blanks the rest of the day:
 
 ```bash
 curl -X POST https://your-domain.com/api/operator/ingest \
@@ -180,6 +180,28 @@ curl -X POST https://your-domain.com/api/operator/ingest \
        "workouts":[{"startedAt":"2026-08-03T18:15:00Z","type":"Strength",
         "durationMin":52,"energyKcal":320,"avgHr":128}]}'
 ```
+
+**Apple Health, automatically — the "Health Auto Export" app.** This is
+the real sync: install [Health Auto Export – JSON+CSV](https://apps.apple.com/app/health-auto-export-json-csv/id1115567069)
+on the phone that carries your Health data, then in the app:
+
+1. **Automations → new automation → REST API**
+2. `URL`: `https://your-domain.com/api/operator/healthkit`
+3. `Method`: POST · `Body format`: JSON (the app's default export)
+4. Add a header: `Authorization: Bearer <OPERATOR_ACCESS_KEY>`
+5. Pick the metrics to include — steps, active energy, resting heart rate,
+   HRV, VO2 max, sleep analysis, dietary energy/protein/carbs/fat/fibre/
+   sugar/water, and workouts. (Body composition — weight, body fat, muscle,
+   water — isn't part of this export; that still comes from a smart scale
+   via `/api/operator/readings` above, or logged by hand on the Today tab.)
+6. Set it to run automatically (hourly is plenty), or tap **Sync Now** to
+   test.
+
+The endpoint responds with `metricsSeen` and `unmatchedMetrics` so a naming
+mismatch across app versions is visible rather than silent — if a metric
+you enabled isn't landing, check the response body from a manual sync and
+send it over, since the mapping in `src/lib/operator/healthkit.ts` is easy
+to extend.
 
 Targets and body profile (height, age, goal weight, weekly rate, protein and
 step targets) live in the single `operator_settings` row — edit it in the

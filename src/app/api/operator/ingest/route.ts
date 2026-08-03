@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { hasOperatorAccess } from '@/lib/operator/guard';
+import { buildDayRows, buildWorkoutRows } from '@/lib/operator/ingestColumns';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -72,31 +73,6 @@ const payloadSchema = z
     message: 'payload must include days or workouts',
   });
 
-const DAY_COLUMNS: Record<string, string> = {
-  steps: 'steps',
-  activeEnergyKcal: 'active_energy_kcal',
-  exerciseMinutes: 'exercise_minutes',
-  standHours: 'stand_hours',
-  distanceKm: 'distance_km',
-  restingHr: 'resting_hr',
-  hrvMs: 'hrv_ms',
-  walkingHrAvg: 'walking_hr_avg',
-  vo2Max: 'vo2_max',
-  sleepTotalMin: 'sleep_total_min',
-  sleepInBedMin: 'sleep_in_bed_min',
-  sleepRemMin: 'sleep_rem_min',
-  sleepDeepMin: 'sleep_deep_min',
-  sleepCoreMin: 'sleep_core_min',
-  sleepAwakeMin: 'sleep_awake_min',
-  dietaryEnergyKcal: 'dietary_energy_kcal',
-  proteinG: 'protein_g',
-  carbsG: 'carbs_g',
-  fatG: 'fat_g',
-  fiberG: 'fiber_g',
-  sugarG: 'sugar_g',
-  waterMl: 'water_ml',
-};
-
 export async function POST(request: NextRequest) {
   if (!(await hasOperatorAccess())) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
@@ -120,33 +96,14 @@ export async function POST(request: NextRequest) {
   if (days.length) {
     // Only send the keys actually present, so a partial sync merges
     // into the existing row instead of nulling the rest of the day.
-    const rows = days.map((day) => {
-      const row: Record<string, unknown> = { date: day.date, updated_at: new Date().toISOString() };
-      for (const [field, column] of Object.entries(DAY_COLUMNS)) {
-        const value = (day as Record<string, unknown>)[field];
-        if (value !== undefined && value !== null) row[column] = value;
-      }
-      return row;
-    });
-
+    const rows = buildDayRows(days);
     const { error } = await supabase.from('operator_daily_metrics').upsert(rows, { onConflict: 'date' });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     daysWritten = rows.length;
   }
 
   if (workouts.length) {
-    const rows = workouts.map((workout) => ({
-      started_at: workout.startedAt,
-      ended_at: workout.endedAt ?? null,
-      type: workout.type,
-      duration_min: workout.durationMin ?? null,
-      energy_kcal: workout.energyKcal ?? null,
-      avg_hr: workout.avgHr ?? null,
-      max_hr: workout.maxHr ?? null,
-      distance_km: workout.distanceKm ?? null,
-      source: 'ingest',
-    }));
-
+    const rows = buildWorkoutRows(workouts, 'ingest');
     const { error } = await supabase
       .from('operator_workouts')
       .upsert(rows, { onConflict: 'started_at,type' });
