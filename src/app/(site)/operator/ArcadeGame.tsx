@@ -13,6 +13,7 @@
 // (title / playing / paused / won / over) and the saved high score.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import SupplyDrop from './SupplyDrop';
 
 const W = 320;
 const H = 180;
@@ -633,7 +634,7 @@ function update(s: GameState, dt: number): 'won' | 'over' | null {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function ArcadeGame({ active }: { active: boolean }) {
+function WardRun({ active }: { active: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameRef = useRef<GameState>(freshState());
   const [phase, setPhase] = useState<Phase>('title');
@@ -723,28 +724,60 @@ export default function ArcadeGame({ active }: { active: boolean }) {
   }, [active]);
 
   return (
-    <div className="op-arcade">
-      <div className="op-arcade-frame">
-        <div className="op-arcade-head">
-          <span className="op-arcade-kicker">Paeds ward arcade · WC1N</span>
-          <span className="op-arcade-best">Best {best > 0 ? best.toLocaleString() : '—'}</span>
-        </div>
-        <canvas
-          ref={canvasRef}
-          width={W}
-          height={H}
-          className="op-arcade-canvas"
-          tabIndex={0}
-          role="application"
-          aria-label="GOSH Ward Run, an 8-bit runner. Press space or tap to jump. Run the paediatric ward from the doors to handover, collecting teddies, bravery stickers, and balloons while dodging wet floors, toy blocks, playroom balls, and a stray pigeon."
-          onPointerDown={(e) => { e.currentTarget.focus(); action(); }}
-        />
-        <p className="op-arcade-note">
-          Space or tap to jump — twice for a double-jump · P pauses · Collect teddies (+10), bravery
-          stickers (+25), and balloons (+40); dodge the wet floors, dropped toy blocks, runaway playroom
-          balls — and the pigeon that got in through the window. Twelve bays from the ward doors to handover.
-        </p>
+    <div className="op-arcade-frame">
+      <div className="op-arcade-head">
+        <span className="op-arcade-kicker">Cabinet 01 · Paeds ward · WC1N</span>
+        <span className="op-arcade-best">Best {best > 0 ? best.toLocaleString() : '—'}</span>
       </div>
+      <canvas
+        ref={canvasRef}
+        width={W}
+        height={H}
+        className="op-arcade-canvas"
+        tabIndex={0}
+        role="application"
+        aria-label="GOSH Ward Run, an 8-bit runner. Press space or tap to jump. Run the paediatric ward from the doors to handover, collecting teddies, bravery stickers, and balloons while dodging wet floors, toy blocks, playroom balls, and a stray pigeon."
+        onPointerDown={(e) => { e.currentTarget.focus(); action(); }}
+      />
+      <p className="op-arcade-note">
+        Space or tap to jump — twice for a double-jump · P pauses · Collect teddies (+10), bravery
+        stickers (+25), and balloons (+40); dodge the wet floors, dropped toy blocks, runaway playroom
+        balls — and the pigeon that got in through the window. Twelve bays from the ward doors to handover.
+      </p>
+    </div>
+  );
+}
+
+// ─── Arcade shell ────────────────────────────────────────────────────────────
+// Two cabinets share the arcade page: Ward Run (jump) and Supply Drop
+// (left/right). Only the selected one mounts, so each game's keyboard
+// listeners never fight over the same keys.
+
+const CABINETS = [
+  { id: 'run' as const, label: 'Ward Run', hint: 'jump' },
+  { id: 'drop' as const, label: 'Supply Drop', hint: 'left / right' },
+];
+
+export default function ArcadeGame({ active }: { active: boolean }) {
+  const [cabinet, setCabinet] = useState<'run' | 'drop'>('run');
+  return (
+    <div className="op-arcade">
+      <div className="op-arcade-tabs" role="tablist" aria-label="Arcade cabinets">
+        {CABINETS.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            role="tab"
+            aria-selected={cabinet === c.id}
+            className={`op-arcade-tab ${cabinet === c.id ? 'is-active' : ''}`}
+            onClick={(e) => { setCabinet(c.id); e.currentTarget.blur(); }}
+          >
+            {c.label}
+            <span className="op-arcade-tab-hint">{c.hint}</span>
+          </button>
+        ))}
+      </div>
+      {cabinet === 'run' ? <WardRun active={active} /> : <SupplyDrop active={active} />}
     </div>
   );
 }

@@ -191,15 +191,21 @@ export async function upsertFitnessReading(reading: FitnessReadingInput) {
   if (!isPlausibleWeightKg(reading.weight)) {
     throw new Error('weight_out_of_range');
   }
-  const dayStart = `${isoDay(reading.date)}T00:00:00.000Z`;
-  const dayEnd = `${isoDay(reading.date)}T23:59:59.999Z`;
+  const day = isoDay(reading.date);
+  const dayStart = `${day}T00:00:00.000Z`;
+  const nextDay = new Date(Date.UTC(
+    parseInt(day.slice(0, 4)),
+    parseInt(day.slice(5, 7)) - 1,
+    parseInt(day.slice(8, 10)) + 1,
+  )).toISOString().slice(0, 10);
+  const nextDayStart = `${nextDay}T00:00:00.000Z`;
 
   try {
     const { data: existingRows, error: loadError } = await supabaseAdmin
       .from('operator_fitness_readings')
       .select('id, date, weight, bmi, body_fat, water, muscle_mass, bone_mass')
       .gte('date', dayStart)
-      .lte('date', dayEnd)
+      .lt('date', nextDayStart)
       .order('date', { ascending: false })
       .limit(1);
 
