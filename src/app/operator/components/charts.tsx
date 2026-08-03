@@ -59,7 +59,7 @@ function Tooltip({ state, width, height }: { state: TooltipState; width: number;
 
 const VB_W = 900;
 const VB_H = 340;
-const PAD = { top: 20, right: 64, bottom: 34, left: 52 };
+const PAD = { top: 22, right: 54, bottom: 54, left: 54 };
 
 /* ── Trajectory: raw readings, trend, fluctuation band, projection ── */
 
@@ -161,6 +161,11 @@ export function TrajectoryChart({
         ].join(' ')
       : '';
 
+  // Two dot layers, as in the spec: a fine dust of small trend-line dots
+  // for texture, and larger ringed markers on the days actually weighed
+  // in — the endpoint reading drawn bigger than the rest.
+  const dustDots = trendPoints.map((p) => ({ cx: x(p.i), cy: y(p.t) }));
+
   const readingDots = points
     .map((p, i) => (p.weight === null ? null : { i, cx: x(i), cy: y(p.weight), value: p.weight }))
     .filter((d): d is { i: number; cx: number; cy: number; value: number } => d !== null);
@@ -182,6 +187,18 @@ export function TrajectoryChart({
   const lastProjection = projection[projection.length - 1] ?? null;
   const xTickIndexes = pickTickIndexes(points.length, 6);
 
+  // Lowest and highest weigh-in in the visible range, each called out —
+  // the two numbers a reader actually goes looking for on a weight chart.
+  const loPoint = readingDots.reduce<typeof readingDots[number] | null>(
+    (min, dot) => (min === null || dot.value < min.value ? dot : min),
+    null,
+  );
+  const hiPoint = readingDots.reduce<typeof readingDots[number] | null>(
+    (max, dot) => (max === null || dot.value > max.value ? dot : max),
+    null,
+  );
+  const showLoHi = loPoint && hiPoint && loPoint.i !== hiPoint.i;
+
   return (
     <div className="op-chart">
       <svg
@@ -198,8 +215,8 @@ export function TrajectoryChart({
 
         {ticks.map((tick) => (
           <g key={tick}>
-            <line className="op-grid-line" x1={PAD.left} x2={VB_W - PAD.right} y1={y(tick)} y2={y(tick)} />
-            <text className="op-tick" x={PAD.left - 10} y={y(tick) + 3.5} textAnchor="end">
+            <line x1={PAD.left} x2={VB_W - PAD.right} y1={y(tick)} y2={y(tick)} stroke="var(--grid)" strokeWidth={0.5} />
+            <text className="op-tick" x={PAD.left - 10} y={y(tick) + 3.5} textAnchor="end" fill="var(--faint)">
               {fmtNumber(tick, 1)}
             </text>
           </g>
@@ -213,101 +230,136 @@ export function TrajectoryChart({
               y1={y(goal)}
               y2={y(goal)}
               stroke="var(--blush)"
-              strokeWidth={1.5}
+              strokeWidth={1.2}
               strokeDasharray="5 5"
             />
-            <text className="op-tick" x={VB_W - PAD.right + 8} y={y(goal) + 3.5} fill="var(--mauve)">
-              goal {fmtNumber(goal, 1)}
+            <text className="op-tick" x={PAD.left + 4} y={y(goal) - 5} fill="var(--marker-hi)" letterSpacing={1.6}>
+              GOAL {fmtNumber(goal, 1)}
             </text>
           </g>
         ) : null}
 
         {xTickIndexes.map((index) => (
-          <text key={index} className="op-tick" x={x(index)} y={VB_H - PAD.bottom + 20} textAnchor="middle">
+          <text
+            key={index}
+            className="op-tick"
+            x={x(index)}
+            y={VB_H - PAD.bottom + 30}
+            textAnchor="middle"
+            fill="var(--faint)"
+          >
             {fmtDate(points[index].date)}
           </text>
         ))}
 
-        <line
-          className="op-axis-line"
-          x1={PAD.left}
-          x2={VB_W - PAD.right}
-          y1={VB_H - PAD.bottom}
-          y2={VB_H - PAD.bottom}
-        />
-
         <g clipPath={`url(#${clipId})`}>
-          {bandPath ? <path d={bandPath} fill="var(--lilac)" opacity={0.55} /> : null}
-          {projBand ? <path d={projBand} fill="var(--sky)" opacity={0.22} /> : null}
-          {projLine ? (
-            <path className="op-line" d={projLine} stroke="var(--sky)" strokeDasharray="6 6" />
-          ) : null}
+          {bandPath ? <path d={bandPath} fill="var(--lilac)" opacity={0.42} /> : null}
+          {projBand ? <path d={projBand} fill="var(--sky-band)" opacity={0.34} /> : null}
 
-          {readingDots.map((dot) => (
-            <circle key={dot.i} cx={dot.cx} cy={dot.cy} r={2.2} fill="var(--blush)" opacity={0.75} />
+          {dustDots.map((dot, index) => (
+            <circle key={index} cx={dot.cx} cy={dot.cy} r={1.9} fill="var(--blush)" opacity={0.62} />
           ))}
 
           {trendPath ? (
-            <path className="op-line" d={trendPath} stroke="var(--series-1)" strokeWidth={2.4} />
+            <path className="op-line" d={trendPath} stroke="var(--violet)" strokeWidth={2.4} />
           ) : null}
-        </g>
 
-        {/* Endpoint marker + the single direct label this chart carries. */}
-        {lastReading ? (
-          <>
-            <circle
-              className="op-dot-ring"
-              cx={lastReading.cx}
-              cy={lastReading.cy}
-              r={5}
-              fill="var(--series-1)"
-            />
-            <text className="op-mark-label" x={lastReading.cx + 11} y={lastReading.cy - 10}>
-              {fmtNumber(lastReading.value, 1)} {unit}
-            </text>
-          </>
-        ) : null}
+          {projLine ? (
+            <path className="op-line" d={projLine} stroke="var(--sky)" strokeWidth={1.8} strokeDasharray="6 6" />
+          ) : null}
 
-        {lastProjection ? (
-          <>
+          {lastProjection ? (
             <circle
-              className="op-dot-ring"
               cx={x(projOffset + projection.length - 1)}
               cy={y(lastProjection.y)}
-              r={4.5}
-              fill="var(--sky)"
+              r={5}
+              fill="var(--card)"
+              stroke="var(--sky)"
+              strokeWidth={1.8}
             />
-            <text
-              className="op-tick"
-              x={x(projOffset + projection.length - 1) + 8}
-              y={y(lastProjection.y) + 3.5}
-              fill="var(--sky)"
-            >
-              {fmtNumber(lastProjection.y, 1)}
-            </text>
-          </>
+          ) : null}
+
+          {/* Each actual weigh-in: a white-ringed dot, the most recent one
+              drawn larger so the eye lands on it first. */}
+          {readingDots.map((dot) => (
+            <circle
+              key={dot.i}
+              cx={dot.cx}
+              cy={dot.cy}
+              r={dot.i === lastReading?.i ? 5.5 : 3.4}
+              fill="var(--card)"
+              stroke="var(--violet)"
+              strokeWidth={1.8}
+            />
+          ))}
+        </g>
+
+        {lastProjection ? (
+          <text
+            className="op-mark-label"
+            x={x(projOffset + projection.length - 1) - 10}
+            y={y(lastProjection.y) - 12}
+            textAnchor="end"
+            fill="var(--marker-lo)"
+            style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, fontWeight: 400 }}
+          >
+            {fmtNumber(lastProjection.y, 1)} {unit}
+          </text>
         ) : null}
 
-        {activeIndex !== null ? (
+        {showLoHi && loPoint ? (
           <g>
+            <circle cx={loPoint.cx} cy={loPoint.cy} r={3} fill="var(--marker-lo)" />
+            <text
+              className="op-tick"
+              x={loPoint.cx}
+              y={loPoint.cy + 20}
+              textAnchor="middle"
+              fill="var(--marker-lo)"
+              letterSpacing={1.2}
+            >
+              Lowest {fmtNumber(loPoint.value, 1)}
+            </text>
+          </g>
+        ) : null}
+        {showLoHi && hiPoint ? (
+          <g>
+            <circle cx={hiPoint.cx} cy={hiPoint.cy} r={3} fill="var(--marker-hi)" />
+            <text
+              className="op-tick"
+              x={hiPoint.cx}
+              y={hiPoint.cy - 12}
+              textAnchor="middle"
+              fill="var(--marker-hi)"
+              letterSpacing={1.2}
+            >
+              Highest {fmtNumber(hiPoint.value, 1)}
+            </text>
+          </g>
+        ) : null}
+
+        {activeIndex !== null && points[activeIndex].trend !== null ? (
+          <g opacity={0.9}>
             <line
               x1={x(activeIndex)}
               x2={x(activeIndex)}
               y1={PAD.top}
               y2={VB_H - PAD.bottom}
-              stroke="var(--series-1)"
+              stroke="var(--violet)"
               strokeWidth={0.75}
               strokeDasharray="3 4"
               opacity={0.55}
             />
-            {points[activeIndex].trend !== null ? (
-              <circle
-                cx={x(activeIndex)}
-                cy={y(points[activeIndex].trend as number)}
-                r={5.5}
-                fill="var(--series-1)"
-              />
-            ) : null}
+            <circle cx={x(activeIndex)} cy={y(points[activeIndex].trend as number)} r={5.5} fill="var(--violet)" />
+            <circle
+              cx={x(activeIndex)}
+              cy={y(points[activeIndex].trend as number)}
+              r={10}
+              fill="none"
+              stroke="var(--violet)"
+              strokeWidth={0.8}
+              opacity={0.4}
+            />
           </g>
         ) : null}
 
@@ -336,7 +388,7 @@ export function TrajectoryChart({
                 {
                   label: '7-day trend',
                   value: point.trend === null ? '—' : `${fmtNumber(point.trend, 1)} ${unit}`,
-                  color: 'var(--series-1)',
+                  color: 'var(--violet)',
                   shape: 'line',
                 },
               ],
@@ -357,7 +409,7 @@ export function TrajectoryChart({
           Daily scale reading
         </span>
         <span className="op-legend-item">
-          <span className="op-swatch" data-shape="line" style={{ background: 'var(--series-1)' }} />
+          <span className="op-swatch" data-shape="line" style={{ background: 'var(--violet)' }} />
           7-day trend
         </span>
         <span className="op-legend-item">

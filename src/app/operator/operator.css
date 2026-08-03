@@ -41,6 +41,11 @@
   --blush: #e79db4;
   --lilac: #dcd5f2;
   --sky: #6e9bd1;
+  --sky-band: #b9d4f2;
+  /* The trend chart's two callout colours — lowest/highest reading and
+     the projection value label share these, same as the goal label. */
+  --marker-lo: #4a7fc1;
+  --marker-hi: #c97a9a;
 
   /* Categorical series — fixed order, never cycled.
      Validated on this surface: adjacent CVD ΔE 12.1, normal-vision ΔE 17.6. */
@@ -99,6 +104,9 @@
     --blush: #d4809a;
     --lilac: #4a3f68;
     --sky: #6e9bd1;
+    --sky-band: #3a5a80;
+    --marker-lo: #6e9bd1;
+    --marker-hi: #d18cb4;
     --series-1: #9270d6;
     --series-2: #d4517f;
     --series-3: #4590d8;
@@ -135,6 +143,9 @@
   --blush: #d4809a;
   --lilac: #4a3f68;
   --sky: #6e9bd1;
+  --sky-band: #3a5a80;
+  --marker-lo: #6e9bd1;
+  --marker-hi: #d18cb4;
   --series-1: #9270d6;
   --series-2: #d4517f;
   --series-3: #4590d8;
