@@ -149,6 +149,11 @@ export default function OperatorDashboard({ snapshot }: { snapshot: OperatorSnap
         if (ok) flash('Targets updated');
         return ok;
       },
+      logSet: async (date, move, loadKg, reps, type) => {
+        const ok = await post('/api/operator/sets', { date, move, loadKg, reps, type });
+        if (ok) flash(`${move} logged`);
+        return ok;
+      },
     }),
     [busy, post, flash],
   );

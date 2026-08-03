@@ -170,11 +170,27 @@ async function readDailies(client: SupabaseClient, since: string) {
   }
 }
 
+function parseSets(raw: unknown): Workout['sets'] {
+  const value = raw && typeof raw === 'object' ? (raw as Row).sets : undefined;
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry): Workout['sets'][number] | null => {
+      if (!entry || typeof entry !== 'object') return null;
+      const row = entry as Row;
+      const loadKg = num(row.loadKg);
+      const reps = num(row.reps);
+      const move = typeof row.move === 'string' ? row.move.trim() : '';
+      if (!move || loadKg === null || reps === null) return null;
+      return { move, loadKg, reps: Math.round(reps) };
+    })
+    .filter((set): set is Workout['sets'][number] => set !== null);
+}
+
 async function readWorkouts(client: SupabaseClient, since: string) {
   try {
     const { data, error } = await client
       .from('operator_workouts')
-      .select('id, started_at, type, duration_min, energy_kcal, avg_hr, max_hr, distance_km')
+      .select('id, started_at, type, duration_min, energy_kcal, avg_hr, max_hr, distance_km, raw')
       .gte('started_at', since)
       .order('started_at', { ascending: true });
 
@@ -192,6 +208,7 @@ async function readWorkouts(client: SupabaseClient, since: string) {
           avgHr: int(row.avg_hr),
           maxHr: int(row.max_hr),
           distanceKm: num(row.distance_km),
+          sets: parseSets(row.raw),
         };
       })
       // The old importer parked body-composition rows in this table.

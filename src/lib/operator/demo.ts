@@ -42,6 +42,17 @@ const WORKOUT_TYPES = [
   { type: 'Cycling', minutes: 40, kcal: 300, hr: 140 },
 ];
 
+/* HealthKit carries no set/rep/load detail, so a Strength demo session
+   needs its own small, slowly-progressing lift pool to show what hand
+   logging looks like once real sets exist. */
+const LIFT_POOL = [
+  { move: 'Back squat', baseKg: 55, reps: 6 },
+  { move: 'Deadlift', baseKg: 75, reps: 5 },
+  { move: 'Overhead press', baseKg: 24, reps: 6 },
+  { move: 'Bench press', baseKg: 42, reps: 6 },
+  { move: 'Romanian deadlift', baseKg: 50, reps: 8 },
+];
+
 export function buildDemoSnapshot(settings: OperatorSettings = DEFAULT_SETTINGS): OperatorSnapshot {
   const random = seeded(20260803);
   const today = isoDay(new Date());
@@ -129,6 +140,15 @@ export function buildDemoSnapshot(settings: OperatorSettings = DEFAULT_SETTINGS)
     if (trained) {
       const template = WORKOUT_TYPES[Math.floor(random() * WORKOUT_TYPES.length)];
       const duration = Math.round(template.minutes + (random() - 0.5) * 18);
+      const isStrength = template.type === 'Strength';
+      const sets = isStrength
+        ? Array.from({ length: 2 + Math.floor(random() * 2) }, () => {
+            const lift = LIFT_POOL[Math.floor(random() * LIFT_POOL.length)];
+            // A gentle upward drift over the six-month window, plus noise.
+            const load = lift.baseKg * (1 + eased * 0.12) + (random() - 0.5) * 2.5;
+            return { move: lift.move, loadKg: Number(load.toFixed(1)), reps: lift.reps };
+          })
+        : [];
       workouts.push({
         id: `demo-w-${date}`,
         startedAt: `${date}T${isWeekend ? '10' : '18'}:15:00.000Z`,
@@ -137,6 +157,7 @@ export function buildDemoSnapshot(settings: OperatorSettings = DEFAULT_SETTINGS)
         energyKcal: Math.round(template.kcal * (duration / template.minutes) * (0.9 + random() * 0.2)),
         avgHr: Math.round(template.hr + (random() - 0.5) * 12),
         maxHr: Math.round(template.hr + 22 + random() * 14),
+        sets,
         distanceKm:
           template.type === 'Running' || template.type === 'Cycling' || template.type === 'Walking'
             ? Number((duration * (template.type === 'Cycling' ? 0.42 : 0.15)).toFixed(2))

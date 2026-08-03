@@ -92,8 +92,12 @@ export interface TrainingSummary {
   sessionsPerWeek: number;
   byType: { type: string; sessions: number; minutes: number; kcal: number }[];
   /** Sessions per ISO week, oldest first. */
-  weekly: { weekStart: string; sessions: number; minutes: number }[];
+  weekly: { weekStart: string; sessions: number; minutes: number; kcal: number; volumeKg: number }[];
   recent: Workout[];
+  /** Total load × reps across every logged set — 0 until sets exist. */
+  volumeKg: number;
+  /** Best single-set load per exercise, sorted heaviest first. */
+  bests: { move: string; loadKg: number; reps: number }[];
 }
 
 export interface RecoverySummary {
@@ -311,13 +315,15 @@ function summariseTraining(days: DerivedDay[]): TrainingSummary {
     byType.set(type, entry);
   }
 
-  const weekMap = new Map<string, { sessions: number; minutes: number }>();
+  const weekMap = new Map<string, { sessions: number; minutes: number; kcal: number; volumeKg: number }>();
   for (const day of days) {
     const week = startOfWeek(day.date);
-    const entry = weekMap.get(week) ?? { sessions: 0, minutes: 0 };
+    const entry = weekMap.get(week) ?? { sessions: 0, minutes: 0, kcal: 0, volumeKg: 0 };
     for (const workout of day.workouts) {
       entry.sessions += 1;
       entry.minutes += workout.durationMin ?? 0;
+      entry.kcal += workout.energyKcal ?? 0;
+      for (const set of workout.sets) entry.volumeKg += set.loadKg * set.reps;
     }
     weekMap.set(week, entry);
   }
@@ -325,6 +331,19 @@ function summariseTraining(days: DerivedDay[]): TrainingSummary {
   const minutes = workouts.reduce((acc, w) => acc + (w.durationMin ?? 0), 0);
   const kcal = workouts.reduce((acc, w) => acc + (w.energyKcal ?? 0), 0);
   const weeks = Math.max(1, days.length / 7);
+
+  const volumeKg = workouts.reduce(
+    (acc, w) => acc + w.sets.reduce((setAcc, set) => setAcc + set.loadKg * set.reps, 0),
+    0,
+  );
+
+  const bestByMove = new Map<string, { move: string; loadKg: number; reps: number }>();
+  for (const workout of workouts) {
+    for (const set of workout.sets) {
+      const current = bestByMove.get(set.move);
+      if (!current || set.loadKg > current.loadKg) bestByMove.set(set.move, set);
+    }
+  }
 
   return {
     sessions: workouts.length,
@@ -336,7 +355,15 @@ function summariseTraining(days: DerivedDay[]): TrainingSummary {
       .sort((a, b) => b.sessions - a.sessions),
     weekly: [...weekMap.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([weekStart, value]) => ({ weekStart, ...value, minutes: Math.round(value.minutes) })),
+      .map(([weekStart, value]) => ({
+        weekStart,
+        ...value,
+        minutes: Math.round(value.minutes),
+        kcal: Math.round(value.kcal),
+        volumeKg: Math.round(value.volumeKg),
+      })),
+    volumeKg: Math.round(volumeKg),
+    bests: [...bestByMove.values()].sort((a, b) => b.loadKg - a.loadKg),
     recent: [...workouts]
       .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
       .slice(0, 8),

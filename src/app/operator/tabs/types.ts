@@ -10,6 +10,8 @@ export interface Logger {
   saveWeight: (date: string, weightKg: number) => Promise<boolean>;
   /** Merge partial fields into the single operator_settings row. */
   saveSettings: (fields: Record<string, number | string>) => Promise<boolean>;
+  /** Append one set to the day's session of the given type (default Strength). */
+  logSet: (date: string, move: string, loadKg: number, reps: number, type?: string) => Promise<boolean>;
 }
 
 /* Lives in its own module rather than beside the dashboard component so

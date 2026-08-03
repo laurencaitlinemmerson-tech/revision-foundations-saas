@@ -50,6 +50,12 @@ export interface DailyMetric {
   waterMl: number | null;
 }
 
+export interface LiftSet {
+  move: string;
+  loadKg: number;
+  reps: number;
+}
+
 export interface Workout {
   id: string;
   startedAt: string;
@@ -59,6 +65,9 @@ export interface Workout {
   avgHr: number | null;
   maxHr: number | null;
   distanceKm: number | null;
+  /** Hand-logged sets — HealthKit workouts carry no rep/load detail, so
+   *  this is the only source for strength-training volume. */
+  sets: LiftSet[];
 }
 
 export interface OperatorSettings {
