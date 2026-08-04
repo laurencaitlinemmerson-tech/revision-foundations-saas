@@ -305,17 +305,19 @@ export default function OperatorDashboard({ snapshot }: { snapshot: OperatorSnap
             <div>
               <div className="op-hero-label">This morning</div>
               <div className="op-hero-row">
-                <span className="op-hero-value">
-                  {heroWeight === null ? '—' : fmtNumber(heroWeight, 1)}
+                <span className="op-hero-value" data-empty={heroWeight === null}>
+                  {heroWeight === null ? 'No weigh-in logged yet' : fmtNumber(heroWeight, 1)}
                 </span>
-                <span className="op-hero-unit">{unitLabel}</span>
-                <Chip
-                  value={toUnit(weeklyDelta, unit)}
-                  suffix={` ${unitLabel}`}
-                  digits={2}
-                  goodDirection="down"
-                  label="this week"
-                />
+                {heroWeight !== null ? <span className="op-hero-unit">{unitLabel}</span> : null}
+                {weeklyDelta !== null ? (
+                  <Chip
+                    value={toUnit(weeklyDelta, unit)}
+                    suffix={` ${unitLabel}`}
+                    digits={2}
+                    goodDirection="down"
+                    label="this week"
+                  />
+                ) : null}
               </div>
               <p className="op-hero-verdict">{verdict}</p>
             </div>
@@ -340,17 +342,15 @@ export default function OperatorDashboard({ snapshot }: { snapshot: OperatorSnap
               <div className="op-hero-stats">
                 <div>
                   <div className="op-hero-stat-label">Calories left</div>
-                  <div className="op-hero-stat-value">
-                    {intake === null ? '—' : fmtNumber(Math.max(0, targetIntake - intake))}
+                  <div className="op-hero-stat-value" data-empty={intake === null}>
+                    {intake === null ? 'not logged' : fmtNumber(Math.max(0, targetIntake - intake))}
                   </div>
                   <div className="op-hero-stat-note">of {fmtNumber(targetIntake)}</div>
                 </div>
                 <div>
                   <div className="op-hero-stat-label">Protein</div>
-                  <div className="op-hero-stat-value">
-                    {today?.proteinG === null || today?.proteinG === undefined
-                      ? '—'
-                      : `${fmtNumber(today.proteinG)} g`}
+                  <div className="op-hero-stat-value" data-empty={today?.proteinG == null}>
+                    {today?.proteinG == null ? 'not logged' : `${fmtNumber(today.proteinG)} g`}
                   </div>
                   <div className="op-hero-stat-note">of {fmtNumber(settings.proteinTargetG)} g</div>
                 </div>

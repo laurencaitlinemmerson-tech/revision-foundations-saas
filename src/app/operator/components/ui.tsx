@@ -117,8 +117,10 @@ export function Kpi({
         {chip}
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginTop: 12 }}>
-        <span className="op-kpi-value">{value}</span>
-        {unit ? <span className="op-kpi-unit">{unit}</span> : null}
+        <span className="op-kpi-value" data-empty={value === '—'}>
+          {value === '—' ? 'no data yet' : value}
+        </span>
+        {unit && value !== '—' ? <span className="op-kpi-unit">{unit}</span> : null}
       </div>
       <div style={{ marginTop: 10, minHeight: 24 }}>
         {spark ? <Sparkline values={spark} color={color} label={`${label} trend`} /> : null}
