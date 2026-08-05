@@ -79,3 +79,18 @@
 @media (max-width: 1080px) {
   .daily-log-shell [data-metric-band] { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 }
+
+/* Section rhythm: heading, block, hairline, heading, block. The rule is drawn
+   before each section head except the first in a panel, so the tabs read as a
+   single vertical stack rather than a grid of cards. */
+.daily-log-shell [data-section-head] + div { margin-top: 0; }
+.daily-log-shell [data-section-head] ~ [data-section-head]::before,
+.daily-log-shell [data-tab-panel] > div + [data-section-head]::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 0.5px;
+  background: rgba(26, 24, 21, 0.12);
+  margin: 12px 0 26px;
+}
+.daily-log-shell [data-tab-panel] { row-gap: 30px; }
