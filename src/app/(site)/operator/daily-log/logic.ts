@@ -230,7 +230,7 @@ export function deriveVals(
   const proteinPerKg = T.proteinPerKg ?? props.proteinPerKg ?? 1.8;
   const kpis = [
     { label: 'Weight', value: +conv(latest.weight).toFixed(1), decimals: 1, unit: uLabel, chip: (dw <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(dw)).toFixed(1), chipBg: dw <= 0 ? '#EDF1EC' : '#F7F6F5', chipColor: dw <= 0 ? '#7F9289' : '#AA7F68', color: '#B08D57', spark: sparkOf(last8) },
-    { label: 'Calories', value: Math.max(0, kcalTarget - logged.kcal), decimals: 0, unit: 'kcal', chip: logged.kcal + ' in', chipBg: '#F4F4F3', chipColor: '#57544E', color: '#7F9289', spark: sparkOf(intakeSeries.slice(-8)) },
+    { label: 'Calories', value: logged.kcal, decimals: 0, unit: 'kcal', chip: Math.max(0, kcalTarget - logged.kcal).toLocaleString() + ' left', chipBg: '#F4F4F3', chipColor: '#57544E', color: '#7F9289', spark: sparkOf(intakeSeries.slice(-8)) },
     { label: 'Protein', value: logged.protein, decimals: 0, unit: 'g', chip: Math.round((logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#F7F5F0', chipColor: '#957962', color: '#957962', spark: sparkOf(proteinSeries ? [...proteinSeries.slice(-7), logged.protein] : [88, 104, 96, 120, 112, 98, 126, logged.protein]) },
     { label: 'Steps', value: logged.steps, decimals: 0, unit: '', chip: logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: logged.steps >= 8000 ? '#EDF1EC' : '#F4F4F3', chipColor: logged.steps >= 8000 ? '#7F9289' : '#57544E', color: '#57544E', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]) },
     { label: 'Sleep', value: +(sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1), decimals: 1, unit: 'h avg', chip: 'RHR ' + Math.round(rhrAvg ?? 58), chipBg: '#F4F4F3', chipColor: '#57544E', color: '#B08D57', spark: sparkOf(sleepSeries.slice(-8)) },
@@ -256,8 +256,8 @@ export function deriveVals(
   });
   const focus = ringDefs.find((r) => r.key === st.ringFocus) || ringDefs[0];
   const ringFocus = {
-    value: focus.key === 'kcal' ? Math.max(0, focus.target - focus.value).toLocaleString() : focus.value.toLocaleString(),
-    label: focus.key === 'kcal' ? 'KCAL LEFT' : focus.name.toUpperCase() + ' TODAY',
+    value: focus.value.toLocaleString(),
+    label: focus.key === 'kcal' ? 'KCAL EATEN' : focus.name.toUpperCase() + ' TODAY',
   };
 
   /* ── chart ── */
@@ -735,7 +735,9 @@ export function deriveVals(
     greetingTail: 'Lauren.',
     subhead: new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) +
       ' · ' + conv(latest.weight).toFixed(1) + ' ' + uLabel + ' this morning, ' +
-      Math.max(0, kcalTarget - logged.kcal).toLocaleString() + ' kcal left today.',
+      (logged.kcal > 0
+        ? logged.kcal.toLocaleString() + ' kcal in, ' + Math.max(0, kcalTarget - logged.kcal).toLocaleString() + ' left today.'
+        : 'nothing logged yet today.'),
     // ISO week number, so the top bar tracks the real week rather than a fixed one.
     weekLabel: (() => {
       const d = new Date();
@@ -922,7 +924,7 @@ function shellVals(
       { label: st.targetsOpen ? 'Hide targets' : 'Adjust targets', onClick: () => setState({ targetsOpen: !st.targetsOpen }), style: 'padding:12px 20px;border:0;border-radius:10px;background:var(--ink);color:var(--paper);font-size:12.5px;cursor:pointer;' },
     ],
     heroStats: [
-      { label: 'Calories left', value: kcalLeft.toLocaleString(), note: 'of ' + kcalTarget.toLocaleString() },
+      { label: 'Calories', value: logged.kcal.toLocaleString(), note: 'of ' + kcalTarget.toLocaleString() + ' · ' + kcalLeft.toLocaleString() + ' left' },
       { label: 'Protein', value: logged.protein + ' g', note: 'of ' + proteinTarget + ' g' },
       { label: '7-day trend', value: conv(maLast).toFixed(1) + ' ' + uLabel, note: 'Apple Health' },
     ],
