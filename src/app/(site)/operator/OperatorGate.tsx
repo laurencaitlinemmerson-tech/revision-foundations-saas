@@ -85,23 +85,23 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
   const display = "'Playfair Display', Georgia, serif";
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAF8', padding: 24 }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAF8F0', padding: 24 }}>
       <form
         onSubmit={submit}
-        style={{ width: '100%', maxWidth: 400, textAlign: 'left', padding: '30px 30px 32px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, background: '#FBF8F3' }}
+        style={{ width: '100%', maxWidth: 400, textAlign: 'left', padding: '30px 30px 32px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, background: '#FDFBF5' }}
       >
-        <div style={{ fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#9A948C', marginBottom: 10 }}>
+        <div style={{ fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: 10 }}>
           Operator · Restricted
         </div>
-        <h1 style={{ fontFamily: display, fontWeight: 500, fontSize: 30, lineHeight: 1.1, color: '#1A1815', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
-          The Operator <em style={{ fontStyle: 'italic', color: '#C2A87C' }}>Log</em>
+        <h1 style={{ fontFamily: display, fontWeight: 500, fontSize: 30, lineHeight: 1.1, color: '#1A1A18', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
+          The Operator <em style={{ fontStyle: 'italic', color: '#B08D57' }}>Log</em>
         </h1>
-        <p style={{ fontFamily: sans, fontSize: 13, color: '#9A948C', margin: '0 0 24px', lineHeight: 1.55 }}>
+        <p style={{ fontFamily: sans, fontSize: 13, color: '#8E8A82', margin: '0 0 24px', lineHeight: 1.55 }}>
           A private fitness &amp; nursing log. Enter your password to continue.
         </p>
         <label
           htmlFor="op-pw"
-          style={{ display: 'block', fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#9A948C', marginBottom: 6 }}
+          style={{ display: 'block', fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: 6 }}
         >
           Password
         </label>
@@ -113,9 +113,9 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           value={pw}
           onChange={(e) => setPw(e.target.value)}
           style={{
-            width: '100%', background: '#FAFAF8', outline: 'none',
+            width: '100%', background: '#FAF8F0', outline: 'none',
             border: `1px solid ${err ? '#AA7F68' : 'rgba(0,0,0,0.08)'}`, borderRadius: 6,
-            fontFamily: sans, fontSize: 14, color: '#1A1815',
+            fontFamily: sans, fontSize: 14, color: '#1A1A18',
             padding: '10px 12px', marginBottom: err ? 8 : 20, transition: 'border-color 0.2s',
           }}
         />
@@ -124,7 +124,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           type="submit"
           disabled={loading}
           style={{
-            width: '100%', background: '#1A1815', color: '#FAFAF8', border: 0, borderRadius: 6, cursor: 'pointer',
+            width: '100%', background: '#1A1A18', color: '#FAF8F0', border: 0, borderRadius: 6, cursor: 'pointer',
             padding: '12px 20px', fontFamily: sans, fontSize: 12, fontWeight: 600,
             letterSpacing: '0.08em', textTransform: 'uppercase', opacity: loading ? 0.6 : 1,
           }}
