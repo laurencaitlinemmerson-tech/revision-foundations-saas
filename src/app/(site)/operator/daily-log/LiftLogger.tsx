@@ -15,10 +15,10 @@ import type { Lift } from './data';
  * that is how they are written in a notebook between sets.
  */
 
-const INK = '#1A1A18';
-const MUTED = '#8E8A82';
-const GOLD = '#B08D57';
-const LINE = 'rgba(26,24,21,0.12)';
+const INK = '#1B2733';
+const MUTED = '#6E7A88';
+const GOLD = '#17365D';
+const LINE = 'rgba(27,39,51,0.14)';
 
 type Parsed = { reps: number; weightKg: number };
 
@@ -159,7 +159,7 @@ export default function LiftLogger({
         )}
       </p>
 
-      {error && <p style={{ margin: '8px 0 0', fontSize: 11.5, color: '#AA7F68' }}>{error}</p>}
+      {error && <p style={{ margin: '8px 0 0', fontSize: 11.5, color: '#C0492F' }}>{error}</p>}
     </div>
   );
 }

@@ -90,18 +90,18 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
         onSubmit={submit}
         style={{ width: '100%', maxWidth: 400, textAlign: 'left', padding: '30px 30px 32px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, background: '#FFFFFF' }}
       >
-        <div style={{ fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: 10 }}>
+        <div style={{ fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#6E7A88', marginBottom: 10 }}>
           Operator · Restricted
         </div>
-        <h1 style={{ fontFamily: display, fontWeight: 500, fontSize: 30, lineHeight: 1.1, color: '#1A1A18', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
-          The Operator <em style={{ fontStyle: 'italic', color: '#B08D57' }}>Log</em>
+        <h1 style={{ fontFamily: display, fontWeight: 500, fontSize: 30, lineHeight: 1.1, color: '#1B2733', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
+          The Operator <em style={{ fontStyle: 'italic', color: '#17365D' }}>Log</em>
         </h1>
-        <p style={{ fontFamily: sans, fontSize: 13, color: '#8E8A82', margin: '0 0 24px', lineHeight: 1.55 }}>
+        <p style={{ fontFamily: sans, fontSize: 13, color: '#6E7A88', margin: '0 0 24px', lineHeight: 1.55 }}>
           A private fitness &amp; nursing log. Enter your password to continue.
         </p>
         <label
           htmlFor="op-pw"
-          style={{ display: 'block', fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: 6 }}
+          style={{ display: 'block', fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#6E7A88', marginBottom: 6 }}
         >
           Password
         </label>
@@ -114,17 +114,17 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           onChange={(e) => setPw(e.target.value)}
           style={{
             width: '100%', background: '#FFFFFF', outline: 'none',
-            border: `1px solid ${err ? '#AA7F68' : 'rgba(0,0,0,0.08)'}`, borderRadius: 6,
-            fontFamily: sans, fontSize: 14, color: '#1A1A18',
+            border: `1px solid ${err ? '#C0492F' : 'rgba(0,0,0,0.08)'}`, borderRadius: 6,
+            fontFamily: sans, fontSize: 14, color: '#1B2733',
             padding: '10px 12px', marginBottom: err ? 8 : 20, transition: 'border-color 0.2s',
           }}
         />
-        {err && <p style={{ fontFamily: sans, fontSize: 11, color: '#AA7F68', margin: '0 0 16px' }}>Incorrect password. Try again.</p>}
+        {err && <p style={{ fontFamily: sans, fontSize: 11, color: '#C0492F', margin: '0 0 16px' }}>Incorrect password. Try again.</p>}
         <button
           type="submit"
           disabled={loading}
           style={{
-            width: '100%', background: '#1A1A18', color: '#FFFFFF', border: 0, borderRadius: 6, cursor: 'pointer',
+            width: '100%', background: '#1B2733', color: '#FFFFFF', border: 0, borderRadius: 6, cursor: 'pointer',
             padding: '12px 20px', fontFamily: sans, fontSize: 12, fontWeight: 600,
             letterSpacing: '0.08em', textTransform: 'uppercase', opacity: loading ? 0.6 : 1,
           }}
