@@ -31,7 +31,7 @@ export default function DailyLogClient({ props = DEFAULT_PROPS }: { props?: Dail
   }, []);
 
   const vals = useMemo(
-    () => deriveVals(state, setState, props, live),
+    () => deriveVals(state, setState, props, live, live.refresh),
     [state, setState, props, live],
   );
 

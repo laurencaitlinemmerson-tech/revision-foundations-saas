@@ -1,5 +1,5 @@
 import type React from 'react';
-import { avgOf, lastSyncedDate, latestOf, series, today as todayRow, type LiveData, type Workout } from './data';
+import { avgOf, lastSyncedDate, latestOf, series, today as todayRow, type LiveData, type Lift, type Workout } from './data';
 import { storedOperatorPassword } from '../OperatorGate';
 
 /**
@@ -157,6 +157,7 @@ export function deriveVals(
   setState: SetState,
   props: DailyLogProps,
   live: LiveData,
+  onLiftSaved: () => void = () => {},
 ) {
   const st = state;
   const T = st.targets || {};
@@ -514,10 +515,21 @@ export function deriveVals(
   ];
   const DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const weekStart = Date.now() - 7 * DAY;
+  const liftsByDate = new Map<string, Lift[]>();
+  for (const l of live.lifts ?? []) {
+    const k = l.performedOn.slice(0, 10);
+    liftsByDate.set(k, [...(liftsByDate.get(k) ?? []), l]);
+  }
   const liveSessions = (live.workouts ?? [])
     .filter((w) => new Date(w.startedAt).getTime() >= weekStart)
     .map((w) => {
-      const detail: Array<{ move: string; load: string; reps: string }> = [];
+      const dayKey = new Date(w.startedAt).toISOString().slice(0, 10);
+      // A lift logged on the same day belongs to that session.
+      const detail = (liftsByDate.get(dayKey) ?? []).map((l) => ({
+        move: l.exercise,
+        load: l.topSetKg ? l.topSetKg + ' kg' : '—',
+        reps: l.sets.length + ' × ' + (l.sets[0]?.reps ?? 0),
+      }));
       if (w.durationMin) detail.push({ move: 'Duration', load: Math.round(w.durationMin) + ' min', reps: '' });
       if (w.distanceKm) detail.push({ move: 'Distance', load: w.distanceKm.toFixed(1) + ' km', reps: '' });
       if (w.avgHr) detail.push({ move: 'Average heart rate', load: Math.round(w.avgHr) + ' bpm', reps: w.maxHr ? 'max ' + Math.round(w.maxHr) : '' });
@@ -529,7 +541,7 @@ export function deriveVals(
         tint: '#F7F5F0',
         // Set-level detail needs a lift log, which nothing writes yet; until then
         // a session opens onto what Apple Health actually recorded.
-        sets: detail.length ? detail : [{ move: 'No set detail recorded', load: '—', reps: '' }],
+        sets: detail.length ? detail : [{ move: 'Nothing logged for this session', load: '—', reps: '' }],
       };
     });
   const sessionSource = liveSessions.length ? liveSessions : sessionDefs;
@@ -562,6 +574,26 @@ export function deriveVals(
   // Bests Apple Health can actually answer. Lift PRs would need set-level data,
   // which nothing records; these come off the workout log itself.
   const prs = (() => {
+    // A lift log gives real per-movement bests; without one, fall back to what
+    // Apple Health can answer about sessions.
+    const lifts = live.lifts ?? [];
+    if (lifts.length) {
+      const best = new Map<string, Lift>();
+      for (const l of lifts) {
+        const cur = best.get(l.exercise);
+        if (!cur || l.e1rmKg > cur.e1rmKg) best.set(l.exercise, l);
+      }
+      const ranked = [...best.values()].sort((a, b) => b.e1rmKg - a.e1rmKg).slice(0, 4);
+      if (ranked.length) {
+        return ranked.map((l) => {
+          const top = l.sets.reduce((a, s) => (s.weightKg > a.weightKg ? s : a), l.sets[0]);
+          return {
+            move: l.exercise + ' · ' + top.reps + ' reps',
+            value: top.weightKg + ' kg',
+          };
+        });
+      }
+    }
     const w = live.workouts ?? [];
     if (!w.length) {
       return [
@@ -837,6 +869,8 @@ export function deriveVals(
     },
 
     sessions, loadBars, prs,
+    lifts: live.lifts,
+    onLiftSaved,
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,
     ...volumeVals(st, setState, live, st.tune.neat + st.tune.exercise),
 
@@ -1083,6 +1117,9 @@ function planVals(
  * with an everyday equivalent chosen to land near a comprehensible count.
  */
 function volumeVals(st: DailyLogState, setState: SetState, live: LiveData, fallbackDaily: number) {
+  // With a lift log the card can count what the design originally counted:
+  // sets x reps x load. Without one it falls back to measured active energy.
+  const hasLifts = Boolean(live.lifts?.length);
   const ranges: Array<[string, string, number]> = [
     ['week', 'This week', 7],
     ['month', 'This month', 30],
@@ -1093,6 +1130,7 @@ function volumeVals(st: DailyLogState, setState: SetState, live: LiveData, fallb
   const windowDays = active[2];
 
   const cutoff = Date.now() - windowDays * DAY;
+  if (hasLifts) return liftVolumeVals(st, setState, live, ranges, active, windowDays, cutoff);
   const inWindow = (live.days ?? []).filter(
     (d) => new Date(d.date).getTime() >= cutoff && d.activity.activeEnergyKcal != null,
   );
@@ -1129,6 +1167,11 @@ function volumeVals(st: DailyLogState, setState: SetState, live: LiveData, fallb
       onClick: () => setState({ volRange: r[0] as DailyLogState['volRange'] }),
       style: chip((st.volRange || 'month') === r[0]),
     })),
+    volTitleLead: 'Total',
+    volTitleTail: 'energy burned',
+    volCaption: 'Active energy from Apple Health — every walk, shift and session.',
+    volUnit: 'kcal',
+    volUnitNote: 'kcal each',
     volTotal: total.toLocaleString(),
     volSub: active[1].toLowerCase() + ' · ' + perSession.toLocaleString() + ' kcal per session on average' +
       (inWindow.length ? '' : ' · estimated until Apple Health syncs'),
@@ -1158,3 +1201,77 @@ function volumeVals(st: DailyLogState, setState: SetState, live: LiveData, fallb
 }
 
 export type DailyLogVals = ReturnType<typeof deriveVals>;
+
+/**
+ * Total weight moved, from the lift log — the design's original framing, which
+ * only becomes answerable once sets and loads are recorded.
+ */
+function liftVolumeVals(
+  st: DailyLogState,
+  setState: SetState,
+  live: LiveData,
+  ranges: Array<[string, string, number]>,
+  active: [string, string, number],
+  windowDays: number,
+  cutoff: number,
+) {
+  const lifts = (live.lifts ?? []).filter((l) => new Date(l.performedOn).getTime() >= cutoff);
+  const total = lifts.reduce((a, l) => a + l.volumeKg, 0);
+  const sessionDays = new Set(lifts.map((l) => l.performedOn)).size;
+  const perSession = sessionDays ? Math.round(total / sessionDays) : 0;
+
+  const animals = [
+    { name: 'golden retrievers', one: 'a golden retriever', kg: 32 },
+    { name: 'red kangaroos', one: 'a red kangaroo', kg: 85 },
+    { name: 'reindeer', one: 'a reindeer', kg: 180 },
+    { name: 'polar bears', one: 'a polar bear', kg: 450 },
+    { name: 'highland cows', one: 'a highland cow', kg: 500 },
+    { name: 'giraffes', one: 'a giraffe', kg: 1200 },
+    { name: 'African elephants', one: 'an African elephant', kg: 6000 },
+  ];
+  const best = animals
+    .map((a) => ({ a, count: total / a.kg }))
+    .filter((x) => x.count >= 1.5)
+    .sort((x, y) => Math.abs(Math.log(x.count / 6)) - Math.abs(Math.log(y.count / 6)))[0]
+    || { a: animals[0], count: total / animals[0].kg };
+  const count = best.count;
+  const units = Math.min(24, Math.max(1, Math.round(count)));
+
+  return {
+    volRanges: ranges.map((r) => ({
+      label: r[1],
+      onClick: () => setState({ volRange: r[0] as DailyLogState['volRange'] }),
+      style: chip((st.volRange || 'month') === r[0]),
+    })),
+    volTitleLead: 'Total',
+    volTitleTail: 'weight moved',
+    volCaption: 'Every rep, every set, added up — sets × reps × load.',
+    volUnit: 'kg',
+    volUnitNote: 'kg each',
+    volTotal: total.toLocaleString(),
+    volSub: active[1].toLowerCase() + ' · ' +
+      (sessionDays ? perSession.toLocaleString() + ' kg per session across ' + sessionDays + ' session' + (sessionDays === 1 ? '' : 's') : 'nothing logged in this range'),
+    animalCount: (count >= 100 ? Math.round(count).toLocaleString() : count.toFixed(1)) + '\u00d7',
+    animalName: best.a.name,
+    animalNote: best.a.one + ' \u2248 ' + best.a.kg.toLocaleString() + ' kg',
+    animalUnitKg: best.a.kg.toLocaleString(),
+    animalUnits: Array.from({ length: units }, (_, i) => ({
+      style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#D2B49C' : '#D6C09A') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
+    })),
+    animalScale: (() => {
+      const sorted = animals.slice().sort((x, y) => x.kg - y.kg);
+      const bi = sorted.findIndex((a) => a.name === best.a.name);
+      const from = Math.max(0, Math.min(bi - 2, sorted.length - 5));
+      return sorted.slice(from, from + 5);
+    })().map((a) => {
+      const c = total / a.kg;
+      const isBest = a.name === best.a.name;
+      return {
+        name: a.name,
+        count: c >= 100 ? Math.round(c).toLocaleString() + '\u00d7' : c.toFixed(1) + '\u00d7',
+        labelColor: isBest ? '#B08D57' : '#8E8A82',
+        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / animals[0].kg))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#B08D57' : '#EFEADC') + ';',
+      };
+    }),
+  };
+}

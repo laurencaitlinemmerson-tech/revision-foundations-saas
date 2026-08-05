@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { storedOperatorPassword } from '../OperatorGate';
 import type { Reading } from './logic';
 
@@ -76,6 +76,19 @@ export type Schedule = {
   detail?: string;
 };
 
+export type LiftSet = { reps: number; weightKg: number };
+
+export type Lift = {
+  id: string;
+  performedOn: string;
+  exercise: string;
+  sets: LiftSet[];
+  note: string | null;
+  volumeKg: number;
+  e1rmKg: number;
+  topSetKg: number;
+};
+
 export type Workout = {
   id: string;
   startedAt: string;
@@ -99,6 +112,8 @@ export type LiveData = {
   /** Apple Health days, oldest first. */
   days: HealthDay[] | null;
   workouts: Workout[] | null;
+  /** Logged lifts — the only hand-entered source. */
+  lifts: Lift[] | null;
   /** This week from Google Calendar, with why it is empty when it is. */
   schedule: Schedule | null;
   /** Whether any source reported that its table is not set up yet. */
@@ -111,6 +126,7 @@ export const EMPTY_LIVE: LiveData = {
   weighIns: null,
   days: null,
   workouts: null,
+  lifts: null,
   schedule: null,
   setupRequired: false,
 };
@@ -125,9 +141,10 @@ function localISODate(d = new Date()) {
 /** How often to re-read while the tab is open. */
 const REFRESH_MS = 5 * 60 * 1000;
 
-export function useOperatorData(): LiveData {
+export function useOperatorData(): LiveData & { refresh: () => void } {
   const [live, setLive] = useState<LiveData>(EMPTY_LIVE);
   const [tick, setTick] = useState(0);
+  const refresh = useCallback(() => setTick((n) => n + 1), []);
 
   // Re-read on a timer, when the tab comes back to the foreground, and the
   // moment the local date changes — a dashboard left open overnight has to roll
@@ -185,10 +202,11 @@ export function useOperatorData(): LiveData {
         if (!cancelled) setLive({ ...EMPTY_LIVE, loaded: true });
         return;
       }
-      const [fitness, health, workouts, schedule] = await Promise.all([
+      const [fitness, health, workouts, lifts, schedule] = await Promise.all([
         get('/api/operator/fitness'),
         get(`/api/operator/health?from=${from}`),
         get('/api/operator/workouts'),
+        get(`/api/operator/lifts?from=${from}`),
         get('/api/operator/schedule'),
       ]);
       if (cancelled) return;
@@ -204,6 +222,7 @@ export function useOperatorData(): LiveData {
           : null,
         days,
         workouts: nonEmpty((workouts?.workouts as Workout[]) ?? null),
+        lifts: nonEmpty((lifts?.lifts as Lift[]) ?? null),
         schedule: (schedule as unknown as Schedule) ?? null,
         setupRequired: Boolean(
           fitness?.setup_required || health?.setup_required || workouts?.setup_required,
@@ -214,7 +233,7 @@ export function useOperatorData(): LiveData {
     return () => { cancelled = true; };
   }, [tick]);
 
-  return live;
+  return { ...live, refresh };
 }
 
 /* ── series helpers ───────────────────────────────────────────────────────── */
