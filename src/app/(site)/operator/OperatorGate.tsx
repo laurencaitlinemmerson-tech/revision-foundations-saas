@@ -5,9 +5,9 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 /**
  * Password gate for the operator area.
  *
- * Extracted from OperatorDashboardClient so more than one operator surface can
- * sit behind the same lock. It reuses that component's storage key and TTL, so
- * an existing unlock carries straight over and unlocking here unlocks there.
+ * Extracted from the previous dashboard so every operator surface sits behind
+ * the same lock. It keeps that dashboard's storage key and 30-day TTL, so an
+ * unlock made before the redesign still counts.
  */
 
 const AUTH_KEY = 'operator-log-auth-v3';
@@ -34,7 +34,11 @@ export default function OperatorGate({ children }: { children: ReactNode }) {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
+    // localStorage is only readable after mount, so the stored unlock has to be
+    // picked up here rather than during the initial render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAuthed(storedOperatorPassword() !== null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setChecked(true);
   }, []);
 

@@ -1,4 +1,6 @@
 import type React from 'react';
+import { avgOf, latestOf, series, today as todayRow, type LiveData } from './data';
+import { storedOperatorPassword } from '../OperatorGate';
 
 /**
  * Daily log — derivation layer.
@@ -156,12 +158,29 @@ export function deriveVals(
   state: DailyLogState,
   setState: SetState,
   props: DailyLogProps,
+  live: LiveData,
 ) {
   const st = state;
   const T = st.targets || {};
   const goal = T.goal ?? props.goalKg ?? 68;
   const kcalTarget = T.kcal ?? props.calorieTarget ?? 2000;
-  const readings: Reading[] = st.readings ?? BASE.map((r) => ({ date: r[0], weight: r[1] }));
+  // Live weigh-ins win; a locally added reading (the weigh-in composer) wins over
+  // both; the design's seed series is the last resort so an empty account still
+  // renders the dashboard rather than a blank.
+  const readings: Reading[] = st.readings
+    ?? live.readings
+    ?? BASE.map((r) => ({ date: r[0], weight: r[1] }));
+  const days = live.days;
+  const dayNow = todayRow(days);
+  const intakeSeries = series(days, (d) => d.nutrition.dietaryEnergyKcal, 14) ?? INTAKE;
+  const sleepSeries = series(days, (d) => (d.sleep.totalMin == null ? null : d.sleep.totalMin / 60), 10) ?? SLEEP_HOURS;
+  const stepSeries = series(days, (d) => d.activity.steps, 8);
+  const proteinSeries = series(days, (d) => d.nutrition.proteinG, 8);
+  const rhrAvg = avgOf(days, (d) => d.heart.restingHr, 7);
+  const hrvAvg = avgOf(days, (d) => d.heart.hrvMs, 7);
+  const activeEnergy7 = avgOf(days, (d) => d.activity.activeEnergyKcal, 7);
+  // Real body composition from the scale, where the scale reports it.
+  const weighByDate = new Map((live.weighIns ?? []).map((w) => [w.date.slice(0, 10), w]));
   const latest = readings[readings.length - 1];
   const prev = readings[readings.length - 2] ?? latest;
   const tdee = Math.round(st.tune.bmr + st.tune.neat + st.tune.exercise + st.tune.tef);
@@ -209,10 +228,10 @@ export function deriveVals(
   const proteinPerKg = T.proteinPerKg ?? props.proteinPerKg ?? 1.8;
   const kpis = [
     { label: 'Weight', value: +conv(latest.weight).toFixed(1), decimals: 1, unit: uLabel, chip: (dw <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(dw)).toFixed(1), chipBg: dw <= 0 ? '#E7F0FA' : '#FBEAF1', chipColor: dw <= 0 ? '#4A7FC1' : '#B4577B', color: '#8B72C4', spark: sparkOf(last8) },
-    { label: 'Calories', value: Math.max(0, kcalTarget - st.logged.kcal), decimals: 0, unit: 'kcal', chip: st.logged.kcal + ' in', chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#4A7FC1', spark: sparkOf(INTAKE.slice(-8)) },
-    { label: 'Protein', value: st.logged.protein, decimals: 0, unit: 'g', chip: Math.round((st.logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#F6EDF7', chipColor: '#A85E8C', color: '#A85E8C', spark: sparkOf([88, 104, 96, 120, 112, 98, 126, st.logged.protein]) },
-    { label: 'Steps', value: st.logged.steps, decimals: 0, unit: '', chip: st.logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: st.logged.steps >= 8000 ? '#E7F0FA' : '#F5F3F0', chipColor: st.logged.steps >= 8000 ? '#4A7FC1' : '#5A5750', color: '#5A5750', spark: sparkOf([7400, 9100, 6800, 10400, 8900, 7600, 11200, st.logged.steps]) },
-    { label: 'Sleep', value: 6.9, decimals: 1, unit: 'h avg', chip: 'RHR 58', chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#8B72C4', spark: sparkOf(SLEEP_HOURS.slice(-8)) },
+    { label: 'Calories', value: Math.max(0, kcalTarget - st.logged.kcal), decimals: 0, unit: 'kcal', chip: st.logged.kcal + ' in', chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#4A7FC1', spark: sparkOf(intakeSeries.slice(-8)) },
+    { label: 'Protein', value: st.logged.protein, decimals: 0, unit: 'g', chip: Math.round((st.logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#F6EDF7', chipColor: '#A85E8C', color: '#A85E8C', spark: sparkOf(proteinSeries ? [...proteinSeries.slice(-7), st.logged.protein] : [88, 104, 96, 120, 112, 98, 126, st.logged.protein]) },
+    { label: 'Steps', value: st.logged.steps, decimals: 0, unit: '', chip: st.logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: st.logged.steps >= 8000 ? '#E7F0FA' : '#F5F3F0', chipColor: st.logged.steps >= 8000 ? '#4A7FC1' : '#5A5750', color: '#5A5750', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), st.logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, st.logged.steps]) },
+    { label: 'Sleep', value: +(sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1), decimals: 1, unit: 'h avg', chip: 'RHR ' + Math.round(rhrAvg ?? 58), chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#8B72C4', spark: sparkOf(sleepSeries.slice(-8)) },
   ].map((k) => ({ ...k, display: k.decimals ? k.value.toFixed(k.decimals) : Math.round(k.value).toLocaleString() }));
 
   /* ── rings ── */
@@ -244,10 +263,21 @@ export function deriveVals(
   };
 
   /* ── chart ── */
+  // BMI and body fat come off the scale when it reports them; otherwise they fall
+  // back to the design's estimates so the metric switcher still has four series.
+  const scaleAt = (r: { date?: string }) => (r.date ? weighByDate.get(r.date.slice(0, 10)) : undefined);
   const metricDefs = {
     weight: { label: 'Weight', get: (r: { weight: number }) => conv(r.weight), unit: uLabel, dp: 1 },
-    bmi: { label: 'BMI', get: (r: { weight: number }) => bmiOf(r.weight), unit: '', dp: 1 },
-    fat: { label: 'Body fat', get: (r: { weight: number }) => 30.5 - (76.9 - r.weight) * 0.55, unit: '%', dp: 1 },
+    bmi: {
+      label: 'BMI',
+      get: (r: { weight: number; date?: string }) => scaleAt(r)?.bmi ?? bmiOf(r.weight),
+      unit: '', dp: 1,
+    },
+    fat: {
+      label: 'Body fat',
+      get: (r: { weight: number; date?: string }) => scaleAt(r)?.bodyFat ?? 30.5 - (76.9 - r.weight) * 0.55,
+      unit: '%', dp: 1,
+    },
     waist: { label: 'Waist', get: (r: { weight: number }) => 84 - (76.9 - r.weight) * 0.9, unit: 'cm', dp: 1 },
   };
   const M = metricDefs[st.metric];
@@ -377,8 +407,8 @@ export function deriveVals(
   const proteinTarget = Math.round(latest.weight * proteinPerKg);
   const macros = [
     { label: 'Protein', v: st.logged.protein, t: proteinTarget, unit: 'g', color: '#4A7FC1' },
-    { label: 'Carbohydrate', v: 148, t: 210, unit: 'g', color: '#8B72C4' },
-    { label: 'Fat', v: 52, t: 68, unit: 'g', color: '#A85E8C' },
+    { label: 'Carbohydrate', v: Math.round(dayNow?.nutrition.carbsG ?? 148), t: 210, unit: 'g', color: '#8B72C4' },
+    { label: 'Fat', v: Math.round(dayNow?.nutrition.fatG ?? 52), t: 68, unit: 'g', color: '#A85E8C' },
   ].map((m) => ({
     label: m.label,
     value: m.v + ' / ' + m.t + ' ' + m.unit,
@@ -394,8 +424,8 @@ export function deriveVals(
     value: st.tune[r.key], percent: Math.round((st.tune[r.key] / tdee) * 100),
     onTune: (v: number) => setState((s) => ({ tune: { ...s.tune, [r.key]: Math.round(v) } })),
   }));
-  const ledgerDays = INTAKE.map((kcal, i) => ({
-    date: new Date(new Date(latest.date).getTime() - (13 - i) * DAY).toISOString().slice(0, 10),
+  const ledgerDays = intakeSeries.map((kcal, i) => ({
+    date: new Date(new Date(latest.date).getTime() - (intakeSeries.length - 1 - i) * DAY).toISOString().slice(0, 10),
     intake: kcal,
     tdee: tdee + (i % 3 === 0 ? 110 : i % 3 === 1 ? -50 : 40),
   }));
@@ -408,13 +438,47 @@ export function deriveVals(
     { day: 'FRI', name: 'Full body', note: 'Deadlift, push-ups, core', kcal: 340, tint: '#F6EDF7', sets: [{ move: 'Deadlift', load: '85 kg', reps: '3 × 5' }, { move: 'Push-up', load: 'bodyweight', reps: '3 × 12' }, { move: 'Dead bug', load: '—', reps: '3 × 10' }] },
     { day: 'SUN', name: 'Mobility', note: 'Hips and ankles', kcal: 60, tint: '#F5F3F0', sets: [{ move: 'Flow', load: '22 min', reps: 'easy' }] },
   ];
-  const sessions = sessionDefs.map((s, i) => ({
+  const DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const weekStart = Date.now() - 7 * DAY;
+  const liveSessions = (live.workouts ?? [])
+    .filter((w) => new Date(w.startedAt).getTime() >= weekStart)
+    .map((w) => {
+      const detail: Array<{ move: string; load: string; reps: string }> = [];
+      if (w.durationMin) detail.push({ move: 'Duration', load: Math.round(w.durationMin) + ' min', reps: '' });
+      if (w.distanceKm) detail.push({ move: 'Distance', load: w.distanceKm.toFixed(1) + ' km', reps: '' });
+      if (w.avgHr) detail.push({ move: 'Average heart rate', load: Math.round(w.avgHr) + ' bpm', reps: w.maxHr ? 'max ' + Math.round(w.maxHr) : '' });
+      return {
+        day: DOW[new Date(w.startedAt).getDay()],
+        name: w.type ?? 'Session',
+        note: [w.durationMin ? Math.round(w.durationMin) + ' min' : null, w.source].filter(Boolean).join(' · '),
+        kcal: Math.round(w.energyKcal ?? 0),
+        tint: '#F7EDF6',
+        // Set-level detail needs a lift log, which nothing writes yet; until then
+        // a session opens onto what Apple Health actually recorded.
+        sets: detail.length ? detail : [{ move: 'No set detail recorded', load: '—', reps: '' }],
+      };
+    });
+  const sessionSource = liveSessions.length ? liveSessions : sessionDefs;
+  const sessions = sessionSource.map((s, i) => ({
     ...s,
     open: st.openSession === i,
     caret: st.openSession === i ? '−' : '+',
     onClick: () => setState({ openSession: st.openSession === i ? null : i }),
   }));
-  const loadVals = [1820, 2140, 1960, 2380, 2050, 2460, 2280, 2410];
+  // Weekly active-energy totals, most recent eight weeks.
+  const liveLoad = (() => {
+    if (!days) return null;
+    const buckets = new Map<number, number>();
+    for (const d of days) {
+      const kcal = d.activity.activeEnergyKcal;
+      if (kcal == null) continue;
+      const wk = Math.floor(new Date(d.date).getTime() / (7 * DAY));
+      buckets.set(wk, (buckets.get(wk) ?? 0) + kcal);
+    }
+    const keys = [...buckets.keys()].sort((a, b) => a - b).slice(-8);
+    return keys.length >= 2 ? keys.map((k) => Math.round(buckets.get(k)!)) : null;
+  })();
+  const loadVals = liveLoad ?? [1820, 2140, 1960, 2380, 2050, 2460, 2280, 2410];
   const loadMax = Math.max.apply(null, loadVals);
   const loadBars = loadVals.map((v, i) => ({
     label: 'W' + (i + 24),
@@ -430,11 +494,32 @@ export function deriveVals(
 
   /* ── habits + sleep ── */
   let done = 0, total = 0;
+  // A habit day is "done" when Apple Health shows the target met; an explicit tap
+  // still overrides it, and days with no sync fall back to the design's pattern.
+  const last14 = (days ?? []).slice(-14);
+  const liveHabit = (key: string, i: number): boolean | undefined => {
+    const d = last14[last14.length - 14 + i] ?? last14[i];
+    if (!d) return undefined;
+    switch (key) {
+      case 'protein': {
+        const g = d.nutrition.proteinG;
+        return g == null ? undefined : g >= latest.weight * proteinPerKg * 0.9;
+      }
+      case 'steps':
+        return d.activity.steps == null ? undefined : d.activity.steps >= 8000;
+      case 'water':
+        return d.nutrition.waterMl == null ? undefined : d.nutrition.waterMl >= 2000;
+      case 'lights':
+        return d.sleep.totalMin == null ? undefined : d.sleep.totalMin >= 7 * 60;
+      default:
+        return undefined;
+    }
+  };
   const habits = HABIT_DEFS.map((h) => {
     let count = 0;
     const days = [];
     for (let i = 0; i < 14; i++) {
-      const on = habitCell(st, h.key, i);
+      const on = st.habitDone[h.key + i] ?? liveHabit(h.key, i) ?? habitCell(st, h.key, i);
       if (on) count++;
       total++;
       if (on) done++;
@@ -447,22 +532,36 @@ export function deriveVals(
     return { name: h.name, days, count };
   });
   const sleepMax = 9;
-  const sleepBars = SLEEP_HOURS.map((h, i) => ({
+  const sleepBars = sleepSeries.map((h, i) => ({
     label: String(i + 1),
     title: h.toFixed(1) + ' hours',
     style: 'width:100%;height:' + ((h / sleepMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (h >= 7 ? '#4A7FC1' : '#DCD5F2') + ';opacity:' + (h >= 7 ? 0.75 : 1) + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
-  const avgIntake = Math.round(INTAKE.reduce((a, b) => a + b, 0) / INTAKE.length);
+  const avgIntake = Math.round(intakeSeries.reduce((a, b) => a + b, 0) / intakeSeries.length);
 
   const addWeight = () => {
     const raw = parseFloat(st.draft);
     if (!raw || isNaN(raw)) return;
     const kg = st.unit === 'lb' ? raw / 2.20462 : raw;
     if (kg < 30 || kg > 250) { setState({ draft: '' }); return; }
-    const next = readings.slice();
-    const last = new Date(next[next.length - 1].date).getTime();
-    next.push({ date: new Date(last + 7 * DAY).toISOString().slice(0, 10), weight: +kg.toFixed(1) });
+    const weight = +kg.toFixed(1);
+    const date = new Date().toISOString().slice(0, 10);
+
+    // Show it on the chart straight away, then persist. A same-day re-weigh
+    // replaces the earlier entry rather than stacking a second point.
+    const next = readings.filter((r) => r.date.slice(0, 10) !== date).concat([{ date, weight }]);
+    next.sort((a, b) => a.date.localeCompare(b.date));
     setState({ readings: next, draft: '' });
+
+    const pw = storedOperatorPassword();
+    if (!pw) return;
+    void fetch('/api/operator/fitness', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-operator-pw': pw },
+      body: JSON.stringify({ date, weight, bmi: weight / (1.68 * 1.68) }),
+    }).catch(() => {
+      /* offline or storage not set up — the reading stays in view for this session */
+    });
   };
 
   return {
@@ -521,7 +620,7 @@ export function deriveVals(
     kpis,
     rings, ringFocus,
     balanceProps: { intakeSoFar: st.logged.kcal, tdee, mealsLogged: 3 },
-    recoveryProps: { hrv: 52, rhr: 58, plannedSession: 'Lower body — squat and hinge' },
+    recoveryProps: { hrv: hrvAvg == null ? 52 : Math.round(hrvAvg), rhr: rhrAvg == null ? 58 : Math.round(rhrAvg), plannedSession: 'Lower body — squat and hinge' },
     glasses: Array.from({ length: 8 }, (_, i) => ({
       onClick: () => setState({ water: st.water === i + 1 ? i : i + 1 }),
       title: (i + 1) * 250 + ' ml',
@@ -598,14 +697,17 @@ export function deriveVals(
     ledgerProps: { days: ledgerDays, targetDeficit: 500 },
     proteinProps: {
       proteinTodayG: st.logged.protein, proteinTargetG: proteinTarget,
-      rhrWeekAvg: 58, hrvWeekAvg: 52, trainingLoad7Day: 430, trainingLoadYesterday: 280,
+      rhrWeekAvg: rhrAvg == null ? 58 : Math.round(rhrAvg),
+      hrvWeekAvg: hrvAvg == null ? 52 : Math.round(hrvAvg),
+      trainingLoad7Day: activeEnergy7 == null ? 430 : Math.round(activeEnergy7),
+      trainingLoadYesterday: latestOf(days, (d) => d.activity.activeEnergyKcal) ?? 280,
     },
 
     sessions, loadBars, prs,
     ...volumeVals(st, setState),
 
     habits, habitPct: Math.round((done / total) * 100),
-    sleepBars, sleepAvg: (SLEEP_HOURS.reduce((a, b) => a + b, 0) / SLEEP_HOURS.length).toFixed(1),
+    sleepBars, sleepAvg: (sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1),
     reviewHeadline: 'Down 0.2 kg, four sessions, and sleep still the weak link.',
     reviewBody: 'Average intake ' + avgIntake.toLocaleString() + ' kcal against ' + tdee.toLocaleString() + ' kcal burned — about a ' + Math.max(0, tdee - avgIntake) + ' kcal daily deficit. Protein hit on six of seven days, which is why the scale is moving without the sessions getting harder. Nothing to change: keep the food where it is and aim one earlier bedtime this week.',
     reviewChips: ['4 sessions', '6/7 protein days', '6.9 h sleep', 'RHR 58 bpm'],
