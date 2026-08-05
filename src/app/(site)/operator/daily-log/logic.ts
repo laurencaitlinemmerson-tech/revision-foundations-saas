@@ -1,6 +1,8 @@
 import type React from 'react';
 import { avgOf, lastSyncedDate, latestOf, series, today as todayRow, type LiveData, type Lift, type Workout } from './data';
 import { storedOperatorPassword } from '../OperatorGate';
+import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
+import { tdeeRealityCheck, driftCopy } from '@/lib/fitness/tdeeRealityCheck';
 
 /**
  * Daily log — derivation layer.
@@ -191,6 +193,7 @@ export function deriveVals(
   const activeEnergy7 = avgOf(days, (d) => d.activity.activeEnergyKcal, 7);
   // Real body composition from the scale, where the scale reports it.
   const weighByDate = new Map((live.weighIns ?? []).map((w) => [w.date.slice(0, 10), w]));
+  const latestWeighIn = live.weighIns?.[live.weighIns.length - 1] ?? null;
   const latest = readings[readings.length - 1];
   const prev = readings[readings.length - 2] ?? latest;
   const tdee = Math.round(st.tune.bmr + st.tune.neat + st.tune.exercise + st.tune.tef);
@@ -419,6 +422,22 @@ export function deriveVals(
     { label: 'BMI', value: bmiOf(latest.weight).toFixed(1), spark: last12.map((r) => bmiOf(r.weight)), d: bmiOf(latest.weight) - bmiOf(ref12.weight) },
     { label: 'Body fat', value: metricDefs.fat.get(latest).toFixed(1) + ' %', spark: last12.map((r) => metricDefs.fat.get(r)), d: metricDefs.fat.get(latest) - metricDefs.fat.get(ref12) },
     { label: 'Waist', value: metricDefs.waist.get(latest).toFixed(1) + ' cm', spark: last12.map((r) => metricDefs.waist.get(r)), d: metricDefs.waist.get(latest) - metricDefs.waist.get(ref12) },
+    ...(latestWeighIn && latestWeighIn.muscleMass > 0
+      ? [{
+          label: 'Muscle mass',
+          value: latestWeighIn.muscleMass.toFixed(1) + ' kg',
+          spark: (live.weighIns ?? []).slice(-12).map((w) => w.muscleMass),
+          d: latestWeighIn.muscleMass - ((live.weighIns ?? [])[Math.max(0, (live.weighIns ?? []).length - 12)]?.muscleMass ?? latestWeighIn.muscleMass),
+        }]
+      : []),
+    ...(latestWeighIn && latestWeighIn.water > 0
+      ? [{
+          label: 'Body water',
+          value: latestWeighIn.water.toFixed(1) + ' %',
+          spark: (live.weighIns ?? []).slice(-12).map((w) => w.water),
+          d: latestWeighIn.water - ((live.weighIns ?? [])[Math.max(0, (live.weighIns ?? []).length - 12)]?.water ?? latestWeighIn.water),
+        }]
+      : []),
   ].map((b) => ({
     label: b.label, value: b.value, spark: b.spark,
     delta: (b.d >= 0 ? '+' : '−') + Math.abs(b.d).toFixed(1),
@@ -452,6 +471,56 @@ export function deriveVals(
     intake: kcal,
     tdee: tdee + (i % 3 === 0 ? 110 : i % 3 === 1 ? -50 : 40),
   }));
+
+  /* ── analysis ── */
+  // The maths already existed in src/lib/fitness; it just had no caller after
+  // the old dashboard went. Everything here runs on the real series and
+  // returns null when there isn't enough of one to say anything.
+  const intakeByDate: Record<string, number> = {};
+  for (const d of days ?? []) {
+    if (d.nutrition.dietaryEnergyKcal != null) intakeByDate[d.date.slice(0, 10)] = d.nutrition.dietaryEnergyKcal;
+  }
+
+  const plateau = readings.length >= 3 ? detectPlateau(readings) : null;
+  const reality = Object.keys(intakeByDate).length >= 5
+    ? tdeeRealityCheck(readings, intakeByDate, tdee, -st.pace)
+    : null;
+
+  // Recovery readiness: today's HRV and resting HR against their own baselines,
+  // plus how hard the last seven days have been.
+  const hrvBase = avgOf(days, (d) => d.heart.hrvMs, 28);
+  const rhrBase = avgOf(days, (d) => d.heart.restingHr, 28);
+  const hrvNow = avgOf(days, (d) => d.heart.hrvMs, 3);
+  const rhrNow = avgOf(days, (d) => d.heart.restingHr, 3);
+  const readiness = (() => {
+    if (hrvBase == null || hrvNow == null || rhrBase == null || rhrNow == null) return null;
+    // Above-baseline HRV and below-baseline resting HR both read as recovered.
+    const hrvDelta = (hrvNow - hrvBase) / hrvBase;
+    const rhrDelta = (rhrBase - rhrNow) / rhrBase;
+    const score = Math.max(0, Math.min(100, Math.round(50 + (hrvDelta * 120) + (rhrDelta * 160))));
+    const verdict = score >= 66
+      ? 'Recovered — train as planned, and take the top set if it is there.'
+      : score >= 40
+      ? 'Middling — train, but hold the last set back rather than chasing a number.'
+      : 'Under-recovered — drop a set, keep the walk, and get the earlier night.';
+    return { score, verdict, hrvDelta, rhrDelta };
+  })();
+
+  // Macro adherence over the last week: how often protein cleared its target
+  // and intake stayed inside the budget.
+  const adherence7 = (() => {
+    const recent = (days ?? []).slice(-7).filter((d) => d.nutrition.dietaryEnergyKcal != null);
+    if (!recent.length) return null;
+    const proteinTargetG = Math.round(latest.weight * proteinPerKg);
+    const proteinDays = recent.filter((d) => (d.nutrition.proteinG ?? 0) >= proteinTargetG * 0.9).length;
+    const intakeDays = recent.filter((d) => (d.nutrition.dietaryEnergyKcal ?? 0) <= kcalTarget * 1.05).length;
+    return {
+      days: recent.length,
+      proteinDays,
+      intakeDays,
+      pct: Math.round(((proteinDays + intakeDays) / (recent.length * 2)) * 100),
+    };
+  })();
 
   /* ── weekly deficit ── */
   // Burn per day uses the measured active energy where Apple Health has it and
@@ -898,11 +967,90 @@ export function deriveVals(
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,
     ...volumeVals(st, setState, live, st.tune.neat + st.tune.exercise),
 
+    // Read-outs for the coaching card: only what the data actually supports.
+    coachNotes: [
+      plateau
+        ? {
+            tag: 'Plateau',
+            tone: 'warn' as const,
+            title: `Flat for ${plateau.days} days at ${plateau.meanWeight.toFixed(1)} kg`,
+            note: plateauSuggestion(plateau, logged.kcal || avgIntake, tdee),
+          }
+        : null,
+      reality?.significant
+        ? {
+            tag: 'Maintenance',
+            tone: 'warn' as const,
+            title: `Formula is off by ${Math.round(Math.abs(reality.driftPct) * 100)}%`,
+            note: driftCopy(reality),
+          }
+        : reality
+        ? {
+            tag: 'Maintenance',
+            tone: 'ok' as const,
+            title: `Estimate holds at ${reality.actualTdee.toLocaleString()} kcal`,
+            note: `Intake and weight change agree with the formula across ${reality.days} days, so the plan numbers can stand.`,
+          }
+        : null,
+      readiness
+        ? {
+            tag: 'Readiness',
+            tone: readiness.score >= 66 ? ('ok' as const) : readiness.score >= 40 ? ('mid' as const) : ('warn' as const),
+            title: `${readiness.score} / 100`,
+            note: readiness.verdict,
+          }
+        : null,
+      adherence7
+        ? {
+            tag: 'Adherence',
+            tone: adherence7.pct >= 70 ? ('ok' as const) : ('mid' as const),
+            title: `${adherence7.pct}% over ${adherence7.days} days`,
+            note: `Protein cleared target on ${adherence7.proteinDays} of ${adherence7.days}; intake stayed inside budget on ${adherence7.intakeDays}.`,
+          }
+        : null,
+    ].filter((n): n is { tag: string; tone: 'ok' | 'mid' | 'warn'; title: string; note: string } => n !== null),
+    coachEmpty: !plateau && !reality && !readiness && !adherence7,
     habits, habitPct: Math.round((done / total) * 100),
     sleepBars, sleepAvg: (sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1),
-    reviewHeadline: 'Down 0.2 kg, four sessions, and sleep still the weak link.',
+    reviewHeadline: (() => {
+      const wk = readings.length >= 2 ? latest.weight - readings[readings.length - 2].weight : 0;
+      const dir = wk < -0.05 ? `Down ${Math.abs(wk).toFixed(1)} kg` : wk > 0.05 ? `Up ${wk.toFixed(1)} kg` : 'Weight holding';
+      const sleepAvgH = sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length;
+      const weak = sleepAvgH < 7 ? 'sleep still the weak link' : adherence7 && adherence7.pct < 70 ? 'adherence the weak link' : 'nothing obviously off';
+      return `${dir}, ${(live.workouts ?? []).length || 'no'} session${(live.workouts ?? []).length === 1 ? '' : 's'}, and ${weak}.`;
+    })(),
     reviewBody: 'Average intake ' + avgIntake.toLocaleString() + ' kcal against ' + tdee.toLocaleString() + ' kcal burned — about a ' + Math.max(0, tdee - avgIntake) + ' kcal daily deficit. Protein hit on six of seven days, which is why the scale is moving without the sessions getting harder. Nothing to change: keep the food where it is and aim one earlier bedtime this week.',
-    reviewChips: ['4 sessions', '6/7 protein days', '6.9 h sleep', 'RHR 58 bpm'],
+    reviewChips: [
+      ((live.workouts ?? []).length || 0) + ' sessions',
+      adherence7 ? `${adherence7.proteinDays}/${adherence7.days} protein days` : '— protein days',
+      (sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1) + ' h sleep',
+      'RHR ' + Math.round(rhrAvg ?? 58) + ' bpm',
+      ...(latestOf(days, (d) => d.heart.vo2Max) ? ['VO₂ max ' + latestOf(days, (d) => d.heart.vo2Max)!.toFixed(1)] : []),
+      ...(avgOf(days, (d) => d.activity.exerciseMinutes, 7) ? [Math.round(avgOf(days, (d) => d.activity.exerciseMinutes, 7)!) + ' min/day active'] : []),
+      ...(avgOf(days, (d) => d.activity.distanceKm, 7) ? [avgOf(days, (d) => d.activity.distanceKm, 7)!.toFixed(1) + ' km/day'] : []),
+    ],
+    // Sleep stages, where Apple Health breaks the night down.
+    sleepStages: (() => {
+      const d = (days ?? []).slice(-1)[0];
+      if (!d || d.sleep.totalMin == null) return null;
+      const parts = [
+        { label: 'Deep', min: d.sleep.deepMin, color: '#8A6D3F' },
+        { label: 'Core', min: d.sleep.coreMin, color: '#B08D57' },
+        { label: 'REM', min: d.sleep.remMin, color: '#C4A375' },
+        { label: 'Awake', min: d.sleep.awakeMin, color: '#EFEADC' },
+      ].filter((s) => s.min != null && s.min > 0) as Array<{ label: string; min: number; color: string }>;
+      if (!parts.length) return null;
+      const total = parts.reduce((a, s) => a + s.min, 0);
+      return {
+        total: (total / 60).toFixed(1) + ' h',
+        parts: parts.map((s) => ({
+          label: s.label,
+          value: Math.round(s.min) + ' min',
+          pct: Math.round((s.min / total) * 100),
+          barStyle: `height:100%;width:${((s.min / total) * 100).toFixed(1)}%;background:${s.color};`,
+        })),
+      };
+    })(),
   };
 }
 

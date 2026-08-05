@@ -591,6 +591,22 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
+      <div style={{ padding: '24px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 2px' }}>What the numbers <em style={{ color: '#B08D57' }}>say</em></h2>
+      <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Read from your own series — each note appears only once there is enough data behind it.</p>
+      {(v.coachEmpty) ? (<>
+      <p style={{ margin: '0', fontSize: '13px', color: 'var(--ink-mute)', lineHeight: 1.6 }}>Nothing to say yet. Plateau detection needs three weigh-ins, the maintenance check needs five days of logged intake, and readiness needs a few weeks of heart data.</p>
+      </>) : null}
+      {(v.coachNotes ?? []).map((c, c_i) => (<React.Fragment key={c_i}>
+      <div style={{ display: 'grid', gridTemplateColumns: '92px minmax(0,1fr)', gap: '16px', alignItems: 'start', padding: '14px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
+      <span style={sx(`font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;text-align:center;background:${c.tone === 'ok' ? '#EDF1EC' : c.tone === 'mid' ? '#F6F3EA' : '#F9F1E8'};color:${c.tone === 'ok' ? '#7F9289' : c.tone === 'mid' ? '#8A6D3F' : '#AA7F68'};`)}>{c.tag}</span>
+      <div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: 'var(--ink)', marginBottom: '3px' }}>{c.title}</div>
+      <div style={{ fontSize: '12.5px', color: 'var(--ink-mute)', lineHeight: 1.6 }}>{c.note}</div>
+      </div>
+      </div>
+      </React.Fragment>))}
+      </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '6px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>What you burn — open a row to tune it</h2>
@@ -748,6 +764,24 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       <p style={{ margin: '14px 0 0', fontSize: '12.5px', color: 'var(--ink-soft)' }}>Averaging {v.sleepAvg} h — the 7-hour line is the dashed one.</p>
+      {(v.sleepStages) ? (<>
+      <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '0.5px solid var(--rule-soft)' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '10px' }}>
+      <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Last night by stage</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: 'var(--ink)' }}>{v.sleepStages.total}</span>
+      </div>
+      <div style={{ display: 'flex', height: '10px', borderRadius: '999px', overflow: 'hidden', background: 'var(--paper-deep)' }}>
+      {(v.sleepStages.parts ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
+      <span style={sx(s.barStyle)} title={`${s.label} · ${s.value}`}></span>
+      </React.Fragment>))}
+      </div>
+      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '10px' }}>
+      {(v.sleepStages.parts ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
+      <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{s.label} · {s.value} ({s.pct}%)</span>
+      </React.Fragment>))}
+      </div>
+      </div>
+      </>) : null}
       </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Week in review</span>
