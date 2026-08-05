@@ -647,7 +647,7 @@ export function deriveVals(
     isProgress: st.tab === 'progress', isPlan: st.tab === 'plan',
     isTraining: st.tab === 'training', isHabits: st.tab === 'habits',
     ...planVals(st, setState, latest, goal, tdee, conv, uLabel),
-    ...shellVals(st, setState, latest, goal, tdee, kcalTarget, proteinTarget, conv, uLabel, maLast, avgIntake, readings, proteinPerKg),
+    ...shellVals(st, setState, latest, goal, tdee, kcalTarget, proteinTarget, conv, uLabel, maLast, avgIntake, readings, proteinPerKg, live),
     lostValue: +conv(BASE[0][1] - latest.weight).toFixed(1),
     lostCopy: 'Down from ' + conv(BASE[0][1]).toFixed(1) + ' ' + uLabel + ' on 8 February — ' + Math.round((tLast - new Date(BASE[0][0]).getTime()) / DAY) + ' days of daily weigh-ins.',
     startLabel: 'Start ' + conv(BASE[0][1]).toFixed(1) + ' ' + uLabel,
@@ -795,6 +795,7 @@ function shellVals(
   st: DailyLogState, setState: SetState, latest: Reading, goal: number, tdee: number,
   kcalTarget: number, proteinTarget: number, conv: (v: number) => number, uLabel: string,
   maLast: number, avgIntake: number, readings: Reading[], proteinPerKg: number,
+  live: LiveData,
 ) {
   const pace = st.pace;
   const wkAgo = readings[readings.length - 2] || latest;
@@ -818,20 +819,32 @@ function shellVals(
     'height:100%;width:' + Math.max(3, Math.min(100, pct)).toFixed(0) + '%;border-radius:999px;background:' + color + ';transition:width 500ms cubic-bezier(.16,1,.3,1);';
 
 
-  const notionRows = [
-    { day: 'Mon', calendar: 'Uni · 9–4', suggestion: 'Lower body after class · 45 min' },
-    { day: 'Tue', calendar: 'Shift · 7am–7.30pm', suggestion: 'Steps only — shift covers the deficit' },
-    { day: 'Wed', calendar: 'Free evening', suggestion: 'Upper body · 40 min' },
-    { day: 'Thu', calendar: 'Shift · 7am–7.30pm', suggestion: 'Rest and eat at maintenance' },
-    { day: 'Fri', calendar: 'Free', suggestion: 'Full body · 45 min' },
-    { day: 'Sat', calendar: 'Dinner out · 8pm', suggestion: 'Long walk, protein-led day' },
-    { day: 'Sun', calendar: 'Free', suggestion: 'Weigh-in, meal prep, rest' },
-  ].map((r) => ({
+  // Notion (shifts, lectures) and Google Calendar, merged server-side into the
+  // week and read straight through. Until either is configured the card shows
+  // the design's example week, dimmed, so the layout still reads.
+  const schedule = live.schedule;
+  const notionRows = (schedule?.days.length
+    ? schedule.days.map((d) => ({ day: d.day, calendar: d.calendar, suggestion: d.suggestion }))
+    : [
+        { day: 'Mon', calendar: 'Uni · 9–4', suggestion: 'Lower body after class · 45 min' },
+        { day: 'Tue', calendar: 'Shift · 7am–7.30pm', suggestion: 'Steps only — shift covers the deficit' },
+        { day: 'Wed', calendar: 'Free evening', suggestion: 'Upper body · 40 min' },
+        { day: 'Thu', calendar: 'Shift · 7am–7.30pm', suggestion: 'Rest and eat at maintenance' },
+        { day: 'Fri', calendar: 'Free', suggestion: 'Full body · 45 min' },
+        { day: 'Sat', calendar: 'Dinner out · 8pm', suggestion: 'Long walk, protein-led day' },
+        { day: 'Sun', calendar: 'Free', suggestion: 'Weigh-in, meal prep, rest' },
+      ]
+  ).map((r) => ({
     day: r.day,
-    calendar: st.notion ? r.calendar : 'not connected',
-    calColor: st.notion ? '#C2A87C' : '#B7B1A8',
-    suggestion: st.notion ? r.suggestion : '—',
+    calendar: schedule ? r.calendar : 'not connected',
+    calColor: schedule ? '#C2A87C' : '#B7B1A8',
+    suggestion: schedule ? r.suggestion : '—',
   }));
+
+  const sources = schedule
+    ? [schedule.connected.notion ? 'Notion' : null, schedule.connected.google ? 'Google Calendar' : null]
+        .filter(Boolean)
+    : [];
 
   const setTarget = (key: 'goal' | 'kcal' | 'proteinPerKg', raw: string) => {
     const v = parseFloat(raw);
@@ -893,13 +906,14 @@ function shellVals(
       ? 'At your measured pace — not the target — goal lands in about ' + correctedWeeks + ' weeks. The plan timeline updates from this number, so it stays honest even on a slow fortnight.'
       : 'Not enough downward movement in the last six weeks to project a date. Tighten the food logging for two weeks and this recalculates itself.',
 
-    notionCopy: st.notion
-      ? 'Reading your shifts and lectures from the Notion calendar — lifts land on free evenings, easy days on twelve-hour shifts.'
-      : 'Connect a Notion database of your shifts and lectures and training days place themselves around the week you actually have.',
-    notionButtonLabel: st.notion ? 'Connected ✓' : 'Connect Notion →',
-    notionButtonStyle: 'padding:11px 18px;border-radius:16px;font-size:12px;cursor:pointer;flex:none;border:0.5px solid ' +
-      (st.notion ? 'rgba(178,152,106,0.28);background:#F4EEE0;color:#8A7346;' : 'rgba(26,24,21,0.08);background:var(--ink);color:var(--paper);border-color:transparent;'),
-    onToggleNotion: () => setState({ notion: !st.notion }),
+    notionCopy: sources.length
+      ? 'Reading your week from ' + sources.join(' and ') + ' — lifts land on the lightest days, steps on the longest, and a reset on the quietest.'
+      : 'Set NOTION_TOKEN and NOTION_SCHEDULE_DATABASE_ID, or the GOOGLE_* calendar credentials, and your real week replaces this example — training then places itself around the days you actually have.',
+    notionButtonLabel: sources.length ? sources.join(' + ') + ' ✓' : 'Not configured',
+    notionButtonStyle: 'padding:11px 18px;border-radius:16px;font-size:12px;flex:none;border:0.5px solid ' +
+      (sources.length
+        ? 'rgba(178,152,106,0.28);background:#F4EEE0;color:#8A7346;'
+        : 'rgba(26,24,21,0.08);background:transparent;color:#B7B1A8;'),
     notionRows,
   };
 }

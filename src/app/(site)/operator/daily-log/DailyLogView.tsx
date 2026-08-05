@@ -394,10 +394,10 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.06)', borderRadius: '28px', boxShadow: '0 1px 1px rgba(26,24,21,0.015),0 14px 34px rgba(26,24,21,0.035)' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '14px' }}>
       <div>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Smart scheduling · Notion</h2>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Smart <em style={{ color: '#C2A87C' }}>scheduling</em></h2>
       <p style={{ margin: '0', fontSize: '12.5px', color: '#9A9287', maxWidth: '46ch' }}>{v.notionCopy}</p>
       </div>
-      <button onClick={v.onToggleNotion} style={sx(v.notionButtonStyle)}>{v.notionButtonLabel}</button>
+      <span style={sx(v.notionButtonStyle)}>{v.notionButtonLabel}</span>
       </div>
       {(v.notionRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.05)' }}>

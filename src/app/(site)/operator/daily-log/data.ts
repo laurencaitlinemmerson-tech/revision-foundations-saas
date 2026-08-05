@@ -58,6 +58,21 @@ export type WeighIn = {
   boneMass: number;
 };
 
+export type ScheduleDay = {
+  day: string;
+  date: string;
+  calendar: string;
+  suggestion: string;
+  tag: string;
+  busyHours: number;
+};
+
+export type Schedule = {
+  connected: { notion: boolean; google: boolean };
+  days: ScheduleDay[];
+  configured: boolean;
+};
+
 export type Workout = {
   id: string;
   startedAt: string;
@@ -81,6 +96,8 @@ export type LiveData = {
   /** Apple Health days, oldest first. */
   days: HealthDay[] | null;
   workouts: Workout[] | null;
+  /** This week from Notion / Google Calendar; null until either is configured. */
+  schedule: Schedule | null;
   /** Whether any source reported that its table is not set up yet. */
   setupRequired: boolean;
 };
@@ -91,6 +108,7 @@ export const EMPTY_LIVE: LiveData = {
   weighIns: null,
   days: null,
   workouts: null,
+  schedule: null,
   setupRequired: false,
 };
 
@@ -122,10 +140,11 @@ export function useOperatorData(): LiveData {
         if (!cancelled) setLive({ ...EMPTY_LIVE, loaded: true });
         return;
       }
-      const [fitness, health, workouts] = await Promise.all([
+      const [fitness, health, workouts, schedule] = await Promise.all([
         get('/api/operator/fitness'),
         get(`/api/operator/health?from=${from}`),
         get('/api/operator/workouts'),
+        get('/api/operator/schedule'),
       ]);
       if (cancelled) return;
 
@@ -140,6 +159,7 @@ export function useOperatorData(): LiveData {
           : null,
         days,
         workouts: nonEmpty((workouts?.workouts as Workout[]) ?? null),
+        schedule: schedule?.configured ? (schedule as unknown as Schedule) : null,
         setupRequired: Boolean(
           fitness?.setup_required || health?.setup_required || workouts?.setup_required,
         ),
