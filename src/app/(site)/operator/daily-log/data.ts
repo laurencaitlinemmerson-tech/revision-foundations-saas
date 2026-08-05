@@ -117,8 +117,50 @@ export const EMPTY_LIVE: LiveData = {
 
 const nonEmpty = <T,>(a: T[] | null | undefined): T[] | null => (a && a.length ? a : null);
 
+/** Local calendar date, which is what "today" and "resets each day" mean here. */
+function localISODate(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** How often to re-read while the tab is open. */
+const REFRESH_MS = 5 * 60 * 1000;
+
 export function useOperatorData(): LiveData {
   const [live, setLive] = useState<LiveData>(EMPTY_LIVE);
+  const [tick, setTick] = useState(0);
+
+  // Re-read on a timer, when the tab comes back to the foreground, and the
+  // moment the local date changes — a dashboard left open overnight has to roll
+  // onto the new day rather than keep showing yesterday's totals.
+  useEffect(() => {
+    const bump = () => setTick((n) => n + 1);
+    let day = localISODate();
+
+    const timer = window.setInterval(() => {
+      const now = localISODate();
+      if (now !== day) {
+        day = now;
+        bump();
+        return;
+      }
+      if (document.visibilityState === 'visible') bump();
+    }, REFRESH_MS);
+
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const now = localISODate();
+      if (now !== day) day = now;
+      bump();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -170,7 +212,7 @@ export function useOperatorData(): LiveData {
     })();
 
     return () => { cancelled = true; };
-  }, []);
+  }, [tick]);
 
   return live;
 }
@@ -217,6 +259,12 @@ export function avgOf(
 /** Today's row, if Apple Health has already synced one. */
 export function today(days: HealthDay[] | null): HealthDay | null {
   if (!days) return null;
-  const iso = new Date().toISOString().slice(0, 10);
+  const iso = localISODate();
   return days.find((d) => d.date.slice(0, 10) === iso) ?? null;
+}
+
+/** The most recent date Apple Health has any row for. */
+export function lastSyncedDate(days: HealthDay[] | null): string | null {
+  if (!days || !days.length) return null;
+  return days[days.length - 1].date.slice(0, 10);
 }

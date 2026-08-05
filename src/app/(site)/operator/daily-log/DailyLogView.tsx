@@ -32,15 +32,15 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div data-topbar style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', padding: '20px 48px 0', maxWidth: '1220px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', letterSpacing: '-0.015em' }}>Daily<em style={{ color: '#B08D57' }}> log</em></span>
-      <span style={{ fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Week 31 · 2026</span>
+      <span style={{ fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>{v.weekLabel}</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
       <StreakChip days={21} label='days logged' tone='brass'></StreakChip>
       <StreakChip days={6} label='protein hit' tone='green'></StreakChip>
       <StreakChip days={4} label='workouts' tone='brass'></StreakChip>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 12px', borderRadius: '999px', background: '#F7F5F0', border: '0.5px solid rgba(176,141,87,0.20)', fontSize: '10.5px', color: '#957962' }}>
-      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#9FB3A9', display: 'inline-block' }}></span>
-      Apple Health · synced 7 min ago
+      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: v.syncDotColour, display: 'inline-block' }}></span>
+      {v.syncLabel}
       </span>
       </div>
       </div>
