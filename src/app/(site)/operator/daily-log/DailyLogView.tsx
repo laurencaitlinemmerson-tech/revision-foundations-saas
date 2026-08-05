@@ -35,6 +35,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <span style={{ fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>{v.weekLabel}</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      {(v.unitToggle ?? []).map((u, u_i) => (<React.Fragment key={u_i}>
+      <button onClick={u.onClick} style={sx(u.style)}>{u.label}</button>
+      </React.Fragment>))}
       <StreakChip days={21} label='days logged' tone='brass'></StreakChip>
       <StreakChip days={6} label='protein hit' tone='green'></StreakChip>
       <StreakChip days={4} label='workouts' tone='brass'></StreakChip>
@@ -45,24 +48,17 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       <main data-main style={{ padding: '28px 48px 88px', maxWidth: '1220px', minWidth: '0', margin: '0 auto' }}>
-      <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap', marginBottom: '18px' }}>
-      <div style={{ flex: '1 1 380px', minWidth: '0' }}>
-      <div style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: '10px' }}>Fitness &amp; recovery</div>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '46px', letterSpacing: '-0.025em', lineHeight: '1.06', color: 'var(--ink)', margin: '0 0 10px' }}>{v.greetingLead} <em style={{ fontStyle: 'italic', color: '#B08D57' }}>{v.greetingTail}</em></h1>
-      <p style={{ margin: '0', fontSize: '14.5px', fontWeight: '300', color: '#8E8A82', lineHeight: '1.6', maxWidth: '58ch' }}>{v.subhead}</p>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px', flex: '0 1 auto' }}>
+      <header style={{ marginBottom: '20px' }}>
+      <div style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: '8px' }}>Fitness &amp; recovery</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '42px', letterSpacing: '-0.025em', lineHeight: '1.06', color: 'var(--ink)', margin: '0' }}>{v.greetingLead} <em style={{ fontStyle: 'italic', color: '#B08D57' }}>{v.greetingTail}</em></h1>
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
       {(v.tabs ?? []).map((t, t_i) => (<React.Fragment key={t_i}>
       <button onClick={t.onClick} style={sx(t.style)}>{t.label}</button>
       </React.Fragment>))}
       </div>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-      {(v.unitToggle ?? []).map((u, u_i) => (<React.Fragment key={u_i}>
-      <button onClick={u.onClick} style={sx(u.style)}>{u.label}</button>
-      </React.Fragment>))}
       </div>
-      </div>
+      <p style={{ margin: '10px 0 0', fontSize: '14.5px', fontWeight: '300', color: '#8E8A82', lineHeight: '1.6', maxWidth: '58ch' }}>{v.subhead}</p>
       </header>
       <div style={{ height: '0.5px', background: 'rgba(26,24,21,0.12)', margin: '0 0 26px' }}></div>
       {(v.isFresh) ? (<>
@@ -125,9 +121,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </>) : null}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(178px,1fr))', gap: '14px', marginBottom: '16px' }}>
+      <div data-metric-band style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(178px,1fr))', background: '#FBFAF8', border: '0.5px solid rgba(26,24,21,0.11)', borderRadius: '12px', overflow: 'hidden', marginBottom: '26px' }}>
       {(v.kpis ?? []).map((k, k_i) => (<React.Fragment key={k_i}>
-      <div style={{ padding: '22px 24px 18px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.11)', borderRadius: '12px', boxShadow: 'none', transition: 'box-shadow 300ms cubic-bezier(.16,1,.3,1)' }} className="hv3">
+      <div data-metric-cell style={{ padding: '20px 22px 16px', borderLeft: k_i === 0 ? '0' : '0.5px solid rgba(26,24,21,0.09)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-mute)', minWidth: '0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.label}</span>
       <span style={sx(`font-size:10px;padding:3px 9px;border-radius:999px;background:${k.chipBg};color:${k.chipColor};letter-spacing:0.06em;white-space:nowrap;flex:none;`)}>{k.chip}</span>
@@ -142,7 +138,6 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div style={{ height: '0.5px', background: 'rgba(26,24,21,0.12)', margin: '4px 0 26px' }}></div>
       {(v.isToday) ? (<>
       <div data-tab-panel data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>

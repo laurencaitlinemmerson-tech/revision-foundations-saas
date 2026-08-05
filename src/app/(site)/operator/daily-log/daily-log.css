@@ -73,3 +73,9 @@
   .daily-log-shell [data-main] { padding: 24px 18px 60px !important; }
   .daily-log-shell [data-hero] { grid-template-columns: minmax(0, 1fr) !important; }
 }
+
+/* The metric band divides with hairlines, so the first cell in each wrapped
+   row must drop the divider it would otherwise inherit. */
+@media (max-width: 1080px) {
+  .daily-log-shell [data-metric-band] { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
