@@ -720,34 +720,123 @@ export function deriveVals(
     ];
   })();
 
+  /* ── per-movement progression ── */
+  // One line per exercise: estimated one-rep max over time, with the session
+  // that set each personal best marked. This is the view that tells you whether
+  // a lift is actually moving, which a table of current bests cannot.
+  const liftProgress = (() => {
+    const byExercise = new Map<string, Lift[]>();
+    for (const l of live.lifts ?? []) {
+      if (l.e1rmKg <= 0) continue;
+      byExercise.set(l.exercise, [...(byExercise.get(l.exercise) ?? []), l]);
+    }
+    const series = [...byExercise.entries()]
+      .map(([exercise, ls]) => ({ exercise, ls: ls.sort((a, b) => a.performedOn.localeCompare(b.performedOn)) }))
+      .filter((s) => s.ls.length >= 2)
+      .sort((a, b) => b.ls.length - a.ls.length)
+      .slice(0, 4);
+    if (!series.length) return null;
+
+    const W = 320, H = 96, PAD = 6;
+    return series.map((s, i) => {
+      const vals = s.ls.map((l) => l.e1rmKg);
+      const mn = Math.min(...vals);
+      const mx = Math.max(...vals);
+      const rng = mx - mn || 1;
+      const t0 = new Date(s.ls[0].performedOn).getTime();
+      const t1 = new Date(s.ls[s.ls.length - 1].performedOn).getTime();
+      const span = t1 - t0 || 1;
+      const pt = (l: Lift) => ({
+        x: +(PAD + ((new Date(l.performedOn).getTime() - t0) / span) * (W - PAD * 2)).toFixed(1),
+        y: +(H - PAD - ((l.e1rmKg - mn) / rng) * (H - PAD * 2)).toFixed(1),
+      });
+      const pts = s.ls.map(pt);
+      const path = pts.map((q, j) => (j ? 'L' : 'M') + q.x + ',' + q.y).join(' ');
+
+      // Mark a session only when it beat everything before it.
+      let running = 0;
+      const prs = s.ls.map((l, j) => {
+        const isPr = l.e1rmKg > running;
+        if (isPr) running = l.e1rmKg;
+        return isPr && j > 0 ? pts[j] : null;
+      }).filter((q): q is { x: number; y: number } => q !== null);
+
+      const first = vals[0];
+      const last = vals[vals.length - 1];
+      const delta = last - first;
+      return {
+        exercise: s.exercise,
+        gradId: 'lift-' + i,
+        path,
+        area: path + ` L${pts[pts.length - 1].x},${H} L${pts[0].x},${H} Z`,
+        prs,
+        sessions: s.ls.length,
+        current: last.toFixed(1) + ' kg',
+        delta: (delta >= 0 ? '+' : '−') + Math.abs(delta).toFixed(1) + ' kg',
+        deltaColor: delta >= 0 ? '#7F9289' : '#AA7F68',
+        note: s.ls.length + ' sessions · best ' + mx.toFixed(1) + ' kg estimated max',
+      };
+    });
+  })();
+
+  /* ── macro split over the fortnight ── */
+  const macroTrend = (() => {
+    const recent = (days ?? []).slice(-14).filter((d) => d.nutrition.dietaryEnergyKcal != null);
+    if (recent.length < 3) return null;
+    return recent.map((d) => {
+      const pG = d.nutrition.proteinG ?? 0;
+      const cG = d.nutrition.carbsG ?? 0;
+      const fG = d.nutrition.fatG ?? 0;
+      const kcal = pG * 4 + cG * 4 + fG * 9;
+      const pct = (g: number, per: number) => (kcal > 0 ? (g * per) / kcal * 100 : 0);
+      return {
+        date: new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric' }),
+        title: `${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · ${Math.round(pG)} p / ${Math.round(cG)} c / ${Math.round(fG)} f`,
+        proteinStyle: `height:${pct(pG, 4).toFixed(1)}%;background:#7F9289;display:block;`,
+        carbStyle: `height:${pct(cG, 4).toFixed(1)}%;background:#B08D57;display:block;`,
+        fatStyle: `height:${pct(fG, 9).toFixed(1)}%;background:#D2B49C;display:block;`,
+      };
+    });
+  })();
+
+  const fibreToday = dayNow?.nutrition.fiberG ?? null;
+  const sugarToday = dayNow?.nutrition.sugarG ?? null;
+  const proteinPerKgToday = logged.protein > 0 ? logged.protein / latest.weight : 0;
+
   /* ── habits + sleep ── */
+  // A habit day is "done" when Apple Health shows the target met; days with no
+  // sync fall back to the design's pattern so the grid is never blank.
+  const habitWindow = (days ?? []).slice(-14);
+  const resolveHabit = (key: string, i: number): boolean => {
+    const d = habitWindow[habitWindow.length - 14 + i] ?? habitWindow[i];
+    const measured = ((): boolean | undefined => {
+      if (!d) return undefined;
+      switch (key) {
+        case 'protein': {
+          const g = d.nutrition.proteinG;
+          return g == null ? undefined : g >= latest.weight * proteinPerKg * 0.9;
+        }
+        case 'steps':
+          return d.activity.steps == null ? undefined : d.activity.steps >= 8000;
+        case 'water':
+          return d.nutrition.waterMl == null ? undefined : d.nutrition.waterMl >= 2000;
+        case 'lights':
+          return d.sleep.totalMin == null ? undefined : d.sleep.totalMin >= 7 * 60;
+        default:
+          return undefined;
+      }
+    })();
+    return measured ?? habitCell(st, key, i);
+  };
+
   let done = 0, total = 0;
   // A habit day is "done" when Apple Health shows the target met; an explicit tap
   // still overrides it, and days with no sync fall back to the design's pattern.
-  const last14 = (days ?? []).slice(-14);
-  const liveHabit = (key: string, i: number): boolean | undefined => {
-    const d = last14[last14.length - 14 + i] ?? last14[i];
-    if (!d) return undefined;
-    switch (key) {
-      case 'protein': {
-        const g = d.nutrition.proteinG;
-        return g == null ? undefined : g >= latest.weight * proteinPerKg * 0.9;
-      }
-      case 'steps':
-        return d.activity.steps == null ? undefined : d.activity.steps >= 8000;
-      case 'water':
-        return d.nutrition.waterMl == null ? undefined : d.nutrition.waterMl >= 2000;
-      case 'lights':
-        return d.sleep.totalMin == null ? undefined : d.sleep.totalMin >= 7 * 60;
-      default:
-        return undefined;
-    }
-  };
   const habits = HABIT_DEFS.map((h) => {
     let count = 0;
     const days = [];
     for (let i = 0; i < 14; i++) {
-      const on = liveHabit(h.key, i) ?? habitCell(st, h.key, i);
+      const on = resolveHabit(h.key, i);
       if (on) count++;
       total++;
       if (on) done++;
@@ -765,6 +854,56 @@ export function deriveVals(
     style: 'width:100%;height:' + ((h / sleepMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (h >= 7 ? '#7F9289' : '#EFEADC') + ';opacity:' + (h >= 7 ? 0.75 : 1) + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
   const avgIntake = Math.round(intakeSeries.reduce((a, b) => a + b, 0) / intakeSeries.length);
+
+
+  /* ── sleep depth ── */
+  // Debt against a seven-hour target, and how consistent the nights are — a
+  // steady 6.5 costs less than alternating 5 and 8 for the same average.
+  const sleepDepth = (() => {
+    const nights = series(days, (d) => (d.sleep.totalMin == null ? null : d.sleep.totalMin / 60), 14);
+    if (!nights || nights.length < 3) return null;
+    const target = 7;
+    const debt = nights.reduce((a, h) => a + Math.max(0, target - h), 0);
+    const mean = nights.reduce((a, b) => a + b, 0) / nights.length;
+    const sd = Math.sqrt(nights.reduce((a, h) => a + (h - mean) ** 2, 0) / nights.length);
+    const consistency = Math.max(0, Math.min(100, Math.round(100 - sd * 40)));
+    return {
+      debt: debt.toFixed(1) + ' h',
+      debtNote: debt < 3
+        ? `Barely any debt across ${nights.length} nights — this is the shape you want.`
+        : `${debt.toFixed(1)} hours short of ${target} h across ${nights.length} nights. Most of that is paid back by moving bedtime, not by lying in.`,
+      consistency,
+      consistencyNote: sd < 0.75
+        ? `Steady — nights vary by about ${(sd * 60).toFixed(0)} minutes.`
+        : `Nights swing by roughly ${(sd * 60).toFixed(0)} minutes. Evening out the short ones does more than adding to the long ones.`,
+      barStyle: `height:100%;width:${consistency}%;border-radius:999px;background:${consistency >= 70 ? '#7F9289' : consistency >= 45 ? '#B08D57' : '#AA7F68'};`,
+    };
+  })();
+
+  /* ── habit streaks ── */
+  const habitStreaks = (() => {
+    const rows = HABIT_DEFS.map((h) => {
+      const flags: boolean[] = [];
+      for (let i = 0; i < 14; i++) flags.push(resolveHabit(h.key, i));
+      // Current run counts back from the most recent day.
+      let current = 0;
+      for (let i = flags.length - 1; i >= 0 && flags[i]; i--) current++;
+      let best = 0;
+      let run = 0;
+      for (const f of flags) { run = f ? run + 1 : 0; best = Math.max(best, run); }
+      const hit = flags.filter(Boolean).length;
+      return {
+        name: h.name,
+        current,
+        best,
+        hit,
+        pct: Math.round((hit / flags.length) * 100),
+        barStyle: `height:100%;width:${Math.round((hit / flags.length) * 100)}%;border-radius:999px;background:${hit / flags.length >= 0.7 ? '#B08D57' : '#EFEADC'};`,
+      };
+    });
+    return rows.sort((a, b) => b.pct - a.pct);
+  })();
+
 
   const addWeight = () => {
     const raw = parseFloat(st.draft);
@@ -961,7 +1100,10 @@ export function deriveVals(
       trainingLoadYesterday: latestOf(days, (d) => d.activity.activeEnergyKcal) ?? 280,
     },
 
-    sessions, loadBars, prs,
+    sessions, loadBars, prs, liftProgress,
+    macroTrend, fibreToday, sugarToday,
+    proteinPerKgLabel: proteinPerKgToday > 0 ? proteinPerKgToday.toFixed(2) + ' g/kg' : '—',
+    sleepDepth, habitStreaks,
     lifts: live.lifts,
     onLiftSaved,
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,
