@@ -28,7 +28,7 @@ import {
 export default function DailyLogView({ v }: { v: DailyLogVals }) {
   return (
     <>
-      <div data-shell style={{ minHeight: '100vh', fontFamily: 'var(--font-body)', fontWeight: '300', color: 'var(--ink-soft)', background: '#FAF8F0' }}>
+      <div data-shell style={{ minHeight: '100vh', fontFamily: 'var(--font-body)', fontWeight: '300', color: 'var(--ink-soft)', background: '#FFFFFF' }}>
       <div data-topbar style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', padding: '20px 48px 0', maxWidth: '1220px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', letterSpacing: '-0.015em' }}>Daily<em style={{ color: '#B08D57' }}> log</em></span>
@@ -38,7 +38,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <StreakChip days={21} label='days logged' tone='brass'></StreakChip>
       <StreakChip days={6} label='protein hit' tone='green'></StreakChip>
       <StreakChip days={4} label='workouts' tone='brass'></StreakChip>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 12px', borderRadius: '999px', background: '#F7F1E4', border: '0.5px solid rgba(176,141,87,0.16)', fontSize: '10.5px', color: '#957962' }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 12px', borderRadius: '999px', background: '#F7F5F0', border: '0.5px solid rgba(176,141,87,0.20)', fontSize: '10.5px', color: '#957962' }}>
       <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#9FB3A9', display: 'inline-block' }}></span>
       Apple Health · synced 7 min ago
       </span>
@@ -64,15 +64,15 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </header>
-      <div style={{ height: '0.5px', background: 'rgba(26,24,21,0.10)', margin: '0 0 26px' }}></div>
+      <div style={{ height: '0.5px', background: 'rgba(26,24,21,0.12)', margin: '0 0 26px' }}></div>
       {(v.isFresh) ? (<>
-      <div style={{ padding: '40px 42px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none', maxWidth: '760px' }}>
+      <div style={{ padding: '40px 42px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none', maxWidth: '760px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#957962' }}>Day one</span>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '34px', color: 'var(--ink)', margin: '12px 0 10px', letterSpacing: '-0.02em', lineHeight: '1.12' }}>Nothing logged yet — <em style={{ color: '#B08D57' }}>let&apos;s fix that</em>.</h2>
       <p style={{ margin: '0 0 26px', fontSize: '14px', color: '#8E8A82', lineHeight: '1.7', maxWidth: '56ch' }}>Three things and the dashboard comes alive: connect Apple Health so weight and activity arrive on their own, set the pace you want to lose at, then log today&apos;s first meal.</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {(v.onboardSteps ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '30px 1fr auto', gap: '16px', alignItems: 'center', padding: '16px 18px', borderRadius: '10px', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.14)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '30px 1fr auto', gap: '16px', alignItems: 'center', padding: '16px 18px', borderRadius: '10px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.14)' }}>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: '#B08D57' }}>{s.num}</span>
       <div>
       <div style={{ fontSize: '13.5px', color: 'var(--ink)' }}>{s.title}</div>
@@ -85,7 +85,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </>) : null}
       {(v.hasData) ? (<>
-      <div data-hero style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr)', gap: '36px', alignItems: 'end', padding: '30px 34px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div data-hero style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr)', gap: '36px', alignItems: 'end', padding: '30px 34px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div>
       <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#957962', marginBottom: '12px' }}>This morning</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
@@ -101,7 +101,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <button onClick={a.onClick} style={sx(a.style)}>{a.label}</button>
       </React.Fragment>))}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', paddingTop: '14px', borderTop: '0.5px solid rgba(26,24,21,0.09)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', paddingTop: '14px', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       {(v.heroStats ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
       <div>
       <div style={{ fontSize: '9.5px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#A29D95' }}>{s.label}</div>
@@ -113,12 +113,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       {(v.targetsOpen) ? (<>
-      <div data-cols-2 style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', padding: '22px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px' }}>
+      <div data-cols-2 style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', padding: '22px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
       {(v.targetFields ?? []).map((t, t_i) => (<React.Fragment key={t_i}>
       <div>
       <div style={{ fontSize: '9.5px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#A29D95', marginBottom: '8px' }}>{t.label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '7px' }}>
-      <input value={t.value} onChange={t.onChange} type='number' step={t.step} style={{ width: '88px', padding: '9px 12px', border: '0.5px solid rgba(26,24,21,0.08)', borderRadius: '12px', background: '#FDFBF5', fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', outline: 'none' }} style-focus='border-color:#D6C09A;' />
+      <input value={t.value} onChange={t.onChange} type='number' step={t.step} style={{ width: '88px', padding: '9px 12px', border: '0.5px solid rgba(26,24,21,0.08)', borderRadius: '12px', background: '#FFFFFF', fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', outline: 'none' }} style-focus='border-color:#D6C09A;' />
       <span style={{ fontSize: '11px', color: '#8E8A82' }}>{t.unit}</span>
       </div>
       </div>
@@ -127,7 +127,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(178px,1fr))', gap: '14px', marginBottom: '16px' }}>
       {(v.kpis ?? []).map((k, k_i) => (<React.Fragment key={k_i}>
-      <div style={{ padding: '22px 24px 18px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.09)', borderRadius: '12px', boxShadow: 'none', transition: 'box-shadow 300ms cubic-bezier(.16,1,.3,1)' }} className="hv3">
+      <div style={{ padding: '22px 24px 18px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.11)', borderRadius: '12px', boxShadow: 'none', transition: 'box-shadow 300ms cubic-bezier(.16,1,.3,1)' }} className="hv3">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-mute)', minWidth: '0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.label}</span>
       <span style={sx(`font-size:10px;padding:3px 9px;border-radius:999px;background:${k.chipBg};color:${k.chipColor};letter-spacing:0.06em;white-space:nowrap;flex:none;`)}>{k.chip}</span>
@@ -142,10 +142,10 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div style={{ height: '0.5px', background: 'rgba(26,24,21,0.10)', margin: '4px 0 26px' }}></div>
+      <div style={{ height: '0.5px', background: 'rgba(26,24,21,0.12)', margin: '4px 0 26px' }}></div>
       {(v.isToday) ? (<>
       <div data-tab-panel data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', marginBottom: '6px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0', letterSpacing: '-0.01em' }}>Today&apos;s targets</h2>
       <span style={{ fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>tap a ring</span>
@@ -178,7 +178,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <RunningBalance {...v.balanceProps}></RunningBalance>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '22px 24px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '22px 24px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>Water</h2>
       <p style={{ margin: '0 0 14px', fontSize: '12px', color: 'var(--ink-mute)' }}>{v.waterCopy}</p>
       <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap' }}>
@@ -187,16 +187,16 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </div>
-      <div style={{ padding: '22px 24px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '22px 24px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 12px' }}>Log a weigh-in</h2>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-      <input value={v.draftWeight} onChange={v.onDraftChange} onKeyDown={v.onDraftKey} placeholder='71.4' inputMode='decimal' style={{ flex: '1', padding: '12px 14px', border: '0.5px solid var(--rule)', borderRadius: '8px', background: 'var(--paper)', fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--ink)', outline: 'none' }} style-focus='border-color:#EADFC6;' />
+      <input value={v.draftWeight} onChange={v.onDraftChange} onKeyDown={v.onDraftKey} placeholder='71.4' inputMode='decimal' style={{ flex: '1', padding: '12px 14px', border: '0.5px solid var(--rule)', borderRadius: '8px', background: 'var(--paper)', fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--ink)', outline: 'none' }} style-focus='border-color:#EFEADC;' />
       <span style={{ fontSize: '12px', color: 'var(--ink-mute)' }}>{v.unitLabel}</span>
       <button onClick={v.onAddWeight} style={{ padding: '12px 20px', border: '0', borderRadius: '8px', background: 'var(--ink)', color: 'var(--paper)', fontSize: '12.5px', cursor: 'pointer', letterSpacing: '0.02em' }} className="hv5">Save →</button>
       </div>
       <p style={{ margin: '12px 0 0', fontSize: '11.5px', color: 'var(--ink-mute)' }}>{v.lastLoggedCopy}</p>
       </div>
-      <div style={{ padding: '22px 24px', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
+      <div style={{ padding: '22px 24px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Today&apos;s plan</span>
       <RecoveryBanner {...v.recoveryProps}></RecoveryBanner>
       </div>
@@ -205,7 +205,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isTrends) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '18px' }}>
       <div style={{ display: 'flex', gap: '6px' }}>
       {(v.metricTabs ?? []).map((m, m_i) => (<React.Fragment key={m_i}>
@@ -243,7 +243,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       <line x1='54' x2='846' y1={v.goalY} y2={v.goalY} stroke='#D2B49C' strokeWidth='1.2' strokeDasharray='5 5'></line>
       <text x='58' y={v.goalTextY} fontFamily='Inter' fontSize='9.5' letterSpacing='1.6' fill='#B8957C'>{v.goalChip}</text>
-      <path d={v.bandPath} fill='#EADFC6' opacity='0.42'></path>
+      <path d={v.bandPath} fill='#EFEADC' opacity='0.42'></path>
       <path d={v.projBandPath} fill='#C5D2CB' opacity='0.34'></path>
       {(v.rawDots ?? []).map((d, d_i) => (<React.Fragment key={d_i}>
       <circle cx={d.x} cy={d.y} r='1.9' fill='#D2B49C' opacity='0.62'></circle>
@@ -280,16 +280,16 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </>) : null}
       </div>
-      <div style={{ display: 'flex', gap: '22px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '14px', borderTop: '0.5px solid rgba(26,24,21,0.09)', fontSize: '11px', color: '#8E8A82' }}>
+      <div style={{ display: 'flex', gap: '22px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '14px', borderTop: '0.5px solid rgba(26,24,21,0.11)', fontSize: '11px', color: '#8E8A82' }}>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}><i style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#D2B49C', display: 'inline-block' }}></i> Daily scale reading</span>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}><i style={{ width: '16px', height: '2.5px', borderRadius: '2px', background: '#B08D57', display: 'inline-block' }}></i> 7-day trend</span>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}><i style={{ width: '14px', height: '9px', borderRadius: '3px', background: '#EADFC6', display: 'inline-block' }}></i> Daily fluctuation band</span>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}><i style={{ width: '14px', height: '9px', borderRadius: '3px', background: '#EFEADC', display: 'inline-block' }}></i> Daily fluctuation band</span>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}><i style={{ width: '16px', height: '2.5px', borderRadius: '2px', background: '#98ABA2', display: 'inline-block' }}></i> 12-week projection</span>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}><i style={{ width: '16px', height: '2.5px', borderRadius: '2px', background: '#D2B49C', display: 'inline-block' }}></i> Goal</span>
       </div>
       </div>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>Where this lands</h2>
       <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Slide to test a different weekly pace.</p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
@@ -305,7 +305,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       <p style={{ margin: '16px 0 0', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: '1.65' }}>{v.etaCopy}</p>
       </div>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 14px' }}>Body metrics</h2>
       {(v.bodyRows ?? []).map((b, b_i) => (<React.Fragment key={b_i}>
       <StatRowHover sparkPoints={b.spark} color='#B08D57'>
@@ -323,7 +323,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isPlan) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '22px' }}>
       <div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Your plan · <em style={{ color: '#B08D57' }}>{v.paceLabel} a week</em></h2>
@@ -347,7 +347,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <p style={{ margin: '18px 0 0', fontSize: '12.5px', color: '#8E8A82', lineHeight: '1.7', maxWidth: '82ch' }}>{v.planCaution}</p>
       </div>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', marginBottom: '6px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0' }}>Reality check</h2>
       <span style={sx(`font-size:10.5px;padding:5px 12px;border-radius:999px;background:${v.realityChipBg};color:${v.realityChipColor};`)}>{v.realityChip}</span>
@@ -355,7 +355,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: '#8E8A82' }}>Maintenance back-calculated from what you actually ate and what the scale actually did — not the formula.</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
       {(v.realityNumbers ?? []).map((r, r_i) => (<React.Fragment key={r_i}>
-      <div style={{ padding: '16px 18px', borderRadius: '10px', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.14)' }}>
+      <div style={{ padding: '16px 18px', borderRadius: '10px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.14)' }}>
       <div style={{ fontSize: '9.5px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#A29D95' }}>{r.label}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--ink)', marginTop: '6px', lineHeight: '1' }}>{r.value}</div>
       <div style={{ fontSize: '10.5px', color: '#8E8A82', marginTop: '5px' }}>{r.note}</div>
@@ -364,13 +364,13 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       <p style={{ margin: '16px 0 0', fontSize: '13px', color: '#57544E', lineHeight: '1.7' }}>{v.realityCopy2}</p>
       </div>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', marginBottom: '16px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0' }}>Adherence</h2>
-      <span style={{ fontSize: '10.5px', padding: '5px 12px', borderRadius: '999px', background: '#F5EFDF', color: '#8A6D3F' }}>{v.adherenceLabel}</span>
+      <span style={{ fontSize: '10.5px', padding: '5px 12px', borderRadius: '999px', background: '#F6F3EA', color: '#8A6D3F' }}>{v.adherenceLabel}</span>
       </div>
       {(v.adherenceRows ?? []).map((a, a_i) => (<React.Fragment key={a_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr auto', gap: '12px', alignItems: 'center', padding: '10px 0', borderTop: '0.5px solid rgba(26,24,21,0.09)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr auto', gap: '12px', alignItems: 'center', padding: '10px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '12.5px', color: '#57544E' }}>{a.label}</span>
       <div style={{ height: '9px', borderRadius: '999px', background: '#EFF2EE', overflow: 'hidden' }}><div style={sx(a.barStyle)}></div></div>
       <span style={sx(`font-family:var(--font-display);font-size:16px;color:${a.color};min-width:56px;text-align:right;`)}>{a.value}</span>
@@ -380,7 +380,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '14px' }}>
       <div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Smart <em style={{ color: '#B08D57' }}>scheduling</em></h2>
@@ -389,18 +389,18 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <span style={sx(v.scheduleBadgeStyle)}>{v.scheduleBadgeLabel}</span>
       </div>
       {(v.scheduleRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.09)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{n.day}</span>
       <span style={sx(`font-size:12.5px;color:${n.calColor};`)}>{n.calendar}</span>
       <span style={{ fontSize: '12.5px', color: 'var(--ink)' }}>{n.suggestion}</span>
       </div>
       </React.Fragment>))}
       </div>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>The training week</h2>
       <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#8E8A82' }}>Three lifts, two easy days — enough stimulus to hold muscle while the deficit runs.</p>
       {(v.planWeek ?? []).map((d, d_i) => (<React.Fragment key={d_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: '14px', alignItems: 'center', padding: '13px 0', borderTop: '0.5px solid rgba(26,24,21,0.09)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: '14px', alignItems: 'center', padding: '13px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{d.day}</span>
       <div>
       <div style={{ fontSize: '13.5px', color: 'var(--ink)' }}>{d.session}</div>
@@ -411,7 +411,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 14px' }}>Daily plate</h2>
       {(v.planMacros ?? []).map((m, m_i) => (<React.Fragment key={m_i}>
       <div style={{ marginBottom: '16px' }}>
@@ -426,7 +426,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div style={{ padding: '26px 28px', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8B918A' }}>Non-negotiables</span>
       {(v.planRules ?? []).map((r, r_i) => (<React.Fragment key={r_i}>
       <div style={{ display: 'flex', gap: '11px', alignItems: 'flex-start', padding: '11px 0', borderBottom: '0.5px solid rgba(178,152,106,0.12)' }}>
@@ -437,13 +437,13 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </div>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '14px' }}>
       <div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Week-by-week targets</h2>
       <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Tick a week off as you weigh in — the bar fills as you go.</p>
       </div>
-      <span style={{ fontSize: '10.5px', padding: '6px 13px', borderRadius: '999px', background: '#F5EFDF', color: '#8A6D3F' }}>{v.planDoneLabel}</span>
+      <span style={{ fontSize: '10.5px', padding: '6px 13px', borderRadius: '999px', background: '#F6F3EA', color: '#8A6D3F' }}>{v.planDoneLabel}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(132px,1fr))', gap: '10px' }}>
       {(v.planWeeks ?? []).map((w, w_i) => (<React.Fragment key={w_i}>
@@ -459,7 +459,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isProgress) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div data-hero style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '44px', alignItems: 'center' }}>
       <div>
       <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#A29D95', marginBottom: '10px' }}>Lost since February</div>
@@ -487,18 +487,18 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </div>
-      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '20px' }}>
       <div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Progress <em style={{ color: '#D2B49C' }}>pictures</em></h2>
       <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Drop a photo into any frame — same light, same time of day, and the comparison actually means something.</p>
       </div>
-      <span style={{ fontSize: '10.5px', padding: '6px 13px', borderRadius: '999px', background: '#F7F1E4', border: '0.5px solid rgba(178,152,106,0.16)', color: '#957962' }}>private to you</span>
+      <span style={{ fontSize: '10.5px', padding: '6px 13px', borderRadius: '999px', background: '#F7F5F0', border: '0.5px solid rgba(178,152,106,0.16)', color: '#957962' }}>private to you</span>
       </div>
       <div data-cols-2 style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px' }}>
       {(v.photoFrames ?? []).map((p, p_i) => (<React.Fragment key={p_i}>
       <div>
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', borderRadius: '12px', overflow: 'hidden', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.14)' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', borderRadius: '12px', overflow: 'hidden', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.14)' }}>
       <ImageSlot id={p.id} shape='rect' placeholder={p.placeholder} style={{ position: 'absolute', inset: '0', width: '100%', height: '100%', display: 'block' }}></ImageSlot>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px', marginTop: '12px' }}>
@@ -511,10 +511,10 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,1fr)', gap: '16px' }}>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 16px' }}>Month by month</h2>
       {(v.monthly ?? []).map((m, m_i) => (<React.Fragment key={m_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '78px 1fr auto', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.09)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '78px 1fr auto', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '12.5px', color: '#8E8A82' }}>{m.month}</span>
       <div style={{ height: '10px', borderRadius: '999px', background: '#EFF2EE', overflow: 'hidden' }}>
       <div style={sx(m.barStyle)}></div>
@@ -523,7 +523,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div style={{ padding: '26px 28px', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8B918A' }}>Non-scale wins</span>
       {(v.wins ?? []).map((w, w_i) => (<React.Fragment key={w_i}>
       <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', padding: '13px 0', borderBottom: '0.5px solid rgba(178,152,106,0.1)' }}>
@@ -541,7 +541,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       {(v.isFood) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.1fr)', gap: '16px' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 16px' }}>Macros today</h2>
       {(v.macros ?? []).map((m, m_i) => (<React.Fragment key={m_i}>
       <div style={{ marginBottom: '18px' }}>
@@ -560,13 +560,13 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </div>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 2px' }}>Energy ledger</h2>
       <p style={{ margin: '0', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Fourteen days of intake against burn.</p>
       <EnergyLedger {...v.ledgerProps}></EnergyLedger>
       </div>
       </div>
-      <div style={{ padding: '24px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', marginBottom: '2px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Weekly <em style={{ color: '#B08D57' }}>deficit</em></h2>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--ink)', fontWeight: 300 }}>{v.weeklyDeficitHeadline}<span style={{ fontSize: '11px', letterSpacing: '0.1em', color: 'var(--ink-mute)', marginLeft: '5px' }}>kcal this week</span></span>
@@ -581,7 +581,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '6px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>What you burn — open a row to tune it</h2>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--ink)' }}>{v.tdeeTotalLabel} <span style={{ fontSize: '11px', fontFamily: 'var(--font-body)', color: 'var(--ink-mute)' }}>kcal/day</span></span>
@@ -590,14 +590,14 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <ExpandableTdeeComponent acronym={row.acronym} fullName={row.fullName} value={row.value} percent={row.percent} color={row.color} onTune={row.onTune}>{row.detail}</ExpandableTdeeComponent>
       </React.Fragment>))}
       </div>
-      <div style={{ padding: '8px 26px 4px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '8px 26px 4px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <ProteinRecovery {...v.proteinProps}></ProteinRecovery>
       </div>
       </div>
       </>) : null}
       {(v.isTraining) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '22px' }}>
       <div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Total <em style={{ color: '#B08D57' }}>energy burned</em></h2>
@@ -618,7 +618,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div style={{ fontSize: '12px', color: '#8E8A82', marginTop: '8px' }}>{v.volSub}</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-      <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: '#F7F1E4', border: '0.5px solid rgba(176,141,87,0.22)', flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+      <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: '#F7F5F0', border: '0.5px solid rgba(176,141,87,0.22)', flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#B08D57', letterSpacing: '-0.02em' }}>{v.animalUnitKg}</span>
       <span style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#957962' }}>kcal each</span>
       </div>
@@ -648,7 +648,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>This week&apos;s sessions</h2>
       <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Tap a session for what Apple Health recorded.</p>
       {(v.sessions ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
@@ -677,7 +677,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 16px' }}>Weekly load</h2>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '130px' }}>
       {(v.loadBars ?? []).map((b, b_i) => (<React.Fragment key={b_i}>
@@ -688,7 +688,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </div>
-      <div style={{ padding: '24px 26px', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 14px' }}>Recent bests</h2>
       {(v.prs ?? []).map((p, p_i) => (<React.Fragment key={p_i}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
@@ -703,7 +703,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isHabits) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '18px' }}>
       <div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>Habits · last 14 days</h2>
@@ -724,7 +724,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px' }}>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.10)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 14px' }}>Sleep · last 10 nights</h2>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '7px', height: '120px' }}>
       {(v.sleepBars ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
@@ -736,7 +736,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       <p style={{ margin: '14px 0 0', fontSize: '12.5px', color: 'var(--ink-soft)' }}>Averaging {v.sleepAvg} h — the 7-hour line is the dashed one.</p>
       </div>
-      <div style={{ padding: '24px 26px', background: '#FBF6EA', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Week in review</span>
       <p style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', lineHeight: '1.45', margin: '10px 0 14px', letterSpacing: '-0.01em' }}>{v.reviewHeadline}</p>
       <p style={{ margin: '0', fontSize: '13px', color: 'var(--ink-soft)', lineHeight: '1.75' }}>{v.reviewBody}</p>

@@ -72,6 +72,8 @@ export type ScheduleStatus = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_fail
 export type Schedule = {
   status: ScheduleStatus;
   days: ScheduleDay[];
+  /** Google's own reason, when it rejected the credentials. */
+  detail?: string;
 };
 
 export type Workout = {

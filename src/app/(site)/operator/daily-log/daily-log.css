@@ -7,16 +7,16 @@
    ============================================================= */
 
 .daily-log-shell {
-  --paper: #FAF8F0;
-  --paper-deep: #F2EFE6;
-  --surface: #FDFBF5;
+  --paper: #FFFFFF;
+  --paper-deep: #F4F4F3;
+  --surface: #FFFFFF;
 
   --ink: #1A1A18;
   --ink-soft: #57544E;
   --ink-mute: #8E8A82;
 
   --rule: rgba(0, 0, 0, 0.08);
-  --rule-soft: rgba(26, 24, 21, 0.10);
+  --rule-soft: rgba(26, 24, 21, 0.12);
 
   /* Accents: warm neutrals. Champagne is the only accent; sage is the single
      cool contrast the charts need to separate a second series. */
@@ -24,11 +24,11 @@
   --rose: #AA7F68;
   --brass: #D2B49C;
   --brass-deep: #957962;
-  --brass-haze: #F7F1E4;
+  --brass-haze: #F7F5F0;
 
   --champagne: #B08D57;
-  --champagne-soft: #EADFC6;
-  --champagne-haze: #F5EFDF;
+  --champagne-soft: #EFEADC;
+  --champagne-haze: #F6F3EA;
   --champagne-deep: #8A6D3F;
 
   --shell-tint-a: rgba(229, 216, 190, 0.18);
@@ -37,7 +37,7 @@
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  background: #FAF8F0;
+  background: #FFFFFF;
   color: var(--ink-soft);
   font-family: var(--font-body);
   font-weight: 300;

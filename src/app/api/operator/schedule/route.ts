@@ -41,24 +41,64 @@ function hhmm(d: Date) {
   return d.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
 }
 
-async function accessToken(): Promise<string | null> {
-  const client_id = process.env.GOOGLE_CLIENT_ID;
-  const client_secret = process.env.GOOGLE_CLIENT_SECRET;
-  const refresh_token = process.env.GOOGLE_REFRESH_TOKEN;
-  if (!client_id || !client_secret || !refresh_token) return null;
+/**
+ * Google's own words for why a refresh failed, mapped to something actionable.
+ * Guessing at the cause wastes far more time than passing the reason through.
+ */
+function explainTokenError(error: string, description: string): string {
+  switch (error) {
+    case 'invalid_grant':
+      return 'Google rejected the refresh token itself (invalid_grant). Usually it was revoked, or the OAuth consent screen is still in Testing mode — tokens issued there expire after seven days. Publish the app, then mint a new token.';
+    case 'invalid_client':
+      return 'Google rejected the client credentials (invalid_client). GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET does not match the client the refresh token was minted with — check for a truncated paste.';
+    case 'unauthorized_client':
+      return 'This client is not authorised for the refresh grant (unauthorized_client). The token was most likely minted against a different OAuth client than the one configured here.';
+    default:
+      return `Google returned "${error}"${description ? ': ' + description : ''}.`;
+  }
+}
+
+type TokenResult =
+  | { ok: true; token: string }
+  | { ok: false; detail: string };
+
+async function accessToken(): Promise<TokenResult> {
+  const client_id = process.env.GOOGLE_CLIENT_ID!;
+  const client_secret = process.env.GOOGLE_CLIENT_SECRET!;
+  const refresh_token = process.env.GOOGLE_REFRESH_TOKEN!;
+
+  // A stray newline or space survives copy-paste far more often than you would
+  // think, and Google rejects it with an unhelpful invalid_grant.
+  const trimmed = refresh_token.trim();
 
   try {
     const res = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: 'refresh_token' }),
+      body: new URLSearchParams({
+        client_id: client_id.trim(),
+        client_secret: client_secret.trim(),
+        refresh_token: trimmed,
+        grant_type: 'refresh_token',
+      }),
       cache: 'no-store',
     });
-    if (!res.ok) return null;
-    const json = (await res.json()) as { access_token?: string };
-    return json.access_token ?? null;
-  } catch {
-    return null;
+
+    const json = (await res.json().catch(() => ({}))) as {
+      access_token?: string;
+      error?: string;
+      error_description?: string;
+    };
+
+    if (!res.ok || !json.access_token) {
+      return {
+        ok: false,
+        detail: explainTokenError(json.error ?? `http_${res.status}`, json.error_description ?? ''),
+      };
+    }
+    return { ok: true, token: json.access_token };
+  } catch (e) {
+    return { ok: false, detail: `Could not reach Google to refresh the token (${String(e).slice(0, 80)}).` };
   }
 }
 
@@ -157,13 +197,13 @@ export async function GET(req: NextRequest) {
   }
 
   const token = await accessToken();
-  if (!token) {
-    return NextResponse.json({ status: 'auth_failed' satisfies Status, days: [] });
+  if (!token.ok) {
+    return NextResponse.json({ status: 'auth_failed' satisfies Status, days: [], detail: token.detail });
   }
 
   const from = weekStart();
   const to = new Date(from.getTime() + 7 * DAY_MS);
-  const events = await fetchWeek(token, from, to);
+  const events = await fetchWeek(token.token, from, to);
   if (events === null) {
     return NextResponse.json({ status: 'fetch_failed' satisfies Status, days: [] });
   }
