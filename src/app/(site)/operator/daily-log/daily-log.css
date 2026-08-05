@@ -22,14 +22,14 @@
      cool contrast the charts need to separate a second series. */
   --green: #7F9289;
   --rose: #AA7F68;
-  --brass: #D2B49C;
-  --brass-deep: #957962;
-  --brass-haze: #F7F5F0;
+  --brass: #C98BA0;
+  --brass-deep: #8A4459;
+  --brass-haze: #FBF4F6;
 
-  --champagne: #B08D57;
-  --champagne-soft: #EFEADC;
-  --champagne-haze: #F6F3EA;
-  --champagne-deep: #8A6D3F;
+  --champagne: #C06C84;
+  --champagne-soft: #F2DCE4;
+  --champagne-haze: #FAF0F3;
+  --champagne-deep: #8A4459;
 
   --shell-tint-a: rgba(229, 216, 190, 0.18);
   --shell-tint-b: rgba(230, 212, 196, 0.14);
@@ -46,8 +46,8 @@
 /* The template's `style-hover` attributes, lifted into real CSS. */
 .daily-log-shell .hv0:hover { background: #FFFFFF; }
 .daily-log-shell .hv1:hover { background: #3A382F; }
-.daily-log-shell .hv2:hover { box-shadow: 0 8px 20px rgba(176, 141, 87, 0.16); }
-.daily-log-shell .hv3:hover { box-shadow: 0 2px 3px rgba(26, 24, 21, 0.02), 0 18px 40px rgba(176, 141, 87, 0.14); }
+.daily-log-shell .hv2:hover { box-shadow: 0 8px 20px rgba(192, 108, 132, 0.16); }
+.daily-log-shell .hv3:hover { box-shadow: 0 2px 3px rgba(26, 24, 21, 0.02), 0 18px 40px rgba(192, 108, 132, 0.14); }
 .daily-log-shell .hv4:hover { background: var(--paper-deep); }
 .daily-log-shell .hv5:hover { background: #3A382F; }
 

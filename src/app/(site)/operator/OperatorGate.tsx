@@ -94,7 +94,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           Operator · Restricted
         </div>
         <h1 style={{ fontFamily: display, fontWeight: 500, fontSize: 30, lineHeight: 1.1, color: '#1A1A18', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
-          The Operator <em style={{ fontStyle: 'italic', color: '#B08D57' }}>Log</em>
+          The Operator <em style={{ fontStyle: 'italic', color: '#C06C84' }}>Log</em>
         </h1>
         <p style={{ fontFamily: sans, fontSize: 13, color: '#8E8A82', margin: '0 0 24px', lineHeight: 1.55 }}>
           A private fitness &amp; nursing log. Enter your password to continue.

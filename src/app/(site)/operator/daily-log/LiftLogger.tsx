@@ -17,7 +17,7 @@ import type { Lift } from './data';
 
 const INK = '#1A1A18';
 const MUTED = '#8E8A82';
-const GOLD = '#B08D57';
+const GOLD = '#C06C84';
 const LINE = 'rgba(26,24,21,0.12)';
 
 type Parsed = { reps: number; weightKg: number };
