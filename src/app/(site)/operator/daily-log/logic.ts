@@ -101,6 +101,8 @@ export const HABIT_DEFS = [
 ];
 
 const DAY = 86400000;
+/** Energy in a kilogram of bodyweight — the standard planning figure. */
+const KCAL_PER_KG = 7700;
 
 export function fmt(iso: string, kind?: 'long') {
   const d = new Date(iso);
@@ -110,13 +112,13 @@ export function fmt(iso: string, kind?: 'long') {
 
 export function pill(active: boolean) {
   return 'padding:10px 20px;border-radius:999px;border:0;cursor:pointer;font-size:12.5px;letter-spacing:0.01em;transition:background 220ms cubic-bezier(.4,0,.2,1),color 220ms;' +
-    (active ? 'background:#F3E7F5;color:#6B4E86;' : 'background:transparent;color:#9A9287;');
+    (active ? 'background:#F4EEE0;color:#8A7346;' : 'background:transparent;color:#9A9287;');
 }
 
 export function chip(active: boolean) {
   return 'padding:7px 15px;border-radius:999px;cursor:pointer;font-size:11.5px;transition:all 220ms cubic-bezier(.4,0,.2,1);border:0.5px solid ' +
-    (active ? 'rgba(160,120,190,0.35);' : 'rgba(26,24,21,0.06);') +
-    (active ? 'background:#FBEFF6;color:#A85E8C;' : 'background:transparent;color:#A19A8F;');
+    (active ? 'rgba(178,152,106,0.35);' : 'rgba(26,24,21,0.06);') +
+    (active ? 'background:#F8F3EC;color:#9C7F6A;' : 'background:transparent;color:#A19A8F;');
 }
 
 function habitCell(state: DailyLogState, key: string, i: number): boolean {
@@ -227,18 +229,18 @@ export function deriveVals(
   const dw = latest.weight - prev.weight;
   const proteinPerKg = T.proteinPerKg ?? props.proteinPerKg ?? 1.8;
   const kpis = [
-    { label: 'Weight', value: +conv(latest.weight).toFixed(1), decimals: 1, unit: uLabel, chip: (dw <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(dw)).toFixed(1), chipBg: dw <= 0 ? '#E7F0FA' : '#FBEAF1', chipColor: dw <= 0 ? '#4A7FC1' : '#B4577B', color: '#8B72C4', spark: sparkOf(last8) },
-    { label: 'Calories', value: Math.max(0, kcalTarget - st.logged.kcal), decimals: 0, unit: 'kcal', chip: st.logged.kcal + ' in', chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#4A7FC1', spark: sparkOf(intakeSeries.slice(-8)) },
-    { label: 'Protein', value: st.logged.protein, decimals: 0, unit: 'g', chip: Math.round((st.logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#F6EDF7', chipColor: '#A85E8C', color: '#A85E8C', spark: sparkOf(proteinSeries ? [...proteinSeries.slice(-7), st.logged.protein] : [88, 104, 96, 120, 112, 98, 126, st.logged.protein]) },
-    { label: 'Steps', value: st.logged.steps, decimals: 0, unit: '', chip: st.logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: st.logged.steps >= 8000 ? '#E7F0FA' : '#F5F3F0', chipColor: st.logged.steps >= 8000 ? '#4A7FC1' : '#5A5750', color: '#5A5750', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), st.logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, st.logged.steps]) },
-    { label: 'Sleep', value: +(sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1), decimals: 1, unit: 'h avg', chip: 'RHR ' + Math.round(rhrAvg ?? 58), chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#8B72C4', spark: sparkOf(sleepSeries.slice(-8)) },
+    { label: 'Weight', value: +conv(latest.weight).toFixed(1), decimals: 1, unit: uLabel, chip: (dw <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(dw)).toFixed(1), chipBg: dw <= 0 ? '#ECF0ED' : '#F7F0E9', chipColor: dw <= 0 ? '#8A9C93' : '#AA7F68', color: '#C2A87C', spark: sparkOf(last8) },
+    { label: 'Calories', value: Math.max(0, kcalTarget - st.logged.kcal), decimals: 0, unit: 'kcal', chip: st.logged.kcal + ' in', chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#8A9C93', spark: sparkOf(intakeSeries.slice(-8)) },
+    { label: 'Protein', value: st.logged.protein, decimals: 0, unit: 'g', chip: Math.round((st.logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#F6F1E6', chipColor: '#9C7F6A', color: '#9C7F6A', spark: sparkOf(proteinSeries ? [...proteinSeries.slice(-7), st.logged.protein] : [88, 104, 96, 120, 112, 98, 126, st.logged.protein]) },
+    { label: 'Steps', value: st.logged.steps, decimals: 0, unit: '', chip: st.logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: st.logged.steps >= 8000 ? '#ECF0ED' : '#F5F3F0', chipColor: st.logged.steps >= 8000 ? '#8A9C93' : '#5A5750', color: '#5A5750', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), st.logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, st.logged.steps]) },
+    { label: 'Sleep', value: +(sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1), decimals: 1, unit: 'h avg', chip: 'RHR ' + Math.round(rhrAvg ?? 58), chipBg: '#F5F3F0', chipColor: '#5A5750', color: '#C2A87C', spark: sparkOf(sleepSeries.slice(-8)) },
   ].map((k) => ({ ...k, display: k.decimals ? k.value.toFixed(k.decimals) : Math.round(k.value).toLocaleString() }));
 
   /* ── rings ── */
   const ringDefs = [
-    { key: 'kcal' as const, name: 'Calories', r: 84, color: '#E79DB4', track: '#FBEAF0', value: st.logged.kcal, target: kcalTarget, unit: 'kcal', step: 250 },
-    { key: 'protein' as const, name: 'Protein', r: 66, color: '#7FA8D8', track: '#F6EDF7', value: st.logged.protein, target: Math.round(latest.weight * proteinPerKg), unit: 'g', step: 15 },
-    { key: 'steps' as const, name: 'Steps', r: 48, color: '#B58FD0', track: '#F1EAF7', value: st.logged.steps, target: 8000, unit: '', step: 500 },
+    { key: 'kcal' as const, name: 'Calories', r: 84, color: '#D8BCA8', track: '#F7F0E9', value: st.logged.kcal, target: kcalTarget, unit: 'kcal', step: 250 },
+    { key: 'protein' as const, name: 'Protein', r: 66, color: '#A6B8AF', track: '#F6F1E6', value: st.logged.protein, target: Math.round(latest.weight * proteinPerKg), unit: 'g', step: 15 },
+    { key: 'steps' as const, name: 'Steps', r: 48, color: '#CDB88F', track: '#F5F0E4', value: st.logged.steps, target: 8000, unit: '', step: 500 },
   ];
   const bump = (key: 'kcal' | 'protein' | 'steps', amount: number) =>
     setState((s) => ({ logged: { ...s.logged, [key]: Math.max(0, s.logged[key] + amount) } }));
@@ -354,7 +356,7 @@ export function deriveVals(
     xTicks.push({
       x: +xOf(t).toFixed(1),
       label: new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase(),
-      color: t > tLast ? '#9DAAB8' : '#9A948C',
+      color: t > tLast ? '#A6ADA7' : '#9A948C',
     });
   }
 
@@ -378,8 +380,8 @@ export function deriveVals(
     return {
       label, kg: conv(kg).toFixed(1) + ' ' + uLabel,
       delta: (d >= 0 ? '+' : '−') + Math.abs(conv(d)).toFixed(1),
-      chipBg: d >= 0 ? '#FBEAF1' : '#E7F0FA',
-      chipColor: d >= 0 ? '#B4577B' : '#4A7FC1',
+      chipBg: d >= 0 ? '#F7F0E9' : '#ECF0ED',
+      chipColor: d >= 0 ? '#AA7F68' : '#8A9C93',
     };
   };
   const remainingToGoal = latest.weight - goal;
@@ -399,16 +401,16 @@ export function deriveVals(
   ].map((b) => ({
     label: b.label, value: b.value, spark: b.spark,
     delta: (b.d >= 0 ? '+' : '−') + Math.abs(b.d).toFixed(1),
-    chipBg: b.d <= 0 ? '#E7F0FA' : '#FBEAF1',
-    chipColor: b.d <= 0 ? '#4A7FC1' : '#B4577B',
+    chipBg: b.d <= 0 ? '#ECF0ED' : '#F7F0E9',
+    chipColor: b.d <= 0 ? '#8A9C93' : '#AA7F68',
   }));
 
   /* ── nutrition ── */
   const proteinTarget = Math.round(latest.weight * proteinPerKg);
   const macros = [
-    { label: 'Protein', v: st.logged.protein, t: proteinTarget, unit: 'g', color: '#4A7FC1' },
-    { label: 'Carbohydrate', v: Math.round(dayNow?.nutrition.carbsG ?? 148), t: 210, unit: 'g', color: '#8B72C4' },
-    { label: 'Fat', v: Math.round(dayNow?.nutrition.fatG ?? 52), t: 68, unit: 'g', color: '#A85E8C' },
+    { label: 'Protein', v: st.logged.protein, t: proteinTarget, unit: 'g', color: '#8A9C93' },
+    { label: 'Carbohydrate', v: Math.round(dayNow?.nutrition.carbsG ?? 148), t: 210, unit: 'g', color: '#C2A87C' },
+    { label: 'Fat', v: Math.round(dayNow?.nutrition.fatG ?? 52), t: 68, unit: 'g', color: '#9C7F6A' },
   ].map((m) => ({
     label: m.label,
     value: m.v + ' / ' + m.t + ' ' + m.unit,
@@ -416,9 +418,9 @@ export function deriveVals(
   }));
   const tdeeRows = [
     { key: 'bmr' as const, acronym: 'BMR', fullName: 'what the body spends existing', color: '#1A1815', detail: 'Mifflin–St Jeor at ' + latest.weight.toFixed(1) + ' kg, 168 cm, 26 years. This is the floor.' },
-    { key: 'neat' as const, acronym: 'NEAT', fullName: 'everything that is not training', color: '#8B72C4', detail: 'Walking, shifts, stairs, fidgeting. The most volatile line — a busy day and a rest day differ by roughly 400 kcal.' },
-    { key: 'exercise' as const, acronym: 'EAT', fullName: 'deliberate training', color: '#4A7FC1', detail: 'Four logged sessions a week, spread across seven days. Strength work costs less than it feels like.' },
-    { key: 'tef' as const, acronym: 'TEF', fullName: 'the cost of digesting food', color: '#A85E8C', detail: 'Roughly 8–10% of intake, and it rises with protein.' },
+    { key: 'neat' as const, acronym: 'NEAT', fullName: 'everything that is not training', color: '#C2A87C', detail: 'Walking, shifts, stairs, fidgeting. The most volatile line — a busy day and a rest day differ by roughly 400 kcal.' },
+    { key: 'exercise' as const, acronym: 'EAT', fullName: 'deliberate training', color: '#8A9C93', detail: 'Four logged sessions a week, spread across seven days. Strength work costs less than it feels like.' },
+    { key: 'tef' as const, acronym: 'TEF', fullName: 'the cost of digesting food', color: '#9C7F6A', detail: 'Roughly 8–10% of intake, and it rises with protein.' },
   ].map((r) => ({
     acronym: r.acronym, fullName: r.fullName, color: r.color, detail: r.detail,
     value: st.tune[r.key], percent: Math.round((st.tune[r.key] / tdee) * 100),
@@ -430,12 +432,88 @@ export function deriveVals(
     tdee: tdee + (i % 3 === 0 ? 110 : i % 3 === 1 ? -50 : 40),
   }));
 
+  /* ── weekly deficit ── */
+  // Burn per day uses the measured active energy where Apple Health has it and
+  // the tuned NEAT + EAT estimate where it doesn't, so a week with partial sync
+  // still lands in the right place rather than dropping out.
+  const restingBurn = st.tune.bmr + st.tune.tef;
+  const deficitWeeks = (() => {
+    if (!days) return null;
+    const buckets = new Map<number, { intake: number; burn: number; n: number; start: number }>();
+    for (const d of days) {
+      const intake = d.nutrition.dietaryEnergyKcal;
+      if (intake == null) continue;
+      const t0 = new Date(d.date).getTime();
+      // Weeks start on Monday.
+      const dow = (new Date(d.date).getDay() + 6) % 7;
+      const start = t0 - dow * DAY;
+      const key = Math.floor(start / DAY);
+      const active = d.activity.activeEnergyKcal;
+      const burn = restingBurn + (active == null ? st.tune.neat + st.tune.exercise : active);
+      const b = buckets.get(key) ?? { intake: 0, burn: 0, n: 0, start };
+      b.intake += intake;
+      b.burn += burn;
+      b.n += 1;
+      buckets.set(key, b);
+    }
+    const keys = [...buckets.keys()].sort((a, b) => a - b).slice(-8);
+    return keys.length ? keys.map((k) => buckets.get(k)!) : null;
+  })()
+    // With no synced nutrition, fold the seed intake series into whole weeks so
+    // the card demonstrates its shape rather than sitting empty.
+    ?? (() => {
+      const out: Array<{ intake: number; burn: number; n: number; start: number }> = [];
+      const anchor = new Date(latest.date).getTime();
+      for (let w = 0; w * 7 < intakeSeries.length; w++) {
+        const slice = intakeSeries.slice(w * 7, w * 7 + 7);
+        if (!slice.length) break;
+        out.push({
+          intake: slice.reduce((a, b) => a + b, 0),
+          burn: tdee * slice.length,
+          n: slice.length,
+          start: anchor - (Math.ceil(intakeSeries.length / 7) - w) * 7 * DAY,
+        });
+      }
+      return out.length ? out : null;
+    })();
+
+  const weeklyDeficitRows = (deficitWeeks ?? []).map((w, i, arr) => {
+    const deficit = w.burn - w.intake;
+    const perDay = Math.round(deficit / w.n);
+    const kg = deficit / KCAL_PER_KG;
+    const peak = Math.max(...arr.map((x) => Math.abs(x.burn - x.intake)), 1);
+    const isNow = i === arr.length - 1;
+    return {
+      label: new Date(w.start).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      total: (deficit >= 0 ? '−' : '+') + Math.abs(Math.round(deficit)).toLocaleString(),
+      perDay: (perDay >= 0 ? '−' : '+') + Math.abs(perDay).toLocaleString() + ' / day',
+      kg: (kg >= 0 ? '−' : '+') + Math.abs(kg).toFixed(2) + ' kg',
+      partial: w.n < 7 ? w.n + '/7 days' : '',
+      barStyle: 'height:100%;width:' + Math.max(2, (Math.abs(deficit) / peak) * 100).toFixed(0) +
+        '%;border-radius:999px;transition:width 500ms cubic-bezier(.16,1,.3,1);background:' +
+        (deficit >= 0 ? (isNow ? '#C2A87C' : '#EBE1CC') : '#D8BCA8') + ';',
+    };
+  });
+
+  const thisWeek = deficitWeeks?.[deficitWeeks.length - 1] ?? null;
+  const thisWeekDeficit = thisWeek ? thisWeek.burn - thisWeek.intake : null;
+  const weeklyDeficitHeadline = thisWeekDeficit == null
+    ? '—'
+    : (thisWeekDeficit >= 0 ? '−' : '+') + Math.abs(Math.round(thisWeekDeficit)).toLocaleString();
+  const weeklyDeficitCopy = thisWeek == null
+    ? 'No intake logged yet this week — the ledger fills in as Apple Health syncs.'
+    : 'Across ' + thisWeek.n + ' logged day' + (thisWeek.n === 1 ? '' : 's') + ' that is ' +
+      (thisWeekDeficit! >= 0 ? 'a deficit' : 'a surplus') + ' of about ' +
+      Math.abs(Math.round(thisWeekDeficit! / thisWeek.n)).toLocaleString() + ' kcal a day, or ' +
+      Math.abs(thisWeekDeficit! / KCAL_PER_KG).toFixed(2) + ' kg of bodyweight at ' +
+      KCAL_PER_KG.toLocaleString() + ' kcal per kg.';
+
   /* ── training ── */
   const sessionDefs = [
-    { day: 'MON', name: 'Lower body', note: 'Squat, hinge, calves', kcal: 310, tint: '#F7EDF6', sets: [{ move: 'Back squat', load: '62.5 kg', reps: '4 × 6' }, { move: 'Romanian deadlift', load: '55 kg', reps: '3 × 8' }, { move: 'Calf raise', load: '40 kg', reps: '3 × 12' }] },
-    { day: 'TUE', name: 'Long walk', note: '74 min, riverside', kcal: 290, tint: '#E7F0FA', sets: [{ move: 'Zone 2 walk', load: '5.9 km', reps: '74 min' }] },
-    { day: 'WED', name: 'Upper body', note: 'Press, row, curls', kcal: 265, tint: '#F7EDF6', sets: [{ move: 'Overhead press', load: '27.5 kg', reps: '4 × 6' }, { move: 'Chest-supported row', load: '35 kg', reps: '3 × 10' }, { move: 'Cable curl', load: '15 kg', reps: '3 × 12' }] },
-    { day: 'FRI', name: 'Full body', note: 'Deadlift, push-ups, core', kcal: 340, tint: '#F6EDF7', sets: [{ move: 'Deadlift', load: '85 kg', reps: '3 × 5' }, { move: 'Push-up', load: 'bodyweight', reps: '3 × 12' }, { move: 'Dead bug', load: '—', reps: '3 × 10' }] },
+    { day: 'MON', name: 'Lower body', note: 'Squat, hinge, calves', kcal: 310, tint: '#F6F1E6', sets: [{ move: 'Back squat', load: '62.5 kg', reps: '4 × 6' }, { move: 'Romanian deadlift', load: '55 kg', reps: '3 × 8' }, { move: 'Calf raise', load: '40 kg', reps: '3 × 12' }] },
+    { day: 'TUE', name: 'Long walk', note: '74 min, riverside', kcal: 290, tint: '#ECF0ED', sets: [{ move: 'Zone 2 walk', load: '5.9 km', reps: '74 min' }] },
+    { day: 'WED', name: 'Upper body', note: 'Press, row, curls', kcal: 265, tint: '#F6F1E6', sets: [{ move: 'Overhead press', load: '27.5 kg', reps: '4 × 6' }, { move: 'Chest-supported row', load: '35 kg', reps: '3 × 10' }, { move: 'Cable curl', load: '15 kg', reps: '3 × 12' }] },
+    { day: 'FRI', name: 'Full body', note: 'Deadlift, push-ups, core', kcal: 340, tint: '#F6F1E6', sets: [{ move: 'Deadlift', load: '85 kg', reps: '3 × 5' }, { move: 'Push-up', load: 'bodyweight', reps: '3 × 12' }, { move: 'Dead bug', load: '—', reps: '3 × 10' }] },
     { day: 'SUN', name: 'Mobility', note: 'Hips and ankles', kcal: 60, tint: '#F5F3F0', sets: [{ move: 'Flow', load: '22 min', reps: 'easy' }] },
   ];
   const DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -452,7 +530,7 @@ export function deriveVals(
         name: w.type ?? 'Session',
         note: [w.durationMin ? Math.round(w.durationMin) + ' min' : null, w.source].filter(Boolean).join(' · '),
         kcal: Math.round(w.energyKcal ?? 0),
-        tint: '#F7EDF6',
+        tint: '#F6F1E6',
         // Set-level detail needs a lift log, which nothing writes yet; until then
         // a session opens onto what Apple Health actually recorded.
         sets: detail.length ? detail : [{ move: 'No set detail recorded', load: '—', reps: '' }],
@@ -483,7 +561,7 @@ export function deriveVals(
   const loadBars = loadVals.map((v, i) => ({
     label: 'W' + (i + 24),
     title: v.toLocaleString() + ' kcal active energy',
-    style: 'width:100%;height:' + ((v / loadMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (i === loadVals.length - 1 ? '#8B72C4' : '#DCD5F2') + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
+    style: 'width:100%;height:' + ((v / loadMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (i === loadVals.length - 1 ? '#C2A87C' : '#EBE1CC') + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
   const prs = [
     { move: 'Back squat · 6 reps', value: '62.5 kg' },
@@ -519,14 +597,13 @@ export function deriveVals(
     let count = 0;
     const days = [];
     for (let i = 0; i < 14; i++) {
-      const on = st.habitDone[h.key + i] ?? liveHabit(h.key, i) ?? habitCell(st, h.key, i);
+      const on = liveHabit(h.key, i) ?? habitCell(st, h.key, i);
       if (on) count++;
       total++;
       if (on) done++;
       days.push({
-        onClick: () => setState((s) => ({ habitDone: { ...s.habitDone, [h.key + i]: !habitCell(s, h.key, i) } })),
         title: h.name + ' · day ' + (i + 1) + (on ? ' · done' : ' · missed'),
-        style: 'aspect-ratio:1;width:100%;border-radius:7px;cursor:pointer;border:0.5px solid rgba(0,0,0,0.06);transition:background 200ms cubic-bezier(.4,0,.2,1);background:' + (on ? '#8B72C4' : '#F5F3F0') + ';',
+        style: 'aspect-ratio:1;width:100%;border-radius:7px;border:0.5px solid rgba(0,0,0,0.06);transition:background 200ms cubic-bezier(.4,0,.2,1);background:' + (on ? '#C2A87C' : '#F5F3F0') + ';',
       });
     }
     return { name: h.name, days, count };
@@ -535,7 +612,7 @@ export function deriveVals(
   const sleepBars = sleepSeries.map((h, i) => ({
     label: String(i + 1),
     title: h.toFixed(1) + ' hours',
-    style: 'width:100%;height:' + ((h / sleepMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (h >= 7 ? '#4A7FC1' : '#DCD5F2') + ';opacity:' + (h >= 7 ? 0.75 : 1) + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
+    style: 'width:100%;height:' + ((h / sleepMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (h >= 7 ? '#8A9C93' : '#EBE1CC') + ';opacity:' + (h >= 7 ? 0.75 : 1) + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
   const avgIntake = Math.round(intakeSeries.reduce((a, b) => a + b, 0) / intakeSeries.length);
 
@@ -576,13 +653,13 @@ export function deriveVals(
     startLabel: 'Start ' + conv(BASE[0][1]).toFixed(1) + ' ' + uLabel,
     goalDisplay: conv(goal).toFixed(1) + ' ' + uLabel,
     pctLabel: Math.round(Math.min(100, ((BASE[0][1] - latest.weight) / (BASE[0][1] - goal)) * 100)) + '%',
-    progressBarStyle: 'height:100%;width:' + Math.min(100, ((BASE[0][1] - latest.weight) / (BASE[0][1] - goal)) * 100).toFixed(1) + '%;border-radius:999px;background:#C9A8DC;transition:width 700ms cubic-bezier(.16,1,.3,1);',
+    progressBarStyle: 'height:100%;width:' + Math.min(100, ((BASE[0][1] - latest.weight) / (BASE[0][1] - goal)) * 100).toFixed(1) + '%;border-radius:999px;background:#DBC9A2;transition:width 700ms cubic-bezier(.16,1,.3,1);',
     milestones: [1, 2, 3, 4, 5, 6, 7, 8].map((kg) => {
       const hit = BASE[0][1] - latest.weight >= kg;
       return {
         label: '−' + kg + ' kg',
         style: 'font-size:11px;padding:5px 12px;border-radius:999px;border:0.5px solid ' +
-          (hit ? 'rgba(160,120,190,0.22);background:#F6EDF7;color:#A85E8C;' : 'rgba(26,24,21,0.06);background:transparent;color:#B7B1A8;'),
+          (hit ? 'rgba(178,152,106,0.22);background:#F6F1E6;color:#9C7F6A;' : 'rgba(26,24,21,0.06);background:transparent;color:#B7B1A8;'),
       };
     }),
     photoFrames: [
@@ -596,7 +673,7 @@ export function deriveVals(
         id: p.id, placeholder: p.placeholder, date: p.date,
         weight: conv(p.w).toFixed(1) + ' ' + uLabel,
         delta: p.key === 0 ? 'starting point' : (d <= 0 ? '−' : '+') + Math.abs(conv(d)).toFixed(1) + ' ' + uLabel + ' from start',
-        deltaColor: p.key === 0 ? '#A9A29A' : '#4A7FC1',
+        deltaColor: p.key === 0 ? '#A9A29A' : '#8A9C93',
       };
     }),
     monthly: [
@@ -605,8 +682,8 @@ export function deriveVals(
     ].map((m) => ({
       month: m.month,
       delta: (m.d >= 0 ? '+' : '−') + Math.abs(m.d).toFixed(1) + ' kg',
-      color: m.d <= 0 ? '#8B72C4' : '#C97A9A',
-      barStyle: 'height:100%;width:' + Math.min(100, (Math.abs(m.d) / 1.4) * 100).toFixed(0) + '%;border-radius:999px;background:' + (m.d <= 0 ? '#D9C2EA' : '#F2C3D1') + ';',
+      color: m.d <= 0 ? '#C2A87C' : '#BC9B84',
+      barStyle: 'height:100%;width:' + Math.min(100, (Math.abs(m.d) / 1.4) * 100).toFixed(0) + '%;border-radius:999px;background:' + (m.d <= 0 ? '#E5D8BE' : '#E6D4C4') + ';',
     })),
     wins: [
       { title: 'Jeans from January fit again', note: 'Noticed 14 July — waist down 4.4 cm since February.' },
@@ -622,11 +699,10 @@ export function deriveVals(
     balanceProps: { intakeSoFar: st.logged.kcal, tdee, mealsLogged: 3 },
     recoveryProps: { hrv: hrvAvg == null ? 52 : Math.round(hrvAvg), rhr: rhrAvg == null ? 58 : Math.round(rhrAvg), plannedSession: 'Lower body — squat and hinge' },
     glasses: Array.from({ length: 8 }, (_, i) => ({
-      onClick: () => setState({ water: st.water === i + 1 ? i : i + 1 }),
       title: (i + 1) * 250 + ' ml',
-      style: 'width:26px;height:38px;border-radius:6px 6px 10px 10px;cursor:pointer;border:0.5px solid ' + (i < st.water ? '#8B72C4' : 'rgba(0,0,0,0.08)') + ';background:' + (i < st.water ? '#DCD5F2' : '#FAFAF8') + ';transition:background 200ms cubic-bezier(.4,0,.2,1);',
+      style: 'width:26px;height:38px;border-radius:6px 6px 10px 10px;display:block;border:0.5px solid ' + (i < st.water ? '#C2A87C' : 'rgba(0,0,0,0.08)') + ';background:' + (i < st.water ? '#EBE1CC' : '#FAFAF8') + ';transition:background 200ms cubic-bezier(.4,0,.2,1);',
     })),
-    waterCopy: ((st.water * 250) / 1000).toFixed(2) + ' L of 2 L · tap a glass',
+    waterCopy: ((st.water * 250) / 1000).toFixed(2) + ' L of 2 L · from Apple Health',
     draftWeight: st.draft,
     unitLabel: uLabel,
     onDraftChange: (e: React.FormEvent<HTMLInputElement>) => setState({ draft: e.currentTarget.value }),
@@ -680,8 +756,8 @@ export function deriveVals(
     tooltipStyle: st.hover ? {
       position: 'absolute' as const, left: st.hover.x + '%', top: st.hover.y + '%',
       transform: 'translate(-50%,-118%)', pointerEvents: 'none' as const, zIndex: 3,
-      background: '#FFFFFF', border: '0.5px solid rgba(160,120,190,0.18)', borderRadius: 16,
-      padding: '11px 15px', minWidth: 168, boxShadow: '0 12px 34px rgba(160,120,190,0.14)',
+      background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.18)', borderRadius: 16,
+      padding: '11px 15px', minWidth: 168, boxShadow: '0 12px 34px rgba(178,152,106,0.14)',
     } : null,
 
     weeklyRate: st.rate,
@@ -704,6 +780,7 @@ export function deriveVals(
     },
 
     sessions, loadBars, prs,
+    weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,
     ...volumeVals(st, setState),
 
     habits, habitPct: Math.round((done / total) * 100),
@@ -740,37 +817,6 @@ function shellVals(
   const bar = (pct: number, color: string) =>
     'height:100%;width:' + Math.max(3, Math.min(100, pct)).toFixed(0) + '%;border-radius:999px;background:' + color + ';transition:width 500ms cubic-bezier(.16,1,.3,1);';
 
-  const composers = {
-    food: {
-      title: 'Log food',
-      note: 'Presets add to today’s totals — a real build would read your Apple Health nutrition entries instead.',
-      presets: [
-        { label: 'Breakfast', detail: '420 kcal · 28 g protein', kcal: 420, p: 28 },
-        { label: 'Lunch', detail: '510 kcal · 42 g protein', kcal: 510, p: 42 },
-        { label: 'Dinner', detail: '620 kcal · 46 g protein', kcal: 620, p: 46 },
-        { label: 'Snack', detail: '190 kcal · 18 g protein', kcal: 190, p: 18 },
-      ].map((x) => ({
-        label: x.label, detail: x.detail,
-        onClick: () => setState((s) => ({ logged: { ...s.logged, kcal: s.logged.kcal + x.kcal, protein: s.logged.protein + x.p } })),
-      })),
-    },
-    session: {
-      title: 'Log a session',
-      note: 'Sessions add to today’s burn and this week’s load.',
-      presets: [
-        { label: 'Lower body', detail: '45 min · 310 kcal', steps: 0, kcal: 310 },
-        { label: 'Upper body', detail: '40 min · 265 kcal', steps: 0, kcal: 265 },
-        { label: 'Long walk', detail: '70 min · 290 kcal', steps: 7000, kcal: 290 },
-        { label: 'Mobility', detail: '20 min · 60 kcal', steps: 0, kcal: 60 },
-      ].map((x) => ({
-        label: x.label, detail: x.detail,
-        onClick: () => setState((s) => ({
-          logged: { ...s.logged, steps: s.logged.steps + x.steps },
-          tune: { ...s.tune, exercise: s.tune.exercise + Math.round(x.kcal / 7) },
-        })),
-      })),
-    },
-  };
 
   const notionRows = [
     { day: 'Mon', calendar: 'Uni · 9–4', suggestion: 'Lower body after class · 45 min' },
@@ -783,7 +829,7 @@ function shellVals(
   ].map((r) => ({
     day: r.day,
     calendar: st.notion ? r.calendar : 'not connected',
-    calColor: st.notion ? '#8B72C4' : '#B7B1A8',
+    calColor: st.notion ? '#C2A87C' : '#B7B1A8',
     suggestion: st.notion ? r.suggestion : '—',
   }));
 
@@ -802,24 +848,20 @@ function shellVals(
     ],
     heroWeight: conv(latest.weight).toFixed(1),
     heroChip: (actualWeekly <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(actualWeekly)).toFixed(1) + ' this week',
-    heroChipBg: actualWeekly <= 0 ? '#F3E7F5' : '#FBEAF1',
-    heroChipColor: actualWeekly <= 0 ? '#6B4E86' : '#B4577B',
+    heroChipBg: actualWeekly <= 0 ? '#F4EEE0' : '#F7F0E9',
+    heroChipColor: actualWeekly <= 0 ? '#8A7346' : '#AA7F68',
     heroVerdict: onTrack
       ? 'On plan — the 7-day trend sits at ' + conv(maLast).toFixed(1) + ' ' + uLabel + ' and you are losing at roughly ' + Math.abs(actualWeekly).toFixed(2) + ' kg a week against a ' + pace.toFixed(2) + ' kg target.'
       : 'Slightly behind plan — losing ' + Math.abs(actualWeekly).toFixed(2) + ' kg a week against a ' + pace.toFixed(2) + ' kg target. Hold the food and add steps before cutting further.',
     quickActions: [
-      { label: 'Log food →', onClick: () => setState({ showLog: st.showLog === 'food' ? null : 'food' }), style: 'padding:12px 20px;border:0;border-radius:16px;background:var(--ink);color:var(--paper);font-size:12.5px;cursor:pointer;' },
-      { label: 'Log session →', onClick: () => setState({ showLog: st.showLog === 'session' ? null : 'session' }), style: 'padding:12px 20px;border-radius:16px;border:0.5px solid rgba(160,120,190,0.25);background:#FBF6FA;color:#6B4E86;font-size:12.5px;cursor:pointer;' },
-      { label: st.targetsOpen ? 'Hide targets' : 'Adjust targets', onClick: () => setState({ targetsOpen: !st.targetsOpen }), style: 'padding:12px 20px;border-radius:16px;border:0.5px solid rgba(26,24,21,0.08);background:transparent;color:#8A8377;font-size:12.5px;cursor:pointer;' },
-      { label: st.fresh ? 'Sample data' : 'Start fresh', onClick: () => setState({ fresh: !st.fresh }), style: 'padding:12px 20px;border-radius:16px;border:0.5px solid rgba(26,24,21,0.08);background:transparent;color:#B7B1A8;font-size:12.5px;cursor:pointer;' },
+      { label: st.targetsOpen ? 'Hide targets' : 'Adjust targets', onClick: () => setState({ targetsOpen: !st.targetsOpen }), style: 'padding:12px 20px;border:0;border-radius:16px;background:var(--ink);color:var(--paper);font-size:12.5px;cursor:pointer;' },
     ],
     heroStats: [
       { label: 'Calories left', value: kcalLeft.toLocaleString(), note: 'of ' + kcalTarget.toLocaleString() },
       { label: 'Protein', value: st.logged.protein + ' g', note: 'of ' + proteinTarget + ' g' },
       { label: '7-day trend', value: conv(maLast).toFixed(1) + ' ' + uLabel, note: 'Apple Health' },
     ],
-    composer: st.showLog ? composers[st.showLog] : null,
-    onCloseComposer: () => setState({ showLog: null }),
+    composer: null,
     targetsOpen: st.targetsOpen,
     targetFields: [
       { label: 'Goal weight', value: goal, unit: uLabel, step: 0.5, onChange: (e: React.FormEvent<HTMLInputElement>) => setTarget('goal', e.currentTarget.value) },
@@ -829,8 +871,8 @@ function shellVals(
     ],
 
     realityChip: Math.abs(drift) < 90 ? 'formula holds' : drift > 0 ? 'burning more' : 'burning less',
-    realityChipBg: Math.abs(drift) < 90 ? '#F3E7F5' : '#FBEAF1',
-    realityChipColor: Math.abs(drift) < 90 ? '#6B4E86' : '#B4577B',
+    realityChipBg: Math.abs(drift) < 90 ? '#F4EEE0' : '#F7F0E9',
+    realityChipColor: Math.abs(drift) < 90 ? '#8A7346' : '#AA7F68',
     realityNumbers: [
       { label: 'Formula says', value: tdee.toLocaleString(), note: 'kcal maintenance' },
       { label: 'Your data says', value: impliedTdee.toLocaleString(), note: 'kcal maintenance' },
@@ -842,10 +884,10 @@ function shellVals(
 
     adherenceLabel: hitWeeks + ' of ' + weekDeltas.length + ' weeks on pace',
     adherenceRows: [
-      { label: 'Weeks on pace', value: adherencePct + '%', color: '#8B72C4', barStyle: bar(adherencePct, '#C9A8DC') },
-      { label: 'Avg weekly loss', value: avgWeekly.toFixed(2) + ' kg', color: '#8B72C4', barStyle: bar((Math.abs(avgWeekly) / pace) * 100, '#E79DB4') },
-      { label: 'Protein days', value: '6 / 7', color: '#4A7FC1', barStyle: bar(86, '#7FA8D8') },
-      { label: 'Sessions logged', value: '4 / 5', color: '#4A7FC1', barStyle: bar(80, '#B58FD0') },
+      { label: 'Weeks on pace', value: adherencePct + '%', color: '#C2A87C', barStyle: bar(adherencePct, '#DBC9A2') },
+      { label: 'Avg weekly loss', value: avgWeekly.toFixed(2) + ' kg', color: '#C2A87C', barStyle: bar((Math.abs(avgWeekly) / pace) * 100, '#D8BCA8') },
+      { label: 'Protein days', value: '6 / 7', color: '#8A9C93', barStyle: bar(86, '#A6B8AF') },
+      { label: 'Sessions logged', value: '4 / 5', color: '#8A9C93', barStyle: bar(80, '#CDB88F') },
     ],
     adherenceCopy: correctedWeeks
       ? 'At your measured pace — not the target — goal lands in about ' + correctedWeeks + ' weeks. The plan timeline updates from this number, so it stays honest even on a slow fortnight.'
@@ -856,7 +898,7 @@ function shellVals(
       : 'Connect a Notion database of your shifts and lectures and training days place themselves around the week you actually have.',
     notionButtonLabel: st.notion ? 'Connected ✓' : 'Connect Notion →',
     notionButtonStyle: 'padding:11px 18px;border-radius:16px;font-size:12px;cursor:pointer;flex:none;border:0.5px solid ' +
-      (st.notion ? 'rgba(160,120,190,0.28);background:#F3E7F5;color:#6B4E86;' : 'rgba(26,24,21,0.08);background:var(--ink);color:var(--paper);border-color:transparent;'),
+      (st.notion ? 'rgba(178,152,106,0.28);background:#F4EEE0;color:#8A7346;' : 'rgba(26,24,21,0.08);background:var(--ink);color:var(--paper);border-color:transparent;'),
     onToggleNotion: () => setState({ notion: !st.notion }),
     notionRows,
   };
@@ -891,7 +933,7 @@ function planVals(
       date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
       onClick: () => setState((s) => ({ weekDone: { ...s.weekDone, [i]: !s.weekDone[i] } })),
       style: 'display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:14px 16px;border-radius:18px;cursor:pointer;text-align:left;transition:all 220ms cubic-bezier(.4,0,.2,1);border:0.5px solid ' +
-        (done ? 'rgba(160,120,190,0.3);background:#F3E7F5;color:#5B4372;' : 'rgba(26,24,21,0.06);background:#FCFBF9;color:#5A5750;'),
+        (done ? 'rgba(178,152,106,0.3);background:#F4EEE0;color:#7A6540;' : 'rgba(26,24,21,0.06);background:#FCFBF9;color:#5A5750;'),
     });
   }
   const doneCount = weeks.filter((_, i) => st.weekDone[i + 1]).length;
@@ -907,31 +949,31 @@ function planVals(
       ? 'Food covers ' + foodDeficit.toLocaleString() + ' kcal of the deficit and movement covers the last ' + moveDeficit.toLocaleString() + ' — eating lower than ' + floor.toLocaleString() + ' kcal is not worth it.'
       : 'All of it comes from food, no extra cardio needed.'),
     planNumbers: [
-      { label: 'Eat per day', value: intake.toLocaleString(), note: 'kcal · ' + (moveDeficit > 0 ? 'plus ' + extraSteps.toLocaleString() + ' extra steps' : 'no extra cardio required'), bg: '#FBF6FA' },
-      { label: 'Daily deficit', value: totalDeficit.toLocaleString(), note: 'kcal · ' + Math.round(totalDeficit * 7).toLocaleString() + ' a week', bg: '#F6EDF7' },
-      { label: 'Weeks to goal', value: weeksToGoal, note: 'at ' + pace.toFixed(2) + ' kg a week', bg: '#FBEFF6' },
-      { label: 'Goal date', value: goalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), note: conv(goal).toFixed(1) + ' ' + uLabel + ' · ' + goalDate.getFullYear(), bg: '#FBF6FA' },
+      { label: 'Eat per day', value: intake.toLocaleString(), note: 'kcal · ' + (moveDeficit > 0 ? 'plus ' + extraSteps.toLocaleString() + ' extra steps' : 'no extra cardio required'), bg: '#FBF8F1' },
+      { label: 'Daily deficit', value: totalDeficit.toLocaleString(), note: 'kcal · ' + Math.round(totalDeficit * 7).toLocaleString() + ' a week', bg: '#F6F1E6' },
+      { label: 'Weeks to goal', value: weeksToGoal, note: 'at ' + pace.toFixed(2) + ' kg a week', bg: '#F8F3EC' },
+      { label: 'Goal date', value: goalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), note: conv(goal).toFixed(1) + ' ' + uLabel + ' · ' + goalDate.getFullYear(), bg: '#FBF8F1' },
     ],
     planCaution: pace >= 1
       ? '1 kg a week is about 1.4% of your bodyweight — sustainable for a four to six week block, not forever. Keep protein at ' + proteinG + ' g, lift three times a week, and if strength drops two sessions in a row or sleep goes under six hours, step down to 0.75 kg a week.'
       : '0.75 kg a week is roughly 1% of bodyweight — the sweet spot for holding onto muscle. If the 7-day trend stalls for two weeks, add 1,000 steps a day before cutting food further.',
     planMacros: [
-      { label: 'Protein', value: proteinG + ' g', note: '2.0 g per kg — spread across four meals', color: '#7FA8D8', pct: 100 },
-      { label: 'Carbohydrate', value: carbG + ' g', note: 'Most of it around training and shifts', color: '#E79DB4', pct: 80 },
-      { label: 'Fat', value: fatG + ' g', note: '0.8 g per kg — keeps hormones and mood steady', color: '#B58FD0', pct: 62 },
-      { label: 'Fibre', value: '30 g', note: 'Volume food: it is what makes 1,500 kcal bearable', color: '#9FC0A8', pct: 55 },
+      { label: 'Protein', value: proteinG + ' g', note: '2.0 g per kg — spread across four meals', color: '#A6B8AF', pct: 100 },
+      { label: 'Carbohydrate', value: carbG + ' g', note: 'Most of it around training and shifts', color: '#D8BCA8', pct: 80 },
+      { label: 'Fat', value: fatG + ' g', note: '0.8 g per kg — keeps hormones and mood steady', color: '#CDB88F', pct: 62 },
+      { label: 'Fibre', value: '30 g', note: 'Volume food: it is what makes 1,500 kcal bearable', color: '#AAB8A3', pct: 55 },
     ].map((m) => ({
       label: m.label, value: m.value, note: m.note,
       barStyle: 'height:100%;width:' + m.pct + '%;border-radius:999px;background:' + m.color + ';transition:width 500ms cubic-bezier(.16,1,.3,1);',
     })),
     planWeek: [
-      { day: 'Mon', session: 'Lower body strength', detail: 'Squat, hinge, calves · 45 min', tag: 'Lift', tagBg: '#F3E7F5', tagColor: '#6B4E86' },
-      { day: 'Tue', session: 'Walk + easy day', detail: (8000 + (moveDeficit > 0 ? extraSteps : 0)).toLocaleString() + ' steps target', tag: 'Move', tagBg: '#FBEFF6', tagColor: '#A85E8C' },
-      { day: 'Wed', session: 'Upper body strength', detail: 'Press, row, curls · 40 min', tag: 'Lift', tagBg: '#F3E7F5', tagColor: '#6B4E86' },
-      { day: 'Thu', session: 'Mobility or rest', detail: 'Hips and ankles · 20 min', tag: 'Easy', tagBg: '#F1EAF7', tagColor: '#6B4E86' },
-      { day: 'Fri', session: 'Full body strength', detail: 'Deadlift, push-ups, core · 45 min', tag: 'Lift', tagBg: '#F3E7F5', tagColor: '#6B4E86' },
-      { day: 'Sat', session: 'Long walk', detail: '60–75 min, conversational pace', tag: 'Move', tagBg: '#FBEFF6', tagColor: '#A85E8C' },
-      { day: 'Sun', session: 'Rest · weigh-in · prep', detail: 'Review the 7-day trend and cook for the week', tag: 'Reset', tagBg: '#EEF3F8', tagColor: '#4A7FC1' },
+      { day: 'Mon', session: 'Lower body strength', detail: 'Squat, hinge, calves · 45 min', tag: 'Lift', tagBg: '#F4EEE0', tagColor: '#8A7346' },
+      { day: 'Tue', session: 'Walk + easy day', detail: (8000 + (moveDeficit > 0 ? extraSteps : 0)).toLocaleString() + ' steps target', tag: 'Move', tagBg: '#F8F3EC', tagColor: '#9C7F6A' },
+      { day: 'Wed', session: 'Upper body strength', detail: 'Press, row, curls · 40 min', tag: 'Lift', tagBg: '#F4EEE0', tagColor: '#8A7346' },
+      { day: 'Thu', session: 'Mobility or rest', detail: 'Hips and ankles · 20 min', tag: 'Easy', tagBg: '#F5F0E4', tagColor: '#8A7346' },
+      { day: 'Fri', session: 'Full body strength', detail: 'Deadlift, push-ups, core · 45 min', tag: 'Lift', tagBg: '#F4EEE0', tagColor: '#8A7346' },
+      { day: 'Sat', session: 'Long walk', detail: '60–75 min, conversational pace', tag: 'Move', tagBg: '#F8F3EC', tagColor: '#9C7F6A' },
+      { day: 'Sun', session: 'Rest · weigh-in · prep', detail: 'Review the 7-day trend and cook for the week', tag: 'Reset', tagBg: '#EFF2EF', tagColor: '#8A9C93' },
     ],
     planRules: [
       'Protein at every meal — ' + Math.round(proteinG / 4) + ' g a sitting hits ' + proteinG + ' g without thinking about it.',
@@ -981,7 +1023,7 @@ function volumeVals(st: DailyLogState, setState: SetState) {
     animalNote: 'one ' + best.a.name.replace(/s$/, '') + ' ≈ ' + best.a.kg.toLocaleString() + ' kg',
     animalUnitKg: best.a.kg.toLocaleString(),
     animalUnits: Array.from({ length: units }, (_, i) => ({
-      style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#E79DB4' : '#C9A8DC') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
+      style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#D8BCA8' : '#DBC9A2') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
     })),
     animalScale: (() => {
       const sorted = animals.slice().sort((x, y) => x.kg - y.kg);
@@ -994,8 +1036,8 @@ function volumeVals(st: DailyLogState, setState: SetState) {
       return {
         name: a.name,
         count: c >= 100 ? Math.round(c).toLocaleString() + '×' : c.toFixed(1) + '×',
-        labelColor: isBest ? '#8B72C4' : '#9A9287',
-        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / animals[0].kg))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#8B72C4' : '#DCD5F2') + ';',
+        labelColor: isBest ? '#C2A87C' : '#9A9287',
+        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / animals[0].kg))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#C2A87C' : '#EBE1CC') + ';',
       };
     }),
   };

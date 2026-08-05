@@ -38,7 +38,7 @@ export default function OperatorGate({ children }: { children: ReactNode }) {
     // picked up here rather than during the initial render.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAuthed(storedOperatorPassword() !== null);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setChecked(true);
   }, []);
 
@@ -94,7 +94,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           Operator · Restricted
         </div>
         <h1 style={{ fontFamily: display, fontWeight: 500, fontSize: 30, lineHeight: 1.1, color: '#1A1815', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
-          The Operator <em style={{ fontStyle: 'italic', color: '#8B72C4' }}>Log</em>
+          The Operator <em style={{ fontStyle: 'italic', color: '#C2A87C' }}>Log</em>
         </h1>
         <p style={{ fontFamily: sans, fontSize: 13, color: '#9A948C', margin: '0 0 24px', lineHeight: 1.55 }}>
           A private fitness &amp; nursing log. Enter your password to continue.
@@ -114,12 +114,12 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           onChange={(e) => setPw(e.target.value)}
           style={{
             width: '100%', background: '#FAFAF8', outline: 'none',
-            border: `1px solid ${err ? '#B4577B' : 'rgba(0,0,0,0.08)'}`, borderRadius: 6,
+            border: `1px solid ${err ? '#AA7F68' : 'rgba(0,0,0,0.08)'}`, borderRadius: 6,
             fontFamily: sans, fontSize: 14, color: '#1A1815',
             padding: '10px 12px', marginBottom: err ? 8 : 20, transition: 'border-color 0.2s',
           }}
         />
-        {err && <p style={{ fontFamily: sans, fontSize: 11, color: '#B4577B', margin: '0 0 16px' }}>Incorrect password. Try again.</p>}
+        {err && <p style={{ fontFamily: sans, fontSize: 11, color: '#AA7F68', margin: '0 0 16px' }}>Incorrect password. Try again.</p>}
         <button
           type="submit"
           disabled={loading}

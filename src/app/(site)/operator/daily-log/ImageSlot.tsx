@@ -74,8 +74,8 @@ export default function ImageSlot({
         placeItems: 'center',
         cursor: 'pointer',
         overflow: 'hidden',
-        background: over ? 'rgba(139,114,196,0.10)' : undefined,
-        outline: over ? '1.5px dashed rgba(139,114,196,0.55)' : undefined,
+        background: over ? 'rgba(194,168,124,0.10)' : undefined,
+        outline: over ? '1.5px dashed rgba(194,168,124,0.55)' : undefined,
         outlineOffset: '-4px',
       }}
       onClick={() => inputRef.current?.click()}

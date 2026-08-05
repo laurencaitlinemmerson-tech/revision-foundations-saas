@@ -18,20 +18,21 @@
   --rule: rgba(0, 0, 0, 0.08);
   --rule-soft: rgba(26, 24, 21, 0.06);
 
-  /* Accents: the pink/lavender/plum family that replaces brass + gold. */
-  --green: #4A7FC1;
-  --rose: #B4577B;
-  --brass: #E79DB4;
-  --brass-deep: #A85E8C;
-  --brass-haze: #F6EDF7;
+  /* Accents: warm neutrals. Champagne is the only accent; sage is the single
+     cool contrast the charts need to separate a second series. */
+  --green: #8A9C93;
+  --rose: #AA7F68;
+  --brass: #D8BCA8;
+  --brass-deep: #9C7F6A;
+  --brass-haze: #F6F1E6;
 
-  --violet: #8B72C4;
-  --violet-soft: #DCD5F2;
-  --violet-haze: #F3E7F5;
-  --plum: #6B4E86;
+  --champagne: #C2A87C;
+  --champagne-soft: #EBE1CC;
+  --champagne-haze: #F4EEE0;
+  --champagne-deep: #8A7346;
 
-  --shell-tint-a: rgba(216, 205, 245, 0.18);
-  --shell-tint-b: rgba(242, 195, 209, 0.14);
+  --shell-tint-a: rgba(229, 216, 190, 0.18);
+  --shell-tint-b: rgba(230, 212, 196, 0.14);
 
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -44,15 +45,15 @@
 
 /* The template's `style-hover` attributes, lifted into real CSS. */
 .daily-log-shell .hv0:hover { background: #FFFFFF; }
-.daily-log-shell .hv1:hover { background: #24405E; }
-.daily-log-shell .hv2:hover { box-shadow: 0 8px 20px rgba(160, 120, 190, 0.14); }
-.daily-log-shell .hv3:hover { box-shadow: 0 2px 3px rgba(26, 24, 21, 0.02), 0 18px 40px rgba(160, 120, 190, 0.12); }
+.daily-log-shell .hv1:hover { background: #3A382F; }
+.daily-log-shell .hv2:hover { box-shadow: 0 8px 20px rgba(178, 152, 106, 0.14); }
+.daily-log-shell .hv3:hover { box-shadow: 0 2px 3px rgba(26, 24, 21, 0.02), 0 18px 40px rgba(178, 152, 106, 0.12); }
 .daily-log-shell .hv4:hover { background: var(--paper-deep); }
-.daily-log-shell .hv5:hover { background: #24405E; }
+.daily-log-shell .hv5:hover { background: #3A382F; }
 
 /* Range slider — the pace and rate controls. */
 .daily-log-shell input[type='range'] {
-  accent-color: var(--violet);
+  accent-color: var(--champagne);
 }
 
 /* Responsive: the sidebar folds away and the metric grids reflow. */
