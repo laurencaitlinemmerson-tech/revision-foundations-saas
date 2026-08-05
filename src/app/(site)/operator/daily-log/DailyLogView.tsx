@@ -133,8 +133,15 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '34px', color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: '1' }}>{k.display}</span>
       <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{k.unit}</span>
       </div>
-      <svg viewBox='0 0 120 28' style={{ width: '100%', height: '24px', display: 'block', marginTop: '10px', overflow: 'visible' }}>
-      <path d={k.spark} fill='none' stroke={k.color} strokeWidth='1.4' strokeLinejoin='round' strokeLinecap='round'></path>
+      <svg viewBox='0 0 120 30' preserveAspectRatio='none' style={{ width: '100%', height: '34px', display: 'block', marginTop: '12px' }}>
+      <defs>
+      <linearGradient id={k.gradId} x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0%' stopColor={k.color} stopOpacity='0.26'></stop>
+      <stop offset='100%' stopColor={k.color} stopOpacity='0'></stop>
+      </linearGradient>
+      </defs>
+      <path d={k.area} fill={`url(#${k.gradId})`} stroke='none'></path>
+      <path d={k.spark} fill='none' stroke={k.color} strokeWidth='1.8' strokeLinejoin='round' strokeLinecap='round' vectorEffect='non-scaling-stroke'></path>
       </svg>
       </div>
       </React.Fragment>))}
@@ -150,8 +157,8 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <svg viewBox='0 0 200 200' style={{ width: '196px', height: '196px' }}>
       {(v.rings ?? []).map((r, r_i) => (<React.Fragment key={r_i}>
       <g style={{ cursor: 'pointer' }} onClick={r.onClick}>
-      <circle cx='100' cy='100' r={r.r} fill='none' stroke={r.track} strokeWidth='9'></circle>
-      <circle cx='100' cy='100' r={r.r} fill='none' stroke={r.color} strokeWidth='9' strokeLinecap='round' strokeDasharray={r.dash} strokeDashoffset={r.offset} transform='rotate(-90 100 100)' style={{ transition: 'stroke-dasharray 600ms cubic-bezier(.16,1,.3,1)' }}></circle>
+      <circle cx='100' cy='100' r={r.r} fill='none' stroke={r.track} strokeWidth='13'></circle>
+      <circle cx='100' cy='100' r={r.r} fill='none' stroke={r.color} strokeWidth='13' strokeLinecap='round' strokeDasharray={r.dash} strokeDashoffset={r.offset} transform='rotate(-90 100 100)' style={{ transition: 'stroke-dashoffset 700ms cubic-bezier(.16,1,.3,1)' }}></circle>
       </g>
       </React.Fragment>))}
       <text x='100' y='96' textAnchor='middle' fontFamily='Playfair Display' fontSize='30' fill='#1A1A18'>{v.ringFocus.value}</text>
@@ -244,7 +251,14 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       {(v.rawDots ?? []).map((d, d_i) => (<React.Fragment key={d_i}>
       <circle cx={d.x} cy={d.y} r='1.9' fill='#D2B49C' opacity='0.62'></circle>
       </React.Fragment>))}
-      <path d={v.maPath} fill='none' stroke='#B08D57' strokeWidth='2.4' strokeLinejoin='round' strokeLinecap='round'></path>
+      <defs>
+      <linearGradient id='trend-fill' x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0%' stopColor='#B08D57' stopOpacity='0.18'></stop>
+      <stop offset='100%' stopColor='#B08D57' stopOpacity='0'></stop>
+      </linearGradient>
+      </defs>
+      <path d={`${v.maPath} L846,286 L54,286 Z`} fill='url(#trend-fill)' stroke='none'></path>
+      <path d={v.maPath} fill='none' stroke='#B08D57' strokeWidth='2.6' strokeLinejoin='round' strokeLinecap='round'></path>
       <path d={v.projPath} fill='none' stroke='#98ABA2' strokeWidth='1.8' strokeDasharray='6 6'></path>
       <circle cx={v.projX} cy={v.projY} r='5' fill='#FFFFFF' stroke='#98ABA2' strokeWidth='1.8'></circle>
       <text x={v.projLabelX} y={v.projLabelY} textAnchor='end' fontFamily='Playfair Display' fontStyle='italic' fontSize='15' fill='#7F9289'>{v.projLabel}</text>
