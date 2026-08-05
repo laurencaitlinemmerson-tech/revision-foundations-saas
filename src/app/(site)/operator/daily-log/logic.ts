@@ -34,7 +34,6 @@ export type DailyLogState = {
   fresh: boolean;
   showLog: 'food' | 'session' | null;
   targetsOpen: boolean;
-  notion: boolean;
   targets: { goal?: number; kcal?: number; proteinPerKg?: number };
   volRange?: 'week' | 'month' | 'quarter' | 'all';
 };
@@ -72,7 +71,6 @@ export const INITIAL_STATE: DailyLogState = {
   fresh: false,
   showLog: null,
   targetsOpen: false,
-  notion: false,
   targets: {},
 };
 
@@ -848,12 +846,13 @@ function shellVals(
     'height:100%;width:' + Math.max(3, Math.min(100, pct)).toFixed(0) + '%;border-radius:999px;background:' + color + ';transition:width 500ms cubic-bezier(.16,1,.3,1);';
 
 
-  // Notion (shifts, lectures) and Google Calendar, merged server-side into the
-  // week and read straight through. Until either is configured the card shows
-  // the design's example week, dimmed, so the layout still reads.
+  // This week from Google Calendar, shaped server-side. Until it is configured
+  // — or if the credentials stop working — the card shows the design's example
+  // week, dimmed, so the layout still reads and the copy says why.
   const schedule = live.schedule;
-  const notionRows = (schedule?.days.length
-    ? schedule.days.map((d) => ({ day: d.day, calendar: d.calendar, suggestion: d.suggestion }))
+  const scheduleLive = schedule?.status === 'ok' && schedule.days.length > 0;
+  const scheduleRows = (scheduleLive
+    ? schedule!.days.map((d) => ({ day: d.day, calendar: d.calendar, suggestion: d.suggestion }))
     : [
         { day: 'Mon', calendar: 'Uni · 9–4', suggestion: 'Lower body after class · 45 min' },
         { day: 'Tue', calendar: 'Shift · 7am–7.30pm', suggestion: 'Steps only — shift covers the deficit' },
@@ -865,15 +864,11 @@ function shellVals(
       ]
   ).map((r) => ({
     day: r.day,
-    calendar: schedule ? r.calendar : 'not connected',
-    calColor: schedule ? '#C2A87C' : '#B7B1A8',
-    suggestion: schedule ? r.suggestion : '—',
+    calendar: scheduleLive ? r.calendar : 'not connected',
+    calColor: scheduleLive ? '#C2A87C' : '#B7B1A8',
+    suggestion: scheduleLive ? r.suggestion : '—',
   }));
 
-  const sources = schedule
-    ? [schedule.connected.notion ? 'Notion' : null, schedule.connected.google ? 'Google Calendar' : null]
-        .filter(Boolean)
-    : [];
 
   const setTarget = (key: 'goal' | 'kcal' | 'proteinPerKg', raw: string) => {
     const v = parseFloat(raw);
@@ -935,15 +930,34 @@ function shellVals(
       ? 'At your measured pace — not the target — goal lands in about ' + correctedWeeks + ' weeks. The plan timeline updates from this number, so it stays honest even on a slow fortnight.'
       : 'Not enough downward movement in the last six weeks to project a date. Tighten the food logging for two weeks and this recalculates itself.',
 
-    notionCopy: sources.length
-      ? 'Reading your week from ' + sources.join(' and ') + ' — lifts land on the lightest days, steps on the longest, and a reset on the quietest.'
-      : 'Set NOTION_TOKEN and NOTION_SCHEDULE_DATABASE_ID, or the GOOGLE_* calendar credentials, and your real week replaces this example — training then places itself around the days you actually have.',
-    notionButtonLabel: sources.length ? sources.join(' + ') + ' ✓' : 'Not configured',
-    notionButtonStyle: 'padding:11px 18px;border-radius:16px;font-size:12px;flex:none;border:0.5px solid ' +
-      (sources.length
+    scheduleCopy: (() => {
+      switch (schedule?.status) {
+        case 'ok':
+          return scheduleLive
+            ? 'Reading your week from Google Calendar — lifts land on the lightest days, steps on the longest, and a reset on the quietest.'
+            : 'Google Calendar is connected but this week is empty, so the example below stands in.';
+        case 'auth_failed':
+          return 'Google Calendar rejected the credentials. The refresh token may have expired or been revoked — mint a new one and update GOOGLE_REFRESH_TOKEN.';
+        case 'fetch_failed':
+          return 'Signed in to Google, but the calendar could not be read. Check GOOGLE_CALENDAR_ID and that the Calendar API is enabled.';
+        default:
+          return 'Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN and your real week replaces this example — training then places itself around the days you actually have.';
+      }
+    })(),
+    scheduleBadgeLabel: schedule?.status === 'ok'
+      ? 'Google Calendar ✓'
+      : schedule?.status === 'auth_failed'
+      ? 'Credentials rejected'
+      : schedule?.status === 'fetch_failed'
+      ? 'Calendar unreachable'
+      : 'Not configured',
+    scheduleBadgeStyle: 'padding:11px 18px;border-radius:16px;font-size:12px;flex:none;border:0.5px solid ' +
+      (schedule?.status === 'ok'
         ? 'rgba(178,152,106,0.28);background:#F4EEE0;color:#8A7346;'
+        : schedule?.status === 'auth_failed' || schedule?.status === 'fetch_failed'
+        ? 'rgba(170,127,104,0.28);background:#F7F0E9;color:#AA7F68;'
         : 'rgba(26,24,21,0.08);background:transparent;color:#B7B1A8;'),
-    notionRows,
+    scheduleRows,
   };
 }
 

@@ -67,10 +67,11 @@ export type ScheduleDay = {
   busyHours: number;
 };
 
+export type ScheduleStatus = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_failed';
+
 export type Schedule = {
-  connected: { notion: boolean; google: boolean };
+  status: ScheduleStatus;
   days: ScheduleDay[];
-  configured: boolean;
 };
 
 export type Workout = {
@@ -96,7 +97,7 @@ export type LiveData = {
   /** Apple Health days, oldest first. */
   days: HealthDay[] | null;
   workouts: Workout[] | null;
-  /** This week from Notion / Google Calendar; null until either is configured. */
+  /** This week from Google Calendar, with why it is empty when it is. */
   schedule: Schedule | null;
   /** Whether any source reported that its table is not set up yet. */
   setupRequired: boolean;
@@ -159,7 +160,7 @@ export function useOperatorData(): LiveData {
           : null,
         days,
         workouts: nonEmpty((workouts?.workouts as Workout[]) ?? null),
-        schedule: schedule?.configured ? (schedule as unknown as Schedule) : null,
+        schedule: (schedule as unknown as Schedule) ?? null,
         setupRequired: Boolean(
           fitness?.setup_required || health?.setup_required || workouts?.setup_required,
         ),

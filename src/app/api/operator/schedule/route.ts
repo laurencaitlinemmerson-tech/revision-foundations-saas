@@ -1,24 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * The operator's week — shifts and lectures from Notion, events from Google
- * Calendar — folded into the seven rows the dashboard's scheduling card shows.
+ * The operator's week from Google Calendar, folded into the seven rows the
+ * dashboard's scheduling card shows.
  *
- * This is a single-operator surface, so both integrations authenticate from
- * environment variables rather than an OAuth flow:
+ * This is a single-operator surface, so it authenticates from environment
+ * variables rather than an OAuth flow:
  *
- *   NOTION_TOKEN                 internal integration secret (secret_…)
- *   NOTION_SCHEDULE_DATABASE_ID  database of shifts / lectures
- *   NOTION_SCHEDULE_DATE_PROP    date property name        (default "Date")
- *   NOTION_SCHEDULE_TITLE_PROP   title property name       (default "Name")
- *
- *   GOOGLE_CLIENT_ID             OAuth client
+ *   GOOGLE_CLIENT_ID       OAuth client
  *   GOOGLE_CLIENT_SECRET
- *   GOOGLE_REFRESH_TOKEN         obtained once, offline access
- *   GOOGLE_CALENDAR_ID           defaults to "primary"
+ *   GOOGLE_REFRESH_TOKEN   obtained once with calendar.readonly, offline access
+ *   GOOGLE_CALENDAR_ID     defaults to "primary"
  *
- * Either side can be configured alone; whatever is present is merged, and the
- * card reports which sources answered.
+ * `status` distinguishes "nothing set up yet" from "credentials were rejected",
+ * so a typo in the refresh token doesn't masquerade as an unconfigured card.
  */
 
 export const dynamic = 'force-dynamic';
@@ -29,6 +24,7 @@ function authed(req: NextRequest) {
 }
 
 type Entry = { start: Date; end: Date | null; title: string; allDay: boolean };
+type Status = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_failed';
 
 const DAY_MS = 86400000;
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -45,64 +41,7 @@ function hhmm(d: Date) {
   return d.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
 }
 
-/* ── Notion ──────────────────────────────────────────────────────────────── */
-
-async function fromNotion(from: Date, to: Date): Promise<Entry[] | null> {
-  const token = process.env.NOTION_TOKEN;
-  const db = process.env.NOTION_SCHEDULE_DATABASE_ID;
-  if (!token || !db) return null;
-
-  const dateProp = process.env.NOTION_SCHEDULE_DATE_PROP ?? 'Date';
-  const titleProp = process.env.NOTION_SCHEDULE_TITLE_PROP ?? 'Name';
-
-  try {
-    const res = await fetch(`https://api.notion.com/v1/databases/${db}/query`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Notion-Version': '2022-06-28',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        page_size: 100,
-        filter: {
-          and: [
-            { property: dateProp, date: { on_or_after: from.toISOString().slice(0, 10) } },
-            { property: dateProp, date: { before: to.toISOString().slice(0, 10) } },
-          ],
-        },
-      }),
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-
-    const json = (await res.json()) as { results?: Array<Record<string, unknown>> };
-    const out: Entry[] = [];
-
-    for (const page of json.results ?? []) {
-      const props = (page.properties ?? {}) as Record<string, Record<string, unknown>>;
-      const date = props[dateProp]?.date as { start?: string; end?: string } | undefined;
-      if (!date?.start) continue;
-
-      const titleRuns = (props[titleProp]?.title ?? []) as Array<{ plain_text?: string }>;
-      const title = titleRuns.map((r) => r.plain_text ?? '').join('').trim() || 'Untitled';
-
-      out.push({
-        start: new Date(date.start),
-        end: date.end ? new Date(date.end) : null,
-        title,
-        allDay: date.start.length === 10,
-      });
-    }
-    return out;
-  } catch {
-    return null;
-  }
-}
-
-/* ── Google Calendar ─────────────────────────────────────────────────────── */
-
-async function googleAccessToken(): Promise<string | null> {
+async function accessToken(): Promise<string | null> {
   const client_id = process.env.GOOGLE_CLIENT_ID;
   const client_secret = process.env.GOOGLE_CLIENT_SECRET;
   const refresh_token = process.env.GOOGLE_REFRESH_TOKEN;
@@ -123,10 +62,7 @@ async function googleAccessToken(): Promise<string | null> {
   }
 }
 
-async function fromGoogle(from: Date, to: Date): Promise<Entry[] | null> {
-  const token = await googleAccessToken();
-  if (!token) return null;
-
+async function fetchWeek(token: string, from: Date, to: Date): Promise<Entry[] | null> {
   const calendar = encodeURIComponent(process.env.GOOGLE_CALENDAR_ID ?? 'primary');
   const params = new URLSearchParams({
     timeMin: from.toISOString(),
@@ -146,12 +82,16 @@ async function fromGoogle(from: Date, to: Date): Promise<Entry[] | null> {
     const json = (await res.json()) as {
       items?: Array<{
         summary?: string;
+        status?: string;
+        transparency?: string;
         start?: { dateTime?: string; date?: string };
         end?: { dateTime?: string; date?: string };
       }>;
     };
 
     return (json.items ?? []).flatMap((e) => {
+      // Cancelled events and ones marked "free" do not constrain the day.
+      if (e.status === 'cancelled' || e.transparency === 'transparent') return [];
       const startRaw = e.start?.dateTime ?? e.start?.date;
       if (!startRaw) return [];
       const endRaw = e.end?.dateTime ?? e.end?.date;
@@ -166,8 +106,6 @@ async function fromGoogle(from: Date, to: Date): Promise<Entry[] | null> {
     return null;
   }
 }
-
-/* ── shaping ─────────────────────────────────────────────────────────────── */
 
 /** Hours committed on a day, all-day entries counting as a full working day. */
 function busyHours(entries: Entry[]) {
@@ -187,8 +125,9 @@ function lastFinishHour(entries: Entry[]) {
 }
 
 /**
- * Place the week's training around what the calendar already contains: lifts on
- * the lightest days, movement on the heaviest, and a reset on the quietest.
+ * Place the week's training around what the calendar already contains: steps on
+ * days that are already long, rest on long days that finish late, lifts on the
+ * lightest days up to three a week, and a reset on Sunday.
  */
 function suggest(entries: Entry[], index: number, liftsPlaced: number) {
   const hours = busyHours(entries);
@@ -199,7 +138,7 @@ function suggest(entries: Entry[], index: number, liftsPlaced: number) {
   if (index === 6) return { text: 'Weigh-in, meal prep, rest', tag: 'Reset' };
   if (liftsPlaced < 3) {
     return {
-      text: finish > 0 ? `Strength after you finish — 45 min` : 'Strength — 45 min',
+      text: finish > 0 ? 'Strength once you finish · 45 min' : 'Strength · 45 min',
       tag: 'Lift',
     };
   }
@@ -210,25 +149,30 @@ function suggest(entries: Entry[], index: number, liftsPlaced: number) {
 export async function GET(req: NextRequest) {
   if (!authed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const from = weekStart();
-  const to = new Date(from.getTime() + 7 * DAY_MS);
-
-  const [notion, google] = await Promise.all([fromNotion(from, to), fromGoogle(from, to)]);
-
-  const connected = { notion: notion !== null, google: google !== null };
-  if (!connected.notion && !connected.google) {
-    return NextResponse.json({ connected, days: [], configured: false });
+  const configured = Boolean(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN,
+  );
+  if (!configured) {
+    return NextResponse.json({ status: 'unconfigured' satisfies Status, days: [] });
   }
 
-  const all = [...(notion ?? []), ...(google ?? [])].sort(
-    (a, b) => a.start.getTime() - b.start.getTime(),
-  );
+  const token = await accessToken();
+  if (!token) {
+    return NextResponse.json({ status: 'auth_failed' satisfies Status, days: [] });
+  }
+
+  const from = weekStart();
+  const to = new Date(from.getTime() + 7 * DAY_MS);
+  const events = await fetchWeek(token, from, to);
+  if (events === null) {
+    return NextResponse.json({ status: 'fetch_failed' satisfies Status, days: [] });
+  }
 
   let liftsPlaced = 0;
   const days = DAY_LABELS.map((label, i) => {
     const dayStart = new Date(from.getTime() + i * DAY_MS);
     const dayEnd = new Date(dayStart.getTime() + DAY_MS);
-    const entries = all.filter((e) => e.start >= dayStart && e.start < dayEnd);
+    const entries = events.filter((e) => e.start >= dayStart && e.start < dayEnd);
 
     const calendar = entries.length
       ? entries
@@ -250,5 +194,5 @@ export async function GET(req: NextRequest) {
     };
   });
 
-  return NextResponse.json({ connected, days, configured: true });
+  return NextResponse.json({ status: 'ok' satisfies Status, days });
 }

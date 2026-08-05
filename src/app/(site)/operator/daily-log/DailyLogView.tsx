@@ -395,11 +395,11 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '14px' }}>
       <div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Smart <em style={{ color: '#C2A87C' }}>scheduling</em></h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: '#9A9287', maxWidth: '46ch' }}>{v.notionCopy}</p>
+      <p style={{ margin: '0', fontSize: '12.5px', color: '#9A9287', maxWidth: '46ch' }}>{v.scheduleCopy}</p>
       </div>
-      <span style={sx(v.notionButtonStyle)}>{v.notionButtonLabel}</span>
+      <span style={sx(v.scheduleBadgeStyle)}>{v.scheduleBadgeLabel}</span>
       </div>
-      {(v.notionRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
+      {(v.scheduleRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.05)' }}>
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A9A29A' }}>{n.day}</span>
       <span style={sx(`font-size:12.5px;color:${n.calColor};`)}>{n.calendar}</span>
