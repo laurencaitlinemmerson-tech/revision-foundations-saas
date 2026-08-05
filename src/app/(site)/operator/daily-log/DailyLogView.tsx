@@ -62,12 +62,10 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </header>
       <div style={{ height: '0.5px', background: 'rgba(26,24,21,0.12)', margin: '0 0 26px' }}></div>
       {(v.isFresh) ? (<>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '34px', color: 'var(--ink)', margin: '12px 0 10px', letterSpacing: '-0.02em', lineHeight: '1.12' }}>Nothing logged yet — <em style={{ color: '#B08D57' }}>let&apos;s fix that</em>.</h2>
-      <p style={{ margin: '0 0 26px', fontSize: '14px', color: '#8E8A82', lineHeight: '1.7', maxWidth: '56ch' }}>Three things and the dashboard comes alive: connect Apple Health so weight and activity arrive on their own, set the pace you want to lose at, then log today&apos;s first meal.</p>
-      </div>
       <div style={{ padding: '40px 42px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none', maxWidth: '760px' }}>
       <span style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#957962' }}>Day one</span>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '34px', color: 'var(--ink)', margin: '12px 0 10px', letterSpacing: '-0.02em', lineHeight: '1.12' }}>Nothing logged yet — <em style={{ color: '#B08D57' }}>let&apos;s fix that</em>.</h2>
+      <p style={{ margin: '0 0 26px', fontSize: '14px', color: '#8E8A82', lineHeight: '1.7', maxWidth: '56ch' }}>Three things and the dashboard comes alive: connect Apple Health so weight and activity arrive on their own, set the pace you want to lose at, then log today&apos;s first meal.</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {(v.onboardSteps ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '30px 1fr auto', gap: '16px', alignItems: 'center', padding: '16px 18px', borderRadius: '10px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.14)' }}>
@@ -141,12 +139,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       {(v.isToday) ? (<>
-      <div data-tab-panel data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', color: 'var(--ink)', margin: '0', letterSpacing: '-0.01em' }}>Today&apos;s targets</h2>
+      <div data-tab-panel data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', marginBottom: '6px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0', letterSpacing: '-0.01em' }}>Today&apos;s targets</h2>
       <span style={{ fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>tap a ring</span>
       </div>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div data-hero style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '26px', alignItems: 'center' }}>
       <svg viewBox='0 0 200 200' style={{ width: '196px', height: '196px' }}>
       {(v.rings ?? []).map((r, r_i) => (<React.Fragment key={r_i}>
@@ -175,21 +173,17 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <RunningBalance {...v.balanceProps}></RunningBalance>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Water</h2>
-      <p style={{ margin: '0 0 14px', fontSize: '12px', color: 'var(--ink-mute)' }}>{v.waterCopy}</p>
-      </div>
       <div style={{ padding: '22px 24px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>Water</h2>
+      <p style={{ margin: '0 0 14px', fontSize: '12px', color: 'var(--ink-mute)' }}>{v.waterCopy}</p>
       <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap' }}>
       {(v.glasses ?? []).map((g, g_i) => (<React.Fragment key={g_i}>
       <span style={sx(g.style)} title={g.title}></span>
       </React.Fragment>))}
       </div>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Log a weigh-in</h2>
-      </div>
       <div style={{ padding: '22px 24px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 12px' }}>Log a weigh-in</h2>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
       <input value={v.draftWeight} onChange={v.onDraftChange} onKeyDown={v.onDraftKey} placeholder='71.4' inputMode='decimal' style={{ flex: '1', padding: '12px 14px', border: '0.5px solid var(--rule)', borderRadius: '8px', background: 'var(--paper)', fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--ink)', outline: 'none' }} style-focus='border-color:#EFEADC;' />
       <span style={{ fontSize: '12px', color: 'var(--ink-mute)' }}>{v.unitLabel}</span>
@@ -221,7 +215,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '16px' }}>
       <div>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Weight · <em style={{ color: '#B08D57' }}>{v.rangeLabel}</em></h2>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Weight · <em style={{ color: '#B08D57' }}>{v.rangeLabel}</em></h2>
       <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>{v.chartSub}</p>
       </div>
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
@@ -289,12 +283,10 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}><i style={{ width: '16px', height: '2.5px', borderRadius: '2px', background: '#D2B49C', display: 'inline-block' }}></i> Goal</span>
       </div>
       </div>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Where this lands</h2>
-      <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Slide to test a different weekly pace.</p>
-      </div>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>Where this lands</h2>
+      <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Slide to test a different weekly pace.</p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
       <input type='range' min='-1.2' max='0.4' step='0.02' value={v.weeklyRate} onChange={v.onRateChange} onInput={v.onRateChange} style={{ flex: '1' }} />
       <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '16px', color: 'var(--ink)', whiteSpace: 'nowrap' }}>{v.rateLabel}</span>
@@ -308,10 +300,8 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       <p style={{ margin: '16px 0 0', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: '1.65' }}>{v.etaCopy}</p>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Body metrics</h2>
-      </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 14px' }}>Body metrics</h2>
       {(v.bodyRows ?? []).map((b, b_i) => (<React.Fragment key={b_i}>
       <StatRowHover sparkPoints={b.spark} color='#B08D57'>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '12px', alignItems: 'baseline', padding: '14px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
@@ -328,12 +318,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isPlan) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', color: 'var(--ink)', margin: '0', letterSpacing: '-0.015em' }}>Your plan · <em style={{ color: '#B08D57' }}>{v.paceLabel} a week</em></h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82', maxWidth: '64ch' }}>{v.planSub}</p>
-      </div>
       <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '22px' }}>
+      <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Your plan · <em style={{ color: '#B08D57' }}>{v.paceLabel} a week</em></h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82', maxWidth: '64ch' }}>{v.planSub}</p>
+      </div>
       <div style={{ display: 'flex', gap: '8px' }}>
       {(v.paceOptions ?? []).map((p, p_i) => (<React.Fragment key={p_i}>
       <button onClick={p.onClick} style={sx(p.style)}>{p.label}</button>
@@ -351,12 +341,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       <p style={{ margin: '18px 0 0', fontSize: '12.5px', color: '#8E8A82', lineHeight: '1.7', maxWidth: '82ch' }}>{v.planCaution}</p>
       </div>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Reality check</h2>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', marginBottom: '6px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0' }}>Reality check</h2>
       <span style={sx(`font-size:10.5px;padding:5px 12px;border-radius:999px;background:${v.realityChipBg};color:${v.realityChipColor};`)}>{v.realityChip}</span>
       </div>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: '#8E8A82' }}>Maintenance back-calculated from what you actually ate and what the scale actually did — not the formula.</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
       {(v.realityNumbers ?? []).map((r, r_i) => (<React.Fragment key={r_i}>
@@ -369,11 +359,11 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       <p style={{ margin: '16px 0 0', fontSize: '13px', color: '#57544E', lineHeight: '1.7' }}>{v.realityCopy2}</p>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Adherence</h2>
+      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', marginBottom: '16px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0' }}>Adherence</h2>
       <span style={{ fontSize: '10.5px', padding: '5px 12px', borderRadius: '999px', background: '#F6F3EA', color: '#8A6D3F' }}>{v.adherenceLabel}</span>
       </div>
-      <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       {(v.adherenceRows ?? []).map((a, a_i) => (<React.Fragment key={a_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr auto', gap: '12px', alignItems: 'center', padding: '10px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '12.5px', color: '#57544E' }}>{a.label}</span>
@@ -384,13 +374,13 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <p style={{ margin: '16px 0 0', fontSize: '13px', color: '#57544E', lineHeight: '1.7' }}>{v.adherenceCopy}</p>
       </div>
       </div>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Smart <em style={{ color: '#B08D57' }}>scheduling</em></h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82', maxWidth: '46ch' }}>{v.scheduleCopy}</p>
-      </div>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '14px' }}>
+      <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Smart <em style={{ color: '#B08D57' }}>scheduling</em></h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82', maxWidth: '46ch' }}>{v.scheduleCopy}</p>
+      </div>
       <span style={sx(v.scheduleBadgeStyle)}>{v.scheduleBadgeLabel}</span>
       </div>
       {(v.scheduleRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
@@ -401,11 +391,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>The training week</h2>
-      <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#8E8A82' }}>Three lifts, two easy days — enough stimulus to hold muscle while the deficit runs.</p>
-      </div>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>The training week</h2>
+      <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#8E8A82' }}>Three lifts, two easy days — enough stimulus to hold muscle while the deficit runs.</p>
       {(v.planWeek ?? []).map((d, d_i) => (<React.Fragment key={d_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: '14px', alignItems: 'center', padding: '13px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{d.day}</span>
@@ -418,10 +406,8 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Daily plate</h2>
-      </div>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 14px' }}>Daily plate</h2>
       {(v.planMacros ?? []).map((m, m_i) => (<React.Fragment key={m_i}>
       <div style={{ marginBottom: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '7px' }}>
@@ -446,12 +432,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Week-by-week targets</h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Tick a week off as you weigh in — the bar fills as you go.</p>
-      </div>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '14px' }}>
+      <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Week-by-week targets</h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Tick a week off as you weigh in — the bar fills as you go.</p>
+      </div>
       <span style={{ fontSize: '10.5px', padding: '6px 13px', borderRadius: '999px', background: '#F6F3EA', color: '#8A6D3F' }}>{v.planDoneLabel}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(132px,1fr))', gap: '10px' }}>
@@ -496,12 +482,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Progress <em style={{ color: '#D2B49C' }}>pictures</em></h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Drop a photo into any frame — same light, same time of day, and the comparison actually means something.</p>
-      </div>
       <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '20px' }}>
+      <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Progress <em style={{ color: '#D2B49C' }}>pictures</em></h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Drop a photo into any frame — same light, same time of day, and the comparison actually means something.</p>
+      </div>
       <span style={{ fontSize: '10.5px', padding: '6px 13px', borderRadius: '999px', background: '#F7F5F0', border: '0.5px solid rgba(178,152,106,0.16)', color: '#957962' }}>private to you</span>
       </div>
       <div data-cols-2 style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px' }}>
@@ -519,11 +505,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </div>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Month by month</h2>
-      </div>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,1fr)', gap: '16px' }}>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 16px' }}>Month by month</h2>
       {(v.monthly ?? []).map((m, m_i) => (<React.Fragment key={m_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '78px 1fr auto', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '12.5px', color: '#8E8A82' }}>{m.month}</span>
@@ -551,11 +535,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isFood) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Macros today</h2>
-      </div>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.1fr)', gap: '16px' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 16px' }}>Macros today</h2>
       {(v.macros ?? []).map((m, m_i) => (<React.Fragment key={m_i}>
       <div style={{ marginBottom: '18px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
@@ -573,19 +555,17 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Energy ledger</h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Fourteen days of intake against burn.</p>
-      </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 2px' }}>Energy ledger</h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Fourteen days of intake against burn.</p>
       <EnergyLedger {...v.ledgerProps}></EnergyLedger>
       </div>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Weekly <em style={{ color: '#B08D57' }}>deficit</em></h2>
+      <div style={{ padding: '24px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', marginBottom: '2px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Weekly <em style={{ color: '#B08D57' }}>deficit</em></h2>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--ink)', fontWeight: 300 }}>{v.weeklyDeficitHeadline}<span style={{ fontSize: '11px', letterSpacing: '0.1em', color: 'var(--ink-mute)', marginLeft: '5px' }}>kcal this week</span></span>
       </div>
-      <div style={{ padding: '24px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <p style={{ margin: '0 0 18px', fontSize: '12.5px', color: 'var(--ink-mute)', lineHeight: 1.55, maxWidth: '62ch' }}>{v.weeklyDeficitCopy}</p>
       {(v.weeklyDeficitRows ?? []).map((w, w_i) => (<React.Fragment key={w_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '58px minmax(0,1fr) 92px 74px', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
@@ -596,11 +576,11 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>What you burn — open a row to tune it</h2>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '6px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>What you burn — open a row to tune it</h2>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--ink)' }}>{v.tdeeTotalLabel} <span style={{ fontSize: '11px', fontFamily: 'var(--font-body)', color: 'var(--ink-mute)' }}>kcal/day</span></span>
       </div>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       {(v.tdeeRows ?? []).map((row, row_i) => (<React.Fragment key={row_i}>
       <ExpandableTdeeComponent acronym={row.acronym} fullName={row.fullName} value={row.value} percent={row.percent} color={row.color} onTune={row.onTune}>{row.detail}</ExpandableTdeeComponent>
       </React.Fragment>))}
@@ -612,12 +592,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isTraining) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Total <em style={{ color: '#B08D57' }}>energy burned</em></h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Active energy from Apple Health — every walk, shift and session.</p>
-      </div>
       <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '22px' }}>
+      <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Total <em style={{ color: '#B08D57' }}>energy burned</em></h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82' }}>Active energy from Apple Health — every walk, shift and session.</p>
+      </div>
       <div style={{ display: 'flex', gap: '8px' }}>
       {(v.volRanges ?? []).map((v, v_i) => (<React.Fragment key={v_i}>
       <button onClick={v.onClick} style={sx(v.style)}>{v.label}</button>
@@ -662,12 +642,10 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </div>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>This week&apos;s sessions</h2>
-      <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Tap a session for what Apple Health recorded.</p>
-      </div>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>This week&apos;s sessions</h2>
+      <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Tap a session for what Apple Health recorded.</p>
       {(v.sessions ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
       <div style={{ borderTop: '0.5px solid var(--rule-soft)' }}>
       <button onClick={s.onClick} style={{ width: '100%', display: 'grid', gridTemplateColumns: 'auto 1fr auto auto', gap: '14px', alignItems: 'center', padding: '16px 4px', background: 'transparent', border: '0', cursor: 'pointer', textAlign: 'left' }}>
@@ -694,10 +672,8 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Weekly load</h2>
-      </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 16px' }}>Weekly load</h2>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '130px' }}>
       {(v.loadBars ?? []).map((b, b_i) => (<React.Fragment key={b_i}>
       <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end' }} title={b.title}>
@@ -707,10 +683,8 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </div>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Recent bests</h2>
-      </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(178,152,106,0.16)', borderRadius: '12px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 14px' }}>Recent bests</h2>
       {(v.prs ?? []).map((p, p_i) => (<React.Fragment key={p_i}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
       <span style={{ fontSize: '13px', color: 'var(--ink-soft)' }}>{p.move}</span>
@@ -724,12 +698,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isHabits) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Habits · last 14 days</h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Filled where Apple Health shows the target met.</p>
-      </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '18px' }}>
+      <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>Habits · last 14 days</h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Filled where Apple Health shows the target met.</p>
+      </div>
       <span style={{ fontSize: '11px', padding: '5px 12px', borderRadius: '999px', background: '#EDF1EC', color: 'var(--green)' }}>{v.habitPct}% complete</span>
       </div>
       {(v.habits ?? []).map((h, h_i) => (<React.Fragment key={h_i}>
@@ -744,11 +718,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       </div>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '16px' }}>
-      <div data-section-head style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: '400', fontSize: '27px', letterSpacing: '-0.02em', color: 'var(--ink)', margin: '0' }}>Sleep · last 10 nights</h2>
-      </div>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 14px' }}>Sleep · last 10 nights</h2>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '7px', height: '120px' }}>
       {(v.sleepBars ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
       <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end' }} title={s.title}>
