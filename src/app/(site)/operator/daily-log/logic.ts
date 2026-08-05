@@ -106,21 +106,17 @@ export function fmt(iso: string, kind?: 'long') {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-/** Tab grade, lightest to deepest — the sequence ePAD uses across its strip. */
-const TAB_GRADE = ['#E3EDF8', '#CFE1F3', '#B7D3EC', '#9CC3E4', '#7FB0DA', '#5E99CD', '#17365D'];
-
-export function pill(active: boolean, index = 0) {
-  const tint = TAB_GRADE[Math.min(index, TAB_GRADE.length - 1)];
-  return 'padding:9px 18px;border-radius:8px 8px 0 0;cursor:pointer;font-size:12.5px;letter-spacing:0.01em;transition:all 200ms cubic-bezier(.4,0,.2,1);border:0;border-bottom:3px solid ' +
+export function pill(active: boolean) {
+  return 'padding:9px 18px;border-radius:999px;cursor:pointer;font-size:12.5px;letter-spacing:0.01em;transition:background 220ms cubic-bezier(.4,0,.2,1),color 220ms;border:0.5px solid ' +
     (active
-      ? `${tint};background:#FFFFFF;color:#17365D;font-weight:500;`
-      : `transparent;background:${tint};color:${index >= 5 ? '#FFFFFF' : '#17365D'};`);
+      ? 'transparent;background:#1A1A18;color:#FFFFFF;'
+      : 'rgba(26,24,21,0.12);background:#FFFFFF;color:#57544E;');
 }
 
 export function chip(active: boolean) {
   return 'padding:7px 15px;border-radius:999px;cursor:pointer;font-size:11.5px;transition:all 220ms cubic-bezier(.4,0,.2,1);border:0.5px solid ' +
-    (active ? 'rgba(178,152,106,0.35);' : 'rgba(27,39,51,0.14);') +
-    (active ? 'background:#F7F9FC;color:#7A3D91;' : 'background:transparent;color:#6E7A88;');
+    (active ? 'rgba(178,152,106,0.35);' : 'rgba(26,24,21,0.12);') +
+    (active ? 'background:#FAFAF9;color:#957962;' : 'background:transparent;color:#8E8A82;');
 }
 
 function habitCell(state: DailyLogState, key: string, i: number): boolean {
@@ -216,10 +212,10 @@ export function deriveVals(
     ['training', 'Training', '4 sessions'],
     ['habits', 'Habits', '21 days'],
   ];
-  const tabs = navDefs.map((n, nIdx) => ({
+  const tabs = navDefs.map((n) => ({
     label: n[1],
     onClick: () => setState({ tab: n[0] }),
-    style: pill(st.tab === n[0], nIdx),
+    style: pill(st.tab === n[0]),
   }));
 
   /* ── KPI cards ── */
@@ -261,18 +257,18 @@ export function deriveVals(
   const dw = latest.weight - prev.weight;
   const proteinPerKg = T.proteinPerKg ?? props.proteinPerKg ?? 1.8;
   const kpis = [
-    { label: 'Weight', value: +conv(latest.weight).toFixed(1), decimals: 1, unit: uLabel, chip: (dw <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(dw)).toFixed(1), chipBg: dw <= 0 ? '#E4F3F0' : '#EDF1F8', chipColor: dw <= 0 ? '#3E9C8C' : '#C0492F', color: '#17365D', spark: sparkOf(last8), area: areaOf(last8) },
-    { label: 'Calories', value: logged.kcal, decimals: 0, unit: 'kcal', chip: Math.max(0, kcalTarget - logged.kcal).toLocaleString() + ' left', chipBg: '#E7ECF4', chipColor: '#46525F', color: '#2E7CBF', spark: sparkOf(intakeSeries.slice(-8)), area: areaOf(intakeSeries.slice(-8)) },
-    { label: 'Protein', value: logged.protein, decimals: 0, unit: 'g', chip: Math.round((logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#E9EFF7', chipColor: '#7A3D91', color: '#3E9C8C', spark: sparkOf(proteinSeries ? [...proteinSeries.slice(-7), logged.protein] : [88, 104, 96, 120, 112, 98, 126, logged.protein]), area: areaOf(proteinSeries ? [...proteinSeries.slice(-7), logged.protein] : [88, 104, 96, 120, 112, 98, 126, logged.protein]) },
-    { label: 'Steps', value: logged.steps, decimals: 0, unit: '', chip: logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: logged.steps >= 8000 ? '#E4F3F0' : '#E7ECF4', chipColor: logged.steps >= 8000 ? '#3E9C8C' : '#46525F', color: '#8E4BA8', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]), area: areaOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]) },
-    { label: 'Sleep', value: +(sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1), decimals: 1, unit: 'h avg', chip: 'RHR ' + Math.round(rhrAvg ?? 58), chipBg: '#E7ECF4', chipColor: '#46525F', color: '#4E9A51', spark: sparkOf(sleepSeries.slice(-8)), area: areaOf(sleepSeries.slice(-8)) },
+    { label: 'Weight', value: +conv(latest.weight).toFixed(1), decimals: 1, unit: uLabel, chip: (dw <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(dw)).toFixed(1), chipBg: dw <= 0 ? '#EDF1EC' : '#F7F6F5', chipColor: dw <= 0 ? '#7F9289' : '#AA7F68', color: '#B08D57', spark: sparkOf(last8), area: areaOf(last8) },
+    { label: 'Calories', value: logged.kcal, decimals: 0, unit: 'kcal', chip: Math.max(0, kcalTarget - logged.kcal).toLocaleString() + ' left', chipBg: '#F4F4F3', chipColor: '#57544E', color: '#7F9289', spark: sparkOf(intakeSeries.slice(-8)), area: areaOf(intakeSeries.slice(-8)) },
+    { label: 'Protein', value: logged.protein, decimals: 0, unit: 'g', chip: Math.round((logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#F7F5F0', chipColor: '#957962', color: '#957962', spark: sparkOf(proteinSeries ? [...proteinSeries.slice(-7), logged.protein] : [88, 104, 96, 120, 112, 98, 126, logged.protein]), area: areaOf(proteinSeries ? [...proteinSeries.slice(-7), logged.protein] : [88, 104, 96, 120, 112, 98, 126, logged.protein]) },
+    { label: 'Steps', value: logged.steps, decimals: 0, unit: '', chip: logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: logged.steps >= 8000 ? '#EDF1EC' : '#F4F4F3', chipColor: logged.steps >= 8000 ? '#7F9289' : '#57544E', color: '#57544E', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]), area: areaOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]) },
+    { label: 'Sleep', value: +(sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1), decimals: 1, unit: 'h avg', chip: 'RHR ' + Math.round(rhrAvg ?? 58), chipBg: '#F4F4F3', chipColor: '#57544E', color: '#B08D57', spark: sparkOf(sleepSeries.slice(-8)), area: areaOf(sleepSeries.slice(-8)) },
   ].map((k, i) => ({ ...k, gradId: 'spark-' + i, display: k.decimals ? k.value.toFixed(k.decimals) : Math.round(k.value).toLocaleString() }));
 
   /* ── rings ── */
   const ringDefs = [
-    { key: 'kcal' as const, name: 'Calories', r: 84, color: '#17365D', track: '#E1E7F0', value: logged.kcal, target: kcalTarget, unit: 'kcal', step: 250 },
-    { key: 'protein' as const, name: 'Protein', r: 66, color: '#3E9C8C', track: '#E1EFEC', value: logged.protein, target: Math.round(latest.weight * proteinPerKg), unit: 'g', step: 15 },
-    { key: 'steps' as const, name: 'Steps', r: 48, color: '#8E4BA8', track: '#EFE6F4', value: logged.steps, target: 8000, unit: '', step: 500 },
+    { key: 'kcal' as const, name: 'Calories', r: 84, color: '#D2B49C', track: '#F7F6F5', value: logged.kcal, target: kcalTarget, unit: 'kcal', step: 250 },
+    { key: 'protein' as const, name: 'Protein', r: 66, color: '#9FB3A9', track: '#F7F5F0', value: logged.protein, target: Math.round(latest.weight * proteinPerKg), unit: 'g', step: 15 },
+    { key: 'steps' as const, name: 'Steps', r: 48, color: '#C4A375', track: '#F6F3EA', value: logged.steps, target: 8000, unit: '', step: 500 },
   ];
   const rings = ringDefs.map((r) => {
     const c = 2 * Math.PI * r.r;
@@ -384,7 +380,7 @@ export function deriveVals(
     xTicks.push({
       x: +xOf(t).toFixed(1),
       label: new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase(),
-      color: t > tLast ? '#8592A1' : '#6E7A88',
+      color: t > tLast ? '#A6ADA7' : '#8E8A82',
     });
   }
 
@@ -408,8 +404,8 @@ export function deriveVals(
     return {
       label, kg: conv(kg).toFixed(1) + ' ' + uLabel,
       delta: (d >= 0 ? '+' : '−') + Math.abs(conv(d)).toFixed(1),
-      chipBg: d >= 0 ? '#EDF1F8' : '#E4F3F0',
-      chipColor: d >= 0 ? '#C0492F' : '#3E9C8C',
+      chipBg: d >= 0 ? '#F7F6F5' : '#EDF1EC',
+      chipColor: d >= 0 ? '#AA7F68' : '#7F9289',
     };
   };
   const remainingToGoal = latest.weight - goal;
@@ -445,26 +441,26 @@ export function deriveVals(
   ].map((b) => ({
     label: b.label, value: b.value, spark: b.spark,
     delta: (b.d >= 0 ? '+' : '−') + Math.abs(b.d).toFixed(1),
-    chipBg: b.d <= 0 ? '#E4F3F0' : '#EDF1F8',
-    chipColor: b.d <= 0 ? '#3E9C8C' : '#C0492F',
+    chipBg: b.d <= 0 ? '#EDF1EC' : '#F7F6F5',
+    chipColor: b.d <= 0 ? '#7F9289' : '#AA7F68',
   }));
 
   /* ── nutrition ── */
   const proteinTarget = Math.round(latest.weight * proteinPerKg);
   const macros = [
-    { label: 'Protein', v: logged.protein, t: proteinTarget, unit: 'g', color: '#3E9C8C' },
-    { label: 'Carbohydrate', v: Math.round(dayNow?.nutrition.carbsG ?? 148), t: 210, unit: 'g', color: '#17365D' },
-    { label: 'Fat', v: Math.round(dayNow?.nutrition.fatG ?? 52), t: 68, unit: 'g', color: '#7A3D91' },
+    { label: 'Protein', v: logged.protein, t: proteinTarget, unit: 'g', color: '#7F9289' },
+    { label: 'Carbohydrate', v: Math.round(dayNow?.nutrition.carbsG ?? 148), t: 210, unit: 'g', color: '#B08D57' },
+    { label: 'Fat', v: Math.round(dayNow?.nutrition.fatG ?? 52), t: 68, unit: 'g', color: '#957962' },
   ].map((m) => ({
     label: m.label,
     value: m.v + ' / ' + m.t + ' ' + m.unit,
     barStyle: 'height:100%;width:' + Math.min(100, (m.v / m.t) * 100).toFixed(1) + '%;background:' + m.color + ';border-radius:999px;transition:width 500ms cubic-bezier(.16,1,.3,1);',
   }));
   const tdeeRows = [
-    { key: 'bmr' as const, acronym: 'BMR', fullName: 'what the body spends existing', color: '#1B2733', detail: 'Mifflin–St Jeor at ' + latest.weight.toFixed(1) + ' kg, 168 cm, 26 years. This is the floor.' },
-    { key: 'neat' as const, acronym: 'NEAT', fullName: 'everything that is not training', color: '#17365D', detail: 'Walking, shifts, stairs, fidgeting. The most volatile line — a busy day and a rest day differ by roughly 400 kcal.' },
-    { key: 'exercise' as const, acronym: 'EAT', fullName: 'deliberate training', color: '#3E9C8C', detail: 'Four logged sessions a week, spread across seven days. Strength work costs less than it feels like.' },
-    { key: 'tef' as const, acronym: 'TEF', fullName: 'the cost of digesting food', color: '#7A3D91', detail: 'Roughly 8–10% of intake, and it rises with protein.' },
+    { key: 'bmr' as const, acronym: 'BMR', fullName: 'what the body spends existing', color: '#1A1A18', detail: 'Mifflin–St Jeor at ' + latest.weight.toFixed(1) + ' kg, 168 cm, 26 years. This is the floor.' },
+    { key: 'neat' as const, acronym: 'NEAT', fullName: 'everything that is not training', color: '#B08D57', detail: 'Walking, shifts, stairs, fidgeting. The most volatile line — a busy day and a rest day differ by roughly 400 kcal.' },
+    { key: 'exercise' as const, acronym: 'EAT', fullName: 'deliberate training', color: '#7F9289', detail: 'Four logged sessions a week, spread across seven days. Strength work costs less than it feels like.' },
+    { key: 'tef' as const, acronym: 'TEF', fullName: 'the cost of digesting food', color: '#957962', detail: 'Roughly 8–10% of intake, and it rises with protein.' },
   ].map((r) => ({
     acronym: r.acronym, fullName: r.fullName, color: r.color, detail: r.detail,
     value: st.tune[r.key], percent: Math.round((st.tune[r.key] / tdee) * 100),
@@ -585,7 +581,7 @@ export function deriveVals(
       partial: w.n < 7 ? w.n + '/7 days' : '',
       barStyle: 'height:100%;width:' + Math.max(2, (Math.abs(deficit) / peak) * 100).toFixed(0) +
         '%;border-radius:999px;transition:width 500ms cubic-bezier(.16,1,.3,1);background:' +
-        (deficit >= 0 ? (isNow ? '#17365D' : '#C9DCEF') : '#8E4BA8') + ';',
+        (deficit >= 0 ? (isNow ? '#B08D57' : '#EFEADC') : '#D2B49C') + ';',
     };
   });
 
@@ -604,11 +600,11 @@ export function deriveVals(
 
   /* ── training ── */
   const sessionDefs = [
-    { day: 'MON', name: 'Lower body', note: 'Squat, hinge, calves', kcal: 310, tint: '#E9EFF7', sets: [{ move: 'Back squat', load: '62.5 kg', reps: '4 × 6' }, { move: 'Romanian deadlift', load: '55 kg', reps: '3 × 8' }, { move: 'Calf raise', load: '40 kg', reps: '3 × 12' }] },
-    { day: 'TUE', name: 'Long walk', note: '74 min, riverside', kcal: 290, tint: '#E4F3F0', sets: [{ move: 'Zone 2 walk', load: '5.9 km', reps: '74 min' }] },
-    { day: 'WED', name: 'Upper body', note: 'Press, row, curls', kcal: 265, tint: '#E9EFF7', sets: [{ move: 'Overhead press', load: '27.5 kg', reps: '4 × 6' }, { move: 'Chest-supported row', load: '35 kg', reps: '3 × 10' }, { move: 'Cable curl', load: '15 kg', reps: '3 × 12' }] },
-    { day: 'FRI', name: 'Full body', note: 'Deadlift, push-ups, core', kcal: 340, tint: '#E9EFF7', sets: [{ move: 'Deadlift', load: '85 kg', reps: '3 × 5' }, { move: 'Push-up', load: 'bodyweight', reps: '3 × 12' }, { move: 'Dead bug', load: '—', reps: '3 × 10' }] },
-    { day: 'SUN', name: 'Mobility', note: 'Hips and ankles', kcal: 60, tint: '#E7ECF4', sets: [{ move: 'Flow', load: '22 min', reps: 'easy' }] },
+    { day: 'MON', name: 'Lower body', note: 'Squat, hinge, calves', kcal: 310, tint: '#F7F5F0', sets: [{ move: 'Back squat', load: '62.5 kg', reps: '4 × 6' }, { move: 'Romanian deadlift', load: '55 kg', reps: '3 × 8' }, { move: 'Calf raise', load: '40 kg', reps: '3 × 12' }] },
+    { day: 'TUE', name: 'Long walk', note: '74 min, riverside', kcal: 290, tint: '#EDF1EC', sets: [{ move: 'Zone 2 walk', load: '5.9 km', reps: '74 min' }] },
+    { day: 'WED', name: 'Upper body', note: 'Press, row, curls', kcal: 265, tint: '#F7F5F0', sets: [{ move: 'Overhead press', load: '27.5 kg', reps: '4 × 6' }, { move: 'Chest-supported row', load: '35 kg', reps: '3 × 10' }, { move: 'Cable curl', load: '15 kg', reps: '3 × 12' }] },
+    { day: 'FRI', name: 'Full body', note: 'Deadlift, push-ups, core', kcal: 340, tint: '#F7F5F0', sets: [{ move: 'Deadlift', load: '85 kg', reps: '3 × 5' }, { move: 'Push-up', load: 'bodyweight', reps: '3 × 12' }, { move: 'Dead bug', load: '—', reps: '3 × 10' }] },
+    { day: 'SUN', name: 'Mobility', note: 'Hips and ankles', kcal: 60, tint: '#F4F4F3', sets: [{ move: 'Flow', load: '22 min', reps: 'easy' }] },
   ];
   const DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const weekStart = Date.now() - 7 * DAY;
@@ -635,7 +631,7 @@ export function deriveVals(
         name: w.type ?? 'Session',
         note: [w.durationMin ? Math.round(w.durationMin) + ' min' : null, w.source].filter(Boolean).join(' · '),
         kcal: Math.round(w.energyKcal ?? 0),
-        tint: '#E9EFF7',
+        tint: '#F7F5F0',
         // Set-level detail needs a lift log, which nothing writes yet; until then
         // a session opens onto what Apple Health actually recorded.
         sets: detail.length ? detail : [{ move: 'Nothing logged for this session', load: '—', reps: '' }],
@@ -666,7 +662,7 @@ export function deriveVals(
   const loadBars = loadVals.map((v, i) => ({
     label: 'W' + (i + 24),
     title: v.toLocaleString() + ' kcal active energy',
-    style: 'width:100%;height:' + ((v / loadMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (i === loadVals.length - 1 ? '#17365D' : '#C9DCEF') + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
+    style: 'width:100%;height:' + ((v / loadMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (i === loadVals.length - 1 ? '#B08D57' : '#EFEADC') + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
   // Bests Apple Health can actually answer. Lift PRs would need set-level data,
   // which nothing records; these come off the workout log itself.
@@ -777,7 +773,7 @@ export function deriveVals(
         sessions: s.ls.length,
         current: last.toFixed(1) + ' kg',
         delta: (delta >= 0 ? '+' : '−') + Math.abs(delta).toFixed(1) + ' kg',
-        deltaColor: delta >= 0 ? '#3E9C8C' : '#C0492F',
+        deltaColor: delta >= 0 ? '#7F9289' : '#AA7F68',
         note: s.ls.length + ' sessions · best ' + mx.toFixed(1) + ' kg estimated max',
       };
     });
@@ -796,9 +792,9 @@ export function deriveVals(
       return {
         date: new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric' }),
         title: `${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · ${Math.round(pG)} p / ${Math.round(cG)} c / ${Math.round(fG)} f`,
-        proteinStyle: `height:${pct(pG, 4).toFixed(1)}%;background:#3E9C8C;display:block;`,
-        carbStyle: `height:${pct(cG, 4).toFixed(1)}%;background:#17365D;display:block;`,
-        fatStyle: `height:${pct(fG, 9).toFixed(1)}%;background:#8E4BA8;display:block;`,
+        proteinStyle: `height:${pct(pG, 4).toFixed(1)}%;background:#7F9289;display:block;`,
+        carbStyle: `height:${pct(cG, 4).toFixed(1)}%;background:#B08D57;display:block;`,
+        fatStyle: `height:${pct(fG, 9).toFixed(1)}%;background:#D2B49C;display:block;`,
       };
     });
   })();
@@ -846,7 +842,7 @@ export function deriveVals(
       if (on) done++;
       days.push({
         title: h.name + ' · day ' + (i + 1) + (on ? ' · done' : ' · missed'),
-        style: 'aspect-ratio:1;width:100%;border-radius:7px;border:0.5px solid rgba(0,0,0,0.06);transition:background 200ms cubic-bezier(.4,0,.2,1);background:' + (on ? '#17365D' : '#E7ECF4') + ';',
+        style: 'aspect-ratio:1;width:100%;border-radius:7px;border:0.5px solid rgba(0,0,0,0.06);transition:background 200ms cubic-bezier(.4,0,.2,1);background:' + (on ? '#B08D57' : '#F4F4F3') + ';',
       });
     }
     return { name: h.name, days, count };
@@ -855,7 +851,7 @@ export function deriveVals(
   const sleepBars = sleepSeries.map((h, i) => ({
     label: String(i + 1),
     title: h.toFixed(1) + ' hours',
-    style: 'width:100%;height:' + ((h / sleepMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (h >= 7 ? '#3E9C8C' : '#C9DCEF') + ';opacity:' + (h >= 7 ? 0.75 : 1) + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
+    style: 'width:100%;height:' + ((h / sleepMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (h >= 7 ? '#7F9289' : '#EFEADC') + ';opacity:' + (h >= 7 ? 0.75 : 1) + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
   const avgIntake = Math.round(intakeSeries.reduce((a, b) => a + b, 0) / intakeSeries.length);
 
@@ -880,7 +876,7 @@ export function deriveVals(
       consistencyNote: sd < 0.75
         ? `Steady — nights vary by about ${(sd * 60).toFixed(0)} minutes.`
         : `Nights swing by roughly ${(sd * 60).toFixed(0)} minutes. Evening out the short ones does more than adding to the long ones.`,
-      barStyle: `height:100%;width:${consistency}%;border-radius:999px;background:${consistency >= 70 ? '#3E9C8C' : consistency >= 45 ? '#17365D' : '#C0492F'};`,
+      barStyle: `height:100%;width:${consistency}%;border-radius:999px;background:${consistency >= 70 ? '#7F9289' : consistency >= 45 ? '#B08D57' : '#AA7F68'};`,
     };
   })();
 
@@ -902,7 +898,7 @@ export function deriveVals(
         best,
         hit,
         pct: Math.round((hit / flags.length) * 100),
-        barStyle: `height:100%;width:${Math.round((hit / flags.length) * 100)}%;border-radius:999px;background:${hit / flags.length >= 0.7 ? '#17365D' : '#C9DCEF'};`,
+        barStyle: `height:100%;width:${Math.round((hit / flags.length) * 100)}%;border-radius:999px;background:${hit / flags.length >= 0.7 ? '#B08D57' : '#EFEADC'};`,
       };
     });
     return rows.sort((a, b) => b.pct - a.pct);
@@ -946,13 +942,13 @@ export function deriveVals(
     startLabel: 'Start ' + conv(BASE[0][1]).toFixed(1) + ' ' + uLabel,
     goalDisplay: conv(goal).toFixed(1) + ' ' + uLabel,
     pctLabel: Math.round(Math.min(100, ((BASE[0][1] - latest.weight) / (BASE[0][1] - goal)) * 100)) + '%',
-    progressBarStyle: 'height:100%;width:' + Math.min(100, ((BASE[0][1] - latest.weight) / (BASE[0][1] - goal)) * 100).toFixed(1) + '%;border-radius:999px;background:#8FB6DE;transition:width 700ms cubic-bezier(.16,1,.3,1);',
+    progressBarStyle: 'height:100%;width:' + Math.min(100, ((BASE[0][1] - latest.weight) / (BASE[0][1] - goal)) * 100).toFixed(1) + '%;border-radius:999px;background:#D6C09A;transition:width 700ms cubic-bezier(.16,1,.3,1);',
     milestones: [1, 2, 3, 4, 5, 6, 7, 8].map((kg) => {
       const hit = BASE[0][1] - latest.weight >= kg;
       return {
         label: '−' + kg + ' kg',
         style: 'font-size:11px;padding:5px 12px;border-radius:999px;border:0.5px solid ' +
-          (hit ? 'rgba(23,54,93,0.26);background:#E9EFF7;color:#7A3D91;' : 'rgba(27,39,51,0.14);background:transparent;color:#9AA6B4;'),
+          (hit ? 'rgba(176,141,87,0.26);background:#F7F5F0;color:#957962;' : 'rgba(26,24,21,0.12);background:transparent;color:#B0ABA2;'),
       };
     }),
     photoFrames: [
@@ -966,7 +962,7 @@ export function deriveVals(
         id: p.id, placeholder: p.placeholder, date: p.date,
         weight: conv(p.w).toFixed(1) + ' ' + uLabel,
         delta: p.key === 0 ? 'starting point' : (d <= 0 ? '−' : '+') + Math.abs(conv(d)).toFixed(1) + ' ' + uLabel + ' from start',
-        deltaColor: p.key === 0 ? '#8592A1' : '#3E9C8C',
+        deltaColor: p.key === 0 ? '#A29D95' : '#7F9289',
       };
     }),
     monthly: [
@@ -975,8 +971,8 @@ export function deriveVals(
     ].map((m) => ({
       month: m.month,
       delta: (m.d >= 0 ? '+' : '−') + Math.abs(m.d).toFixed(1) + ' kg',
-      color: m.d <= 0 ? '#17365D' : '#A46BBA',
-      barStyle: 'height:100%;width:' + Math.min(100, (Math.abs(m.d) / 1.4) * 100).toFixed(0) + '%;border-radius:999px;background:' + (m.d <= 0 ? '#B9D3EC' : '#E2D0EB') + ';',
+      color: m.d <= 0 ? '#B08D57' : '#B8957C',
+      barStyle: 'height:100%;width:' + Math.min(100, (Math.abs(m.d) / 1.4) * 100).toFixed(0) + '%;border-radius:999px;background:' + (m.d <= 0 ? '#E4D5B8' : '#E7D3C0') + ';',
     })),
     wins: [
       { title: 'Jeans from January fit again', note: 'Noticed 14 July — waist down 4.4 cm since February.' },
@@ -998,35 +994,7 @@ export function deriveVals(
       const daysAgo = Math.round((new Date(todayIso).getTime() - new Date(last).getTime()) / DAY);
       return 'Apple Health · ' + (daysAgo === 1 ? 'synced yesterday' : `last synced ${daysAgo} days ago`);
     })(),
-    syncDotColour: live.loaded && dayNow ? '#3E9C8C' : live.loaded ? '#4E86C4' : '#8592A1',
-    // Profile rail — ePAD's left column: who, and the one number that matters
-    // most, as a fraction of its target.
-    profile: {
-      initials: 'LE',
-      name: 'Lauren Emmerson',
-      phase: 'Cut · week ' + Math.max(1, Math.ceil((Date.now() - new Date(BASE[0][0]).getTime()) / (7 * DAY))),
-      goalRing: (() => {
-        const start = BASE[0][1];
-        const done = Math.max(0, start - latest.weight);
-        const span = Math.max(0.1, start - goal);
-        const pct = Math.max(0, Math.min(1, done / span));
-        const C = 2 * Math.PI * 76;
-        return {
-          value: conv(done).toFixed(1),
-          total: conv(span).toFixed(1),
-          unit: uLabel + ' lost',
-          pct: Math.round(pct * 100),
-          dash: C.toFixed(1),
-          offset: (C * (1 - pct)).toFixed(1),
-        };
-      })(),
-      fields: [
-        { label: 'Current', value: conv(latest.weight).toFixed(1) + ' ' + uLabel },
-        { label: 'Goal', value: conv(goal).toFixed(1) + ' ' + uLabel },
-        { label: 'Pace', value: st.pace.toFixed(2) + ' ' + uLabel + '/week' },
-        { label: 'Maintenance', value: tdee.toLocaleString() + ' kcal' },
-      ],
-    },
+    syncDotColour: live.loaded && dayNow ? '#7F9289' : live.loaded ? '#C4A375' : '#A29D95',
     greetingLead: (() => { const h = new Date().getHours(); return h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,'; })(),
     greetingTail: 'Lauren.',
     subhead: new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) +
@@ -1053,7 +1021,7 @@ export function deriveVals(
     recoveryProps: { hrv: hrvAvg == null ? 52 : Math.round(hrvAvg), rhr: rhrAvg == null ? 58 : Math.round(rhrAvg), plannedSession: 'Lower body — squat and hinge' },
     glasses: Array.from({ length: 8 }, (_, i) => ({
       title: (i + 1) * 250 + ' ml',
-      style: 'width:26px;height:38px;border-radius:6px 6px 10px 10px;display:block;border:0.5px solid ' + (i < water ? '#17365D' : 'rgba(0,0,0,0.08)') + ';background:' + (i < water ? '#C9DCEF' : '#FFFFFF') + ';transition:background 200ms cubic-bezier(.4,0,.2,1);',
+      style: 'width:26px;height:38px;border-radius:6px 6px 10px 10px;display:block;border:0.5px solid ' + (i < water ? '#B08D57' : 'rgba(0,0,0,0.08)') + ';background:' + (i < water ? '#EFEADC' : '#FFFFFF') + ';transition:background 200ms cubic-bezier(.4,0,.2,1);',
     })),
     waterCopy: ((water * 250) / 1000).toFixed(2) + ' L of 2 L · from Apple Health',
     draftWeight: st.draft,
@@ -1109,7 +1077,7 @@ export function deriveVals(
     tooltipStyle: st.hover ? {
       position: 'absolute' as const, left: st.hover.x + '%', top: st.hover.y + '%',
       transform: 'translate(-50%,-118%)', pointerEvents: 'none' as const, zIndex: 3,
-      background: '#FFFFFF', border: '0.5px solid rgba(23,54,93,0.22)', borderRadius: 16,
+      background: '#FFFFFF', border: '0.5px solid rgba(176,141,87,0.22)', borderRadius: 16,
       padding: '11px 15px', minWidth: 168, boxShadow: '0 12px 34px rgba(178,152,106,0.14)',
     } : null,
 
@@ -1208,10 +1176,10 @@ export function deriveVals(
       const d = (days ?? []).slice(-1)[0];
       if (!d || d.sleep.totalMin == null) return null;
       const parts = [
-        { label: 'Deep', min: d.sleep.deepMin, color: '#0F2745' },
-        { label: 'Core', min: d.sleep.coreMin, color: '#17365D' },
-        { label: 'REM', min: d.sleep.remMin, color: '#4E86C4' },
-        { label: 'Awake', min: d.sleep.awakeMin, color: '#C9DCEF' },
+        { label: 'Deep', min: d.sleep.deepMin, color: '#8A6D3F' },
+        { label: 'Core', min: d.sleep.coreMin, color: '#B08D57' },
+        { label: 'REM', min: d.sleep.remMin, color: '#C4A375' },
+        { label: 'Awake', min: d.sleep.awakeMin, color: '#EFEADC' },
       ].filter((s) => s.min != null && s.min > 0) as Array<{ label: string; min: number; color: string }>;
       if (!parts.length) return null;
       const total = parts.reduce((a, s) => a + s.min, 0);
@@ -1275,7 +1243,7 @@ function shellVals(
   ).map((r) => ({
     day: r.day,
     calendar: scheduleLive ? r.calendar : 'not connected',
-    calColor: scheduleLive ? '#17365D' : '#9AA6B4',
+    calColor: scheduleLive ? '#B08D57' : '#B0ABA2',
     suggestion: scheduleLive ? r.suggestion : '—',
   }));
 
@@ -1295,8 +1263,8 @@ function shellVals(
     ],
     heroWeight: conv(latest.weight).toFixed(1),
     heroChip: (actualWeekly <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(actualWeekly)).toFixed(1) + ' this week',
-    heroChipBg: actualWeekly <= 0 ? '#E6EEF8' : '#EDF1F8',
-    heroChipColor: actualWeekly <= 0 ? '#0F2745' : '#C0492F',
+    heroChipBg: actualWeekly <= 0 ? '#F6F3EA' : '#F7F6F5',
+    heroChipColor: actualWeekly <= 0 ? '#8A6D3F' : '#AA7F68',
     heroVerdict: onTrack
       ? 'On plan — the 7-day trend sits at ' + conv(maLast).toFixed(1) + ' ' + uLabel + ' and you are losing at roughly ' + Math.abs(actualWeekly).toFixed(2) + ' kg a week against a ' + pace.toFixed(2) + ' kg target.'
       : 'Slightly behind plan — losing ' + Math.abs(actualWeekly).toFixed(2) + ' kg a week against a ' + pace.toFixed(2) + ' kg target. Hold the food and add steps before cutting further.',
@@ -1318,8 +1286,8 @@ function shellVals(
     ],
 
     realityChip: Math.abs(drift) < 90 ? 'formula holds' : drift > 0 ? 'burning more' : 'burning less',
-    realityChipBg: Math.abs(drift) < 90 ? '#E6EEF8' : '#EDF1F8',
-    realityChipColor: Math.abs(drift) < 90 ? '#0F2745' : '#C0492F',
+    realityChipBg: Math.abs(drift) < 90 ? '#F6F3EA' : '#F7F6F5',
+    realityChipColor: Math.abs(drift) < 90 ? '#8A6D3F' : '#AA7F68',
     realityNumbers: [
       { label: 'Formula says', value: tdee.toLocaleString(), note: 'kcal maintenance' },
       { label: 'Your data says', value: impliedTdee.toLocaleString(), note: 'kcal maintenance' },
@@ -1331,10 +1299,10 @@ function shellVals(
 
     adherenceLabel: hitWeeks + ' of ' + weekDeltas.length + ' weeks on pace',
     adherenceRows: [
-      { label: 'Weeks on pace', value: adherencePct + '%', color: '#17365D', barStyle: bar(adherencePct, '#8FB6DE') },
-      { label: 'Avg weekly loss', value: avgWeekly.toFixed(2) + ' kg', color: '#17365D', barStyle: bar((Math.abs(avgWeekly) / pace) * 100, '#8E4BA8') },
-      { label: 'Protein days', value: '6 / 7', color: '#3E9C8C', barStyle: bar(86, '#6FBCAE') },
-      { label: 'Sessions logged', value: '4 / 5', color: '#3E9C8C', barStyle: bar(80, '#4E86C4') },
+      { label: 'Weeks on pace', value: adherencePct + '%', color: '#B08D57', barStyle: bar(adherencePct, '#D6C09A') },
+      { label: 'Avg weekly loss', value: avgWeekly.toFixed(2) + ' kg', color: '#B08D57', barStyle: bar((Math.abs(avgWeekly) / pace) * 100, '#D2B49C') },
+      { label: 'Protein days', value: '6 / 7', color: '#7F9289', barStyle: bar(86, '#9FB3A9') },
+      { label: 'Sessions logged', value: '4 / 5', color: '#7F9289', barStyle: bar(80, '#C4A375') },
     ],
     adherenceCopy: correctedWeeks
       ? 'At your measured pace — not the target — goal lands in about ' + correctedWeeks + ' weeks. The plan timeline updates from this number, so it stays honest even on a slow fortnight.'
@@ -1364,10 +1332,10 @@ function shellVals(
       : 'Not configured',
     scheduleBadgeStyle: 'padding:11px 18px;border-radius:10px;font-size:12px;flex:none;border:0.5px solid ' +
       (schedule?.status === 'ok'
-        ? 'rgba(23,54,93,0.30);background:#E6EEF8;color:#0F2745;'
+        ? 'rgba(176,141,87,0.30);background:#F6F3EA;color:#8A6D3F;'
         : schedule?.status === 'auth_failed' || schedule?.status === 'fetch_failed'
-        ? 'rgba(170,127,104,0.28);background:#EDF1F8;color:#C0492F;'
-        : 'rgba(27,39,51,0.10);background:transparent;color:#9AA6B4;'),
+        ? 'rgba(170,127,104,0.28);background:#F7F6F5;color:#AA7F68;'
+        : 'rgba(26,24,21,0.08);background:transparent;color:#B0ABA2;'),
     scheduleRows,
   };
 }
@@ -1401,7 +1369,7 @@ function planVals(
       date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
       onClick: () => setState((s) => ({ weekDone: { ...s.weekDone, [i]: !s.weekDone[i] } })),
       style: 'display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:14px 16px;border-radius:10px;cursor:pointer;text-align:left;transition:all 220ms cubic-bezier(.4,0,.2,1);border:0.5px solid ' +
-        (done ? 'rgba(178,152,106,0.3);background:#E6EEF8;color:#0F2745;' : 'rgba(27,39,51,0.14);background:#FFFFFF;color:#46525F;'),
+        (done ? 'rgba(178,152,106,0.3);background:#F6F3EA;color:#7A5F38;' : 'rgba(26,24,21,0.12);background:#FFFFFF;color:#57544E;'),
     });
   }
   const doneCount = weeks.filter((_, i) => st.weekDone[i + 1]).length;
@@ -1418,30 +1386,30 @@ function planVals(
       : 'All of it comes from food, no extra cardio needed.'),
     planNumbers: [
       { label: 'Eat per day', value: intake.toLocaleString(), note: 'kcal · ' + (moveDeficit > 0 ? 'plus ' + extraSteps.toLocaleString() + ' extra steps' : 'no extra cardio required'), bg: '#FFFFFF' },
-      { label: 'Daily deficit', value: totalDeficit.toLocaleString(), note: 'kcal · ' + Math.round(totalDeficit * 7).toLocaleString() + ' a week', bg: '#E9EFF7' },
-      { label: 'Weeks to goal', value: weeksToGoal, note: 'at ' + pace.toFixed(2) + ' kg a week', bg: '#F7F9FC' },
+      { label: 'Daily deficit', value: totalDeficit.toLocaleString(), note: 'kcal · ' + Math.round(totalDeficit * 7).toLocaleString() + ' a week', bg: '#F7F5F0' },
+      { label: 'Weeks to goal', value: weeksToGoal, note: 'at ' + pace.toFixed(2) + ' kg a week', bg: '#FAFAF9' },
       { label: 'Goal date', value: goalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), note: conv(goal).toFixed(1) + ' ' + uLabel + ' · ' + goalDate.getFullYear(), bg: '#FFFFFF' },
     ],
     planCaution: pace >= 1
       ? '1 kg a week is about 1.4% of your bodyweight — sustainable for a four to six week block, not forever. Keep protein at ' + proteinG + ' g, lift three times a week, and if strength drops two sessions in a row or sleep goes under six hours, step down to 0.75 kg a week.'
       : '0.75 kg a week is roughly 1% of bodyweight — the sweet spot for holding onto muscle. If the 7-day trend stalls for two weeks, add 1,000 steps a day before cutting food further.',
     planMacros: [
-      { label: 'Protein', value: proteinG + ' g', note: '2.0 g per kg — spread across four meals', color: '#6FBCAE', pct: 100 },
-      { label: 'Carbohydrate', value: carbG + ' g', note: 'Most of it around training and shifts', color: '#8E4BA8', pct: 80 },
-      { label: 'Fat', value: fatG + ' g', note: '0.8 g per kg — keeps hormones and mood steady', color: '#4E86C4', pct: 62 },
+      { label: 'Protein', value: proteinG + ' g', note: '2.0 g per kg — spread across four meals', color: '#9FB3A9', pct: 100 },
+      { label: 'Carbohydrate', value: carbG + ' g', note: 'Most of it around training and shifts', color: '#D2B49C', pct: 80 },
+      { label: 'Fat', value: fatG + ' g', note: '0.8 g per kg — keeps hormones and mood steady', color: '#C4A375', pct: 62 },
       { label: 'Fibre', value: '30 g', note: 'Volume food: it is what makes 1,500 kcal bearable', color: '#AAB8A3', pct: 55 },
     ].map((m) => ({
       label: m.label, value: m.value, note: m.note,
       barStyle: 'height:100%;width:' + m.pct + '%;border-radius:999px;background:' + m.color + ';transition:width 500ms cubic-bezier(.16,1,.3,1);',
     })),
     planWeek: [
-      { day: 'Mon', session: 'Lower body strength', detail: 'Squat, hinge, calves · 45 min', tag: 'Lift', tagBg: '#E6EEF8', tagColor: '#0F2745' },
-      { day: 'Tue', session: 'Walk + easy day', detail: (8000 + (moveDeficit > 0 ? extraSteps : 0)).toLocaleString() + ' steps target', tag: 'Move', tagBg: '#F7F9FC', tagColor: '#7A3D91' },
-      { day: 'Wed', session: 'Upper body strength', detail: 'Press, row, curls · 40 min', tag: 'Lift', tagBg: '#E6EEF8', tagColor: '#0F2745' },
-      { day: 'Thu', session: 'Mobility or rest', detail: 'Hips and ankles · 20 min', tag: 'Easy', tagBg: '#E6EEF8', tagColor: '#0F2745' },
-      { day: 'Fri', session: 'Full body strength', detail: 'Deadlift, push-ups, core · 45 min', tag: 'Lift', tagBg: '#E6EEF8', tagColor: '#0F2745' },
-      { day: 'Sat', session: 'Long walk', detail: '60–75 min, conversational pace', tag: 'Move', tagBg: '#F7F9FC', tagColor: '#7A3D91' },
-      { day: 'Sun', session: 'Rest · weigh-in · prep', detail: 'Review the 7-day trend and cook for the week', tag: 'Reset', tagBg: '#E4F3F0', tagColor: '#3E9C8C' },
+      { day: 'Mon', session: 'Lower body strength', detail: 'Squat, hinge, calves · 45 min', tag: 'Lift', tagBg: '#F6F3EA', tagColor: '#8A6D3F' },
+      { day: 'Tue', session: 'Walk + easy day', detail: (8000 + (moveDeficit > 0 ? extraSteps : 0)).toLocaleString() + ' steps target', tag: 'Move', tagBg: '#FAFAF9', tagColor: '#957962' },
+      { day: 'Wed', session: 'Upper body strength', detail: 'Press, row, curls · 40 min', tag: 'Lift', tagBg: '#F6F3EA', tagColor: '#8A6D3F' },
+      { day: 'Thu', session: 'Mobility or rest', detail: 'Hips and ankles · 20 min', tag: 'Easy', tagBg: '#F6F3EA', tagColor: '#8A6D3F' },
+      { day: 'Fri', session: 'Full body strength', detail: 'Deadlift, push-ups, core · 45 min', tag: 'Lift', tagBg: '#F6F3EA', tagColor: '#8A6D3F' },
+      { day: 'Sat', session: 'Long walk', detail: '60–75 min, conversational pace', tag: 'Move', tagBg: '#FAFAF9', tagColor: '#957962' },
+      { day: 'Sun', session: 'Rest · weigh-in · prep', detail: 'Review the 7-day trend and cook for the week', tag: 'Reset', tagBg: '#EFF2EE', tagColor: '#7F9289' },
     ],
     planRules: [
       'Protein at every meal — ' + Math.round(proteinG / 4) + ' g a sitting hits ' + proteinG + ' g without thinking about it.',
@@ -1526,7 +1494,7 @@ function volumeVals(st: DailyLogState, setState: SetState, live: LiveData, fallb
     animalNote: best.a.one + ' \u2248 ' + best.a.kcal.toLocaleString() + ' kcal',
     animalUnitKg: best.a.kcal.toLocaleString(),
     animalUnits: Array.from({ length: units }, (_, i) => ({
-      style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#8E4BA8' : '#8FB6DE') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
+      style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#D2B49C' : '#D6C09A') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
     })),
     animalScale: (() => {
       const sorted = treats.slice().sort((x, y) => x.kcal - y.kcal);
@@ -1539,8 +1507,8 @@ function volumeVals(st: DailyLogState, setState: SetState, live: LiveData, fallb
       return {
         name: a.name,
         count: c >= 100 ? Math.round(c).toLocaleString() + '\u00d7' : c.toFixed(1) + '\u00d7',
-        labelColor: isBest ? '#17365D' : '#6E7A88',
-        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / treats[0].kcal))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#17365D' : '#C9DCEF') + ';',
+        labelColor: isBest ? '#B08D57' : '#8E8A82',
+        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / treats[0].kcal))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#B08D57' : '#EFEADC') + ';',
       };
     }),
   };
@@ -1602,7 +1570,7 @@ function liftVolumeVals(
     animalNote: best.a.one + ' \u2248 ' + best.a.kg.toLocaleString() + ' kg',
     animalUnitKg: best.a.kg.toLocaleString(),
     animalUnits: Array.from({ length: units }, (_, i) => ({
-      style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#8E4BA8' : '#8FB6DE') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
+      style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#D2B49C' : '#D6C09A') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
     })),
     animalScale: (() => {
       const sorted = animals.slice().sort((x, y) => x.kg - y.kg);
@@ -1615,8 +1583,8 @@ function liftVolumeVals(
       return {
         name: a.name,
         count: c >= 100 ? Math.round(c).toLocaleString() + '\u00d7' : c.toFixed(1) + '\u00d7',
-        labelColor: isBest ? '#17365D' : '#6E7A88',
-        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / animals[0].kg))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#17365D' : '#C9DCEF') + ';',
+        labelColor: isBest ? '#B08D57' : '#8E8A82',
+        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / animals[0].kg))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#B08D57' : '#EFEADC') + ';',
       };
     }),
   };

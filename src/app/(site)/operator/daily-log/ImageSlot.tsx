@@ -101,8 +101,8 @@ export default function ImageSlot({
             aria-label={`Remove ${placeholder} photo`}
             style={{
               position: 'absolute', top: 8, right: 8, width: 24, height: 24,
-              borderRadius: '50%', border: '0.5px solid rgba(27,39,51,0.12)',
-              background: 'rgba(255,255,255,0.92)', color: '#6E7A88',
+              borderRadius: '50%', border: '0.5px solid rgba(26,24,21,0.10)',
+              background: 'rgba(255,255,255,0.92)', color: '#8E8A82',
               fontSize: 13, lineHeight: 1, cursor: 'pointer',
             }}
           >
@@ -110,7 +110,7 @@ export default function ImageSlot({
           </button>
         </>
       ) : (
-        <span style={{ fontSize: 12, color: '#9AA6B4', textAlign: 'center', padding: '0 12px' }}>
+        <span style={{ fontSize: 12, color: '#B0ABA2', textAlign: 'center', padding: '0 12px' }}>
           {placeholder}
         </span>
       )}
