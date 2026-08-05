@@ -1,5 +1,5 @@
 import type React from 'react';
-import { avgOf, latestOf, series, today as todayRow, type LiveData } from './data';
+import { avgOf, latestOf, series, today as todayRow, type LiveData, type Workout } from './data';
 import { storedOperatorPassword } from '../OperatorGate';
 
 /**
@@ -563,12 +563,41 @@ export function deriveVals(
     title: v.toLocaleString() + ' kcal active energy',
     style: 'width:100%;height:' + ((v / loadMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (i === loadVals.length - 1 ? '#C2A87C' : '#EBE1CC') + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
-  const prs = [
-    { move: 'Back squat · 6 reps', value: '62.5 kg' },
-    { move: 'Deadlift · 5 reps', value: '85 kg' },
-    { move: 'Overhead press · 6 reps', value: '27.5 kg' },
-    { move: 'Longest walk', value: '9.4 km' },
-  ];
+  // Bests Apple Health can actually answer. Lift PRs would need set-level data,
+  // which nothing records; these come off the workout log itself.
+  const prs = (() => {
+    const w = live.workouts ?? [];
+    if (!w.length) {
+      return [
+        { move: 'Longest session', value: '—' },
+        { move: 'Furthest distance', value: '—' },
+        { move: 'Biggest burn', value: '—' },
+        { move: 'Busiest day', value: '—' },
+      ];
+    }
+    const max = (pick: (x: Workout) => number | null | undefined) =>
+      w.reduce<{ v: number; w: Workout } | null>((best, x) => {
+        const v = pick(x);
+        if (v == null || !Number.isFinite(v)) return best;
+        return !best || v > best.v ? { v, w: x } : best;
+      }, null);
+
+    const longest = max((x) => x.durationMin);
+    const furthest = max((x) => x.distanceKm);
+    const biggest = max((x) => x.energyKcal);
+    const steppiest = (days ?? []).reduce<number | null>((best, d) => {
+      const v = d.activity.steps;
+      if (v == null) return best;
+      return best == null || v > best ? v : best;
+    }, null);
+
+    return [
+      { move: 'Longest session', value: longest ? Math.round(longest.v) + ' min' : '—' },
+      { move: 'Furthest distance', value: furthest ? furthest.v.toFixed(1) + ' km' : '—' },
+      { move: 'Biggest burn', value: biggest ? Math.round(biggest.v).toLocaleString() + ' kcal' : '—' },
+      { move: 'Most steps in a day', value: steppiest == null ? '—' : Math.round(steppiest).toLocaleString() },
+    ];
+  })();
 
   /* ── habits + sleep ── */
   let done = 0, total = 0;
@@ -781,7 +810,7 @@ export function deriveVals(
 
     sessions, loadBars, prs,
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,
-    ...volumeVals(st, setState),
+    ...volumeVals(st, setState, live, st.tune.neat + st.tune.exercise),
 
     habits, habitPct: Math.round((done / total) * 100),
     sleepBars, sleepAvg: (sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1),
@@ -1000,27 +1029,52 @@ function planVals(
   };
 }
 
-function volumeVals(st: DailyLogState, setState: SetState) {
+/**
+ * The energy card on Training.
+ *
+ * The design counted total weight moved (sets x reps x load). Nothing records
+ * set-level lifting — Apple Health stores workouts, not reps — so this counts
+ * the thing that is actually measured: active energy burned over the range,
+ * with an everyday equivalent chosen to land near a comprehensible count.
+ */
+function volumeVals(st: DailyLogState, setState: SetState, live: LiveData, fallbackDaily: number) {
   const ranges: Array<[string, string, number]> = [
-    ['week', 'This week', 14820], ['month', 'This month', 61400],
-    ['quarter', 'Last 3 months', 174300], ['all', 'Since February', 412600],
+    ['week', 'This week', 7],
+    ['month', 'This month', 30],
+    ['quarter', 'Last 3 months', 91],
+    ['all', 'Since February', 3650],
   ];
   const active = ranges.find((r) => r[0] === (st.volRange || 'month'))!;
-  const total = active[2];
-  const animals = [
-    { name: 'golden retrievers', kg: 32 },
-    { name: 'red kangaroos', kg: 85 },
-    { name: 'reindeer', kg: 180 },
-    { name: 'highland cows', kg: 500 },
-    { name: 'polar bears', kg: 450 },
-    { name: 'giraffes', kg: 1200 },
-    { name: 'African elephants', kg: 6000 },
+  const windowDays = active[2];
+
+  const cutoff = Date.now() - windowDays * DAY;
+  const inWindow = (live.days ?? []).filter(
+    (d) => new Date(d.date).getTime() >= cutoff && d.activity.activeEnergyKcal != null,
+  );
+  const sessions = (live.workouts ?? []).filter((w) => new Date(w.startedAt).getTime() >= cutoff);
+
+  const total = inWindow.length
+    ? Math.round(inWindow.reduce((a, d) => a + (d.activity.activeEnergyKcal ?? 0), 0))
+    : Math.round(fallbackDaily * Math.min(windowDays, 30));
+  const perSession = sessions.length
+    ? Math.round(total / sessions.length)
+    : Math.round(total / Math.max(1, Math.round(Math.min(windowDays, 30) / 2)));
+
+  // Everyday energy equivalents, in kcal.
+  const treats = [
+    { name: 'flat whites', one: 'a flat white', kcal: 110 },
+    { name: 'bananas', one: 'a banana', kcal: 105 },
+    { name: 'slices of pizza', one: 'a slice', kcal: 285 },
+    { name: 'flapjacks', one: 'a flapjack', kcal: 320 },
+    { name: 'roast dinners', one: 'a roast dinner', kcal: 850 },
+    { name: 'Christmas dinners', one: 'a Christmas dinner', kcal: 1500 },
+    { name: 'days of eating', one: 'a full day of eating', kcal: 2000 },
   ];
-  const best = animals
-    .map((a) => ({ a, count: total / a.kg }))
+  const best = treats
+    .map((a) => ({ a, count: total / a.kcal }))
     .filter((x) => x.count >= 1.5)
     .sort((x, y) => Math.abs(Math.log(x.count / 6)) - Math.abs(Math.log(y.count / 6)))[0]
-    || { a: animals[0], count: total / animals[0].kg };
+    || { a: treats[0], count: total / treats[0].kcal };
   const count = best.count;
   const units = Math.min(24, Math.max(1, Math.round(count)));
 
@@ -1031,27 +1085,28 @@ function volumeVals(st: DailyLogState, setState: SetState) {
       style: chip((st.volRange || 'month') === r[0]),
     })),
     volTotal: total.toLocaleString(),
-    volSub: active[1].toLowerCase() + ' · ' + Math.round(total / 20).toLocaleString() + ' kg per session on average',
-    animalCount: count.toFixed(count < 10 ? 1 : 0) + '×',
+    volSub: active[1].toLowerCase() + ' · ' + perSession.toLocaleString() + ' kcal per session on average' +
+      (inWindow.length ? '' : ' · estimated until Apple Health syncs'),
+    animalCount: (count >= 100 ? Math.round(count).toLocaleString() : count.toFixed(1)) + '\u00d7',
     animalName: best.a.name,
-    animalNote: 'one ' + best.a.name.replace(/s$/, '') + ' ≈ ' + best.a.kg.toLocaleString() + ' kg',
-    animalUnitKg: best.a.kg.toLocaleString(),
+    animalNote: best.a.one + ' \u2248 ' + best.a.kcal.toLocaleString() + ' kcal',
+    animalUnitKg: best.a.kcal.toLocaleString(),
     animalUnits: Array.from({ length: units }, (_, i) => ({
       style: 'width:16px;height:16px;border-radius:6px;display:inline-block;background:' + (i % 2 ? '#D8BCA8' : '#DBC9A2') + ';opacity:' + (i < count ? 1 : 0.35) + ';',
     })),
     animalScale: (() => {
-      const sorted = animals.slice().sort((x, y) => x.kg - y.kg);
+      const sorted = treats.slice().sort((x, y) => x.kcal - y.kcal);
       const bi = sorted.findIndex((a) => a.name === best.a.name);
       const from = Math.max(0, Math.min(bi - 2, sorted.length - 5));
       return sorted.slice(from, from + 5);
     })().map((a) => {
-      const c = total / a.kg;
+      const c = total / a.kcal;
       const isBest = a.name === best.a.name;
       return {
         name: a.name,
-        count: c >= 100 ? Math.round(c).toLocaleString() + '×' : c.toFixed(1) + '×',
+        count: c >= 100 ? Math.round(c).toLocaleString() + '\u00d7' : c.toFixed(1) + '\u00d7',
         labelColor: isBest ? '#C2A87C' : '#9A9287',
-        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / animals[0].kg))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#C2A87C' : '#EBE1CC') + ';',
+        barStyle: 'height:100%;width:' + Math.min(100, (Math.log10(Math.max(1.02, c)) / Math.log10(Math.max(2, total / treats[0].kcal))) * 100).toFixed(0) + '%;border-radius:999px;background:' + (isBest ? '#C2A87C' : '#EBE1CC') + ';',
       };
     }),
   };

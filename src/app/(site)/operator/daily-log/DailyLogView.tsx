@@ -611,8 +611,8 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.06)', borderRadius: '28px', boxShadow: '0 1px 1px rgba(26,24,21,0.015),0 14px 34px rgba(26,24,21,0.035)' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '22px' }}>
       <div>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Total <em style={{ color: '#C2A87C' }}>weight moved</em></h2>
-      <p style={{ margin: '0', fontSize: '12.5px', color: '#9A9287' }}>Every rep, every set, added up — sets × reps × load.</p>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--ink)', margin: '0 0 5px', letterSpacing: '-0.015em' }}>Total <em style={{ color: '#C2A87C' }}>energy burned</em></h2>
+      <p style={{ margin: '0', fontSize: '12.5px', color: '#9A9287' }}>Active energy from Apple Health — every walk, shift and session.</p>
       </div>
       <div style={{ display: 'flex', gap: '8px' }}>
       {(v.volRanges ?? []).map((v, v_i) => (<React.Fragment key={v_i}>
@@ -624,14 +624,14 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '64px', lineHeight: '0.9', letterSpacing: '-0.03em', color: 'var(--ink)' }}>{v.volTotal}</span>
-      <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '22px', color: '#A6ADA7' }}>kg</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '22px', color: '#A6ADA7' }}>kcal</span>
       </div>
       <div style={{ fontSize: '12px', color: '#9A9287', marginTop: '8px' }}>{v.volSub}</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
       <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: '#F6F1E6', border: '0.5px solid rgba(178,152,106,0.18)', flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#C2A87C', letterSpacing: '-0.02em' }}>{v.animalUnitKg}</span>
-      <span style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#9C7F6A' }}>kg each</span>
+      <span style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#9C7F6A' }}>kcal each</span>
       </div>
       <div>
       <div style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#9C7F6A' }}>that is about</div>
@@ -661,7 +661,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.06)', borderRadius: '28px', boxShadow: '0 1px 1px rgba(26,24,21,0.015),0 14px 34px rgba(26,24,21,0.035)' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 4px' }}>This week&apos;s sessions</h2>
-      <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Tap a session for the set detail.</p>
+      <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Tap a session for what Apple Health recorded.</p>
       {(v.sessions ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
       <div style={{ borderTop: '0.5px solid var(--rule-soft)' }}>
       <button onClick={s.onClick} style={{ width: '100%', display: 'grid', gridTemplateColumns: 'auto 1fr auto auto', gap: '14px', alignItems: 'center', padding: '16px 4px', background: 'transparent', border: '0', cursor: 'pointer', textAlign: 'left' }}>
