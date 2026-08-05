@@ -28,39 +28,23 @@ import {
 export default function DailyLogView({ v }: { v: DailyLogVals }) {
   return (
     <>
-      <div data-shell style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '252px minmax(0,1fr)', fontFamily: 'var(--font-body)', fontWeight: '300', color: 'var(--ink-soft)', background: '#FAF8F0' }}>
-      <aside data-sidebar style={{ borderRight: '0.5px solid rgba(26,24,21,0.09)', padding: '34px 24px', position: 'sticky', top: '0', height: '100vh', display: 'flex', flexDirection: 'column', gap: '30px', background: '#FDFBF5' }}>
-      <div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: '21px', color: 'var(--ink)', letterSpacing: '-0.015em' }}>Daily<em style={{ color: '#B08D57' }}> log</em></div>
-      <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginTop: '4px' }}>Week 31 · 2026</div>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', marginTop: '12px', padding: '6px 12px', borderRadius: '999px', background: '#F7F1E4', border: '0.5px solid rgba(178,152,106,0.16)', fontSize: '10.5px', color: '#957962' }}>
-      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#9FB3A9', display: 'inline-block' }}></span>
-              Apple Health · synced 7 min ago
-            </div>
+      <div data-shell style={{ minHeight: '100vh', fontFamily: 'var(--font-body)', fontWeight: '300', color: 'var(--ink-soft)', background: '#FAF8F0' }}>
+      <div data-topbar style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', padding: '20px 48px 0', maxWidth: '1220px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', letterSpacing: '-0.015em' }}>Daily<em style={{ color: '#B08D57' }}> log</em></span>
+      <span style={{ fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Week 31 · 2026</span>
       </div>
-      <div data-sidebar-hide style={{ display: 'flex', alignItems: 'center', gap: '13px', padding: '15px 16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.09)', borderRadius: '12px', boxShadow: 'none' }}>
-      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#F5EFDF', display: 'grid', placeItems: 'center', fontFamily: 'var(--font-display)', fontSize: '17px', color: '#957962' }}>M</div>
-      <div>
-      <div style={{ fontSize: '13px', color: 'var(--ink)' }}>Maya</div>
-      <div style={{ fontSize: '10.5px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Cut · week 9</div>
-      </div>
-      </div>
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      {(v.navItems ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
-      <button onClick={n.onClick} style={sx(n.style)} className="hv0">
-      <span style={{ flex: 'none' }}>{n.label}</span>
-      <span data-nav-meta style={{ flex: 'none', fontSize: '10px', letterSpacing: '0.12em', color: 'var(--ink-mute)' }}>{n.meta}</span>
-      </button>
-      </React.Fragment>))}
-      </nav>
-      <div data-sidebar-hide style={{ marginTop: 'auto', padding: '18px', borderRadius: '12px', background: '#FAF3EC', border: '0.5px solid rgba(178,152,106,0.14)', display: 'flex', flexDirection: 'column', gap: '11px' }}>
-      <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Streaks</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
       <StreakChip days={21} label='days logged' tone='brass'></StreakChip>
       <StreakChip days={6} label='protein hit' tone='green'></StreakChip>
       <StreakChip days={4} label='workouts' tone='brass'></StreakChip>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 12px', borderRadius: '999px', background: '#F7F1E4', border: '0.5px solid rgba(176,141,87,0.16)', fontSize: '10.5px', color: '#957962' }}>
+      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#9FB3A9', display: 'inline-block' }}></span>
+      Apple Health · synced 7 min ago
+      </span>
       </div>
-      </aside>
-      <main data-main style={{ padding: '44px 48px 88px', maxWidth: '1220px', minWidth: '0' }}>
+      </div>
+      <main data-main style={{ padding: '28px 48px 88px', maxWidth: '1220px', minWidth: '0', margin: '0 auto' }}>
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap', marginBottom: '18px' }}>
       <div style={{ flex: '1 1 380px', minWidth: '0' }}>
       <div style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: '10px' }}>Fitness &amp; recovery</div>

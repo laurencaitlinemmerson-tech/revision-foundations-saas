@@ -191,7 +191,7 @@ export function deriveVals(
   const uLabel = unit === 'lb' ? 'lb' : 'kg';
   const bmiOf = (w: number) => w / (1.68 * 1.68);
 
-  /* ── nav + tabs ── */
+  /* ── tabs ── */
   const navDefs: Array<[DailyLogState['tab'], string, string]> = [
     ['today', 'Today', 'now'],
     ['trends', 'Trends', readings.length + ' logs'],
@@ -201,13 +201,6 @@ export function deriveVals(
     ['training', 'Training', '4 sessions'],
     ['habits', 'Habits', '21 days'],
   ];
-  const navItems = navDefs.map((n) => ({
-    label: n[1],
-    meta: n[2],
-    onClick: () => setState({ tab: n[0] }),
-    style: 'display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:13px 16px;border:0;border-radius:10px;cursor:pointer;font-size:13.5px;text-align:left;transition:background 220ms cubic-bezier(.4,0,.2,1),color 220ms;' +
-      (st.tab === n[0] ? 'background:#FFFFFF;color:#1A1A18;' : 'background:transparent;color:#8E8A82;'),
-  }));
   const tabs = navDefs.map((n) => ({
     label: n[1],
     onClick: () => setState({ tab: n[0] }),
@@ -671,7 +664,7 @@ export function deriveVals(
   };
 
   return {
-    navItems, tabs,
+    tabs,
     isToday: st.tab === 'today', isTrends: st.tab === 'trends', isFood: st.tab === 'food',
     isProgress: st.tab === 'progress', isPlan: st.tab === 'plan',
     isTraining: st.tab === 'training', isHabits: st.tab === 'habits',
@@ -723,7 +716,7 @@ export function deriveVals(
     // Split so the header can set the last word in italic gold, the way the
     // section headings elsewhere do.
     greetingLead: 'Good morning,',
-    greetingTail: 'Maya.',
+    greetingTail: 'Lauren.',
     subhead: 'Sunday 2 August · ' + conv(latest.weight).toFixed(1) + ' ' + uLabel + ' this morning, ' + Math.max(0, kcalTarget - st.logged.kcal).toLocaleString() + ' kcal left today.',
     unitToggle: (['kg', 'lb'] as const).map((u) => ({ label: u, onClick: () => setState({ unit: u }), style: chip(unit === u) })),
     kpis,
