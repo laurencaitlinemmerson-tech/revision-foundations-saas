@@ -28,6 +28,8 @@ type Status = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_failed';
 
 const DAY_MS = 86400000;
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+/** How far back to pull for the shift-vs-off comparison. */
+const HISTORY_DAYS = 84;
 
 /** Monday 00:00 of the week containing `now`. */
 function weekStart(now = new Date()) {
@@ -102,14 +104,14 @@ async function accessToken(): Promise<TokenResult> {
   }
 }
 
-async function fetchWeek(token: string, from: Date, to: Date): Promise<Entry[] | null> {
+async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[] | null> {
   const calendar = encodeURIComponent(process.env.GOOGLE_CALENDAR_ID ?? 'primary');
   const params = new URLSearchParams({
     timeMin: from.toISOString(),
     timeMax: to.toISOString(),
     singleEvents: 'true',
     orderBy: 'startTime',
-    maxResults: '250',
+    maxResults: '2500',
   });
 
   try {
@@ -145,6 +147,23 @@ async function fetchWeek(token: string, from: Date, to: Date): Promise<Entry[] |
   } catch {
     return null;
   }
+}
+
+/**
+ * Words that mark a day as clinical work rather than anything else in the
+ * calendar. Matched case-insensitively against the event title.
+ */
+const SHIFT_WORDS = /\b(shift|placement|ward|clinical|nights?|long day|early|late|on call|oncall|hospital|practice|trust)\b/i;
+
+/** A day counts as worked when it is named as one, or when it simply is one. */
+function classifyDay(entries: Entry[]) {
+  const named = entries.find((e) => SHIFT_WORDS.test(e.title));
+  const hours = busyHours(entries);
+  const shift = Boolean(named) || hours >= 6;
+  const night = entries.some(
+    (e) => /\bnights?\b/i.test(e.title) || (!e.allDay && (e.start.getHours() >= 19 || e.start.getHours() < 5)),
+  );
+  return { shift, night: shift && night, hours: Math.round(hours * 10) / 10, label: named?.title ?? null };
 }
 
 /** Hours committed on a day, all-day entries counting as a full working day. */
@@ -203,7 +222,11 @@ export async function GET(req: NextRequest) {
 
   const from = weekStart();
   const to = new Date(from.getTime() + 7 * DAY_MS);
-  const events = await fetchWeek(token.token, from, to);
+
+  // The card needs this week; the shift analysis needs a run of past weeks to
+  // compare worked days against off days. One fetch covers both.
+  const historyFrom = new Date(from.getTime() - HISTORY_DAYS * DAY_MS);
+  const events = await fetchEvents(token.token, historyFrom, to);
   if (events === null) {
     return NextResponse.json({ status: 'fetch_failed' satisfies Status, days: [] });
   }
@@ -234,5 +257,18 @@ export async function GET(req: NextRequest) {
     };
   });
 
-  return NextResponse.json({ status: 'ok' satisfies Status, days });
+  // Past days, classified, for the shift-vs-off comparison. Today is excluded —
+  // a day still in progress would drag every "on shift" average down.
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const history = [];
+  for (let t = historyFrom.getTime(); t < todayStart.getTime(); t += DAY_MS) {
+    const dayStart = new Date(t);
+    const dayEnd = new Date(t + DAY_MS);
+    const entries = events.filter((e) => e.start >= dayStart && e.start < dayEnd);
+    const c = classifyDay(entries);
+    history.push({ date: dayStart.toISOString().slice(0, 10), ...c });
+  }
+
+  return NextResponse.json({ status: 'ok' satisfies Status, days, history });
 }

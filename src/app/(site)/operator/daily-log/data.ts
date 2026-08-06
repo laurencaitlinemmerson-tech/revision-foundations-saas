@@ -45,6 +45,10 @@ export type HealthDay = {
     sugarG: number | null;
     waterMl: number | null;
   };
+  cycle: {
+    /** 0 none, 1 light, 2 medium, 3 heavy. Null when nothing was recorded. */
+    flow: number | null;
+  };
 };
 
 export type WeighIn = {
@@ -69,9 +73,20 @@ export type ScheduleDay = {
 
 export type ScheduleStatus = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_failed';
 
+/** A past day, classified as worked or not, for the shift-vs-off comparison. */
+export type ShiftDay = {
+  date: string;
+  shift: boolean;
+  night: boolean;
+  hours: number;
+  /** The calendar entry that named it, when a title matched rather than hours. */
+  label: string | null;
+};
+
 export type Schedule = {
   status: ScheduleStatus;
   days: ScheduleDay[];
+  history?: ShiftDay[];
   /** Google's own reason, when it rejected the credentials. */
   detail?: string;
 };

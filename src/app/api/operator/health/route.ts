@@ -45,6 +45,11 @@ function fromRow(row: Record<string, unknown>) {
       sugarG: num(row.sugar_g),
       waterMl: num(row.water_ml),
     },
+    cycle: {
+      // Null both when nothing was recorded and when the column does not exist
+      // yet, so the dashboard treats "no migration" and "no data" alike.
+      flow: num(row.menstrual_flow),
+    },
   };
 }
 

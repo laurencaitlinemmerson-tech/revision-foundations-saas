@@ -1,5 +1,5 @@
 import type React from 'react';
-import { avgOf, lastSyncedDate, latestOf, series, today as todayRow, type LiveData, type Lift, type Workout } from './data';
+import { avgOf, lastSyncedDate, latestOf, series, today as todayRow, type HealthDay, type LiveData, type Lift, type Workout } from './data';
 import { storedOperatorPassword } from '../OperatorGate';
 import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
 import { fitReadings, projectWithBand } from '@/lib/fitness/regression';
@@ -740,7 +740,15 @@ export function deriveVals(
   // A dashboard that only reports is half a dashboard. Where the numbers imply
   // a specific change, work out what that change is and offer to make it.
   const fit = readings.length >= 4 ? fitReadings(readings) : null;
-  const measuredWeekly = fit ? fit.slope * 7 : null;
+  // The forecast wants the long-run line; a correction wants the current one. A
+  // rate averaged over six months would keep prescribing changes for a month
+  // that has already turned around.
+  const recent = readings.filter(
+    (r) => new Date(r.date).getTime() >= new Date(latest.date).getTime() - 28 * DAY,
+  );
+  const recentFit = recent.length >= 4 ? fitReadings(recent) : fit;
+  const measuredWeekly = recentFit ? recentFit.slope * 7 : null;
+
   const correction = (() => {
     if (measuredWeekly == null || !Number.isFinite(measuredWeekly)) return null;
     const targetWeekly = -st.pace;
@@ -754,21 +762,43 @@ export function deriveVals(
     // Below BMR is where a cut stops being a diet, so it is the floor — and it is
     // a number already on the dashboard rather than an arbitrary one.
     const floor = Math.max(1200, Math.round(st.tune.bmr / 10) * 10);
-    const needed = kcalTarget - (gap * KCAL_PER_KG) / 7;
+    // The measured rate is the body's answer to what she actually ate, not to
+    // what the plan asked for. Anchoring the arithmetic on the budget instead of
+    // on real intake is how you end up telling someone to eat more in order to
+    // lose faster.
+    const eating = avgIntake > 0 ? avgIntake : kcalTarget;
+    const needed = eating - (gap * KCAL_PER_KG) / 7;
 
-    // When the budget that would hit the target pace sits under the floor, the
-    // budget is not the thing to change — the pace is. The measured response says
-    // how much loss the floor can actually buy.
-    if (needed < floor && kcalTarget > floor) {
-      const reachable = Math.abs(measuredWeekly) + ((kcalTarget - floor) * 7) / KCAL_PER_KG;
-      const pace = Math.round(Math.max(0.1, Math.min(st.pace - 0.05, reachable)) * 20) / 20;
-      if (pace >= st.pace) return null;
+    // When the pace cannot be met without eating under BMR — or when the plan is
+    // already asking for that — the pace is what has to give, not the food.
+    if (needed < floor || kcalTarget < floor) {
+      // Two constraints, both of which have to hold: what her measured response
+      // says the floor can actually buy, and what keeps the plan's own derived
+      // budget above the floor. Rounded down, not to nearest — rounding up would
+      // land the budget a few kcal under and ask for a second click.
+      const reachable = Math.abs(measuredWeekly) + ((eating - floor) * 7) / KCAL_PER_KG;
+      const budgetAllows = (tdee - floor) / (KCAL_PER_KG / 7);
+      const pace = Math.floor(Math.max(0.05, Math.min(st.pace - 0.05, reachable, budgetAllows)) * 20) / 20;
+      if (pace >= st.pace || pace < 0.05) return null;
+      const already = kcalTarget < floor;
       return {
         cta: `Set ${pace.toFixed(2)} kg/wk`,
         delta: '−' + (st.pace - pace).toFixed(2),
-        title: `${st.pace.toFixed(2)} kg/wk is not reachable without eating below BMR`,
-        note: `You are losing ${rate} kg/wk. Hitting ${st.pace.toFixed(2)} from here needs about ${Math.round(needed).toLocaleString()} kcal, which is under your ${floor.toLocaleString()} kcal BMR. The honest ceiling at this maintenance estimate is ${pace.toFixed(2)} kg/wk. Log a week of intake and the dashboard can measure maintenance properly instead of estimating it.`,
+        title: already
+          ? `The plan is asking for ${kcalTarget.toLocaleString()} kcal — under your BMR`
+          : `${st.pace.toFixed(2)} kg/wk is not reachable without eating below BMR`,
+        note: already
+          ? `A ${st.pace.toFixed(2)} kg/wk target against your current maintenance works out at ${kcalTarget.toLocaleString()} kcal, below your ${floor.toLocaleString()} kcal BMR. That is not a budget worth holding. At ${pace.toFixed(2)} kg/wk the budget clears BMR and the loss keeps going — slower, but at a rate you can actually eat at.`
+          : `You are losing ${rate} kg/wk on about ${Math.round(eating).toLocaleString()} kcal a day. Hitting ${st.pace.toFixed(2)} from here needs roughly ${Math.round(needed).toLocaleString()} kcal, under your ${floor.toLocaleString()} kcal BMR. The honest ceiling is ${pace.toFixed(2)} kg/wk.`,
         apply: () => setState({ pace }),
+      };
+    }
+
+    // A budget that is being missed by a wide margin is not a budget problem.
+    if (eating - kcalTarget > 250) {
+      return {
+        title: `Eating about ${Math.round(eating).toLocaleString()} kcal against a ${kcalTarget.toLocaleString()} budget`,
+        note: `The trend is off plan, but the budget is not the reason — it is being missed by roughly ${Math.round(eating - kcalTarget).toLocaleString()} kcal a day. Lowering the number on the card will not change that. Either set the budget somewhere you will actually hold, or look at which days the overshoot lands on before touching it.`,
       };
     }
 
@@ -790,20 +820,6 @@ export function deriveVals(
         : `Faster than planned is not free — it costs muscle and adherence. Moving the budget to ${suggested.toLocaleString()} kcal brings it back to target.`)
         + (capped ? ` That is a ${STEP} kcal step rather than the full correction, because the maintenance figure behind it is an estimate — change one thing, then re-read the trend in a fortnight.` : ''),
       apply: () => setState((s) => ({ targets: { ...s.targets, kcal: suggested } })),
-    };
-  })();
-
-  // A weigh-in far off the trend line is usually water, not fat. Say so, rather
-  // than letting a 1.5 kg jump read as a bad week.
-  const outlier = (() => {
-    if (!fit || fit.rmse <= 0 || readings.length < 6) return null;
-    const daysFromT0 = (new Date(latest.date).getTime() - fit.t0) / DAY;
-    const expected = fit.intercept + fit.slope * daysFromT0;
-    const resid = latest.weight - expected;
-    if (Math.abs(resid) < fit.rmse * 2) return null;
-    return {
-      title: `${Math.abs(resid).toFixed(1)} kg ${resid > 0 ? 'above' : 'below'} trend`,
-      note: `Today's reading sits more than two standard deviations off your own trend line. That is almost always water — salt, carbs, a hard session, or the time of the month — rather than a real change. The 7-day line is the one to read.`,
     };
   })();
 
@@ -836,6 +852,305 @@ export function deriveVals(
           range: conv(b.lower).toFixed(1) + '–' + conv(b.upper).toFixed(1),
         };
       }),
+    };
+  })();
+
+  /* ── cycle ── */
+  // The largest source of unexplained noise in a weight series. Apple Health
+  // records flow; everything else here is derived from her own cycle lengths
+  // rather than assuming a textbook 28 days.
+  const cycle = (() => {
+    const flowDays = (days ?? [])
+      .filter((d) => (d.cycle?.flow ?? 0) > 0)
+      .map((d) => d.date.slice(0, 10))
+      .sort();
+    if (flowDays.length < 2) return null;
+
+    // A period starts on a flow day with no flow in the three days before it,
+    // which tolerates the one-day gaps that spotting leaves in the record.
+    const flowSet = new Set(flowDays);
+    const starts = flowDays.filter((d) => {
+      const t = new Date(d).getTime();
+      return ![1, 2, 3].some((n) => flowSet.has(new Date(t - n * DAY).toISOString().slice(0, 10)));
+    });
+    if (!starts.length) return null;
+
+    const lengths = starts
+      .slice(1)
+      .map((s, i) => Math.round((new Date(s).getTime() - new Date(starts[i]).getTime()) / DAY))
+      .filter((n) => n >= 18 && n <= 45);
+    const avgLen = lengths.length
+      ? Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length)
+      : 28;
+
+    const lastStart = starts[starts.length - 1];
+    const dayOf = Math.round((new Date(latest.date).getTime() - new Date(lastStart).getTime()) / DAY) + 1;
+    if (dayOf < 1 || dayOf > 60) return null;
+
+    // The luteal phase is the stable one at about fourteen days, so ovulation is
+    // counted back from the end rather than fixed at day fourteen.
+    const ovulation = Math.max(10, avgLen - 14);
+    const phaseOf = (n: number) =>
+      n <= 5 ? 'Menstrual' : n < ovulation ? 'Follicular' : n <= ovulation + 2 ? 'Ovulation' : 'Luteal';
+    const phase = phaseOf(dayOf);
+
+    // What the scale actually does in each phase, measured as the average
+    // distance from her own trend line. This is the number that stops a luteal
+    // week reading as a failed one.
+    const offsets: Record<string, number[]> = {};
+    if (fit) {
+      for (const r of readings) {
+        const t = new Date(r.date).getTime();
+        const start = [...starts].reverse().find((s) => new Date(s).getTime() <= t);
+        if (!start) continue;
+        const n = Math.round((t - new Date(start).getTime()) / DAY) + 1;
+        if (n > 45) continue;
+        const expected = fit.intercept + fit.slope * ((t - fit.t0) / DAY);
+        (offsets[phaseOf(n)] ??= []).push(r.weight - expected);
+      }
+    }
+    const phaseRows = ['Menstrual', 'Follicular', 'Ovulation', 'Luteal']
+      .map((name) => {
+        const vals = offsets[name] ?? [];
+        if (vals.length < 2) return null;
+        const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+        return {
+          name,
+          n: vals.length,
+          offset: (mean >= 0 ? '+' : '−') + Math.abs(conv(mean)).toFixed(2) + ' ' + uLabel,
+          current: name === phase,
+          barStyle:
+            'height:100%;border-radius:3px;background:' + (name === phase ? '#C06C84' : '#E7C9D4') +
+            ';width:' + Math.min(100, Math.abs(mean) * 120).toFixed(1) + '%;',
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+
+    const here = phaseRows.find((r) => r.current);
+    const note =
+      phase === 'Luteal'
+        ? `Day ${dayOf} of about ${avgLen}. The luteal phase is where the scale is least honest — water, not fat.${here ? ` Across your own history it reads ${here.offset} against trend here.` : ''} Hold the plan and read the trend line, not the morning number.`
+        : phase === 'Menstrual'
+        ? `Day ${dayOf}. Weight usually drops sharply in the first few days as the luteal water clears — a satisfying number that is mostly not fat.${here ? ` Your own average here is ${here.offset} against trend.` : ''}`
+        : phase === 'Ovulation'
+        ? `Day ${dayOf} of about ${avgLen}, around ovulation. A small water rise here is normal and passes within a few days.`
+        : `Day ${dayOf} of about ${avgLen}. The follicular phase is the cleanest read you get — weigh-ins now reflect what is actually happening, and training tends to feel easiest.`;
+
+    return {
+      phase,
+      dayOf,
+      avgLen,
+      lengthNote: lengths.length
+        ? `Averaged over ${lengths.length} recorded cycle${lengths.length === 1 ? '' : 's'}.`
+        : 'Cycle length assumed at 28 days until a second period is recorded.',
+      note,
+      phaseRows,
+    };
+  })();
+
+  // A weigh-in far off the trend line is usually water, not fat. With cycle data
+  // the dashboard can name the reason instead of listing the possibilities.
+  const outlier = (() => {
+    if (!fit || fit.rmse <= 0 || readings.length < 6) return null;
+    const daysFromT0 = (new Date(latest.date).getTime() - fit.t0) / DAY;
+    const expected = fit.intercept + fit.slope * daysFromT0;
+    const resid = latest.weight - expected;
+    if (Math.abs(resid) < fit.rmse * 2) return null;
+
+    const phaseExplains =
+      cycle && resid > 0 && (cycle.phase === 'Luteal' || cycle.phase === 'Ovulation');
+    return {
+      title: `${Math.abs(conv(resid)).toFixed(1)} ${uLabel} ${resid > 0 ? 'above' : 'below'} trend`,
+      note: phaseExplains
+        ? `Today's reading sits more than two standard deviations off your own trend line — and you are on day ${cycle.dayOf}, in the ${cycle.phase.toLowerCase()} phase, which is exactly where your history says the scale runs high. This is water. Read the 7-day line and carry on.`
+        : `Today's reading sits more than two standard deviations off your own trend line. That is almost always water — salt, carbs, or a hard session — rather than a real change. The 7-day line is the one to read.`,
+    };
+  })();
+
+  /* ── shift vs off day ── */
+  // She is on placement. A twelve-hour ward day and a day off are not the same
+  // day, and averaging them together hides the only pattern worth acting on.
+  const shiftSplit = (() => {
+    const hist = live.schedule?.history;
+    if (!hist?.length || !days?.length) return null;
+    const byDate = new Map(hist.map((h) => [h.date, h]));
+    const on: HealthDay[] = [];
+    const off: HealthDay[] = [];
+    for (const d of days) {
+      const h = byDate.get(d.date.slice(0, 10));
+      if (!h) continue;
+      (h.shift ? on : off).push(d);
+    }
+    if (on.length < 3 || off.length < 3) return null;
+
+    const mean = (arr: HealthDay[], pick: (d: HealthDay) => number | null | undefined) => {
+      const v = arr.map(pick).filter((x): x is number => typeof x === 'number' && Number.isFinite(x));
+      return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+    };
+
+    const specs: Array<{
+      label: string;
+      pick: (d: HealthDay) => number | null | undefined;
+      fmt: (n: number) => string;
+      /** Whether more is the better direction, for colouring the gap. */
+      up: boolean;
+    }> = [
+      { label: 'Protein', pick: (d) => d.nutrition.proteinG, fmt: (n) => Math.round(n) + ' g', up: true },
+      { label: 'Intake', pick: (d) => d.nutrition.dietaryEnergyKcal, fmt: (n) => Math.round(n).toLocaleString() + ' kcal', up: false },
+      { label: 'Steps', pick: (d) => d.activity.steps, fmt: (n) => Math.round(n).toLocaleString(), up: true },
+      { label: 'Sleep', pick: (d) => (d.sleep.totalMin == null ? null : d.sleep.totalMin / 60), fmt: (n) => n.toFixed(1) + ' h', up: true },
+      { label: 'Active burn', pick: (d) => d.activity.activeEnergyKcal, fmt: (n) => Math.round(n).toLocaleString() + ' kcal', up: true },
+    ];
+
+    const rows = specs
+      .map((s) => {
+        const a = mean(on, s.pick);
+        const b = mean(off, s.pick);
+        if (a == null || b == null) return null;
+        const pct = b === 0 ? 0 : Math.round(((a - b) / b) * 100);
+        return {
+          label: s.label,
+          onValue: s.fmt(a),
+          offValue: s.fmt(b),
+          delta: (pct > 0 ? '+' : '') + pct + '%',
+          good: Math.abs(pct) < 8 ? null : s.up ? pct > 0 : pct < 0,
+          gap: Math.abs(pct),
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+    if (!rows.length) return null;
+
+    // The biggest gap is not the one worth naming — a big gap in your favour is
+    // not a problem. Lead with the largest harmful one, and only fall back to
+    // raw size when nothing is going the wrong way.
+    const bySize = [...rows].sort((a, b) => b.gap - a.gap);
+    const worst = bySize.find((r) => r.good === false) ?? bySize[0];
+    const nights = hist.filter((h) => h.night).length;
+
+    return {
+      onDays: on.length,
+      offDays: off.length,
+      rows,
+      note:
+        worst.gap < 8
+          ? `Across ${on.length} shift days and ${off.length} off days nothing moves much — placement is not costing you the plan, which is worth knowing.`
+          : `The gap that matters is ${worst.label.toLowerCase()}: ${worst.onValue} on shift against ${worst.offValue} off, a ${worst.delta} difference across ${on.length} shift days. ${
+              worst.good === false
+                ? 'That is the one to prepare around rather than rely on willpower for — pack it the night before.'
+                : 'That one is working in your favour; the rest of the plan can lean on it.'
+            }${nights >= 3 ? ` ${nights} of those were nights.` : ''}`,
+    };
+  })();
+
+  /* ── relative strength ── */
+  // Absolute load falls in a deficit and that is not automatically bad. Load per
+  // kilo of bodyweight is the number that says whether the cut is taking muscle.
+  const relativeStrength = (() => {
+    const all = (live.lifts ?? []).filter((l) => l.e1rmKg > 0);
+    if (all.length < 4 || readings.length < 2) return null;
+
+    // Bodyweight on the day of a lift, taken from the nearest weigh-in.
+    const weightAt = (iso: string) => {
+      const t = new Date(iso).getTime();
+      let best: Reading | null = null;
+      let bestGap = Infinity;
+      for (const r of readings) {
+        const gap = Math.abs(new Date(r.date).getTime() - t);
+        if (gap < bestGap) { bestGap = gap; best = r; }
+      }
+      return bestGap <= 14 * DAY && best ? best.weight : null;
+    };
+
+    const byExercise = new Map<string, Lift[]>();
+    for (const l of all) byExercise.set(l.exercise, [...(byExercise.get(l.exercise) ?? []), l]);
+
+    const rows = [...byExercise.entries()]
+      .map(([exercise, ls]) => {
+        const pts = ls
+          .sort((a, b) => a.performedOn.localeCompare(b.performedOn))
+          .map((l) => { const bw = weightAt(l.performedOn); return bw ? { date: l.performedOn, ratio: l.e1rmKg / bw } : null; })
+          .filter((p): p is { date: string; ratio: number } => p !== null);
+        if (pts.length < 2) return null;
+        const first = pts[0];
+        const last = pts[pts.length - 1];
+        const change = ((last.ratio - first.ratio) / first.ratio) * 100;
+        return {
+          exercise,
+          ratio: last.ratio.toFixed(2) + '×',
+          change: (change >= 0 ? '+' : '−') + Math.abs(change).toFixed(1) + '%',
+          rising: change >= 0,
+          sessions: pts.length,
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null)
+      .sort((a, b) => b.sessions - a.sessions)
+      .slice(0, 5);
+    if (!rows.length) return null;
+
+    const rising = rows.filter((r) => r.rising).length;
+    const lost = readings.length >= 2 ? readings[0].weight - latest.weight : 0;
+    return {
+      rows,
+      note:
+        rising === rows.length
+          ? `Every movement is stronger per kilo than when you started, across ${lost.toFixed(1)} kg of weight loss. That is the pattern you want from a cut — the weight coming off is not muscle.`
+          : rising === 0
+          ? `Load per kilo is down across the board. Over a deficit that usually means the deficit is too steep, protein is too low, or recovery is short — in that order of likelihood.`
+          : `${rising} of ${rows.length} movements are stronger per kilo. Mixed is normal mid-cut; watch whether the falling ones share a session day.`,
+    };
+  })();
+
+  /* ── adaptive maintenance ── */
+  // Maintenance is not a constant. Back-derived from intake and weight change at
+  // successive points, it shows adaptation as it happens rather than as a single
+  // number that quietly goes stale.
+  const maintenanceTrend = (() => {
+    if (Object.keys(intakeByDate).length < 21 || readings.length < 6) return null;
+    const end = new Date(readings[readings.length - 1].date).getTime();
+    const pts: Array<{ date: string; tdee: number }> = [];
+    for (let back = 56; back >= 0; back -= 7) {
+      const cut = end - back * DAY;
+      const sub = readings.filter((r) => new Date(r.date).getTime() <= cut);
+      const rc = tdeeRealityCheck(sub, intakeByDate, formulaTdee, -st.pace, 21);
+      if (rc && rc.days >= 10) pts.push({ date: new Date(cut).toISOString().slice(0, 10), tdee: rc.actualTdee });
+    }
+    if (pts.length < 3) return null;
+
+    const vals = pts.map((p) => p.tdee);
+    const mn = Math.min(...vals);
+    const mx = Math.max(...vals);
+    const rng = mx - mn || 1;
+    const W = 320, H = 90, PAD = 8;
+    const path = pts
+      .map((p, i) => {
+        const x = PAD + (i / (pts.length - 1)) * (W - PAD * 2);
+        const y = H - PAD - ((p.tdee - mn) / rng) * (H - PAD * 2);
+        return (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1);
+      })
+      .join(' ');
+
+    const drift = vals[vals.length - 1] - vals[0];
+    const weeks = pts.length - 1;
+    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    // Endpoints alone will call a violently swinging series "steady" whenever it
+    // happens to start and finish in the same place. The spread decides whether
+    // there is a trend here worth reading at all.
+    const noisy = rng > Math.max(300, mean * 0.15);
+
+    return {
+      path,
+      first: vals[0].toLocaleString(),
+      last: vals[vals.length - 1].toLocaleString(),
+      low: mn.toLocaleString(),
+      high: mx.toLocaleString(),
+      weeks,
+      note: noisy
+        ? `These estimates swing by ${Math.round(rng).toLocaleString()} kcal week to week, which is more than any real adaptation could account for — three weeks of weight change is a noisy thing to divide by. Read the level, not the wiggle: your maintenance is somewhere near ${Math.round(mean).toLocaleString()} kcal, and it will take another month before the direction means anything.`
+        : drift <= -120
+        ? `Your measured maintenance has fallen about ${Math.abs(drift).toLocaleString()} kcal over ${weeks} weeks. Some of that is simply carrying less weight around, but a drop this size is also what adaptation looks like — a week at maintenance does more from here than cutting further.`
+        : drift >= 120
+        ? `Measured maintenance has risen about ${drift.toLocaleString()} kcal over ${weeks} weeks, which usually means training volume or daily movement went up. You can afford to eat more than the original plan assumed.`
+        : `Maintenance has held inside ${Math.round(rng).toLocaleString()} kcal across ${weeks} weeks. Nothing has adapted away — the plan's numbers are still the right ones.`,
     };
   })();
 
@@ -1222,6 +1537,7 @@ export function deriveVals(
     proteinPerKgLabel: proteinPerKgToday > 0 ? proteinPerKgToday.toFixed(2) + ' g/kg' : '—',
     sleepDepth, habitStreaks,
     correction, outlier, muscleRisk, forecast,
+    cycle, shiftSplit, relativeStrength, maintenanceTrend,
     lifts: live.lifts,
     onLiftSaved,
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,

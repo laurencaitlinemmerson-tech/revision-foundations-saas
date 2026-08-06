@@ -281,7 +281,14 @@ type DailyMetricRow = {
   fiber_g: number | null;
   sugar_g: number | null;
   water_ml: number | null;
+  menstrual_flow: number | null;
 };
+
+/**
+ * Columns introduced after the table's original migration. If the operator has
+ * not run the corresponding .sql yet, the sync drops these rather than failing.
+ */
+const OPTIONAL_COLUMNS = ['menstrual_flow'] as const;
 
 function emptyDaily(date: string): DailyMetricRow {
   return {
@@ -308,6 +315,7 @@ function emptyDaily(date: string): DailyMetricRow {
     fiber_g: null,
     sugar_g: null,
     water_ml: null,
+    menstrual_flow: null,
   };
 }
 
@@ -391,6 +399,22 @@ function setSum(target: Map<string, DailyMetricRow>, key: keyof DailyMetricRow, 
   for (const [day, total] of sums) {
     const row = target.get(day) ?? emptyDaily(day);
     (row[key] as number | null) = round(total, 2);
+    target.set(day, row);
+  }
+}
+
+// Accumulator that keeps the largest value seen for a day (for graded metrics
+// where the day should read as its strongest reading, not its last).
+function setMax(target: Map<string, DailyMetricRow>, key: keyof DailyMetricRow, points: HealthAutoExportPoint[], transform?: (qty: number) => number) {
+  for (const p of points) {
+    if (p.qty === undefined || !p.date) continue;
+    const day = parseDay(p.date);
+    if (!day) continue;
+    const value = transform ? transform(p.qty) : p.qty;
+    if (!Number.isFinite(value)) continue;
+    const row = target.get(day) ?? emptyDaily(day);
+    const prev = row[key] as number | null;
+    if (prev == null || value > prev) (row[key] as number | null) = value;
     target.set(day, row);
   }
 }
@@ -549,6 +573,12 @@ function parseDailyMetrics(payload: Record<string, unknown>): DailyMetricRow[] {
     return q; // assume ml
   });
 
+  // Cycle. Apple Health can log more than one flow entry in a day, so the day
+  // takes the heaviest — a day with any bleeding is a flow day regardless of
+  // what else was recorded alongside it.
+  const flow = get('menstrual_flow', 'menstrual_flow_level', 'cycle_tracking_menstrual_flow');
+  if (flow?.data) setMax(target, 'menstrual_flow', flow.data, (q) => Math.max(0, Math.min(3, Math.round(q))));
+
   return Array.from(target.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -679,7 +709,25 @@ async function upsertDailyMetrics(rows: DailyMetricRow[]) {
   const { error } = await supabaseAdmin
     .from('operator_daily_metrics')
     .upsert(merged, { onConflict: 'date' });
-  if (error) throw new Error(error.message);
+
+  if (error) {
+    // Columns added after the table was created are opt-in: the operator has to
+    // run the migration. Until then, drop the unknown column and sync the rest
+    // rather than failing the whole import over a field they may not use.
+    const missing = OPTIONAL_COLUMNS.find((c) => error.message.includes(c));
+    if (!missing) throw new Error(error.message);
+
+    const stripped = merged.map((row) => {
+      const rest = { ...(row as Record<string, unknown>) };
+      delete rest[missing];
+      return rest;
+    });
+    const retry = await supabaseAdmin
+      .from('operator_daily_metrics')
+      .upsert(stripped, { onConflict: 'date' });
+    if (retry.error) throw new Error(retry.error.message);
+    return { upserted: stripped.length, skippedColumn: missing };
+  }
 
   return { upserted: merged.length };
 }
