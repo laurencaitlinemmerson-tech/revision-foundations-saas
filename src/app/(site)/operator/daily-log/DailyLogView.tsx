@@ -155,6 +155,19 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </>) : null}
+      {(v.correction) ? (<>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: '20px', alignItems: 'center', padding: '16px 20px', marginBottom: '16px', background: '#FDF7F9', border: '0.5px solid rgba(192,108,132,0.28)', borderRadius: '12px' }}>
+      <div>
+      <div style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#8A4459', marginBottom: '6px' }}>Suggested correction</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: 'var(--ink)', marginBottom: '3px' }}>{v.correction.title}</div>
+      <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.6, maxWidth: '78ch' }}>{v.correction.note}</div>
+      </div>
+      <button type='button' onClick={v.correction.apply} style={{ padding: '11px 18px', borderRadius: '8px', border: 0, cursor: 'pointer', background: '#C06C84', color: '#FFFFFF', fontSize: '12px', whiteSpace: 'nowrap' }}>
+      {v.correction.cta}
+      <span style={{ opacity: 0.75, marginLeft: '8px' }}>{v.correction.delta}</span>
+      </button>
+      </div>
+      </>) : null}
       {(v.isToday) ? (<>
       <div data-tab-panel data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
@@ -338,6 +351,22 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <p style={{ margin: '14px 0 0', fontSize: '11.5px', color: 'var(--ink-mute)' }}>Hover a row for its twelve-week shape.</p>
       </div>
       </div>
+      {(v.forecast) ? (<>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '2px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Where the trend <em style={{ color: '#C06C84' }}>actually</em> lands</h2>
+      <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>fit quality {v.forecast.r2}% · {v.forecast.quality}</span>
+      </div>
+      <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--ink-mute)', lineHeight: 1.55, maxWidth: '66ch' }}>Not the pace you picked — the line your own weigh-ins are drawing. The range is where the reading is likely to sit, and it widens the further out you look because that is honest.</p>
+      {(v.forecast.rows ?? []).map((f, f_i) => (<React.Fragment key={f_i}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto auto', gap: '16px', alignItems: 'baseline', padding: '13px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
+      <span style={{ fontSize: '13px', color: 'var(--ink-soft)' }}>{f.label}</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--ink)' }}>{f.value}</span>
+      <span style={{ fontSize: '11.5px', color: 'var(--ink-mute)', textAlign: 'right', minWidth: '96px' }}>{f.range}</span>
+      </div>
+      </React.Fragment>))}
+      </div>
+      </>) : null}
       </div>
       </>) : null}
       {(v.isPlan) ? (<>

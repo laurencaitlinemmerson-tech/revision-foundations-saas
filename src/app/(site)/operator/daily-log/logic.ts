@@ -2,6 +2,7 @@ import type React from 'react';
 import { avgOf, lastSyncedDate, latestOf, series, today as todayRow, type LiveData, type Lift, type Workout } from './data';
 import { storedOperatorPassword } from '../OperatorGate';
 import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
+import { fitReadings, projectWithBand } from '@/lib/fitness/regression';
 import { tdeeRealityCheck, driftCopy } from '@/lib/fitness/tdeeRealityCheck';
 
 /**
@@ -173,6 +174,10 @@ export function deriveVals(
   const days = live.days;
   const dayNow = todayRow(days);
   const intakeSeries = series(days, (d) => d.nutrition.dietaryEnergyKcal, 14) ?? INTAKE;
+  // Declared here rather than beside its first display use: several of the
+  // analysis blocks below read it, and a `const` referenced before its line is a
+  // runtime crash rather than a compile error.
+  const avgIntake = Math.round(intakeSeries.reduce((a, b) => a + b, 0) / intakeSeries.length);
   const sleepSeries = series(days, (d) => (d.sleep.totalMin == null ? null : d.sleep.totalMin / 60), 10) ?? SLEEP_HOURS;
   const stepSeries = series(days, (d) => d.activity.steps, 8);
   const proteinSeries = series(days, (d) => d.nutrition.proteinG, 8);
@@ -731,6 +736,109 @@ export function deriveVals(
     ];
   })();
 
+  /* ── corrections ── */
+  // A dashboard that only reports is half a dashboard. Where the numbers imply
+  // a specific change, work out what that change is and offer to make it.
+  const fit = readings.length >= 4 ? fitReadings(readings) : null;
+  const measuredWeekly = fit ? fit.slope * 7 : null;
+  const correction = (() => {
+    if (measuredWeekly == null || !Number.isFinite(measuredWeekly)) return null;
+    const targetWeekly = -st.pace;
+    const gap = measuredWeekly - targetWeekly;      // positive = losing too slowly
+    if (Math.abs(gap) < 0.12) return null;          // inside the noise, leave it alone
+
+    const rate = Math.abs(measuredWeekly).toFixed(2);
+    // One move at a time. A big correction applied in one step overshoots, because
+    // the maintenance figure it was calculated from is itself an estimate.
+    const STEP = 200;
+    // Below BMR is where a cut stops being a diet, so it is the floor — and it is
+    // a number already on the dashboard rather than an arbitrary one.
+    const floor = Math.max(1200, Math.round(st.tune.bmr / 10) * 10);
+    const needed = kcalTarget - (gap * KCAL_PER_KG) / 7;
+
+    // When the budget that would hit the target pace sits under the floor, the
+    // budget is not the thing to change — the pace is. The measured response says
+    // how much loss the floor can actually buy.
+    if (needed < floor && kcalTarget > floor) {
+      const reachable = Math.abs(measuredWeekly) + ((kcalTarget - floor) * 7) / KCAL_PER_KG;
+      const pace = Math.round(Math.max(0.1, Math.min(st.pace - 0.05, reachable)) * 20) / 20;
+      if (pace >= st.pace) return null;
+      return {
+        cta: `Set ${pace.toFixed(2)} kg/wk`,
+        delta: '−' + (st.pace - pace).toFixed(2),
+        title: `${st.pace.toFixed(2)} kg/wk is not reachable without eating below BMR`,
+        note: `You are losing ${rate} kg/wk. Hitting ${st.pace.toFixed(2)} from here needs about ${Math.round(needed).toLocaleString()} kcal, which is under your ${floor.toLocaleString()} kcal BMR. The honest ceiling at this maintenance estimate is ${pace.toFixed(2)} kg/wk. Log a week of intake and the dashboard can measure maintenance properly instead of estimating it.`,
+        apply: () => setState({ pace }),
+      };
+    }
+
+    const suggested = Math.round(
+      Math.max(floor, Math.max(kcalTarget - STEP, Math.min(kcalTarget + STEP, needed))) / 10,
+    ) * 10;
+    if (Math.abs(suggested - kcalTarget) < 40) return null;
+
+    const slower = gap > 0;
+    const capped = Math.abs(needed - kcalTarget) > STEP + 10;
+    return {
+      cta: `Set ${suggested.toLocaleString()} kcal`,
+      delta: (suggested > kcalTarget ? '+' : '−') + Math.abs(suggested - kcalTarget).toLocaleString(),
+      title: slower
+        ? `Losing ${rate} kg/wk against a ${st.pace.toFixed(2)} target`
+        : `Losing ${rate} kg/wk — faster than the ${st.pace.toFixed(2)} target`,
+      note: (slower
+        ? `Over ${readings.length} weigh-ins the trend is shallower than the plan. Moving the budget to ${suggested.toLocaleString()} kcal pulls it back without touching training.`
+        : `Faster than planned is not free — it costs muscle and adherence. Moving the budget to ${suggested.toLocaleString()} kcal brings it back to target.`)
+        + (capped ? ` That is a ${STEP} kcal step rather than the full correction, because the maintenance figure behind it is an estimate — change one thing, then re-read the trend in a fortnight.` : ''),
+      apply: () => setState((s) => ({ targets: { ...s.targets, kcal: suggested } })),
+    };
+  })();
+
+  // A weigh-in far off the trend line is usually water, not fat. Say so, rather
+  // than letting a 1.5 kg jump read as a bad week.
+  const outlier = (() => {
+    if (!fit || fit.rmse <= 0 || readings.length < 6) return null;
+    const daysFromT0 = (new Date(latest.date).getTime() - fit.t0) / DAY;
+    const expected = fit.intercept + fit.slope * daysFromT0;
+    const resid = latest.weight - expected;
+    if (Math.abs(resid) < fit.rmse * 2) return null;
+    return {
+      title: `${Math.abs(resid).toFixed(1)} kg ${resid > 0 ? 'above' : 'below'} trend`,
+      note: `Today's reading sits more than two standard deviations off your own trend line. That is almost always water — salt, carbs, a hard session, or the time of the month — rather than a real change. The 7-day line is the one to read.`,
+    };
+  })();
+
+  // Large deficit plus low protein is the combination that costs muscle.
+  const muscleRisk = (() => {
+    if (!adherence7 || adherence7.days < 4) return null;
+    const deficit = tdee - (avgIntake || tdee);
+    const proteinShort = adherence7.proteinDays <= Math.floor(adherence7.days / 2);
+    if (deficit < 600 || !proteinShort) return null;
+    return {
+      title: `${Math.round(deficit)} kcal deficit on ${adherence7.proteinDays}/${adherence7.days} protein days`,
+      note: `A deficit this size with protein missed more often than hit is the combination that takes muscle rather than fat. Protein first, then the deficit — ${Math.round(latest.weight * proteinPerKg)} g is the floor.`,
+    };
+  })();
+
+  // Where the trend actually lands, with a band that widens with the horizon —
+  // an honest projection rather than a single confident line.
+  const forecast = (() => {
+    if (!fit) return null;
+    const horizons: Array<[string, number]> = [['4 weeks', 28], ['12 weeks', 84], ['6 months', 182]];
+    const base = (new Date(latest.date).getTime() - fit.t0) / DAY;
+    return {
+      r2: Math.round(fit.r2 * 100),
+      quality: fit.r2 >= 0.7 ? 'tight' : fit.r2 >= 0.4 ? 'noisy' : 'very noisy',
+      rows: horizons.map(([label, d]) => {
+        const b = projectWithBand(fit, base + d);
+        return {
+          label,
+          value: conv(b.y).toFixed(1) + ' ' + uLabel,
+          range: conv(b.lower).toFixed(1) + '–' + conv(b.upper).toFixed(1),
+        };
+      }),
+    };
+  })();
+
   /* ── per-movement progression ── */
   // One line per exercise: estimated one-rep max over time, with the session
   // that set each personal best marked. This is the view that tells you whether
@@ -864,8 +972,6 @@ export function deriveVals(
     title: h.toFixed(1) + ' hours',
     style: 'width:100%;height:' + ((h / sleepMax) * 100).toFixed(1) + '%;border-radius:8px 8px 0 0;background:' + (h >= 7 ? '#7F9289' : '#F2DCE4') + ';opacity:' + (h >= 7 ? 0.75 : 1) + ';transition:height 500ms cubic-bezier(.16,1,.3,1);',
   }));
-  const avgIntake = Math.round(intakeSeries.reduce((a, b) => a + b, 0) / intakeSeries.length);
-
 
   /* ── sleep depth ── */
   // Debt against a seven-hour target, and how consistent the nights are — a
@@ -1115,6 +1221,7 @@ export function deriveVals(
     macroTrend, fibreToday, sugarToday,
     proteinPerKgLabel: proteinPerKgToday > 0 ? proteinPerKgToday.toFixed(2) + ' g/kg' : '—',
     sleepDepth, habitStreaks,
+    correction, outlier, muscleRisk, forecast,
     lifts: live.lifts,
     onLiftSaved,
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,
@@ -1122,6 +1229,12 @@ export function deriveVals(
 
     // Read-outs for the coaching card: only what the data actually supports.
     coachNotes: [
+      muscleRisk
+        ? { tag: 'Muscle', tone: 'warn' as const, title: muscleRisk.title, note: muscleRisk.note }
+        : null,
+      outlier
+        ? { tag: 'Reading', tone: 'mid' as const, title: outlier.title, note: outlier.note }
+        : null,
       plateau
         ? {
             tag: 'Plateau',
@@ -1162,10 +1275,11 @@ export function deriveVals(
           }
         : null,
     ].filter((n): n is { tag: string; tone: 'ok' | 'mid' | 'warn'; title: string; note: string } => n !== null),
-    coachEmpty: !plateau && !reality && !readiness && !adherence7,
+    coachEmpty: !plateau && !reality && !readiness && !adherence7 && !muscleRisk && !outlier,
     // The one note worth reading first, promoted out of Nutrition onto Today —
     // a plateau or a rejected assumption matters more than a tidy adherence score.
     topNote: (() => {
+      if (muscleRisk) return { tag: 'Muscle', title: muscleRisk.title, note: muscleRisk.note, tone: 'warn' as const };
       if (plateau) return { tag: 'Plateau', title: `Flat for ${plateau.days} days`, note: plateauSuggestion(plateau, logged.kcal || avgIntake, tdee), tone: 'warn' as const };
       if (reality?.significant) return { tag: 'Maintenance', title: `Formula is off by ${Math.round(Math.abs(reality.driftPct) * 100)}%`, note: driftCopy(reality), tone: 'warn' as const };
       if (readiness && readiness.score < 40) return { tag: 'Readiness', title: `${readiness.score} / 100`, note: readiness.verdict, tone: 'warn' as const };
