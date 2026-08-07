@@ -577,7 +577,15 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </>) : null}
       {(v.scheduleRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
+      <div
+        role='button'
+        tabIndex={0}
+        onClick={() => v.onTab('today')}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') v.onTab('today'); }}
+        title={`Click to view ${n.day} on rota`}
+        style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 10px', margin: '0 -10px', borderRadius: '8px', borderTop: n_i === 0 ? 'none' : '0.5px solid rgba(26,24,21,0.11)', cursor: 'pointer', transition: 'background 160ms ease, transform 140ms ease' }}
+        className="rota-cell"
+      >
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{n.day}</span>
       <span style={sx(`font-size:12.5px;color:${n.calColor};`)}>{n.calendar}</span>
       <span style={{ fontSize: '12.5px', color: 'var(--ink)' }}>{n.suggestion}</span>
@@ -586,15 +594,23 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>The training week</h2>
-      <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#8E8A82' }}>Three lifts, two easy days — enough stimulus to hold muscle while the deficit runs.</p>
+      <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#8E8A82' }}>Three lifts, two easy days — enough stimulus to hold muscle while the deficit runs. Click any session to log.</p>
       {(v.planWeek ?? []).map((d, d_i) => (<React.Fragment key={d_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: '14px', alignItems: 'center', padding: '13px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
+      <div
+        role='button'
+        tabIndex={0}
+        onClick={() => { if (d.tag === 'Lift') v.onOpenSession(0); else v.onTab('today'); }}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { if (d.tag === 'Lift') v.onOpenSession(0); else v.onTab('today'); } }}
+        title={d.tag === 'Lift' ? `Click to start ${d.session}` : `Click to view ${d.day} details`}
+        style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: '14px', alignItems: 'center', padding: '13px 12px', margin: '0 -12px', borderRadius: '8px', borderTop: d_i === 0 ? 'none' : '0.5px solid rgba(26,24,21,0.11)', cursor: 'pointer', transition: 'background 160ms ease, transform 140ms ease' }}
+        className="rota-cell"
+      >
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{d.day}</span>
       <div>
       <div style={{ fontSize: '13.5px', color: 'var(--ink)' }}>{d.session}</div>
       <div style={{ fontSize: '11.5px', color: '#8E8A82', marginTop: '2px' }}>{d.detail}</div>
       </div>
-      <span style={sx(`font-size:10.5px;padding:4px 11px;border-radius:999px;background:${d.tagBg};color:${d.tagColor};`)}>{d.tag}</span>
+      <span style={sx(`font-size:10.5px;padding:4px 11px;border-radius:999px;background:${d.tagBg};color:${d.tagColor};font-weight:500;`)}>{d.tag} →</span>
       </div>
       </React.Fragment>))}
       </div>
@@ -813,8 +829,26 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <p style={{ margin: '0', fontSize: '13px', color: 'var(--ink-mute)', lineHeight: 1.6 }}>Nothing to say yet. Plateau detection needs three weigh-ins, the maintenance check needs five days of logged intake, and readiness needs a few weeks of heart data.</p>
       </>) : null}
       {(v.coachNotes ?? []).map((c, c_i) => (<React.Fragment key={c_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '92px minmax(0,1fr)', gap: '16px', alignItems: 'start', padding: '14px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
-      <span style={sx(`font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;text-align:center;background:${c.tone === 'ok' ? '#EDF1EC' : c.tone === 'mid' ? '#FAF0F3' : '#FAF0F3'};color:${c.tone === 'ok' ? '#7F9289' : c.tone === 'mid' ? '#8A4459' : '#AA7F68'};`)}>{c.tag}</span>
+      <div
+        role='button'
+        tabIndex={0}
+        onClick={() => {
+          if (c.tag === 'Readiness' || c.tag === 'Plateau' || c.tag === 'Maintenance') v.onTab('trends');
+          else if (c.tag === 'Adherence') v.onTab('food');
+          else v.onTab('today');
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            if (c.tag === 'Readiness' || c.tag === 'Plateau' || c.tag === 'Maintenance') v.onTab('trends');
+            else if (c.tag === 'Adherence') v.onTab('food');
+            else v.onTab('today');
+          }
+        }}
+        title={`Click to open ${c.tag} breakdown`}
+        style={{ display: 'grid', gridTemplateColumns: '92px minmax(0,1fr)', gap: '16px', alignItems: 'start', padding: '14px 10px', margin: '0 -10px', borderRadius: '8px', borderTop: c_i === 0 ? 'none' : '0.5px solid var(--rule-soft)', cursor: 'pointer', transition: 'background 160ms ease' }}
+        className="rota-cell"
+      >
+      <span style={sx(`font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;text-align:center;background:${c.tone === 'ok' ? '#EDF1EC' : c.tone === 'mid' ? '#FAF0F3' : '#FAF0F3'};color:${c.tone === 'ok' ? '#7F9289' : c.tone === 'mid' ? '#8A4459' : '#AA7F68'};font-weight:500;`)}>{c.tag}</span>
       <div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: 'var(--ink)', marginBottom: '3px' }}>{c.title}</div>
       <div style={{ fontSize: '12.5px', color: 'var(--ink-mute)', lineHeight: 1.6 }}>{c.note}</div>
