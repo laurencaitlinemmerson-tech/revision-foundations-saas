@@ -91,6 +91,8 @@ export type Schedule = {
   canConnect?: boolean;
   /** GOOGLE_REFRESH_TOKEN is set, so it overrides anything the flow stores. */
   envPinned?: boolean;
+  /** The exact callback URL this deployment sends, to register on the client. */
+  redirectUri?: string;
   /** Google's own reason, when it rejected the credentials. */
   detail?: string;
 };

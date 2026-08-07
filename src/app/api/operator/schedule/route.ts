@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { googleClientConfigured, loadAuth } from '@/lib/operatorGoogle';
+import { googleClientConfigured, loadAuth, redirectUri } from '@/lib/operatorGoogle';
 
 /**
  * The operator's week from Google Calendar, folded into the seven rows the
@@ -215,6 +215,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       status: 'unconfigured' satisfies Status,
       days: [],
+      redirectUri: redirectUri(req),
       detail: 'GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set on this deployment.',
     });
   }
@@ -225,6 +226,7 @@ export async function GET(req: NextRequest) {
       status: 'unconfigured' satisfies Status,
       days: [],
       canConnect: false,
+      redirectUri: redirectUri(req),
       detail: 'The connection table is not set up yet — run supabase-operator-google.sql.',
     });
   }
@@ -233,6 +235,7 @@ export async function GET(req: NextRequest) {
       status: 'unconfigured' satisfies Status,
       days: [],
       canConnect: true,
+      redirectUri: redirectUri(req),
       detail: 'No Google account is connected yet.',
     });
   }
@@ -246,6 +249,7 @@ export async function GET(req: NextRequest) {
       // An env-var token cannot be replaced by reconnecting — it wins over the
       // stored one, so saying "connect" without saying that would loop forever.
       envPinned: auth.source === 'env',
+      redirectUri: redirectUri(req),
       detail: token.detail,
     });
   }

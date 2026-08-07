@@ -1802,6 +1802,15 @@ function shellVals(
         window.alert('Could not reach the server to start the Google connection.');
       }
     },
+    // Google's redirect_uri_mismatch names no URL, and the one it actually
+    // received is only visible percent-encoded inside a query string. Show the
+    // exact value this deployment sends, so it can be pasted rather than
+    // reconstructed by hand.
+    scheduleRedirectUri: schedule && schedule.status !== 'ok' ? schedule.redirectUri ?? null : null,
+    onCopyRedirectUri: () => {
+      const uri = schedule?.redirectUri;
+      if (uri) void navigator.clipboard?.writeText(uri);
+    },
     scheduleBadgeLabel: schedule?.status === 'ok'
       ? 'Google Calendar ✓'
       : schedule?.status === 'auth_failed'

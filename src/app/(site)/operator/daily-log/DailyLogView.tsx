@@ -468,6 +468,16 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       </div>
       </div>
+      {(v.scheduleRedirectUri) ? (<>
+      <div style={{ padding: '12px 14px', marginBottom: '14px', borderRadius: '10px', background: 'var(--surface)', border: '0.5px solid var(--rule)' }}>
+      <div style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '6px' }}>Authorised redirect URI</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <code style={{ fontSize: '11.5px', color: 'var(--ink)', wordBreak: 'break-all', flex: '1 1 240px' }}>{v.scheduleRedirectUri}</code>
+      <button type='button' onClick={v.onCopyRedirectUri} style={{ padding: '6px 12px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: 'pointer', fontSize: '11px', color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>Copy</button>
+      </div>
+      <p style={{ margin: '8px 0 0', fontSize: '11px', color: 'var(--ink-mute)', lineHeight: 1.5 }}>Paste this exact string into Authorised redirect URIs on the OAuth client — no trailing slash. A redirect_uri_mismatch means it is not listed there, or it is listed on a different client than the one GOOGLE_CLIENT_ID points at.</p>
+      </div>
+      </>) : null}
       {(v.scheduleRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{n.day}</span>
