@@ -229,7 +229,7 @@ function classifyDay(entries: Entry[]) {
   );
 
   const shift = Boolean(named) || longest >= 6;
-  if (!shift) return { shift: false, night: false, kind: 'off' as ShiftKind, hours: 0, start: null, end: null, label: null };
+  if (!shift) return { shift: false, night: false, kind: 'off' as ShiftKind, hours: null, start: null, end: null, label: null };
 
   // Measured length, where the rota gives times to measure. Needed before the
   // kind, because an unlabelled shift is classified by how long it ran.
@@ -278,14 +278,10 @@ function classifyDay(entries: Entry[]) {
       ? 'late'
       : 'day');
 
-  // Where the rota is all-day entries there is nothing to measure, so the
-  // shift's standard length stands in — an LD is twelve and a half hours by
-  // definition. Approximate, but the day panel names the entry it came from, so
-  // it stays checkable.
-  const STANDARD: Record<ShiftKind, number> = {
-    night: 12.5, long: 12.5, early: 7.5, late: 7.5, day: 8, off: 0,
-  };
-  const hours = timedHours > 0 ? timedHours : STANDARD[kind];
+  // Hours are whatever the calendar says and nothing else. An all-day entry
+  // carries no times, so the answer is that there are none — not a plausible
+  // number standing in for one.
+  const hours = timedHours > 0 ? Math.round(timedHours * 10) / 10 : null;
 
   const hhmmOf = (h: number | null) =>
     h == null ? null : `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
@@ -294,7 +290,7 @@ function classifyDay(entries: Entry[]) {
     shift: true,
     night,
     kind,
-    hours: Math.round(hours * 10) / 10,
+    hours,
     start: hhmmOf(startHour),
     end: hhmmOf(endHour),
     // The event this was read from. Surfaced so a wrong call is visible as a
@@ -303,11 +299,10 @@ function classifyDay(entries: Entry[]) {
   };
 }
 
-/** Hours committed on a day, all-day entries counting as a full working day. */
+/** Hours the calendar actually accounts for. Untimed entries contribute none. */
 function busyHours(entries: Entry[]) {
   return entries.reduce((total, e) => {
-    if (e.allDay) return total + 8;
-    if (!e.end) return total + 1;
+    if (e.allDay || !e.end) return total;
     return total + Math.max(0, (e.end.getTime() - e.start.getTime()) / 3600000);
   }, 0);
 }
@@ -444,15 +439,5 @@ export async function GET(req: NextRequest) {
   const history = classified.filter((d) => d.date < today);
   const upcoming = classified.filter((d) => d.date >= today);
 
-  // Practice hours toward registration, counted from the rota itself. Only what
-  // the calendar covers — anything before this window has to be added by hand.
-  const worked = history.filter((d) => d.shift);
-  const placement = {
-    hours: Math.round(worked.reduce((a, d) => a + d.hours, 0)),
-    days: worked.length,
-    from: history[0]?.date ?? null,
-    to: history[history.length - 1]?.date ?? null,
-  };
-
-  return NextResponse.json({ status: 'ok' satisfies Status, days, history, upcoming, placement });
+  return NextResponse.json({ status: 'ok' satisfies Status, days, history, upcoming });
 }

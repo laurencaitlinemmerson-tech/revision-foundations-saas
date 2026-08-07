@@ -1125,7 +1125,7 @@ export function deriveVals(
           // grid stays on screen while you read across it.
           onClick: () => setState({ rotaDate: date }),
           title: entry?.shift
-            ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''} · ${entry.hours} h`
+            ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''}${entry.hours != null ? ` · ${entry.hours} h` : ' · all-day entry, no times'}`
             : `${date} · off`,
           style:
             'aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease;' +
@@ -1165,7 +1165,7 @@ export function deriveVals(
         kindLabel: entry?.shift
           ? (entry.kind === 'long' ? 'Long day' : entry.kind[0].toUpperCase() + entry.kind.slice(1)) +
             (entry.start ? ` · ${entry.start}–${entry.end ?? ''}` : '') +
-            ` · ${entry.hours} h`
+            (entry.hours != null ? ` · ${entry.hours} h` : ' · all-day')
           : 'Day off',
         chipStyle:
           'font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 11px;border-radius:999px;white-space:nowrap;' +
@@ -1193,9 +1193,18 @@ export function deriveVals(
     const weekStart = new Date(todayISO + 'T00:00:00');
     weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
     const weekFrom = localISODate(weekStart);
-    const thisWeekHours = all
-      .filter((d) => d.shift && d.date >= weekFrom && d.date < localISODate(new Date(weekStart.getTime() + 7 * DAY)))
-      .reduce((a, d) => a + d.hours, 0);
+    // A rota kept as all-day entries has no hours to add up. Counting the
+    // shifts is the honest read there; summing a partial set would understate
+    // the week and look like a real figure.
+    const thisWeek = all.filter(
+      (d) => d.shift && d.date >= weekFrom && d.date < localISODate(new Date(weekStart.getTime() + 7 * DAY)),
+    );
+    const timedThisWeek = thisWeek.filter((d) => d.hours != null);
+    const thisWeekLabel = !thisWeek.length
+      ? 'nothing rostered this week'
+      : timedThisWeek.length === thisWeek.length
+      ? `${Math.round(timedThisWeek.reduce((a, d) => a + (d.hours ?? 0), 0) * 10) / 10} h this week`
+      : `${thisWeek.length} shift${thisWeek.length === 1 ? '' : 's'} this week`;
 
     const first = weeks[0].cells[0].date;
     const last = weeks[5].cells[6].date;
@@ -1219,7 +1228,7 @@ export function deriveVals(
         label: k === 'long' ? 'Long day' : k[0].toUpperCase() + k.slice(1),
         style: `width:11px;height:11px;border-radius:4px;display:inline-block;background:${KIND_STYLE[k].bg};`,
       })),
-      thisWeekHours: Math.round(thisWeekHours * 10) / 10,
+      thisWeekLabel,
       nextUp: next.length
         ? next
             .map((d) =>
@@ -1312,7 +1321,7 @@ export function deriveVals(
     }
 
     return {
-      title: `Tomorrow is a ${kindLabel}${rotaTomorrow.start ? `, ${rotaTomorrow.start}–${rotaTomorrow.end ?? ''}` : ''}${rotaTomorrow.hours ? ` · ${rotaTomorrow.hours} h` : ''}`,
+      title: `Tomorrow is a ${kindLabel}${rotaTomorrow.start ? `, ${rotaTomorrow.start}–${rotaTomorrow.end ?? ''}` : ''}${rotaTomorrow.hours != null ? ` · ${rotaTomorrow.hours} h` : ''}`,
       note:
         (rotaTomorrow.kind === 'night'
           ? 'Nights cost the most sleep and the most protein of anything on your rota.'

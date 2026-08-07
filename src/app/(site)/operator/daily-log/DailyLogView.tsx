@@ -466,7 +466,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: '4px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Your <em style={{ color: '#C06C84' }}>rota</em></h2>
-      <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{v.rota.thisWeekHours} h this week</span>
+      <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{v.rota.thisWeekLabel}</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', margin: '10px 0 12px' }}>
       <button type='button' onClick={v.rota.onPrev} disabled={!v.rota.canPrev} aria-label='Earlier weeks' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canPrev ? 'pointer' : 'default', opacity: v.rota.canPrev ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>←</button>

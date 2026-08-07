@@ -81,20 +81,13 @@ export type ShiftDay = {
   shift: boolean;
   night: boolean;
   kind: ShiftKind;
-  hours: number;
+  /** Hours the calendar accounts for. Null when the entry carries no times. */
+  hours: number | null;
   /** Local clock times, when the calendar entry was timed rather than all-day. */
   start: string | null;
   end: string | null;
   /** The calendar entry that named it, when a title matched rather than hours. */
   label: string | null;
-};
-
-/** Practice hours found in the rota, for the registration total. */
-export type Placement = {
-  hours: number;
-  days: number;
-  from: string | null;
-  to: string | null;
 };
 
 export type Schedule = {
@@ -103,7 +96,6 @@ export type Schedule = {
   history?: ShiftDay[];
   /** Today and the weeks ahead, for the rota and the night-before prompt. */
   upcoming?: ShiftDay[];
-  placement?: Placement;
   /** Whether running the connect flow could plausibly fix this state. */
   canConnect?: boolean;
   /** GOOGLE_REFRESH_TOKEN is set, so it overrides anything the flow stores. */
