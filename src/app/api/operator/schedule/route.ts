@@ -194,27 +194,47 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
 }
 
 /**
- * Words that mark a day as clinical work rather than anything else in the
- * calendar. Matched case-insensitively against the event title.
+ * Words that mark a day as clinical work.
+ *
+ * Deliberately narrow. An earlier version also matched "early", "late",
+ * "practice" and "trust", which turned "early lecture", "running late" and
+ * "practice questions" into ward shifts. Those words only mean a shift next to
+ * one of these, so they are read as a kind below rather than as evidence here.
  */
-const SHIFT_WORDS = /\b(shift|placement|ward|clinical|nights?|long day|early|late|on call|oncall|hospital|practice|trust)\b/i;
+const SHIFT_WORDS = /\b(shifts?|placement|ward|clinical|on[- ]?call|night shift|long day)\b/i;
+
+/** Titles that look like a shift but are not — the rota's false friends. */
+const NOT_SHIFT = /\b(lecture|seminar|tutorial|revision|exam|assignment|essay|deadline|birthday|holiday|leave|annual leave|dentist|doctor|gp|appointment|meeting|study|library|zoom|teams)\b/i;
 
 export type ShiftKind = 'night' | 'long' | 'early' | 'late' | 'day' | 'off';
 
 /**
- * A day counts as worked when it is named as one, or when it simply is one.
+ * A day counts as worked when the calendar names it as one, or when it holds a
+ * single long block of time that looks like nothing else.
  *
- * The kind is taken from the title where the title says so, and from the clock
- * otherwise — a rota written as "Ward — Early" and one written as "Ward
- * 07:00–15:00" should classify the same way.
+ * The unnamed fallback used to be "six or more busy hours in the day", summed
+ * across every entry and counting all-day events as eight. A birthday reminder
+ * was therefore a shift, and so was any day with three lectures. It now needs
+ * one continuous timed block, which is what a real shift is.
  */
 function classifyDay(entries: Entry[]) {
-  const named = entries.find((e) => SHIFT_WORDS.test(e.title));
-  const hours = busyHours(entries);
-  const shift = Boolean(named) || hours >= 6;
+  const real = entries.filter((e) => !NOT_SHIFT.test(e.title));
+  const named = real.find((e) => SHIFT_WORDS.test(e.title));
+
+  // All-day entries are markers, not commitments, so they never imply a shift.
+  const timed = real.filter((e) => !e.allDay && e.end);
+  const longest = timed.reduce(
+    (best, e) => Math.max(best, (e.end!.getTime() - e.start.getTime()) / 3600000),
+    0,
+  );
+
+  const shift = Boolean(named) || longest >= 6;
   if (!shift) return { shift: false, night: false, kind: 'off' as ShiftKind, hours: 0, start: null, end: null, label: null };
 
-  const timed = entries.filter((e) => !e.allDay);
+  // Hours come from the entries that made it a shift, not from the whole day.
+  const hours = named
+    ? busyHours(real.filter((e) => SHIFT_WORDS.test(e.title) || !e.allDay))
+    : longest;
   const startHour = timed.length ? Math.min(...timed.map((e) => localHour(e.start))) : null;
   const endHour = timed.reduce<number | null>((latest, e) => {
     if (!e.end) return latest;
@@ -222,7 +242,13 @@ function classifyDay(entries: Entry[]) {
     return latest == null || h > latest ? h : latest;
   }, null);
 
-  const titles = entries.map((e) => e.title).join(' ');
+  // Kind words are read only off the entry that made this a shift. Taking them
+  // from the whole day is how "late lunch" turned an early into a late.
+  const source = named ?? timed.reduce<Entry | null>(
+    (best, e) => (!best || e.end!.getTime() - e.start.getTime() > best.end!.getTime() - best.start.getTime() ? e : best),
+    null,
+  );
+  const titles = source?.title ?? '';
   const night =
     /\bnights?\b/i.test(titles) ||
     (startHour != null && (startHour >= 18 || startHour < 5)) ||
@@ -248,7 +274,9 @@ function classifyDay(entries: Entry[]) {
     hours: Math.round(hours * 10) / 10,
     start: hhmmOf(startHour),
     end: hhmmOf(endHour),
-    label: named?.title ?? null,
+    // The event this was read from. Surfaced so a wrong call is visible as a
+    // wrong call rather than as the dashboard inventing a shift.
+    label: source?.title ?? null,
   };
 }
 

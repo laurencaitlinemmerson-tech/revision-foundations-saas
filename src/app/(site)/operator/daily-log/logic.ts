@@ -40,10 +40,6 @@ export type DailyLogState = {
   rotaDate: string | null;
   /** How many six-week pages back or forward the rota is scrolled. */
   rotaPage: number;
-  /** Practice hours worked before the calendar window, entered by hand. */
-  placementPrior: number;
-  /** Hours needed for registration — 2,300 under current NMC standards. */
-  placementTarget: number;
   volRange?: 'week' | 'month' | 'quarter' | 'all';
 };
 
@@ -81,8 +77,6 @@ export const INITIAL_STATE: DailyLogState = {
   targets: {},
   rotaDate: null,
   rotaPage: 0,
-  placementPrior: 0,
-  placementTarget: 2300,
 };
 
 export const DEFAULT_PROPS: DailyLogProps = { goalKg: 68, calorieTarget: 2000, proteinPerKg: 1.8 };
@@ -511,8 +505,11 @@ export function deriveVals(
   const proteinTarget = Math.round(latest.weight * proteinPerKg);
   const macros = [
     { label: 'Protein', v: logged.protein, t: proteinTarget, unit: 'g', color: '#7F9289' },
-    { label: 'Carbohydrate', v: Math.round(dayNow?.nutrition.carbsG ?? 148), t: 210, unit: 'g', color: '#C06C84' },
-    { label: 'Fat', v: Math.round(dayNow?.nutrition.fatG ?? 52), t: 68, unit: 'g', color: '#8A4459' },
+    // Zero until Apple Health has something, like every other figure for today.
+    // These carried the design's seed values, so an unlogged morning showed
+    // 148 g of carbohydrate that had not been eaten.
+    { label: 'Carbohydrate', v: Math.round(dayNow?.nutrition.carbsG ?? 0), t: 210, unit: 'g', color: '#C06C84' },
+    { label: 'Fat', v: Math.round(dayNow?.nutrition.fatG ?? 0), t: 68, unit: 'g', color: '#8A4459' },
   ].map((m) => ({
     label: m.label,
     value: m.v + ' / ' + m.t + ' ' + m.unit,
@@ -1162,6 +1159,9 @@ export function deriveVals(
         date: selectedDate,
         label,
         isFuture: selectedDate > todayISO,
+        // The calendar entry this was read from, so a misread reads as a misread
+        // rather than as the dashboard inventing a shift.
+        source: entry?.shift ? entry.label : null,
         kindLabel: entry?.shift
           ? (entry.kind === 'long' ? 'Long day' : entry.kind[0].toUpperCase() + entry.kind.slice(1)) +
             (entry.start ? ` · ${entry.start}–${entry.end ?? ''}` : '') +
@@ -1227,57 +1227,6 @@ export function deriveVals(
             )
             .join('   ·   ')
         : 'Nothing rostered in the weeks ahead.',
-    };
-  })();
-
-  /* ── practice hours ── */
-  // Registration needs a fixed number of practice hours. The rota already knows
-  // how many have been worked, so the only thing to type is what came before it.
-  const placementProgress = (() => {
-    const p = live.schedule?.placement;
-    if (!p || !p.days) return null;
-    const target = st.placementTarget || 2300;
-    const total = p.hours + (st.placementPrior || 0);
-    const pct = Math.max(0, Math.min(100, (total / target) * 100));
-
-    // Rate from the last twelve weeks, not the whole window — a summer with no
-    // placement would otherwise stretch the projection out forever.
-    const recent = (live.schedule?.history ?? []).filter(
-      (d) => d.shift && new Date(d.date + 'T00:00:00').getTime() >= Date.now() - 84 * DAY,
-    );
-    const perWeek = recent.reduce((a, d) => a + d.hours, 0) / 12;
-    const remaining = target - total;
-    const weeksLeft = perWeek > 0.5 && remaining > 0 ? Math.ceil(remaining / perWeek) : null;
-    const eta = weeksLeft
-      ? new Date(Date.now() + weeksLeft * 7 * DAY).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
-      : null;
-
-    return {
-      total: Math.round(total).toLocaleString(),
-      target: target.toLocaleString(),
-      pct: Math.round(pct),
-      days: p.days,
-      perWeek: perWeek.toFixed(1),
-      prior: st.placementPrior || 0,
-      targetValue: target,
-      barStyle: `height:100%;width:${pct.toFixed(1)}%;border-radius:999px;background:#C06C84;transition:width 700ms cubic-bezier(.16,1,.3,1);`,
-      note: remaining <= 0
-        ? `${Math.round(total).toLocaleString()} hours against a ${target.toLocaleString()} requirement — that is done, with ${Math.round(-remaining).toLocaleString()} to spare.`
-        : eta
-        ? `${Math.round(remaining).toLocaleString()} hours to go. At ${perWeek.toFixed(1)} hours a week — your actual rate over the last twelve weeks — that lands around ${eta}.`
-        : `${Math.round(remaining).toLocaleString()} hours to go. No shifts in the last twelve weeks, so there is nothing to project a date from yet.`,
-      windowNote: p.from
-        ? `From ${p.days} rostered days since ${new Date(p.from + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}.` +
-          (st.placementPrior ? ` Plus ${st.placementPrior.toLocaleString()} hours entered by hand.` : ' Hours before that are not in the calendar — add them here.')
-        : '',
-      onPriorChange: (e: React.FormEvent<HTMLInputElement>) => {
-        const v = parseInt(e.currentTarget.value, 10);
-        setState({ placementPrior: Number.isFinite(v) ? Math.max(0, v) : 0 });
-      },
-      onTargetChange: (e: React.FormEvent<HTMLInputElement>) => {
-        const v = parseInt(e.currentTarget.value, 10);
-        setState({ placementTarget: Number.isFinite(v) && v > 0 ? v : 2300 });
-      },
     };
   })();
 
@@ -1852,7 +1801,6 @@ export function deriveVals(
     bodyRows,
 
     macros,
-    meals: ['Porridge · 420 kcal', 'Chicken salad · 510 kcal', 'Yogurt + berries · 190 kcal', 'Dinner pending'],
     tdeeRows, tdeeTotalLabel: tdee.toLocaleString(),
     ledgerProps: { days: ledgerDays, targetDeficit: 500 },
     proteinProps: {
@@ -1869,7 +1817,7 @@ export function deriveVals(
     sleepDepth, habitStreaks,
     correction, outlier, muscleRisk, forecast,
     cycle, shiftSplit, relativeStrength, maintenanceTrend,
-    rota, placementProgress, nightRecovery, tomorrowPrep,
+    rota, nightRecovery, tomorrowPrep,
     lifts: live.lifts,
     onLiftSaved,
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,

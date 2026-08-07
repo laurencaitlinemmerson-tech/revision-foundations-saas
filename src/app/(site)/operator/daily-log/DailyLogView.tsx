@@ -462,7 +462,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       {(v.rota) ? (<>
-      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px', marginBottom: '16px', alignItems: 'start' }}>
+      <div style={{ marginBottom: '16px' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: '4px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Your <em style={{ color: '#C06C84' }}>rota</em></h2>
@@ -504,7 +504,12 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       {(v.rota.selected) ? (<>
       <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '0.5px solid var(--rule-soft)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+      <div>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--ink)' }}>{v.rota.selected.label}</span>
+      {(v.rota.selected.source) ? (<>
+      <div style={{ fontSize: '11px', color: 'var(--ink-mute)', marginTop: '2px' }}>from “{v.rota.selected.source}”</div>
+      </>) : null}
+      </div>
       <span style={sx(v.rota.selected.chipStyle)}>{v.rota.selected.kindLabel}</span>
       </div>
       {(v.rota.selected.note) ? (<>
@@ -522,28 +527,6 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </>) : null}
       </div>
-      {(v.placementProgress) ? (<>
-      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 12px' }}>Practice <em style={{ color: '#C06C84' }}>hours</em></h2>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '10px' }}>
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: '34px', color: 'var(--ink)', letterSpacing: '-0.02em' }}>{v.placementProgress.total}</span>
-      <span style={{ fontSize: '12.5px', color: 'var(--ink-mute)' }}>of {v.placementProgress.target} · {v.placementProgress.pct}%</span>
-      </div>
-      <div style={{ height: '10px', borderRadius: '999px', background: 'var(--paper-deep)', overflow: 'hidden', marginBottom: '12px' }}>
-      <div style={sx(v.placementProgress.barStyle)}></div>
-      </div>
-      <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>{v.placementProgress.note}</p>
-      <p style={{ margin: '0 0 14px', fontSize: '11px', color: 'var(--ink-mute)', lineHeight: 1.5 }}>{v.placementProgress.windowNote}</p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '10px', paddingTop: '12px', borderTop: '0.5px solid var(--rule-soft)' }}>
-      <label style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Hours before this calendar
-      <input type='number' min='0' step='10' value={v.placementProgress.prior} onChange={v.placementProgress.onPriorChange} style={{ display: 'block', width: '100%', marginTop: '5px', padding: '8px 10px', border: '0.5px solid var(--rule)', borderRadius: '7px', fontSize: '13px', color: 'var(--ink)', background: '#FFFFFF', outline: 'none' }} />
-      </label>
-      <label style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Required total
-      <input type='number' min='1' step='50' value={v.placementProgress.targetValue} onChange={v.placementProgress.onTargetChange} style={{ display: 'block', width: '100%', marginTop: '5px', padding: '8px 10px', border: '0.5px solid var(--rule)', borderRadius: '7px', fontSize: '13px', color: 'var(--ink)', background: '#FFFFFF', outline: 'none' }} />
-      </label>
-      </div>
-      </div>
-      </>) : null}
       </div>
       </>) : null}
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
@@ -743,11 +726,6 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </div>
       </React.Fragment>))}
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
-      {(v.meals ?? []).map((ml, ml_i) => (<React.Fragment key={ml_i}>
-      <span style={{ fontSize: '11px', padding: '5px 11px', borderRadius: '999px', background: 'var(--surface)', border: '0.5px solid var(--rule)', color: 'var(--ink-soft)' }}>{ml}</span>
-      </React.Fragment>))}
-      </div>
       </div>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 2px' }}>Energy ledger</h2>
