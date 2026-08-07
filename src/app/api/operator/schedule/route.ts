@@ -32,8 +32,49 @@ type Status = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_failed';
 
 const DAY_MS = 86400000;
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-/** How far back to pull for the shift-vs-off comparison. */
-const HISTORY_DAYS = 84;
+/**
+ * How far back to pull. The shift comparison only needs a few weeks, but the
+ * placement-hours total wants everything the calendar has, and it is the same
+ * single request either way.
+ */
+const HISTORY_DAYS = 550;
+/** How far forward, for the rota and the night-before prompt. */
+const FUTURE_DAYS = 35;
+
+/**
+ * The rota is written in UK local time and this runs on a UTC server, so day
+ * boundaries and clock hours are both resolved in Europe/London. Without it a
+ * night shift starting 00:30 BST files under the previous day, and every
+ * "starts before 9am" test is an hour out for half the year.
+ */
+const TZ = 'Europe/London';
+
+/** Local calendar date of an instant, as YYYY-MM-DD. */
+function dayKey(d: Date) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+}
+
+/** Local clock time of an instant, in hours past midnight. */
+function localHour(d: Date) {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d);
+  const h = Number(parts.find((p) => p.type === 'hour')?.value ?? '0');
+  const m = Number(parts.find((p) => p.type === 'minute')?.value ?? '0');
+  return h + m / 60;
+}
+
+/** Every local calendar date from `from` up to but excluding `to`. */
+function eachDayKey(from: Date, to: Date) {
+  const keys: string[] = [];
+  // Step by 24h and de-duplicate rather than doing calendar arithmetic: a DST
+  // change makes one day 23 or 25 hours long, and stepping would either skip or
+  // repeat it. The Set absorbs both.
+  const seen = new Set<string>();
+  for (let t = from.getTime(); t < to.getTime(); t += DAY_MS / 2) {
+    const k = dayKey(new Date(t));
+    if (!seen.has(k)) { seen.add(k); keys.push(k); }
+  }
+  return keys;
+}
 
 /** Monday 00:00 of the week containing `now`. */
 function weekStart(now = new Date()) {
@@ -158,15 +199,57 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
  */
 const SHIFT_WORDS = /\b(shift|placement|ward|clinical|nights?|long day|early|late|on call|oncall|hospital|practice|trust)\b/i;
 
-/** A day counts as worked when it is named as one, or when it simply is one. */
+export type ShiftKind = 'night' | 'long' | 'early' | 'late' | 'day' | 'off';
+
+/**
+ * A day counts as worked when it is named as one, or when it simply is one.
+ *
+ * The kind is taken from the title where the title says so, and from the clock
+ * otherwise — a rota written as "Ward — Early" and one written as "Ward
+ * 07:00–15:00" should classify the same way.
+ */
 function classifyDay(entries: Entry[]) {
   const named = entries.find((e) => SHIFT_WORDS.test(e.title));
   const hours = busyHours(entries);
   const shift = Boolean(named) || hours >= 6;
-  const night = entries.some(
-    (e) => /\bnights?\b/i.test(e.title) || (!e.allDay && (e.start.getHours() >= 19 || e.start.getHours() < 5)),
-  );
-  return { shift, night: shift && night, hours: Math.round(hours * 10) / 10, label: named?.title ?? null };
+  if (!shift) return { shift: false, night: false, kind: 'off' as ShiftKind, hours: 0, start: null, end: null, label: null };
+
+  const timed = entries.filter((e) => !e.allDay);
+  const startHour = timed.length ? Math.min(...timed.map((e) => localHour(e.start))) : null;
+  const endHour = timed.reduce<number | null>((latest, e) => {
+    if (!e.end) return latest;
+    const h = localHour(e.end);
+    return latest == null || h > latest ? h : latest;
+  }, null);
+
+  const titles = entries.map((e) => e.title).join(' ');
+  const night =
+    /\bnights?\b/i.test(titles) ||
+    (startHour != null && (startHour >= 18 || startHour < 5)) ||
+    (endHour != null && startHour != null && endHour < startHour); // crosses midnight
+
+  const kind: ShiftKind = night
+    ? 'night'
+    : /\blong day\b/i.test(titles) || hours >= 11
+    ? 'long'
+    : /\bearly\b/i.test(titles) || (startHour != null && startHour < 9)
+    ? 'early'
+    : /\blate\b/i.test(titles) || (startHour != null && startHour >= 12)
+    ? 'late'
+    : 'day';
+
+  const hhmmOf = (h: number | null) =>
+    h == null ? null : `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
+
+  return {
+    shift: true,
+    night,
+    kind,
+    hours: Math.round(hours * 10) / 10,
+    start: hhmmOf(startHour),
+    end: hhmmOf(endHour),
+    label: named?.title ?? null,
+  };
 }
 
 /** Hours committed on a day, all-day entries counting as a full working day. */
@@ -255,12 +338,12 @@ export async function GET(req: NextRequest) {
   }
 
   const from = weekStart();
-  const to = new Date(from.getTime() + 7 * DAY_MS);
 
-  // The card needs this week; the shift analysis needs a run of past weeks to
-  // compare worked days against off days. One fetch covers both.
+  // One fetch serves all of it: this week's card, the weeks behind for the shift
+  // comparison and practice hours, and the weeks ahead for the rota.
   const historyFrom = new Date(from.getTime() - HISTORY_DAYS * DAY_MS);
-  const events = await fetchEvents(token.token, historyFrom, to);
+  const futureTo = new Date(from.getTime() + FUTURE_DAYS * DAY_MS);
+  const events = await fetchEvents(token.token, historyFrom, futureTo);
   if (events === null) {
     return NextResponse.json({ status: 'fetch_failed' satisfies Status, days: [] });
   }
@@ -291,18 +374,34 @@ export async function GET(req: NextRequest) {
     };
   });
 
-  // Past days, classified, for the shift-vs-off comparison. Today is excluded —
-  // a day still in progress would drag every "on shift" average down.
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const history = [];
-  for (let t = historyFrom.getTime(); t < todayStart.getTime(); t += DAY_MS) {
-    const dayStart = new Date(t);
-    const dayEnd = new Date(t + DAY_MS);
-    const entries = events.filter((e) => e.start >= dayStart && e.start < dayEnd);
-    const c = classifyDay(entries);
-    history.push({ date: dayStart.toISOString().slice(0, 10), ...c });
+  // Bucket every event by its local calendar date once, rather than re-scanning
+  // the whole list for each of ~600 days.
+  const byDay = new Map<string, Entry[]>();
+  for (const e of events) {
+    const k = dayKey(e.start);
+    byDay.set(k, [...(byDay.get(k) ?? []), e]);
   }
 
-  return NextResponse.json({ status: 'ok' satisfies Status, days, history });
+  const today = dayKey(new Date());
+  const classified = eachDayKey(historyFrom, futureTo).map((date) => ({
+    date,
+    ...classifyDay(byDay.get(date) ?? []),
+  }));
+
+  // Today is excluded from history: a day still in progress would drag every
+  // "on shift" average down. It belongs to the forward-looking half instead.
+  const history = classified.filter((d) => d.date < today);
+  const upcoming = classified.filter((d) => d.date >= today);
+
+  // Practice hours toward registration, counted from the rota itself. Only what
+  // the calendar covers — anything before this window has to be added by hand.
+  const worked = history.filter((d) => d.shift);
+  const placement = {
+    hours: Math.round(worked.reduce((a, d) => a + d.hours, 0)),
+    days: worked.length,
+    from: history[0]?.date ?? null,
+    to: history[history.length - 1]?.date ?? null,
+  };
+
+  return NextResponse.json({ status: 'ok' satisfies Status, days, history, upcoming, placement });
 }

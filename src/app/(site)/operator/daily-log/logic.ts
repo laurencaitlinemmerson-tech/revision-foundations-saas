@@ -1,5 +1,5 @@
 import type React from 'react';
-import { avgOf, lastSyncedDate, latestOf, series, today as todayRow, type HealthDay, type LiveData, type Lift, type Workout } from './data';
+import { avgOf, lastSyncedDate, latestOf, localISODate, series, today as todayRow, type HealthDay, type LiveData, type Lift, type Workout } from './data';
 import { storedOperatorPassword } from '../OperatorGate';
 import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
 import { fitReadings, projectWithBand } from '@/lib/fitness/regression';
@@ -36,6 +36,10 @@ export type DailyLogState = {
   showLog: 'food' | 'session' | null;
   targetsOpen: boolean;
   targets: { goal?: number; kcal?: number; proteinPerKg?: number };
+  /** Practice hours worked before the calendar window, entered by hand. */
+  placementPrior: number;
+  /** Hours needed for registration — 2,300 under current NMC standards. */
+  placementTarget: number;
   volRange?: 'week' | 'month' | 'quarter' | 'all';
 };
 
@@ -71,6 +75,8 @@ export const INITIAL_STATE: DailyLogState = {
   showLog: null,
   targetsOpen: false,
   targets: {},
+  placementPrior: 0,
+  placementTarget: 2300,
 };
 
 export const DEFAULT_PROPS: DailyLogProps = { goalKg: 68, calorieTarget: 2000, proteinPerKg: 1.8 };
@@ -189,6 +195,33 @@ export function deriveVals(
     protein: Math.round(dayNow?.nutrition.proteinG ?? 0),
     steps: Math.round(dayNow?.activity.steps ?? 0),
   };
+
+  /* ── today on the rota ── */
+  // Declared up here because the step ring reads it. A twelve-hour ward day and
+  // a day off are not the same day, and a target that ignores which one it is
+  // will be either trivially met or quietly impossible.
+  const todayISO = localISODate();
+  const tomorrowISO = localISODate(new Date(Date.now() + DAY));
+  const rotaToday = (live.schedule?.upcoming ?? []).find((d) => d.date === todayISO) ?? null;
+  const rotaTomorrow = (live.schedule?.upcoming ?? []).find((d) => d.date === tomorrowISO) ?? null;
+
+  // A step target read off her own distribution for this kind of day: the
+  // seventieth percentile of what she actually does, so it is a stretch rather
+  // than a formality. Falls back to a flat 8,000 until there is history.
+  const stepTarget = (() => {
+    const hist = live.schedule?.history;
+    if (!hist || !days) return 8000;
+    const onShift = rotaToday?.shift ?? false;
+    const wanted = new Set(hist.filter((h) => h.shift === onShift).map((h) => h.date));
+    const vals = days
+      .filter((d) => wanted.has(d.date.slice(0, 10)))
+      .map((d) => d.activity.steps)
+      .filter((v): v is number => typeof v === 'number' && v > 0)
+      .sort((a, b) => a - b);
+    if (vals.length < 6) return 8000;
+    const p70 = vals[Math.min(vals.length - 1, Math.floor(vals.length * 0.7))];
+    return Math.max(4000, Math.round(p70 / 500) * 500);
+  })();
   const water = dayNow?.nutrition.waterMl == null
     ? 0
     : Math.max(0, Math.min(8, Math.round(dayNow.nutrition.waterMl / 250)));
@@ -283,7 +316,7 @@ export function deriveVals(
     { label: 'Weight', value: +conv(latest.weight).toFixed(1), decimals: 1, unit: uLabel, chip: (dw <= 0 ? '↓ ' : '↑ ') + Math.abs(conv(dw)).toFixed(1), chipBg: dw <= 0 ? '#EDF1EC' : '#F7F6F5', chipColor: dw <= 0 ? '#7F9289' : '#AA7F68', color: '#C06C84', spark: sparkOf(last8), area: areaOf(last8) },
     { label: 'Calories', value: logged.kcal, decimals: 0, unit: 'kcal', chip: Math.max(0, kcalTarget - logged.kcal).toLocaleString() + ' left', chipBg: '#F4F4F3', chipColor: '#57544E', color: '#7F9289', spark: sparkOf(intakeSeries.slice(-8)), area: areaOf(intakeSeries.slice(-8)) },
     { label: 'Protein', value: logged.protein, decimals: 0, unit: 'g', chip: Math.round((logged.protein / (latest.weight * proteinPerKg)) * 100) + '%', chipBg: '#FBF4F6', chipColor: '#8A4459', color: '#8A4459', spark: sparkOf(proteinSeries ? [...proteinSeries.slice(-7), logged.protein] : [88, 104, 96, 120, 112, 98, 126, logged.protein]), area: areaOf(proteinSeries ? [...proteinSeries.slice(-7), logged.protein] : [88, 104, 96, 120, 112, 98, 126, logged.protein]) },
-    { label: 'Steps', value: logged.steps, decimals: 0, unit: '', chip: logged.steps >= 8000 ? 'goal met' : 'keep going', chipBg: logged.steps >= 8000 ? '#EDF1EC' : '#F4F4F3', chipColor: logged.steps >= 8000 ? '#7F9289' : '#57544E', color: '#57544E', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]), area: areaOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]) },
+    { label: 'Steps', value: logged.steps, decimals: 0, unit: '', chip: logged.steps >= stepTarget ? 'goal met' : 'keep going', chipBg: logged.steps >= stepTarget ? '#EDF1EC' : '#F4F4F3', chipColor: logged.steps >= stepTarget ? '#7F9289' : '#57544E', color: '#57544E', spark: sparkOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]), area: areaOf(stepSeries ? [...stepSeries.slice(-7), logged.steps] : [7400, 9100, 6800, 10400, 8900, 7600, 11200, logged.steps]) },
     { label: 'Sleep', value: +(sleepSeries.reduce((a, b) => a + b, 0) / sleepSeries.length).toFixed(1), decimals: 1, unit: 'h avg', chip: 'RHR ' + Math.round(rhrAvg ?? 58), chipBg: '#F4F4F3', chipColor: '#57544E', color: '#C06C84', spark: sparkOf(sleepSeries.slice(-8)), area: areaOf(sleepSeries.slice(-8)) },
   ].map((k, i) => ({ ...k, gradId: 'spark-' + i, display: k.decimals ? k.value.toFixed(k.decimals) : Math.round(k.value).toLocaleString() }));
 
@@ -291,7 +324,7 @@ export function deriveVals(
   const ringDefs = [
     { key: 'kcal' as const, name: 'Calories', r: 84, color: '#C98BA0', track: '#F7F6F5', value: logged.kcal, target: kcalTarget, unit: 'kcal', step: 250 },
     { key: 'protein' as const, name: 'Protein', r: 66, color: '#9FB3A9', track: '#FBF4F6', value: logged.protein, target: Math.round(latest.weight * proteinPerKg), unit: 'g', step: 15 },
-    { key: 'steps' as const, name: 'Steps', r: 48, color: '#D194A8', track: '#FAF0F3', value: logged.steps, target: 8000, unit: '', step: 500 },
+    { key: 'steps' as const, name: 'Steps', r: 48, color: '#D194A8', track: '#FAF0F3', value: logged.steps, target: stepTarget, unit: '', step: 500 },
   ];
   const rings = ringDefs.map((r) => {
     const c = 2 * Math.PI * r.r;
@@ -1042,6 +1075,227 @@ export function deriveVals(
     };
   })();
 
+  /* ── the rota ── */
+  // Six weeks at a glance, so a block of nights reads as a block rather than as
+  // one bad night at a time.
+  const KIND_STYLE: Record<string, { bg: string; fg: string; short: string }> = {
+    night: { bg: '#3A2A33', fg: '#FFFFFF', short: 'N' },
+    long: { bg: '#C06C84', fg: '#FFFFFF', short: 'L' },
+    early: { bg: '#E0AFBF', fg: '#5A2233', short: 'E' },
+    late: { bg: '#C98BA0', fg: '#FFFFFF', short: 'La' },
+    day: { bg: '#EBD3DB', fg: '#5A2233', short: 'D' },
+    off: { bg: 'transparent', fg: '#B0ABA2', short: '·' },
+  };
+
+  const rota = (() => {
+    const all = [...(live.schedule?.history ?? []), ...(live.schedule?.upcoming ?? [])]
+      .sort((a, b) => a.date.localeCompare(b.date));
+    if (all.length < 14) return null;
+
+    const byDate = new Map(all.map((d) => [d.date, d]));
+    // Start on the Monday a fortnight before this week, so the grid reads as
+    // weeks and today sits about a third of the way down.
+    const start = new Date(todayISO + 'T00:00:00');
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 14);
+
+    const weeks = [];
+    for (let w = 0; w < 6; w++) {
+      const cells = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + w * 7 + i);
+        const date = localISODate(d);
+        const entry = byDate.get(date);
+        const kind = entry?.shift ? entry.kind : 'off';
+        const s = KIND_STYLE[kind] ?? KIND_STYLE.off;
+        const isToday = date === todayISO;
+        cells.push({
+          date,
+          day: String(d.getDate()),
+          short: entry?.shift ? s.short : '',
+          today: isToday,
+          title: entry?.shift
+            ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''} · ${entry.hours} h`
+            : `${date} · off`,
+          style:
+            'aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;' +
+            `background:${s.bg};color:${s.fg};` +
+            `border:${isToday ? '1.5px solid #1A1A18' : !entry?.shift ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
+            `opacity:${date > todayISO ? 0.66 : 1};`,
+        });
+      }
+      weeks.push({ label: new Date(cells[0].date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), cells });
+    }
+
+    const next = (live.schedule?.upcoming ?? []).filter((d) => d.shift && d.date > todayISO).slice(0, 3);
+    const weekStart = new Date(todayISO + 'T00:00:00');
+    weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+    const weekFrom = localISODate(weekStart);
+    const thisWeekHours = all
+      .filter((d) => d.shift && d.date >= weekFrom && d.date < localISODate(new Date(weekStart.getTime() + 7 * DAY)))
+      .reduce((a, d) => a + d.hours, 0);
+
+    return {
+      weeks,
+      dayLabels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      legend: (['night', 'long', 'early', 'late', 'day'] as const).map((k) => ({
+        label: k === 'long' ? 'Long day' : k[0].toUpperCase() + k.slice(1),
+        style: `width:11px;height:11px;border-radius:4px;display:inline-block;background:${KIND_STYLE[k].bg};`,
+      })),
+      thisWeekHours: Math.round(thisWeekHours * 10) / 10,
+      nextUp: next.length
+        ? next
+            .map((d) =>
+              `${new Date(d.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })} · ${d.kind === 'long' ? 'long day' : d.kind}${d.start ? ' ' + d.start : ''}`,
+            )
+            .join('   ·   ')
+        : 'Nothing rostered in the weeks ahead.',
+    };
+  })();
+
+  /* ── practice hours ── */
+  // Registration needs a fixed number of practice hours. The rota already knows
+  // how many have been worked, so the only thing to type is what came before it.
+  const placementProgress = (() => {
+    const p = live.schedule?.placement;
+    if (!p || !p.days) return null;
+    const target = st.placementTarget || 2300;
+    const total = p.hours + (st.placementPrior || 0);
+    const pct = Math.max(0, Math.min(100, (total / target) * 100));
+
+    // Rate from the last twelve weeks, not the whole window — a summer with no
+    // placement would otherwise stretch the projection out forever.
+    const recent = (live.schedule?.history ?? []).filter(
+      (d) => d.shift && new Date(d.date + 'T00:00:00').getTime() >= Date.now() - 84 * DAY,
+    );
+    const perWeek = recent.reduce((a, d) => a + d.hours, 0) / 12;
+    const remaining = target - total;
+    const weeksLeft = perWeek > 0.5 && remaining > 0 ? Math.ceil(remaining / perWeek) : null;
+    const eta = weeksLeft
+      ? new Date(Date.now() + weeksLeft * 7 * DAY).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+      : null;
+
+    return {
+      total: Math.round(total).toLocaleString(),
+      target: target.toLocaleString(),
+      pct: Math.round(pct),
+      days: p.days,
+      perWeek: perWeek.toFixed(1),
+      prior: st.placementPrior || 0,
+      targetValue: target,
+      barStyle: `height:100%;width:${pct.toFixed(1)}%;border-radius:999px;background:#C06C84;transition:width 700ms cubic-bezier(.16,1,.3,1);`,
+      note: remaining <= 0
+        ? `${Math.round(total).toLocaleString()} hours against a ${target.toLocaleString()} requirement — that is done, with ${Math.round(-remaining).toLocaleString()} to spare.`
+        : eta
+        ? `${Math.round(remaining).toLocaleString()} hours to go. At ${perWeek.toFixed(1)} hours a week — your actual rate over the last twelve weeks — that lands around ${eta}.`
+        : `${Math.round(remaining).toLocaleString()} hours to go. No shifts in the last twelve weeks, so there is nothing to project a date from yet.`,
+      windowNote: p.from
+        ? `From ${p.days} rostered days since ${new Date(p.from + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}.` +
+          (st.placementPrior ? ` Plus ${st.placementPrior.toLocaleString()} hours entered by hand.` : ' Hours before that are not in the calendar — add them here.')
+        : '',
+      onPriorChange: (e: React.FormEvent<HTMLInputElement>) => {
+        const v = parseInt(e.currentTarget.value, 10);
+        setState({ placementPrior: Number.isFinite(v) ? Math.max(0, v) : 0 });
+      },
+      onTargetChange: (e: React.FormEvent<HTMLInputElement>) => {
+        const v = parseInt(e.currentTarget.value, 10);
+        setState({ placementTarget: Number.isFinite(v) && v > 0 ? v : 2300 });
+      },
+    };
+  })();
+
+  /* ── recovery from nights ── */
+  // Everyone says nights take a day or two to shake off. This measures how long
+  // they actually take for her, from her own heart data.
+  const nightRecovery = (() => {
+    const hist = live.schedule?.history;
+    if (!hist || !days) return null;
+    const byDate = new Map(days.map((d) => [d.date.slice(0, 10), d]));
+
+    // Baseline: days that are neither a shift nor sitting in the wake of one.
+    const restful = hist.filter((h, i) => !h.shift && hist.slice(Math.max(0, i - 3), i).every((q) => !q.shift));
+    const baseOf = (pick: (d: HealthDay) => number | null | undefined) => {
+      const v = restful
+        .map((h) => byDate.get(h.date))
+        .filter((d): d is HealthDay => Boolean(d))
+        .map(pick)
+        .filter((x): x is number => typeof x === 'number' && Number.isFinite(x));
+      return v.length >= 5 ? v.reduce((a, b) => a + b, 0) / v.length : null;
+    };
+    const baseHrv = baseOf((d) => d.heart.hrvMs);
+    const baseRhr = baseOf((d) => d.heart.restingHr);
+    if (baseHrv == null && baseRhr == null) return null;
+
+    // The last day of each run of nights.
+    const ends = hist.filter((h, i) => h.night && !(hist[i + 1]?.night ?? false)).map((h) => h.date);
+    if (ends.length < 2) return null;
+
+    const lags: number[] = [];
+    for (const end of ends) {
+      for (let k = 1; k <= 6; k++) {
+        const d = byDate.get(localISODate(new Date(new Date(end + 'T00:00:00').getTime() + k * DAY)));
+        if (!d) continue;
+        // Recovered once variability is back within a tenth of baseline and the
+        // resting rate is no longer elevated.
+        const hrvOk = baseHrv == null || d.heart.hrvMs == null || d.heart.hrvMs >= baseHrv * 0.9;
+        const rhrOk = baseRhr == null || d.heart.restingHr == null || d.heart.restingHr <= baseRhr * 1.05;
+        if (hrvOk && rhrOk) { lags.push(k); break; }
+      }
+    }
+    if (lags.length < 2) return null;
+
+    const sorted = [...lags].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+
+    return {
+      days: median,
+      runs: lags.length,
+      nights: hist.filter((h) => h.night).length,
+      baseline:
+        (baseHrv != null ? `HRV ${Math.round(baseHrv)} ms` : '') +
+        (baseHrv != null && baseRhr != null ? ' · ' : '') +
+        (baseRhr != null ? `RHR ${Math.round(baseRhr)} bpm` : ''),
+      note: `Across ${lags.length} runs of nights your heart data takes a median of ${median} day${median === 1 ? '' : 's'} to return to baseline. Treat the first day after a set as recovery rather than as a normal day off, and put the hard session ${median + 1} days out.`,
+    };
+  })();
+
+  /* ── the night before ── */
+  // The one part of this dashboard that acts before the problem rather than
+  // describing it afterwards.
+  const tomorrowPrep = (() => {
+    if (!rotaTomorrow?.shift) return null;
+    const kindLabel = rotaTomorrow.kind === 'long' ? 'long day' : rotaTomorrow.kind;
+    const hist = live.schedule?.history;
+
+    let gap = '';
+    if (hist && days) {
+      const on = new Set(hist.filter((h) => h.shift).map((h) => h.date));
+      const off = new Set(hist.filter((h) => !h.shift).map((h) => h.date));
+      const meanOf = (set: Set<string>) => {
+        const v = days
+          .filter((d) => set.has(d.date.slice(0, 10)))
+          .map((d) => d.nutrition.proteinG)
+          .filter((x): x is number => typeof x === 'number' && x > 0);
+        return v.length >= 3 ? v.reduce((a, b) => a + b, 0) / v.length : null;
+      };
+      const a = meanOf(on);
+      const b = meanOf(off);
+      if (a != null && b != null && b - a > 15) {
+        gap = ` You average ${Math.round(a)} g of protein on shift against ${Math.round(b)} g off. That ${Math.round(b - a)} g gets decided tonight, not tomorrow.`;
+      }
+    }
+
+    return {
+      title: `Tomorrow is a ${kindLabel}${rotaTomorrow.start ? `, ${rotaTomorrow.start}–${rotaTomorrow.end ?? ''}` : ''}${rotaTomorrow.hours ? ` · ${rotaTomorrow.hours} h` : ''}`,
+      note:
+        (rotaTomorrow.kind === 'night'
+          ? 'Nights cost the most sleep and the most protein of anything on your rota.'
+          : 'A day this long covers the deficit by itself — steps are not the thing to plan for.') +
+        gap +
+        ' Pack it before bed.',
+    };
+  })();
+
   /* ── relative strength ── */
   // Absolute load falls in a deficit and that is not automatically bad. Load per
   // kilo of bodyweight is the number that says whether the cut is taking muscle.
@@ -1538,6 +1792,7 @@ export function deriveVals(
     sleepDepth, habitStreaks,
     correction, outlier, muscleRisk, forecast,
     cycle, shiftSplit, relativeStrength, maintenanceTrend,
+    rota, placementProgress, nightRecovery, tomorrowPrep,
     lifts: live.lifts,
     onLiftSaved,
     weeklyDeficitRows, weeklyDeficitHeadline, weeklyDeficitCopy,

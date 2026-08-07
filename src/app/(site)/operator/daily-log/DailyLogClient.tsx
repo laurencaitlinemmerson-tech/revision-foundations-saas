@@ -31,6 +31,13 @@ const GOOGLE_RESULTS: Record<string, { ok: boolean; text: string }> = {
   save_failed: { ok: false, text: 'Google authorised fine, but the token could not be stored — run supabase-operator-google.sql.' },
 };
 
+/**
+ * The two figures the dashboard cannot derive: practice hours worked before the
+ * calendar window, and the registration target. Kept in localStorage so they
+ * survive a reload without needing a table of their own.
+ */
+const PLACEMENT_KEY = 'operator-placement-v1';
+
 export default function DailyLogClient({ props = DEFAULT_PROPS }: { props?: DailyLogProps }) {
   const [state, setStateRaw] = useState<DailyLogState>(INITIAL_STATE);
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
@@ -42,6 +49,35 @@ export default function DailyLogClient({ props = DEFAULT_PROPS }: { props?: Dail
   >((patch) => {
     setStateRaw((s) => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) }));
   }, []);
+
+  // localStorage is only readable after mount, so the saved practice-hours
+  // figures are picked up here rather than in the initial state.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(PLACEMENT_KEY);
+      if (!raw) return;
+      const { prior, target } = JSON.parse(raw) as { prior?: number; target?: number };
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStateRaw((s) => ({
+        ...s,
+        placementPrior: Number.isFinite(prior) ? Number(prior) : s.placementPrior,
+        placementTarget: Number.isFinite(target) && Number(target) > 0 ? Number(target) : s.placementTarget,
+      }));
+    } catch {
+      /* a corrupt entry just means the defaults stand */
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        PLACEMENT_KEY,
+        JSON.stringify({ prior: state.placementPrior, target: state.placementTarget }),
+      );
+    } catch {
+      /* private browsing, or the quota is full — not worth surfacing */
+    }
+  }, [state.placementPrior, state.placementTarget]);
 
   // The connect flow returns as a page load with ?google=… on it. Report the
   // outcome, then strip the parameter so a reload does not repeat the message.

@@ -73,20 +73,37 @@ export type ScheduleDay = {
 
 export type ScheduleStatus = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_failed';
 
-/** A past day, classified as worked or not, for the shift-vs-off comparison. */
+export type ShiftKind = 'night' | 'long' | 'early' | 'late' | 'day' | 'off';
+
+/** A day classified from the rota — past or upcoming. */
 export type ShiftDay = {
   date: string;
   shift: boolean;
   night: boolean;
+  kind: ShiftKind;
   hours: number;
+  /** Local clock times, when the calendar entry was timed rather than all-day. */
+  start: string | null;
+  end: string | null;
   /** The calendar entry that named it, when a title matched rather than hours. */
   label: string | null;
+};
+
+/** Practice hours found in the rota, for the registration total. */
+export type Placement = {
+  hours: number;
+  days: number;
+  from: string | null;
+  to: string | null;
 };
 
 export type Schedule = {
   status: ScheduleStatus;
   days: ScheduleDay[];
   history?: ShiftDay[];
+  /** Today and the weeks ahead, for the rota and the night-before prompt. */
+  upcoming?: ShiftDay[];
+  placement?: Placement;
   /** Whether running the connect flow could plausibly fix this state. */
   canConnect?: boolean;
   /** GOOGLE_REFRESH_TOKEN is set, so it overrides anything the flow stores. */
@@ -155,7 +172,7 @@ export const EMPTY_LIVE: LiveData = {
 const nonEmpty = <T,>(a: T[] | null | undefined): T[] | null => (a && a.length ? a : null);
 
 /** Local calendar date, which is what "today" and "resets each day" mean here. */
-function localISODate(d = new Date()) {
+export function localISODate(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 

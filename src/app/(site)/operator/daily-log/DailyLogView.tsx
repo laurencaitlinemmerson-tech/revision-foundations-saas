@@ -170,6 +170,15 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       </div>
       </>) : null}
+      {(v.isToday && v.tomorrowPrep) ? (<>
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(0,1fr)', gap: '16px', alignItems: 'start', padding: '16px 20px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderLeft: '3px solid #3A2A33', borderRadius: '12px' }}>
+      <span style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 11px', borderRadius: '999px', whiteSpace: 'nowrap', background: '#F4EFF1', color: '#3A2A33' }}>Tonight</span>
+      <div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: 'var(--ink)', marginBottom: '3px' }}>{v.tomorrowPrep.title}</div>
+      <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>{v.tomorrowPrep.note}</div>
+      </div>
+      </div>
+      </>) : null}
       {(v.isToday && v.cycle) ? (<>
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr)', gap: '16px', marginBottom: '16px', alignItems: 'start' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
@@ -452,6 +461,61 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <p style={{ margin: '16px 0 0', fontSize: '13px', color: '#57544E', lineHeight: '1.7' }}>{v.adherenceCopy}</p>
       </div>
       </div>
+      {(v.rota) ? (<>
+      <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '16px', marginBottom: '16px', alignItems: 'start' }}>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: '4px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Your <em style={{ color: '#C06C84' }}>rota</em></h2>
+      <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{v.rota.thisWeekHours} h this week</span>
+      </div>
+      <p style={{ margin: '0 0 14px', fontSize: '11.5px', color: 'var(--ink-mute)' }}>Next up — {v.rota.nextUp}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '38px repeat(7, minmax(0,1fr))', gap: '5px', alignItems: 'center', marginBottom: '5px' }}>
+      <span></span>
+      {(v.rota.dayLabels ?? []).map((d, d_i) => (<React.Fragment key={d_i}>
+      <span style={{ fontSize: '9.5px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-mute)', textAlign: 'center' }}>{d}</span>
+      </React.Fragment>))}
+      </div>
+      {(v.rota.weeks ?? []).map((w, w_i) => (<React.Fragment key={w_i}>
+      <div style={{ display: 'grid', gridTemplateColumns: '38px repeat(7, minmax(0,1fr))', gap: '5px', alignItems: 'center', marginBottom: '5px' }}>
+      <span style={{ fontSize: '9.5px', color: 'var(--ink-mute)', whiteSpace: 'nowrap' }}>{w.label}</span>
+      {(w.cells ?? []).map((c, c_i) => (<React.Fragment key={c_i}>
+      <div title={c.title} style={sx(c.style)}>
+      <span style={{ opacity: 0.75 }}>{c.day}</span>
+      {(c.short) ? (<><span style={{ fontWeight: 600, fontSize: '9px' }}>{c.short}</span></>) : null}
+      </div>
+      </React.Fragment>))}
+      </div>
+      </React.Fragment>))}
+      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '12px', paddingTop: '12px', borderTop: '0.5px solid var(--rule-soft)', fontSize: '10.5px', color: 'var(--ink-mute)' }}>
+      {(v.rota.legend ?? []).map((g, g_i) => (<React.Fragment key={g_i}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={sx(g.style)}></i>{g.label}</span>
+      </React.Fragment>))}
+      </div>
+      </div>
+      {(v.placementProgress) ? (<>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 12px' }}>Practice <em style={{ color: '#C06C84' }}>hours</em></h2>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '10px' }}>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '34px', color: 'var(--ink)', letterSpacing: '-0.02em' }}>{v.placementProgress.total}</span>
+      <span style={{ fontSize: '12.5px', color: 'var(--ink-mute)' }}>of {v.placementProgress.target} · {v.placementProgress.pct}%</span>
+      </div>
+      <div style={{ height: '10px', borderRadius: '999px', background: 'var(--paper-deep)', overflow: 'hidden', marginBottom: '12px' }}>
+      <div style={sx(v.placementProgress.barStyle)}></div>
+      </div>
+      <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>{v.placementProgress.note}</p>
+      <p style={{ margin: '0 0 14px', fontSize: '11px', color: 'var(--ink-mute)', lineHeight: 1.5 }}>{v.placementProgress.windowNote}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '10px', paddingTop: '12px', borderTop: '0.5px solid var(--rule-soft)' }}>
+      <label style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Hours before this calendar
+      <input type='number' min='0' step='10' value={v.placementProgress.prior} onChange={v.placementProgress.onPriorChange} style={{ display: 'block', width: '100%', marginTop: '5px', padding: '8px 10px', border: '0.5px solid var(--rule)', borderRadius: '7px', fontSize: '13px', color: 'var(--ink)', background: '#FFFFFF', outline: 'none' }} />
+      </label>
+      <label style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-mute)' }}>Required total
+      <input type='number' min='1' step='50' value={v.placementProgress.targetValue} onChange={v.placementProgress.onTargetChange} style={{ display: 'block', width: '100%', marginTop: '5px', padding: '8px 10px', border: '0.5px solid var(--rule)', borderRadius: '7px', fontSize: '13px', color: 'var(--ink)', background: '#FFFFFF', outline: 'none' }} />
+      </label>
+      </div>
+      </div>
+      </>) : null}
+      </div>
+      </>) : null}
       <div data-cols style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)', gap: '16px', alignItems: 'start' }}>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '14px' }}>
@@ -900,6 +964,19 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </>) : null}
       {(v.isHabits) ? (<>
       <div data-tab-panel style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {(v.nightRecovery) ? (<>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '2px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Recovering from <em style={{ color: '#C06C84' }}>nights</em></h2>
+      <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>baseline {v.nightRecovery.baseline}</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', margin: '8px 0 8px' }}>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '34px', color: 'var(--ink)', letterSpacing: '-0.02em' }}>{v.nightRecovery.days}</span>
+      <span style={{ fontSize: '12.5px', color: 'var(--ink-mute)' }}>day{v.nightRecovery.days === 1 ? '' : 's'} back to baseline · from {v.nightRecovery.runs} runs of nights</span>
+      </div>
+      <p style={{ margin: '0', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.6, maxWidth: '70ch' }}>{v.nightRecovery.note}</p>
+      </div>
+      </>) : null}
       {(v.shiftSplit) ? (<>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '2px' }}>
