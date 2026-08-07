@@ -468,6 +468,16 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Your <em style={{ color: '#C06C84' }}>rota</em></h2>
       <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{v.rota.thisWeekHours} h this week</span>
       </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', margin: '10px 0 12px' }}>
+      <button type='button' onClick={v.rota.onPrev} disabled={!v.rota.canPrev} aria-label='Earlier weeks' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canPrev ? 'pointer' : 'default', opacity: v.rota.canPrev ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>←</button>
+      <span style={{ fontSize: '11.5px', color: 'var(--ink-soft)', letterSpacing: '0.04em' }}>{v.rota.rangeLabel}</span>
+      <div style={{ display: 'flex', gap: '6px' }}>
+      {(!v.rota.atToday) ? (<>
+      <button type='button' onClick={v.rota.onToday} style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: 'pointer', fontSize: '11px', color: 'var(--ink-soft)' }}>This week</button>
+      </>) : null}
+      <button type='button' onClick={v.rota.onNext} disabled={!v.rota.canNext} aria-label='Later weeks' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canNext ? 'pointer' : 'default', opacity: v.rota.canNext ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>→</button>
+      </div>
+      </div>
       <p style={{ margin: '0 0 14px', fontSize: '11.5px', color: 'var(--ink-mute)' }}>Next up — {v.rota.nextUp}</p>
       <div style={{ display: 'grid', gridTemplateColumns: '38px repeat(7, minmax(0,1fr))', gap: '5px', alignItems: 'center', marginBottom: '5px' }}>
       <span></span>
@@ -479,7 +489,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div style={{ display: 'grid', gridTemplateColumns: '38px repeat(7, minmax(0,1fr))', gap: '5px', alignItems: 'center', marginBottom: '5px' }}>
       <span style={{ fontSize: '9.5px', color: 'var(--ink-mute)', whiteSpace: 'nowrap' }}>{w.label}</span>
       {(w.cells ?? []).map((c, c_i) => (<React.Fragment key={c_i}>
-      <div title={c.title} style={sx(c.style)}>
+      <div role='button' tabIndex={0} onClick={c.onClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.onClick(); } }} title={c.title} style={sx(c.style)} className="rota-cell">
       <span style={{ opacity: 0.75 }}>{c.day}</span>
       {(c.short) ? (<><span style={{ fontWeight: 600, fontSize: '9px' }}>{c.short}</span></>) : null}
       </div>
@@ -491,6 +501,26 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={sx(g.style)}></i>{g.label}</span>
       </React.Fragment>))}
       </div>
+      {(v.rota.selected) ? (<>
+      <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '0.5px solid var(--rule-soft)' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--ink)' }}>{v.rota.selected.label}</span>
+      <span style={sx(v.rota.selected.chipStyle)}>{v.rota.selected.kindLabel}</span>
+      </div>
+      {(v.rota.selected.note) ? (<>
+      <p style={{ margin: '0', fontSize: '12px', color: 'var(--ink-mute)' }}>{v.rota.selected.note}</p>
+      </>) : (<>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(84px, 1fr))', gap: '10px' }}>
+      {(v.rota.selected.stats ?? []).map((s, s_i) => (<React.Fragment key={s_i}>
+      <div>
+      <div style={{ fontSize: '9.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '2px' }}>{s.label}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--ink)' }}>{s.value}</div>
+      </div>
+      </React.Fragment>))}
+      </div>
+      </>)}
+      </div>
+      </>) : null}
       </div>
       {(v.placementProgress) ? (<>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>

@@ -79,3 +79,7 @@
 @media (max-width: 1080px) {
   .daily-log-shell [data-metric-band] { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 }
+
+/* Rota cells are clickable, so they need to feel it. */
+.rota-cell:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(26, 24, 21, 0.14); }
+.rota-cell:focus-visible { outline: 2px solid #c06c84; outline-offset: 2px; }

@@ -36,6 +36,10 @@ export type DailyLogState = {
   showLog: 'food' | 'session' | null;
   targetsOpen: boolean;
   targets: { goal?: number; kcal?: number; proteinPerKg?: number };
+  /** Which rota day is open, as an ISO date. Null means today. */
+  rotaDate: string | null;
+  /** How many six-week pages back or forward the rota is scrolled. */
+  rotaPage: number;
   /** Practice hours worked before the calendar window, entered by hand. */
   placementPrior: number;
   /** Hours needed for registration — 2,300 under current NMC standards. */
@@ -75,6 +79,8 @@ export const INITIAL_STATE: DailyLogState = {
   showLog: null,
   targetsOpen: false,
   targets: {},
+  rotaDate: null,
+  rotaPage: 0,
   placementPrior: 0,
   placementTarget: 2300,
 };
@@ -1093,10 +1099,13 @@ export function deriveVals(
     if (all.length < 14) return null;
 
     const byDate = new Map(all.map((d) => [d.date, d]));
+    const selectedDate = st.rotaDate ?? todayISO;
+
     // Start on the Monday a fortnight before this week, so the grid reads as
-    // weeks and today sits about a third of the way down.
+    // weeks and today sits about a third of the way down. Paging moves the
+    // whole window six weeks at a time.
     const start = new Date(todayISO + 'T00:00:00');
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 14);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 14 + st.rotaPage * 42);
 
     const weeks = [];
     for (let w = 0; w < 6; w++) {
@@ -1109,23 +1118,76 @@ export function deriveVals(
         const kind = entry?.shift ? entry.kind : 'off';
         const s = KIND_STYLE[kind] ?? KIND_STYLE.off;
         const isToday = date === todayISO;
+        const isSelected = date === selectedDate;
         cells.push({
           date,
           day: String(d.getDate()),
           short: entry?.shift ? s.short : '',
           today: isToday,
+          // Clicking a day opens it below rather than navigating away, so the
+          // grid stays on screen while you read across it.
+          onClick: () => setState({ rotaDate: date }),
           title: entry?.shift
             ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''} · ${entry.hours} h`
             : `${date} · off`,
           style:
-            'aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;' +
+            'aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease;' +
             `background:${s.bg};color:${s.fg};` +
-            `border:${isToday ? '1.5px solid #1A1A18' : !entry?.shift ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
+            (isSelected
+              ? 'outline:2px solid #C06C84;outline-offset:2px;'
+              : isToday
+              ? 'outline:1.5px solid #1A1A18;outline-offset:1px;'
+              : '') +
+            `border:${!entry?.shift ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
             `opacity:${date > todayISO ? 0.66 : 1};`,
         });
       }
       weeks.push({ label: new Date(cells[0].date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), cells });
     }
+
+    // What the selected day actually was — the rota entry joined to what the
+    // body did that day, which is the whole reason for making it clickable.
+    const selected = (() => {
+      const entry = byDate.get(selectedDate) ?? null;
+      const health = (days ?? []).find((d) => d.date.slice(0, 10) === selectedDate) ?? null;
+      const weigh = readings.find((r) => r.date.slice(0, 10) === selectedDate) ?? null;
+      const label = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long',
+      });
+
+      const n = (v: number | null | undefined, f: (x: number) => string) =>
+        typeof v === 'number' && Number.isFinite(v) ? f(v) : '—';
+
+      return {
+        date: selectedDate,
+        label,
+        isFuture: selectedDate > todayISO,
+        kindLabel: entry?.shift
+          ? (entry.kind === 'long' ? 'Long day' : entry.kind[0].toUpperCase() + entry.kind.slice(1)) +
+            (entry.start ? ` · ${entry.start}–${entry.end ?? ''}` : '') +
+            ` · ${entry.hours} h`
+          : 'Day off',
+        chipStyle:
+          'font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 11px;border-radius:999px;white-space:nowrap;' +
+          (entry?.shift
+            ? `background:${KIND_STYLE[entry.kind]?.bg ?? '#EBD3DB'};color:${KIND_STYLE[entry.kind]?.fg ?? '#5A2233'};`
+            : 'background:#F4F4F3;color:#57544E;'),
+        stats: [
+          { label: 'Steps', value: n(health?.activity.steps, (x) => Math.round(x).toLocaleString()) },
+          { label: 'Protein', value: n(health?.nutrition.proteinG, (x) => Math.round(x) + ' g') },
+          { label: 'Intake', value: n(health?.nutrition.dietaryEnergyKcal, (x) => Math.round(x).toLocaleString() + ' kcal') },
+          { label: 'Sleep', value: n(health?.sleep.totalMin, (x) => (x / 60).toFixed(1) + ' h') },
+          { label: 'Resting HR', value: n(health?.heart.restingHr, (x) => Math.round(x) + ' bpm') },
+          { label: 'HRV', value: n(health?.heart.hrvMs, (x) => Math.round(x) + ' ms') },
+          { label: 'Weight', value: n(weigh?.weight, (x) => conv(x).toFixed(1) + ' ' + uLabel) },
+        ],
+        note: selectedDate > todayISO
+          ? 'Still ahead — nothing recorded yet.'
+          : health
+          ? ''
+          : 'Apple Health has nothing for this day.',
+      };
+    })();
 
     const next = (live.schedule?.upcoming ?? []).filter((d) => d.shift && d.date > todayISO).slice(0, 3);
     const weekStart = new Date(todayISO + 'T00:00:00');
@@ -1135,9 +1197,24 @@ export function deriveVals(
       .filter((d) => d.shift && d.date >= weekFrom && d.date < localISODate(new Date(weekStart.getTime() + 7 * DAY)))
       .reduce((a, d) => a + d.hours, 0);
 
+    const first = weeks[0].cells[0].date;
+    const last = weeks[5].cells[6].date;
+    const monthOf = (iso: string) =>
+      new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+
     return {
       weeks,
+      selected,
       dayLabels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      rangeLabel: monthOf(first) === monthOf(last) ? monthOf(first) : `${monthOf(first)} – ${monthOf(last)}`,
+      // Paging is bounded by what the calendar was actually fetched for, so the
+      // arrows never walk off into six empty weeks.
+      canPrev: all[0].date < first,
+      canNext: all[all.length - 1].date > last,
+      atToday: st.rotaPage === 0,
+      onPrev: () => setState((s) => ({ rotaPage: s.rotaPage - 1 })),
+      onNext: () => setState((s) => ({ rotaPage: s.rotaPage + 1 })),
+      onToday: () => setState({ rotaPage: 0, rotaDate: todayISO }),
       legend: (['night', 'long', 'early', 'late', 'day'] as const).map((k) => ({
         label: k === 'long' ? 'Long day' : k[0].toUpperCase() + k.slice(1),
         style: `width:11px;height:11px;border-radius:4px;display:inline-block;background:${KIND_STYLE[k].bg};`,
