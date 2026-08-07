@@ -1,14 +1,22 @@
 import { Metadata } from 'next';
-import './operator-dashboard.css';
-import './operator-dashboard-polish.css';
-import './print-issue.css';
-import OperatorDashboardClient from './OperatorDashboardClient';
+import OperatorGate from './OperatorGate';
+import DailyLogClient from './daily-log/DailyLogClient';
 
 export const metadata: Metadata = {
   title: 'Operator Dashboard',
   robots: { index: false, follow: false },
 };
 
+/**
+ * The operator dashboard — the Daily log redesign.
+ *
+ * The previous warm-editorial dashboard is still available at /operator/legacy;
+ * both sit behind the same password gate.
+ */
 export default function OperatorPage() {
-  return <OperatorDashboardClient />;
+  return (
+    <OperatorGate>
+      <DailyLogClient />
+    </OperatorGate>
+  );
 }

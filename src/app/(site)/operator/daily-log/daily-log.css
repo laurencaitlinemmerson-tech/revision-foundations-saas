@@ -1,0 +1,81 @@
+/* =============================================================
+   Daily log — design tokens.
+
+   The purple editorial palette from the approved redesign. Scoped to
+   .daily-log-shell so it cannot leak into the rest of the operator area,
+   which still runs the warm-editorial (brass) tokens.
+   ============================================================= */
+
+.daily-log-shell {
+  --paper: #FFFFFF;
+  --paper-deep: #F4F4F3;
+  --surface: #FFFFFF;
+
+  --ink: #1A1A18;
+  --ink-soft: #57544E;
+  --ink-mute: #8E8A82;
+
+  --rule: rgba(0, 0, 0, 0.08);
+  --rule-soft: rgba(26, 24, 21, 0.12);
+
+  /* Accents: warm neutrals. Champagne is the only accent; sage is the single
+     cool contrast the charts need to separate a second series. */
+  --green: #7F9289;
+  --rose: #AA7F68;
+  --brass: #C98BA0;
+  --brass-deep: #8A4459;
+  --brass-haze: #FBF4F6;
+
+  --champagne: #C06C84;
+  --champagne-soft: #F2DCE4;
+  --champagne-haze: #FAF0F3;
+  --champagne-deep: #8A4459;
+
+  --shell-tint-a: rgba(229, 216, 190, 0.18);
+  --shell-tint-b: rgba(230, 212, 196, 0.14);
+
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  background: #FFFFFF;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-weight: 300;
+}
+
+/* The template's `style-hover` attributes, lifted into real CSS. */
+.daily-log-shell .hv0:hover { background: #FFFFFF; }
+.daily-log-shell .hv1:hover { background: #3A382F; }
+.daily-log-shell .hv2:hover { box-shadow: 0 8px 20px rgba(192, 108, 132, 0.16); }
+.daily-log-shell .hv3:hover { box-shadow: 0 2px 3px rgba(26, 24, 21, 0.02), 0 18px 40px rgba(192, 108, 132, 0.14); }
+.daily-log-shell .hv4:hover { background: var(--paper-deep); }
+.daily-log-shell .hv5:hover { background: #3A382F; }
+
+/* Range slider — the pace and rate controls. */
+.daily-log-shell input[type='range'] {
+  accent-color: var(--champagne);
+}
+
+/* Responsive: the sidebar folds away and the metric grids reflow. */
+@media (max-width: 1080px) {
+  .daily-log-shell [data-shell] { grid-template-columns: minmax(0, 1fr) !important; }
+  .daily-log-shell [data-sidebar] {
+    position: static !important;
+    height: auto !important;
+    border-right: 0 !important;
+    border-bottom: 0.5px solid rgba(26, 24, 21, 0.05);
+  }
+  .daily-log-shell [data-sidebar-hide] { display: none !important; }
+  .daily-log-shell [data-cols] { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+@media (max-width: 760px) {
+  .daily-log-shell [data-main] { padding: 24px 18px 60px !important; }
+  .daily-log-shell [data-hero] { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+/* The metric band divides with hairlines, so the first cell in each wrapped
+   row must drop the divider it would otherwise inherit. */
+@media (max-width: 1080px) {
+  .daily-log-shell [data-metric-band] { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
