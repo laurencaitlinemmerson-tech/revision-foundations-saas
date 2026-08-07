@@ -10,8 +10,7 @@
    useTickerObserver()          attaches count-up to elements with
                                  [data-ticker] — runs once on entry
    useChartDrawObserver()       triggers line draw + point pop on
-                                 [data-chart] entry (works with the
-                                 classes in operator-dashboard-polish.css)
+                                 [data-chart] entry
    useDimOnRead()               dims sections that aren't currently
                                  centred in the viewport
    useStickyRail()              attaches vertical Roman-numeral rail
