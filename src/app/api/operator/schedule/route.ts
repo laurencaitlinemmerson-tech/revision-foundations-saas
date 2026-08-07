@@ -170,6 +170,7 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
         summary?: string;
         status?: string;
         transparency?: string;
+        attendees?: Array<{ self?: boolean; responseStatus?: string }>;
         start?: { dateTime?: string; date?: string };
         end?: { dateTime?: string; date?: string };
       }>;
@@ -178,6 +179,10 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
     return (json.items ?? []).flatMap((e) => {
       // Cancelled events and ones marked "free" do not constrain the day.
       if (e.status === 'cancelled' || e.transparency === 'transparent') return [];
+      // Skip events where the user explicitly declined the invitation
+      const selfAttendee = e.attendees?.find((a) => a.self);
+      if (selfAttendee?.responseStatus === 'declined') return [];
+
       const startRaw = e.start?.dateTime ?? e.start?.date;
       if (!startRaw) return [];
       const endRaw = e.end?.dateTime ?? e.end?.date;
@@ -194,45 +199,75 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
 }
 
 /**
- * Words that mark a day as clinical work.
- *
- * Deliberately narrow. An earlier version also matched "early", "late",
- * "practice" and "trust", which turned "early lecture", "running late" and
- * "practice questions" into ward shifts. Those words only mean a shift next to
- * one of these, so they are read as a kind below rather than as evidence here.
+ * Words that explicitly mean the day is NOT a shift, even if other shift-like words
+ * appear in the title (e.g., "Night off", "Shift cancelled", "No shift", "Off").
  */
-const SHIFT_WORDS = /\b(shifts?|placement|ward|clinical|on[- ]?call|night shift|long day)\b/i;
+const OFF_WORDS = /\b(off|day off|no shift|cancelled|canceled|not working|rest day|annual leave|holiday|leave|zero|swapped out|vacation|free day|day-off|night-off|night off)\b/i;
+
+/**
+ * Words that mark a day as clinical work.
+ */
+const SHIFT_WORDS = /\b(shifts?|placement|ward|clinical|on[- ]?call|night shift|long day|early shift|late shift|day shift|hospital|nhs|kch|gosh|gstt|st thomas|guy'?s)\b/i;
 
 /** Titles that look like a shift but are not — the rota's false friends. */
-const NOT_SHIFT = /\b(lecture|seminar|tutorial|revision|exam|assignment|essay|deadline|birthday|holiday|leave|annual leave|dentist|doctor|gp|appointment|meeting|study|library|zoom|teams)\b/i;
+const NOT_SHIFT = /\b(lecture|seminar|tutorial|revision|exam|assignment|essay|deadline|birthday|holiday|leave|annual leave|dentist|doctor|gp|appointment|meeting|study|library|zoom|teams|travel|flight|drive|personal|wfh|work from home|conference|workshop|ceremony|dinner|party|lunch)\b/i;
 
 export type ShiftKind = 'night' | 'long' | 'early' | 'late' | 'day' | 'off';
 
 /**
- * A day counts as worked when the calendar names it as one, or when it holds a
- * single long block of time that looks like nothing else.
- *
- * The unnamed fallback used to be "six or more busy hours in the day", summed
- * across every entry and counting all-day events as eight. A birthday reminder
- * was therefore a shift, and so was any day with three lectures. It now needs
- * one continuous timed block, which is what a real shift is.
+ * Parses explicit NHS / rota shift codes from an event title.
+ */
+function getShiftCode(title: string): ShiftKind | null {
+  const t = title.trim();
+  if (OFF_WORDS.test(t)) return null;
+
+  // Exact codes or standalone shift types
+  if (/^(n|nights?|night shift)$/i.test(t)) return 'night';
+  if (/^(ld|long day)$/i.test(t)) return 'long';
+  if (/^(e|early|early shift)$/i.test(t)) return 'early';
+  if (/^(l|late|late shift)$/i.test(t)) return 'late';
+  if (/^(d|day shift)$/i.test(t)) return 'day';
+
+  // Words with explicit shift context: "Placement N", "Shift LD", "Ward E", etc.
+  if (/\b(placement|shift|ward|clinical)\s+n\b/i.test(t) || /\bnight\s+shift\b/i.test(t) || /\bnights?\b/i.test(t)) return 'night';
+  if (/\b(placement|shift|ward|clinical)\s+ld\b/i.test(t) || /\blong\s+day\b/i.test(t)) return 'long';
+  if (/\b(placement|shift|ward|clinical)\s+e\b/i.test(t) || /\bearly\s+shift\b/i.test(t)) return 'early';
+  if (/\b(placement|shift|ward|clinical)\s+l\b/i.test(t) || /\blate\s+shift\b/i.test(t)) return 'late';
+
+  return null;
+}
+
+/**
+ * Checks if an event is a multi-day placement block banner (e.g. July 13 - Aug 15)
+ * rather than an individual daily shift.
+ */
+function isMultiDayBlock(e: Entry): boolean {
+  if (!e.end) return false;
+  return (e.end.getTime() - e.start.getTime()) > 24 * 3600000;
+}
+
+/**
+ * A day counts as worked when the calendar names a single-day shift entry,
+ * or when it holds a single long block of time that looks like nothing else.
  */
 function classifyDay(entries: Entry[]) {
-  const real = entries.filter((e) => !NOT_SHIFT.test(e.title));
-  const named = real.find((e) => SHIFT_WORDS.test(e.title));
+  // Ignore multi-day placement block banners (which cover weeks at a time)
+  // so days off within a placement block are correctly identified as off days.
+  const singleDayEntries = entries.filter((e) => !isMultiDayBlock(e));
+  const real = singleDayEntries.filter((e) => !OFF_WORDS.test(e.title) && !NOT_SHIFT.test(e.title));
+  const named = real.find((e) => SHIFT_WORDS.test(e.title) || getShiftCode(e.title) !== null);
 
-  // All-day entries are markers, not commitments, so they never imply a shift.
+  // All-day entries are markers, not commitments, so they never imply a shift unless named
   const timed = real.filter((e) => !e.allDay && e.end);
   const longest = timed.reduce(
     (best, e) => Math.max(best, (e.end!.getTime() - e.start.getTime()) / 3600000),
     0,
   );
 
-  const shift = Boolean(named) || longest >= 6;
+  const shift = Boolean(named) || (longest >= 7 && real.some((e) => !e.allDay && (e.end!.getTime() - e.start.getTime()) / 3600000 >= 7));
   if (!shift) return { shift: false, night: false, kind: 'off' as ShiftKind, hours: null, start: null, end: null, label: null };
 
-  // Measured length, where the rota gives times to measure. Needed before the
-  // kind, because an unlabelled shift is classified by how long it ran.
+  // Measured length
   const timedHours = named ? busyHours(real.filter((e) => !e.allDay)) : longest;
 
   const startHour = timed.length ? Math.min(...timed.map((e) => localHour(e.start))) : null;
@@ -242,29 +277,19 @@ function classifyDay(entries: Entry[]) {
     return latest == null || h > latest ? h : latest;
   }, null);
 
-  // Kind words are read only off the entry that made this a shift. Taking them
-  // from the whole day is how "late lunch" turned an early into a late.
   const source = named ?? timed.reduce<Entry | null>(
     (best, e) => (!best || e.end!.getTime() - e.start.getTime() > best.end!.getTime() - best.start.getTime() ? e : best),
     null,
   );
   const titles = source?.title ?? '';
 
-  // NHS rotas are written in codes — "PLACEMENT LD", "PLACEMENT N" — and a rota
-  // kept as all-day entries has no clock to infer anything from. The code is an
-  // explicit statement of which shift it is, so it outranks the times.
-  const coded: ShiftKind | null =
-    /\b(n|night|nights)\b/i.test(titles) ? 'night'
-    : /\b(ld|long day)\b/i.test(titles) ? 'long'
-    : /\b(e|early)\b/i.test(titles) ? 'early'
-    : /\b(l|late)\b/i.test(titles) ? 'late'
-    : null;
+  const coded = getShiftCode(titles);
 
   const night =
     coded === 'night' ||
     (coded == null &&
       ((startHour != null && (startHour >= 18 || startHour < 5)) ||
-        (endHour != null && startHour != null && endHour < startHour))); // crosses midnight
+        (endHour != null && startHour != null && endHour < startHour)));
 
   const kind: ShiftKind =
     coded ??
@@ -278,9 +303,6 @@ function classifyDay(entries: Entry[]) {
       ? 'late'
       : 'day');
 
-  // Hours are whatever the calendar says and nothing else. An all-day entry
-  // carries no times, so the answer is that there are none — not a plausible
-  // number standing in for one.
   const hours = timedHours > 0 ? Math.round(timedHours * 10) / 10 : null;
 
   const hhmmOf = (h: number | null) =>
@@ -293,8 +315,6 @@ function classifyDay(entries: Entry[]) {
     hours,
     start: hhmmOf(startHour),
     end: hhmmOf(endHour),
-    // The event this was read from. Surfaced so a wrong call is visible as a
-    // wrong call rather than as the dashboard inventing a shift.
     label: source?.title ?? null,
   };
 }
@@ -421,12 +441,20 @@ export async function GET(req: NextRequest) {
     };
   });
 
-  // Bucket every event by its local calendar date once, rather than re-scanning
-  // the whole list for each of ~600 days.
+  // Bucket every event by its local calendar date once, expanding multi-day events across all dates
   const byDay = new Map<string, Entry[]>();
   for (const e of events) {
-    const k = dayKey(e.start);
-    byDay.set(k, [...(byDay.get(k) ?? []), e]);
+    if (e.allDay && e.end && e.end.getTime() > e.start.getTime() + DAY_MS) {
+      for (let t = e.start.getTime(); t < e.end.getTime(); t += DAY_MS / 2) {
+        const k = dayKey(new Date(t));
+        if (!byDay.has(k)) byDay.set(k, []);
+        const list = byDay.get(k)!;
+        if (!list.includes(e)) list.push(e);
+      }
+    } else {
+      const k = dayKey(e.start);
+      byDay.set(k, [...(byDay.get(k) ?? []), e]);
+    }
   }
 
   const today = dayKey(new Date());

@@ -464,18 +464,24 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       {(v.rota) ? (<>
       <div style={{ marginBottom: '16px' }}>
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: '4px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: '4px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Your <em style={{ color: '#C06C84' }}>rota</em></h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: '#F4F4F3', padding: '2px', borderRadius: '7px' }}>
+      <button type='button' onClick={() => v.rota?.onSetMode('month')} style={{ padding: '3px 8px', fontSize: '10.5px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: v.rota.mode === 'month' ? 600 : 400, background: v.rota.mode === 'month' ? '#FFFFFF' : 'transparent', color: v.rota.mode === 'month' ? 'var(--ink)' : 'var(--ink-mute)', boxShadow: v.rota.mode === 'month' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none' }}>Month</button>
+      <button type='button' onClick={() => v.rota?.onSetMode('6wk')} style={{ padding: '3px 8px', fontSize: '10.5px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: v.rota.mode === '6wk' ? 600 : 400, background: v.rota.mode === '6wk' ? '#FFFFFF' : 'transparent', color: v.rota.mode === '6wk' ? 'var(--ink)' : 'var(--ink-mute)', boxShadow: v.rota.mode === '6wk' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none' }}>6-Week</button>
+      </div>
+      </div>
       <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{v.rota.thisWeekLabel}</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', margin: '10px 0 12px' }}>
-      <button type='button' onClick={v.rota.onPrev} disabled={!v.rota.canPrev} aria-label='Earlier weeks' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canPrev ? 'pointer' : 'default', opacity: v.rota.canPrev ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>←</button>
+      <button type='button' onClick={v.rota.onPrev} disabled={!v.rota.canPrev} aria-label='Earlier' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canPrev ? 'pointer' : 'default', opacity: v.rota.canPrev ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>←</button>
       <span style={{ fontSize: '11.5px', color: 'var(--ink-soft)', letterSpacing: '0.04em' }}>{v.rota.rangeLabel}</span>
       <div style={{ display: 'flex', gap: '6px' }}>
       {(!v.rota.atToday) ? (<>
-      <button type='button' onClick={v.rota.onToday} style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: 'pointer', fontSize: '11px', color: 'var(--ink-soft)' }}>This week</button>
+      <button type='button' onClick={v.rota.onToday} style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: 'pointer', fontSize: '11px', color: 'var(--ink-soft)' }}>{v.rota.todayBtnLabel}</button>
       </>) : null}
-      <button type='button' onClick={v.rota.onNext} disabled={!v.rota.canNext} aria-label='Later weeks' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canNext ? 'pointer' : 'default', opacity: v.rota.canNext ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>→</button>
+      <button type='button' onClick={v.rota.onNext} disabled={!v.rota.canNext} aria-label='Later' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canNext ? 'pointer' : 'default', opacity: v.rota.canNext ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>→</button>
       </div>
       </div>
       <p style={{ margin: '0 0 14px', fontSize: '11.5px', color: 'var(--ink-mute)' }}>Next up — {v.rota.nextUp}</p>
@@ -556,7 +562,15 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </>) : null}
       {(v.scheduleRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
+      <div
+        role='button'
+        tabIndex={0}
+        onClick={() => v.onTab('today')}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') v.onTab('today'); }}
+        title={`Click to view ${n.day} on rota`}
+        style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 10px', margin: '0 -10px', borderRadius: '8px', borderTop: n_i === 0 ? 'none' : '0.5px solid rgba(26,24,21,0.11)', cursor: 'pointer', transition: 'background 160ms ease, transform 140ms ease' }}
+        className="rota-cell"
+      >
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{n.day}</span>
       <span style={sx(`font-size:12.5px;color:${n.calColor};`)}>{n.calendar}</span>
       <span style={{ fontSize: '12.5px', color: 'var(--ink)' }}>{n.suggestion}</span>
@@ -565,15 +579,29 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       <div style={{ padding: '26px 28px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>The training week</h2>
-      <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#8E8A82' }}>Three lifts, two easy days — enough stimulus to hold muscle while the deficit runs.</p>
+      <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#8E8A82' }}>Three lifts, two easy days — enough stimulus to hold muscle while the deficit runs. Click any session to log.</p>
       {(v.planWeek ?? []).map((d, d_i) => (<React.Fragment key={d_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: '14px', alignItems: 'center', padding: '13px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>
+      <div
+        role='button'
+        tabIndex={0}
+        onClick={() => {
+          if (d.tag === 'Lift') {
+            v.onOpenSession(0);
+          } else {
+            v.onTab('today');
+          }
+        }}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { if (d.tag === 'Lift') v.onOpenSession(0); else v.onTab('today'); } }}
+        title={d.tag === 'Lift' ? `Click to start ${d.session}` : `Click to view ${d.day} details`}
+        style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: '14px', alignItems: 'center', padding: '13px 12px', margin: '0 -12px', borderRadius: '8px', borderTop: d_i === 0 ? 'none' : '0.5px solid rgba(26,24,21,0.11)', cursor: 'pointer', transition: 'background 160ms ease, transform 140ms ease' }}
+        className="rota-cell"
+      >
       <span style={{ fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A29D95' }}>{d.day}</span>
       <div>
       <div style={{ fontSize: '13.5px', color: 'var(--ink)' }}>{d.session}</div>
       <div style={{ fontSize: '11.5px', color: '#8E8A82', marginTop: '2px' }}>{d.detail}</div>
       </div>
-      <span style={sx(`font-size:10.5px;padding:4px 11px;border-radius:999px;background:${d.tagBg};color:${d.tagColor};`)}>{d.tag}</span>
+      <span style={sx(`font-size:10.5px;padding:4px 11px;border-radius:999px;background:${d.tagBg};color:${d.tagColor};font-weight:500;`)}>{d.tag} →</span>
       </div>
       </React.Fragment>))}
       </div>
@@ -792,8 +820,26 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <p style={{ margin: '0', fontSize: '13px', color: 'var(--ink-mute)', lineHeight: 1.6 }}>Nothing to say yet. Plateau detection needs three weigh-ins, the maintenance check needs five days of logged intake, and readiness needs a few weeks of heart data.</p>
       </>) : null}
       {(v.coachNotes ?? []).map((c, c_i) => (<React.Fragment key={c_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '92px minmax(0,1fr)', gap: '16px', alignItems: 'start', padding: '14px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
-      <span style={sx(`font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;text-align:center;background:${c.tone === 'ok' ? '#EDF1EC' : c.tone === 'mid' ? '#FAF0F3' : '#FAF0F3'};color:${c.tone === 'ok' ? '#7F9289' : c.tone === 'mid' ? '#8A4459' : '#AA7F68'};`)}>{c.tag}</span>
+      <div
+        role='button'
+        tabIndex={0}
+        onClick={() => {
+          if (c.tag === 'Readiness' || c.tag === 'Plateau' || c.tag === 'Maintenance') v.onTab('trends');
+          else if (c.tag === 'Adherence') v.onTab('food');
+          else v.onTab('today');
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            if (c.tag === 'Readiness' || c.tag === 'Plateau' || c.tag === 'Maintenance') v.onTab('trends');
+            else if (c.tag === 'Adherence') v.onTab('food');
+            else v.onTab('today');
+          }
+        }}
+        title={`Click to open ${c.tag} breakdown`}
+        style={{ display: 'grid', gridTemplateColumns: '92px minmax(0,1fr)', gap: '16px', alignItems: 'start', padding: '14px 10px', margin: '0 -10px', borderRadius: '8px', borderTop: c_i === 0 ? 'none' : '0.5px solid var(--rule-soft)', cursor: 'pointer', transition: 'background 160ms ease' }}
+        className="rota-cell"
+      >
+      <span style={sx(`font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;text-align:center;background:${c.tone === 'ok' ? '#EDF1EC' : c.tone === 'mid' ? '#FAF0F3' : '#FAF0F3'};color:${c.tone === 'ok' ? '#7F9289' : c.tone === 'mid' ? '#8A4459' : '#AA7F68'};font-weight:500;`)}>{c.tag}</span>
       <div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: 'var(--ink)', marginBottom: '3px' }}>{c.title}</div>
       <div style={{ fontSize: '12.5px', color: 'var(--ink-mute)', lineHeight: 1.6 }}>{c.note}</div>

@@ -40,6 +40,10 @@ export type DailyLogState = {
   rotaDate: string | null;
   /** How many six-week pages back or forward the rota is scrolled. */
   rotaPage: number;
+  /** View mode for the rota: month view or 6-week rolling view. */
+  rotaMode?: 'month' | '6wk';
+  /** Month offset from current month when in month mode. */
+  monthOffset?: number;
   volRange?: 'week' | 'month' | 'quarter' | 'all';
 };
 
@@ -77,6 +81,8 @@ export const INITIAL_STATE: DailyLogState = {
   targets: {},
   rotaDate: null,
   rotaPage: 0,
+  rotaMode: 'month',
+  monthOffset: 0,
 };
 
 export const DEFAULT_PROPS: DailyLogProps = { goalKg: 68, calorieTarget: 2000, proteinPerKg: 1.8 };
@@ -549,12 +555,35 @@ export function deriveVals(
     // Above-baseline HRV and below-baseline resting HR both read as recovered.
     const hrvDelta = (hrvNow - hrvBase) / hrvBase;
     const rhrDelta = (rhrBase - rhrNow) / rhrBase;
-    const score = Math.max(0, Math.min(100, Math.round(50 + (hrvDelta * 120) + (rhrDelta * 160))));
-    const verdict = score >= 66
+    let rawScore = Math.max(0, Math.min(100, Math.round(50 + (hrvDelta * 120) + (rhrDelta * 160))));
+
+    // Shift pattern context
+    const upcomingList = live.schedule?.upcoming ?? [];
+    const historyList = live.schedule?.history ?? [];
+
+    const todayShift = upcomingList.find((d) => d.date === todayISO) ?? historyList.find((d) => d.date === todayISO);
+    const yesterdayDate = localISODate(new Date(Date.now() - DAY));
+    const yesterdayShift = historyList.find((d) => d.date === yesterdayDate) ?? upcomingList.find((d) => d.date === yesterdayDate);
+
+    let shiftNote = '';
+    if (yesterdayShift?.shift && yesterdayShift.kind === 'night') {
+      rawScore = Math.max(15, rawScore - 15);
+      shiftNote = ' · Post-night recovery: Heart rate & HRV are returning to baseline. Prioritise hydration, protein (+15g), and sleep over heavy lifting today.';
+    } else if (yesterdayShift?.shift && yesterdayShift.kind === 'long') {
+      rawScore = Math.max(20, rawScore - 8);
+      shiftNote = ' · Ward fatigue: Coming off a 12.5h long day shift. Step deficit was met on shift — keep training light or rest.';
+    } else if (todayShift?.shift && todayShift.kind === 'night') {
+      shiftNote = ' · Night shift today: Nap pre-shift if possible, spread 160g+ protein across ward breaks, and hydrate well.';
+    } else if (todayShift?.shift && todayShift.kind === 'long') {
+      shiftNote = ' · Long day today: 12.5h ward placement already covers daily step deficit — no extra workout required.';
+    }
+
+    const score = rawScore;
+    const verdict = (score >= 66
       ? 'Recovered — train as planned, and take the top set if it is there.'
       : score >= 40
       ? 'Middling — train, but hold the last set back rather than chasing a number.'
-      : 'Under-recovered — drop a set, keep the walk, and get the earlier night.';
+      : 'Under-recovered — drop a set, keep the walk, and get the earlier night.') + shiftNote;
     return { score, verdict, hrvDelta, rhrDelta };
   })();
 
@@ -1097,15 +1126,44 @@ export function deriveVals(
 
     const byDate = new Map(all.map((d) => [d.date, d]));
     const selectedDate = st.rotaDate ?? todayISO;
+    const mode = st.rotaMode ?? 'month';
+    const monthOffset = st.monthOffset ?? 0;
 
-    // Start on the Monday a fortnight before this week, so the grid reads as
-    // weeks and today sits about a third of the way down. Paging moves the
-    // whole window six weeks at a time.
-    const start = new Date(todayISO + 'T00:00:00');
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 14 + st.rotaPage * 42);
+    let start: Date;
+    let numWeeks = 6;
+    let rangeLabel = '';
+    let targetYear = 0;
+    let targetMonth = 0;
+
+    if (mode === 'month') {
+      const todayDate = new Date(todayISO + 'T00:00:00');
+      const targetDate = new Date(todayDate.getFullYear(), todayDate.getMonth() + monthOffset, 1);
+      targetYear = targetDate.getFullYear();
+      targetMonth = targetDate.getMonth();
+
+      rangeLabel = targetDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+      const firstOfMonth = new Date(targetYear, targetMonth, 1);
+      start = new Date(firstOfMonth);
+      start.setDate(1 - ((firstOfMonth.getDay() + 6) % 7));
+
+      const lastOfMonth = new Date(targetYear, targetMonth + 1, 0);
+      const daysInGrid = Math.ceil((lastOfMonth.getTime() - start.getTime()) / DAY) + (7 - (lastOfMonth.getDay() || 7));
+      numWeeks = Math.ceil(daysInGrid / 7);
+      if (numWeeks < 5) numWeeks = 5;
+    } else {
+      start = new Date(todayISO + 'T00:00:00');
+      start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 14 + (st.rotaPage ?? 0) * 42);
+      numWeeks = 6;
+      const firstStr = localISODate(start);
+      const endStr = localISODate(new Date(start.getTime() + 41 * DAY));
+      const monthOf = (iso: string) =>
+        new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+      rangeLabel = monthOf(firstStr) === monthOf(endStr) ? monthOf(firstStr) : `${monthOf(firstStr)} – ${monthOf(endStr)}`;
+    }
 
     const weeks = [];
-    for (let w = 0; w < 6; w++) {
+    for (let w = 0; w < numWeeks; w++) {
       const cells = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(start);
@@ -1116,27 +1174,28 @@ export function deriveVals(
         const s = KIND_STYLE[kind] ?? KIND_STYLE.off;
         const isToday = date === todayISO;
         const isSelected = date === selectedDate;
+        const isOutsideMonth = mode === 'month' && (d.getMonth() !== targetMonth || d.getFullYear() !== targetYear);
+
         cells.push({
           date,
           day: String(d.getDate()),
           short: entry?.shift ? s.short : '',
           today: isToday,
-          // Clicking a day opens it below rather than navigating away, so the
-          // grid stays on screen while you read across it.
+          isOutsideMonth,
           onClick: () => setState({ rotaDate: date }),
           title: entry?.shift
             ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''}${entry.hours != null ? ` · ${entry.hours} h` : ' · all-day entry, no times'}`
             : `${date} · off`,
           style:
             'aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease;' +
-            `background:${s.bg};color:${s.fg};` +
+            `background:${isOutsideMonth ? 'transparent' : s.bg};color:${isOutsideMonth ? '#D0CCC6' : s.fg};` +
             (isSelected
               ? 'outline:2px solid #C06C84;outline-offset:2px;'
               : isToday
               ? 'outline:1.5px solid #1A1A18;outline-offset:1px;'
               : '') +
-            `border:${!entry?.shift ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
-            `opacity:${date > todayISO ? 0.66 : 1};`,
+            `border:${!entry?.shift || isOutsideMonth ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
+            `opacity:${isOutsideMonth ? 0.35 : date > todayISO ? 0.75 : 1};`,
         });
       }
       weeks.push({ label: new Date(cells[0].date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), cells });
@@ -1206,24 +1265,23 @@ export function deriveVals(
       ? `${Math.round(timedThisWeek.reduce((a, d) => a + (d.hours ?? 0), 0) * 10) / 10} h this week`
       : `${thisWeek.length} shift${thisWeek.length === 1 ? '' : 's'} this week`;
 
-    const first = weeks[0].cells[0].date;
-    const last = weeks[5].cells[6].date;
-    const monthOf = (iso: string) =>
-      new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+    const firstDate = weeks[0].cells[0].date;
+    const lastDate = weeks[weeks.length - 1].cells[6].date;
 
     return {
+      mode,
       weeks,
       selected,
       dayLabels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-      rangeLabel: monthOf(first) === monthOf(last) ? monthOf(first) : `${monthOf(first)} – ${monthOf(last)}`,
-      // Paging is bounded by what the calendar was actually fetched for, so the
-      // arrows never walk off into six empty weeks.
-      canPrev: all[0].date < first,
-      canNext: all[all.length - 1].date > last,
-      atToday: st.rotaPage === 0,
-      onPrev: () => setState((s) => ({ rotaPage: s.rotaPage - 1 })),
-      onNext: () => setState((s) => ({ rotaPage: s.rotaPage + 1 })),
-      onToday: () => setState({ rotaPage: 0, rotaDate: todayISO }),
+      rangeLabel,
+      canPrev: mode === 'month' ? all[0].date < localISODate(new Date(targetYear, targetMonth, 1)) : all[0].date < firstDate,
+      canNext: mode === 'month' ? all[all.length - 1].date > localISODate(new Date(targetYear, targetMonth + 1, 0)) : all[all.length - 1].date > lastDate,
+      atToday: mode === 'month' ? monthOffset === 0 : st.rotaPage === 0,
+      todayBtnLabel: mode === 'month' ? 'This month' : 'This week',
+      onPrev: () => setState((s) => (s.rotaMode === '6wk' ? { rotaPage: (s.rotaPage ?? 0) - 1 } : { monthOffset: (s.monthOffset ?? 0) - 1 })),
+      onNext: () => setState((s) => (s.rotaMode === '6wk' ? { rotaPage: (s.rotaPage ?? 0) + 1 } : { monthOffset: (s.monthOffset ?? 0) + 1 })),
+      onToday: () => setState({ rotaPage: 0, monthOffset: 0, rotaDate: todayISO }),
+      onSetMode: (m: 'month' | '6wk') => setState({ rotaMode: m }),
       legend: (['night', 'long', 'early', 'late', 'day'] as const).map((k) => ({
         label: k === 'long' ? 'Long day' : k[0].toUpperCase() + k.slice(1),
         style: `width:11px;height:11px;border-radius:4px;display:inline-block;background:${KIND_STYLE[k].bg};`,
@@ -1653,10 +1711,12 @@ export function deriveVals(
 
   return {
     tabs,
+    onTab: (tab: DailyLogState['tab']) => setState({ tab }),
+    onOpenSession: (openSession: number) => setState({ tab: 'training', openSession }),
     isToday: st.tab === 'today', isTrends: st.tab === 'trends', isFood: st.tab === 'food',
     isProgress: st.tab === 'progress', isPlan: st.tab === 'plan',
     isTraining: st.tab === 'training', isHabits: st.tab === 'habits',
-    ...planVals(st, setState, latest, goal, tdee, conv, uLabel),
+    ...planVals(st, setState, latest, goal, tdee, conv, uLabel, live),
     ...shellVals(st, setState, latest, goal, tdee, kcalTarget, proteinTarget, conv, uLabel, maLast, avgIntake, readings, proteinPerKg, live, logged, tdeeSource),
     lostValue: +conv(BASE[0][1] - latest.weight).toFixed(1),
     lostCopy: 'Down from ' + conv(BASE[0][1]).toFixed(1) + ' ' + uLabel + ' on 8 February — ' + Math.round((tLast - new Date(BASE[0][0]).getTime()) / DAY) + ' days of daily weigh-ins.',
@@ -2119,7 +2179,7 @@ function shellVals(
 
 function planVals(
   st: DailyLogState, setState: SetState, latest: Reading, goal: number, tdee: number,
-  conv: (v: number) => number, uLabel: string,
+  conv: (v: number) => number, uLabel: string, live: LiveData,
 ) {
   const pace = st.pace;
   const totalDeficit = Math.round(pace * 1100);
@@ -2151,6 +2211,72 @@ function planVals(
   }
   const doneCount = weeks.filter((_, i) => st.weekDone[i + 1]).length;
 
+  const planWeek = (() => {
+    const defaultWeek = [
+      { day: 'Mon', session: 'Lower body strength', detail: 'Squat, hinge, calves · 45 min', tag: 'Lift', tagBg: '#FAF0F3', tagColor: '#8A4459' },
+      { day: 'Tue', session: 'Walk + easy day', detail: (8000 + (moveDeficit > 0 ? extraSteps : 0)).toLocaleString() + ' steps target', tag: 'Move', tagBg: '#FAFAF9', tagColor: '#8A4459' },
+      { day: 'Wed', session: 'Upper body strength', detail: 'Press, row, curls · 40 min', tag: 'Lift', tagBg: '#FAF0F3', tagColor: '#8A4459' },
+      { day: 'Thu', session: 'Mobility or rest', detail: 'Hips and ankles · 20 min', tag: 'Easy', tagBg: '#FAF0F3', tagColor: '#8A4459' },
+      { day: 'Fri', session: 'Full body strength', detail: 'Deadlift, push-ups, core · 45 min', tag: 'Lift', tagBg: '#FAF0F3', tagColor: '#8A4459' },
+      { day: 'Sat', session: 'Long walk', detail: '60–75 min, conversational pace', tag: 'Move', tagBg: '#FAFAF9', tagColor: '#8A4459' },
+      { day: 'Sun', session: 'Rest · weigh-in · prep', detail: 'Review the 7-day trend and cook for the week', tag: 'Reset', tagBg: '#EFF2EE', tagColor: '#7F9289' },
+    ];
+
+    const schedDays = live.schedule?.days;
+    if (!schedDays || schedDays.length !== 7) return defaultWeek;
+
+    const liftsToPlace = [
+      { session: 'Lower body strength', detail: 'Squat, hinge, calves · 45 min' },
+      { session: 'Upper body strength', detail: 'Press, row, curls · 40 min' },
+      { session: 'Full body strength', detail: 'Deadlift, push-ups, core · 45 min' },
+    ];
+
+    let liftIdx = 0;
+    return schedDays.map((sd, i) => {
+      const isShift = sd.busyHours >= 7 || /night|long|shift/i.test(sd.suggestion ?? '') || /ld|night|shift/i.test(sd.calendar ?? '');
+
+      if (isShift) {
+        return {
+          day: sd.day,
+          session: 'Ward shift · step target met',
+          detail: `12.5h placement / ward shift · ${sd.calendar !== 'Free' ? sd.calendar : 'Shift day'}`,
+          tag: 'Move',
+          tagBg: '#FAFAF9',
+          tagColor: '#8A4459',
+        };
+      }
+      if (i === 6) {
+        return {
+          day: sd.day,
+          session: 'Rest · weigh-in · prep',
+          detail: 'Review the 7-day trend and cook for the week',
+          tag: 'Reset',
+          tagBg: '#EFF2EE',
+          tagColor: '#7F9289',
+        };
+      }
+      if (liftIdx < liftsToPlace.length) {
+        const l = liftsToPlace[liftIdx++];
+        return {
+          day: sd.day,
+          session: l.session,
+          detail: l.detail,
+          tag: 'Lift',
+          tagBg: '#FAF0F3',
+          tagColor: '#8A4459',
+        };
+      }
+      return {
+        day: sd.day,
+        session: 'Mobility or easy walk',
+        detail: 'Conversational pace, light recovery',
+        tag: 'Easy',
+        tagBg: '#FAF0F3',
+        tagColor: '#8A4459',
+      };
+    });
+  })();
+
   return {
     paceLabel: pace.toFixed(2).replace(/0$/, '') + ' kg',
     paceOptions: [0.75, 1.0].map((p) => ({
@@ -2179,18 +2305,10 @@ function planVals(
       label: m.label, value: m.value, note: m.note,
       barStyle: 'height:100%;width:' + m.pct + '%;border-radius:999px;background:' + m.color + ';transition:width 500ms cubic-bezier(.16,1,.3,1);',
     })),
-    planWeek: [
-      { day: 'Mon', session: 'Lower body strength', detail: 'Squat, hinge, calves · 45 min', tag: 'Lift', tagBg: '#FAF0F3', tagColor: '#8A4459' },
-      { day: 'Tue', session: 'Walk + easy day', detail: (8000 + (moveDeficit > 0 ? extraSteps : 0)).toLocaleString() + ' steps target', tag: 'Move', tagBg: '#FAFAF9', tagColor: '#8A4459' },
-      { day: 'Wed', session: 'Upper body strength', detail: 'Press, row, curls · 40 min', tag: 'Lift', tagBg: '#FAF0F3', tagColor: '#8A4459' },
-      { day: 'Thu', session: 'Mobility or rest', detail: 'Hips and ankles · 20 min', tag: 'Easy', tagBg: '#FAF0F3', tagColor: '#8A4459' },
-      { day: 'Fri', session: 'Full body strength', detail: 'Deadlift, push-ups, core · 45 min', tag: 'Lift', tagBg: '#FAF0F3', tagColor: '#8A4459' },
-      { day: 'Sat', session: 'Long walk', detail: '60–75 min, conversational pace', tag: 'Move', tagBg: '#FAFAF9', tagColor: '#8A4459' },
-      { day: 'Sun', session: 'Rest · weigh-in · prep', detail: 'Review the 7-day trend and cook for the week', tag: 'Reset', tagBg: '#EFF2EE', tagColor: '#7F9289' },
-    ],
+    planWeek,
     planRules: [
       'Protein at every meal — ' + Math.round(proteinG / 4) + ' g a sitting hits ' + proteinG + ' g without thinking about it.',
-      'Three lifting sessions is the floor. Cardio is for the deficit; lifting is what keeps the shape.',
+      'On 12.5h ward shifts & night shifts, placement steps cover your movement deficit — heavy lifts are placed on off days.',
       'Weigh daily, judge weekly. Only the 7-day trend line counts.',
       pace >= 1 ? 'One day a week at maintenance (' + tdee.toLocaleString() + ' kcal) to keep training and mood intact.' : 'Sleep seven hours — under that, hunger and adherence both fall apart.',
     ],
