@@ -459,7 +459,14 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', color: 'var(--ink)', margin: '0 0 4px' }}>Smart <em style={{ color: '#C06C84' }}>scheduling</em></h2>
       <p style={{ margin: '0', fontSize: '12.5px', color: '#8E8A82', maxWidth: '46ch' }}>{v.scheduleCopy}</p>
       </div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flex: 'none' }}>
       <span style={sx(v.scheduleBadgeStyle)}>{v.scheduleBadgeLabel}</span>
+      {(v.scheduleCanConnect) ? (<>
+      <button type='button' onClick={v.onConnectGoogle} style={{ padding: '10px 16px', borderRadius: '8px', border: 0, cursor: 'pointer', background: 'var(--ink)', color: '#FFFFFF', fontSize: '12px', whiteSpace: 'nowrap' }}>
+      {v.scheduleConnectLabel}
+      </button>
+      </>) : null}
+      </div>
       </div>
       {(v.scheduleRows ?? []).map((n, n_i) => (<React.Fragment key={n_i}>
       <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr 1fr', gap: '14px', alignItems: 'center', padding: '11px 0', borderTop: '0.5px solid rgba(26,24,21,0.11)' }}>

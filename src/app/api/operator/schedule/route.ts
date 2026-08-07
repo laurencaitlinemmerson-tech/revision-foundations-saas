@@ -1,19 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { googleClientConfigured, loadAuth } from '@/lib/operatorGoogle';
 
 /**
  * The operator's week from Google Calendar, folded into the seven rows the
  * dashboard's scheduling card shows.
  *
- * This is a single-operator surface, so it authenticates from environment
- * variables rather than an OAuth flow:
+ * The OAuth client comes from the environment:
  *
  *   GOOGLE_CLIENT_ID       OAuth client
  *   GOOGLE_CLIENT_SECRET
- *   GOOGLE_REFRESH_TOKEN   obtained once with calendar.readonly, offline access
  *   GOOGLE_CALENDAR_ID     defaults to "primary"
  *
- * `status` distinguishes "nothing set up yet" from "credentials were rejected",
- * so a typo in the refresh token doesn't masquerade as an unconfigured card.
+ * The refresh token does not. It is written by the connect flow in
+ * /api/operator/google, so an expired token is a button on the dashboard rather
+ * than an environment edit and a redeploy. GOOGLE_REFRESH_TOKEN still overrides
+ * it when set, so an existing deployment keeps working unchanged.
+ *
+ * `status` distinguishes "nothing connected yet" from "credentials were
+ * rejected", so an expired token doesn't masquerade as an unconfigured card.
  */
 
 export const dynamic = 'force-dynamic';
@@ -50,7 +54,7 @@ function hhmm(d: Date) {
 function explainTokenError(error: string, description: string): string {
   switch (error) {
     case 'invalid_grant':
-      return 'Google rejected the refresh token itself (invalid_grant). Usually it was revoked, or the OAuth consent screen is still in Testing mode — tokens issued there expire after seven days. Publish the app, then mint a new token.';
+      return 'Google rejected the refresh token itself (invalid_grant) — it was revoked, or the OAuth consent screen is still in Testing mode, where every token dies after seven days. Publishing the app at console.cloud.google.com/auth/audience is what stops that recurring.';
     case 'invalid_client':
       return 'Google rejected the client credentials (invalid_client). GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET does not match the client the refresh token was minted with — check for a truncated paste.';
     case 'unauthorized_client':
@@ -64,10 +68,9 @@ type TokenResult =
   | { ok: true; token: string }
   | { ok: false; detail: string };
 
-async function accessToken(): Promise<TokenResult> {
+async function accessToken(refresh_token: string): Promise<TokenResult> {
   const client_id = process.env.GOOGLE_CLIENT_ID!;
   const client_secret = process.env.GOOGLE_CLIENT_SECRET!;
-  const refresh_token = process.env.GOOGLE_REFRESH_TOKEN!;
 
   // A stray newline or space survives copy-paste far more often than you would
   // think, and Google rejects it with an unhelpful invalid_grant.
@@ -208,16 +211,43 @@ function suggest(entries: Entry[], index: number, liftsPlaced: number) {
 export async function GET(req: NextRequest) {
   if (!authed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const configured = Boolean(
-    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN,
-  );
-  if (!configured) {
-    return NextResponse.json({ status: 'unconfigured' satisfies Status, days: [] });
+  if (!googleClientConfigured()) {
+    return NextResponse.json({
+      status: 'unconfigured' satisfies Status,
+      days: [],
+      detail: 'GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set on this deployment.',
+    });
   }
 
-  const token = await accessToken();
+  const auth = await loadAuth();
+  if (auth === 'setup_required') {
+    return NextResponse.json({
+      status: 'unconfigured' satisfies Status,
+      days: [],
+      canConnect: false,
+      detail: 'The connection table is not set up yet — run supabase-operator-google.sql.',
+    });
+  }
+  if (!auth) {
+    return NextResponse.json({
+      status: 'unconfigured' satisfies Status,
+      days: [],
+      canConnect: true,
+      detail: 'No Google account is connected yet.',
+    });
+  }
+
+  const token = await accessToken(auth.refreshToken);
   if (!token.ok) {
-    return NextResponse.json({ status: 'auth_failed' satisfies Status, days: [], detail: token.detail });
+    return NextResponse.json({
+      status: 'auth_failed' satisfies Status,
+      days: [],
+      canConnect: true,
+      // An env-var token cannot be replaced by reconnecting — it wins over the
+      // stored one, so saying "connect" without saying that would loop forever.
+      envPinned: auth.source === 'env',
+      detail: token.detail,
+    });
   }
 
   const from = weekStart();

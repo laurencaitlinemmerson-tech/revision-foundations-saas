@@ -87,6 +87,10 @@ export type Schedule = {
   status: ScheduleStatus;
   days: ScheduleDay[];
   history?: ShiftDay[];
+  /** Whether running the connect flow could plausibly fix this state. */
+  canConnect?: boolean;
+  /** GOOGLE_REFRESH_TOKEN is set, so it overrides anything the flow stores. */
+  envPinned?: boolean;
   /** Google's own reason, when it rejected the credentials. */
   detail?: string;
 };

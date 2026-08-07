@@ -1768,14 +1768,40 @@ function shellVals(
             ? 'Reading your week from Google Calendar — lifts land on the lightest days, steps on the longest, and a reset on the quietest.'
             : 'Google Calendar is connected but this week is empty, so the example below stands in.';
         case 'auth_failed':
-          return schedule.detail
-            ?? 'Google Calendar rejected the credentials. Mint a new refresh token and update GOOGLE_REFRESH_TOKEN.';
+          return schedule.envPinned
+            ? (schedule.detail ?? 'Google rejected the stored credentials.') +
+              ' GOOGLE_REFRESH_TOKEN is set on this deployment and takes priority, so reconnecting here will not replace it — clear that variable first, then connect.'
+            : (schedule.detail ?? 'Google rejected the stored credentials.') +
+              ' Connecting again mints a fresh token; nothing needs pasting or redeploying.';
         case 'fetch_failed':
           return 'Signed in to Google, but the calendar could not be read. Check GOOGLE_CALENDAR_ID and that the Calendar API is enabled.';
         default:
-          return 'Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN and your real week replaces this example — training then places itself around the days you actually have.';
+          return schedule?.canConnect
+            ? 'Connect your Google account and your real week replaces this example — training then places itself around the days you actually have, and the shift comparison on Habits starts filling in.'
+            : (schedule?.detail ??
+              'Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET on the deployment, then connect your account here.');
       }
     })(),
+    // Shown whenever connecting could plausibly help. The env-var case is
+    // deliberately included: the button explains why it will not work there.
+    scheduleCanConnect: Boolean(
+      schedule && schedule.status !== 'ok' && (schedule.canConnect || schedule.status === 'auth_failed'),
+    ),
+    scheduleConnectLabel: schedule?.status === 'auth_failed' ? 'Reconnect Google →' : 'Connect Google Calendar →',
+    onConnectGoogle: async () => {
+      const pw = storedOperatorPassword();
+      try {
+        const res = await fetch('/api/operator/google/start', {
+          method: 'POST',
+          headers: { 'x-operator-pw': pw ?? '' },
+        });
+        const body = (await res.json().catch(() => ({}))) as { url?: string; detail?: string };
+        if (body.url) window.location.href = body.url;
+        else window.alert(body.detail ?? 'Could not start the Google connection.');
+      } catch {
+        window.alert('Could not reach the server to start the Google connection.');
+      }
+    },
     scheduleBadgeLabel: schedule?.status === 'ok'
       ? 'Google Calendar ✓'
       : schedule?.status === 'auth_failed'
