@@ -231,10 +231,10 @@ function classifyDay(entries: Entry[]) {
   const shift = Boolean(named) || longest >= 6;
   if (!shift) return { shift: false, night: false, kind: 'off' as ShiftKind, hours: 0, start: null, end: null, label: null };
 
-  // Hours come from the entries that made it a shift, not from the whole day.
-  const hours = named
-    ? busyHours(real.filter((e) => SHIFT_WORDS.test(e.title) || !e.allDay))
-    : longest;
+  // Measured length, where the rota gives times to measure. Needed before the
+  // kind, because an unlabelled shift is classified by how long it ran.
+  const timedHours = named ? busyHours(real.filter((e) => !e.allDay)) : longest;
+
   const startHour = timed.length ? Math.min(...timed.map((e) => localHour(e.start))) : null;
   const endHour = timed.reduce<number | null>((latest, e) => {
     if (!e.end) return latest;
@@ -249,20 +249,43 @@ function classifyDay(entries: Entry[]) {
     null,
   );
   const titles = source?.title ?? '';
-  const night =
-    /\bnights?\b/i.test(titles) ||
-    (startHour != null && (startHour >= 18 || startHour < 5)) ||
-    (endHour != null && startHour != null && endHour < startHour); // crosses midnight
 
-  const kind: ShiftKind = night
-    ? 'night'
-    : /\blong day\b/i.test(titles) || hours >= 11
-    ? 'long'
-    : /\bearly\b/i.test(titles) || (startHour != null && startHour < 9)
-    ? 'early'
-    : /\blate\b/i.test(titles) || (startHour != null && startHour >= 12)
-    ? 'late'
-    : 'day';
+  // NHS rotas are written in codes — "PLACEMENT LD", "PLACEMENT N" — and a rota
+  // kept as all-day entries has no clock to infer anything from. The code is an
+  // explicit statement of which shift it is, so it outranks the times.
+  const coded: ShiftKind | null =
+    /\b(n|night|nights)\b/i.test(titles) ? 'night'
+    : /\b(ld|long day)\b/i.test(titles) ? 'long'
+    : /\b(e|early)\b/i.test(titles) ? 'early'
+    : /\b(l|late)\b/i.test(titles) ? 'late'
+    : null;
+
+  const night =
+    coded === 'night' ||
+    (coded == null &&
+      ((startHour != null && (startHour >= 18 || startHour < 5)) ||
+        (endHour != null && startHour != null && endHour < startHour))); // crosses midnight
+
+  const kind: ShiftKind =
+    coded ??
+    (night
+      ? 'night'
+      : timedHours >= 11
+      ? 'long'
+      : startHour != null && startHour < 9
+      ? 'early'
+      : startHour != null && startHour >= 12
+      ? 'late'
+      : 'day');
+
+  // Where the rota is all-day entries there is nothing to measure, so the
+  // shift's standard length stands in — an LD is twelve and a half hours by
+  // definition. Approximate, but the day panel names the entry it came from, so
+  // it stays checkable.
+  const STANDARD: Record<ShiftKind, number> = {
+    night: 12.5, long: 12.5, early: 7.5, late: 7.5, day: 8, off: 0,
+  };
+  const hours = timedHours > 0 ? timedHours : STANDARD[kind];
 
   const hhmmOf = (h: number | null) =>
     h == null ? null : `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
