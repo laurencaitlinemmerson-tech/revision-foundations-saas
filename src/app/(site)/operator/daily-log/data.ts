@@ -90,12 +90,25 @@ export type ShiftDay = {
   label: string | null;
 };
 
+/**
+ * A lecture or exam from the university timetable feed. Informational only —
+ * never read by shift detection, which stays purely Google Calendar.
+ */
+export type TimetableEntry = {
+  date: string;
+  title: string;
+  start: string | null;
+  end: string | null;
+  allDay: boolean;
+};
+
 export type Schedule = {
   status: ScheduleStatus;
   days: ScheduleDay[];
   history?: ShiftDay[];
   /** Today and the weeks ahead, for the rota and the night-before prompt. */
   upcoming?: ShiftDay[];
+  lectures?: TimetableEntry[];
   /** Whether running the connect flow could plausibly fix this state. */
   canConnect?: boolean;
   /** GOOGLE_REFRESH_TOKEN is set, so it overrides anything the flow stores. */

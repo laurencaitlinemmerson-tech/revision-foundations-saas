@@ -40,6 +40,10 @@ export type DailyLogState = {
   rotaDate: string | null;
   /** How many six-week pages back or forward the rota is scrolled. */
   rotaPage: number;
+  /** 'weeks': the rolling six-week strip. 'month': a calendar-month grid. */
+  rotaView: 'weeks' | 'month';
+  /** Months from the current month, only used when rotaView is 'month'. */
+  rotaMonthOffset: number;
   volRange?: 'week' | 'month' | 'quarter' | 'all';
 };
 
@@ -77,6 +81,8 @@ export const INITIAL_STATE: DailyLogState = {
   targets: {},
   rotaDate: null,
   rotaPage: 0,
+  rotaView: 'weeks',
+  rotaMonthOffset: 0,
 };
 
 export const DEFAULT_PROPS: DailyLogProps = { goalKg: 68, calorieTarget: 2000, proteinPerKg: 1.8 };
@@ -1096,50 +1102,120 @@ export function deriveVals(
     if (all.length < 14) return null;
 
     const byDate = new Map(all.map((d) => [d.date, d]));
+    const lecturesByDate = new Map<string, { title: string; start: string | null; end: string | null; allDay: boolean }[]>();
+    for (const l of live.schedule?.lectures ?? []) {
+      const arr = lecturesByDate.get(l.date) ?? [];
+      arr.push(l);
+      lecturesByDate.set(l.date, arr);
+    }
+
     const selectedDate = st.rotaDate ?? todayISO;
+    const monthMode = st.rotaView === 'month';
 
-    // Start on the Monday a fortnight before this week, so the grid reads as
-    // weeks and today sits about a third of the way down. Paging moves the
-    // whole window six weeks at a time.
-    const start = new Date(todayISO + 'T00:00:00');
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 14 + st.rotaPage * 42);
-
-    const weeks = [];
-    for (let w = 0; w < 6; w++) {
-      const cells = [];
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(start);
-        d.setDate(d.getDate() + w * 7 + i);
-        const date = localISODate(d);
-        const entry = byDate.get(date);
-        const kind = entry?.shift ? entry.kind : 'off';
-        const s = KIND_STYLE[kind] ?? KIND_STYLE.off;
-        const isToday = date === todayISO;
-        const isSelected = date === selectedDate;
-        cells.push({
-          date,
-          day: String(d.getDate()),
-          short: entry?.shift ? s.short : '',
-          today: isToday,
-          // Clicking a day opens it below rather than navigating away, so the
-          // grid stays on screen while you read across it.
-          onClick: () => setState({ rotaDate: date }),
-          title: entry?.shift
+    // One cell builder for both the rolling six-week strip and the
+    // calendar-month grid — they differ only in which dates they ask for.
+    const buildCell = (d: Date, outOfMonth = false) => {
+      const date = localISODate(d);
+      const entry = byDate.get(date);
+      const kind = entry?.shift ? entry.kind : 'off';
+      const s = KIND_STYLE[kind] ?? KIND_STYLE.off;
+      const isToday = date === todayISO;
+      const isSelected = date === selectedDate;
+      const lects = lecturesByDate.get(date) ?? [];
+      const future = date > todayISO;
+      return {
+        date,
+        day: String(d.getDate()),
+        short: entry?.shift ? s.short : '',
+        today: isToday,
+        lecture: lects.length > 0,
+        // Clicking a day opens it below rather than navigating away, so the
+        // grid stays on screen while you read across it.
+        onClick: () => setState({ rotaDate: date }),
+        title:
+          (entry?.shift
             ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''}${entry.hours != null ? ` · ${entry.hours} h` : ' · all-day entry, no times'}`
-            : `${date} · off`,
-          style:
-            'aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease;' +
-            `background:${s.bg};color:${s.fg};` +
-            (isSelected
-              ? 'outline:2px solid #C06C84;outline-offset:2px;'
-              : isToday
-              ? 'outline:1.5px solid #1A1A18;outline-offset:1px;'
-              : '') +
-            `border:${!entry?.shift ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
-            `opacity:${date > todayISO ? 0.66 : 1};`,
+            : `${date} · off`) + (lects.length ? ` · ${lects.length} lecture${lects.length === 1 ? '' : 's'}` : ''),
+        style:
+          'position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease;' +
+          `background:${s.bg};color:${s.fg};` +
+          (isSelected
+            ? 'outline:2px solid #C06C84;outline-offset:2px;'
+            : isToday
+            ? 'outline:1.5px solid #1A1A18;outline-offset:1px;'
+            : '') +
+          `border:${!entry?.shift ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
+          `opacity:${outOfMonth ? 0.28 : future ? 0.66 : 1};`,
+      };
+    };
+
+    let weeks: Array<{ label: string; cells: ReturnType<typeof buildCell>[] }>;
+    let rangeLabel: string;
+    let canPrev: boolean;
+    let canNext: boolean;
+
+    if (monthMode) {
+      // A standard calendar-month grid: the target month plus enough of its
+      // neighbours to fill whole weeks, Monday first.
+      const anchor = new Date(todayISO + 'T00:00:00');
+      anchor.setDate(1);
+      anchor.setMonth(anchor.getMonth() + st.rotaMonthOffset);
+      const year = anchor.getFullYear();
+      const month = anchor.getMonth();
+      const firstOfMonth = new Date(year, month, 1);
+      const lastOfMonth = new Date(year, month + 1, 0);
+      const gridStart = new Date(firstOfMonth);
+      gridStart.setDate(gridStart.getDate() - ((gridStart.getDay() + 6) % 7));
+      const gridEnd = new Date(lastOfMonth);
+      gridEnd.setDate(gridEnd.getDate() + (6 - ((gridEnd.getDay() + 6) % 7)));
+      // Inclusive day count divided by seven, not day-count-then-plus-one — the
+      // latter double-counts the first week and can add a phantom seventh row.
+      const numWeeks = Math.round(((gridEnd.getTime() - gridStart.getTime()) / DAY + 1) / 7);
+
+      weeks = [];
+      for (let w = 0; w < numWeeks; w++) {
+        const cells = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(gridStart);
+          d.setDate(d.getDate() + w * 7 + i);
+          cells.push(buildCell(d, d.getMonth() !== month));
+        }
+        weeks.push({ label: '', cells });
+      }
+      rangeLabel = firstOfMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+      // Bounded by what the calendar was actually fetched for, same as the
+      // week strip — the arrows never walk off into an empty month.
+      canPrev = localISODate(new Date(year, month, 0)) >= all[0].date;
+      canNext = localISODate(new Date(year, month + 1, 1)) <= all[all.length - 1].date;
+    } else {
+      // Start on the Monday a fortnight before this week, so the grid reads
+      // as weeks and today sits about a third of the way down. Paging moves
+      // the whole window six weeks at a time.
+      const start = new Date(todayISO + 'T00:00:00');
+      start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 14 + st.rotaPage * 42);
+
+      weeks = [];
+      for (let w = 0; w < 6; w++) {
+        const cells = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(start);
+          d.setDate(d.getDate() + w * 7 + i);
+          cells.push(buildCell(d));
+        }
+        weeks.push({
+          label: new Date(cells[0].date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+          cells,
         });
       }
-      weeks.push({ label: new Date(cells[0].date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), cells });
+
+      const first = weeks[0].cells[0].date;
+      const last = weeks[weeks.length - 1].cells[6].date;
+      const monthOf = (iso: string) =>
+        new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+      rangeLabel = monthOf(first) === monthOf(last) ? monthOf(first) : `${monthOf(first)} – ${monthOf(last)}`;
+      canPrev = all[0].date < first;
+      canNext = all[all.length - 1].date > last;
     }
 
     // What the selected day actually was — the rota entry joined to what the
@@ -1172,6 +1248,12 @@ export function deriveVals(
           (entry?.shift
             ? `background:${KIND_STYLE[entry.kind]?.bg ?? '#EBD3DB'};color:${KIND_STYLE[entry.kind]?.fg ?? '#5A2233'};`
             : 'background:#F4F4F3;color:#57544E;'),
+        // The university timetable, purely informational — it never decides
+        // whether this day counts as a shift.
+        lectures: (lecturesByDate.get(selectedDate) ?? []).map((l) => ({
+          title: l.title,
+          time: l.allDay ? 'All day' : l.start ? `${l.start}${l.end ? '–' + l.end : ''}` : '',
+        })),
         stats: [
           { label: 'Steps', value: n(health?.activity.steps, (x) => Math.round(x).toLocaleString()) },
           { label: 'Protein', value: n(health?.nutrition.proteinG, (x) => Math.round(x) + ' g') },
@@ -1206,28 +1288,28 @@ export function deriveVals(
       ? `${Math.round(timedThisWeek.reduce((a, d) => a + (d.hours ?? 0), 0) * 10) / 10} h this week`
       : `${thisWeek.length} shift${thisWeek.length === 1 ? '' : 's'} this week`;
 
-    const first = weeks[0].cells[0].date;
-    const last = weeks[5].cells[6].date;
-    const monthOf = (iso: string) =>
-      new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
-
     return {
       weeks,
       selected,
       dayLabels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-      rangeLabel: monthOf(first) === monthOf(last) ? monthOf(first) : `${monthOf(first)} – ${monthOf(last)}`,
+      rangeLabel,
+      viewMode: st.rotaView,
+      onViewWeeks: () => setState({ rotaView: 'weeks', rotaPage: 0 }),
+      onViewMonth: () => setState({ rotaView: 'month', rotaMonthOffset: 0 }),
+      todayButtonLabel: monthMode ? 'This month' : 'This week',
       // Paging is bounded by what the calendar was actually fetched for, so the
-      // arrows never walk off into six empty weeks.
-      canPrev: all[0].date < first,
-      canNext: all[all.length - 1].date > last,
-      atToday: st.rotaPage === 0,
-      onPrev: () => setState((s) => ({ rotaPage: s.rotaPage - 1 })),
-      onNext: () => setState((s) => ({ rotaPage: s.rotaPage + 1 })),
-      onToday: () => setState({ rotaPage: 0, rotaDate: todayISO }),
+      // arrows never walk off into empty weeks or an empty month.
+      canPrev,
+      canNext,
+      atToday: monthMode ? st.rotaMonthOffset === 0 : st.rotaPage === 0,
+      onPrev: () => setState(monthMode ? (s) => ({ rotaMonthOffset: s.rotaMonthOffset - 1 }) : (s) => ({ rotaPage: s.rotaPage - 1 })),
+      onNext: () => setState(monthMode ? (s) => ({ rotaMonthOffset: s.rotaMonthOffset + 1 }) : (s) => ({ rotaPage: s.rotaPage + 1 })),
+      onToday: () => setState(monthMode ? { rotaMonthOffset: 0, rotaDate: todayISO } : { rotaPage: 0, rotaDate: todayISO }),
       legend: (['night', 'long', 'early', 'late', 'day'] as const).map((k) => ({
         label: k === 'long' ? 'Long day' : k[0].toUpperCase() + k.slice(1),
         style: `width:11px;height:11px;border-radius:4px;display:inline-block;background:${KIND_STYLE[k].bg};`,
       })),
+      hasLectures: (live.schedule?.lectures?.length ?? 0) > 0,
       thisWeekLabel,
       nextUp: next.length
         ? next

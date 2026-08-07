@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { googleClientConfigured, loadAuth, redirectUri } from '@/lib/operatorGoogle';
+import { fetchTimetable } from '@/lib/operatorTimetable';
 
 /**
  * The operator's week from Google Calendar, folded into the seven rows the
@@ -175,9 +176,13 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
       }>;
     };
 
-    return (json.items ?? []).flatMap((e) => {
-      // Cancelled events and ones marked "free" do not constrain the day.
-      if (e.status === 'cancelled' || e.transparency === 'transparent') return [];
+    const raw = (json.items ?? []).flatMap((e) => {
+      // Cancelled events, unconfirmed ones, and ones marked "free" do not
+      // constrain the day. Tentative is Google's own "not confirmed yet"
+      // state — precisely the shape of a stale placeholder a re-synced or
+      // subscribed calendar leaves behind, which is what shows up as a shift
+      // on a day that never had one.
+      if (e.status === 'cancelled' || e.status === 'tentative' || e.transparency === 'transparent') return [];
       const startRaw = e.start?.dateTime ?? e.start?.date;
       if (!startRaw) return [];
       const endRaw = e.end?.dateTime ?? e.end?.date;
@@ -187,6 +192,18 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
         title: (e.summary ?? 'Busy').trim(),
         allDay: !e.start?.dateTime,
       }];
+    });
+
+    // A calendar re-synced from an external source (or resubscribed to one)
+    // can hand back the same event twice under different IDs — identical
+    // title and times, which is invisible to the API's own de-duplication
+    // since that only catches a repeated ID.
+    const seen = new Set<string>();
+    return raw.filter((e) => {
+      const key = `${e.title}|${e.start.toISOString()}|${e.end?.toISOString() ?? ''}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
   } catch {
     return null;
@@ -390,10 +407,19 @@ export async function GET(req: NextRequest) {
   // comparison and practice hours, and the weeks ahead for the rota.
   const historyFrom = new Date(from.getTime() - HISTORY_DAYS * DAY_MS);
   const futureTo = new Date(from.getTime() + FUTURE_DAYS * DAY_MS);
-  const events = await fetchEvents(token.token, historyFrom, futureTo);
+  const [events, timetableAll] = await Promise.all([
+    fetchEvents(token.token, historyFrom, futureTo),
+    fetchTimetable(),
+  ]);
   if (events === null) {
     return NextResponse.json({ status: 'fetch_failed' satisfies Status, days: [] });
   }
+
+  // Informational only — never read by shift detection, so a bad or absent
+  // feed here cannot affect the rota's actual data.
+  const lectures = (timetableAll ?? []).filter(
+    (l) => l.date >= dayKey(historyFrom) && l.date <= dayKey(futureTo),
+  );
 
   let liftsPlaced = 0;
   const days = DAY_LABELS.map((label, i) => {
@@ -440,23 +466,44 @@ export async function GET(req: NextRequest) {
   const history = classified.filter((d) => d.date < today);
   const upcoming = classified.filter((d) => d.date >= today);
 
-  // A raw sample of what Google actually returned, so a rota that reads wrong
-  // can be diagnosed from the response instead of by guessing at the calendar.
-  // ?debug=1 only — it is noise the dashboard never needs.
+  // What Google actually returned, so a rota that reads wrong can be
+  // diagnosed from the response instead of by guessing at the calendar.
+  // ?debug=1 only — it is noise the dashboard never needs. Add &date=YYYY-MM-DD
+  // to see exactly what was found for one day, rather than the general tail
+  // sample, which a busy calendar can easily push a specific day out of.
+  const debugDate = url.searchParams.get('date');
   const debug = url.searchParams.get('debug')
     ? {
         eventCount: events.length,
         calendarId: process.env.GOOGLE_CALENDAR_ID ?? 'primary',
         window: { from: dayKey(historyFrom), to: dayKey(futureTo) },
-        sample: events.slice(-40).map((e) => ({
-          title: e.title,
-          allDay: e.allDay,
-          start: e.start.toISOString(),
-          end: e.end?.toISOString() ?? null,
-          readAs: classifyDay([e]),
-        })),
+        timetable: {
+          configured: Boolean(process.env.UNIVERSITY_ICS_URL),
+          totalEntries: timetableAll?.length ?? null,
+          windowEntries: lectures.length,
+        },
+        ...(debugDate
+          ? {
+              date: debugDate,
+              rawEntries: (byDay.get(debugDate) ?? []).map((e) => ({
+                title: e.title,
+                allDay: e.allDay,
+                start: e.start.toISOString(),
+                end: e.end?.toISOString() ?? null,
+              })),
+              classifiedAs: classifyDay(byDay.get(debugDate) ?? []),
+            }
+          : {
+              sample: events.slice(-40).map((e) => ({
+                title: e.title,
+                allDay: e.allDay,
+                start: e.start.toISOString(),
+                end: e.end?.toISOString() ?? null,
+                readAs: classifyDay([e]),
+              })),
+            }),
       }
     : undefined;
 
-  return NextResponse.json({ status: 'ok' satisfies Status, days, history, upcoming, debug });
+  return NextResponse.json({ status: 'ok' satisfies Status, days, history, upcoming, lectures, debug });
 }

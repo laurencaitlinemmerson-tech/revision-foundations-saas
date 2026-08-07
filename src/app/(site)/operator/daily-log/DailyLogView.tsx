@@ -466,16 +466,22 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: '4px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0' }}>Your <em style={{ color: '#C06C84' }}>rota</em></h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{v.rota.thisWeekLabel}</span>
+      <div style={{ display: 'flex', border: '0.5px solid var(--rule)', borderRadius: '7px', overflow: 'hidden' }}>
+      <button type='button' onClick={v.rota.onViewWeeks} style={sx(`padding:4px 10px;border:0;cursor:pointer;font-size:10.5px;background:${v.rota.viewMode === 'weeks' ? '#1A1A18' : '#FFFFFF'};color:${v.rota.viewMode === 'weeks' ? '#FFFFFF' : '#57544E'};`)}>Weeks</button>
+      <button type='button' onClick={v.rota.onViewMonth} style={sx(`padding:4px 10px;border:0;cursor:pointer;font-size:10.5px;background:${v.rota.viewMode === 'month' ? '#1A1A18' : '#FFFFFF'};color:${v.rota.viewMode === 'month' ? '#FFFFFF' : '#57544E'};`)}>Month</button>
+      </div>
+      </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', margin: '10px 0 12px' }}>
-      <button type='button' onClick={v.rota.onPrev} disabled={!v.rota.canPrev} aria-label='Earlier weeks' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canPrev ? 'pointer' : 'default', opacity: v.rota.canPrev ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>←</button>
+      <button type='button' onClick={v.rota.onPrev} disabled={!v.rota.canPrev} aria-label='Earlier' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canPrev ? 'pointer' : 'default', opacity: v.rota.canPrev ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>←</button>
       <span style={{ fontSize: '11.5px', color: 'var(--ink-soft)', letterSpacing: '0.04em' }}>{v.rota.rangeLabel}</span>
       <div style={{ display: 'flex', gap: '6px' }}>
       {(!v.rota.atToday) ? (<>
-      <button type='button' onClick={v.rota.onToday} style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: 'pointer', fontSize: '11px', color: 'var(--ink-soft)' }}>This week</button>
+      <button type='button' onClick={v.rota.onToday} style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: 'pointer', fontSize: '11px', color: 'var(--ink-soft)' }}>{v.rota.todayButtonLabel}</button>
       </>) : null}
-      <button type='button' onClick={v.rota.onNext} disabled={!v.rota.canNext} aria-label='Later weeks' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canNext ? 'pointer' : 'default', opacity: v.rota.canNext ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>→</button>
+      <button type='button' onClick={v.rota.onNext} disabled={!v.rota.canNext} aria-label='Later' style={{ padding: '5px 11px', borderRadius: '7px', border: '0.5px solid var(--rule)', background: '#FFFFFF', cursor: v.rota.canNext ? 'pointer' : 'default', opacity: v.rota.canNext ? 1 : 0.35, fontSize: '12px', color: 'var(--ink-soft)' }}>→</button>
       </div>
       </div>
       <p style={{ margin: '0 0 14px', fontSize: '11.5px', color: 'var(--ink-mute)' }}>Next up — {v.rota.nextUp}</p>
@@ -492,6 +498,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div role='button' tabIndex={0} onClick={c.onClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.onClick(); } }} title={c.title} style={sx(c.style)} className="rota-cell">
       <span style={{ opacity: 0.75 }}>{c.day}</span>
       {(c.short) ? (<><span style={{ fontWeight: 600, fontSize: '9px' }}>{c.short}</span></>) : null}
+      {(c.lecture) ? (<><span style={{ position: 'absolute', top: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '50%', background: '#7F9289', boxShadow: '0 0 0 1.5px #FFFFFF' }}></span></>) : null}
       </div>
       </React.Fragment>))}
       </div>
@@ -500,6 +507,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       {(v.rota.legend ?? []).map((g, g_i) => (<React.Fragment key={g_i}>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={sx(g.style)}></i>{g.label}</span>
       </React.Fragment>))}
+      {(v.rota.hasLectures) ? (<>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={{ width: '9px', height: '9px', borderRadius: '50%', display: 'inline-block', background: '#7F9289' }}></i>Lecture / exam</span>
+      </>) : null}
       </div>
       {(v.rota.selected) ? (<>
       <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '0.5px solid var(--rule-soft)' }}>
@@ -524,6 +534,17 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </>)}
+      {(v.rota.selected.lectures && v.rota.selected.lectures.length > 0) ? (<>
+      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '0.5px solid var(--rule-soft)' }}>
+      <div style={{ fontSize: '9.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '6px' }}>Timetable</div>
+      {(v.rota.selected.lectures ?? []).map((l, l_i) => (<React.Fragment key={l_i}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', fontSize: '12px', color: 'var(--ink-soft)', padding: '4px 0' }}>
+      <span>{l.title}</span>
+      <span style={{ color: 'var(--ink-mute)', whiteSpace: 'nowrap' }}>{l.time}</span>
+      </div>
+      </React.Fragment>))}
+      </div>
+      </>) : null}
       </div>
       </>) : null}
       </div>
