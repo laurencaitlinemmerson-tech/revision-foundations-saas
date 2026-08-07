@@ -219,7 +219,9 @@ export function useOperatorData(): LiveData & { refresh: () => void } {
 
     const get = async (url: string) => {
       try {
-        const res = await fetch(url, { headers });
+        // Every one of these is live data with a daily reset behind it, so a
+        // reused response is always wrong rather than merely stale.
+        const res = await fetch(url, { headers, cache: 'no-store' });
         if (!res.ok) return null;
         return (await res.json()) as Record<string, unknown>;
       } catch {

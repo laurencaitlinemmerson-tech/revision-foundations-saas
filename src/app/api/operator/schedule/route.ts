@@ -339,6 +339,7 @@ function suggest(entries: Entry[], index: number, liftsPlaced: number) {
 
 export async function GET(req: NextRequest) {
   if (!authed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const url = new URL(req.url);
 
   if (!googleClientConfigured()) {
     return NextResponse.json({
@@ -439,5 +440,23 @@ export async function GET(req: NextRequest) {
   const history = classified.filter((d) => d.date < today);
   const upcoming = classified.filter((d) => d.date >= today);
 
-  return NextResponse.json({ status: 'ok' satisfies Status, days, history, upcoming });
+  // A raw sample of what Google actually returned, so a rota that reads wrong
+  // can be diagnosed from the response instead of by guessing at the calendar.
+  // ?debug=1 only — it is noise the dashboard never needs.
+  const debug = url.searchParams.get('debug')
+    ? {
+        eventCount: events.length,
+        calendarId: process.env.GOOGLE_CALENDAR_ID ?? 'primary',
+        window: { from: dayKey(historyFrom), to: dayKey(futureTo) },
+        sample: events.slice(-40).map((e) => ({
+          title: e.title,
+          allDay: e.allDay,
+          start: e.start.toISOString(),
+          end: e.end?.toISOString() ?? null,
+          readAs: classifyDay([e]),
+        })),
+      }
+    : undefined;
+
+  return NextResponse.json({ status: 'ok' satisfies Status, days, history, upcoming, debug });
 }

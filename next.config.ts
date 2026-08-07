@@ -69,6 +69,18 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // The operator dashboard reads live data. With no explicit directive the
+      // browser and the CDN are both free to reuse a response, which shows up
+      // as a dashboard that has quietly stopped updating.
+      {
+        source: '/api/operator/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, max-age=0',
+          },
+        ],
+      },
       // Cache static assets
       {
         source: '/static/:path*',
