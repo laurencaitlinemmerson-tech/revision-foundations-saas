@@ -507,6 +507,51 @@ export function deriveVals(
     chipColor: b.d <= 0 ? '#7F9289' : '#AA7F68',
   }));
 
+  /* ── composition of loss ── */
+  // The scale gives one number. The smart scale's own body-fat % turns that
+  // into two — fat mass and everything else — which is the actual question
+  // behind "is this costing muscle" that a muscle-mass sparkline alone doesn't
+  // answer.
+  const compositionOfLoss = (() => {
+    const wi = (live.weighIns ?? []).filter((w) => w.bodyFat > 0 && w.muscleMass > 0);
+    if (wi.length < 4) return null;
+    const first = wi[0];
+    const last = wi[wi.length - 1];
+    const windowDays = Math.round((new Date(last.date).getTime() - new Date(first.date).getTime()) / DAY);
+    if (windowDays < 14) return null;
+
+    const totalChange = last.weight - first.weight;
+    if (Math.abs(totalChange) < 0.8) return null; // too little movement to attribute honestly
+
+    // Bioimpedance body-fat % is noisy day to day but the endpoints of a real
+    // window smooth most of that out.
+    const fatMassFirst = first.weight * (first.bodyFat / 100);
+    const fatMassLast = last.weight * (last.bodyFat / 100);
+    const fatChange = fatMassLast - fatMassFirst;
+    const leanChange = totalChange - fatChange;
+    const muscleScaleChange = last.muscleMass - first.muscleMass;
+
+    const losing = totalChange < 0;
+    // What fraction of a loss was NOT fat — the number that actually answers
+    // the muscle question, rather than either mass figure read alone.
+    const leanShare = losing && totalChange !== 0 ? (leanChange / totalChange) * 100 : null;
+
+    const verdict = !losing
+      ? `Weight is up ${conv(totalChange).toFixed(1)} ${uLabel} over ${windowDays} days, of which about ${conv(fatChange).toFixed(1)} ${uLabel} reads as fat mass and the rest as lean — expected direction for a surplus, and the scale's own muscle-mass reading agrees, up ${muscleScaleChange.toFixed(1)} kg.`
+      : leanShare != null && leanShare > 35
+      ? `Of the ${Math.abs(conv(totalChange)).toFixed(1)} ${uLabel} lost over ${windowDays} days, about ${Math.abs(conv(leanChange)).toFixed(1)} ${uLabel} reads as lean mass rather than fat — more than you'd want from a cut. Protein and the deficit size are the two levers, in that order.`
+      : `Of the ${Math.abs(conv(totalChange)).toFixed(1)} ${uLabel} lost over ${windowDays} days, about ${Math.abs(conv(fatChange)).toFixed(1)} ${uLabel} reads as fat mass — the loss is coming from where it should. The scale's own muscle-mass reading is ${muscleScaleChange >= 0 ? 'up' : 'down'} ${Math.abs(muscleScaleChange).toFixed(1)} kg over the same window.`;
+
+    return {
+      windowDays,
+      totalChange: (totalChange >= 0 ? '+' : '−') + Math.abs(conv(totalChange)).toFixed(1) + ' ' + uLabel,
+      fatChange: (fatChange >= 0 ? '+' : '−') + Math.abs(conv(fatChange)).toFixed(1) + ' ' + uLabel,
+      leanChange: (leanChange >= 0 ? '+' : '−') + Math.abs(conv(leanChange)).toFixed(1) + ' ' + uLabel,
+      verdict,
+      note: 'Estimated from body-fat % at each end of the window, not measured directly — bioimpedance is noisy day to day, which is why this only fires across at least a fortnight rather than week to week.',
+    };
+  })();
+
   /* ── nutrition ── */
   const proteinTarget = Math.round(latest.weight * proteinPerKg);
   const macros = [
@@ -897,6 +942,30 @@ export function deriveVals(
     return {
       title: `${Math.round(deficit)} kcal deficit on ${adherence7.proteinDays}/${adherence7.days} protein days`,
       note: `A deficit this size with protein missed more often than hit is the combination that takes muscle rather than fat. Protein first, then the deficit — ${Math.round(latest.weight * proteinPerKg)} g is the floor.`,
+    };
+  })();
+
+  // Everything else on the dashboard reads an established pattern — three weeks
+  // flat, a week of low adherence. This looks for one still forming, so a slide
+  // is visible while a single good day can still fix it.
+  const earlyWarning = (() => {
+    const recent = series(days, (d) => d.nutrition.proteinG, 10);
+    if (!recent || recent.length < 10) return null;
+    const last3 = recent.slice(-3);
+    const prior = recent.slice(0, -3);
+    if (prior.length < 5) return null;
+
+    const priorMean = prior.reduce((a, b) => a + b, 0) / prior.length;
+    const last3Mean = last3.reduce((a, b) => a + b, 0) / last3.length;
+    const dropPct = (priorMean - last3Mean) / priorMean;
+    // A real slide, not one bad day dragging the average — each of the last
+    // three days has to sit at or below the one before it.
+    const declining = last3.every((v, i) => i === 0 || v <= last3[i - 1] + 5);
+    if (dropPct < 0.15 || !declining) return null;
+
+    return {
+      title: `Protein has slipped ${Math.round(dropPct * 100)}% over the last 3 days`,
+      note: `Averaging ${Math.round(last3Mean)} g against a ${Math.round(priorMean)} g baseline over the ten days before. Early enough that one good day resets it, before it reads as a pattern the way the adherence card does.`,
     };
   })();
 
@@ -1494,6 +1563,81 @@ export function deriveVals(
     };
   })();
 
+  /* ── cycle × performance ── */
+  // Nothing on the dashboard had connected the cycle to the lift log. Reusing
+  // the cycle card's own period-start detection rather than a fresh guess, so
+  // a session's phase is read the same way here as it is on Today.
+  const cyclePerformance = (() => {
+    const flowDays = (days ?? [])
+      .filter((d) => (d.cycle?.flow ?? 0) > 0)
+      .map((d) => d.date.slice(0, 10))
+      .sort();
+    if (flowDays.length < 2) return null;
+    const flowSet = new Set(flowDays);
+    const starts = flowDays.filter((d) => {
+      const t = new Date(d).getTime();
+      return ![1, 2, 3].some((n) => flowSet.has(new Date(t - n * DAY).toISOString().slice(0, 10)));
+    });
+    if (starts.length < 2) return null;
+    const lengths = starts
+      .slice(1)
+      .map((s, i) => Math.round((new Date(s).getTime() - new Date(starts[i]).getTime()) / DAY))
+      .filter((n) => n >= 18 && n <= 45);
+    const avgLen = lengths.length ? Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length) : 28;
+    const ovulation = Math.max(10, avgLen - 14);
+
+    // Follicular/ovulation half against luteal/menstrual half — a two-way split
+    // rather than four phases, because a lift log rarely has enough sessions
+    // per phase to support finer buckets honestly.
+    const halfAt = (dateStr: string): 'high' | 'low' | null => {
+      const t = new Date(dateStr).getTime();
+      const start = [...starts].reverse().find((s) => new Date(s).getTime() <= t);
+      if (!start) return null;
+      const n = Math.round((t - new Date(start).getTime()) / DAY) + 1;
+      if (n > 60) return null;
+      return n <= ovulation + 2 ? 'high' : 'low';
+    };
+
+    const byExercise = new Map<string, Array<{ e1rm: number; half: 'high' | 'low' }>>();
+    for (const l of live.lifts ?? []) {
+      if (l.e1rmKg <= 0) continue;
+      const half = halfAt(l.performedOn);
+      if (!half) continue;
+      const arr = byExercise.get(l.exercise) ?? [];
+      arr.push({ e1rm: l.e1rmKg, half });
+      byExercise.set(l.exercise, arr);
+    }
+
+    const rows = [...byExercise.entries()]
+      .map(([exercise, pts]) => {
+        const high = pts.filter((p) => p.half === 'high').map((p) => p.e1rm);
+        const low = pts.filter((p) => p.half === 'low').map((p) => p.e1rm);
+        if (high.length < 3 || low.length < 3) return null;
+        const meanHigh = high.reduce((a, b) => a + b, 0) / high.length;
+        const meanLow = low.reduce((a, b) => a + b, 0) / low.length;
+        const pct = ((meanLow - meanHigh) / meanHigh) * 100;
+        return { exercise, pct, sessions: high.length + low.length };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null && Math.abs(r.pct) >= 2)
+      .sort((a, b) => a.pct - b.pct);
+    if (!rows.length) return null;
+
+    const worst = rows[0];
+    const totalSessions = rows.reduce((a, r) => a + r.sessions, 0);
+    const thinCaveat = totalSessions < 12 ? ' Still a small sample — treat it as a hint to watch, not a rule yet.' : '';
+    return {
+      rows: rows.map((r) => ({
+        exercise: r.exercise,
+        delta: (r.pct >= 0 ? '+' : '−') + Math.abs(r.pct).toFixed(1) + '%',
+        lower: r.pct < 0,
+        sessions: `${r.sessions} sessions`,
+      })),
+      note: worst.pct < -3
+        ? `${worst.exercise} reads ${Math.abs(worst.pct).toFixed(1)}% lower across your luteal-and-menstrual sessions than your follicular-and-ovulation ones, over ${worst.sessions} sessions.${thinCaveat} Putting the heaviest planned session in the first half of the cycle plays to a pattern that is actually yours rather than a general rule.`
+        : `Nothing in your lift log reads meaningfully different by cycle half yet — load is holding regardless of where you are.`,
+    };
+  })();
+
   /* ── adaptive maintenance ── */
   // Maintenance is not a constant. Back-derived from intake and weight change at
   // successive points, it shows adaptation as it happens rather than as a single
@@ -1933,6 +2077,7 @@ export function deriveVals(
     sleepDepth, habitStreaks,
     correction, outlier, muscleRisk, forecast,
     cycle, shiftSplit, relativeStrength, maintenanceTrend,
+    earlyWarning, compositionOfLoss, cyclePerformance,
     rota, nightRecovery, tomorrowPrep,
     lifts: live.lifts,
     onLiftSaved,
@@ -1946,6 +2091,9 @@ export function deriveVals(
         : null,
       outlier
         ? { tag: 'Reading', tone: 'mid' as const, title: outlier.title, note: outlier.note }
+        : null,
+      earlyWarning
+        ? { tag: 'Trending', tone: 'mid' as const, title: earlyWarning.title, note: earlyWarning.note }
         : null,
       plateau
         ? {
@@ -1987,11 +2135,12 @@ export function deriveVals(
           }
         : null,
     ].filter((n): n is { tag: string; tone: 'ok' | 'mid' | 'warn'; title: string; note: string } => n !== null),
-    coachEmpty: !plateau && !reality && !readiness && !adherence7 && !muscleRisk && !outlier,
+    coachEmpty: !plateau && !reality && !readiness && !adherence7 && !muscleRisk && !outlier && !earlyWarning,
     // The one note worth reading first, promoted out of Nutrition onto Today —
     // a plateau or a rejected assumption matters more than a tidy adherence score.
     topNote: (() => {
       if (muscleRisk) return { tag: 'Muscle', title: muscleRisk.title, note: muscleRisk.note, tone: 'warn' as const };
+      if (earlyWarning) return { tag: 'Trending', title: earlyWarning.title, note: earlyWarning.note, tone: 'mid' as const };
       if (plateau) return { tag: 'Plateau', title: `Flat for ${plateau.days} days`, note: plateauSuggestion(plateau, logged.kcal || avgIntake, tdee), tone: 'warn' as const };
       if (reality?.significant) return { tag: 'Maintenance', title: `Formula is off by ${Math.round(Math.abs(reality.driftPct) * 100)}%`, note: driftCopy(reality), tone: 'warn' as const };
       if (readiness && readiness.score < 40) return { tag: 'Readiness', title: `${readiness.score} / 100`, note: readiness.verdict, tone: 'warn' as const };
@@ -2008,7 +2157,31 @@ export function deriveVals(
       const weak = sleepAvgH < 7 ? 'sleep still the weak link' : adherence7 && adherence7.pct < 70 ? 'adherence the weak link' : 'nothing obviously off';
       return `${dir}, ${(live.workouts ?? []).length || 'no'} session${(live.workouts ?? []).length === 1 ? '' : 's'}, and ${weak}.`;
     })(),
-    reviewBody: 'Average intake ' + avgIntake.toLocaleString() + ' kcal against ' + tdee.toLocaleString() + ' kcal burned — about a ' + Math.max(0, tdee - avgIntake) + ' kcal daily deficit. Protein hit on six of seven days, which is why the scale is moving without the sessions getting harder. Nothing to change: keep the food where it is and aim one earlier bedtime this week.',
+    // The weekly briefing. One synthesised paragraph rather than another card —
+    // a fixed fact (the deficit) plus whichever single signal is actually
+    // driving the week, in the same priority order the Today tab uses for its
+    // one note, so the two never contradict each other.
+    reviewBody: (() => {
+      const base = `Average intake ${avgIntake.toLocaleString()} kcal against ${tdee.toLocaleString()} kcal burned — about a ${Math.max(0, tdee - avgIntake).toLocaleString()} kcal daily deficit.`;
+
+      if (muscleRisk) {
+        return `${base} ${muscleRisk.title} this week — that is the thing to fix before anything else. Protein first, the deficit second.`;
+      }
+      if (earlyWarning) {
+        return `${base} ${earlyWarning.title.charAt(0).toLowerCase()}${earlyWarning.title.slice(1)} — worth a good day before it becomes a pattern rather than after.`;
+      }
+      if (cycle && (cycle.phase === 'Luteal' || cycle.phase === 'Menstrual')) {
+        return `${base} You're day ${cycle.dayOf} of your cycle, in the ${cycle.phase.toLowerCase()} phase — read the trend line this week, not the morning number.`;
+      }
+      const worstShift = shiftSplit?.rows.find((r) => r.good === false);
+      if (worstShift) {
+        return `${base} ${worstShift.label} is where shift days cost you this week — ${worstShift.onValue} on shift against ${worstShift.offValue} off. That is the one to prepare around rather than rely on willpower for.`;
+      }
+      if (adherence7 && adherence7.pct >= 70) {
+        return `${base} Protein hit target on ${adherence7.proteinDays} of ${adherence7.days} days, which is why the scale is moving without the sessions getting harder. Nothing to change: keep the food where it is.`;
+      }
+      return `${base} Nothing unusual driving this week — the plan is doing what it says.`;
+    })(),
     reviewChips: [
       ((live.workouts ?? []).length || 0) + ' sessions',
       adherence7 ? `${adherence7.proteinDays}/${adherence7.days} protein days` : '— protein days',

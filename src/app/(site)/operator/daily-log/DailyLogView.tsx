@@ -401,6 +401,28 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </>) : null}
+      {(v.compositionOfLoss) ? (<>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 2px' }}>Where the <em style={{ color: '#C06C84' }}>change</em> came from</h2>
+      <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--ink-mute)' }}>Body-fat % at each end of a {v.compositionOfLoss.windowDays}-day window, split into fat mass and everything else.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: '14px', marginBottom: '16px' }}>
+      <div>
+      <div style={{ fontSize: '9.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '4px' }}>Total</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--ink)' }}>{v.compositionOfLoss.totalChange}</div>
+      </div>
+      <div>
+      <div style={{ fontSize: '9.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '4px' }}>Fat mass</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#C06C84' }}>{v.compositionOfLoss.fatChange}</div>
+      </div>
+      <div>
+      <div style={{ fontSize: '9.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '4px' }}>Lean & other</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#7F9289' }}>{v.compositionOfLoss.leanChange}</div>
+      </div>
+      </div>
+      <p style={{ margin: '0 0 10px', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.6 }}>{v.compositionOfLoss.verdict}</p>
+      <p style={{ margin: '0', fontSize: '11px', color: 'var(--ink-mute)', lineHeight: 1.5 }}>{v.compositionOfLoss.note}</p>
+      </div>
+      </>) : null}
       </div>
       </>) : null}
       {(v.isPlan) ? (<>
@@ -885,6 +907,20 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </div>
       </React.Fragment>))}
       <p style={{ margin: '14px 0 0', fontSize: '11px', color: 'var(--ink-mute)' }}>Estimated one-rep max divided by bodyweight on the day, from the nearest weigh-in within a fortnight.</p>
+      </div>
+      </>) : null}
+      {(v.cyclePerformance) ? (<>
+      <div style={{ padding: '24px 26px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--ink)', margin: '0 0 2px' }}>Strength by <em style={{ color: '#C06C84' }}>cycle half</em></h2>
+      <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--ink-soft)', lineHeight: 1.6, maxWidth: '70ch' }}>{v.cyclePerformance.note}</p>
+      {(v.cyclePerformance.rows ?? []).map((r, r_i) => (<React.Fragment key={r_i}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto 74px', gap: '14px', alignItems: 'baseline', padding: '12px 0', borderTop: '0.5px solid var(--rule-soft)' }}>
+      <span style={{ fontSize: '13px', color: 'var(--ink-soft)' }}>{r.exercise}</span>
+      <span style={{ fontSize: '11px', color: 'var(--ink-mute)' }}>{r.sessions}</span>
+      <span style={sx(`font-size:10.5px;padding:3px 9px;border-radius:999px;text-align:center;background:${r.lower ? '#FAF0F3' : '#EDF1EC'};color:${r.lower ? '#8A4459' : '#7F9289'};`)}>{r.delta}</span>
+      </div>
+      </React.Fragment>))}
+      <p style={{ margin: '14px 0 0', fontSize: '11px', color: 'var(--ink-mute)' }}>Follicular and ovulation sessions against luteal and menstrual ones — e1RM per session, not per kilo of bodyweight.</p>
       </div>
       </>) : null}
       <div style={{ padding: '30px 32px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px', boxShadow: 'none' }}>
