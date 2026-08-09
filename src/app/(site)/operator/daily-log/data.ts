@@ -75,6 +75,18 @@ export type ScheduleStatus = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_fail
 
 export type ShiftKind = 'night' | 'long' | 'early' | 'late' | 'day' | 'off';
 
+/** One calendar entry, exactly as it read from Google — not filtered down to a shift. */
+export type CalendarEventBrief = {
+  title: string;
+  start: string | null;
+  end: string | null;
+  allDay: boolean;
+  /** Which of the account's calendars this came from (e.g. "Placement", "University"). */
+  source: string;
+};
+
+export type DaySuggestion = { text: string; tag: 'Lift' | 'Move' | 'Easy' | 'Rest' };
+
 /** A day classified from the rota — past or upcoming. */
 export type ShiftDay = {
   date: string;
@@ -88,6 +100,10 @@ export type ShiftDay = {
   end: string | null;
   /** The calendar entry that named it, when a title matched rather than hours. */
   label: string | null;
+  /** Everything on the calendar that day, across every calendar in the account. */
+  events: CalendarEventBrief[];
+  /** A training read for this specific day. Null on past days — nothing to suggest. */
+  suggestion: DaySuggestion | null;
 };
 
 /**

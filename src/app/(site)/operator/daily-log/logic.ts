@@ -1204,6 +1204,11 @@ export function deriveVals(
     const selectedDate = st.rotaDate ?? todayISO;
     const monthMode = st.rotaView === 'month';
 
+    const suggestionTagStyle = (tag: string) => {
+      const c = { Lift: { bg: '#FAF0F3', fg: '#8A4459' }, Move: { bg: '#FAFAF9', fg: '#8A4459' }, Easy: { bg: '#F4F4F3', fg: '#57544E' }, Rest: { bg: '#EFF2EE', fg: '#7F9289' } }[tag] ?? { bg: '#F4F4F3', fg: '#57544E' };
+      return `font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;white-space:nowrap;background:${c.bg};color:${c.fg};`;
+    };
+
     // One cell builder for both the rolling six-week strip and the
     // calendar-month grid — they differ only in which dates they ask for.
     const buildCell = (d: Date, outOfMonth = false) => {
@@ -1215,19 +1220,26 @@ export function deriveVals(
       const isSelected = date === selectedDate;
       const lects = lecturesByDate.get(date) ?? [];
       const future = date > todayISO;
+      // Everything on the calendar that isn't the entry the shift itself was
+      // read from — a day off that still has a dentist appointment on it, or
+      // a shift day that also has something in the evening.
+      const otherEvents = (entry?.events ?? []).filter((e) => e.title !== entry?.label);
       return {
         date,
         day: String(d.getDate()),
         short: entry?.shift ? s.short : '',
         today: isToday,
         lecture: lects.length > 0,
+        hasEvents: otherEvents.length > 0,
         // Clicking a day opens it below rather than navigating away, so the
         // grid stays on screen while you read across it.
         onClick: () => setState({ rotaDate: date }),
         title:
           (entry?.shift
             ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''}${entry.hours != null ? ` · ${entry.hours} h` : ' · all-day entry, no times'}`
-            : `${date} · off`) + (lects.length ? ` · ${lects.length} lecture${lects.length === 1 ? '' : 's'}` : ''),
+            : `${date} · off`) +
+          (otherEvents.length ? ` · ${otherEvents.length} other event${otherEvents.length === 1 ? '' : 's'}` : '') +
+          (lects.length ? ` · ${lects.length} lecture${lects.length === 1 ? '' : 's'}` : ''),
         style:
           'position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease;' +
           `background:${s.bg};color:${s.fg};` +
@@ -1340,12 +1352,25 @@ export function deriveVals(
           (entry?.shift
             ? `background:${KIND_STYLE[entry.kind]?.bg ?? '#EBD3DB'};color:${KIND_STYLE[entry.kind]?.fg ?? '#5A2233'};`
             : 'background:#F4F4F3;color:#57544E;'),
-        // The university timetable, purely informational — it never decides
-        // whether this day counts as a shift.
-        lectures: (lecturesByDate.get(selectedDate) ?? []).map((l) => ({
-          title: l.title,
-          time: l.allDay ? 'All day' : l.start ? `${l.start}${l.end ? '–' + l.end : ''}` : '',
-        })),
+        // Every calendar the account has, plus the university timetable, merged
+        // into one chronological agenda — the whole day, not just the shift
+        // read. All-day entries first, then whatever has a start time.
+        agenda: [
+          ...(entry?.events ?? []),
+          ...(lecturesByDate.get(selectedDate) ?? []).map((l) => ({ ...l, source: 'Timetable' })),
+        ]
+          .slice()
+          .sort((a, b) => (a.allDay !== b.allDay ? (a.allDay ? -1 : 1) : (a.start ?? '').localeCompare(b.start ?? '')))
+          .map((e) => ({
+            title: e.title,
+            time: e.allDay ? 'All day' : e.start ? `${e.start}${e.end ? '–' + e.end : ''}` : '',
+            source: e.source,
+          })),
+        // A training read for this one day, from the calendar's real gaps —
+        // null on past days, where there is nothing left to suggest.
+        suggestion: entry?.suggestion
+          ? { text: entry.suggestion.text, tag: entry.suggestion.tag, tagStyle: suggestionTagStyle(entry.suggestion.tag) }
+          : null,
         stats: [
           { label: 'Steps', value: n(health?.activity.steps, (x) => Math.round(x).toLocaleString()) },
           { label: 'Protein', value: n(health?.nutrition.proteinG, (x) => Math.round(x) + ' g') },
@@ -1402,6 +1427,7 @@ export function deriveVals(
         style: `width:11px;height:11px;border-radius:4px;display:inline-block;background:${KIND_STYLE[k].bg};`,
       })),
       hasLectures: (live.schedule?.lectures?.length ?? 0) > 0,
+      hasOtherEvents: weeks.some((w) => w.cells.some((c) => c.hasEvents)),
       thisWeekLabel,
       nextUp: next.length
         ? next

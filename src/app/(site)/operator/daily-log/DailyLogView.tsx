@@ -521,6 +521,7 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <span style={{ opacity: 0.75 }}>{c.day}</span>
       {(c.short) ? (<><span style={{ fontWeight: 600, fontSize: '9px' }}>{c.short}</span></>) : null}
       {(c.lecture) ? (<><span style={{ position: 'absolute', top: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '50%', background: '#7F9289', boxShadow: '0 0 0 1.5px #FFFFFF' }}></span></>) : null}
+      {(c.hasEvents) ? (<><span style={{ position: 'absolute', bottom: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '50%', background: '#C06C84', boxShadow: '0 0 0 1.5px #FFFFFF' }}></span></>) : null}
       </div>
       </React.Fragment>))}
       </div>
@@ -531,6 +532,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       {(v.rota.hasLectures) ? (<>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={{ width: '9px', height: '9px', borderRadius: '50%', display: 'inline-block', background: '#7F9289' }}></i>Lecture / exam</span>
+      </>) : null}
+      {(v.rota.hasOtherEvents) ? (<>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={{ width: '9px', height: '9px', borderRadius: '50%', display: 'inline-block', background: '#C06C84' }}></i>Other event</span>
       </>) : null}
       </div>
       {(v.rota.selected) ? (<>
@@ -556,13 +560,19 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </>)}
-      {(v.rota.selected.lectures && v.rota.selected.lectures.length > 0) ? (<>
+      {(v.rota.selected.suggestion) ? (<>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', padding: '10px 12px', borderRadius: '9px', background: 'var(--surface)' }}>
+      <span style={sx(v.rota.selected.suggestion.tagStyle)}>{v.rota.selected.suggestion.tag}</span>
+      <span style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>{v.rota.selected.suggestion.text}</span>
+      </div>
+      </>) : null}
+      {(v.rota.selected.agenda && v.rota.selected.agenda.length > 0) ? (<>
       <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '0.5px solid var(--rule-soft)' }}>
-      <div style={{ fontSize: '9.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '6px' }}>Timetable</div>
-      {(v.rota.selected.lectures ?? []).map((l, l_i) => (<React.Fragment key={l_i}>
+      <div style={{ fontSize: '9.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-mute)', marginBottom: '6px' }}>On the calendar</div>
+      {(v.rota.selected.agenda ?? []).map((e, e_i) => (<React.Fragment key={e_i}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', fontSize: '12px', color: 'var(--ink-soft)', padding: '4px 0' }}>
-      <span>{l.title}</span>
-      <span style={{ color: 'var(--ink-mute)', whiteSpace: 'nowrap' }}>{l.time}</span>
+      <span>{e.title}<span style={{ fontSize: '10px', color: 'var(--ink-mute)', marginLeft: '7px' }}>{e.source}</span></span>
+      <span style={{ color: 'var(--ink-mute)', whiteSpace: 'nowrap' }}>{e.time}</span>
       </div>
       </React.Fragment>))}
       </div>

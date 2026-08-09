@@ -89,8 +89,21 @@ function weekStart(now = new Date()) {
   return d;
 }
 
+/**
+ * Local "H:MM" (Europe/London). Not `toLocaleTimeString` without a zone —
+ * that reads the server's own clock, which is UTC on most hosts and quietly
+ * puts every displayed time an hour out for half the year.
+ */
 function hhmm(d: Date) {
-  return d.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: 'numeric', minute: '2-digit', hour12: false }).formatToParts(d);
+  const h = parts.find((p) => p.type === 'hour')?.value ?? '0';
+  const m = parts.find((p) => p.type === 'minute')?.value ?? '00';
+  return m === '00' ? h : `${h}:${m}`;
+}
+
+/** Hour-as-float back to "HH:MM", for text built from `localHour`/`lastFinishHour`. */
+function hhmmOf(h: number | null) {
+  return h == null ? null : `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
 }
 
 /**
@@ -382,9 +395,6 @@ function classifyDay(entries: Entry[]) {
 
   const hours = timedHours > 0 ? Math.round(timedHours * 10) / 10 : null;
 
-  const hhmmOf = (h: number | null) =>
-    h == null ? null : `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
-
   return {
     shift: true,
     night,
@@ -408,7 +418,7 @@ function busyHours(entries: Entry[]) {
 function lastFinishHour(entries: Entry[]) {
   return entries.reduce((latest, e) => {
     if (e.allDay || !e.end) return latest;
-    return Math.max(latest, e.end.getHours() + e.end.getMinutes() / 60);
+    return Math.max(latest, localHour(e.end));
   }, 0);
 }
 
@@ -432,6 +442,29 @@ function suggest(entries: Entry[], index: number, liftsPlaced: number) {
   }
   if (hours === 0) return { text: 'Long walk, conversational pace', tag: 'Move' };
   return { text: 'Mobility or an easy walk', tag: 'Easy' };
+}
+
+/**
+ * A single day's training read, for the rota's day panel — any day, not just
+ * this week's seven. Unlike `suggest()` it carries no weekly state (lift cap,
+ * "day 6 is the reset day"), because a day panel shows one day at a time and
+ * has nothing to reset against; it reads purely from what is actually on the
+ * calendar that day.
+ */
+function suggestForDay(entries: Entry[]): { text: string; tag: 'Lift' | 'Move' | 'Easy' | 'Rest' } {
+  const hours = busyHours(entries);
+  const finish = lastFinishHour(entries);
+
+  if (hours >= 8) return { text: 'A day this long already covers the deficit — steps only.', tag: 'Move' };
+  if (hours >= 5 && finish >= 19) return { text: 'Long day finishing late — rest and eat at maintenance.', tag: 'Rest' };
+  if (hours === 0) return { text: 'Nothing on the calendar — a clean day for a full session.', tag: 'Lift' };
+  if (finish > 0) {
+    const free = hhmmOf(finish);
+    return finish < 17
+      ? { text: `Free from ${free} — a lift fits before the evening.`, tag: 'Lift' }
+      : { text: `Free from ${free}, but late — keep it light.`, tag: 'Easy' };
+  }
+  return { text: 'Open day — good for a full session or a long walk.', tag: 'Lift' };
 }
 
 export async function GET(req: NextRequest) {
@@ -544,11 +577,27 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  /** Every event on a day, as text — the actual agenda, not just the shift read. */
+  const eventBrief = (e: Entry) => ({
+    title: e.title,
+    start: e.allDay ? null : hhmm(e.start),
+    end: e.allDay || !e.end ? null : hhmm(e.end),
+    allDay: e.allDay,
+    source: e.source,
+  });
+
   const today = dayKey(new Date());
-  const classified = eachDayKey(historyFrom, futureTo).map((date) => ({
-    date,
-    ...classifyDay(byDay.get(date) ?? []),
-  }));
+  const classified = eachDayKey(historyFrom, futureTo).map((date) => {
+    const dayEntries = (byDay.get(date) ?? []).slice().sort((a, b) => a.start.getTime() - b.start.getTime());
+    return {
+      date,
+      ...classifyDay(dayEntries),
+      events: dayEntries.map(eventBrief),
+      // Only forward-looking — there is nothing to suggest for a day that has
+      // already happened.
+      suggestion: date >= today ? suggestForDay(dayEntries) : null,
+    };
+  });
 
   // Today is excluded from history: a day still in progress would drag every
   // "on shift" average down. It belongs to the forward-looking half instead.
