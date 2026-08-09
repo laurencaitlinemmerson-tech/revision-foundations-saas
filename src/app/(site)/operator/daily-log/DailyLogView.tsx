@@ -520,9 +520,9 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       <div role='button' tabIndex={0} onClick={c.onClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.onClick(); } }} title={c.title} style={sx(c.style)} className="rota-cell">
       <span style={sx(c.dayStyle)}>{c.day}</span>
       {(c.chips ?? []).map((ch, ch_i) => (<React.Fragment key={ch_i}>
-      <span title={ch.title} style={sx(`width:100%;${ch.style}`)}>{ch.text}</span>
+      <span data-rota-chip title={ch.title} style={sx(`width:100%;${ch.style}`)}>{ch.text}</span>
       </React.Fragment>))}
-      {(c.overflowLabel) ? (<><span style={{ fontSize: '9px', color: 'var(--ink-mute)', padding: '0 2px' }}>{c.overflowLabel}</span></>) : null}
+      {(c.overflowLabel) ? (<><span data-rota-overflow style={{ fontSize: '9px', color: 'var(--ink-mute)', padding: '0 2px' }}>{c.overflowLabel}</span></>) : null}
       </div>
       </React.Fragment>))}
       </div>

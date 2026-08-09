@@ -203,7 +203,7 @@ export function ExpandableTdeeComponent({ acronym, fullName, value, percent, col
   const [tuneVal, setTuneVal] = useState(value);
   return (
     <div style={{ borderBottom: '0.5px solid var(--rule-soft)' }}>
-      <button onClick={() => setOpen(o => !o)} style={{
+      <button className="tdee-row" onClick={() => setOpen(o => !o)} style={{
         all: 'unset', cursor: 'pointer', display: 'grid', gridTemplateColumns: '140px 1fr auto',
         gap: 28, padding: '20px 0', alignItems: 'baseline', width: '100%',
       }}>

@@ -72,6 +72,15 @@
 @media (max-width: 760px) {
   .daily-log-shell [data-main] { padding: 24px 18px 60px !important; }
   .daily-log-shell [data-hero] { grid-template-columns: minmax(0, 1fr) !important; }
+  /* Four fixed columns (targets, plan numbers, macro summary) don't wrap —
+     the fourth one was clipped clean off the card on a phone, not just
+     cramped, so "Weekly pace" was unreachable rather than merely tight. */
+  .daily-log-shell [data-cols-2] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  /* The "What you burn" rows (BMR/NEAT/TEF/…) use a fixed 140px first
+     column; on a phone that leaves so little room for the description that
+     it wraps one word per line. Stack the row instead. */
+  .daily-log-shell .tdee-row { grid-template-columns: minmax(0, 1fr) auto !important; row-gap: 10px !important; column-gap: 14px !important; }
+  .daily-log-shell .tdee-row > div:first-child { grid-column: 1 / -1; }
 }
 
 /* The metric band divides with hairlines, so the first cell in each wrapped
@@ -83,3 +92,31 @@
 /* Rota cells are clickable, so they need to feel it. */
 .rota-cell:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(26, 24, 21, 0.14); }
 .rota-cell:focus-visible { outline: 2px solid #c06c84; outline-offset: 2px; }
+
+/* Seven day-columns leave each chip too narrow to hold readable text once
+   the rota card itself is phone-width — every mobile calendar app collapses
+   month-view events to a colour mark for the same reason. Chips shrink to a
+   coloured bar here; tapping the day still opens the full agenda below. */
+@media (max-width: 640px) {
+  .daily-log-shell [data-rota-chip] {
+    height: 5px;
+    min-height: 5px;
+    padding: 0;
+    border-radius: 3px;
+    overflow: hidden;
+    text-indent: -999px;
+    margin-top: 1px;
+  }
+  .daily-log-shell [data-rota-overflow] { display: none; }
+  .daily-log-shell .rota-cell { min-height: 46px !important; }
+}
+
+/* The site-wide accessibility FAB is fixed bottom-left at every width. On a
+   phone-height screen that is exactly where this dashboard's hero "Adjust
+   targets" button lands on first paint — every mobile visit opens with the
+   FAB sitting on top of it. Moving the FAB out of the way here is safer
+   than touching its own (site-wide, public-page) positioning. */
+@media (max-width: 480px) {
+  body:has(.daily-log-shell) .a11y-fab { left: auto; right: 12px; bottom: auto; top: 12px; }
+  body:has(.daily-log-shell) .a11y-panel { left: auto; right: 12px; bottom: auto; top: 56px; }
+}
