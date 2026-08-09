@@ -1209,47 +1209,65 @@ export function deriveVals(
       return `font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;white-space:nowrap;background:${c.bg};color:${c.fg};`;
     };
 
+    const chipStyle = (bg: string, fg: string) =>
+      `display:block;padding:2px 6px;border-radius:5px;font-size:9.5px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:${bg};color:${fg};`;
+
     // One cell builder for both the rolling six-week strip and the
     // calendar-month grid — they differ only in which dates they ask for.
+    // A real calendar cell, not a single colour standing in for the whole
+    // day: a neutral square holding one small chip per thing actually on the
+    // calendar, the way Google/Notion Calendar's month view reads, rather
+    // than a heatmap tile.
     const buildCell = (d: Date, outOfMonth = false) => {
       const date = localISODate(d);
       const entry = byDate.get(date);
-      const kind = entry?.shift ? entry.kind : 'off';
-      const s = KIND_STYLE[kind] ?? KIND_STYLE.off;
       const isToday = date === todayISO;
       const isSelected = date === selectedDate;
       const lects = lecturesByDate.get(date) ?? [];
       const future = date > todayISO;
-      // Everything on the calendar that isn't the entry the shift itself was
-      // read from — a day off that still has a dentist appointment on it, or
-      // a shift day that also has something in the evening.
-      const otherEvents = (entry?.events ?? []).filter((e) => e.title !== entry?.label);
+
+      const chips: Array<{ text: string; style: string; title: string }> = [];
+      if (entry?.shift) {
+        const s = KIND_STYLE[entry.kind] ?? KIND_STYLE.off;
+        const label = entry.kind === 'long' ? 'Long day' : entry.kind[0].toUpperCase() + entry.kind.slice(1);
+        chips.push({
+          text: label,
+          style: chipStyle(s.bg, s.fg),
+          title: `${label}${entry.start ? ` · ${entry.start}–${entry.end ?? ''}` : ''}${entry.hours != null ? ` · ${entry.hours} h` : ' · all-day entry, no times'}`,
+        });
+      }
+      for (const l of lects) chips.push({ text: l.title, style: chipStyle('#EFF2EE', '#5C6B62'), title: l.title });
+      // Everything else on the calendar that isn't the entry the shift itself
+      // was read from — a day off that still has a dentist appointment on it,
+      // or a shift day that also has something in the evening.
+      for (const e of entry?.events ?? []) {
+        if (e.title === entry?.label) continue;
+        chips.push({ text: e.title, style: chipStyle('#FBF4F6', '#8A4459'), title: `${e.title}${e.source ? ` · ${e.source}` : ''}` });
+      }
+      const shown = chips.slice(0, 3);
+      const overflow = chips.length - shown.length;
+
       return {
         date,
         day: String(d.getDate()),
-        short: entry?.shift ? s.short : '',
         today: isToday,
-        lecture: lects.length > 0,
-        hasEvents: otherEvents.length > 0,
+        dayStyle: isToday
+          ? 'display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#1A1A18;color:#FFFFFF;font-weight:600;font-size:10px;flex:none;'
+          : 'font-size:10px;color:var(--ink-mute);flex:none;',
+        chips: shown,
+        overflowLabel: overflow > 0 ? `+${overflow} more` : null,
         // Clicking a day opens it below rather than navigating away, so the
         // grid stays on screen while you read across it.
         onClick: () => setState({ rotaDate: date }),
-        title:
-          (entry?.shift
-            ? `${date} · ${kind}${entry.start ? ` ${entry.start}–${entry.end ?? ''}` : ''}${entry.hours != null ? ` · ${entry.hours} h` : ' · all-day entry, no times'}`
-            : `${date} · off`) +
-          (otherEvents.length ? ` · ${otherEvents.length} other event${otherEvents.length === 1 ? '' : 's'}` : '') +
-          (lects.length ? ` · ${lects.length} lecture${lects.length === 1 ? '' : 's'}` : ''),
+        title: `${date}${chips.length ? ' · ' + chips.length + ' event' + (chips.length === 1 ? '' : 's') : ' · free'}`,
         style:
-          'position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px;font-size:10px;line-height:1;cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease;' +
-          `background:${s.bg};color:${s.fg};` +
+          'position:relative;min-height:82px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:5px 4px;border-radius:9px;line-height:1;cursor:pointer;transition:box-shadow 140ms ease;background:#FFFFFF;border:0.5px solid rgba(26,24,21,0.10);' +
           (isSelected
-            ? 'outline:2px solid #C06C84;outline-offset:2px;'
+            ? 'outline:2px solid #C06C84;outline-offset:1px;'
             : isToday
             ? 'outline:1.5px solid #1A1A18;outline-offset:1px;'
             : '') +
-          `border:${!entry?.shift ? '0.5px solid rgba(26,24,21,0.10)' : '0'};` +
-          `opacity:${outOfMonth ? 0.28 : future ? 0.66 : 1};`,
+          `opacity:${outOfMonth ? 0.45 : future ? 0.9 : 1};`,
       };
     };
 
@@ -1426,8 +1444,6 @@ export function deriveVals(
         label: k === 'long' ? 'Long day' : k[0].toUpperCase() + k.slice(1),
         style: `width:11px;height:11px;border-radius:4px;display:inline-block;background:${KIND_STYLE[k].bg};`,
       })),
-      hasLectures: (live.schedule?.lectures?.length ?? 0) > 0,
-      hasOtherEvents: weeks.some((w) => w.cells.some((c) => c.hasEvents)),
       thisWeekLabel,
       nextUp: next.length
         ? next

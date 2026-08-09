@@ -514,14 +514,15 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       {(v.rota.weeks ?? []).map((w, w_i) => (<React.Fragment key={w_i}>
-      <div style={{ display: 'grid', gridTemplateColumns: '38px repeat(7, minmax(0,1fr))', gap: '5px', alignItems: 'center', marginBottom: '5px' }}>
-      <span style={{ fontSize: '9.5px', color: 'var(--ink-mute)', whiteSpace: 'nowrap' }}>{w.label}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: '38px repeat(7, minmax(0,1fr))', gap: '5px', alignItems: 'stretch', marginBottom: '5px' }}>
+      <span style={{ fontSize: '9.5px', color: 'var(--ink-mute)', whiteSpace: 'nowrap', paddingTop: '4px' }}>{w.label}</span>
       {(w.cells ?? []).map((c, c_i) => (<React.Fragment key={c_i}>
       <div role='button' tabIndex={0} onClick={c.onClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.onClick(); } }} title={c.title} style={sx(c.style)} className="rota-cell">
-      <span style={{ opacity: 0.75 }}>{c.day}</span>
-      {(c.short) ? (<><span style={{ fontWeight: 600, fontSize: '9px' }}>{c.short}</span></>) : null}
-      {(c.lecture) ? (<><span style={{ position: 'absolute', top: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '50%', background: '#7F9289', boxShadow: '0 0 0 1.5px #FFFFFF' }}></span></>) : null}
-      {(c.hasEvents) ? (<><span style={{ position: 'absolute', bottom: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '50%', background: '#C06C84', boxShadow: '0 0 0 1.5px #FFFFFF' }}></span></>) : null}
+      <span style={sx(c.dayStyle)}>{c.day}</span>
+      {(c.chips ?? []).map((ch, ch_i) => (<React.Fragment key={ch_i}>
+      <span title={ch.title} style={sx(`width:100%;${ch.style}`)}>{ch.text}</span>
+      </React.Fragment>))}
+      {(c.overflowLabel) ? (<><span style={{ fontSize: '9px', color: 'var(--ink-mute)', padding: '0 2px' }}>{c.overflowLabel}</span></>) : null}
       </div>
       </React.Fragment>))}
       </div>
@@ -530,12 +531,6 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       {(v.rota.legend ?? []).map((g, g_i) => (<React.Fragment key={g_i}>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={sx(g.style)}></i>{g.label}</span>
       </React.Fragment>))}
-      {(v.rota.hasLectures) ? (<>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={{ width: '9px', height: '9px', borderRadius: '50%', display: 'inline-block', background: '#7F9289' }}></i>Lecture / exam</span>
-      </>) : null}
-      {(v.rota.hasOtherEvents) ? (<>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><i style={{ width: '9px', height: '9px', borderRadius: '50%', display: 'inline-block', background: '#C06C84' }}></i>Other event</span>
-      </>) : null}
       </div>
       {(v.rota.selected) ? (<>
       <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '0.5px solid var(--rule-soft)' }}>
