@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import TDEECalculator from '@/components/dashboard/TDEECalculator';
 import PracticeHoursTracker from '@/components/dashboard/PracticeHoursTracker';
+import ProficiencyTracker from '@/components/dashboard/ProficiencyTracker';
+import ReflectionLog from '@/components/dashboard/ReflectionLog';
 import BackfillButton from '@/components/operator/BackfillButton';
 import { createServiceClient } from '@/lib/supabase';
 import { getOperatorStatus, allowedEmails, type OperatorStatus } from '@/lib/operator';
@@ -334,6 +336,10 @@ export default async function OperatorPage() {
         <Divider label="My nursing" accent="#8BBCAA" />
         <div style={{ marginBottom: '12px' }}>
           <PracticeHoursTracker />
+        </div>
+        <div className="op-2col">
+          <ProficiencyTracker />
+          <ReflectionLog />
         </div>
 
         {/* ━━ Wellness ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}

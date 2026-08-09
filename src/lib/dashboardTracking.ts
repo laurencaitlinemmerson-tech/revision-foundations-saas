@@ -9,6 +9,8 @@ export const TRACKING_KEYS = {
   lastSessionPing: 'rf_last_session_ping',
   practiceShifts: 'rf_practice_shifts',
   practiceTarget: 'rf_practice_target',
+  proficiencies: 'rf_proficiencies',
+  reflections: 'rf_reflections',
 } as const;
 
 /** NMC requirement for UK pre-registration nursing programmes */
@@ -164,4 +166,60 @@ export function getPracticeTarget(): number {
 
 export function savePracticeTarget(target: number): void {
   save(TRACKING_KEYS.practiceTarget, target);
+}
+
+// ── NMC proficiencies ──────────────────────────────────────────────────────────
+
+export type ProficiencyStatus = 'not-started' | 'in-progress' | 'signed-off';
+
+/** The seven platforms of the NMC Future Nurse standards of proficiency */
+export const NMC_PLATFORMS = [
+  { id: 'p1', label: 'Being an accountable professional' },
+  { id: 'p2', label: 'Promoting health and preventing ill health' },
+  { id: 'p3', label: 'Assessing needs and planning care' },
+  { id: 'p4', label: 'Providing and evaluating care' },
+  { id: 'p5', label: 'Leading and managing nursing care, working in teams' },
+  { id: 'p6', label: 'Improving safety and quality of care' },
+  { id: 'p7', label: 'Coordinating care' },
+] as const;
+
+export type ProficiencyMap = Record<string, ProficiencyStatus>;
+
+export function getProficiencies(): ProficiencyMap {
+  return load<ProficiencyMap>(TRACKING_KEYS.proficiencies, {});
+}
+
+export function setProficiency(id: string, status: ProficiencyStatus): ProficiencyMap {
+  const next = { ...getProficiencies(), [id]: status };
+  save(TRACKING_KEYS.proficiencies, next);
+  return next;
+}
+
+// ── Reflections ────────────────────────────────────────────────────────────────
+
+export interface Reflection {
+  id: string;
+  date: string;   // YYYY-MM-DD
+  title: string;
+  body: string;
+}
+
+export function getReflections(): Reflection[] {
+  return load<Reflection[]>(TRACKING_KEYS.reflections, [])
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export function addReflection(entry: Omit<Reflection, 'id'>): Reflection[] {
+  const all = getReflections();
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  all.unshift({ ...entry, id });
+  save(TRACKING_KEYS.reflections, all);
+  return getReflections();
+}
+
+export function removeReflection(id: string): Reflection[] {
+  const all = getReflections().filter(r => r.id !== id);
+  save(TRACKING_KEYS.reflections, all);
+  return all;
 }
