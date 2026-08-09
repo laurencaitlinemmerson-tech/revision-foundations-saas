@@ -10,7 +10,11 @@ import { fetchTimetable } from '@/lib/operatorTimetable';
  *
  *   GOOGLE_CLIENT_ID       OAuth client
  *   GOOGLE_CLIENT_SECRET
- *   GOOGLE_CALENDAR_ID     defaults to "primary"
+ *   GOOGLE_CALENDAR_ID     pins the rota to one calendar when set. Left unset
+ *                          (the default), every calendar the account can see —
+ *                          shift rota, lectures kept outside the ICS feed,
+ *                          personal — is fetched and merged, minus whatever is
+ *                          hidden in Google Calendar's own sidebar.
  *
  * The refresh token does not. It is written by the connect flow in
  * /api/operator/google, so an expired token is a button on the dashboard rather
@@ -28,7 +32,7 @@ function authed(req: NextRequest) {
   return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
 }
 
-type Entry = { start: Date; end: Date | null; title: string; allDay: boolean };
+type Entry = { start: Date; end: Date | null; title: string; allDay: boolean; source: string };
 type Status = 'ok' | 'unconfigured' | 'auth_failed' | 'fetch_failed';
 
 const DAY_MS = 86400000;
@@ -149,8 +153,38 @@ async function accessToken(refresh_token: string): Promise<TokenResult> {
   }
 }
 
-async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[] | null> {
-  const calendar = encodeURIComponent(process.env.GOOGLE_CALENDAR_ID ?? 'primary');
+/** One entry per calendar the account can see, minus anything hidden in Google's own sidebar. */
+async function fetchCalendarIds(token: string): Promise<Array<{ id: string; summary: string }> | null> {
+  try {
+    const res = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250',
+      { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+
+    const json = (await res.json()) as {
+      items?: Array<{ id?: string; summary?: string; hidden?: boolean; accessRole?: string }>;
+    };
+
+    return (json.items ?? [])
+      // A freeBusyReader calendar (someone else's calendar shared as
+      // free/busy only) returns blocks with no title, which would just
+      // show up as an unexplained "Busy" — worse than leaving it out.
+      .filter((c) => c.id && c.hidden !== true && c.accessRole !== 'freeBusyReader')
+      .map((c) => ({ id: c.id!, summary: c.summary ?? c.id! }));
+  } catch {
+    return null;
+  }
+}
+
+async function fetchEventsForCalendar(
+  token: string,
+  calendarId: string,
+  calendarSummary: string,
+  from: Date,
+  to: Date,
+): Promise<Entry[] | null> {
+  const calendar = encodeURIComponent(calendarId);
   const params = new URLSearchParams({
     timeMin: from.toISOString(),
     timeMax: to.toISOString(),
@@ -177,7 +211,7 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
       }>;
     };
 
-    const raw = (json.items ?? []).flatMap((e) => {
+    return (json.items ?? []).flatMap((e) => {
       // Cancelled events, unconfirmed ones, declined invitations, and ones
       // marked "free" do not constrain the day. Tentative is Google's own
       // "not confirmed yet" state — precisely the shape of a stale
@@ -195,23 +229,50 @@ async function fetchEvents(token: string, from: Date, to: Date): Promise<Entry[]
         end: endRaw ? new Date(endRaw) : null,
         title: (e.summary ?? 'Busy').trim(),
         allDay: !e.start?.dateTime,
+        source: calendarSummary,
       }];
-    });
-
-    // A calendar re-synced from an external source (or resubscribed to one)
-    // can hand back the same event twice under different IDs — identical
-    // title and times, which is invisible to the API's own de-duplication
-    // since that only catches a repeated ID.
-    const seen = new Set<string>();
-    return raw.filter((e) => {
-      const key = `${e.title}|${e.start.toISOString()}|${e.end?.toISOString() ?? ''}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
     });
   } catch {
     return null;
   }
+}
+
+type FetchResult = { entries: Entry[]; calendars: Array<{ id: string; summary: string }> };
+
+/**
+ * Every calendar the account can see, fetched in parallel and merged. A
+ * deployment can pin GOOGLE_CALENDAR_ID to scope this to one calendar; left
+ * unset, this is what makes "connect Google Calendar" mean the whole
+ * account rather than whichever calendar happens to be primary.
+ */
+async function fetchEvents(token: string, from: Date, to: Date): Promise<FetchResult | null> {
+  const pinned = process.env.GOOGLE_CALENDAR_ID;
+  let calendars = pinned ? [{ id: pinned, summary: pinned }] : await fetchCalendarIds(token);
+  if (!calendars || calendars.length === 0) calendars = [{ id: 'primary', summary: 'primary' }];
+
+  const results = await Promise.all(
+    calendars.map((c) => fetchEventsForCalendar(token, c.id, c.summary, from, to)),
+  );
+  // One calendar erroring out (revoked share, deleted subscription) should
+  // not sink the rest of the account's calendars along with it.
+  const successful = results.filter((r): r is Entry[] => r !== null);
+  if (successful.length === 0) return null;
+
+  const raw = successful.flat();
+
+  // A calendar re-synced from an external source (or subscribed to twice
+  // under different IDs) can hand back the same event more than once —
+  // identical title and times, invisible to the API's own de-duplication
+  // since that only catches a repeated ID within a single calendar.
+  const seen = new Set<string>();
+  const entries = raw.filter((e) => {
+    const key = `${e.title}|${e.start.toISOString()}|${e.end?.toISOString() ?? ''}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return { entries, calendars };
 }
 
 /**
@@ -426,13 +487,14 @@ export async function GET(req: NextRequest) {
   // comparison and practice hours, and the weeks ahead for the rota.
   const historyFrom = new Date(from.getTime() - HISTORY_DAYS * DAY_MS);
   const futureTo = new Date(from.getTime() + FUTURE_DAYS * DAY_MS);
-  const [events, timetableAll] = await Promise.all([
+  const [fetched, timetableAll] = await Promise.all([
     fetchEvents(token.token, historyFrom, futureTo),
     fetchTimetable(),
   ]);
-  if (events === null) {
+  if (fetched === null) {
     return NextResponse.json({ status: 'fetch_failed' satisfies Status, days: [] });
   }
+  const events = fetched.entries;
 
   // Informational only — never read by shift detection, so a bad or absent
   // feed here cannot affect the rota's actual data.
@@ -502,7 +564,7 @@ export async function GET(req: NextRequest) {
   const debug = url.searchParams.get('debug')
     ? {
         eventCount: events.length,
-        calendarId: process.env.GOOGLE_CALENDAR_ID ?? 'primary',
+        calendars: fetched.calendars.map((c) => c.summary),
         window: { from: dayKey(historyFrom), to: dayKey(futureTo) },
         timetable: {
           configured: Boolean(process.env.UNIVERSITY_ICS_URL),
@@ -517,6 +579,7 @@ export async function GET(req: NextRequest) {
                 allDay: e.allDay,
                 start: e.start.toISOString(),
                 end: e.end?.toISOString() ?? null,
+                source: e.source,
               })),
               classifiedAs: classifyDay(byDay.get(debugDate) ?? []),
             }
@@ -526,6 +589,7 @@ export async function GET(req: NextRequest) {
                 allDay: e.allDay,
                 start: e.start.toISOString(),
                 end: e.end?.toISOString() ?? null,
+                source: e.source,
                 readAs: classifyDay([e]),
               })),
             }),
