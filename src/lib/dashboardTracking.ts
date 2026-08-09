@@ -7,7 +7,12 @@ export const TRACKING_KEYS = {
   osceScores: 'rf_osce_scores',
   pinnedNote: 'rf_pinned_note',
   lastSessionPing: 'rf_last_session_ping',
+  practiceShifts: 'rf_practice_shifts',
+  practiceTarget: 'rf_practice_target',
 } as const;
+
+/** NMC requirement for UK pre-registration nursing programmes */
+export const DEFAULT_PRACTICE_TARGET = 2300;
 
 export interface RecentPage {
   title: string;
@@ -120,4 +125,43 @@ export function getPinnedNote(): string {
 
 export function savePinnedNote(note: string): void {
   save(TRACKING_KEYS.pinnedNote, note);
+}
+
+// ── Practice hours ─────────────────────────────────────────────────────────────
+
+export interface PracticeShift {
+  id: string;
+  date: string;   // YYYY-MM-DD
+  hours: number;
+  area: string;
+}
+
+export function getPracticeShifts(): PracticeShift[] {
+  return load<PracticeShift[]>(TRACKING_KEYS.practiceShifts, [])
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export function addPracticeShift(shift: Omit<PracticeShift, 'id'>): PracticeShift[] {
+  const shifts = getPracticeShifts();
+  // Date.now() alone can collide when two shifts are added in the same tick
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  shifts.unshift({ ...shift, id });
+  save(TRACKING_KEYS.practiceShifts, shifts);
+  return getPracticeShifts();
+}
+
+export function removePracticeShift(id: string): PracticeShift[] {
+  const shifts = getPracticeShifts().filter(s => s.id !== id);
+  save(TRACKING_KEYS.practiceShifts, shifts);
+  return shifts;
+}
+
+export function getPracticeTarget(): number {
+  const stored = load<number>(TRACKING_KEYS.practiceTarget, DEFAULT_PRACTICE_TARGET);
+  return Number.isFinite(stored) && stored > 0 ? stored : DEFAULT_PRACTICE_TARGET;
+}
+
+export function savePracticeTarget(target: number): void {
+  save(TRACKING_KEYS.practiceTarget, target);
 }

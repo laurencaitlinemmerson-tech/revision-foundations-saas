@@ -90,6 +90,7 @@ export default function DashboardClient({
   const railLinks = [
     { href: '#todays-plan', label: 'Today',   note: 'See the day at a glance'  },
     { href: '#revision-week', label: 'Week',  note: 'Plan your revision week'  },
+    { href: '#practice-hours', label: 'Hours', note: 'Log placement hours'     },
     { href: '#search', label: 'Search',       note: 'Find a guide quickly'     },
     { href: '#saved-folders', label: 'Library', note: 'Revisit saved material' },
   ];

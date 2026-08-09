@@ -13,6 +13,7 @@ import StudySignalsRow from '@/components/dashboard/StudySignalsRow';
 import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
 import OsceSparkline from '@/components/dashboard/OsceSparkline';
+import PracticeHoursTracker from '@/components/dashboard/PracticeHoursTracker';
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your study dashboard for tools, saved pages, and purchased content.',
@@ -332,25 +333,31 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 3 · PRACTICE HOURS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <SectionDivider label="Practice hours" id="practice-hours" accent="#8BBCAA" context="Towards your NMC total" />
+          <PracticeHoursTracker />
+        </section>
+
+        {/* ━━ 4 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
           <SectionDivider label="Sample revision week" id="revision-week" accent="#D4B896" context="Adjust to your schedule" />
           <RevisionWeekPlanner />
         </section>
 
-        {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 5 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
           <SectionDivider label="Find anything" id="search" accent="#7BA7CC" />
           <QuickTopicSearch />
         </section>
 
-        {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 6 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
           <SectionDivider label="Saved folders" id="saved-folders" accent="#D4B896" />
           <SavedFoldersDashboard />
         </section>
 
-        {/* ━━ 6 · CLOSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* ━━ 7 · CLOSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <div style={{
           marginTop: '56px',
           paddingTop: '30px',

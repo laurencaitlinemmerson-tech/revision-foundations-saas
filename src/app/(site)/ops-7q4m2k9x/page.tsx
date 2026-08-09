@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import TDEECalculator from '@/components/dashboard/TDEECalculator';
+import PracticeHoursTracker from '@/components/dashboard/PracticeHoursTracker';
 import BackfillButton from '@/components/operator/BackfillButton';
 import { createServiceClient } from '@/lib/supabase';
 import { getOperatorStatus, allowedEmails, type OperatorStatus } from '@/lib/operator';
@@ -327,6 +328,12 @@ export default async function OperatorPage() {
             Replays all paid Stripe sessions. Creates missing entitlements for signed-in buyers and queues unclaimed purchase records for guests. Safe to run multiple times — skips sessions already processed.
           </p>
           <BackfillButton />
+        </div>
+
+        {/* ━━ Wellness ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <Divider label="My nursing" accent="#8BBCAA" />
+        <div style={{ marginBottom: '12px' }}>
+          <PracticeHoursTracker />
         </div>
 
         {/* ━━ Wellness ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
