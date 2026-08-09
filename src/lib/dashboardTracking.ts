@@ -11,6 +11,8 @@ export const TRACKING_KEYS = {
   practiceTarget: 'rf_practice_target',
   proficiencies: 'rf_proficiencies',
   reflections: 'rf_reflections',
+  modules: 'rf_modules',
+  assignments: 'rf_assignments',
 } as const;
 
 /** NMC requirement for UK pre-registration nursing programmes */
@@ -221,5 +223,84 @@ export function addReflection(entry: Omit<Reflection, 'id'>): Reflection[] {
 export function removeReflection(id: string): Reflection[] {
   const all = getReflections().filter(r => r.id !== id);
   save(TRACKING_KEYS.reflections, all);
+  return all;
+}
+
+// ── Degree: modules and grades ─────────────────────────────────────────────────
+
+export interface DegreeModule {
+  id: string;
+  name: string;
+  credits: number;
+  /** Percentage mark, or null while the module is still in progress */
+  grade: number | null;
+  year: number;
+}
+
+/** Credits in a standard three-year UK BSc (Hons) */
+export const DEFAULT_CREDIT_TARGET = 360;
+/** UK pass mark for an undergraduate module */
+export const PASS_MARK = 40;
+
+export function getModules(): DegreeModule[] {
+  return load<DegreeModule[]>(TRACKING_KEYS.modules, [])
+    .slice()
+    .sort((a, b) => a.year - b.year || a.name.localeCompare(b.name));
+}
+
+export function addModule(mod: Omit<DegreeModule, 'id'>): DegreeModule[] {
+  const all = getModules();
+  all.push({ ...mod, id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
+  save(TRACKING_KEYS.modules, all);
+  return getModules();
+}
+
+export function removeModule(id: string): DegreeModule[] {
+  const all = getModules().filter(m => m.id !== id);
+  save(TRACKING_KEYS.modules, all);
+  return all;
+}
+
+/** UK honours classification for a weighted average mark */
+export function classify(average: number): string {
+  if (average >= 70) return 'First';
+  if (average >= 60) return 'Upper second (2:1)';
+  if (average >= 50) return 'Lower second (2:2)';
+  if (average >= 40) return 'Third';
+  return 'Below pass';
+}
+
+// ── Degree: assignments ────────────────────────────────────────────────────────
+
+export interface Assignment {
+  id: string;
+  title: string;
+  module: string;
+  due: string;     // YYYY-MM-DD
+  done: boolean;
+}
+
+export function getAssignments(): Assignment[] {
+  return load<Assignment[]>(TRACKING_KEYS.assignments, [])
+    .slice()
+    .sort((a, b) => a.due.localeCompare(b.due));
+}
+
+export function addAssignment(a: Omit<Assignment, 'id' | 'done'>): Assignment[] {
+  const all = getAssignments();
+  all.push({ ...a, done: false, id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
+  save(TRACKING_KEYS.assignments, all);
+  return getAssignments();
+}
+
+export function toggleAssignment(id: string): Assignment[] {
+  const all = getAssignments().map(a => (a.id === id ? { ...a, done: !a.done } : a));
+  save(TRACKING_KEYS.assignments, all);
+  return all;
+}
+
+export function removeAssignment(id: string): Assignment[] {
+  const all = getAssignments().filter(a => a.id !== id);
+  save(TRACKING_KEYS.assignments, all);
   return all;
 }

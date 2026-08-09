@@ -6,6 +6,8 @@ import TDEECalculator from '@/components/dashboard/TDEECalculator';
 import PracticeHoursTracker from '@/components/dashboard/PracticeHoursTracker';
 import ProficiencyTracker from '@/components/dashboard/ProficiencyTracker';
 import ReflectionLog from '@/components/dashboard/ReflectionLog';
+import DegreeProgress from '@/components/dashboard/DegreeProgress';
+import AssignmentDeadlines from '@/components/dashboard/AssignmentDeadlines';
 import BackfillButton from '@/components/operator/BackfillButton';
 import { createServiceClient } from '@/lib/supabase';
 import { getOperatorStatus, allowedEmails, type OperatorStatus } from '@/lib/operator';
@@ -333,6 +335,15 @@ export default async function OperatorPage() {
         </div>
 
         {/* ━━ Wellness ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <Divider label="My degree" accent="#7BA7CC" />
+        <div style={{ marginBottom: '12px' }}>
+          <DegreeProgress />
+        </div>
+        <div style={{ marginBottom: '12px' }}>
+          <AssignmentDeadlines />
+        </div>
+
+        {/* ━━ My nursing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <Divider label="My nursing" accent="#8BBCAA" />
         <div style={{ marginBottom: '12px' }}>
           <PracticeHoursTracker />
