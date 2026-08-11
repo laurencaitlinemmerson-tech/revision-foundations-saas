@@ -43,6 +43,10 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# stale second clone of this repo nested inside itself — it predates the
+# operator dashboard, so serving from it 404s /operator. Not a submodule.
+/revision-foundations-saas/
 .claude/
 .claire/
 .claude/
