@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { OperatorSnapshot } from '@/lib/operator/types';
 import { derive, isoDay, type RangeKey } from '@/lib/operator/fitness/derive';
@@ -256,6 +257,13 @@ export default function OperatorDashboard({ snapshot }: { snapshot: OperatorSnap
             <span className="op-streak">
               <b>{data.training.sessions}</b> workouts
             </span>
+            <Link
+              className="op-btn"
+              href="/operator/wedding"
+              style={{ marginTop: 6, justifyContent: 'center' }}
+            >
+              Wedding hub →
+            </Link>
           </div>
         </aside>
 
