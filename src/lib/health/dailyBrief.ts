@@ -478,6 +478,7 @@ export interface DailyBrief {
   protein: ProteinView;
   cycle: CycleView;
   admin: { weekday: string; theme: string; items: string[] };
+  weekly: WeeklyOverview;
   workouts: WorkoutView[];
   cues: Cue[];
   history: BriefDay[];
@@ -602,6 +603,108 @@ function buildCues(
   }
 
   return cues;
+}
+
+
+export interface WeeklyTotals {
+  steps: number | null;
+  activeEnergyKcal: number | null;
+  exerciseMinutes: number | null;
+  distanceKm: number | null;
+  dietaryEnergyKcal: number | null;
+}
+
+export interface WeeklyOverview {
+  from: string;
+  to: string;
+  totals: WeeklyTotals;
+  previousTotals: WeeklyTotals;
+  /* Counts, not averages. "Four days out of seven" is a fact you can act on;
+     "5.8 average stand hours" is not. */
+  consistency: {
+    daysWithData: number;
+    daysFoodLogged: number;
+    daysProteinTargetHit: number | null;
+    daysSteps8k: number;
+    daysTrained: number;
+    daysWeighed: number;
+  };
+  weight: {
+    startKg: number | null;
+    endKg: number | null;
+    changeKg: number | null;
+    trendKgPerWeek: number | null;
+  };
+  bestStepDay: { date: string; weekday: string; steps: number } | null;
+  quietestStepDay: { date: string; weekday: string; steps: number } | null;
+}
+
+function sumOf(days: BriefDay[], pick: (d: BriefDay) => number | null): number | null {
+  const values = days.map(pick).filter((v): v is number => v !== null);
+  if (values.length === 0) return null;
+  return Math.round(values.reduce((a, b) => a + b, 0));
+}
+
+function totalsOf(days: BriefDay[]): WeeklyTotals {
+  return {
+    steps: sumOf(days, (d) => d.activity.steps),
+    activeEnergyKcal: sumOf(days, (d) => d.activity.activeEnergyKcal),
+    exerciseMinutes: sumOf(days, (d) => d.activity.exerciseMinutes),
+    distanceKm: sumOf(days, (d) => d.activity.distanceKm),
+    dietaryEnergyKcal: sumOf(days, (d) => d.nutrition.dietaryEnergyKcal),
+  };
+}
+
+function buildWeekly(
+  weekDays: BriefDay[],
+  previousDays: BriefDay[],
+  readings: Reading[],
+  proteinTargetG: number | null,
+  anchor: string,
+): WeeklyOverview {
+  const from = shiftDay(anchor, -6);
+  const stepDays = weekDays
+    .filter((d) => d.activity.steps !== null)
+    .sort((a, b) => (b.activity.steps ?? 0) - (a.activity.steps ?? 0));
+
+  const weekReadings = readings.filter((r) => isoDay(r.date) >= from && isoDay(r.date) <= anchor);
+  const fit = weekReadings.length >= 2 ? fitReadings(weekReadings) : null;
+  const first = weekReadings[0] ?? null;
+  const last = weekReadings[weekReadings.length - 1] ?? null;
+
+  return {
+    from,
+    to: anchor,
+    totals: totalsOf(weekDays),
+    previousTotals: totalsOf(previousDays),
+    consistency: {
+      daysWithData: weekDays.length,
+      daysFoodLogged: weekDays.filter((d) => (d.nutrition.dietaryEnergyKcal ?? 0) > 0).length,
+      daysProteinTargetHit:
+        proteinTargetG === null
+          ? null
+          : weekDays.filter((d) => (d.nutrition.proteinG ?? 0) >= proteinTargetG).length,
+      daysSteps8k: weekDays.filter((d) => (d.activity.steps ?? 0) >= 8000).length,
+      daysTrained: weekDays.filter((d) => (d.activity.exerciseMinutes ?? 0) >= 20).length,
+      daysWeighed: weekReadings.length,
+    },
+    weight: {
+      startKg: first ? round(first.weight, 2) : null,
+      endKg: last ? round(last.weight, 2) : null,
+      changeKg: first && last && first !== last ? round(last.weight - first.weight, 2) : null,
+      trendKgPerWeek: fit ? round(fit.slope * 7, 2) : null,
+    },
+    bestStepDay: stepDays[0]
+      ? { date: stepDays[0].date, weekday: stepDays[0].weekday, steps: stepDays[0].activity.steps as number }
+      : null,
+    quietestStepDay: stepDays.length > 1
+      ? {
+          date: stepDays[stepDays.length - 1].date,
+          weekday: stepDays[stepDays.length - 1].weekday,
+          steps: stepDays[stepDays.length - 1].activity.steps as number,
+        }
+      : null,
+  };
 }
 
 /* The weigh-in fallback stores readings as pseudo-workouts; they are not
@@ -826,6 +929,14 @@ export async function buildDailyBrief(options: BuildBriefOptions = {}): Promise<
 
   const adminEntry = WEEKLY_ADMIN[weekdayOf(today)] ?? { theme: 'Daily basics', items: [] };
 
+  const weekly = buildWeekly(
+    inWindow(shiftDay(anchor, -6), anchor),
+    inWindow(shiftDay(anchor, -13), shiftDay(anchor, -7)),
+    readings.map((r) => ({ date: r.date, weight: r.weight })),
+    protein.targetG,
+    anchor,
+  );
+
   return {
     generatedAt: new Date().toISOString(),
     timezone: TIMEZONE,
@@ -848,6 +959,7 @@ export async function buildDailyBrief(options: BuildBriefOptions = {}): Promise<
     protein,
     cycle,
     admin: { weekday: weekdayOf(today), theme: adminEntry.theme, items: adminEntry.items },
+    weekly,
     workouts,
     cues: buildCues(subject, last7, previous7, last28, weighIn, energy, protein, freshnessHealthy, realityCheckRejected),
     history: days.slice(-historyDays),
@@ -970,6 +1082,77 @@ export function renderBriefText(brief: DailyBrief): string {
     for (const c of watch) lines.push(`  ~ ${c.text}`);
     lines.push('');
   }
+  if (gaps.length) {
+    lines.push('DO NOT INVENT (missing data)');
+    for (const c of gaps) lines.push(`  ? ${c.text}`);
+  }
+
+  return lines.join('\n');
+}
+
+
+/**
+ * The weekly roll-up, as text.
+ *
+ * Deliberately built on counts and totals rather than the daily brief's
+ * averages: across seven days "four days out of seven" is something you can act
+ * on, where a decimal average of stand hours is not.
+ */
+export function renderWeeklyText(brief: DailyBrief): string {
+  const w = brief.weekly;
+  const a7 = brief.averages.last7;
+  const prev = brief.averages.previous7;
+  const lines: string[] = [];
+
+  const totalDelta = (now: number | null, before: number | null, unit = '') => {
+    if (now === null) return '—';
+    if (before === null) return fmt(now, unit);
+    return `${fmt(now, unit)} (${signed(round(now - before, 0), unit)} vs week before)`;
+  };
+
+  lines.push(`WEEKLY OVERVIEW — ${w.from} to ${w.to} (${brief.timezone})`);
+  lines.push(`Days with data: ${w.consistency.daysWithData} of 7`);
+  lines.push('');
+
+  lines.push('THE WEEK IN TOTAL');
+  lines.push(`  Steps: ${totalDelta(w.totals.steps, w.previousTotals.steps)}`);
+  lines.push(`  Active energy: ${totalDelta(w.totals.activeEnergyKcal, w.previousTotals.activeEnergyKcal, ' kcal')}`);
+  lines.push(`  Exercise: ${totalDelta(w.totals.exerciseMinutes, w.previousTotals.exerciseMinutes, ' min')}`);
+  lines.push(`  Distance: ${totalDelta(w.totals.distanceKm, w.previousTotals.distanceKm, ' km')}`);
+  lines.push('');
+
+  lines.push('CONSISTENCY (the number that actually predicts progress)');
+  lines.push(`  Trained (20+ min): ${w.consistency.daysTrained} of 7 days`);
+  lines.push(`  Steps over 8k: ${w.consistency.daysSteps8k} of 7 days`);
+  lines.push(`  Food logged: ${w.consistency.daysFoodLogged} of 7 days`);
+  lines.push(
+    w.consistency.daysProteinTargetHit === null
+      ? '  Protein target: no target available'
+      : `  Protein target hit: ${w.consistency.daysProteinTargetHit} of 7 days (${fmt(brief.protein.targetG, ' g')})`,
+  );
+  lines.push(`  Weighed in: ${w.consistency.daysWeighed} of 7 days`);
+  lines.push('');
+
+  lines.push('WEIGHT');
+  lines.push(`  Start ${fmt(w.weight.startKg, ' kg')} → end ${fmt(w.weight.endKg, ' kg')} (${signed(w.weight.changeKg, ' kg')} across the week)`);
+  lines.push(`  This week's slope: ${signed(w.weight.trendKgPerWeek, ' kg/week')} · 28-day trend: ${signed(brief.weighIn.trendKgPerWeek, ' kg/week')}`);
+  lines.push('  A single week of scale movement is mostly noise. The 28-day line is the one to read.');
+  lines.push('');
+
+  lines.push('DAY TO DAY');
+  if (w.bestStepDay) lines.push(`  Busiest: ${w.bestStepDay.weekday} — ${fmt(w.bestStepDay.steps)} steps`);
+  if (w.quietestStepDay) lines.push(`  Quietest: ${w.quietestStepDay.weekday} — ${fmt(w.quietestStepDay.steps)} steps`);
+  lines.push('');
+
+  lines.push('AVERAGES, THIS WEEK vs LAST');
+  lines.push(`  Intake: ${fmt(a7.dietaryEnergyKcal, ' kcal')} vs ${fmt(prev.dietaryEnergyKcal, ' kcal')}`);
+  lines.push(`  Protein: ${fmt(a7.proteinG, ' g')} vs ${fmt(prev.proteinG, ' g')}`);
+  lines.push(`  Fibre: ${fmt(a7.fiberG, ' g')} vs ${fmt(prev.fiberG, ' g')}`);
+  lines.push(`  Resting HR: ${fmt(a7.restingHr, ' bpm')} vs ${fmt(prev.restingHr, ' bpm')}`);
+  lines.push(`  HRV: ${fmt(a7.hrvMs, ' ms')} vs ${fmt(prev.hrvMs, ' ms')}`);
+  lines.push('');
+
+  const gaps = brief.cues.filter((c) => c.kind === 'gap');
   if (gaps.length) {
     lines.push('DO NOT INVENT (missing data)');
     for (const c of gaps) lines.push(`  ? ${c.text}`);

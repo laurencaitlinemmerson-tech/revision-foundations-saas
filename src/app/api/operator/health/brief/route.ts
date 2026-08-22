@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { buildDailyBrief, renderBriefText } from '@/lib/health/dailyBrief';
+import { buildDailyBrief, renderBriefText, renderWeeklyText } from '@/lib/health/dailyBrief';
 
 /**
  * The morning brief endpoint.
@@ -83,8 +83,13 @@ export async function GET(req: NextRequest) {
       historyDays: numberParam(params.get('history')),
     });
 
+    /* ?period=week swaps the digest for the weekly roll-up. The JSON payload
+       carries both regardless, so one fetch can serve either email. */
+    const weekly = params.get('period') === 'week';
+    const digest = weekly ? renderWeeklyText(brief) : renderBriefText(brief);
+
     if (format === 'text' || format === 'txt') {
-      return new NextResponse(renderBriefText(brief), {
+      return new NextResponse(digest, {
         headers: {
           'content-type': 'text/plain; charset=utf-8',
           'cache-control': 'no-store',
@@ -93,7 +98,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { brief, text: renderBriefText(brief) },
+      { brief, text: digest, dailyText: renderBriefText(brief), weeklyText: renderWeeklyText(brief) },
       { headers: { 'cache-control': 'no-store' } },
     );
   } catch (error) {
