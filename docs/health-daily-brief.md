@@ -7,12 +7,17 @@ email only has to write.
 ## The endpoint
 
 ```
-GET https://nurselab.co.uk/api/operator/health/brief?format=text
+GET https://www.nurselab.co.uk/api/operator/health/brief?format=text
 Authorization: Bearer <OPERATOR_SYNC_TOKEN>
 ```
 
 `OPERATOR_SYNC_TOKEN` is the same token Health Auto Export already syncs with,
 set in Vercel's environment variables.
+
+**Use the `www` host.** The apex `nurselab.co.uk` answers with a 307 to `www`,
+and most clients — curl included — drop the `Authorization` header when a
+redirect crosses hosts. The call then arrives unauthenticated and fails with a
+401 that looks like a bad token rather than a redirect problem.
 
 | Param | Default | What it does |
 | --- | --- | --- |
@@ -59,7 +64,7 @@ Give Claude this prompt, and schedule it daily. It fetches the brief itself.
 ```text
 Fetch my health brief:
 
-  GET https://nurselab.co.uk/api/operator/health/brief?format=text
+  GET https://www.nurselab.co.uk/api/operator/health/brief?format=text
   Authorization: Bearer <OPERATOR_SYNC_TOKEN>
 
 Then email me a summary at laurencaitlinemmerson@gmail.com.
