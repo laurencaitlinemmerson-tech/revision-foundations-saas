@@ -8,11 +8,25 @@ email only has to write.
 
 ```
 GET https://www.nurselab.co.uk/api/operator/health/brief?format=text
-Authorization: Bearer <OPERATOR_SYNC_TOKEN>
+Authorization: Bearer <read-only brief token>
 ```
 
-`OPERATOR_SYNC_TOKEN` is the same token Health Auto Export already syncs with,
-set in Vercel's environment variables.
+### Which token to use
+
+Use the **read-only brief token**. Generate it with:
+
+```bash
+node scripts/brief-token.mjs
+```
+
+That copies it to the clipboard without printing it. It is derived from
+`OPERATOR_SYNC_TOKEN` by HMAC, so there is no second environment variable to
+configure, and it opens this endpoint only — presented to the auto-sync route it
+returns 401. Rotating it means rotating `OPERATOR_SYNC_TOKEN`.
+
+`OPERATOR_SYNC_TOKEN` itself still works here, but it also authorises POSTs to
+`/api/operator/fitness/auto-sync`, so anything holding it can overwrite the
+health history it is meant to be reporting on. Don't hand it to a scheduled job.
 
 **Use the `www` host.** The apex `nurselab.co.uk` answers with a 307 to `www`,
 and most clients — curl included — drop the `Authorization` header when a
@@ -65,7 +79,7 @@ Give Claude this prompt, and schedule it daily. It fetches the brief itself.
 Fetch my health brief:
 
   GET https://www.nurselab.co.uk/api/operator/health/brief?format=text
-  Authorization: Bearer <OPERATOR_SYNC_TOKEN>
+  Authorization: Bearer <read-only brief token>
 
 Then email me a summary at laurencaitlinemmerson@gmail.com.
 

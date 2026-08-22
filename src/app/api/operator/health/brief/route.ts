@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { buildDailyBrief, renderBriefText } from '@/lib/health/dailyBrief';
 
@@ -16,17 +17,51 @@ import { buildDailyBrief, renderBriefText } from '@/lib/health/dailyBrief';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * A read-only credential for this endpoint, derived from the sync token.
+ *
+ * The scheduled job that writes the morning email needs to read one summary. It
+ * does not need OPERATOR_SYNC_TOKEN, which also authorises POSTs to the
+ * auto-sync route and can therefore overwrite the health history it is meant to
+ * be reporting on. Deriving a token by HMAC gives that job a credential scoped
+ * to this route alone, with no second environment variable to configure and
+ * nothing that can be reversed back into the writing key.
+ *
+ * Rotating it means rotating OPERATOR_SYNC_TOKEN — an acceptable trade for
+ * needing no extra setup, since the phone's sync config is the only other
+ * holder.
+ */
+export function deriveBriefToken(syncToken: string) {
+  return createHmac('sha256', syncToken).update('health-brief-v1').digest('hex');
+}
+
+function constantTimeEquals(a: string, b: string) {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
+}
+
 function authed(req: NextRequest) {
   const syncToken = process.env.OPERATOR_SYNC_TOKEN;
 
   if (syncToken) {
-    const bearer = req.headers.get('authorization') ?? '';
-    if (bearer === `Bearer ${syncToken}`) return true;
-    if (new URL(req.url).searchParams.get('token') === syncToken) return true;
+    const presented = (req.headers.get('authorization') ?? '').replace(/^Bearer /, '');
+    const queryToken = new URL(req.url).searchParams.get('token') ?? '';
+
+    /* The derived read-only token — what the email scheduler should hold. */
+    const briefToken = deriveBriefToken(syncToken);
+    if (presented && constantTimeEquals(presented, briefToken)) return true;
+    if (queryToken && constantTimeEquals(queryToken, briefToken)) return true;
+
+    /* The write token still works, so the phone and any existing caller are
+       unaffected by the addition above. */
+    if (presented && constantTimeEquals(presented, syncToken)) return true;
+    if (queryToken && constantTimeEquals(queryToken, syncToken)) return true;
   }
 
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return constantTimeEquals(pw, process.env.OPERATOR_PASSWORD ?? 'operator2026');
 }
 
 function numberParam(value: string | null) {
