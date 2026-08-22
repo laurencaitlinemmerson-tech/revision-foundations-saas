@@ -8,6 +8,13 @@
  *
  *   node scripts/brief-token.mjs          → copies to the clipboard, prints nothing
  *   node scripts/brief-token.mjs --show   → prints it instead
+ *   node scripts/brief-token.mjs --url    → copies the full authenticated URL
+ *
+ * The --url form exists for callers that cannot set an Authorization header —
+ * a plain web-fetch tool, for instance. It is a real trade: the token then
+ * travels in the query string and lands in access logs at every hop, where a
+ * header would not. Read-only either way, but prefer the header when the caller
+ * can send one.
  */
 
 import { createHmac } from 'node:crypto';
@@ -32,14 +39,23 @@ function readSyncToken() {
 
 const token = createHmac('sha256', readSyncToken()).update('health-brief-v1').digest('hex');
 
+const BRIEF_URL = 'https://www.nurselab.co.uk/api/operator/health/brief';
+const wantsUrl = process.argv.includes('--url');
+const payload = wantsUrl ? `${BRIEF_URL}?format=text&token=${token}` : token;
+
 if (process.argv.includes('--show')) {
-  console.log(token);
+  console.log(payload);
 } else {
-  const copy = spawnSync('pbcopy', { input: token });
+  const copy = spawnSync('pbcopy', { input: payload });
   if (copy.status !== 0) {
     console.error('Could not reach pbcopy. Re-run with --show to print it instead.');
     process.exit(1);
   }
-  console.log('Read-only brief token copied to the clipboard.');
+  console.log(wantsUrl
+    ? 'Authenticated brief URL copied to the clipboard.'
+    : 'Read-only brief token copied to the clipboard.');
   console.log('It can only read /api/operator/health/brief — it cannot write health data.');
+  if (wantsUrl) {
+    console.log('Note: the token is in the URL, so it will appear in access logs.');
+  }
 }
