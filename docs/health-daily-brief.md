@@ -87,7 +87,82 @@ resort — prefer the bearer header, since query strings end up in logs.
 3. **Gaps are stated, not filled.** Sleep stage data too thin to be a real night,
    or water that never synced, arrives labelled *do not invent*.
 
-## Setting up the daily email in Claude Cowork
+## Setting up the emails in Claude Cowork
+
+Cowork's sandbox blocks outbound calls to non-allowlisted domains, and its
+web-fetch tool cannot send an `Authorization` header. Both are solved by the URL
+form — run `node scripts/brief-token.mjs --url` and paste the result where each
+prompt says `<brief URL>`.
+
+If web-fetch is *also* subject to the domain allowlist, no URL will work and the
+domain has to be allowlisted in the account's capability settings instead.
+
+### Daily task — every day, 07:00 Europe/London
+
+```text
+Fetch <brief URL> and email me the result as a morning brief, to
+laurencaitlinemmerson@gmail.com.
+
+Subject: start it with 🩷 and name the day, e.g. "🩷 Morning babe — Tuesday's brief ☀️"
+
+After sending, label the message: mark it Important, star it, and apply the
+label "Health/Daily Brief".
+
+Voice — warm and chatty, like a friend who has my back. Second person. Pink
+emoji throughout (🩷 💗 🌸 💕 🎀 💖). Open with the day ("Morning babe! ☀️💗").
+
+Make it scannable, with a short heading per section and bullets, not prose:
+1. 🩷 FIRST JOB — hop on the scale. Remind me to log today's number, and that
+   the number is one data point, not a verdict. Bodies fluctuate.
+2. 🌸 YESTERDAY'S WINS — as bullets, from the brief's "worth saying out loud".
+3. 💕 ONE SMALL THING — anything from "gently worth a mention", as information,
+   never a telling-off.
+4. 🎀 WORTH KNOWING — if the scale trend is up, name it calmly with its likely
+   causes. Don't skip it, don't moralise.
+5. 🩷 TODAY'S ADMIN — from the brief's admin section, as bullets. Two minutes of
+   upkeep, not a chore list.
+6. 💖 Close with something true about the system I'm building, not the outcome.
+
+Hard rules:
+- Never quote anything the brief lists under "do not invent". If sleep is
+  flagged unreliable, don't mention sleep at all.
+- Never suggest a calorie target below my BMR, and never repeat a suppressed
+  maintenance figure.
+- No food guilt. No "earning" or "burning off" food.
+- Under ~350 words.
+```
+
+### Weekly task — Sundays, 09:00 Europe/London
+
+Same URL with `&period=week` appended.
+
+```text
+Fetch <brief URL>&period=week and email me the weekly overview, to
+laurencaitlinemmerson@gmail.com.
+
+Subject: "🩷 Your week in review ✨"
+
+After sending, mark it Important, star it, and apply the label
+"Health/Daily Brief".
+
+Same warm voice and pink emoji as the daily brief, but this one zooms out:
+
+1. 💗 THE HEADLINE — how the week went overall, in two or three sentences.
+2. 🌸 CONSISTENCY — the "X of 7 days" counts as bullets. Lead with this: how
+   often I showed up is the thing that predicts progress, not any single day.
+3. 🎀 THE TOTALS — steps, training minutes, distance, and how they moved against
+   the week before.
+4. 💕 THE SCALE — report the week's change next to the 28-day trend, and say
+   plainly that one week of scale movement is mostly noise.
+5. 🩷 NEXT WEEK — one specific, small thing to aim at, drawn from whichever
+   consistency count was lowest. One thing only.
+6. 💖 Close warmly.
+
+Same hard rules as the daily brief — never quote anything under "do not invent",
+never a calorie target below my BMR, no food guilt.
+```
+
+## The original single-task prompt
 
 Give Claude this prompt, and schedule it daily. It fetches the brief itself.
 
