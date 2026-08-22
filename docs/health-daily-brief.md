@@ -28,6 +28,22 @@ returns 401. Rotating it means rotating `OPERATOR_SYNC_TOKEN`.
 `/api/operator/fitness/auto-sync`, so anything holding it can overwrite the
 health history it is meant to be reporting on. Don't hand it to a scheduled job.
 
+### Callers that cannot set headers
+
+Some clients — a plain web-fetch tool, a sandbox that only allows simple GETs —
+cannot send an `Authorization` header. The same read-only token works in the
+query string, so no separate endpoint is needed:
+
+```bash
+node scripts/brief-token.mjs --url
+```
+
+That copies a complete authenticated URL. It is a genuine trade: a token in a
+query string is recorded in access logs at every hop, where a header is not.
+Prefer the header whenever the caller can send one. Invalidating a leaked URL
+means rotating `OPERATOR_SYNC_TOKEN`, which also means updating Health Auto
+Export on the phone.
+
 **Use the `www` host.** The apex `nurselab.co.uk` answers with a 307 to `www`,
 and most clients — curl included — drop the `Authorization` header when a
 redirect crosses hosts. The call then arrives unauthenticated and fails with a
