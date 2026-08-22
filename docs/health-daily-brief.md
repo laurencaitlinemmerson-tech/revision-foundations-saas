@@ -103,13 +103,16 @@ domain has to be allowlisted in the account's capability settings instead.
 Fetch <brief URL> and email me the result as a morning brief, to
 laurencaitlinemmerson@gmail.com.
 
-Subject: start it with 🩷 and name the day, e.g. "🩷 Morning babe — Tuesday's brief ☀️"
+Subject: start it with 🩷 and name the day, e.g. "🩷 Tuesday's brief ☀️"
 
 After sending, label the message: mark it Important, star it, and apply the
 label "Health/Daily Brief".
 
 Voice — warm and chatty, like a friend who has my back. Second person. Pink
-emoji throughout (🩷 💗 🌸 💕 🎀 💖). Open with the day ("Morning babe! ☀️💗").
+emoji throughout (🩷 💗 🌸 💕 🎀 💖).
+
+Open with exactly "Morning, Lauren 🩷" and nothing else. Do not use pet names —
+no "babe", "girl", "hun", "lovely". Warm, not performatively matey.
 
 Make it scannable, with a short heading per section and bullets, not prose:
 1. 🩷 FIRST JOB — hop on the scale. Remind me to log today's number, and that
@@ -145,7 +148,8 @@ Subject: "🩷 Your week in review ✨"
 After sending, mark it Important, star it, and apply the label
 "Health/Daily Brief".
 
-Same warm voice and pink emoji as the daily brief, but this one zooms out:
+Same warm voice and pink emoji as the daily brief — open with "Morning, Lauren 🩷",
+no pet names — but this one zooms out:
 
 1. 💗 THE HEADLINE — how the week went overall, in two or three sentences.
 2. 🌸 CONSISTENCY — the "X of 7 days" counts as bullets. Lead with this: how
@@ -161,47 +165,6 @@ Same warm voice and pink emoji as the daily brief, but this one zooms out:
 Same hard rules as the daily brief — never quote anything under "do not invent",
 never a calorie target below my BMR, no food guilt.
 ```
-
-## The original single-task prompt
-
-Give Claude this prompt, and schedule it daily. It fetches the brief itself.
-
-```text
-Fetch my health brief:
-
-  GET https://www.nurselab.co.uk/api/operator/health/brief?format=text
-  Authorization: Bearer <read-only brief token>
-
-Then email me a summary at laurencaitlinemmerson@gmail.com.
-
-Voice — warm, chatty, like a friend who has my back. Second person. Emoji where
-they land naturally, not in every line. Open with the day ("Morning babe! ☀️").
-
-Structure:
-1. Open warm, then the weigh-in nudge — remind me to log today's number, and
-   remind me the number is one data point, not a verdict. Bodies fluctuate with
-   water, sleep, hormones, salt.
-2. Yesterday in a few lines. Lead with what went well — the brief's "worth saying
-   out loud" cues are already the earned ones. Then anything from "gently worth a
-   mention", framed as information, never as a telling-off.
-3. Today's admin, from the brief's admin section. Make it feel like two minutes
-   of upkeep, not a chore list.
-4. Close with something true and encouraging about the system I'm building, not
-   just the outcome.
-
-Hard rules:
-- Never quote a number the brief listed under "do not invent". If sleep is
-  flagged unreliable, do not mention sleep at all.
-- Never suggest a calorie target below my BMR, and never repeat a maintenance
-  figure the brief suppressed.
-- If the scale trend is up, name it calmly with its likely causes attached. Do
-  not skip it, and do not moralise about it.
-- No food guilt, ever. No "earning" or "burning off" food.
-- Keep it under ~300 words.
-```
-
-Schedule it for around 07:00 Europe/London. The brief covers *yesterday*, so any
-morning slot after the overnight sync works.
 
 ## Known gaps in the source data
 
