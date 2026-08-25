@@ -26,7 +26,35 @@ const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.l
 const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
 
 /** A part of a score: its 0–1 value and how much of the dimension it carries. */
-type Part = { value: number | null; weight: number };
+type Part = { value: number | null; weight: number; label?: string; detail?: string };
+
+/** A scored dimension, opened up. */
+export type Breakdown = {
+  score: number | null;
+  parts: Array<{
+    label: string;
+    detail: string;
+    /** 0–100, or null when the input for this part is missing. */
+    value: number | null;
+    /** Share of the dimension this part carries once absent parts are dropped. */
+    weight: number;
+  }>;
+};
+
+/** The parts that carried the score, renormalised over the ones with data. */
+export function breakdownOf(parts: Part[]): Breakdown {
+  const live = parts.filter((p) => p.value !== null);
+  const total = live.reduce((a, p) => a + p.weight, 0) || 1;
+  return {
+    score: blend(parts),
+    parts: parts.map((p) => ({
+      label: p.label ?? '',
+      detail: p.detail ?? '',
+      value: p.value === null ? null : Math.round(p.value * 100),
+      weight: p.value === null ? 0 : Math.round((p.weight / total) * 100),
+    })),
+  };
+}
 
 /** Weighted mean over the parts that have data, renormalised across them. */
 function blend(parts: Part[]): number | null {
@@ -237,97 +265,155 @@ export function statsFor(src: Sources, w: Window, base: Baseline): WindowStats {
 
 /* ── the six scores ──────────────────────────────────────────────────────── */
 
-export function scoreDimension(d: Dimension, s: WindowStats, base: Baseline): number | null {
+/** The parts behind a dimension, labelled so the score can explain itself. */
+export function partsFor(d: Dimension, s: WindowStats, base: Baseline): Part[] {
+  const pct = (v: number | null, of: number) => (v === null ? null : clamp01(v / of));
+
   switch (d) {
     case 'Activity':
-      return blend([
-        { value: s.avgSteps === null ? null : clamp01(s.avgSteps / TARGETS.stepGoal), weight: 0.65 },
+      return [
         {
-          value: s.avgExerciseMin === null
-            ? null
-            : clamp01(s.avgExerciseMin / TARGETS.exerciseMinutesPerDay),
-          weight: 0.35,
+          label: 'Steps', weight: 0.65,
+          value: pct(s.avgSteps, TARGETS.stepGoal),
+          detail: s.avgSteps === null
+            ? 'No step data in this window'
+            : `${Math.round(s.avgSteps).toLocaleString('en-GB')} a day against a ${TARGETS.stepGoal.toLocaleString('en-GB')} goal`,
         },
-      ]);
+        {
+          label: 'Exercise minutes', weight: 0.35,
+          value: pct(s.avgExerciseMin, TARGETS.exerciseMinutesPerDay),
+          detail: s.avgExerciseMin === null
+            ? 'No exercise minutes recorded'
+            : `${Math.round(s.avgExerciseMin)} a day against ${TARGETS.exerciseMinutesPerDay}`,
+        },
+      ];
 
     case 'Nutrition': {
       const logged = s.nutritionDays;
-      return blend([
-        { value: logged ? s.calOnTarget / logged : null, weight: 0.4 },
-        { value: logged ? s.proteinOnTarget / logged : null, weight: 0.4 },
-        { value: logged ? clamp01(logged / s.window.spanDays) : null, weight: 0.2 },
-      ]);
+      return [
+        {
+          label: 'Calories on target', weight: 0.4,
+          value: logged ? s.calOnTarget / logged : null,
+          detail: logged
+            ? `${s.calOnTarget} of ${logged} logged days within 10% of ${TARGETS.calorieTarget.toLocaleString('en-GB')} kcal`
+            : 'Nothing logged in this window',
+        },
+        {
+          label: 'Protein on target', weight: 0.4,
+          value: logged ? s.proteinOnTarget / logged : null,
+          detail: logged
+            ? `${s.proteinOnTarget} of ${logged} logged days at 90% of target or better`
+            : 'Nothing logged in this window',
+        },
+        {
+          label: 'Days logged', weight: 0.2,
+          value: logged ? clamp01(logged / s.window.spanDays) : null,
+          detail: `${logged} of ${s.window.spanDays} days have any food recorded`,
+        },
+      ];
     }
 
     case 'Recovery':
-      return blend([
+      return [
         {
-          value: s.avgSleepH === null ? null : clamp01(s.avgSleepH / TARGETS.sleepTargetH),
-          weight: 0.4,
+          label: 'Sleep duration', weight: 0.4,
+          value: pct(s.avgSleepH, TARGETS.sleepTargetH),
+          detail: s.avgSleepH === null
+            ? 'No sleep data in this window'
+            : `${s.avgSleepH.toFixed(1)}h a night against a ${TARGETS.sleepTargetH}h target`,
         },
-        { value: s.sleepCv === null ? null : clamp01(1 - s.sleepCv / 0.25), weight: 0.2 },
         {
-          // Five beats below the personal baseline scores full marks, five above
-          // scores nothing — resting heart rate only means anything relative to
-          // the person it was measured on.
+          label: 'Sleep consistency', weight: 0.2,
+          value: s.sleepCv === null ? null : clamp01(1 - s.sleepCv / 0.25),
+          detail: s.sleepCv === null
+            ? 'Needs at least three nights'
+            : `Night-to-night variation of ${Math.round(s.sleepCv * 100)}%`,
+        },
+        {
+          label: 'Resting heart rate', weight: 0.2,
           value: s.avgRestingHr === null || base.restingHr === null
             ? null
             : clamp01((base.restingHr + 5 - s.avgRestingHr) / 10),
-          weight: 0.2,
+          detail: s.avgRestingHr === null || base.restingHr === null
+            ? 'No heart rate baseline yet'
+            : `${Math.round(s.avgRestingHr)} bpm against your ${Math.round(base.restingHr)} bpm baseline`,
         },
         {
+          label: 'HRV', weight: 0.2,
           value: s.avgHrv === null || !base.hrv
             ? null
             : clamp01((s.avgHrv - base.hrv * 0.85) / (base.hrv * 0.3)),
-          weight: 0.2,
+          detail: s.avgHrv === null || !base.hrv
+            ? 'No HRV baseline yet'
+            : `${Math.round(s.avgHrv)} ms against your ${Math.round(base.hrv)} ms baseline`,
         },
-      ]);
+      ];
 
     case 'Cardio':
-      return blend([
+      return [
         {
+          label: 'Weekly cardio minutes', weight: 0.6,
           value: s.workouts.length
             ? clamp01(s.cardioMinutes / s.weeks / TARGETS.cardioMinutesPerWeek)
             : null,
-          weight: 0.6,
+          detail: s.workouts.length
+            ? `${Math.round(s.cardioMinutes / s.weeks)} a week against the ${TARGETS.cardioMinutesPerWeek} guideline`
+            : 'No workouts synced in this window',
         },
-        { value: s.vo2 === null ? null : clamp01((s.vo2 - 25) / 20), weight: 0.4 },
-      ]);
+        {
+          label: 'Estimated VO₂ max', weight: 0.4,
+          value: s.vo2 === null ? null : clamp01((s.vo2 - 25) / 20),
+          detail: s.vo2 === null ? 'No VO₂ estimate synced' : `${s.vo2} ml/kg/min, scored across 25–45`,
+        },
+      ];
 
     case 'Strength':
-      // Volume and progression need a lift log. When the training is recorded in
-      // a coaching app instead, sets and loads never reach this project — but the
-      // sessions do, so frequency carries the score rather than the dimension
-      // going blank on somebody who trains three times a week.
-      return blend([
+      return [
         {
+          label: 'Lifted volume', weight: 0.4,
           value: s.lifts.length ? clamp01(s.volumeKg / s.weeks / TARGETS.weeklyVolumeKg) : null,
-          weight: 0.4,
+          detail: s.lifts.length
+            ? `${Math.round(s.volumeKg / s.weeks).toLocaleString('en-GB')} kg a week`
+            : 'Sets and loads live in your coaching app, so volume cannot be scored',
         },
-        { value: s.progressedShare, weight: 0.35 },
         {
+          label: 'Movements progressing', weight: 0.35,
+          value: s.progressedShare,
+          detail: s.progressedShare === null
+            ? 'Needs a lift log to compare against'
+            : `${Math.round(s.progressedShare * 100)}% of movements matched or beat their previous best`,
+        },
+        {
+          label: 'Session frequency', weight: 0.25,
           value: s.strengthSessionDays || s.workouts.length
             ? clamp01(s.strengthSessionDays / s.weeks / TARGETS.sessionsPerWeek)
             : null,
-          weight: 0.25,
+          detail: `${s.strengthSessionDays} strength day${s.strengthSessionDays === 1 ? '' : 's'} against ${TARGETS.sessionsPerWeek} a week`,
         },
-      ]);
+      ];
 
     case 'Consistency':
-      return blend([
+      return [
         {
+          label: 'Sessions against plan', weight: 0.7,
           value: s.plannedSessions ? clamp01(s.sessionDays / s.plannedSessions) : null,
-          weight: 0.7,
+          detail: `${s.sessionDays} of ${s.plannedSessions} planned`,
         },
         {
-          // Three days between sessions is a normal rest gap; ten days is a lapse.
+          label: 'Longest gap', weight: 0.3,
           value: s.longestGapDays === null
             ? null
             : clamp01(1 - Math.max(0, s.longestGapDays - 3) / 7),
-          weight: 0.3,
+          detail: s.longestGapDays === null
+            ? 'No sessions in this window'
+            : `${Math.round(s.longestGapDays)} days between sessions at the widest`,
         },
-      ]);
+      ];
   }
+}
+
+export function scoreDimension(d: Dimension, s: WindowStats, base: Baseline): number | null {
+  return blend(partsFor(d, s, base));
 }
 
 export type DimensionRow = { label: Dimension; score: number | null; prev: number | null };

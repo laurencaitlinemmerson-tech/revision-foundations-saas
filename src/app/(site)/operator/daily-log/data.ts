@@ -18,6 +18,8 @@ export type HealthDay = {
   activity: {
     steps: number | null;
     activeEnergyKcal: number | null;
+    /** Resting burn. Total expenditure is this plus active; the Move ring is only active. */
+    basalEnergyKcal: number | null;
     exerciseMinutes: number | null;
     standHours: number | null;
     distanceKm: number | null;

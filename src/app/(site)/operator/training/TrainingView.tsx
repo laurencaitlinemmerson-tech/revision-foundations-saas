@@ -269,7 +269,7 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
         </div>
       </aside>
 
-      <main className="training-main" style={{ padding: `${PAGE_TOP}px ${PAGE_X}px 120px`, maxWidth: 1320 }}>
+      <main className="training-main" style={{ padding: `${PAGE_TOP}px ${PAGE_X}px 120px`, maxWidth: 1320, margin: '0 auto', width: '100%' }}>
         <header style={{
           display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
           gap: 40, paddingBottom: 32, borderBottom: RULE, flexWrap: 'wrap',
@@ -373,24 +373,87 @@ function Dashboard({ v }: { v: TrainingVals }) {
                 <div style={{ fontSize: 13, color: v.overallDeltaColor, marginTop: 4 }}>{v.overallDelta}</div>
               </div>
             </div>
+            {v.movers.length > 0 && (
+              <div style={{ marginTop: 22, paddingTop: 18, borderTop: RULE_SOFT }}>
+                <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
+                  What moved
+                </div>
+                <div style={{ display: 'flex', gap: 22, marginTop: 12, flexWrap: 'wrap' }}>
+                  {v.movers.map((m) => (
+                    <div key={m.label}>
+                      <div style={{ fontSize: 12, color: INK }}>{m.label}</div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 7, marginTop: 3 }}>
+                        <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: m.color }}>{m.text}</span>
+                        <span style={{ fontSize: 11, color: MUTED }}>{m.from} → {m.to}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <p style={{ fontSize: 14, lineHeight: 1.75, color: SOFT, margin: '24px 0 0', maxWidth: '46ch', textWrap: 'pretty' }}>
               Fitness is a combination of strength, cardiovascular fitness, activity, nutrition,
               recovery and consistency. No single dimension carries the score, and a dimension with
               nothing logged is left out rather than counted as zero.
             </p>
-            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 4 }}>
               {v.dims.map((d) => (
                 <div key={d.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 13, color: INK }}>
-                    <span>{d.label}</span>
-                    <span style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 17 }}>{d.score}</span>
-                      <span style={{ fontSize: 11, color: d.deltaColor, minWidth: 44, textAlign: 'right' }}>{d.delta}</span>
-                    </span>
-                  </div>
-                  <div style={{ height: 3, background: TRACK, marginTop: 7 }}>
-                    <div style={{ height: 3, width: d.pct, background: d.bar }} />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={d.toggle}
+                    aria-expanded={d.open}
+                    className="hv-tab"
+                    style={{
+                      all: 'unset', cursor: 'pointer', display: 'block', width: '100%',
+                      boxSizing: 'border-box', padding: '9px 10px 11px', margin: '0 -10px',
+                      transition: 'background 150ms',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 13, color: INK }}>
+                      <span style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+                        <span style={{ fontSize: 9, color: MUTED, transform: d.open ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform 160ms' }}>▶</span>
+                        {d.label}
+                      </span>
+                      <span style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
+                        <span style={{ fontFamily: 'var(--font-display)', fontSize: 17 }}>{d.score}</span>
+                        <span style={{ fontSize: 11, color: d.deltaColor, minWidth: 44, textAlign: 'right' }}>{d.delta}</span>
+                      </span>
+                    </div>
+                    <div style={{ height: 3, background: TRACK, marginTop: 7 }}>
+                      <div style={{ height: 3, width: d.pct, background: d.bar, transition: 'width 320ms cubic-bezier(0.4,0,0.2,1)' }} />
+                    </div>
+                  </button>
+
+                  {d.open && (
+                    <div style={{ padding: '14px 0 18px 16px', borderLeft: `1px solid ${TRACK_PREV}`, margin: '4px 0 8px 2px' }}>
+                      {d.parts.map((p) => (
+                        <div key={p.label} style={{ marginBottom: 14 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+                            <span style={{ fontSize: 12.5, color: INK }}>{p.label}</span>
+                            <span style={{ fontSize: 12, color: p.color, fontFamily: 'var(--font-display)' }}>{p.valueLabel}</span>
+                          </div>
+                          <div style={{ height: 2, background: TRACK, marginTop: 6 }}>
+                            <div style={{ height: 2, width: p.pct, background: p.color }} />
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 5 }}>
+                            <span style={{ fontSize: 11, color: SOFT, lineHeight: 1.5 }}>{p.detail}</span>
+                            <span style={{ fontSize: 10.5, color: MUTED, flexShrink: 0 }}>{p.weightLabel}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {d.missingNote && (
+                        <div style={{ fontSize: 11.5, color: MUTED, fontStyle: 'italic', lineHeight: 1.6, marginTop: 10 }}>
+                          {d.missingNote}
+                        </div>
+                      )}
+                      {d.lever && (
+                        <div style={{ fontSize: 12, color: INK, lineHeight: 1.6, marginTop: 10, paddingTop: 10, borderTop: RULE_SOFT }}>
+                          {d.lever}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -839,17 +902,43 @@ function HeadToHead({ v }: { v: TrainingVals }) {
 
   return (
     <div style={{ marginTop: 40 }}>
-      {/* A quiet line rather than a headline — the verdict belongs at the end,
-          after the numbers it is drawn from. */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-        gap: 16, flexWrap: 'wrap', paddingBottom: 14, borderBottom: RULE,
-      }}>
-        <Eyebrow>{h.weekLabel}</Eyebrow>
-        <span style={{ fontSize: 12.5, color: SOFT }}>
-          {h.connected ? `${h.roundsDecided} of ${h.roundsTotal} rounds settled` : 'Not connected'}
-        </span>
-      </div>
+      {/* The scoreboard leads — compact, two figures and a line, rather than the
+          oversized headline it replaced. */}
+      {h.connected && (
+        <div style={{ ...card, padding: '30px 40px', background: TINT, marginBottom: GRID_GAP }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ ...display(46, h.leader === 'you' ? PLUM : INK), lineHeight: 1 }}>{h.yourPoints}</div>
+              <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 9 }}>
+                {h.you.name}
+              </div>
+            </div>
+            <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED }}>vs</div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ ...display(46, h.leader === 'them' ? PINK : INK), lineHeight: 1 }}>{h.theirPoints}</div>
+              <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 9 }}>
+                {h.them?.name}
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 22, paddingTop: 18, borderTop: RULE }}>
+            <div style={{ ...display(20), color: INK }}>{h.scoreline}</div>
+            <div style={{ fontSize: 12, color: MUTED, marginTop: 6 }}>
+              {h.weekLabel} · {h.roundsDecided} of {h.roundsTotal} rounds settled
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!h.connected && (
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+          gap: 16, flexWrap: 'wrap', paddingBottom: 14, borderBottom: RULE,
+        }}>
+          <Eyebrow>{h.weekLabel}</Eyebrow>
+          <span style={{ fontSize: 12.5, color: SOFT }}>Not connected</span>
+        </div>
+      )}
 
       {!h.connected && (
         <div style={{ marginTop: 24, padding: '20px 24px', background: TINT, border: RULE }}>
@@ -901,36 +990,11 @@ function HeadToHead({ v }: { v: TrainingVals }) {
             </div>
           ))}
         </div>
+        <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px 0 0', lineHeight: 1.75, maxWidth: '68ch' }}>
+          {h.fairnessNote}
+        </p>
       </section>
 
-      {/* The verdict, last — after everything it is drawn from. */}
-      {h.connected && (
-        <section style={{ marginTop: SECTION_GAP }}>
-          <div style={{ ...card, padding: PANEL_PAD, background: TINT }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ ...display(52, h.leader === 'you' ? PLUM : INK), lineHeight: 1 }}>{h.yourPoints}</div>
-                <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 10 }}>
-                  {h.you.name}
-                </div>
-              </div>
-              <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED }}>vs</div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ ...display(52, h.leader === 'them' ? PINK : INK), lineHeight: 1 }}>{h.theirPoints}</div>
-                <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 10 }}>
-                  {h.them?.name}
-                </div>
-              </div>
-            </div>
-            <div style={{ textAlign: 'center', marginTop: 24, paddingTop: 20, borderTop: RULE }}>
-              <div style={{ ...display(22), color: INK }}>{h.scoreline}</div>
-            </div>
-          </div>
-          <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px auto 0', lineHeight: 1.75, maxWidth: '66ch', textAlign: 'center' }}>
-            {h.fairnessNote}
-          </p>
-        </section>
-      )}
     </div>
   );
 }
@@ -1014,55 +1078,119 @@ function Workouts({ v }: { v: TrainingVals }) {
 /* ── Exercises ───────────────────────────────────────────────────────────── */
 
 function Exercises({ v }: { v: TrainingVals }) {
-  if (!v.exercises.length) {
-    return <Empty title="No exercises logged yet." note="Every lift you record builds this table and its records." />;
+  // The lift log stays empty because a coaching app holds the sets, but 1,500
+  // workouts did sync — so this asks the same question of activity types.
+  const useLifts = v.exercises.length > 0;
+
+  if (!useLifts && !v.activities.length) {
+    return <Empty title="Nothing logged yet." note="Synced workouts and logged lifts both build this table." />;
   }
+
+  if (useLifts) {
+    const heads: Array<[string, 'left' | 'right']> = [
+      ['Exercise', 'left'], ['Muscle group', 'left'], ['Equipment', 'left'],
+      ['PR', 'right'], ['Est. 1RM', 'right'], ['Volume in range', 'right'],
+      ['Trend', 'right'], ['History', 'right'],
+    ];
+    return (
+      <div style={{ marginTop: 40 }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            type="text" value={v.query} onChange={(e) => v.onQuery(e.target.value)}
+            placeholder="Search exercises" aria-label="Search exercises"
+            style={{
+              fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: 14, padding: '11px 14px',
+              border: RULE, background: CARD, color: INK, width: 260, outline: 'none',
+            }}
+          />
+          <Segmented items={v.groups} />
+          <span style={{ fontSize: 12, color: MUTED, marginLeft: 'auto' }}>{v.exerciseCount}</span>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: GRID_GAP, minWidth: 780 }}>
+            <thead>
+              <tr>
+                {heads.map(([label, align], i) => (
+                  <th key={label} style={{ ...th(align), paddingLeft: i === 0 ? 0 : 12, paddingRight: i === heads.length - 1 ? 0 : 12 }}>{label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {v.exercisesFiltered.map((e) => (
+                <tr key={e.key} className="hv-cell" style={{ background: CARD }}>
+                  <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: INK }}>{e.name}</td>
+                  <td style={{ ...td, fontSize: 12.5 }}>{e.group}</td>
+                  <td style={{ ...td, fontSize: 12.5 }}>{e.equipment}</td>
+                  <td style={{ ...td, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{e.pr}</td>
+                  <td style={{ ...td, textAlign: 'right' }}>{e.e1rm}</td>
+                  <td style={{ ...td, textAlign: 'right' }}>{e.volume}</td>
+                  <td style={{ ...td, textAlign: 'right', color: e.trendColor }}>{e.trend}</td>
+                  <td style={{ ...td, padding: `${CELL_Y}px 0 ${CELL_Y}px 12px`, width: 104 }}>
+                    <svg viewBox="0 0 100 26" preserveAspectRatio="none" style={{ width: 100, height: 26, display: 'block' }} aria-hidden="true">
+                      {e.spark && <path d={e.spark} fill="none" stroke={SPARK} strokeWidth="1.25" />}
+                    </svg>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {v.noExercises && (
+          <div style={{ borderBottom: RULE_SOFT }}>
+            <Empty title="No exercises match that search." note="Try a muscle group, or clear the filters." />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   const heads: Array<[string, 'left' | 'right']> = [
-    ['Exercise', 'left'], ['Muscle group', 'left'], ['Equipment', 'left'],
-    ['PR', 'right'], ['Est. 1RM', 'right'], ['Volume in range', 'right'],
-    ['Trend', 'right'], ['History', 'right'],
+    ['Activity', 'left'], ['Kind', 'left'], ['Sessions', 'right'], ['All time', 'right'],
+    ['Time', 'right'], ['Distance', 'right'], ['Best', 'right'], ['Best pace', 'right'],
+    ['Last', 'right'], ['Trend', 'right'], ['History', 'right'],
   ];
+  const q = v.query.trim().toLowerCase();
+  const shown = v.activities.filter((a) => !q || a.name.toLowerCase().includes(q) || a.kind.toLowerCase().includes(q));
+
   return (
-    <div style={{ marginTop: 32 }}>
+    <div style={{ marginTop: 40 }}>
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
         <input
-          type="text"
-          value={v.query}
-          onChange={(e) => v.onQuery(e.target.value)}
-          placeholder="Search exercises"
-          aria-label="Search exercises"
+          type="text" value={v.query} onChange={(e) => v.onQuery(e.target.value)}
+          placeholder="Search activities" aria-label="Search activities"
           style={{
             fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: 14, padding: '11px 14px',
             border: RULE, background: CARD, color: INK, width: 260, outline: 'none',
           }}
         />
-        <Segmented items={v.groups} />
-        <span style={{ fontSize: 12, color: MUTED, marginLeft: 'auto' }}>{v.exerciseCount}</span>
+        <span style={{ fontSize: 12, color: MUTED, marginLeft: 'auto' }}>{v.activityCount}</span>
       </div>
+
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: GRID_GAP, minWidth: 780 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: GRID_GAP, minWidth: 900 }}>
           <thead>
             <tr>
               {heads.map(([label, align], i) => (
-                <th key={label} style={{ ...th(align), paddingLeft: i === 0 ? 0 : 12, paddingRight: i === heads.length - 1 ? 0 : 12 }}>
-                  {label}
-                </th>
+                <th key={label} style={{ ...th(align), paddingLeft: i === 0 ? 0 : 12, paddingRight: i === heads.length - 1 ? 0 : 12 }}>{label}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {v.exercisesFiltered.map((e) => (
-              <tr key={e.key} className="hv-cell" style={{ background: CARD }}>
-                <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: INK }}>{e.name}</td>
-                <td style={{ ...td, fontSize: 12.5 }}>{e.group}</td>
-                <td style={{ ...td, fontSize: 12.5 }}>{e.equipment}</td>
-                <td style={{ ...td, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{e.pr}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{e.e1rm}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{e.volume}</td>
-                <td style={{ ...td, textAlign: 'right', color: e.trendColor }}>{e.trend}</td>
-                <td style={{ ...td, padding: `${CELL_Y}px 0 ${CELL_Y}px 14px`, width: 104 }}>
+            {shown.map((a) => (
+              <tr key={a.key} className="hv-cell" style={{ background: CARD }}>
+                <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: INK }}>{a.name}</td>
+                <td style={{ ...td, fontSize: 12.5, color: a.kind === 'Strength' ? PLUM : a.kind === 'Cardio' ? PINK : MUTED }}>{a.kind}</td>
+                <td style={{ ...td, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{a.sessions}</td>
+                <td style={{ ...td, textAlign: 'right', color: MUTED }}>{a.allTime}</td>
+                <td style={{ ...td, textAlign: 'right' }}>{a.time}</td>
+                <td style={{ ...td, textAlign: 'right' }}>{a.distance}</td>
+                <td style={{ ...td, textAlign: 'right' }}>{a.best}</td>
+                <td style={{ ...td, textAlign: 'right' }}>{a.pace}</td>
+                <td style={{ ...td, textAlign: 'right', color: MUTED }}>{a.last}</td>
+                <td style={{ ...td, textAlign: 'right', color: a.trendColor }}>{a.trend}</td>
+                <td style={{ ...td, padding: `${CELL_Y}px 0 ${CELL_Y}px 12px`, width: 104 }}>
                   <svg viewBox="0 0 100 26" preserveAspectRatio="none" style={{ width: 100, height: 26, display: 'block' }} aria-hidden="true">
-                    {e.spark && <path d={e.spark} fill="none" stroke={SPARK} strokeWidth="1.25" />}
+                    {a.spark && <path d={a.spark} fill="none" stroke={SPARK} strokeWidth="1.25" />}
                   </svg>
                 </td>
               </tr>
@@ -1070,11 +1198,12 @@ function Exercises({ v }: { v: TrainingVals }) {
           </tbody>
         </table>
       </div>
-      {v.noExercises && (
-        <div style={{ borderBottom: RULE_SOFT }}>
-          <Empty title="No exercises match that search." note="Try a muscle group, or clear the filters." />
-        </div>
-      )}
+
+      {!shown.length && <Empty title="No activities match that search." note="Clear the search to see everything." />}
+
+      <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px 0 0', lineHeight: 1.7, maxWidth: '70ch' }}>
+        {v.activityNote}
+      </p>
     </div>
   );
 }
@@ -1251,7 +1380,8 @@ function Goals({ v }: { v: TrainingVals }) {
 
 function Nutrition({ v }: { v: TrainingVals }) {
   return (
-    <div className="training-pair" style={{ marginTop: 44, display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: GRID_GAP, alignItems: 'start' }}>
+    <div style={{ marginTop: 44 }}>
+    <div className="training-pair" style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: GRID_GAP, alignItems: 'start' }}>
       <div style={{ ...card, padding: CARD_PAD }}>
         <Eyebrow>{v.nutritionDayLabel}</Eyebrow>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
@@ -1298,6 +1428,95 @@ function Nutrition({ v }: { v: TrainingVals }) {
         </div>
       </div>
     </div>
+      <EnergySection v={v} />
+    </div>
+  );
+}
+
+/** Energy balance, and what the scale says about it. */
+function EnergySection({ v }: { v: TrainingVals }) {
+  const e = v.energy;
+  return (
+    <section style={{ marginTop: SECTION_GAP }}>
+      <SectionHeading title="Energy balance" aside={`${e.complete} complete days`} />
+
+      <div className="training-pair" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: GRID_GAP, marginTop: GRID_GAP }}>
+        <div style={{ ...card, padding: CARD_PAD }}>
+          <Eyebrow>{e.title}</Eyebrow>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
+            <span style={display(46, e.headlineColor)}>{e.headline}</span>
+            <span style={{ fontSize: 13, color: MUTED, paddingBottom: 7 }}>{e.headlineUnit}</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginTop: 24, borderTop: RULE }}>
+            <div style={{ padding: '18px 14px 0 0' }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>Average in</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: INK, marginTop: 6 }}>{e.inLabel}</div>
+            </div>
+            <div style={{ padding: '18px 0 0 0' }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>Average out</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: INK, marginTop: 6 }}>{e.outLabel}</div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: RULE }}>
+            <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
+              Projected from the log
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: PLUM, marginTop: 8 }}>{e.projectedLabel}</div>
+            <div style={{ fontSize: 11.5, color: SOFT, marginTop: 6, lineHeight: 1.6 }}>{e.projectedNote}</div>
+          </div>
+
+          <div style={{ marginTop: 20, paddingTop: 20, borderTop: RULE_SOFT }}>
+            <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
+              What the scale actually did
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: INK, marginTop: 8 }}>{e.actualLabel}</div>
+            <div style={{ fontSize: 11.5, color: SOFT, marginTop: 6 }}>Fitted across the weigh-ins in this window.</div>
+          </div>
+        </div>
+
+        <div style={{ ...card, padding: CARD_PAD }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+            <Eyebrow>Daily balance</Eyebrow>
+            <span style={{ fontSize: 11.5, color: MUTED }}>
+              <span style={{ color: PLUM }}>&#9660; deficit</span> &middot; <span style={{ color: PINK }}>&#9650; surplus</span>
+            </span>
+          </div>
+
+          <svg viewBox="0 0 560 200" preserveAspectRatio="none" style={{ width: '100%', height: 200, marginTop: 18 }}
+            role="img" aria-label="Daily energy balance, deficit below the line and surplus above">
+            <line x1="0" y1={e.zeroY} x2="560" y2={e.zeroY} stroke="rgba(34,28,36,0.22)" strokeWidth="0.75" />
+            {e.bars.map((b) => <rect key={b.key} x={b.x} y={b.y} width={b.w} height={b.h} fill={b.fill} />)}
+          </svg>
+          <div style={{ fontSize: 11.5, color: MUTED, marginTop: 10 }}>{e.coverageNote}</div>
+
+          {e.reconciliation && (
+            <div style={{ marginTop: 22, paddingTop: 20, borderTop: RULE }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
+                Log against scale
+              </div>
+              <p style={{ fontSize: 13.5, lineHeight: 1.7, color: e.reconciliationColor, margin: '10px 0 0' }}>
+                {e.reconciliation}
+              </p>
+            </div>
+          )}
+
+          <div style={{ marginTop: 20, paddingTop: 18, borderTop: RULE_SOFT }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+              <span style={{ fontSize: 12.5, color: INK }}>Implied daily expenditure</span>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: 20,
+                color: e.impliedTdeeCredible ? INK : MUTED,
+              }}>
+                {e.impliedTdeeCredible ? e.impliedTdeeLabel : 'Not credible'}
+              </span>
+            </div>
+            <div style={{ fontSize: 11.5, color: SOFT, marginTop: 6, lineHeight: 1.6 }}>{e.impliedTdeeNote}</div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

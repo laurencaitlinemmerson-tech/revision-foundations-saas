@@ -1,7 +1,7 @@
 import type { LiveData, Lift, WeighIn, Workout } from '../daily-log/data';
 import { MUSCLE_GROUPS, equipmentOf, muscleGroupOf, sessionNameFor, type MuscleGroup } from './exercises';
 import {
-  DAY, DIMENSIONS, baselineOf, overallScore, scoreAll, statsFor,
+  DAY, DIMENSIONS, baselineOf, breakdownOf, overallScore, partsFor, scoreAll, statsFor,
   type Baseline, type DimensionRow, type Sources,
 } from './scoring';
 import {
@@ -11,6 +11,8 @@ import {
 import { TARGETS, proteinTargetG } from './targets';
 import { PERIOD_IDS, periodWindows, type PeriodId } from './periods';
 import { historyInsights } from './historyInsights';
+import { buildEnergy, energyDays } from './energy';
+import { buildActivities } from './activities';
 import { workoutKindOf } from './workoutKind';
 import { deriveHeadToHead } from './headToHead';
 import type { PeerData } from './peerData';
@@ -54,6 +56,8 @@ export type TrainingState = {
   query: string;
   group: string;
   goalDraft: boolean;
+  /** Which dimension has been opened up to show its parts. */
+  openDim: string | null;
   /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
 };
@@ -76,6 +80,7 @@ export const INITIAL_STATE: TrainingState = {
   query: '',
   group: 'All',
   goalDraft: false,
+  openDim: null,
   dayOffset: 0,
 };
 
@@ -400,8 +405,33 @@ export function deriveVals(
 
   const dims = rows.map((r) => {
     const d = pctDelta(r.score, r.prev);
+    const breakdown = breakdownOf(partsFor(r.label, nowStats, base));
+
+    // The lever is the part with the most headroom once weighted: how much of
+    // the dimension it carries, times how far it currently falls short.
+    const scored = breakdown.parts.filter((p) => p.value !== null);
+    const lever = scored
+      .map((p) => ({ p, gain: (p.weight / 100) * (100 - (p.value as number)) }))
+      .sort((a, b) => b.gain - a.gain)[0];
+    const missing = breakdown.parts.filter((p) => p.value === null);
+
     return {
       label: r.label,
+      parts: breakdown.parts.map((p) => ({
+        ...p,
+        pct: `${p.value ?? 0}%`,
+        valueLabel: p.value === null ? DASH : `${p.value}`,
+        weightLabel: p.value === null ? 'not scored' : `${p.weight}% of the score`,
+        color: p.value === null ? MUTED : p.value >= 80 ? GREEN : p.value >= 50 ? PLUM : AMBER,
+      })),
+      lever: !lever || lever.gain < 3
+        ? null
+        : `Most of the remaining headroom is in ${lever.p.label.toLowerCase()} — worth about ${Math.round(lever.gain)} points.`,
+      missingNote: missing.length
+        ? `${missing.map((m) => m.label.toLowerCase()).join(' and ')} ${missing.length === 1 ? 'is' : 'are'} not scored, so the rest carry the whole dimension.`
+        : null,
+      open: st.openDim === r.label,
+      toggle: () => set({ openDim: st.openDim === r.label ? null : r.label }),
       score: r.score === null ? DASH : String(r.score),
       prev: r.prev === null ? DASH : String(r.prev),
       pct: `${r.score ?? 0}%`,
@@ -411,6 +441,21 @@ export function deriveVals(
       bar: r.score !== null && r.prev !== null && r.score < r.prev ? ROSE : PLUM,
     };
   });
+
+  // What actually changed, ranked by contribution to the overall figure rather
+  // than by raw percentage — a big swing on a dimension nobody scored is noise.
+  const movers = rows
+    .filter((r) => r.score !== null && r.prev !== null && Math.abs(r.score - r.prev) >= 2)
+    .map((r) => ({
+      label: r.label,
+      change: (r.score as number) - (r.prev as number),
+      text: `${(r.score as number) > (r.prev as number) ? '↑' : '↓'} ${Math.abs((r.score as number) - (r.prev as number))}`,
+      color: (r.score as number) > (r.prev as number) ? GREEN : ROSE,
+      from: String(r.prev),
+      to: String(r.score),
+    }))
+    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+    .slice(0, 3);
 
   const falling = rows.filter(
     (r) => r.score !== null && r.prev !== null && r.score < r.prev,
@@ -1336,6 +1381,14 @@ export function deriveVals(
     },
   ];
 
+  /* energy balance -------------------------------------------------------- */
+
+  const energy = buildEnergy(energyDays(nowStats.days), inRangeWeigh.length >= 4 ? inRangeWeigh : weighAll.slice(-60), spanDays);
+
+  /* activities ------------------------------------------------------------ */
+
+  const activityRows = buildActivities(src.workouts, nowStats.workouts, prevStats.workouts, spanDays);
+
   /* the body chart -------------------------------------------------------- */
 
   // Weigh-ins are irregular — several in a week, then nothing for a month. Laying
@@ -1433,7 +1486,9 @@ export function deriveVals(
         : 'Two trackers, same week, five rounds — once the other side answers.',
     ],
     Workouts: ['Workouts', `${allSessions.length} session${allSessions.length === 1 ? '' : 's'} on record. Select one to see every set.`],
-    Exercises: ['Exercises', 'Every movement you have logged, with its best lift and estimated one-rep max.'],
+    Exercises: src.lifts.length
+      ? ['Exercises', 'Every movement you have logged, with its best lift and estimated one-rep max.']
+      : ['Activities', `Every kind of session you have done — ${nf(src.workouts.length)} on record, with how often, how far and how long.`],
     Progress: ['Progress', 'Strength, cardio and the events that moved the score.'],
     Goals: ['Goals', 'Four targets from Settings. Current values come from logged sessions.'],
     Nutrition: ['Nutrition', 'Targets are guides. Consistency across the week is what counts.'],
@@ -1491,6 +1546,10 @@ export function deriveVals(
     overallDeltaColor: overall === null ? MUTED : overallDelta.color,
     dims,
     dimNote,
+    movers,
+    moversNote: movers.length
+      ? `The biggest movers ${againstLabel}.`
+      : `Nothing moved by more than a point or two ${againstLabel}.`,
     radarRings, radarSpokes, radarNow, radarPrev, radarDots, radarLabels,
     topCards,
     measurements,
@@ -1589,6 +1648,44 @@ export function deriveVals(
     /* insights + settings */
     insights: insights.slice(0, 12),
     settings,
+
+    /* energy */
+    energy: {
+      ...energy,
+      inLabel: energy.avgIn === null ? DASH : nf(Math.round(energy.avgIn)),
+      outLabel: energy.avgOut === null ? DASH : nf(Math.round(energy.avgOut)),
+      impliedTdeeLabel: energy.impliedTdee === null ? DASH : nf(Math.round(energy.impliedTdee)),
+      title: energy.direction === 'surplus' ? 'Running a surplus'
+        : energy.direction === 'deficit' ? 'Running a deficit'
+          : energy.direction === 'maintenance' ? 'Holding at maintenance'
+            : 'Not enough logged to say',
+    },
+
+    /* activities */
+    activities: activityRows.map((a) => {
+      const trend = a.prevRatePerMonth === null || !a.prevRatePerMonth
+        ? { text: a.sessionsInRange ? 'first in range' : DASH, color: MUTED }
+        : pctDelta(a.ratePerMonth, a.prevRatePerMonth);
+      return {
+        key: a.key,
+        name: a.name,
+        kind: a.kind === 'strength' ? 'Strength' : a.kind === 'cardio' ? 'Cardio' : 'Other',
+        sessions: nf(a.sessionsInRange),
+        allTime: nf(a.sessions),
+        time: a.totalMinutes >= 60 ? fmtHours(a.totalMinutes / 60) : a.totalMinutes ? `${nf(Math.round(a.totalMinutes))} min` : DASH,
+        distance: a.totalKm ? `${nf(a.totalKm, 1)} km` : DASH,
+        best: a.bestKm ? `${nf(a.bestKm, 1)} km` : a.bestMinutes ? fmtMinutes(a.bestMinutes) : DASH,
+        pace: a.bestPace ? `${fmtPace(a.bestPace)} /km` : DASH,
+        last: a.lastDone ? fmtDate(a.lastDone) : DASH,
+        trend: trend.text,
+        trendColor: trend.color,
+        spark: linePath(a.history, 100, 22, 3),
+      };
+    }),
+    activityCount: `${activityRows.length} activit${activityRows.length === 1 ? 'y' : 'ies'}`,
+    activityNote: src.lifts.length
+      ? 'Movements come from your lift log; activities from synced workouts.'
+      : 'Built from synced workouts. Your coaching app holds the sets and loads, so per-movement detail is not available here.',
 
     /* head to head */
     h2h,

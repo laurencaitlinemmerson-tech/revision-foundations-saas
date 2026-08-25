@@ -18,6 +18,7 @@ function fromRow(row: Record<string, unknown>) {
     activity: {
       steps: num(row.steps),
       activeEnergyKcal: num(row.active_energy_kcal),
+      basalEnergyKcal: num(row.basal_energy_kcal),
       exerciseMinutes: num(row.exercise_minutes),
       standHours: num(row.stand_hours),
       distanceKm: num(row.distance_km),
