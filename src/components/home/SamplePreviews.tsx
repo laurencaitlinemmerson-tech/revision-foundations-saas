@@ -88,7 +88,7 @@ export default function SamplePreviews() {
                     fontFamily: display,
                     fontSize: '84px',
                     lineHeight: 0.9,
-                    color: '#2E67B1',
+                    color: 'var(--topic-assessment-text)',
                     marginBottom: '10px',
                   }}
                 >
@@ -101,8 +101,8 @@ export default function SamplePreviews() {
                     fontSize: '11px',
                     letterSpacing: '0.12em',
                     textTransform: 'uppercase',
-                    color: '#2E67B1',
-                    background: '#E6EEF8',
+                    color: 'var(--topic-assessment-text)',
+                    background: 'var(--topic-assessment-surface)',
                     padding: '6px 10px',
                   }}
                 >
@@ -214,7 +214,7 @@ export default function SamplePreviews() {
                     fontSize: '11px',
                     letterSpacing: '0.12em',
                     textTransform: 'uppercase',
-                    color: '#B05A5A',
+                    color: 'var(--state-incorrect-text)',
                     marginBottom: '10px',
                   }}
                 >
@@ -223,20 +223,20 @@ export default function SamplePreviews() {
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '18px' }}>
                   {['Stridor', 'Silence', 'Cyanosis', 'Cannot speak/cry', 'Drooling'].map((item) => (
-                    <span key={item} style={{ ...tagStyle, background: '#F6E6E6', color: '#B05A5A' }}>
+                    <span key={item} style={{ ...tagStyle, background: 'var(--state-incorrect-surface)', color: 'var(--state-incorrect-text)' }}>
                       {item}
                     </span>
                   ))}
                 </div>
 
-                <div style={{ background: '#F3E6CB', padding: '18px 20px' }}>
+                <div style={{ background: 'var(--state-warning-surface)', padding: '18px 20px' }}>
                   <p
                     style={{
                       fontFamily: serif,
                       fontSize: '11px',
                       letterSpacing: '0.12em',
                       textTransform: 'uppercase',
-                      color: '#9B7442',
+                      color: 'var(--state-warning-text)',
                       marginBottom: '8px',
                     }}
                   >
@@ -305,9 +305,9 @@ export default function SamplePreviews() {
                           width: '100%',
                           padding: '12px 14px',
                           border: `0.5px solid ${
-                            showCorrect ? '#A4D8B7' : showWrong ? '#E1B1B1' : isSelected ? '#C9C1B5' : border
+                            showCorrect ? 'var(--state-correct-border)' : showWrong ? 'var(--state-incorrect-border)' : isSelected ? 'var(--border-strong)' : border
                           }`,
-                          background: showCorrect ? greenBg : showWrong ? '#F6E6E6' : isSelected ? '#F5F3F0' : 'transparent',
+                          background: showCorrect ? greenBg : showWrong ? 'var(--state-incorrect-surface)' : isSelected ? 'var(--surface-sunken)' : 'transparent',
                           textAlign: 'left',
                           cursor: 'pointer',
                         }}
@@ -316,11 +316,11 @@ export default function SamplePreviews() {
                           style={{
                             width: '16px',
                             height: '16px',
-                            border: showCorrect ? 'none' : `0.5px solid #C9C1B5`,
+                            border: showCorrect ? 'none' : `0.5px solid var(--border-strong)`,
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: showWrong ? '#B05A5A' : green,
+                            color: showWrong ? 'var(--state-incorrect-text)' : green,
                             fontSize: '11px',
                             flexShrink: 0,
                           }}
@@ -332,7 +332,7 @@ export default function SamplePreviews() {
                             fontFamily: serif,
                             fontSize: '13px',
                             lineHeight: 1.5,
-                            color: showCorrect ? green : showWrong ? '#B05A5A' : inkMid,
+                            color: showCorrect ? green : showWrong ? 'var(--state-incorrect-text)' : inkMid,
                             fontWeight: showCorrect || showWrong || isSelected ? 400 : 300,
                           }}
                         >
@@ -358,8 +358,8 @@ export default function SamplePreviews() {
                 ) : (
                   <div
                     style={{
-                      background: quizAnsweredCorrectly ? greenBg : '#F6E6E6',
-                      border: `0.5px solid ${quizAnsweredCorrectly ? '#A4D8B7' : '#E1B1B1'}`,
+                      background: quizAnsweredCorrectly ? greenBg : 'var(--state-incorrect-surface)',
+                      border: `0.5px solid ${quizAnsweredCorrectly ? 'var(--state-correct-border)' : 'var(--state-incorrect-border)'}`,
                       padding: '14px 16px',
                     }}
                   >
@@ -369,7 +369,7 @@ export default function SamplePreviews() {
                         fontSize: '11px',
                         letterSpacing: '0.12em',
                         textTransform: 'uppercase',
-                        color: quizAnsweredCorrectly ? green : '#B05A5A',
+                        color: quizAnsweredCorrectly ? green : 'var(--state-incorrect-text)',
                         marginBottom: '8px',
                       }}
                     >
@@ -466,7 +466,7 @@ export default function SamplePreviews() {
                           color: inkMid,
                           fontWeight: 300,
                           padding: '10px 10px 10px 0',
-                          background: idx % 2 === 0 ? '#EEE8DE' : 'transparent',
+                          background: idx % 2 === 0 ? 'var(--surface-sunken)' : 'transparent',
                         }}
                       >
                         {cell}
@@ -509,7 +509,7 @@ export default function SamplePreviews() {
 
                 <div
                   style={{
-                    background: '#EEE8DE',
+                    background: 'var(--surface-sunken)',
                     padding: '16px 18px',
                     marginBottom: '16px',
                     textAlign: 'center',
@@ -599,7 +599,7 @@ export default function SamplePreviews() {
 
                 <div
                   style={{
-                    background: '#EEE8DE',
+                    background: 'var(--surface-sunken)',
                     padding: '14px 16px',
                     marginBottom: '16px',
                   }}

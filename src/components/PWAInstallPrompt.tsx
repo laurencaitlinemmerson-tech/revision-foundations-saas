@@ -170,10 +170,10 @@ export default function PWAInstallPrompt() {
                 style={{
                   width: '2.6rem',
                   height: '2.6rem',
-                  background: '#F3F1EE',
+                  background: 'var(--surface-sunken)',
                 }}
               >
-                <Download className="w-5 h-5" style={{ color: '#1A1815' }} />
+                <Download className="w-5 h-5" style={{ color: 'var(--ink-strong)' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p
@@ -194,7 +194,7 @@ export default function PWAInstallPrompt() {
                     fontSize: '22px',
                     lineHeight: 1.1,
                     fontWeight: 400,
-                    color: '#1A1815',
+                    color: 'var(--ink-strong)',
                     marginBottom: '8px',
                   }}
                 >
@@ -203,7 +203,7 @@ export default function PWAInstallPrompt() {
                 <p
                   className="text-xs mb-3"
                   style={{
-                    color: '#5A5750',
+                    color: 'var(--ink-soft)',
                     lineHeight: 1.65,
                     marginBottom: '14px',
                   }}
@@ -215,7 +215,7 @@ export default function PWAInstallPrompt() {
                   className="w-full px-4 py-2 text-sm transition-colors"
                   style={{
                     background: '#1A1815',
-                    color: '#FAFAF8',
+                    color: 'var(--surface-page)',
                   }}
                 >
                   Install App

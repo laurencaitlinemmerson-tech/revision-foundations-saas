@@ -134,7 +134,7 @@ function ScenarioSheet({ mock, open, onClose }: { mock: MockExam; open: boolean;
           Close scenario
         </button>
         <p className="mk-sidebar-child">{mock.scenario.childName}, {mock.scenario.age}</p>
-        <p style={{ fontSize: '12px', color: '#5A5750', marginBottom: '14px', lineHeight: 1.65 }}>
+        <p style={{ fontSize: '12px', color: 'var(--ink-soft)', marginBottom: '14px', lineHeight: 1.65 }}>
           {mock.scenario.presentingComplaint} ({mock.scenario.duration})
         </p>
         <div className="mk-sidebar-obs">
@@ -145,10 +145,10 @@ function ScenarioSheet({ mock, open, onClose }: { mock: MockExam; open: boolean;
             </div>
           ))}
         </div>
-        <ul style={{ fontSize: '12px', color: '#2C2A27', lineHeight: 1.65, paddingLeft: '16px', marginBottom: '14px' }}>
+        <ul style={{ fontSize: '12px', color: 'var(--ink-mid)', lineHeight: 1.65, paddingLeft: '16px', marginBottom: '14px' }}>
           {mock.scenario.clinicalSigns.map((s, i) => <li key={i}>{s}</li>)}
         </ul>
-        <p style={{ fontSize: '12px', fontWeight: 500, color: '#1A1815' }}>
+        <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--ink-strong)' }}>
           Diagnosis: {mock.scenario.diagnosis}
         </p>
       </div>
@@ -887,7 +887,7 @@ export default function MockExamClient({ mock }: { mock: MockExam }) {
                   <p className="mk-scenario-card-label">Patient</p>
                   <h2 className="mk-scenario-child">{mock.scenario.childName}</h2>
                   <p className="mk-scenario-age">{mock.scenario.age}</p>
-                  <p style={{ fontSize: '13px', fontWeight: 300, color: '#2C2A27', lineHeight: 1.65, marginTop: '8px' }}>
+                  <p style={{ fontSize: '13px', fontWeight: 300, color: 'var(--ink-mid)', lineHeight: 1.65, marginTop: '8px' }}>
                     {mock.scenario.presentingComplaint} ({mock.scenario.duration})
                   </p>
                 </div>
@@ -921,7 +921,7 @@ export default function MockExamClient({ mock }: { mock: MockExam }) {
                 {/* Family context */}
                 <div className="mk-scenario-card">
                   <p className="mk-scenario-card-label">Family Context</p>
-                  <p style={{ fontSize: '13px', fontWeight: 300, color: '#5A5750', lineHeight: 1.65 }}>
+                  <p style={{ fontSize: '13px', fontWeight: 300, color: 'var(--ink-soft)', lineHeight: 1.65 }}>
                     {mock.scenario.familyContext}
                   </p>
                 </div>
@@ -940,7 +940,7 @@ export default function MockExamClient({ mock }: { mock: MockExam }) {
 
             {/* Skills assessed */}
             <motion.div custom={4} initial="hidden" animate="visible" variants={fadeUp}>
-              <p style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#999', marginBottom: '12px' }}>
+              <p style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-faint)', marginBottom: '12px' }}>
                 Skills assessed
               </p>
               <div className="mk-skills">

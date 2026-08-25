@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FITNESS_FALLBACK_TYPE } from '@/lib/operatorFitnessStorage';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 function authed(req: NextRequest) {
@@ -36,9 +37,14 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(Number(url.searchParams.get('limit') ?? '200'), 1000);
 
   try {
+    // Weigh-ins parked in this table under the fallback type are not workouts.
+    // Excluding them in the query rather than after it matters: they are one row
+    // per day, so they would otherwise consume the whole limit and push the real
+    // workouts out of the response entirely.
     let query = supabaseAdmin
       .from('operator_workouts')
       .select('*')
+      .neq('type', FITNESS_FALLBACK_TYPE)
       .order('started_at', { ascending: false })
       .limit(limit);
 

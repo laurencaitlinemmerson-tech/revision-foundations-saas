@@ -3,29 +3,29 @@ import type { CSSProperties } from 'react';
 export const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 export const display = "'Playfair Display', Georgia, serif";
 
-export const ink = '#1A1815';
-export const inkMid = '#5A5750';
-export const inkLight = '#9C8878';
-export const cream = '#FAFAF8';
-export const parchment = '#F5F3F0';
-export const panel = '#FFFFFF';
-export const border = 'rgba(0,0,0,0.08)';
-export const tagBg = '#F3F1EE';
-export const green = '#1E8A4D';
-export const greenBg = '#E6F4EA';
-export const greenLine = 'rgba(30, 138, 77, 0.22)';
-export const teal = '#2F8A7E';
-export const tealBg = '#E6F3F1';
-export const blue = '#2E67B1';
-export const blueBg = '#E7EEF8';
-export const blueLine = 'rgba(46, 103, 177, 0.22)';
-export const coral = '#D96C55';
-export const coralBg = '#F8E7E2';
-export const danger = '#C45D4E';
-export const dangerBg = '#F8E7E2';
-export const dangerLine = 'rgba(196, 93, 78, 0.22)';
-export const infoBg = '#F1F5FA';
-export const strongBorder = 'rgba(26, 24, 21, 0.24)';
+export const ink = 'var(--ink-strong)';
+export const inkMid = 'var(--ink-soft)';
+export const inkLight = 'var(--ink-faint)';
+export const cream = 'var(--surface-page)';
+export const parchment = 'var(--surface-sunken)';
+export const panel = 'var(--surface-raised)';
+export const border = 'var(--hairline-soft)';
+export const tagBg = 'var(--surface-sunken)';
+export const green = 'var(--state-correct-text)';
+export const greenBg = 'var(--state-correct-surface)';
+export const greenLine = 'var(--state-correct-border)';
+export const teal = 'var(--topic-skills-text)';
+export const tealBg = 'var(--topic-skills-surface)';
+export const blue = 'var(--topic-assessment-text)';
+export const blueBg = 'var(--topic-assessment-surface)';
+export const blueLine = 'var(--topic-assessment-border)';
+export const coral = 'var(--state-incorrect-text)';
+export const coralBg = 'var(--state-incorrect-surface)';
+export const danger = 'var(--state-incorrect-text)';
+export const dangerBg = 'var(--state-incorrect-surface)';
+export const dangerLine = 'var(--state-incorrect-border)';
+export const infoBg = 'var(--topic-assessment-surface)';
+export const strongBorder = 'var(--border-strong)';
 
 export const wrap = '1120px';
 
@@ -43,8 +43,8 @@ export const primaryButton: CSSProperties = {
   fontFamily: serif,
   fontSize: '14px',
   fontWeight: 400,
-  background: ink,
-  color: cream,
+  background: 'var(--action-bg)',
+  color: 'var(--action-text)',
   padding: '12px 24px',
   textDecoration: 'none',
   whiteSpace: 'nowrap',

@@ -17,12 +17,12 @@ export default function NotesToMyself() {
   }, [notes]);
 
   return (
-    <div className="card mb-8 border border-black/8 bg-[#FBF8F3]">
+    <div className="card mb-8 border border-black/8 bg-[var(--surface-sunken)]">
       <h2
         className="mb-2 text-lg"
         style={{
           fontFamily: "'Playfair Display', Georgia, serif",
-          color: '#1A1815',
+          color: 'var(--ink-strong)',
           fontWeight: 400,
         }}
       >
@@ -34,7 +34,7 @@ export default function NotesToMyself() {
         onChange={e => setNotes(e.target.value)}
         placeholder="Jot down reminders, goals, or anything you like..."
         style={{
-          color: '#1A1815',
+          color: 'var(--ink-strong)',
           lineHeight: 1.7,
         }}
       />

@@ -5,13 +5,13 @@ import { studySkillsGuides } from '@/lib/studySkills';
 
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const inkMid = '#5A5750';
-const inkLight = '#9C8878';
-const cream = '#FAFAF8';
-const paper = '#FFFFFF';
-const parchment = '#F5F3F0';
-const border = 'rgba(0,0,0,0.08)';
+const ink = 'var(--ink-strong)';
+const inkMid = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
+const cream = 'var(--surface-page)';
+const paper = 'var(--surface-raised)';
+const parchment = 'var(--surface-sunken)';
+const border = 'var(--hairline-soft)';
 
 export default function StudySkillsPage() {
   return (

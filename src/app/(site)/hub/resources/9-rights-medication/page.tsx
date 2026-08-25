@@ -123,8 +123,8 @@ const CSS = `
 .nr-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -143,11 +143,11 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   text-decoration: none;
   margin-bottom: 44px;
 }
-.nr-back:hover { color: #555; }
+.nr-back:hover { color: var(--ink-soft); }
 .nr-back-arrow { font-style: normal; }
 
 /* Masthead */
@@ -155,7 +155,7 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 14px;
 }
 
@@ -164,7 +164,7 @@ const CSS = `
   font-size: 56px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 22px;
   letter-spacing: -0.01em;
 }
@@ -172,7 +172,7 @@ const CSS = `
 .nr-standfirst {
   font-size: 17px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.68;
   max-width: 680px;
   margin-bottom: 14px;
@@ -180,17 +180,17 @@ const CSS = `
 
 .nr-byline {
   font-size: 10px;
-  color: #aaa;
+  color: var(--ink-faint);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 24px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 36px;
 }
 
 /* Pearl / info callout */
 .nr-pearl {
-  background: #FAEEDA;
+  background: var(--amber-50);
   padding: 14px 18px;
   border-radius: 0;
 }
@@ -199,13 +199,13 @@ const CSS = `
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #633806;
+  color: var(--amber-800);
   margin-bottom: 6px;
 }
 
 .nr-pearl p {
   font-size: 12px;
-  color: #633806;
+  color: var(--amber-800);
   line-height: 1.6;
   font-weight: 300;
   margin: 0;
@@ -216,7 +216,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #A32D2D;
+  color: var(--red-600);
   margin-bottom: 7px;
 }
 
@@ -229,8 +229,8 @@ const CSS = `
 
 .nr-red-pill {
   font-size: 11px;
-  background: #FCEBEB;
-  color: #A32D2D;
+  background: var(--red-50);
+  color: var(--red-600);
   padding: 3px 11px;
   border-radius: 0;
   font-weight: 300;
@@ -241,13 +241,13 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 18px;
   padding-top: 24px;
   margin-top: 36px;
   padding-bottom: 16px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 /* Step sections */
@@ -255,7 +255,7 @@ const CSS = `
   display: grid;
   grid-template-columns: 96px 1fr;
   margin-bottom: 36px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
   padding-top: 24px;
 }
 
@@ -264,7 +264,7 @@ const CSS = `
   flex-direction: column;
   align-items: flex-start;
   padding-right: 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
   padding-top: 4px;
 }
 
@@ -295,7 +295,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 3px;
   line-height: 1.2;
 }
@@ -303,7 +303,7 @@ const CSS = `
 .nr-step-question {
   font-size: 13px;
   font-style: italic;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 22px;
 }
 
@@ -311,20 +311,20 @@ const CSS = `
 .nr-content-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .nr-content-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .nr-content-col {
   padding: 14px 14px 18px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .nr-content-col:last-child { border-right: none; }
 
@@ -332,15 +332,15 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   padding-bottom: 9px;
   margin-bottom: 11px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .nr-col-text {
   font-size: 12px;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.55;
   font-weight: 300;
 }
@@ -353,7 +353,7 @@ const CSS = `
 
 .nr-col-list li {
   font-size: 12px;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.55;
   padding: 2px 0;
   font-weight: 300;
@@ -364,7 +364,7 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #ccc;
+  color: var(--ink-faint);
 }
 
 /* Formula box */
@@ -373,10 +373,10 @@ const CSS = `
   font-size: 14px;
   text-align: center;
   padding: 14px;
-  background: #F5F3F0;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  background: var(--surface-sunken);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
-  color: #1A1815;
+  color: var(--ink-strong);
 }
 
 /* Memory aid */
@@ -385,36 +385,36 @@ const CSS = `
   font-size: 13px;
   text-align: center;
   padding: 18px;
-  background: #F5F3F0;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  color: #1A1815;
+  background: var(--surface-sunken);
+  border: 0.5px solid var(--hairline-firm);
+  color: var(--ink-strong);
   margin-bottom: 18px;
 }
 
 /* Step colour system */
-.nr-numeral-1 { color: #185FA5; }
-.nr-badge-1 { background: #E6F1FB; color: #0C447C; }
-.nr-numeral-2 { color: #0F6E56; }
-.nr-badge-2 { background: #E1F5EE; color: #085041; }
-.nr-numeral-3 { color: #993C1D; }
-.nr-badge-3 { background: #FAECE7; color: #712B13; }
-.nr-numeral-4 { color: #534AB7; }
-.nr-badge-4 { background: #EEEDFE; color: #3C3489; }
-.nr-numeral-5 { color: #5F5E5A; }
-.nr-badge-5 { background: #F1EFE8; color: #444441; }
+.nr-numeral-1 { color: var(--blue-600); }
+.nr-badge-1 { background: var(--blue-50); color: var(--blue-800); }
+.nr-numeral-2 { color: var(--teal-600); }
+.nr-badge-2 { background: var(--teal-50); color: var(--teal-800); }
+.nr-numeral-3 { color: var(--coral-600); }
+.nr-badge-3 { background: var(--coral-50); color: var(--coral-800); }
+.nr-numeral-4 { color: var(--purple-600); }
+.nr-badge-4 { background: var(--purple-50); color: var(--purple-800); }
+.nr-numeral-5 { color: var(--gray-600); }
+.nr-badge-5 { background: var(--surface-sunken); color: var(--gray-800); }
 .nr-numeral-6 { color: #8B5E3C; }
-.nr-badge-6 { background: #F5EDE5; color: #6B4529; }
+.nr-badge-6 { background: var(--surface-sunken); color: #6B4529; }
 
 /* Responsive */
 @media (max-width: 800px) {
   .nr-wrap { padding: 24px 20px 60px; }
   .nr-headline { font-size: 34px; }
   .nr-step { grid-template-columns: 1fr; }
-  .nr-step-sidebar { flex-direction: row; align-items: center; gap: 12px; border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); padding-bottom: 12px; padding-right: 0; margin-bottom: 16px; }
+  .nr-step-sidebar { flex-direction: row; align-items: center; gap: 12px; border-right: none; border-bottom: 0.5px solid var(--hairline-firm); padding-bottom: 12px; padding-right: 0; margin-bottom: 16px; }
   .nr-step-numeral { font-size: 48px; }
   .nr-step-content { padding-left: 0; }
   .nr-content-grid-2, .nr-content-grid-3 { grid-template-columns: 1fr; }
-  .nr-content-col { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
+  .nr-content-col { border-right: none; border-bottom: 0.5px solid var(--hairline-firm); }
   .nr-content-col:last-child { border-bottom: none; }
 }
 `;
@@ -475,11 +475,11 @@ export default function NineRightsMedicationPage() {
           <p className="nr-pearl-label">Keep the meds pages straight</p>
           <p>
             This page is for the safety-check side of medication rounds. Use{' '}
-            <Link href="/hub/resources/drug-calculations-cheat-sheet" style={{ color: '#633806', textDecoration: 'underline' }}>
+            <Link href="/hub/resources/drug-calculations-cheat-sheet" style={{ color: 'var(--amber-800)', textDecoration: 'underline' }}>
               Drug Calculations Cheat Sheet
             </Link>{' '}
             for the maths and IV rates, and{' '}
-            <Link href="/hub/resources/medication-abbreviations" style={{ color: '#633806', textDecoration: 'underline' }}>
+            <Link href="/hub/resources/medication-abbreviations" style={{ color: 'var(--amber-800)', textDecoration: 'underline' }}>
               Medication Abbreviations Guide
             </Link>{' '}
             for the chart shorthand you keep seeing on drug charts.
@@ -509,9 +509,9 @@ export default function NineRightsMedicationPage() {
                 <div className="nr-formula">{right.formula}</div>
               )}
 
-              <div className="nr-pearl" style={{ background: '#F5F3F0' }}>
-                <p className="nr-pearl-label" style={{ color: '#555' }}>Paediatric consideration</p>
-                <p style={{ color: '#5A5750' }}>{right.paediatric}</p>
+              <div className="nr-pearl" style={{ background: 'var(--surface-sunken)' }}>
+                <p className="nr-pearl-label" style={{ color: 'var(--ink-soft)' }}>Paediatric consideration</p>
+                <p style={{ color: 'var(--ink-soft)' }}>{right.paediatric}</p>
               </div>
             </div>
           </div>

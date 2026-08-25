@@ -27,8 +27,8 @@ const CSS = `
 .ng-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -47,11 +47,11 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   text-decoration: none;
   margin-bottom: 44px;
 }
-.ng-back:hover { color: #555; }
+.ng-back:hover { color: var(--ink-soft); }
 .ng-back-arrow { font-style: normal; }
 
 /* Masthead */
@@ -59,7 +59,7 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 14px;
 }
 
@@ -68,7 +68,7 @@ const CSS = `
   font-size: 56px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 22px;
   letter-spacing: -0.01em;
 }
@@ -76,7 +76,7 @@ const CSS = `
 .ng-standfirst {
   font-size: 17px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.68;
   max-width: 680px;
   margin-bottom: 14px;
@@ -84,11 +84,11 @@ const CSS = `
 
 .ng-byline {
   font-size: 10px;
-  color: #aaa;
+  color: var(--ink-faint);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 24px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 36px;
 }
 
@@ -97,7 +97,7 @@ const CSS = `
   display: grid;
   grid-template-columns: 96px 1fr;
   margin-bottom: 36px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
   padding-top: 24px;
 }
 
@@ -106,7 +106,7 @@ const CSS = `
   flex-direction: column;
   align-items: flex-start;
   padding-right: 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
   padding-top: 4px;
 }
 
@@ -137,7 +137,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 3px;
   line-height: 1.2;
 }
@@ -145,7 +145,7 @@ const CSS = `
 .ng-step-question {
   font-size: 13px;
   font-style: italic;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 22px;
 }
 
@@ -153,20 +153,20 @@ const CSS = `
 .ng-content-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .ng-content-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .ng-content-col {
   padding: 14px 14px 18px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .ng-content-col:last-child { border-right: none; }
 
@@ -174,10 +174,10 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   padding-bottom: 9px;
   margin-bottom: 11px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .ng-col-list {
@@ -188,7 +188,7 @@ const CSS = `
 
 .ng-col-list li {
   font-size: 12px;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.55;
   padding: 2px 0;
   font-weight: 300;
@@ -199,7 +199,7 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #ccc;
+  color: var(--ink-faint);
 }
 
 /* Numbered steps list */
@@ -214,7 +214,7 @@ const CSS = `
   display: grid;
   grid-template-columns: 32px 1fr;
   padding: 10px 0;
-  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  border-bottom: 0.5px solid var(--hairline-soft);
 }
 .ng-numbered-item:last-child { border-bottom: none; }
 
@@ -222,12 +222,12 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 14px;
   font-style: italic;
-  color: #ccc;
+  color: var(--ink-faint);
 }
 
 .ng-numbered-text {
   font-size: 13px;
-  color: #2C2A27;
+  color: var(--ink-mid);
   line-height: 1.6;
   font-weight: 300;
 }
@@ -237,7 +237,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #A32D2D;
+  color: var(--red-600);
   margin-bottom: 7px;
 }
 
@@ -250,8 +250,8 @@ const CSS = `
 
 .ng-red-pill {
   font-size: 11px;
-  background: #FCEBEB;
-  color: #A32D2D;
+  background: var(--red-50);
+  color: var(--red-600);
   padding: 3px 11px;
   border-radius: 0;
   font-weight: 300;
@@ -259,7 +259,7 @@ const CSS = `
 
 /* Pearl */
 .ng-pearl {
-  background: #FAEEDA;
+  background: var(--amber-50);
   padding: 14px 18px;
   border-radius: 0;
 }
@@ -268,13 +268,13 @@ const CSS = `
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #633806;
+  color: var(--amber-800);
   margin-bottom: 6px;
 }
 
 .ng-pearl p {
   font-size: 12px;
-  color: #633806;
+  color: var(--amber-800);
   line-height: 1.6;
   font-weight: 300;
   margin: 0;
@@ -285,14 +285,14 @@ const CSS = `
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .ng-ph-safe {
-  background: #EDFAEF;
+  background: var(--state-correct-surface);
   padding: 18px 20px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .ng-ph-safe-label {
   font-size: 9px;
@@ -318,14 +318,14 @@ const CSS = `
 }
 
 .ng-ph-unsafe {
-  background: #FCEBEB;
+  background: var(--red-50);
   padding: 18px 20px;
 }
 .ng-ph-unsafe-label {
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #A32D2D;
+  color: var(--red-600);
   margin-bottom: 8px;
   font-weight: 400;
 }
@@ -333,12 +333,12 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 28px;
   font-style: italic;
-  color: #A32D2D;
+  color: var(--red-600);
   margin-bottom: 6px;
 }
 .ng-ph-unsafe-text {
   font-size: 12px;
-  color: #A32D2D;
+  color: var(--red-600);
   line-height: 1.6;
   font-weight: 300;
   margin: 0;
@@ -346,28 +346,28 @@ const CSS = `
 
 /* Factors table */
 .ng-factors {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .ng-factor-row {
   display: grid;
   grid-template-columns: 200px 1fr;
-  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  border-bottom: 0.5px solid var(--hairline-soft);
 }
 .ng-factor-row:last-child { border-bottom: none; }
 
 .ng-factor-name {
   font-size: 12px;
-  color: #2C2A27;
+  color: var(--ink-mid);
   font-weight: 400;
   padding: 12px 18px;
-  border-right: 0.5px solid rgba(0,0,0,0.08);
+  border-right: 0.5px solid var(--hairline-soft);
 }
 
 .ng-factor-desc {
   font-size: 12px;
-  color: #5A5750;
+  color: var(--ink-soft);
   font-weight: 300;
   line-height: 1.6;
   padding: 12px 18px;
@@ -378,7 +378,7 @@ const CSS = `
 .ng-table {
   width: 100%;
   border-collapse: collapse;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
   font-size: 13px;
 }
@@ -387,13 +387,13 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   font-weight: 400;
   padding: 11px 16px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
+  border-right: 0.5px solid var(--hairline-firm);
   text-align: left;
-  background: #F5F3F0;
+  background: var(--surface-sunken);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 .ng-table th:last-child { border-right: none; }
@@ -401,14 +401,14 @@ const CSS = `
 .ng-table td {
   padding: 10px 16px;
   font-size: 12px;
-  color: #555;
-  border-bottom: 0.5px solid rgba(0,0,0,0.08);
-  border-right: 0.5px solid rgba(0,0,0,0.08);
+  color: var(--ink-soft);
+  border-bottom: 0.5px solid var(--hairline-soft);
+  border-right: 0.5px solid var(--hairline-soft);
   font-weight: 300;
 }
 .ng-table td:last-child { border-right: none; }
 .ng-table tr:last-child td { border-bottom: none; }
-.ng-table td:first-child { font-weight: 400; color: #2C2A27; }
+.ng-table td:first-child { font-weight: 400; color: var(--ink-mid); }
 
 /* Dash list */
 .ng-dash-list {
@@ -419,30 +419,30 @@ const CSS = `
 }
 .ng-dash-list li {
   font-size: 13px;
-  color: #2C2A27;
+  color: var(--ink-mid);
   line-height: 1.6;
   font-weight: 300;
   padding: 6px 0 6px 14px;
   position: relative;
-  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  border-bottom: 0.5px solid var(--hairline-soft);
 }
 .ng-dash-list li:last-child { border-bottom: none; }
 .ng-dash-list li::before {
   content: '–';
   position: absolute;
   left: 0;
-  color: #ccc;
+  color: var(--ink-faint);
 }
 
 /* Syringe info box */
 .ng-info-box {
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .ng-info-row {
   padding: 20px 22px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 .ng-info-row:last-child { border-bottom: none; }
 
@@ -450,13 +450,13 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   margin-bottom: 10px;
 }
 
 .ng-info-row-text {
   font-size: 13px;
-  color: #2C2A27;
+  color: var(--ink-mid);
   line-height: 1.7;
   font-weight: 300;
   margin: 0;
@@ -467,43 +467,43 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 18px;
   padding-top: 24px;
   margin-top: 36px;
   padding-bottom: 16px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 /* Step colour system */
-.ng-numeral-1 { color: #185FA5; }
-.ng-badge-1 { background: #E6F1FB; color: #0C447C; }
-.ng-numeral-2 { color: #0F6E56; }
-.ng-badge-2 { background: #E1F5EE; color: #085041; }
-.ng-numeral-3 { color: #993C1D; }
-.ng-badge-3 { background: #FAECE7; color: #712B13; }
-.ng-numeral-4 { color: #534AB7; }
-.ng-badge-4 { background: #EEEDFE; color: #3C3489; }
-.ng-numeral-5 { color: #5F5E5A; }
-.ng-badge-5 { background: #F1EFE8; color: #444441; }
+.ng-numeral-1 { color: var(--blue-600); }
+.ng-badge-1 { background: var(--blue-50); color: var(--blue-800); }
+.ng-numeral-2 { color: var(--teal-600); }
+.ng-badge-2 { background: var(--teal-50); color: var(--teal-800); }
+.ng-numeral-3 { color: var(--coral-600); }
+.ng-badge-3 { background: var(--coral-50); color: var(--coral-800); }
+.ng-numeral-4 { color: var(--purple-600); }
+.ng-badge-4 { background: var(--purple-50); color: var(--purple-800); }
+.ng-numeral-5 { color: var(--gray-600); }
+.ng-badge-5 { background: var(--surface-sunken); color: var(--gray-800); }
 .ng-numeral-6 { color: #8B5E3C; }
-.ng-badge-6 { background: #F5EDE5; color: #6B4529; }
+.ng-badge-6 { background: var(--surface-sunken); color: #6B4529; }
 
 @media (max-width: 800px) {
   .ng-wrap { padding: 24px 18px 60px; }
   .ng-headline { font-size: 34px; }
   .ng-step { grid-template-columns: 1fr; }
-  .ng-step-sidebar { flex-direction: row; align-items: center; gap: 12px; border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); padding-bottom: 16px; padding-right: 0; margin-bottom: 20px; }
+  .ng-step-sidebar { flex-direction: row; align-items: center; gap: 12px; border-right: none; border-bottom: 0.5px solid var(--hairline-firm); padding-bottom: 16px; padding-right: 0; margin-bottom: 20px; }
   .ng-step-content { padding-left: 0; }
   .ng-content-grid { grid-template-columns: 1fr; }
   .ng-content-grid-4 { grid-template-columns: repeat(2, 1fr); }
   .ng-content-col:nth-child(2) { border-right: none; }
-  .ng-content-col:nth-child(n+3) { border-top: 0.5px solid rgba(0,0,0,0.1); }
+  .ng-content-col:nth-child(n+3) { border-top: 0.5px solid var(--hairline-firm); }
   .ng-ph-grid { grid-template-columns: 1fr; }
-  .ng-ph-safe { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
+  .ng-ph-safe { border-right: none; border-bottom: 0.5px solid var(--hairline-firm); }
   .ng-factor-row { grid-template-columns: 1fr; }
-  .ng-factor-name { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
+  .ng-factor-name { border-right: none; border-bottom: 0.5px solid var(--hairline-soft); }
 }
 `;
 
@@ -662,7 +662,7 @@ export default function NGTubeInsertionPage() {
             <h2 className="ng-step-name">Measuring the Tube</h2>
             <p className="ng-step-question">NEX &mdash; Nose, Ear, Xiphisternum</p>
 
-            <p style={{ fontSize: '13px', color: '#5A5750', lineHeight: 1.7, fontWeight: 300, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.7, fontWeight: 300, marginBottom: '16px' }}>
               NEX is the quick measuring rule students often get taught first. It stands for Nose, Ear, Xiphisternum, and it gives you an estimated insertion length:
             </p>
 
@@ -767,7 +767,7 @@ export default function NGTubeInsertionPage() {
               </div>
             </div>
 
-            <p style={{ fontSize: '13px', color: '#1A1815', fontWeight: 400, marginBottom: '12px' }}>Things that affect pH readings</p>
+            <p style={{ fontSize: '13px', color: 'var(--ink-strong)', fontWeight: 400, marginBottom: '12px' }}>Things that affect pH readings</p>
             <div className="ng-factors">
               {PH_FACTORS.map((row, i) => (
                 <div key={i} className="ng-factor-row">
@@ -802,7 +802,7 @@ export default function NGTubeInsertionPage() {
             <h2 className="ng-step-name">Ongoing Checks &amp; Tube Sizes</h2>
             <p className="ng-step-question">When to re-confirm and which size to use</p>
 
-            <p style={{ fontSize: '13px', color: '#5A5750', lineHeight: 1.7, fontWeight: 300, marginBottom: '12px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.7, fontWeight: 300, marginBottom: '12px' }}>
               Placement must be re-confirmed:
             </p>
 
@@ -817,7 +817,7 @@ export default function NGTubeInsertionPage() {
               <p>Always document the external tube length at the nostril when you first confirm placement. This gives you a simple reference point. If the length changes, assume the tube may have moved and re-test before using it.</p>
             </div>
 
-            <p style={{ fontSize: '13px', color: '#1A1815', fontWeight: 400, marginBottom: '12px' }}>Tube size guide</p>
+            <p style={{ fontSize: '13px', color: 'var(--ink-strong)', fontWeight: 400, marginBottom: '12px' }}>Tube size guide</p>
             <table className="ng-table">
               <thead>
                 <tr>

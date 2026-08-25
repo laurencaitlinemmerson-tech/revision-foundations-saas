@@ -668,15 +668,15 @@ export default function HubClient({
               alignItems: 'center'
             }}>
               <div style={{ maxWidth: '600px' }}>
-                <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: '20px', fontWeight: 400, color: '#1A1815', marginBottom: '8px' }}>
+                <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: '20px', fontWeight: 400, color: 'var(--ink-strong)', marginBottom: '8px' }}>
                   Unlock the full study setup.
                 </h2>
-                <p style={{ fontSize: '13px', color: '#5A5750', fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
+                <p style={{ fontSize: '13px', color: 'var(--ink-soft)', fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
                   Get every locked resource, OSCE station pack, and quiz topic in one place.
                 </p>
               </div>
               <Link href="/pricing" style={{
-                fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#FAFAF8',
+                fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--surface-page)',
                 background: '#1A1815', padding: '10px 20px', textDecoration: 'none', whiteSpace: 'nowrap'
               }}>
                 See pricing &rarr;

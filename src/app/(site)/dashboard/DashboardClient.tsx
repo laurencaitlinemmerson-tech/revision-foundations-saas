@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { getPlacementDate } from '@/lib/dashboardTracking';
 
+import InteractiveCommandPalette from '@/components/dashboard/InteractiveCommandPalette';
+
 interface DashboardClientProps {
   children: ReactNode;
   firstName: string | null;
@@ -54,6 +56,7 @@ export default function DashboardClient({
   const anim = !shouldReduceMotion;
   const hour = new Date().getHours();
   const [placementDays, setPlacementDays] = useState<number | null>(null);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   useEffect(() => {
     const saved = getPlacementDate();
@@ -67,6 +70,18 @@ export default function DashboardClient({
     });
 
     return () => window.cancelAnimationFrame(frameId);
+  }, []);
+
+  // Global Cmd+K / Ctrl+K listener
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const greeting = useMemo(() => {
@@ -157,7 +172,7 @@ export default function DashboardClient({
               </motion.div>
 
               {/* Navigation pills */}
-              <div className="mt-12 flex flex-wrap gap-2">
+              <div className="mt-12 flex flex-wrap gap-2 items-center">
                 {quickLinks.map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -192,6 +207,24 @@ export default function DashboardClient({
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Spotlight Command Palette trigger pill */}
+                <motion.button
+                  type="button"
+                  onClick={() => setIsCommandPaletteOpen(true)}
+                  {...(anim ? {
+                    initial: { opacity: 0, y: 8 },
+                    animate: { opacity: 1, y: 0 },
+                    transition: { delay: 0.48, duration: 0.38, ease },
+                    whileTap: { scale: 0.97 },
+                  } : {})}
+                  className="inline-flex items-center gap-2 border border-[var(--espresso)] bg-[var(--espresso)] text-white px-4 py-2.5 text-sm transition-all duration-200 hover:bg-[#2C2A27]"
+                >
+                  <span>🔍 Search</span>
+                  <span className="text-[10px] opacity-60 border border-white/30 px-1.5 py-0.5 rounded">
+                    ⌘K
+                  </span>
+                </motion.button>
               </div>
             </div>
 
@@ -218,7 +251,7 @@ export default function DashboardClient({
                 >
                   <Link
                     href={link.href}
-                    className="group/rail flex items-center justify-between gap-4 px-5 py-[17px] transition-colors duration-200 hover:bg-[#FAF8F5]"
+                    className="group/rail flex items-center justify-between gap-4 px-5 py-[17px] transition-colors duration-200 hover:bg-[var(--surface-page)]"
                   >
                     <div className="min-w-0">
                       <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-[var(--charcoal)]/35 transition-colors duration-200 group-hover/rail:text-[var(--charcoal)]/65">
@@ -246,6 +279,11 @@ export default function DashboardClient({
         </div>
       </main>
 
+      {/* Global Interactive Command Palette */}
+      <InteractiveCommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+      />
     </div>
   );
 }

@@ -1,0 +1,87 @@
+/* =============================================================
+   Training dashboard — scoped tokens and the hover states the
+   design expressed as `style-hover` attributes.
+
+   Everything is scoped to .training-shell so the warm-editorial
+   tokens the rest of the operator area runs on are untouched.
+   ============================================================= */
+
+.training-shell {
+  --paper: #FBF8FA;
+  --sidebar: #F5F1F5;
+  --card: #FFFFFF;
+  --tint: #FBF4F7;
+  --lilac-haze: #F4EFF6;
+
+  --ink: #221C24;
+  --ink-soft: #57515A;
+  --ink-mute: #9C8894;
+
+  --rule: rgba(34, 28, 36, 0.10);
+  --rule-soft: rgba(34, 28, 36, 0.07);
+
+  /* Data marks: plum leads, rose is the second series. */
+  --plum: #5F4472;
+  --plum-soft: #8E6FA3;
+  --pink: #C06C84;
+  --pink-deep: #8A4459;
+  --pink-soft: #F2DCE4;
+
+  --green: #1E8A4D;
+  --amber: #C8700A;
+  --rose: #A14A57;
+
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+.training-shell a { color: var(--ink); text-decoration: none; }
+.training-shell a:hover { color: var(--ink-soft); }
+
+/* Hover states lifted out of the template's `style-hover` attributes. */
+.training-shell .hv-nav:hover { background: var(--lilac-haze); }
+.training-shell .hv-tab:hover { background: var(--tint); }
+.training-shell .hv-row:hover { background: var(--tint); }
+.training-shell .hv-cell:hover { background: var(--tint); }
+.training-shell .hv-solid:hover { background: #4A3459; }
+
+.training-shell button:focus-visible,
+.training-shell input:focus-visible,
+.training-shell select:focus-visible {
+  outline: 2px solid var(--plum);
+  outline-offset: 2px;
+}
+
+/* The layout collapses to a single column before the sidebar would crowd
+   the content out; the nav becomes a scrolling strip along the top. */
+@media (max-width: 900px) {
+  .training-shell .training-grid { grid-template-columns: 1fr; }
+  .training-shell .training-aside {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 0.5px solid var(--rule);
+  }
+  .training-shell .training-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    border-top: 0.5px solid var(--rule);
+  }
+  .training-shell .training-nav button {
+    border-bottom: 0;
+    border-right: 0.5px solid var(--rule-soft);
+    white-space: nowrap;
+  }
+  .training-shell .training-main { padding: 28px 20px 64px; }
+  .training-shell .training-split,
+  .training-shell .training-split-3,
+  .training-shell .training-pair { grid-template-columns: 1fr !important; }
+  .training-shell .training-split > * { border-right: 0 !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .training-shell * { transition: none !important; }
+}

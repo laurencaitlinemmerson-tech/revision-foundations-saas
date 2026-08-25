@@ -266,7 +266,7 @@ export function useOperatorData(): LiveData & { refresh: () => void } {
       const [fitness, health, workouts, lifts, schedule] = await Promise.all([
         get('/api/operator/fitness'),
         get(`/api/operator/health?from=${from}`),
-        get('/api/operator/workouts'),
+        get(`/api/operator/workouts?from=${from}&limit=1000`),
         get(`/api/operator/lifts?from=${from}`),
         get('/api/operator/schedule'),
       ]);

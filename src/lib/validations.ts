@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ── Checkout ──
 export const checkoutSchema = z.object({
-  product: z.enum(['osce', 'quiz', 'bundle']),
+  product: z.enum(['osce', 'quiz', 'bundle', 'template']),
   guestEmail: z.string().email('Invalid email address').optional(),
 });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

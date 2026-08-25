@@ -40,13 +40,13 @@ export async function sendContactNotification(input: ContactInput) {
   ].join('\n');
 
   const html = `
-    <div style="font-family:Inter,Arial,sans-serif;line-height:1.6;color:#1A1815;">
+    <div style="font-family:Inter,Arial,sans-serif;line-height:1.6;color:var(--ink-strong);">
       <p style="margin:0 0 16px;">New contact form message from The Nurse Lab website.</p>
       <p style="margin:0 0 8px;"><strong>Name:</strong> ${escapeHtml(senderName)}</p>
       <p style="margin:0 0 8px;"><strong>Email:</strong> ${escapeHtml(senderEmail)}</p>
       <p style="margin:0 0 16px;"><strong>Subject:</strong> ${escapeHtml(submittedSubject)}</p>
       <p style="margin:0 0 8px;"><strong>Message:</strong></p>
-      <div style="white-space:pre-wrap;border:1px solid rgba(0,0,0,0.08);padding:16px;background:#FAFAF8;">${escapeHtml(message)}</div>
+      <div style="white-space:pre-wrap;border:1px solid var(--hairline-soft);padding:16px;background:var(--surface-page);">${escapeHtml(message)}</div>
     </div>
   `;
 

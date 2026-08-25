@@ -24,18 +24,18 @@ type VisualConfig = {
   details: Detail[];
 };
 
-const border = 'rgba(28, 21, 16, 0.1)';
-const paper = '#FFFFFF';
-const ink = '#1C1510';
-const inkMid = '#5C4A38';
-const inkLight = '#9C8878';
+const border = 'var(--hairline-firm)';
+const paper = 'var(--surface-raised)';
+const ink = 'var(--ink-strong)';
+const inkMid = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
 
 const configs: Record<ProductVisualVariant, VisualConfig> = {
   quiz: {
     imageSrc: '/product-previews/quiz-editorial-preview.png',
     imageAlt: 'Quiz interface screenshot showing a worked multiple-choice question with explanation.',
-    accent: '#2E67B1',
-    accentSoft: '#E7EEF8',
+    accent: 'var(--topic-assessment-text)',
+    accentSoft: 'var(--topic-assessment-surface)',
     eyebrow: 'Real quiz screen',
     details: [
       {
@@ -58,8 +58,8 @@ const configs: Record<ProductVisualVariant, VisualConfig> = {
   osce: {
     imageSrc: '/product-previews/oscepreview.png',
     imageAlt: 'OSCE support screen showing a calm recall page before full station work.',
-    accent: '#2F8A7E',
-    accentSoft: '#E6F3F1',
+    accent: 'var(--topic-skills-text)',
+    accentSoft: 'var(--topic-skills-surface)',
     eyebrow: 'Real OSCE screen',
     details: [
       {
@@ -123,7 +123,7 @@ export default function ProductVisualShowcase({
             gap: '10px',
             padding: compact ? '12px 14px' : '14px 16px',
             borderBottom: `1px solid ${border}`,
-            background: '#FCFBF9',
+            background: 'var(--surface-raised)',
             flexWrap: 'wrap',
           }}
         >
@@ -169,7 +169,7 @@ export default function ProductVisualShowcase({
 
         <div
           style={{
-            background: '#F8F7F4',
+            background: 'var(--surface-raised)',
             padding: compact ? '10px 10px 0' : '14px 14px 0',
           }}
         >
@@ -177,7 +177,7 @@ export default function ProductVisualShowcase({
             style={{
               overflow: 'hidden',
               border: `0.5px solid ${border}`,
-              background: '#fff',
+              background: 'var(--surface-raised)',
             }}
           >
             <Image

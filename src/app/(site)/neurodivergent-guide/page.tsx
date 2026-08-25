@@ -8,8 +8,8 @@ const CSS = `
 .nd-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -27,17 +27,17 @@ const CSS = `
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   text-decoration: none;
   margin-bottom: 44px;
 }
-.nd-back:hover { color: #2C2A27; }
+.nd-back:hover { color: var(--ink-mid); }
 
 .nd-kicker {
   font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 14px;
 }
 
@@ -46,7 +46,7 @@ const CSS = `
   font-size: 56px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 22px;
   letter-spacing: -0.01em;
   max-width: 14ch;
@@ -55,7 +55,7 @@ const CSS = `
 .nd-standfirst {
   font-size: 17px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.68;
   max-width: 720px;
   margin-bottom: 14px;
@@ -63,11 +63,11 @@ const CSS = `
 
 .nd-byline {
   font-size: 12px;
-  color: #666;
+  color: var(--ink-soft);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 28px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 24px;
 }
 
@@ -75,7 +75,7 @@ const CSS = `
 .nd-save-wrap > div { margin-top: 0 !important; margin-bottom: 16px !important; }
 
 .nd-pearl {
-  background: #FAEEDA;
+  background: var(--amber-50);
   padding: 14px 18px;
   margin-bottom: 40px;
 }
@@ -89,13 +89,13 @@ const CSS = `
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #633806;
+  color: var(--amber-800);
   margin-bottom: 6px;
 }
 
 .nd-pearl p {
   font-size: 14px;
-  color: #633806;
+  color: var(--amber-800);
   line-height: 1.6;
   font-weight: 300;
   margin: 0;
@@ -104,13 +104,13 @@ const CSS = `
 .nd-intro-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 40px;
 }
 
 .nd-intro-cell {
   padding: 22px 20px 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.12);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .nd-intro-cell:last-child { border-right: none; }
 
@@ -118,7 +118,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 30px;
   font-style: italic;
-  color: #c8c4be;
+  color: var(--hairline-firm);
   display: block;
   margin-bottom: 6px;
   line-height: 1;
@@ -127,7 +127,7 @@ const CSS = `
 .nd-intro-title {
   font-size: 12px;
   font-weight: 400;
-  color: #2C2A27;
+  color: var(--ink-mid);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 7px;
@@ -135,13 +135,13 @@ const CSS = `
 
 .nd-intro-text {
   font-size: 14px;
-  color: #555;
+  color: var(--ink-soft);
   line-height: 1.55;
   font-weight: 300;
 }
 
 .nd-jump-nav {
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 18px 20px;
   margin-bottom: 20px;
 }
@@ -150,7 +150,7 @@ const CSS = `
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 10px;
 }
 
@@ -165,11 +165,11 @@ const CSS = `
 
 .nd-jump-list a {
   font-size: 14px;
-  color: #1A1815;
+  color: var(--ink-strong);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.nd-jump-list a:hover { color: #633806; }
+.nd-jump-list a:hover { color: var(--amber-800); }
 .nd-jump-list a:focus-visible {
   outline: 2px solid #1A1815;
   outline-offset: 3px;
@@ -179,7 +179,7 @@ const CSS = `
   display: grid;
   grid-template-columns: 180px 1fr;
   margin-bottom: 36px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
   padding-top: 26px;
   scroll-margin-top: 24px;
 }
@@ -189,7 +189,7 @@ const CSS = `
   flex-direction: column;
   align-items: flex-start;
   padding-right: 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
   padding-top: 4px;
   min-width: 0;
 }
@@ -223,7 +223,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 3px;
   line-height: 1.2;
 }
@@ -231,20 +231,20 @@ const CSS = `
 .nd-step-question {
   font-size: 13px;
   font-style: italic;
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 22px;
 }
 
 .nd-content-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .nd-content-col {
   padding: 14px 14px 18px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .nd-content-col:last-child { border-right: none; }
 
@@ -252,10 +252,10 @@ const CSS = `
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   padding-bottom: 9px;
   margin-bottom: 11px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .nd-col-list {
@@ -266,7 +266,7 @@ const CSS = `
 
 .nd-col-list li {
   font-size: 14px;
-  color: #555;
+  color: var(--ink-soft);
   line-height: 1.55;
   padding: 2px 0;
   font-weight: 300;
@@ -277,7 +277,7 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #999;
+  color: var(--ink-faint);
 }
 
 .nd-link-row {
@@ -290,14 +290,14 @@ const CSS = `
 .nd-hub-pair {
   margin-top: 22px;
   padding-top: 16px;
-  border-top: 0.5px solid rgba(0,0,0,0.08);
+  border-top: 0.5px solid var(--hairline-soft);
 }
 
 .nd-hub-pair-label {
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 8px;
 }
 
@@ -315,22 +315,22 @@ const CSS = `
   content: '·';
   position: absolute;
   left: -10px;
-  color: #999;
+  color: var(--ink-faint);
 }
 
 .nd-hub-pair-list a {
   font-size: 14px;
-  color: #1A1815;
+  color: var(--ink-strong);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.nd-hub-pair-list a:hover { color: #633806; }
+.nd-hub-pair-list a:hover { color: var(--amber-800); }
 
 .nd-primary-link {
   display: inline-flex;
   align-items: center;
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   padding: 11px 20px;
   text-decoration: none;
   font-size: 14px;
@@ -340,7 +340,7 @@ const CSS = `
   display: inline-flex;
   align-items: center;
   padding: 11px 0;
-  color: #2C2A27;
+  color: var(--ink-mid);
   text-decoration: underline;
   text-underline-offset: 4px;
   font-size: 14px;
@@ -350,18 +350,18 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 18px;
   padding-top: 24px;
   margin-top: 32px;
   padding-bottom: 14px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .nd-section-intro {
   font-size: 15px;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   max-width: 68ch;
   margin-bottom: 22px;
@@ -370,13 +370,13 @@ const CSS = `
 .nd-mini-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 40px;
 }
 
 .nd-mini-cell {
   padding: 22px 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .nd-mini-cell:last-child { border-right: none; }
 
@@ -384,25 +384,25 @@ const CSS = `
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 10px;
 }
 
 .nd-mini-text {
   font-size: 14px;
   line-height: 1.7;
-  color: #555;
+  color: var(--ink-soft);
 }
 
 .nd-checklist-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
 }
 
 .nd-checklist-col {
   padding: 22px 26px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .nd-checklist-col:last-child { border-right: none; }
 
@@ -410,10 +410,10 @@ const CSS = `
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 16px;
   padding-bottom: 10px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  border-bottom: 0.5px solid var(--hairline-soft);
 }
 
 .nd-checklist-list {
@@ -424,7 +424,7 @@ const CSS = `
 
 .nd-checklist-list li {
   font-size: 14px;
-  color: #555;
+  color: var(--ink-soft);
   line-height: 1.55;
   font-weight: 300;
   padding: 6px 0 6px 12px;
@@ -435,7 +435,7 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #999;
+  color: var(--ink-faint);
 }
 
 .nd-route-grid {
@@ -446,8 +446,8 @@ const CSS = `
 }
 
 .nd-route-card {
-  border: 0.5px solid rgba(0,0,0,0.1);
-  background: #FFFFFF;
+  border: 0.5px solid var(--hairline-firm);
+  background: var(--surface-raised);
   padding: 22px 22px 24px;
 }
 
@@ -455,7 +455,7 @@ const CSS = `
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 10px;
 }
 
@@ -463,14 +463,14 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   line-height: 1.1;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 10px;
 }
 
 .nd-route-copy {
   font-size: 14px;
   line-height: 1.8;
-  color: #555;
+  color: var(--ink-soft);
   margin-bottom: 16px;
 }
 
@@ -478,14 +478,14 @@ const CSS = `
   display: inline-flex;
   align-items: center;
   font-size: 14px;
-  color: #1A1815;
+  color: var(--ink-strong);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
 .nd-summary-card {
-  border: 0.5px solid rgba(0,0,0,0.1);
-  background: #F5F3F0;
+  border: 0.5px solid var(--hairline-firm);
+  background: var(--surface-sunken);
   padding: 26px 24px 28px;
   margin-top: 40px;
 }
@@ -495,7 +495,7 @@ const CSS = `
   font-size: 28px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 10px;
   max-width: 16ch;
 }
@@ -503,25 +503,25 @@ const CSS = `
 .nd-summary-card p {
   font-size: 14px;
   line-height: 1.85;
-  color: #5A5750;
+  color: var(--ink-soft);
   max-width: 48ch;
 }
 
 /* Section colours — each trait profile gets its own muted tone */
 .nd-tag-adhd { color: #5A4A9B; }
-.nd-badge-adhd { background: #EEEAFE; color: #43348A; }
-.nd-tag-autistic { color: #0F6E56; }
-.nd-badge-autistic { background: #E1F5EE; color: #085041; }
-.nd-tag-dyslexia { color: #993C1D; }
-.nd-badge-dyslexia { background: #FAECE7; color: #712B13; }
+.nd-badge-adhd { background: var(--topic-assessment-surface); color: #43348A; }
+.nd-tag-autistic { color: var(--teal-600); }
+.nd-badge-autistic { background: var(--teal-50); color: var(--teal-800); }
+.nd-tag-dyslexia { color: var(--coral-600); }
+.nd-badge-dyslexia { background: var(--coral-50); color: var(--coral-800); }
 .nd-tag-anxiety { color: #3A5F8A; }
-.nd-badge-anxiety { background: #E4EEF8; color: #24415F; }
+.nd-badge-anxiety { background: var(--topic-assessment-surface); color: #24415F; }
 .nd-tag-audhd { color: #7A4B2E; }
-.nd-badge-audhd { background: #F6E7DC; color: #6A3E22; }
+.nd-badge-audhd { background: var(--topic-anatomy-surface); color: #6A3E22; }
 .nd-tag-dyspraxia { color: #1F6B73; }
-.nd-badge-dyspraxia { background: #DFEEEF; color: #134348; }
+.nd-badge-dyspraxia { background: var(--topic-skills-surface); color: #134348; }
 .nd-tag-dyscalculia { color: #6B3E5F; }
-.nd-badge-dyscalculia { background: #F1E3EC; color: #4A2B42; }
+.nd-badge-dyscalculia { background: var(--state-incorrect-surface); color: #4A2B42; }
 
 @media (max-width: 980px) {
   .nd-intro-grid,
@@ -563,7 +563,7 @@ const CSS = `
   .nd-mini-cell,
   .nd-checklist-col {
     border-right: none;
-    border-bottom: 0.5px solid rgba(0,0,0,0.1);
+    border-bottom: 0.5px solid var(--hairline-firm);
   }
 
   .nd-intro-cell:last-child,
@@ -580,7 +580,7 @@ const CSS = `
 
   .nd-step-sidebar {
     border-right: none;
-    border-bottom: 0.5px solid rgba(0,0,0,0.1);
+    border-bottom: 0.5px solid var(--hairline-firm);
     padding-right: 0;
     padding-bottom: 14px;
   }

@@ -31,9 +31,24 @@ export const PRODUCTS = {
     priceId: process.env.STRIPE_BUNDLE_PRICE_ID!,
     price: 9.99,
   },
+  template: {
+    name: 'The Nursing Student Dashboard (Notion template)',
+    description:
+      'A complete Notion system for tracking your degree, placements, hours and PAD proficiencies',
+    priceId: process.env.STRIPE_TEMPLATE_PRICE_ID!,
+    price: 9.99,
+  },
 } as const;
 
 export type ProductKey = keyof typeof PRODUCTS;
+
+// Env var holding the Stripe price ID for each product.
+export const PRICE_ID_ENV_VARS: Record<ProductKey, string> = {
+  osce: 'STRIPE_OSCE_PRICE_ID',
+  quiz: 'STRIPE_QUIZ_PRICE_ID',
+  bundle: 'STRIPE_BUNDLE_PRICE_ID',
+  template: 'STRIPE_TEMPLATE_PRICE_ID',
+};
 
 export async function createCheckoutSession(
   product: ProductKey,

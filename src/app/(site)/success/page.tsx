@@ -97,7 +97,7 @@ function SuccessContent() {
           <p style={kicker}>Purchase complete</p>
           <h1 style={headline}>You&apos;re in.</h1>
           <p style={body}>
-            To unlock your access to <strong style={{ fontWeight: 500, color: '#1A1815' }}>{productName}</strong>,
+            To unlock your access to <strong style={{ fontWeight: 500, color: 'var(--ink-strong)' }}>{productName}</strong>,
             create an account or sign in below. We&apos;ll attach your purchase automatically.
           </p>
           <SignInButton forceRedirectUrl={redirectTo}>
@@ -126,14 +126,14 @@ function SuccessContent() {
 
         {/* Next steps */}
         <div style={{ marginTop: '28px', marginBottom: '28px' }}>
-          <p style={{ fontFamily: inter, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9C8878', marginBottom: '14px' }}>
+          <p style={{ fontFamily: inter, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-faint)', marginBottom: '14px' }}>
             Start here
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', border: '0.5px solid rgba(0,0,0,0.08)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', border: '0.5px solid var(--hairline-soft)' }}>
             {nextSteps.map((step) => (
               <a key={step.href} href={step.href} style={stepCard}>
-                <span style={{ fontFamily: inter, fontSize: '13px', fontWeight: 400, color: '#1A1815' }}>{step.label}</span>
-                <span style={{ fontFamily: inter, fontSize: '11px', fontWeight: 300, color: '#9C8878', marginTop: '3px' }}>{step.desc}</span>
+                <span style={{ fontFamily: inter, fontSize: '13px', fontWeight: 400, color: 'var(--ink-strong)' }}>{step.label}</span>
+                <span style={{ fontFamily: inter, fontSize: '11px', fontWeight: 300, color: 'var(--ink-faint)', marginTop: '3px' }}>{step.desc}</span>
               </a>
             ))}
           </div>
@@ -157,8 +157,8 @@ export default function SuccessPage() {
   return (
     <Suspense
       fallback={
-        <div style={{ minHeight: '100vh', background: '#FAFAF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <p style={{ fontFamily: inter, fontSize: '13px', color: '#9C8878' }}>Loading…</p>
+        <div style={{ minHeight: '100vh', background: 'var(--surface-page)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ fontFamily: inter, fontSize: '13px', color: 'var(--ink-faint)' }}>Loading…</p>
         </div>
       }
     >
@@ -174,7 +174,7 @@ const playfair = "'Playfair Display', Georgia, serif";
 
 const page: React.CSSProperties = {
   minHeight: '100vh',
-  background: '#FAFAF8',
+  background: 'var(--surface-page)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -184,7 +184,7 @@ const page: React.CSSProperties = {
 const card: React.CSSProperties = {
   width: '100%',
   maxWidth: '480px',
-  background: '#fff',
+  background: 'var(--surface-raised)',
   border: '0.5px solid rgba(26,24,21,0.1)',
   padding: '48px 40px',
 };
@@ -194,7 +194,7 @@ const kicker: React.CSSProperties = {
   fontSize: '10px',
   letterSpacing: '0.2em',
   textTransform: 'uppercase',
-  color: '#9C8878',
+  color: 'var(--ink-faint)',
   marginBottom: '12px',
 };
 
@@ -203,7 +203,7 @@ const headline: React.CSSProperties = {
   fontSize: 'clamp(2.4rem, 5vw, 3.2rem)',
   fontWeight: 400,
   lineHeight: 1.05,
-  color: '#1A1815',
+  color: 'var(--ink-strong)',
   marginBottom: '16px',
 };
 
@@ -212,7 +212,7 @@ const body: React.CSSProperties = {
   fontSize: '14px',
   lineHeight: 1.8,
   fontWeight: 300,
-  color: '#5A5750',
+  color: 'var(--ink-soft)',
   marginBottom: '24px',
 };
 
@@ -223,7 +223,7 @@ const primaryBtn: React.CSSProperties = {
   width: '100%',
   padding: '14px 20px',
   background: '#1A1815',
-  color: '#FAFAF8',
+  color: 'var(--surface-page)',
   fontFamily: inter,
   fontSize: '12px',
   letterSpacing: '0.08em',
@@ -239,7 +239,7 @@ const secondaryBtn: React.CSSProperties = {
   width: '100%',
   padding: '13px 20px',
   background: 'transparent',
-  color: '#1A1815',
+  color: 'var(--ink-strong)',
   fontFamily: inter,
   fontSize: '12px',
   letterSpacing: '0.08em',
@@ -265,8 +265,8 @@ const stepCard: React.CSSProperties = {
   flexDirection: 'column',
   padding: '14px 18px',
   textDecoration: 'none',
-  background: '#fff',
-  borderBottom: '0.5px solid rgba(0,0,0,0.07)',
+  background: 'var(--surface-raised)',
+  borderBottom: '0.5px solid var(--hairline-soft)',
   transition: 'background 0.12s',
 };
 
@@ -274,7 +274,7 @@ const footnote: React.CSSProperties = {
   fontFamily: inter,
   fontSize: '11px',
   fontWeight: 300,
-  color: '#B8AD9E',
+  color: 'var(--border-strong)',
   marginTop: '16px',
   textAlign: 'center',
 };

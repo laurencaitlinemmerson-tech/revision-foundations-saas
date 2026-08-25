@@ -1,5 +1,5 @@
 .page {
-  background: #f9f6f0;
+  background: var(--surface-sunken);
   min-height: 100vh;
 }
 
@@ -10,7 +10,7 @@
 
 .hero {
   padding: 128px 24px 108px;
-  border-bottom: 1px solid #d9d0c1;
+  border-bottom: 1px solid var(--surface-sunken);
 }
 
 .heroInner {
@@ -38,23 +38,23 @@
 
 .sectionBorderTop {
   padding: 36px 24px 84px;
-  border-top: 1px solid #d9d0c1;
+  border-top: 1px solid var(--surface-sunken);
 }
 
 .sectionParchment {
   padding: 84px 24px;
-  background: #f3eee4;
+  background: var(--surface-sunken);
 }
 
 .sectionFinal {
   padding: 88px 24px 96px;
-  border-top: 1px solid #d9d0c1;
+  border-top: 1px solid var(--surface-sunken);
 }
 
 .footerNote {
   padding: 26px 24px;
-  background: #f3eee4;
-  border-top: 1px solid #d9d0c1;
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--surface-sunken);
   text-align: center;
 }
 
@@ -96,7 +96,7 @@
 .airwayCols {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 1px solid #d9d0c1;
+  border: 1px solid var(--surface-sunken);
   margin-bottom: 18px;
 }
 
@@ -122,8 +122,8 @@
   margin-top: 44px;
   padding: 46px 40px;
   border-radius: 28px;
-  background: #f6f0e5;
-  border: 1px solid #d9d0c1;
+  background: var(--surface-sunken);
+  border: 1px solid var(--surface-sunken);
 }
 
 .priceValue {
@@ -214,7 +214,7 @@
   }
 
   .airwayCol {
-    border: 1px solid #d9d0c1 !important;
+    border: 1px solid var(--surface-sunken) !important;
     margin-bottom: 10px;
   }
 

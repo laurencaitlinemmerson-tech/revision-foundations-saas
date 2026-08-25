@@ -5,12 +5,12 @@ import { useEffect, useRef, useState } from 'react';
 import { getPinnedNote, savePinnedNote } from '@/lib/dashboardTracking';
 
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const ink = '#1A1815';
-const body = '#2C2A27';
-const mid = '#5A5750';
-const muted = '#999';
-const border = 'rgba(0,0,0,0.08)';
-const borderMid = 'rgba(0,0,0,0.12)';
+const ink = 'var(--ink-strong)';
+const body = 'var(--ink-mid)';
+const mid = 'var(--ink-soft)';
+const muted = 'var(--ink-faint)';
+const border = 'var(--hairline-soft)';
+const borderMid = 'var(--hairline-firm)';
 
 interface PinnedNoteProps {
   compact?: boolean;

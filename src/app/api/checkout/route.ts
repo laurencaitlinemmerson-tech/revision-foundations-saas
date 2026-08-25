@@ -1,6 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, PRODUCTS } from '@/lib/stripe';
+import { stripe, PRODUCTS, PRICE_ID_ENV_VARS } from '@/lib/stripe';
 import { upsertClerkUser } from '@/lib/clerkUsers';
 import { checkoutSchema } from '@/lib/validations';
 
@@ -35,11 +35,7 @@ export async function POST(request: NextRequest) {
     const { product, guestEmail } = parsed.data;
 
     // Validate price IDs are configured
-    const priceIdEnvVar = product === 'osce'
-      ? 'STRIPE_OSCE_PRICE_ID'
-      : product === 'quiz'
-      ? 'STRIPE_QUIZ_PRICE_ID'
-      : 'STRIPE_BUNDLE_PRICE_ID';
+    const priceIdEnvVar = PRICE_ID_ENV_VARS[product];
     const priceId = process.env[priceIdEnvVar];
     if (!priceId) {
       console.error(`${priceIdEnvVar} is not configured`);

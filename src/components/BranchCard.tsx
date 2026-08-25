@@ -4,12 +4,12 @@ import React from 'react';
 
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
-const espresso = '#301906';
-const charcoal = '#5A5750';
-const mist = '#8A8178';
-const linenDeep = '#E8E0D8';
-const linenLight = '#F7F3EF';
-const white = '#FFFFFF';
+const espresso = 'var(--ink-strong)';
+const charcoal = 'var(--ink-soft)';
+const mist = 'var(--ink-faint)';
+const linenDeep = 'var(--hairline-firm)';
+const linenLight = 'var(--surface-sunken)';
+const white = 'var(--surface-raised)';
 
 type BranchCardProps = {
   title: string;
@@ -83,7 +83,7 @@ export default function BranchCard({
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
                 color: mist,
-                background: '#EFE7DE',
+                background: 'var(--surface-sunken)',
                 padding: '5px 10px',
                 whiteSpace: 'nowrap',
               }}

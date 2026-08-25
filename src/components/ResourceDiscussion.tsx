@@ -83,7 +83,7 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
         className="mb-6 flex items-center gap-2 text-lg"
         style={{
           fontFamily: "'Playfair Display', Georgia, serif",
-          color: '#1A1815',
+          color: 'var(--ink-strong)',
           fontWeight: 400,
         }}
       >
@@ -99,10 +99,10 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Ask a question or share your thoughts..."
             rows={3}
-            className="mb-3 w-full resize-none border border-black/10 bg-[#FBF8F3] px-4 py-3 focus:outline-none"
+            className="mb-3 w-full resize-none border border-black/10 bg-[var(--surface-sunken)] px-4 py-3 focus:outline-none"
             maxLength={1000}
             style={{
-              color: '#1A1815',
+              color: 'var(--ink-strong)',
               fontSize: '14px',
               lineHeight: 1.7,
             }}
@@ -111,21 +111,21 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
             type="submit"
             disabled={submitting || !newComment.trim()}
             className="flex items-center gap-2 px-5 py-2 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ background: '#1A1815', color: '#FAFAF8' }}
+            style={{ background: '#1A1815', color: 'var(--surface-page)' }}
           >
             <Send className="w-4 h-4" />
             {submitting ? 'Posting...' : 'Post Comment'}
           </button>
         </form>
       ) : (
-        <div className="mb-6 border border-black/8 bg-[#FBF8F3] p-5 text-center">
-          <p className="mb-3 text-sm" style={{ color: '#5A5750' }}>
+        <div className="mb-6 border border-black/8 bg-[var(--surface-sunken)] p-5 text-center">
+          <p className="mb-3 text-sm" style={{ color: 'var(--ink-soft)' }}>
             Sign in or create an account to join the discussion.
           </p>
           <Link
             href="/sign-in"
             className="inline-flex items-center gap-2 px-5 py-2 text-sm transition-all"
-            style={{ background: '#1A1815', color: '#FAFAF8' }}
+            style={{ background: '#1A1815', color: 'var(--surface-page)' }}
           >
             Open account page
           </Link>
@@ -135,7 +135,7 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
       {/* Comments List */}
       {loading ? (
         <div className="text-center py-8">
-          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-[3px] border-[#D8D0C5] border-t-transparent" />
+          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-[3px] border-[var(--hairline-firm)] border-t-transparent" />
         </div>
       ) : comments.length === 0 ? (
         <div className="py-8 text-center" style={{ color: '#8F877D' }}>
@@ -145,12 +145,12 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
         <div className="space-y-4">
           {comments.map((comment) => (
             <div key={comment.id} className="flex gap-3 border-b border-black/6 pb-4">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#F3F1EE]">
-                <User className="w-4 h-4" style={{ color: '#5A5750' }} />
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[var(--surface-sunken)]">
+                <User className="w-4 h-4" style={{ color: 'var(--ink-soft)' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium" style={{ color: '#1A1815' }}>
+                  <span className="text-sm font-medium" style={{ color: 'var(--ink-strong)' }}>
                     {comment.user_name}
                   </span>
                   <span className="flex items-center gap-1 text-xs" style={{ color: '#8F877D' }}>
@@ -158,7 +158,7 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
                     {timeAgo(comment.created_at)}
                   </span>
                 </div>
-                <p className="text-sm leading-7" style={{ color: '#5A5750' }}>{comment.body}</p>
+                <p className="text-sm leading-7" style={{ color: 'var(--ink-soft)' }}>{comment.body}</p>
               </div>
             </div>
           ))}

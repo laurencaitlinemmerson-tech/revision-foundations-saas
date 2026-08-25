@@ -26,7 +26,16 @@ type FitnessTableRow = {
   bone_mass: number;
 };
 
-const FALLBACK_TYPE = '__operator_fitness_reading__';
+/**
+ * The marker on a weigh-in stored in the workouts table.
+ *
+ * When `operator_fitness_readings` is unavailable, a reading is parked in
+ * `operator_workouts` under this type. Those rows are weigh-ins wearing a
+ * workout's shape, so anything listing actual workouts has to exclude them —
+ * which is why this is exported rather than private.
+ */
+export const FITNESS_FALLBACK_TYPE = '__operator_fitness_reading__';
+const FALLBACK_TYPE = FITNESS_FALLBACK_TYPE;
 const FALLBACK_SOURCE = 'operator_fitness_fallback';
 
 function num(value: unknown, fallback = 0) {

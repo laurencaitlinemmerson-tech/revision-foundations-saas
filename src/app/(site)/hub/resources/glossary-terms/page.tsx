@@ -13,8 +13,8 @@ const CSS = `
 .gl-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -32,17 +32,17 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   text-decoration: none;
   margin-bottom: 44px;
 }
-.gl-back:hover { color: #555; }
+.gl-back:hover { color: var(--ink-soft); }
 
 .gl-kicker {
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 14px;
 }
 
@@ -51,7 +51,7 @@ const CSS = `
   font-size: 56px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 22px;
   letter-spacing: -0.01em;
 }
@@ -59,7 +59,7 @@ const CSS = `
 .gl-standfirst {
   font-size: 17px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.68;
   max-width: 680px;
   margin-bottom: 14px;
@@ -67,16 +67,16 @@ const CSS = `
 
 .gl-byline {
   font-size: 10px;
-  color: #aaa;
+  color: var(--ink-faint);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 24px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 36px;
 }
 
 .gl-pearl {
-  background: #FAEEDA;
+  background: var(--amber-50);
   padding: 14px 18px;
   margin-bottom: 40px;
 }
@@ -84,12 +84,12 @@ const CSS = `
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #633806;
+  color: var(--amber-800);
   margin-bottom: 6px;
 }
 .gl-pearl p {
   font-size: 12px;
-  color: #633806;
+  color: var(--amber-800);
   line-height: 1.6;
   font-weight: 300;
   margin: 0;
@@ -98,17 +98,17 @@ const CSS = `
 .gl-search {
   width: 100%;
   padding: 12px 18px;
-  border: 0.5px solid rgba(0,0,0,0.18);
-  background: #FAFAF8;
+  border: 0.5px solid var(--hairline-firm);
+  background: var(--surface-page);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
-  color: #1A1815;
+  color: var(--ink-strong);
   outline: none;
   margin-bottom: 24px;
   border-radius: 0;
 }
-.gl-search::placeholder { color: #aaa; }
-.gl-search:focus { border-color: rgba(0,0,0,0.32); }
+.gl-search::placeholder { color: var(--ink-faint); }
+.gl-search:focus { border-color: var(--border-strong); }
 
 .gl-letter-nav {
   display: flex;
@@ -135,17 +135,17 @@ const CSS = `
   color: #fff;
 }
 .gl-letter-btn-available {
-  background: #FAFAF8;
-  border: 0.5px solid rgba(0,0,0,0.18);
-  color: #2C2A27;
+  background: var(--surface-page);
+  border: 0.5px solid var(--hairline-firm);
+  color: var(--ink-mid);
 }
 .gl-letter-btn-available:hover {
-  background: #F5F3F0;
+  background: var(--surface-sunken);
 }
 .gl-letter-btn-disabled {
-  background: #F5F3F0;
-  border: 0.5px solid rgba(0,0,0,0.08);
-  color: #ccc;
+  background: var(--surface-sunken);
+  border: 0.5px solid var(--hairline-soft);
+  color: var(--ink-faint);
   cursor: default;
 }
 
@@ -157,41 +157,41 @@ const CSS = `
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  background: #FAFAF8;
+  border: 0.5px solid var(--hairline-firm);
+  background: var(--surface-page);
   cursor: pointer;
   text-align: left;
   transition: background 0.12s;
 }
-.gl-letter-header:hover { background: #F5F3F0; }
-.gl-letter-header-open { background: #F5F0E8 !important; }
+.gl-letter-header:hover { background: var(--surface-sunken); }
+.gl-letter-header-open { background: var(--surface-sunken) !important; }
 
 .gl-letter-header-left { display: flex; align-items: center; gap: 14px; }
 .gl-letter-numeral {
   font-family: 'Playfair Display', serif;
   font-size: 26px;
   font-style: italic;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1;
 }
 .gl-letter-count {
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
 }
-.gl-letter-chevron { color: #aaa; font-size: 14px; line-height: 1; }
+.gl-letter-chevron { color: var(--ink-faint); font-size: 14px; line-height: 1; }
 
 .gl-terms-panel {
-  border-left: 0.5px solid rgba(0,0,0,0.12);
-  border-right: 0.5px solid rgba(0,0,0,0.12);
-  border-bottom: 0.5px solid rgba(0,0,0,0.12);
+  border-left: 0.5px solid var(--hairline-firm);
+  border-right: 0.5px solid var(--hairline-firm);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .gl-term-row {
   display: grid;
   grid-template-columns: 180px 1fr;
-  border-bottom: 0.5px solid rgba(0,0,0,0.07);
+  border-bottom: 0.5px solid var(--hairline-soft);
   padding: 0;
 }
 .gl-term-row:last-child { border-bottom: none; }
@@ -200,8 +200,8 @@ const CSS = `
   padding: 12px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #1A1815;
-  border-right: 0.5px solid rgba(0,0,0,0.07);
+  color: var(--ink-strong);
+  border-right: 0.5px solid var(--hairline-soft);
   line-height: 1.45;
   display: flex;
   align-items: flex-start;
@@ -210,7 +210,7 @@ const CSS = `
 .gl-term-def {
   padding: 12px 16px;
   font-size: 12px;
-  color: #5A5750;
+  color: var(--ink-soft);
   font-weight: 300;
   line-height: 1.6;
   display: flex;
@@ -220,13 +220,13 @@ const CSS = `
 .gl-empty {
   text-align: center;
   padding: 60px 0;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
 }
-.gl-empty p { font-size: 14px; color: #aaa; margin-bottom: 12px; }
+.gl-empty p { font-size: 14px; color: var(--ink-faint); margin-bottom: 12px; }
 .gl-empty button {
   background: transparent;
   border: none;
-  color: #1A1815;
+  color: var(--ink-strong);
   font-size: 13px;
   cursor: pointer;
   text-decoration: underline;
@@ -237,7 +237,7 @@ const CSS = `
   .gl-wrap { padding: 24px 20px 60px; }
   .gl-headline { font-size: 36px; }
   .gl-term-row { grid-template-columns: 1fr; }
-  .gl-term-name { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.07); padding-bottom: 6px; }
+  .gl-term-name { border-right: none; border-bottom: 0.5px solid var(--hairline-soft); padding-bottom: 6px; }
   .gl-term-def { padding-top: 6px; }
 }
 `;

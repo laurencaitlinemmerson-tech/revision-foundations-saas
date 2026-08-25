@@ -202,7 +202,7 @@ export default function RevisionWeekPlanner() {
               padding: '9px 20px', cursor: icsState === 'done' ? 'default' : 'pointer',
               border: 'none', whiteSpace: 'nowrap',
               background: icsState === 'done' ? '#6B9E87' : '#1A1815',
-              color: '#FAFAF8',
+              color: 'var(--surface-page)',
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={e => { if (icsState !== 'done') { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLButtonElement).style.background = '#2C2A27'; } }}
@@ -216,8 +216,8 @@ export default function RevisionWeekPlanner() {
             style={{
               fontFamily: serif, fontSize: '11px', letterSpacing: '0.08em',
               padding: '9px 20px', cursor: 'pointer',
-              border: '0.5px solid rgba(0,0,0,0.14)',
-              background: '#fff', color: ink, whiteSpace: 'nowrap',
+              border: '0.5px solid var(--hairline-firm)',
+              background: 'var(--surface-raised)', color: ink, whiteSpace: 'nowrap',
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLButtonElement).style.background = '#F5F3F0'; }}
@@ -235,7 +235,7 @@ export default function RevisionWeekPlanner() {
             key={d.day}
             className="rwp-day-tile"
             style={{
-              background: '#fff',
+              background: 'var(--surface-raised)',
               border: border,
               opacity: d.rest ? 0.7 : 1,
             }}
@@ -344,7 +344,7 @@ export default function RevisionWeekPlanner() {
         }
         .rwp-day-tile:hover {
           transform: translateY(-2px);
-          border-color: rgba(0,0,0,0.16) !important;
+          border-color: var(--hairline-firm) !important;
         }
         @media (prefers-reduced-motion: reduce) {
           .rwp-day-tile { transition: none; }

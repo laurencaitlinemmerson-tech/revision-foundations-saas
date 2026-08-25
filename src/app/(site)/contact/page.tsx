@@ -9,20 +9,20 @@ import Footer from '@/components/Footer';
 const serif   = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
 
-const ink      = '#1A1815';
-const inkMid   = '#5A5750';
-const inkLight = '#9C8878';
-const cream    = '#FAFAF8';
-const parchment = '#F5F3F0';
-const panel    = '#FFFFFF';
+const ink      = 'var(--ink-strong)';
+const inkMid   = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
+const cream    = 'var(--surface-page)';
+const parchment = 'var(--surface-sunken)';
+const panel    = 'var(--surface-raised)';
 const border   = 'rgba(0,0,0,0.08)';
-const tagBg    = '#F3F1EE';
-const green    = '#1E8A4D';
-const greenBg  = '#E6F4EA';
-const teal     = '#2F8A7E';
-const tealBg   = '#E6F3F1';
-const blue     = '#2E67B1';
-const blueBg   = '#E7EEF8';
+const tagBg    = 'var(--surface-sunken)';
+const green    = 'var(--state-correct-text)';
+const greenBg  = 'var(--state-correct-surface)';
+const teal     = 'var(--topic-skills-text)';
+const tealBg   = 'var(--topic-skills-surface)';
+const blue     = 'var(--topic-assessment-text)';
+const blueBg   = 'var(--topic-assessment-surface)';
 
 const wrap = '1120px';
 const supportEmail = 'lauren@nurselab.co.uk';
@@ -112,7 +112,7 @@ export default function ContactPage() {
     fontSize: '14px',
     color: ink,
     background: parchment,
-    border: `0.5px solid ${focused === field ? '#B8AD9E' : border}`,
+    border: `0.5px solid ${focused === field ? 'var(--border-strong)' : border}`,
     padding: '13px 16px',
     width: '100%',
     outline: 'none',
@@ -620,7 +620,7 @@ export default function ContactPage() {
                     <div
                       style={{
                         padding: '14px 16px',
-                        background: '#F6E6E6',
+                        background: 'var(--state-incorrect-surface)',
                         border: '0.5px solid #E1B1B1',
                         marginBottom: '20px',
                       }}
@@ -658,11 +658,11 @@ export default function ContactPage() {
 
       <style>{`
         .contact-input::placeholder {
-          color: #B8AD9E;
+          color: var(--border-strong);
           font-family: 'Inter', -apple-system, sans-serif;
         }
         .contact-input:focus {
-          background: #FFFFFF !important;
+          background: var(--surface-raised) !important;
         }
 
         .contact-method-row {

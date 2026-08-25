@@ -1,6 +1,9 @@
 import { createServiceClient, Entitlement } from './supabase';
 
-export type Product = 'osce' | 'quiz' | 'bundle';
+export type Product = 'osce' | 'quiz' | 'bundle' | 'template';
+
+// The Notion template is a standalone digital product: the app bundle does not include it.
+const STANDALONE_PRODUCTS: readonly Product[] = ['template'];
 
 export async function checkEntitlement(
   clerkUserId: string,
@@ -9,16 +12,18 @@ export async function checkEntitlement(
   try {
     const supabase = createServiceClient();
 
-    // Check for bundle first (gives access to everything)
-    const { data: bundleEntitlement } = await supabase
-      .from('entitlements')
-      .select('*')
-      .eq('clerk_user_id', clerkUserId)
-      .eq('product', 'bundle')
-      .eq('status', 'active')
-      .single();
+    // Bundle grants the app products, but not standalone ones
+    if (!STANDALONE_PRODUCTS.includes(product)) {
+      const { data: bundleEntitlement } = await supabase
+        .from('entitlements')
+        .select('*')
+        .eq('clerk_user_id', clerkUserId)
+        .eq('product', 'bundle')
+        .eq('status', 'active')
+        .single();
 
-    if (bundleEntitlement) return true;
+      if (bundleEntitlement) return true;
+    }
 
     // Check for specific product
     const { data: productEntitlement } = await supabase
@@ -108,8 +113,11 @@ export function hasAccessToContent(
   entitlements: Entitlement[],
   product: Product
 ): boolean {
-  // Bundle gives access to everything
-  if (entitlements.some(e => e.product === 'bundle' && e.status === 'active')) {
+  // Bundle grants the app products, but not standalone ones
+  if (
+    !STANDALONE_PRODUCTS.includes(product) &&
+    entitlements.some(e => e.product === 'bundle' && e.status === 'active')
+  ) {
     return true;
   }
   // Check specific product

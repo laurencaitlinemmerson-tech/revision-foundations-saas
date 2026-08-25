@@ -11,8 +11,8 @@ const CSS = `
 .how-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -31,18 +31,18 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   text-decoration: none;
   margin-bottom: 44px;
 }
-.how-back:hover { color: #555; }
+.how-back:hover { color: var(--ink-soft); }
 
 /* Masthead */
 .how-kicker {
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 14px;
 }
 
@@ -51,7 +51,7 @@ const CSS = `
   font-size: 56px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 22px;
   letter-spacing: -0.01em;
   max-width: 11ch;
@@ -60,7 +60,7 @@ const CSS = `
 .how-standfirst {
   font-size: 17px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.68;
   max-width: 700px;
   margin-bottom: 14px;
@@ -68,17 +68,17 @@ const CSS = `
 
 .how-byline {
   font-size: 10px;
-  color: #aaa;
+  color: var(--ink-faint);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 36px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 52px;
 }
 
 /* Pearl */
 .how-pearl {
-  background: #FAEEDA;
+  background: var(--amber-50);
   padding: 14px 18px;
   margin-bottom: 40px;
 }
@@ -87,13 +87,13 @@ const CSS = `
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #633806;
+  color: var(--amber-800);
   margin-bottom: 6px;
 }
 
 .how-pearl p {
   font-size: 12px;
-  color: #633806;
+  color: var(--amber-800);
   line-height: 1.6;
   font-weight: 300;
   margin: 0;
@@ -103,13 +103,13 @@ const CSS = `
 .how-golden {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 60px;
 }
 
 .how-golden-cell {
   padding: 22px 20px 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.12);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .how-golden-cell:last-child { border-right: none; }
 
@@ -117,7 +117,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 30px;
   font-style: italic;
-  color: #c8c4be;
+  color: var(--hairline-firm);
   display: block;
   margin-bottom: 6px;
   line-height: 1;
@@ -126,7 +126,7 @@ const CSS = `
 .how-golden-title {
   font-size: 10px;
   font-weight: 400;
-  color: #2C2A27;
+  color: var(--ink-mid);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 7px;
@@ -144,7 +144,7 @@ const CSS = `
   display: grid;
   grid-template-columns: 96px 1fr;
   margin-bottom: 52px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
   padding-top: 36px;
 }
 
@@ -153,7 +153,7 @@ const CSS = `
   flex-direction: column;
   align-items: flex-start;
   padding-right: 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
   padding-top: 4px;
 }
 
@@ -184,7 +184,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 3px;
   line-height: 1.2;
 }
@@ -192,7 +192,7 @@ const CSS = `
 .how-step-question {
   font-size: 13px;
   font-style: italic;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 22px;
 }
 
@@ -200,13 +200,13 @@ const CSS = `
 .how-content-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 18px;
 }
 
 .how-content-col {
   padding: 14px 14px 18px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .how-content-col:last-child { border-right: none; }
 
@@ -214,10 +214,10 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   padding-bottom: 9px;
   margin-bottom: 11px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .how-col-list {
@@ -228,7 +228,7 @@ const CSS = `
 
 .how-col-list li {
   font-size: 12px;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.55;
   padding: 2px 0;
   font-weight: 300;
@@ -239,14 +239,14 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #ccc;
+  color: var(--ink-faint);
 }
 
 .how-tag-label {
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 7px;
 }
 
@@ -259,8 +259,8 @@ const CSS = `
 
 .how-tag {
   font-size: 11px;
-  background: #F5F3F0;
-  color: #5A5750;
+  background: var(--surface-sunken);
+  color: var(--ink-soft);
   padding: 3px 11px;
   border-radius: 0;
   font-weight: 300;
@@ -277,7 +277,7 @@ const CSS = `
   display: inline-flex;
   align-items: center;
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   padding: 11px 20px;
   text-decoration: none;
   font-size: 13px;
@@ -287,7 +287,7 @@ const CSS = `
   display: inline-flex;
   align-items: center;
   padding: 11px 0;
-  color: #2C2A27;
+  color: var(--ink-mid);
   text-decoration: underline;
   text-underline-offset: 4px;
   font-size: 13px;
@@ -297,13 +297,13 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 18px;
   padding-top: 36px;
   margin-top: 52px;
   padding-bottom: 16px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .how-anchor-target {
@@ -313,12 +313,12 @@ const CSS = `
 .how-mini-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
 }
 
 .how-mini-cell {
   padding: 22px 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .how-mini-cell:last-child { border-right: none; }
 
@@ -326,25 +326,25 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   margin-bottom: 10px;
 }
 
 .how-mini-text {
   font-size: 13px;
   line-height: 1.7;
-  color: #5A5750;
+  color: var(--ink-soft);
 }
 
 .how-checklist-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
 }
 
 .how-checklist-col {
   padding: 22px 26px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 .how-checklist-col:last-child { border-right: none; }
 
@@ -352,10 +352,10 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   margin-bottom: 16px;
   padding-bottom: 10px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  border-bottom: 0.5px solid var(--hairline-soft);
 }
 
 .how-checklist-list {
@@ -366,7 +366,7 @@ const CSS = `
 
 .how-checklist-list li {
   font-size: 13px;
-  color: #555;
+  color: var(--ink-soft);
   line-height: 1.55;
   font-weight: 300;
   padding: 6px 0 6px 12px;
@@ -377,18 +377,18 @@ const CSS = `
   content: '–';
   position: absolute;
   left: 0;
-  color: #bbb;
+  color: var(--ink-faint);
 }
 
 /* Colour system */
 .how-letter-s { color: #5A4A9B; }
-.how-badge-s { background: #EEEAFE; color: #43348A; }
-.how-letter-o { color: #0F6E56; }
-.how-badge-o { background: #E1F5EE; color: #085041; }
-.how-letter-q { color: #993C1D; }
-.how-badge-q { background: #FAECE7; color: #712B13; }
-.how-letter-r { color: #5F5E5A; }
-.how-badge-r { background: #F1EFE8; color: #444441; }
+.how-badge-s { background: var(--topic-assessment-surface); color: #43348A; }
+.how-letter-o { color: var(--teal-600); }
+.how-badge-o { background: var(--teal-50); color: var(--teal-800); }
+.how-letter-q { color: var(--coral-600); }
+.how-badge-q { background: var(--coral-50); color: var(--coral-800); }
+.how-letter-r { color: var(--gray-600); }
+.how-badge-r { background: var(--surface-sunken); color: var(--gray-800); }
 
 @media (max-width: 980px) {
   .how-golden,
@@ -428,7 +428,7 @@ const CSS = `
   .how-mini-cell,
   .how-checklist-col {
     border-right: none;
-    border-bottom: 0.5px solid rgba(0,0,0,0.1);
+    border-bottom: 0.5px solid var(--hairline-firm);
   }
 
   .how-golden-cell:last-child,
@@ -445,7 +445,7 @@ const CSS = `
 
   .how-step-sidebar {
     border-right: none;
-    border-bottom: 0.5px solid rgba(0,0,0,0.1);
+    border-bottom: 0.5px solid var(--hairline-firm);
     padding-right: 0;
     padding-bottom: 14px;
   }

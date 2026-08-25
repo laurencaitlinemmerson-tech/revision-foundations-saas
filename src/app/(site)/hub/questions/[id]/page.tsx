@@ -27,16 +27,16 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
 
   if (!question) {
     return (
-      <div style={{ fontFamily: "'Inter', sans-serif", background: '#FAFAF8', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ fontFamily: "'Inter', sans-serif", background: 'var(--surface-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <main style={{ flex: 1, maxWidth: '1180px', margin: '0 auto', width: '100%', padding: '72px 48px 96px' }}>
-          <div style={{ border: '0.5px solid rgba(0,0,0,0.1)', padding: '48px 40px', textAlign: 'center', maxWidth: '560px', margin: '0 auto' }}>
-            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', marginBottom: '14px' }}>Q&amp;A board</p>
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '28px', fontWeight: 400, color: '#1A1815', marginBottom: '16px' }}>
+          <div style={{ border: '0.5px solid var(--hairline-firm)', padding: '48px 40px', textAlign: 'center', maxWidth: '560px', margin: '0 auto' }}>
+            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-faint)', marginBottom: '14px' }}>Q&amp;A board</p>
+            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '28px', fontWeight: 400, color: 'var(--ink-strong)', marginBottom: '16px' }}>
               Question not found
             </h1>
             <Link
               href="/hub/questions"
-              style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#1A1815', textDecoration: 'none', border: '0.5px solid rgba(0,0,0,0.12)', padding: '9px 18px', display: 'inline-block' }}
+              style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-strong)', textDecoration: 'none', border: '0.5px solid var(--hairline-firm)', padding: '9px 18px', display: 'inline-block' }}
             >
               ← Back to Q&amp;A
             </Link>

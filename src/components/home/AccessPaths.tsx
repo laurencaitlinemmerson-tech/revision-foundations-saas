@@ -15,9 +15,9 @@ import {
 } from './styles';
 
 const toneMap = {
-  free:  { color: '#8B6B52', background: '#F3ECE4' },
-  osce:  { color: '#2F8A7E', background: '#E6F3F1' },
-  quiz:  { color: '#2E67B1', background: '#E7EEF8' },
+  free:  { color: '#8B6B52', background: 'var(--surface-sunken)' },
+  osce:  { color: 'var(--topic-skills-text)', background: 'var(--topic-skills-surface)' },
+  quiz:  { color: 'var(--topic-assessment-text)', background: 'var(--topic-assessment-surface)' },
   bundle:{ color: ink,       background: parchment  },
 };
 
@@ -70,7 +70,7 @@ export default function AccessPaths() {
                   fontSize: '11px',
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase' as const,
-                  color: '#FAFAF8',
+                  color: 'var(--surface-page)',
                   background: ink,
                   padding: '5px 10px',
                 }}
@@ -117,7 +117,7 @@ export default function AccessPaths() {
                     fontFamily: serif,
                     fontSize: '11px',
                     color: inkMid,
-                    background: '#E8E0D4',
+                    background: 'var(--surface-sunken)',
                     padding: '5px 10px',
                     letterSpacing: '0.02em',
                   }}
@@ -158,7 +158,7 @@ export default function AccessPaths() {
                 fontFamily: serif,
                 fontSize: '13px',
                 background: ink,
-                color: '#FAFAF8',
+                color: 'var(--surface-page)',
                 padding: '11px 22px',
                 textDecoration: 'none',
                 letterSpacing: '0.02em',

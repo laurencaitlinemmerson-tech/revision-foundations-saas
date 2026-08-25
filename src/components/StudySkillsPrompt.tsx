@@ -26,10 +26,10 @@ export default function StudySkillsPrompt({
 }: StudySkillsPromptProps) {
   const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   const display = "'Playfair Display', Georgia, serif";
-  const ink = '#1C1510';
-  const inkMid = '#5C4A38';
-  const cream = '#FAFAF8';
-  const border = 'rgba(28, 21, 16, 0.1)';
+  const ink = 'var(--ink-strong)';
+  const inkMid = 'var(--ink-soft)';
+  const cream = 'var(--surface-page)';
+  const border = 'var(--hairline-firm)';
 
   const buttonStyle: CSSProperties = {
     display: 'inline-flex',

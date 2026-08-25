@@ -19,8 +19,8 @@ const CSS = `
 
 .hub-page {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -39,7 +39,7 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   margin-bottom: 32px;
 }
 
@@ -48,7 +48,7 @@ const CSS = `
   font-size: clamp(2.6rem, 5vw, 4rem);
   font-weight: 400;
   line-height: 1.06;
-  color: #1A1815;
+  color: var(--ink-strong);
   letter-spacing: -0.01em;
   margin-bottom: 36px;
   max-width: 14ch;
@@ -57,7 +57,7 @@ const CSS = `
 .hub-standfirst {
   font-size: 16px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   max-width: 560px;
   margin-bottom: 40px;
@@ -65,7 +65,7 @@ const CSS = `
 
 .hub-divider {
   border: none;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
   margin: 44px 0 84px;
 }
 
@@ -73,7 +73,7 @@ const CSS = `
 .hub-branches {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 84px;
 }
 
@@ -83,19 +83,19 @@ const CSS = `
   justify-content: space-between;
   padding: 48px 52px 40px;
   text-decoration: none;
-  border-right: 0.5px solid rgba(0,0,0,0.12);
+  border-right: 0.5px solid var(--hairline-firm);
   transition: background 0.15s;
   position: relative;
   overflow: hidden;
 }
 .hub-branch:last-child { border-right: none; }
-.hub-branch:hover { background: #F5F3F0; }
+.hub-branch:hover { background: var(--surface-sunken); }
 
 .hub-branch-eyebrow {
   font-size: 9px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   margin-bottom: 16px;
 }
 
@@ -117,7 +117,7 @@ const CSS = `
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 28px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1.15;
   margin-bottom: 12px;
 }
@@ -125,7 +125,7 @@ const CSS = `
 .hub-branch-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   margin-bottom: 24px;
   max-width: 320px;
@@ -147,7 +147,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-style: italic;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1;
 }
 
@@ -155,7 +155,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
 }
 
 .hub-branch-topics {
@@ -167,9 +167,9 @@ const CSS = `
 
 .hub-branch-topic {
   font-size: 10px;
-  color: #5A5750;
+  color: var(--ink-soft);
   background: transparent;
-  border: 0.5px solid rgba(0,0,0,0.15);
+  border: 0.5px solid var(--hairline-firm);
   padding: 3px 9px;
   border-radius: 2px;
   font-weight: 300;
@@ -180,7 +180,7 @@ const CSS = `
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #1A1815;
+  color: var(--ink-strong);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -198,14 +198,14 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   margin-bottom: 16px;
 }
 
 .hub-more-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
 }
 
 .hub-more-grid:has(:nth-child(4)) {
@@ -220,7 +220,7 @@ const CSS = `
 
 .hub-more-item {
   padding: 32px 36px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
   text-decoration: none;
   transition: background 0.12s;
   display: flex;
@@ -228,12 +228,12 @@ const CSS = `
   gap: 12px;
 }
 .hub-more-item:last-child { border-right: none; }
-.hub-more-item:hover { background: #F5F3F0; }
+.hub-more-item:hover { background: var(--surface-sunken); }
 
 .hub-more-item-title {
   font-size: 14px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -249,8 +249,8 @@ const CSS = `
 
 /* Mock Exams featured section */
 .hub-mock-section {
-  border: 0.5px solid rgba(0,0,0,0.12);
-  background: #FBF8F3;
+  border: 0.5px solid var(--hairline-firm);
+  background: var(--surface-sunken);
   padding: 60px 64px 56px;
   margin-bottom: 84px;
 }
@@ -269,7 +269,7 @@ const CSS = `
 .hub-mock-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   max-width: 520px;
   margin-bottom: 20px;
@@ -281,7 +281,7 @@ const CSS = `
   gap: 10px;
   text-decoration: none;
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   padding: 12px 24px;
   font-size: 11px;
   letter-spacing: 0.14em;
@@ -292,17 +292,17 @@ const CSS = `
   transition: background 0.15s;
 }
 .hub-mock-cta:hover { background: #3a2010; }
-.hub-mock-cta .hub-branch-arrow { color: #FAFAF8; }
+.hub-mock-cta .hub-branch-arrow { color: var(--surface-page); }
 
 @media (max-width: 768px) {
   .hub-main { padding: 48px 20px 64px; }
   .hub-branches { grid-template-columns: 1fr; }
-  .hub-branch { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
+  .hub-branch { border-right: none; border-bottom: 0.5px solid var(--hairline-firm); }
   .hub-branch:last-child { border-bottom: none; }
   .hub-mock-section { padding: 28px 24px; }
   .hub-mock-inner { flex-direction: column; align-items: flex-start; gap: 24px; }
   .hub-more-grid { grid-template-columns: 1fr; }
-  .hub-more-item { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
+  .hub-more-item { border-right: none; border-bottom: 0.5px solid var(--hairline-firm); }
   .hub-more-item:last-child { border-bottom: none; }
   .hub-branch-numeral { font-size: 60px; }
 }
@@ -436,7 +436,7 @@ export default function HubPage() {
             <Link key={item.href} href={item.href} className="hub-more-item">
               <span className="hub-more-item-title">
                 {item.title}
-                <span style={{ color: '#aaa', fontSize: '12px' }}>→</span>
+                <span style={{ color: 'var(--ink-faint)', fontSize: '12px' }}>→</span>
               </span>
               <span className="hub-more-item-desc">{item.desc}</span>
             </Link>

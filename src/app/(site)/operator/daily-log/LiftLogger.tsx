@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { storedOperatorPassword } from '../OperatorGate';
 import type { Lift } from './data';
+import { WorkoutRestTimer } from '@/components/operator/fitness/WorkoutRestTimer';
 
 /**
  * The lift log's entry form.
@@ -19,6 +20,8 @@ const INK = '#1A1A18';
 const MUTED = '#8E8A82';
 const GOLD = '#C06C84';
 const LINE = 'rgba(26,24,21,0.12)';
+
+const COMMON_PRESETS = ['Back Squat', 'Bench Press', 'RDL', 'Overhead Press', 'Pull-Ups', 'Hip Thrust'];
 
 type Parsed = { reps: number; weightKg: number };
 
@@ -65,7 +68,7 @@ export default function LiftLogger({
   // Offer the movements already logged, so naming stays consistent enough for
   // per-movement bests to group correctly.
   const known = useMemo(
-    () => [...new Set((lifts ?? []).map((l) => l.exercise))].sort(),
+    () => [...new Set([...(lifts ?? []).map((l) => l.exercise), ...COMMON_PRESETS])].sort(),
     [lifts],
   );
 
@@ -114,6 +117,32 @@ export default function LiftLogger({
 
   return (
     <div>
+      {/* 1-Tap Quick Movement Chips */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+        <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: MUTED, alignSelf: 'center' }}>
+          Quick preset:
+        </span>
+        {COMMON_PRESETS.map((preset) => (
+          <button
+            key={preset}
+            type="button"
+            onClick={() => setExercise(preset)}
+            style={{
+              padding: '3px 8px',
+              borderRadius: 4,
+              border: `0.5px solid ${exercise === preset ? GOLD : LINE}`,
+              background: exercise === preset ? '#FAF0F3' : '#FFFFFF',
+              color: exercise === preset ? '#8A4459' : MUTED,
+              fontSize: 11,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {preset}
+          </button>
+        ))}
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr) auto', gap: 10, alignItems: 'stretch' }}>
         <input
           list="lift-known"
@@ -160,6 +189,9 @@ export default function LiftLogger({
       </p>
 
       {error && <p style={{ margin: '8px 0 0', fontSize: 11.5, color: '#AA7F68' }}>{error}</p>}
+
+      {/* Built-In Rest Timer */}
+      <WorkoutRestTimer compact />
     </div>
   );
 }

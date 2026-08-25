@@ -16,22 +16,22 @@ type CardTone = Product | 'free';
 // design tokens
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const inkMid = '#5A5750';
-const inkLight = '#9C8878';
-const cream = '#FAFAF8';
-const parchment = '#F5F3F0';
-const panel = '#FFFFFF';
-const border = 'rgba(0,0,0,0.08)';
-const tagBg = '#F3F1EE';
-const green = '#1E8A4D';
-const greenBg = '#E6F4EA';
-const teal = '#2F8A7E';
-const tealBg = '#E6F3F1';
-const blue = '#2E67B1';
-const blueBg = '#E7EEF8';
-const coral = '#D96C55';
-const coralBg = '#F8E7E2';
+const ink = 'var(--ink-strong)';
+const inkMid = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
+const cream = 'var(--surface-page)';
+const parchment = 'var(--surface-sunken)';
+const panel = 'var(--surface-raised)';
+const border = 'var(--hairline-soft)';
+const tagBg = 'var(--surface-sunken)';
+const green = 'var(--state-correct-text)';
+const greenBg = 'var(--state-correct-surface)';
+const teal = 'var(--topic-skills-text)';
+const tealBg = 'var(--topic-skills-surface)';
+const blue = 'var(--topic-assessment-text)';
+const blueBg = 'var(--topic-assessment-surface)';
+const coral = 'var(--state-incorrect-text)';
+const coralBg = 'var(--state-incorrect-surface)';
 const wrap = '1120px';
 
 const sectionLabelStyle: CSSProperties = {
@@ -647,6 +647,35 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* Notion template — a separate product from the app tiers above */}
+      <section style={{ padding: '36px 24px', borderBottom: `0.5px solid ${border}` }}>
+        <div style={{ maxWidth: wrap, margin: '0 auto' }}>
+          <div
+            className="pricing-preview-strip"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0,1fr) auto',
+              gap: '24px',
+              alignItems: 'center',
+            }}
+          >
+            <div>
+              <p style={sectionLabelStyle}>Also available</p>
+              <h2 style={{ fontFamily: display, fontSize: 'clamp(1.4rem, 2.5vw, 1.8rem)', fontWeight: 400, color: ink, lineHeight: 1.15, marginBottom: '10px' }}>
+                The Nursing Student Dashboard — £9.99
+              </h2>
+              <p style={{ fontFamily: serif, fontSize: '15px', lineHeight: 1.85, fontWeight: 300, color: inkMid, maxWidth: '560px', margin: 0 }}>
+                A Notion template, not part of the bundle. Tracks your degree classification,
+                placement hours, NMC proficiencies and assignments in one linked system.
+              </p>
+            </div>
+            <Link href="/template" style={secondaryBtn}>
+              See the template <ArrowRight size={15} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {!isPro && (
         <section style={{ padding: '36px 24px', borderBottom: `0.5px solid ${border}` }}>
           <div style={{ maxWidth: wrap, margin: '0 auto' }}>
@@ -852,14 +881,14 @@ export default function PricingPage() {
 
 
       <style>{`
-        .waitlist-input::placeholder { color: #B8AD9E; }
-        .waitlist-input:focus { border-color: #B8AD9E !important; background: #fff !important; }
+        .waitlist-input::placeholder { color: var(--border-strong); }
+        .waitlist-input:focus { border-color: var(--border-strong) !important; background: var(--surface-raised) !important; }
 
         .pricing-shape-card {
           transition: border-color 0.2s ease;
         }
         .pricing-shape-card:hover {
-          border-color: #B8AD9E !important;
+          border-color: var(--border-strong) !important;
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }

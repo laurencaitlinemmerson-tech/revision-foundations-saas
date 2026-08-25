@@ -75,8 +75,8 @@ export default function SelfTestQuiz({
           onClick={() => setIsOpen(true)}
           style={{
             width: '100%',
-            background: '#F5F3F0',
-            border: '0.5px solid rgba(0,0,0,0.1)',
+            background: 'var(--surface-sunken)',
+            border: '0.5px solid var(--hairline-firm)',
             padding: '18px 24px',
             display: 'flex',
             alignItems: 'center',
@@ -85,33 +85,33 @@ export default function SelfTestQuiz({
             textAlign: 'left',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#EEEDFE')}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--purple-50)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = '#F5F3F0')}
         >
           <div>
-            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', marginBottom: '5px', fontWeight: 400 }}>
+            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-faint)', marginBottom: '5px', fontWeight: 400 }}>
               Quick self-test
             </p>
-            <p style={{ fontSize: '15px', fontWeight: 400, color: '#1A1815', fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <p style={{ fontSize: '15px', fontWeight: 400, color: 'var(--ink-strong)', fontFamily: "'Playfair Display', Georgia, serif" }}>
               {title}
             </p>
-            <p style={{ fontSize: '11px', color: '#999', fontWeight: 300, marginTop: '3px' }}>
+            <p style={{ fontSize: '11px', color: 'var(--ink-faint)', fontWeight: 300, marginTop: '3px' }}>
               {questions.length} questions
             </p>
           </div>
-          <span style={{ fontSize: '16px', color: '#aaa', flexShrink: 0, marginLeft: '16px' }}>→</span>
+          <span style={{ fontSize: '16px', color: 'var(--ink-faint)', flexShrink: 0, marginLeft: '16px' }}>→</span>
         </button>
       ) : (
-        <div style={{ border: '0.5px solid rgba(0,0,0,0.12)', background: '#FAFAF8' }}>
+        <div style={{ border: '0.5px solid var(--hairline-firm)', background: 'var(--surface-page)' }}>
           {/* Header */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '14px 24px',
-            borderBottom: '0.5px solid rgba(0,0,0,0.08)',
+            borderBottom: '0.5px solid var(--hairline-soft)',
           }}>
-            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', fontWeight: 400 }}>
+            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-faint)', fontWeight: 400 }}>
               Self-test
             </p>
             <button
@@ -120,7 +120,7 @@ export default function SelfTestQuiz({
                 fontSize: '10px',
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
-                color: '#aaa',
+                color: 'var(--ink-faint)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
@@ -137,10 +137,10 @@ export default function SelfTestQuiz({
                 {/* Progress */}
                 <div style={{ marginBottom: '22px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '7px' }}>
-                    <span style={{ fontSize: '10px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '10px', color: 'var(--ink-faint)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       {current + 1} of {questions.length}
                     </span>
-                    <span style={{ fontSize: '10px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '10px', color: 'var(--ink-faint)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       Score {score}
                     </span>
                   </div>
@@ -150,7 +150,7 @@ export default function SelfTestQuiz({
                 </div>
 
                 {/* Question */}
-                <p style={{ fontSize: '14px', fontWeight: 400, color: '#1A1815', lineHeight: 1.6, marginBottom: '16px' }}>
+                <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--ink-strong)', lineHeight: 1.6, marginBottom: '16px' }}>
                   {questions[current].question}
                 </p>
 
@@ -164,9 +164,9 @@ export default function SelfTestQuiz({
                     let color = '#2C2A27';
                     let opacity = 1;
                     if (revealed) {
-                      if (isCorrect) { bg = '#E1F5EE'; borderColor = '#0F6E56'; color = '#085041'; }
-                      else if (isSelected) { bg = '#FDF4F4'; borderColor = '#A32D2D'; color = '#5A3030'; }
-                      else { color = '#999'; opacity = 0.5; }
+                      if (isCorrect) { bg = 'var(--teal-50)'; borderColor = 'var(--teal-600)'; color = 'var(--teal-800)'; }
+                      else if (isSelected) { bg = '#FDF4F4'; borderColor = 'var(--red-600)'; color = '#5A3030'; }
+                      else { color = 'var(--ink-faint)'; opacity = 0.5; }
                     }
                     return (
                       <button
@@ -198,11 +198,11 @@ export default function SelfTestQuiz({
                 {revealed && questions[current].explanation && (
                   <div style={{
                     padding: '12px 14px',
-                    background: '#F5F3F0',
-                    borderLeft: '2px solid rgba(0,0,0,0.12)',
+                    background: 'var(--surface-sunken)',
+                    borderLeft: '2px solid var(--hairline-firm)',
                     marginBottom: '16px',
                   }}>
-                    <p style={{ fontSize: '12px', color: '#5A5750', fontWeight: 300, lineHeight: 1.65, margin: 0 }}>
+                    <p style={{ fontSize: '12px', color: 'var(--ink-soft)', fontWeight: 300, lineHeight: 1.65, margin: 0 }}>
                       {questions[current].explanation}
                     </p>
                   </div>
@@ -216,7 +216,7 @@ export default function SelfTestQuiz({
                       width: '100%',
                       padding: '11px 16px',
                       background: '#1A1815',
-                      color: '#FAFAF8',
+                      color: 'var(--surface-page)',
                       border: 'none',
                       fontSize: '10px',
                       letterSpacing: '0.14em',
@@ -231,21 +231,21 @@ export default function SelfTestQuiz({
             ) : (
               /* Results */
               <div style={{ textAlign: 'center', padding: '24px 0 16px' }}>
-                <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#aaa', marginBottom: '14px' }}>
+                <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-faint)', marginBottom: '14px' }}>
                   Result
                 </p>
                 <p style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
                   fontSize: '52px',
                   fontWeight: 400,
-                  color: '#1A1815',
+                  color: 'var(--ink-strong)',
                   lineHeight: 1,
                   marginBottom: '4px',
                 }}>
                   {score}
-                  <span style={{ fontSize: '24px', color: '#aaa', fontWeight: 300 }}>/{questions.length}</span>
+                  <span style={{ fontSize: '24px', color: 'var(--ink-faint)', fontWeight: 300 }}>/{questions.length}</span>
                 </p>
-                <p style={{ fontSize: '12px', color: '#5A5750', fontWeight: 300, marginTop: '10px', marginBottom: '28px', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '12px', color: 'var(--ink-soft)', fontWeight: 300, marginTop: '10px', marginBottom: '28px', lineHeight: 1.6 }}>
                   {scoreMsg()}
                 </p>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -253,12 +253,12 @@ export default function SelfTestQuiz({
                     onClick={reset}
                     style={{
                       padding: '9px 20px',
-                      border: '0.5px solid rgba(0,0,0,0.15)',
-                      background: '#fff',
+                      border: '0.5px solid var(--hairline-firm)',
+                      background: 'var(--surface-raised)',
                       fontSize: '10px',
                       letterSpacing: '0.12em',
                       textTransform: 'uppercase',
-                      color: '#5A5750',
+                      color: 'var(--ink-soft)',
                       cursor: 'pointer',
                     }}
                   >
@@ -273,7 +273,7 @@ export default function SelfTestQuiz({
                       fontSize: '10px',
                       letterSpacing: '0.12em',
                       textTransform: 'uppercase',
-                      color: '#FAFAF8',
+                      color: 'var(--surface-page)',
                       cursor: 'pointer',
                     }}
                   >

@@ -3,20 +3,20 @@ export const EDITORIAL_CSS = `
 .ed *, .ed *::before, .ed *::after { box-sizing: border-box; }
 
 .ed {
-  --ed-paper: #FAFAF8;
-  --ed-surface: #FBF8F3;
+  --ed-paper: var(--surface-page);
+  --ed-surface: var(--surface-sunken);
   --ed-cell: #FFFEFC;
   --ed-ink: #1A1815;
-  --ed-body: #5A5750;
+  --ed-body: var(--ink-soft);
   --ed-muted: #9A948C;
   --ed-line: rgba(26, 24, 21, 0.11);
   --ed-soft-line: rgba(26, 24, 21, 0.07);
-  --ed-blue: #185FA5;
+  --ed-blue: var(--blue-600);
   --ed-blue-soft: #EAF1FA;
-  --ed-green: #1C7A67;
+  --ed-green: var(--state-correct-text);
   --ed-green-soft: #E4F2EC;
-  --ed-gold: #633806;
-  --ed-gold-soft: #FAEEDA;
+  --ed-gold: var(--amber-800);
+  --ed-gold-soft: var(--amber-50);
   --ed-rose: #A14A57;
   --ed-rose-soft: #F9E8EB;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -365,7 +365,7 @@ export const EDITORIAL_CSS = `
 .ed-mono {
   font-family: 'Courier New', monospace;
   font-size: 13px;
-  background: #F3EFE9;
+  background: var(--surface-sunken);
   padding: 10px 14px;
   border-radius: 0;
   margin-bottom: 12px;
@@ -391,7 +391,7 @@ export const EDITORIAL_CSS = `
   border-bottom: 0.5px solid var(--ed-line);
   border-right: 0.5px solid var(--ed-soft-line);
   text-align: left;
-  background: #F7F3EE;
+  background: var(--surface-sunken);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 .ed-table th:last-child { border-right: none; }
@@ -418,8 +418,8 @@ export const EDITORIAL_CSS = `
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 400;
 }
-.ed-tag-free { background: #E8F5E9; color: #2E7D32; }
-.ed-tag-premium { background: #FFF3E0; color: #E65100; }
+.ed-tag-free { background: var(--state-correct-surface); color: #2E7D32; }
+.ed-tag-premium { background: var(--topic-anatomy-surface); color: #E65100; }
 
 /* Tabs (for interactive pages) */
 .ed-tabs {
@@ -427,7 +427,7 @@ export const EDITORIAL_CSS = `
   flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 24px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   padding-bottom: 16px;
 }
 
@@ -460,7 +460,7 @@ export const EDITORIAL_CSS = `
   width: 100%;
   text-align: left;
   padding: 12px 16px;
-  border: 0.5px solid rgba(0,0,0,0.15);
+  border: 0.5px solid var(--hairline-firm);
   border-radius: 2px;
   font-size: 13px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -472,8 +472,8 @@ export const EDITORIAL_CSS = `
   transition: all 0.15s;
 }
 .ed-quiz-option:hover:not(:disabled) { border-color: var(--ed-blue); background: var(--ed-paper); }
-.ed-quiz-correct { background: #E8F5E9 !important; border-color: #2E7D32 !important; color: #1B5E20 !important; }
-.ed-quiz-wrong { background: #FCEBEB !important; border-color: #A32D2D !important; color: #A32D2D !important; }
+.ed-quiz-correct { background: var(--state-correct-surface) !important; border-color: #2E7D32 !important; color: #1B5E20 !important; }
+.ed-quiz-wrong { background: var(--red-50) !important; border-color: var(--red-600) !important; color: var(--red-600) !important; }
 
 /* Responsive */
 @media (max-width: 640px) {
@@ -499,11 +499,11 @@ export const EDITORIAL_CSS = `
   padding: 3px 8px;
   border-radius: 2px;
 }
-.ed-badge-blue   { background: #E6F1FB; color: #0C447C; }
-.ed-badge-teal   { background: #E1F5EE; color: #085041; }
-.ed-badge-coral  { background: #FAECE7; color: #712B13; }
-.ed-badge-purple { background: #EEEDFE; color: #3C3489; }
-.ed-badge-amber  { background: #FAEEDA; color: #633806; }
-.ed-badge-red    { background: #FCEBEB; color: #A32D2D; }
-.ed-badge-gray   { background: #F1EFE8; color: #444441; }
+.ed-badge-blue   { background: var(--blue-50); color: var(--blue-800); }
+.ed-badge-teal   { background: var(--teal-50); color: var(--teal-800); }
+.ed-badge-coral  { background: var(--coral-50); color: var(--coral-800); }
+.ed-badge-purple { background: var(--purple-50); color: var(--purple-800); }
+.ed-badge-amber  { background: var(--amber-50); color: var(--amber-800); }
+.ed-badge-red    { background: var(--red-50); color: var(--red-600); }
+.ed-badge-gray   { background: var(--surface-sunken); color: var(--gray-800); }
 `;

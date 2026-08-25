@@ -26,8 +26,8 @@ const CSS = `
 .inj {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -50,7 +50,7 @@ const CSS = `
   text-decoration: none;
   margin-bottom: 44px;
 }
-.inj-back:hover { color: #555; }
+.inj-back:hover { color: var(--ink-soft); }
 
 /* Masthead */
 .inj-kicker {
@@ -66,7 +66,7 @@ const CSS = `
   font-size: 56px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 22px;
   letter-spacing: -0.01em;
 }
@@ -74,7 +74,7 @@ const CSS = `
 .inj-standfirst {
   font-size: 17px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.68;
   max-width: 680px;
   margin-bottom: 14px;
@@ -86,7 +86,7 @@ const CSS = `
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 24px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 36px;
 }
 
@@ -95,17 +95,17 @@ const CSS = `
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 28px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin: 0 0 20px;
   padding-top: 28px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
 }
 
 .inj-h3 {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 20px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin: 32px 0 14px;
 }
 
@@ -122,7 +122,7 @@ const CSS = `
 .inj-compare {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 32px;
   border-radius: 0;
 }
@@ -131,7 +131,7 @@ const CSS = `
   padding: 22px 24px 26px;
 }
 .inj-compare-col:first-child {
-  border-right: 0.5px solid rgba(0,0,0,0.12);
+  border-right: 0.5px solid var(--hairline-firm);
 }
 
 .inj-compare-label {
@@ -172,12 +172,12 @@ const CSS = `
   border-collapse: collapse;
   margin: 0 0 32px;
   font-size: 13px;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   border-radius: 0;
 }
 
 .inj-table th {
-  background: #F3F1EE;
+  background: var(--surface-sunken);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 9px;
   letter-spacing: 0.16em;
@@ -186,12 +186,12 @@ const CSS = `
   color: #706A63;
   text-align: left;
   padding: 12px 16px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.12);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 .inj-table td {
   padding: 11px 16px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  border-bottom: 0.5px solid var(--hairline-soft);
   color: #3D3A36;
   font-weight: 300;
   line-height: 1.5;
@@ -201,7 +201,7 @@ const CSS = `
 
 /* Callouts */
 .inj-pearl {
-  background: #F3F1EE;
+  background: var(--surface-sunken);
   border-left: 3px solid #C4C0B9;
   padding: 18px 22px;
   margin: 24px 0 28px;
@@ -212,20 +212,20 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 14px;
   font-style: italic;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 8px;
 }
 
 .inj-pearl p {
   font-size: 13px;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.65;
   margin: 0;
   font-weight: 300;
 }
 
 .inj-warn {
-  background: #FFF8F6;
+  background: var(--state-incorrect-surface);
   border-left: 3px solid #C2705A;
   padding: 18px 22px;
   margin: 24px 0 28px;
@@ -249,7 +249,7 @@ const CSS = `
 }
 
 .inj-info {
-  background: #F4F8FB;
+  background: var(--surface-raised);
   border-left: 3px solid #7BA3C4;
   padding: 18px 22px;
   margin: 24px 0 28px;
@@ -277,7 +277,7 @@ const CSS = `
   display: flex;
   gap: 16px;
   padding: 14px 0;
-  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  border-bottom: 0.5px solid var(--hairline-soft);
   font-size: 14px;
   color: #3D3A36;
   line-height: 1.6;
@@ -304,7 +304,7 @@ const CSS = `
 }
 
 .inj-osce-card {
-  background: #F3F1EE;
+  background: var(--surface-sunken);
   padding: 18px 20px;
   border-radius: 0;
 }
@@ -313,14 +313,14 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 13px;
   font-weight: 500;
-  color: #1A1815;
+  color: var(--ink-strong);
   display: block;
   margin-bottom: 6px;
 }
 
 .inj-osce-card p {
   font-size: 12px;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.6;
   margin: 0;
   font-weight: 300;
@@ -331,7 +331,7 @@ const CSS = `
   .inj-wrap { padding: 24px 20px 80px; }
   .inj-headline { font-size: 36px; }
   .inj-compare { grid-template-columns: 1fr; }
-  .inj-compare-col:first-child { border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
+  .inj-compare-col:first-child { border-right: none; border-bottom: 0.5px solid var(--hairline-firm); }
   .inj-osce-grid { grid-template-columns: 1fr; }
   .inj-table { font-size: 12px; }
   .inj-table th, .inj-table td { padding: 9px 12px; }
@@ -668,7 +668,7 @@ export default function IMSCInjectionPage() {
         </div>
 
         {/* ── Footer nav ── */}
-        <div style={{ borderTop: '0.5px solid rgba(0,0,0,0.1)', marginTop: '48px', paddingTop: '32px' }}>
+        <div style={{ borderTop: '0.5px solid var(--hairline-firm)', marginTop: '48px', paddingTop: '32px' }}>
           <Link href="/hub" className="inj-back">
             <span>←</span> Back to Hub
           </Link>

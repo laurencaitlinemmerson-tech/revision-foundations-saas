@@ -54,7 +54,7 @@ export default function QuickTopicSearch() {
       <style>{`
         .dash-search-shell {
           position: relative;
-          background: #FAFAF8;
+          background: var(--surface-page);
           padding: 24px 26px;
           min-height: 100%;
         }

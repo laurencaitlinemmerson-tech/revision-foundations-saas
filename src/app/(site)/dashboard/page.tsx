@@ -13,6 +13,12 @@ import StudySignalsRow from '@/components/dashboard/StudySignalsRow';
 import WhatToDoToday from '@/components/dashboard/WhatToDoToday';
 import RevisionWeekPlanner from '@/components/dashboard/RevisionWeekPlanner';
 import OsceSparkline from '@/components/dashboard/OsceSparkline';
+import InteractiveFocusTimer from '@/components/dashboard/InteractiveFocusTimer';
+import InteractiveDailyChecklist from '@/components/dashboard/InteractiveDailyChecklist';
+import InteractiveEnergySelector from '@/components/dashboard/InteractiveEnergySelector';
+import TopicStrengthDrilldown from '@/components/dashboard/TopicStrengthDrilldown';
+import PinnedNote from '@/components/dashboard/PinnedNote';
+
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your study dashboard for tools, saved pages, and purchased content.',
@@ -93,8 +99,8 @@ function StatCard({
 }) {
   return (
     <div className="dash-stat-card" style={{
-      background: '#fff',
-      border: '0.5px solid rgba(0,0,0,0.12)',
+      background: 'var(--surface-raised)',
+      border: '0.5px solid var(--hairline-firm)',
       padding: '24px 22px',
     }}>
       <p style={{
@@ -145,7 +151,7 @@ function ProgressBar({
   return (
     <div className="dash-pb-row" style={{ marginBottom: '13px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-        <span style={{ fontFamily: serif, fontSize: '12px', color: '#2C2A27' }}>{label}</span>
+        <span style={{ fontFamily: serif, fontSize: '12px', color: 'var(--ink-mid)' }}>{label}</span>
         <span style={{ fontFamily: serif, fontSize: '11px', color: '#B4A89C' }}>{pct}%</span>
       </div>
       <div style={{ height: '3px', background: 'rgba(0,0,0,0.06)' }}>
@@ -262,7 +268,7 @@ export default async function DashboardPage() {
                     display: 'flex', flexDirection: 'column', gap: '5px',
                     padding: '16px 20px',
                     border: `0.5px solid ${border}`,
-                    background: '#fff',
+                    background: 'var(--surface-raised)',
                     textDecoration: 'none',
                     transition: 'background 0.12s',
                   }}>
@@ -274,35 +280,13 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          {/* Topic strength + quiz accuracy bars */}
+          {/* Topic strength + quiz accuracy interactive drilldown */}
           <div className="dash-prog-pair" style={{ marginTop: '12px' }}>
-            <div style={{
-              background: '#fff', border: '0.5px solid rgba(0,0,0,0.12)', padding: '24px 26px',
-            }}>
-              <p style={{
-                fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
-                textTransform: 'uppercase', color: muted, marginBottom: '16px',
-              }}>
-                Topic strength
-              </p>
-              {topicStrength.map((t, i) => (
-                <ProgressBar key={t.label} label={t.label} pct={t.pct} color={t.color} index={i} />
-              ))}
-            </div>
-
-            <div style={{
-              background: '#fff', border: '0.5px solid rgba(0,0,0,0.12)', padding: '24px 26px',
-            }}>
-              <p style={{
-                fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
-                textTransform: 'uppercase', color: muted, marginBottom: '16px',
-              }}>
-                Quiz accuracy by area
-              </p>
-              {topicStrength.map((t, i) => (
-                <ProgressBar key={t.label} label={t.label} pct={Math.min(t.pct + 14, 100)} color={t.color} index={i} />
-              ))}
-            </div>
+            <TopicStrengthDrilldown topics={topicStrength} title="Topic strength breakdown" />
+            <TopicStrengthDrilldown
+              topics={topicStrength.map((t) => ({ ...t, pct: Math.min(t.pct + 14, 100) }))}
+              title="Quiz accuracy by area"
+            />
           </div>
 
           <div className="dash-prog-pair" style={{ marginTop: '16px' }}>
@@ -314,7 +298,16 @@ export default async function DashboardPage() {
         {/* ━━ 2 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
           <SectionDivider label="Today's plan" id="todays-plan" accent="#8BBCAA" />
+          
+          <InteractiveEnergySelector />
           <WhatToDoToday />
+          <InteractiveDailyChecklist />
+
+          <div className="dash-prog-pair" style={{ marginTop: '16px' }}>
+            <InteractiveFocusTimer />
+            <PinnedNote />
+          </div>
+
           <div style={{ marginTop: '12px' }}>
             <PlacementCountdown />
           </div>
@@ -360,7 +353,7 @@ export default async function DashboardPage() {
         }}>
           <p style={{
             fontFamily: display, fontSize: '1.2rem', fontStyle: 'italic',
-            color: '#2C2A27', lineHeight: 1.5, maxWidth: '44ch',
+            color: 'var(--ink-mid)', lineHeight: 1.5, maxWidth: '44ch',
             margin: '0 auto 8px',
           }}>
             "Keep the next step smaller than your stress."
@@ -409,7 +402,7 @@ export default async function DashboardPage() {
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 10px;
         }
-        .dash-empty-actions a:hover { background: #F5F3F0 !important; }
+        .dash-empty-actions a:hover { background: var(--surface-sunken) !important; }
         @media (max-width: 700px) {
           .dash-empty-actions { grid-template-columns: 1fr; }
         }

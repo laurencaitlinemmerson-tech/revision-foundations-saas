@@ -461,7 +461,7 @@ export function TodaysPlanCard() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className="card bg-[#FAF8F6] border border-[var(--linen-deep)] h-full flex flex-col"
+      className="card bg-[var(--surface-page)] border border-[var(--linen-deep)] h-full flex flex-col"
     >
       <div className="flex items-center justify-between mb-5">
         <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--charcoal)]/60">Today&apos;s plan</p>
@@ -566,7 +566,7 @@ export function FocusAreasCard() {
       <motion.div variants={cardVariants} initial="hidden" animate="visible"
         className="card bg-[var(--amber-bg)] border border-[rgba(200,112,10,0.1)] relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#ffeedd] opacity-40 rounded-full blur-3xl z-0 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--state-warning-surface)] opacity-40 rounded-full blur-3xl z-0 pointer-events-none" />
         <div className="flex flex-col items-center text-center py-8 relative z-10">
           <p className="font-display text-2xl text-[var(--amber-text)] mb-2">Uncover your blindspots</p>
           <p className="text-sm text-[var(--amber-text)]/80 font-light max-w-[240px] leading-7">
@@ -582,7 +582,7 @@ export function FocusAreasCard() {
 
   return (
     <motion.div ref={ref} variants={cardVariants} initial="hidden" animate={isInView ? 'visible' : 'hidden'}
-      className="card bg-[#FEFAF2] border border-[rgba(200,112,10,0.12)]"
+      className="card bg-[var(--surface-sunken)] border border-[rgba(200,112,10,0.12)]"
     >
       <div className="space-y-3">
         {weakTopics.map((topic, i) => {
@@ -660,7 +660,7 @@ export function CommunityStatsCard() {
 
   return (
     <motion.div ref={ref} variants={cardVariants} initial="hidden" animate={isInView ? 'visible' : 'hidden'}
-      className="card h-full min-h-[290px] border border-[var(--linen-deep)] bg-[#FBFAF8]"
+      className="card h-full min-h-[290px] border border-[var(--linen-deep)] bg-[var(--surface-raised)]"
     >
       <p className="mb-4 text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]">
         This week
@@ -768,7 +768,7 @@ export function QuickAchievement() {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible"
-      className={`card border ${achieved ? 'bg-[#F9F8FF] border-[rgba(83,74,183,0.2)]' : 'bg-[#FAFAF8] border-[var(--linen-deep)]'}`}
+      className={`card border ${achieved ? 'bg-[#F9F8FF] border-[rgba(83,74,183,0.2)]' : 'bg-[var(--surface-page)] border-[var(--linen-deep)]'}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
