@@ -12,8 +12,9 @@ import { TARGETS, proteinTargetG } from './targets';
 import { PERIOD_IDS, periodWindows, type PeriodId } from './periods';
 import { historyInsights } from './historyInsights';
 import { buildEnergy, energyDays } from './energy';
-import { buildActivities } from './activities';
+import { buildActivities, prettyType } from './activities';
 import { buildBodyAnalysis } from './bodyAnalysis';
+import { buildRibbon } from './trends';
 import { workoutKindOf } from './workoutKind';
 import { deriveHeadToHead } from './headToHead';
 import type { PeerData } from './peerData';
@@ -61,6 +62,8 @@ export type TrainingState = {
   openDim: string | null;
   /** Which body-composition series the Progress chart is showing. */
   bodySeries: string;
+  /** An activity type everything is filtered to, or null for all of them. */
+  focus: string | null;
   /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
 };
@@ -85,6 +88,7 @@ export const INITIAL_STATE: TrainingState = {
   goalDraft: false,
   openDim: null,
   bodySeries: 'weight',
+  focus: null,
   dayOffset: 0,
 };
 
@@ -378,10 +382,15 @@ export function deriveVals(
 ) {
   const set = (patch: Partial<TrainingState>) => setState(patch);
 
+  const allWorkouts = live.workouts ?? [];
+
+  // One filter, applied at the source, so every screen agrees about what is
+  // being looked at rather than each deciding for itself.
+  const focus = st.focus;
   const src: Sources = {
     days: live.days ?? [],
     lifts: live.lifts ?? [],
-    workouts: live.workouts ?? [],
+    workouts: focus ? allWorkouts.filter((w) => prettyType(w.type) === focus) : allWorkouts,
     weighIns: live.weighIns ?? [],
   };
   const hasAny = src.days.length + src.lifts.length + src.workouts.length + src.weighIns.length > 0;
@@ -1412,6 +1421,10 @@ export function deriveVals(
     spanDays,
   );
 
+  /* the dimension ribbon -------------------------------------------------- */
+
+  const ribbon = buildRibbon({ ...src, workouts: allWorkouts }, 12);
+
   /* body composition ------------------------------------------------------ */
 
   const bodyAnalysis = buildBodyAnalysis(
@@ -1706,6 +1719,71 @@ export function deriveVals(
     insights: insights.slice(0, 12),
     settings,
 
+    /* the full-history brush ------------------------------------------------ */
+
+    history: (() => {
+      const W = 900;
+      const H = 46;
+      const pts = weighAll.filter((r) => r.weight > 0);
+      if (pts.length < 4) return null;
+
+      const t = (d: string) => new Date(`${d.slice(0, 10)}T12:00:00Z`).getTime();
+      const first = t(pts[0].date);
+      const span = t(pts[pts.length - 1].date) - first || 1;
+      const vals = pts.map((r) => r.weight);
+      const lo = Math.min(...vals);
+      const hi = Math.max(...vals);
+      const range = hi - lo || 1;
+
+      const x = (d: string) => ((t(d) - first) / span) * W;
+      const path = pts
+        .map((r, i) => `${i ? 'L' : 'M'}${x(r.date).toFixed(1)} ${(4 + (1 - (r.weight - lo) / range) * (H - 8)).toFixed(1)}`)
+        .join(' ');
+
+      // Year boundaries, so a drag has something to aim at.
+      const years: Array<{ key: string; x: number; label: string }> = [];
+      for (let y = new Date(first).getUTCFullYear() + 1; y <= new Date(t(pts[pts.length - 1].date)).getUTCFullYear(); y++) {
+        const at = Date.UTC(y, 0, 1);
+        if (at < first || at > first + span) continue;
+        years.push({ key: String(y), x: ((at - first) / span) * W, label: String(y) });
+      }
+
+      // Where the selected window sits inside the whole history.
+      const clamp = (v: number) => Math.max(0, Math.min(W, v));
+      const selFrom = clamp(((nowWin.from - first) / span) * W);
+      const selTo = clamp(((nowWin.to - first) / span) * W);
+
+      return {
+        width: W, height: H, path, years,
+        selFrom, selWidth: Math.max(2, selTo - selFrom),
+        startLabel: fmtDate(pts[0].date, true),
+        endLabel: fmtDate(pts[pts.length - 1].date, true),
+        count: pts.length,
+        /** Turn two positions on the strip into a custom range. */
+        selectRange: (aFrac: number, bFrac: number) => {
+          const lowFrac = Math.max(0, Math.min(aFrac, bFrac));
+          const highFrac = Math.min(1, Math.max(aFrac, bFrac));
+          const from = new Date(first + lowFrac * span).toISOString().slice(0, 10);
+          const to = new Date(first + highFrac * span).toISOString().slice(0, 10);
+          // A drag of a few pixels is a mis-click, not a one-day window.
+          if (new Date(to).getTime() - new Date(from).getTime() < 2 * DAY) return;
+          set({ range: 'Custom', customFrom: from, customTo: to });
+        },
+        reset: () => set({ range: 'Month' }),
+      };
+    })(),
+
+    /* cross-filter */
+    focus,
+    focusLabel: focus ? `Filtered to ${focus}` : null,
+    focusCount: focus
+      ? `${src.workouts.length} of ${allWorkouts.length} workouts`
+      : null,
+    clearFocus: () => set({ focus: null }),
+
+    /* the ribbon */
+    ribbon,
+
     /* body composition */
     bodyAnalysis,
     bodySeriesTab,
@@ -1735,6 +1813,8 @@ export function deriveVals(
       return {
         key: a.key,
         name: a.name,
+        focused: focus === a.key,
+        focus: () => set({ focus: focus === a.key ? null : a.key }),
         kind: a.kind === 'strength' ? 'Strength' : a.kind === 'cardio' ? 'Cardio' : 'Other',
         sessions: nf(a.sessionsInRange),
         allTime: nf(a.sessions),

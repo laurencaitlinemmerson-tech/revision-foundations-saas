@@ -1,10 +1,10 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
   AMBER, CARD, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
-  PLUM, PLUM_FILL, PLUM_FILL_FAINT, RULE, RULE_SOFT, SIDEBAR, SOFT, SPARK, TINT,
+  PLUM, PLUM_FILL_FAINT, RULE, RULE_SOFT, SIDEBAR, SOFT, SPARK, TINT,
   TRACK, TRACK_PREV,
 } from './palette';
 import { BarSeries, Figure, LineSeries, Sparkline } from './charts';
@@ -112,6 +112,201 @@ function Bar({ pct, color = PLUM, height = 4 }: { pct: string; color?: string; h
   return (
     <div style={{ height, background: TRACK, marginTop: 8 }}>
       <div style={{ height, width: pct, background: color }} />
+    </div>
+  );
+}
+
+/**
+ * Twelve months of the six dimensions, sharing one crosshair.
+ *
+ * Replaces the radar, which plotted six numbers already listed beside it. One
+ * hover reads every dimension for that month at once, which is the comparison
+ * the radar was pretending to make.
+ */
+function Ribbon({ ribbon }: { ribbon: TrainingVals['ribbon'] }) {
+  const [active, setActive] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  if (!ribbon.ok) {
+    return <div style={{ fontSize: 12.5, color: MUTED, fontStyle: 'italic' }}>{ribbon.note}</div>;
+  }
+
+  const pick = (clientX: number) => {
+    const el = ref.current;
+    if (!el || ribbon.months.length < 2) return;
+    const r = el.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    setActive(Math.round(frac * (ribbon.months.length - 1)));
+  };
+
+  const month = active === null ? null : ribbon.months[active] ?? null;
+  const step = ribbon.width / Math.max(1, ribbon.months.length - 1);
+
+  return (
+    <div>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+        gap: 12, marginBottom: 12,
+      }}>
+        <Eyebrow>Twelve months</Eyebrow>
+        <span style={{ fontSize: 11.5, color: month ? INK : MUTED }}>
+          {month ? month.label : 'Hover to read a month'}
+        </span>
+      </div>
+
+      <div
+        ref={ref}
+        onMouseMove={(e) => pick(e.clientX)}
+        onMouseLeave={() => setActive(null)}
+        onTouchStart={(e) => pick(e.touches[0].clientX)}
+        onTouchMove={(e) => pick(e.touches[0].clientX)}
+        onTouchEnd={() => setActive(null)}
+        style={{ touchAction: 'pan-y' }}
+      >
+        {ribbon.rows.map((row) => {
+          const at = active === null ? null : row.points[active] ?? null;
+          const value = month?.scores?.[row.key];
+          return (
+            <div key={row.key} style={{
+              display: 'grid', gridTemplateColumns: '96px 1fr 62px',
+              gap: 14, alignItems: 'center',
+              padding: '5px 0', borderBottom: RULE_SOFT,
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <span style={{ width: 8, height: 8, background: row.colour, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: INK, whiteSpace: 'nowrap' }}>{row.label}</span>
+              </span>
+
+              <svg viewBox={`0 0 ${ribbon.width} ${ribbon.rowHeight}`} preserveAspectRatio="none"
+                style={{ width: '100%', height: ribbon.rowHeight, display: 'block' }}
+                role="img" aria-label={`${row.label} across twelve months`}>
+                <line x1="0" y1={ribbon.rowHeight - 3} x2={ribbon.width} y2={ribbon.rowHeight - 3}
+                  stroke="rgba(34,28,36,0.07)" strokeWidth="0.5" />
+                {row.path && (
+                  <path d={row.path} fill="none" stroke={row.colour} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+                )}
+                {active !== null && (
+                  <line x1={active * step} y1="0" x2={active * step} y2={ribbon.rowHeight}
+                    stroke="rgba(34,28,36,0.22)" strokeWidth="0.75" vectorEffect="non-scaling-stroke" />
+                )}
+                {at?.cy != null && <circle cx={at.cx} cy={at.cy} r="3" fill={row.colour} />}
+              </svg>
+
+              <span style={{ textAlign: 'right', fontSize: 12, whiteSpace: 'nowrap' }}>
+                {month ? (
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: value == null ? MUTED : INK }}>
+                    {value == null ? '—' : value}
+                  </span>
+                ) : (
+                  <span style={{ color: row.changeColour }}>{row.change}</span>
+                )}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ fontSize: 11, color: MUTED, marginTop: 12, lineHeight: 1.6 }}>{ribbon.note}</div>
+    </div>
+  );
+}
+
+/**
+ * The whole history, with the selected window shown inside it.
+ *
+ * Drag across to set a custom range. Everything above uses one window at a time,
+ * which makes it easy to forget how much of the record you are not looking at —
+ * this puts the eight years on screen and marks the slice in view.
+ */
+function HistoryBrush({ history }: { history: NonNullable<TrainingVals['history']> }) {
+  // The drag origin lives in a ref, not state. A mousedown and the first
+  // mousemove can land in the same frame, and a handler closed over state would
+  // still see null there — which is exactly what a quick drag looks like.
+  const origin = useRef<number | null>(null);
+  const last = useRef(0);
+  const [band, setBand] = useState<{ from: number; to: number } | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  const frac = (clientX: number) => {
+    const el = ref.current;
+    if (!el) return 0;
+    const r = el.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+  };
+
+  const start = (clientX: number) => {
+    const f = frac(clientX);
+    origin.current = f;
+    last.current = f;
+    setBand({ from: f, to: f });
+  };
+  const move = (clientX: number) => {
+    if (origin.current === null) return;
+    const f = frac(clientX);
+    last.current = f;
+    setBand({ from: origin.current, to: f });
+  };
+  const end = () => {
+    const from = origin.current;
+    origin.current = null;
+    setBand(null);
+    // A few pixels is a mis-click, not a selection.
+    if (from !== null && Math.abs(last.current - from) > 0.004) {
+      history.selectRange(from, last.current);
+    }
+  };
+
+  const W = history.width;
+  const H = history.height;
+  const shown = band
+    ? { x: Math.min(band.from, band.to) * W, w: Math.abs(band.to - band.from) * W }
+    : { x: history.selFrom, w: history.selWidth };
+
+  return (
+    <div style={{ ...card, padding: '22px 26px 20px', marginTop: GRID_GAP }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+        <Eyebrow>The whole record · {history.count} weigh-ins</Eyebrow>
+        <button
+          type="button" onClick={history.reset} className="hv-tab"
+          style={{
+            all: 'unset', cursor: 'pointer', padding: '4px 11px', fontSize: 11.5,
+            color: SOFT, border: RULE, background: CARD,
+          }}
+        >
+          Reset to month
+        </button>
+      </div>
+
+      <div
+        ref={ref}
+        onMouseDown={(e) => start(e.clientX)}
+        onMouseMove={(e) => move(e.clientX)}
+        onMouseUp={end}
+        onMouseLeave={end}
+        onTouchStart={(e) => start(e.touches[0].clientX)}
+        onTouchMove={(e) => move(e.touches[0].clientX)}
+        onTouchEnd={end}
+        style={{ marginTop: 14, cursor: 'ew-resize', touchAction: 'pan-y', userSelect: 'none' }}
+      >
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
+          style={{ width: '100%', height: H, display: 'block' }}
+          role="img" aria-label={`Weight across the whole record, ${history.startLabel} to ${history.endLabel}`}>
+          <rect x={shown.x} y="0" width={shown.w} height={H} fill={PLUM_FILL_FAINT} />
+          <rect x={shown.x} y="0" width="1" height={H} fill={PLUM} />
+          <rect x={shown.x + shown.w - 1} y="0" width="1" height={H} fill={PLUM} />
+          {history.years.map((y) => (
+            <line key={y.key} x1={y.x} y1="0" x2={y.x} y2={H}
+              stroke="rgba(34,28,36,0.10)" strokeWidth="0.5" />
+          ))}
+          <path d={history.path} fill="none" stroke={SPARK} strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
+        </svg>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 8, gap: 12 }}>
+        <span>{history.startLabel}</span>
+        <span style={{ fontStyle: 'italic' }}>Drag across to select a range</span>
+        <span>{history.endLabel}</span>
+      </div>
     </div>
   );
 }
@@ -230,6 +425,27 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
                 }}
               />
             </label>
+          </div>
+        )}
+
+        {v.focusLabel && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+            marginTop: 18, padding: '12px 18px', background: TINT, border: RULE,
+          }}>
+            <span style={{ fontSize: 12.5, color: INK }}>{v.focusLabel}</span>
+            <span style={{ fontSize: 11.5, color: MUTED }}>{v.focusCount}</span>
+            <button
+              type="button"
+              onClick={v.clearFocus}
+              className="hv-tab"
+              style={{
+                all: 'unset', cursor: 'pointer', marginLeft: 'auto', padding: '5px 12px',
+                fontSize: 11.5, letterSpacing: '0.06em', color: SOFT, border: RULE, background: CARD,
+              }}
+            >
+              Clear filter
+            </button>
           </div>
         )}
 
@@ -372,38 +588,9 @@ function Dashboard({ v }: { v: TrainingVals }) {
               ))}
             </div>
           </div>
-          <div style={{ padding: PANEL_PAD, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: TINT }}>
-            <div style={{ ...eyebrow, alignSelf: 'flex-start' }}>Six dimensions</div>
-            <svg
-              viewBox="0 0 420 360"
-              style={{ width: '100%', maxWidth: 420, marginTop: 8 }}
-              role="img"
-              aria-label={`Radar chart of six fitness dimensions: ${v.dims.map((d) => `${d.label} ${d.score}`).join(', ')}`}
-            >
-              <g fill="none" stroke="rgba(0,0,0,0.09)" strokeWidth="0.5">
-                {v.radarRings.map((r, i) => <polygon key={i} points={r.points} />)}
-              </g>
-              <g stroke="rgba(0,0,0,0.07)" strokeWidth="0.5">
-                {v.radarSpokes.map((s, i) => <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} />)}
-              </g>
-              <polygon points={v.radarPrev} fill="none" stroke={PINK_LINE} strokeWidth="1" strokeDasharray="3 3" />
-              <polygon points={v.radarNow} fill={PLUM_FILL} stroke={PLUM} strokeWidth="1.25" />
-              <g>
-                {v.radarDots.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="2.75" fill={PLUM} />)}
-              </g>
-              <g fontFamily="Inter, sans-serif" fontSize="10.5" fill={SOFT}>
-                {v.radarLabels.map((l, i) => (
-                  <text key={i} x={l.x} y={l.y} textAnchor={l.anchor}>{l.label}</text>
-                ))}
-              </g>
-            </svg>
-            <div style={{ display: 'flex', gap: 20, fontSize: 11, color: MUTED, marginTop: 4 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span style={{ width: 16, height: 1.5, background: PLUM }} />This period
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span style={{ width: 16, height: 0, borderTop: `1px dashed ${PINK_LINE}` }} />Previous
-              </span>
+          <div style={{ padding: PANEL_PAD, background: TINT, display: 'flex', alignItems: 'center' }}>
+            <div style={{ width: '100%' }}>
+              <Ribbon ribbon={v.ribbon} />
             </div>
           </div>
         </div>
@@ -1097,8 +1284,19 @@ function Exercises({ v }: { v: TrainingVals }) {
           </thead>
           <tbody>
             {shown.map((a) => (
-              <tr key={a.key} className="hv-cell" style={{ background: CARD }}>
-                <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: INK }}>{a.name}</td>
+              <tr
+                key={a.key}
+                className="hv-cell"
+                onClick={a.focus}
+                style={{
+                  background: a.focused ? TINT : CARD,
+                  cursor: 'pointer',
+                }}
+              >
+                <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: a.focused ? PLUM : INK }}>
+                  {a.name}
+                  {a.focused && <span style={{ fontSize: 10, marginLeft: 8, color: PLUM }}>filtered</span>}
+                </td>
                 <td style={{ ...td, fontSize: 12.5, color: a.kind === 'Strength' ? PLUM : a.kind === 'Cardio' ? PINK : MUTED }}>{a.kind}</td>
                 <td style={{ ...td, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{a.sessions}</td>
                 <td style={{ ...td, textAlign: 'right', color: MUTED }}>{a.allTime}</td>
@@ -1120,7 +1318,7 @@ function Exercises({ v }: { v: TrainingVals }) {
       {!shown.length && <Empty title="No activities match that search." note="Clear the search to see everything." />}
 
       <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px 0 0', lineHeight: 1.7, maxWidth: '70ch' }}>
-        {v.activityNote}
+        Select a row to filter every screen to that activity. {v.activityNote}
       </p>
     </div>
   );
@@ -1134,9 +1332,10 @@ function Progress({ v }: { v: TrainingVals }) {
 
   return (
     <div style={{ marginTop: 40 }}>
+      {v.history && <HistoryBrush history={v.history} />}
       {/* Body composition replaces lift progression: weight alone conflates fat,
           lean tissue and water, and the split is the part worth knowing. */}
-      <section style={{ ...card, padding: PANEL_PAD }}>
+      <section style={{ ...card, padding: PANEL_PAD, marginTop: GRID_GAP }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: GRID_GAP, flexWrap: 'wrap' }}>
           <div style={{ maxWidth: '52ch' }}>
             <Eyebrow>Body composition</Eyebrow>
