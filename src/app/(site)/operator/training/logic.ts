@@ -9,6 +9,7 @@ import {
   TAG_GOOD, TAG_INFO, TAG_WATCH,
 } from './palette';
 import { TARGETS, proteinTargetG } from './targets';
+import { workoutKindOf } from './workoutKind';
 import {
   daysFromPartner, daysFromSources, deriveHeadToHead, mondayOf,
 } from './headToHead';
@@ -256,13 +257,20 @@ function buildSessions(lifts: Lift[], workouts: Workout[]): Session[] {
         pr: prFlags.get(l.id) ? 'PR' : '',
       }));
 
+      // A synced session carries no sets, so the three columns show what it does
+      // know instead of three em dashes: distance and pace for cardio, time and
+      // energy for a strength session recorded in a coaching app.
       const cardioRows = day.workouts.map((w) => {
         const km = w.distanceKm ?? 0;
         const mins = w.durationMin ?? 0;
+        const kcal = w.energyKcal ?? 0;
+        const isCardio = workoutKindOf(w) === 'cardio' && km > 0;
         return {
           name: w.type ?? 'Workout',
-          sets: km > 0 ? `${nf(km, 1)} km` : fmtMinutes(mins || null),
-          weight: km > 0 && mins > 0 ? `${fmtPace(mins / km)} /km` : fmtMinutes(mins || null),
+          sets: isCardio ? `${nf(km, 1)} km` : fmtMinutes(mins || null),
+          weight: isCardio && mins > 0
+            ? `${fmtPace(mins / km)} /km`
+            : kcal > 0 ? `${nf(Math.round(kcal))} kcal` : DASH,
           volume: w.avgHr ? `${Math.round(w.avgHr)} bpm avg` : DASH,
           pr: cardioPr.get(w.id) ? 'PR' : '',
         };
@@ -696,6 +704,19 @@ export function deriveVals(
       })
       .reduce((a, l) => a + l.volumeKg, 0) / 1000,
   );
+  const strengthSpark = weeklyBuckets(spanDays, (from, to) => {
+    const dates = new Set<string>();
+    for (const l of src.lifts) {
+      const t = new Date(l.performedOn).getTime();
+      if (t >= from && t < to) dates.add(l.performedOn.slice(0, 10));
+    }
+    for (const w of src.workouts) {
+      const t = new Date(w.startedAt).getTime();
+      if (t >= from && t < to && workoutKindOf(w) === 'strength') dates.add(w.startedAt.slice(0, 10));
+    }
+    return dates.size;
+  });
+
   const vo2Spark = src.days
     .slice(-30)
     .map((d) => d.heart.vo2Max)
@@ -709,16 +730,33 @@ export function deriveVals(
   const walkedKm = nowStats.days.reduce((a, d) => a + (d.activity.distanceKm ?? 0), 0);
 
   const topCards = [
-    {
-      eyebrow: 'Strength',
-      label: `Total volume, ${rangeLabel}`,
-      value: nowStats.lifts.length ? nf(volumeTonnes, volumeTonnes >= 10 ? 0 : 1) : DASH,
-      unit: 'tonnes lifted',
-      trend: nowStats.lifts.length ? `${volumeDelta.text} vs previous` : 'No lifts logged in range',
-      trendColor: nowStats.lifts.length ? volumeDelta.color : MUTED,
-      spark: linePath(volumeSpark, 200, 40, 4),
-      note: `${nowStats.liftSessionDays} lift session${nowStats.liftSessionDays === 1 ? '' : 's'} of ${nowStats.plannedSessions} planned.`,
-    },
+    // Volume needs a lift log. Without one the card reports what the synced
+    // sessions do prove — that the training happened — rather than an em dash.
+    nowStats.lifts.length
+      ? {
+        eyebrow: 'Strength',
+        label: `Total volume, ${rangeLabel}`,
+        value: nf(volumeTonnes, volumeTonnes >= 10 ? 0 : 1),
+        unit: 'tonnes lifted',
+        trend: `${volumeDelta.text} vs previous`,
+        trendColor: volumeDelta.color,
+        spark: linePath(volumeSpark, 200, 40, 4),
+        note: `${nowStats.liftSessionDays} lift session${nowStats.liftSessionDays === 1 ? '' : 's'} of ${nowStats.plannedSessions} planned.`,
+      }
+      : {
+        eyebrow: 'Strength',
+        label: `Sessions, ${rangeLabel}`,
+        value: nowStats.strengthSessionDays ? nf(nowStats.strengthSessionDays) : DASH,
+        unit: `of ${nf(nowStats.plannedSessions)} planned`,
+        trend: nowStats.strengthSessionDays
+          ? `${pctDelta(nowStats.strengthSessionDays, prevStats.strengthSessionDays).text} vs previous`
+          : 'No strength sessions in range',
+        trendColor: nowStats.strengthSessionDays
+          ? pctDelta(nowStats.strengthSessionDays, prevStats.strengthSessionDays).color
+          : MUTED,
+        spark: linePath(strengthSpark, 200, 40, 4),
+        note: 'Sets and loads live in your coaching app, so volume is not shown.',
+      },
     {
       eyebrow: 'Cardio',
       label: 'Estimated VO₂ max',
@@ -1172,6 +1210,18 @@ export function deriveVals(
       title: d.color === GREEN ? 'Strength volume is trending up' : d.text === 'held' ? 'Strength volume is holding' : 'Strength volume is down',
       body: `You moved ${nf(nowStats.volumeKg)} kg across ${nowStats.liftSessionDays} lift session${nowStats.liftSessionDays === 1 ? '' : 's'} — ${d.text === DASH ? 'no comparable previous period' : `${d.text} against the period before`}.${exerciseRows[0]?.e1rmKg ? ` Best estimated one-rep max is ${nf(exerciseRows[0].e1rmKg, 1)} kg on the ${exerciseRows[0].name.toLowerCase()}.` : ''}`,
       source: `From ${nowStats.lifts.length} logged lift${nowStats.lifts.length === 1 ? '' : 's'}, ${spanLabel}`,
+    });
+  }
+
+  if (!nowStats.lifts.length && nowStats.strengthSessionDays) {
+    const d = pctDelta(nowStats.strengthSessionDays, prevStats.strengthSessionDays);
+    insights.push({
+      key: 'strength-sessions',
+      tag: 'Strength',
+      tagColor: TAG_GOOD,
+      title: 'Strength is scored on sessions, not volume',
+      body: `${nowStats.strengthSessionDays} strength session${nowStats.strengthSessionDays === 1 ? '' : 's'} against ${nowStats.plannedSessions} planned — ${d.text === DASH ? 'no comparable previous period' : `${d.text} on the period before`}. Your sets and loads are recorded in your coaching app and never reach this project, so volume and personal bests cannot be shown.`,
+      source: `From ${nowStats.workouts.length} synced workout${nowStats.workouts.length === 1 ? '' : 's'}, ${spanLabel}`,
     });
   }
 

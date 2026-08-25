@@ -2,6 +2,7 @@ import type { PartnerDay } from '@/lib/operatorPartnerStorage';
 import type { Sources } from './scoring';
 import { GREEN, MUTED, PINK, PLUM, SOFT } from './palette';
 import { TARGETS } from './targets';
+import { workoutKindOf } from './workoutKind';
 
 /**
  * Head to head — the same week, scored twice.
@@ -50,16 +51,20 @@ export function mondayOf(t: number): number {
 
 /** The operator's own day, assembled from Apple Health, lifts and the scale. */
 export function daysFromSources(src: Sources, from: number, to: number): PersonDay[] {
-  const liftDays = new Map<string, number>();
-  for (const l of src.lifts) {
-    const k = l.performedOn.slice(0, 10);
-    liftDays.set(k, (liftDays.get(k) ?? 0) + 1);
-  }
-  // A "run" is any workout that covered ground; walking is already in the steps.
+  // A gym day is one with lifts written down or a strength workout synced —
+  // Everfit logs its sessions to Apple Health as "Cross Training", so counting
+  // only the lift log would score a full training week as zero sessions.
+  const gymDays = new Set<string>(src.lifts.map((l) => l.performedOn.slice(0, 10)));
   const runDays = new Map<string, number>();
   for (const w of src.workouts) {
-    if (!(w.distanceKm ?? 0) || /walk/i.test(w.type ?? '')) continue;
+    const kind = workoutKindOf(w);
     const k = w.startedAt.slice(0, 10);
+    if (kind === 'strength') {
+      gymDays.add(k);
+      continue;
+    }
+    // Walking is already represented by the step count, so it is not a session.
+    if (kind !== 'cardio' || /walk/i.test(w.type ?? '')) continue;
     runDays.set(k, (runDays.get(k) ?? 0) + 1);
   }
   const weighBy = new Map<string, { weight: number | null; bodyFat: number | null }>();
@@ -78,7 +83,7 @@ export function daysFromSources(src: Sources, from: number, to: number): PersonD
     out.push({
       date: k,
       steps: h?.activity.steps ?? null,
-      gymSessions: liftDays.get(k) ? 1 : (h ? 0 : null),
+      gymSessions: gymDays.has(k) ? 1 : (h ? 0 : null),
       runs: runDays.get(k) ?? (h ? 0 : null),
       caloriesIn: h?.nutrition.dietaryEnergyKcal ?? null,
       caloriesOut: h?.activity.activeEnergyKcal ?? null,

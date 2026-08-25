@@ -1,5 +1,6 @@
 import type { HealthDay, Lift, WeighIn, Workout } from '../daily-log/data';
 import { TARGETS, proteinTargetG } from './targets';
+import { isCardioWorkout, isStrengthWorkout } from './workoutKind';
 
 /**
  * The six dimensions, and how a period of logged data turns into a score.
@@ -104,6 +105,8 @@ export type WindowStats = {
   volumeKg: number;
   liftSessionDays: number;
   progressedShare: number | null;
+  /** Days carrying a strength session, whether logged as lifts or synced. */
+  strengthSessionDays: number;
 
   sessionDays: number;
   plannedSessions: number;
@@ -148,16 +151,22 @@ export function statsFor(src: Sources, w: Window, base: Baseline): WindowStats {
       ? Math.sqrt(mean(sleepH.map((h) => (h - avgSleepH) ** 2)) ?? 0) / avgSleepH
       : null;
 
-  // A cardio workout is one that covered ground or ran long enough to count as
-  // aerobic work; a logged strength session is not double-counted here.
-  const cardio = workouts.filter(
-    (x) => (x.distanceKm ?? 0) > 0 || (x.durationMin ?? 0) >= 10,
-  );
+  // Strength work is deliberately excluded here. Everfit writes gym sessions
+  // into Apple Health as "Cross Training", so counting anything long enough as
+  // cardio would score a squat session as aerobic training.
+  const cardio = workouts.filter(isCardioWorkout);
   const cardioMinutes = cardio.reduce((a, x) => a + (x.durationMin ?? 0), 0);
   const cardioDistanceKm = cardio.reduce((a, x) => a + (x.distanceKm ?? 0), 0);
 
   const volumeKg = lifts.reduce((a, l) => a + l.volumeKg, 0);
   const liftDates = new Set(lifts.map((l) => l.performedOn.slice(0, 10)));
+
+  // A strength day is one with lifts written down or a strength workout synced.
+  // Counting the union means the score does not depend on which app recorded it.
+  const strengthDates = new Set<string>(liftDates);
+  for (const w of workouts.filter(isStrengthWorkout)) {
+    strengthDates.add(w.startedAt.slice(0, 10));
+  }
 
   // Progression: of the exercises trained in this window, how many matched or
   // beat their best set from before it. An exercise with no earlier history is
@@ -216,6 +225,7 @@ export function statsFor(src: Sources, w: Window, base: Baseline): WindowStats {
     volumeKg,
     liftSessionDays: liftDates.size,
     progressedShare,
+    strengthSessionDays: strengthDates.size,
 
     sessionDays: sessions.size,
     plannedSessions: Math.round((w.spanDays / 7) * TARGETS.sessionsPerWeek),
@@ -283,12 +293,22 @@ export function scoreDimension(d: Dimension, s: WindowStats, base: Baseline): nu
       ]);
 
     case 'Strength':
+      // Volume and progression need a lift log. When the training is recorded in
+      // a coaching app instead, sets and loads never reach this project — but the
+      // sessions do, so frequency carries the score rather than the dimension
+      // going blank on somebody who trains three times a week.
       return blend([
         {
           value: s.lifts.length ? clamp01(s.volumeKg / s.weeks / TARGETS.weeklyVolumeKg) : null,
-          weight: 0.55,
+          weight: 0.4,
         },
-        { value: s.progressedShare, weight: 0.45 },
+        { value: s.progressedShare, weight: 0.35 },
+        {
+          value: s.strengthSessionDays || s.workouts.length
+            ? clamp01(s.strengthSessionDays / s.weeks / TARGETS.sessionsPerWeek)
+            : null,
+          weight: 0.25,
+        },
       ]);
 
     case 'Consistency':
