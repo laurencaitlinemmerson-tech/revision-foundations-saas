@@ -1,22 +1,22 @@
 import { Metadata } from 'next';
 import OperatorGate from './OperatorGate';
-import DailyLogClient from './daily-log/DailyLogClient';
+import TrainingClient from './training/TrainingClient';
 
 export const metadata: Metadata = {
-  title: 'Operator Dashboard',
+  title: 'Training',
   robots: { index: false, follow: false },
 };
 
 /**
- * The operator dashboard — the Daily log redesign.
+ * The operator dashboard — Training.
  *
- * The previous warm-editorial dashboard is still available at /operator/legacy;
+ * The previous Daily log dashboard is still available at /operator/daily-log;
  * both sit behind the same password gate.
  */
 export default function OperatorPage() {
   return (
     <OperatorGate>
-      <DailyLogClient />
+      <TrainingClient />
     </OperatorGate>
   );
 }
