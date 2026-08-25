@@ -1,4 +1,6 @@
 import { fitReadings } from '@/lib/fitness/regression';
+import { detectPlateau, plateauSuggestion } from '@/lib/fitness/plateau';
+import { adaptiveTargets } from './adaptive';
 import { isStrengthWorkout } from '@/lib/workoutKind';
 import { MUTED, TAG_GOOD, TAG_INFO, TAG_WATCH } from './palette';
 import type { Sources, Window } from './scoring';
@@ -319,9 +321,82 @@ function coverage(src: Sources): Insight | null {
   };
 }
 
+/**
+ * A flat fortnight, and what to do about it.
+ *
+ * On a long loss a plateau is not a failure, it is a scheduled event — but the
+ * difference between one that needs waiting out and one that needs a change is
+ * the whole question, so the suggestion is scored against the current intake and
+ * expenditure rather than offered generically.
+ */
+function plateau(src: Sources): Insight | null {
+  const readings = src.weighIns
+    .filter((w) => w.weight > 0)
+    .map((w) => ({ date: w.date.slice(0, 10), weight: w.weight }));
+  const found = detectPlateau(readings);
+  if (!found || found.days < 12) return null;
+
+  const targets = adaptiveTargets(src);
+  const recent = src.days.slice(-14)
+    .map((d) => d.nutrition.dietaryEnergyKcal)
+    .filter((v): v is number => !!v);
+  const intake = recent.length ? mean(recent) as number : targets.calorieTarget;
+
+  return {
+    key: 'plateau',
+    tag: 'Plateau',
+    tagColor: TAG_WATCH,
+    title: `Flat for ${found.days} days`,
+    body: `Weight has moved ${nf(Math.abs(found.slopePerWeek), 2)} kg a week over the last ${found.days} days, around a mean of ${nf(found.meanWeight, 1)} kg — inside the noise of the scale rather than a direction. ${plateauSuggestion(found, Math.round(intake), targets.tdee)}`,
+    source: `From ${readings.length} weigh-ins, flat window ${found.startDate} to ${found.endDate}`,
+    metric: { value: String(found.days), unit: 'days flat' },
+  };
+}
+
+/**
+ * A decline that has been running for months.
+ *
+ * Every other comparison on the dashboard is period against period, which is
+ * blind to a slide that happens slowly enough. This looks across the whole year.
+ */
+function longDecline(src: Sources): Insight | null {
+  const now = new Date();
+  const months: number[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const from = Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1);
+    const to = Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i + 1, 1);
+    const vals = src.days
+      .filter((d) => {
+        const t = new Date(d.date).getTime();
+        return t >= from && t < to;
+      })
+      .map((d) => d.activity.steps)
+      .filter((v): v is number => !!v);
+    if (vals.length < 5) return null;
+    months.push(mean(vals) as number);
+  }
+
+  const first = mean(months.slice(0, 2)) as number;
+  const last = mean(months.slice(-2)) as number;
+  const change = ((last - first) / first) * 100;
+  if (change > -12) return null;
+
+  return {
+    key: 'decline',
+    tag: 'Activity',
+    tagColor: TAG_WATCH,
+    title: 'Steps have been sliding for months',
+    body: `Averaging ${nf(Math.round(last))} a day across the last two months against ${nf(Math.round(first))} four months before that — down ${Math.abs(change).toFixed(0)}%. A month-on-month comparison would not have caught this, because no single month fell far enough to notice.`,
+    source: 'From six months of daily step counts',
+    metric: { value: `${change.toFixed(0)}%`, unit: 'over six months' },
+  };
+}
+
 /** Everything the history can say, best-evidence first. */
 export function historyInsights(src: Sources, win: Window): Insight[] {
   return [
+    plateau(src),
+    longDecline(src),
     monthRanking(src),
     weightTrajectory(src),
     yearOnYear(src, win),

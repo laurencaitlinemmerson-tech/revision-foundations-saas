@@ -1,5 +1,6 @@
 import type { HealthDay, Lift, WeighIn, Workout } from '../daily-log/data';
-import { TARGETS, proteinTargetG } from './targets';
+import { TARGETS } from './targets';
+import { adaptiveTargets } from './adaptive';
 import { isCardioWorkout, isStrengthWorkout } from './workoutKind';
 
 /**
@@ -93,13 +94,27 @@ export type Sources = {
 };
 
 /** Baselines drawn from the whole history, for the metrics with no fixed target. */
-export type Baseline = { restingHr: number | null; hrv: number | null; weightKg: number | null };
+export type Baseline = {
+  restingHr: number | null;
+  hrv: number | null;
+  weightKg: number | null;
+  /** Targets that follow the bodyweight rather than sitting fixed. */
+  calorieTarget: number;
+  proteinTarget: number;
+};
 
 export function baselineOf(src: Sources): Baseline {
   const rhr = mean(src.days.map((d) => d.heart.restingHr).filter((v): v is number => !!v));
   const hrv = mean(src.days.map((d) => d.heart.hrvMs).filter((v): v is number => !!v));
   const last = src.weighIns.length ? src.weighIns[src.weighIns.length - 1] : null;
-  return { restingHr: rhr, hrv, weightKg: last && last.weight > 0 ? last.weight : null };
+  const adaptive = adaptiveTargets(src);
+  return {
+    restingHr: rhr,
+    hrv,
+    weightKg: last && last.weight > 0 ? last.weight : null,
+    calorieTarget: adaptive.calorieTarget,
+    proteinTarget: adaptive.proteinTarget,
+  };
 }
 
 export type WindowStats = {
@@ -164,13 +179,12 @@ export function statsFor(src: Sources, w: Window, base: Baseline): WindowStats {
 
   // Nutrition adherence only counts days that were actually logged; an unlogged
   // day is missing data, not a day the target was missed.
-  const proteinTarget = proteinTargetG(base.weightKg);
   const calDays = pick((d) => d.nutrition.dietaryEnergyKcal);
   const proteinDays = pick((d) => d.nutrition.proteinG);
   const calOnTarget = calDays.filter(
-    (v) => Math.abs(v - TARGETS.calorieTarget) <= TARGETS.calorieTarget * 0.1,
+    (v) => Math.abs(v - base.calorieTarget) <= base.calorieTarget * 0.1,
   ).length;
-  const proteinOnTarget = proteinDays.filter((v) => v >= proteinTarget * 0.9).length;
+  const proteinOnTarget = proteinDays.filter((v) => v >= base.proteinTarget * 0.9).length;
 
   const sleepH = pick((d) => d.sleep.totalMin).map((m) => m / 60);
   const avgSleepH = mean(sleepH);
@@ -295,7 +309,7 @@ export function partsFor(d: Dimension, s: WindowStats, base: Baseline): Part[] {
           label: 'Calories on target', weight: 0.4,
           value: logged ? s.calOnTarget / logged : null,
           detail: logged
-            ? `${s.calOnTarget} of ${logged} logged days within 10% of ${TARGETS.calorieTarget.toLocaleString('en-GB')} kcal`
+            ? `${s.calOnTarget} of ${logged} logged days within 10% of ${base.calorieTarget.toLocaleString('en-GB')} kcal`
             : 'Nothing logged in this window',
         },
         {

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isStrengthWorkout, isRunWorkout } from '@/lib/workoutKind';
+import { JOURNEY } from '@/app/(site)/operator/training/targets';
 import {
   CAPS, CONTRACT_VERSION, SESSIONS_PLANNED_PER_WEEK,
   daysBetween, daysElapsedInWeek, londonDate, londonISO, londonMonday,
@@ -21,10 +22,15 @@ export const PEER_PROFILE = {
   heightCm: 157,
   /** Grams of protein a day, the target the weekly protein round is scored against. */
   proteinTargetG: 130,
-  /** The goal this side is working toward, and the weight it started from. */
-  goalKg: 68,
-  /** Null takes the earliest weigh-in in the last year as the baseline. */
-  startKg: null as number | null,
+  /**
+   * The goal and its starting point both come from JOURNEY, so the figure Louis
+   * sees is the same one the Goals screen shows. Deriving the start from the
+   * earliest weigh-in on record made the peer document disagree with this side's
+   * own dashboard, and reported progress against a weight from a different
+   * attempt entirely.
+   */
+  goalKg: JOURNEY.goalKg,
+  startKg: JOURNEY.startKg as number | null,
   avatarUrl: null as string | null,
 } as const;
 
@@ -141,10 +147,7 @@ export async function buildPeerPayload(): Promise<PeerPayload> {
   const weightKg = latest ? n(latest.weight) : null;
   const bodyFatRaw = latest ? n(latest.body_fat) : null;
 
-  const yearAgo = shiftDays(today, -365);
-  const startKg = PEER_PROFILE.startKg
-    ?? n(usable.find((r) => String(r.date).slice(0, 10) >= yearAgo)?.weight)
-    ?? weightKg;
+  const startKg = PEER_PROFILE.startKg ?? weightKg;
 
   const goalKg = PEER_PROFILE.goalKg;
   const span = startKg !== null ? startKg - goalKg : null;

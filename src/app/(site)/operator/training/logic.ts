@@ -16,9 +16,11 @@ import { buildActivities, prettyType } from './activities';
 import { buildBodyAnalysis } from './bodyAnalysis';
 import { buildRibbon } from './trends';
 import { fitReadings } from '@/lib/fitness/regression';
-import { workoutKindOf } from './workoutKind';
+import { isRunWorkout, workoutKindOf } from './workoutKind';
 import { deriveHeadToHead } from './headToHead';
 import type { PeerData } from './peerData';
+import type { BriefData } from './briefData';
+import { adaptiveTargets } from './adaptive';
 
 /**
  * Everything the Training dashboard displays, derived from logged data.
@@ -393,6 +395,7 @@ export function deriveVals(
   props: TrainingProps,
   live: LiveData,
   peer: PeerData,
+  brief: BriefData = { loaded: false, cues: [], staleNote: null, ok: false },
 ) {
   const set = (patch: Partial<TrainingState>) => setState(patch);
 
@@ -1114,7 +1117,7 @@ export function deriveVals(
       }
       case 'Pace': {
         const paces = inBucket
-          .filter((w) => (w.distanceKm ?? 0) > 0 && (w.durationMin ?? 0) > 0)
+          .filter((w) => isRunWorkout(w) && (w.distanceKm ?? 0) >= 1 && (w.durationMin ?? 0) > 0)
           .map((w) => (w.durationMin as number) / (w.distanceKm as number));
         return paces.length ? Math.min(...paces) : 0;
       }
@@ -1122,8 +1125,10 @@ export function deriveVals(
   });
 
   const bestPace = (() => {
+    // Only runs. A walk has a pace arithmetically, but reporting 15:19/km as a
+    // personal best alongside actual running is not a comparison worth making.
     const paces = cardioWorkouts
-      .filter((w) => (w.distanceKm ?? 0) > 0 && (w.durationMin ?? 0) > 0)
+      .filter((w) => isRunWorkout(w) && (w.distanceKm ?? 0) >= 1 && (w.durationMin ?? 0) > 0)
       .map((w) => (w.durationMin as number) / (w.distanceKm as number));
     return paces.length ? Math.min(...paces) : null;
   })();
@@ -2016,7 +2021,7 @@ export function deriveVals(
     // pace, duration and heart rate, none of which is VO₂ max.
     cardioNote: {
       Distance: 'Distance is summed from workouts that recorded one; a gym session contributes nothing here.',
-      Pace: 'The quickest pace in each week, over sessions of at least a kilometre.',
+      Pace: 'The quickest running pace in each week, over at least a kilometre. Walks are excluded — they have a pace, but not a comparable one.',
       Duration: 'Time spent on cardio, by week. Strength sessions are counted on the Strength dimension instead.',
       'Heart rate': 'Average heart rate across cardio sessions, which moves with effort and with the weather.',
     }[st.cardio],
@@ -2106,6 +2111,32 @@ export function deriveVals(
       ? `${src.workouts.length} of ${allWorkouts.length} workouts`
       : null,
     clearFocus: () => set({ focus: null }),
+
+    /* today's cues, from the brief */
+    brief: {
+      loaded: brief.loaded,
+      ok: brief.ok,
+      staleNote: brief.staleNote,
+      cues: brief.cues.map((c, i) => ({
+        key: `${c.kind}-${i}`,
+        kind: c.kind,
+        text: c.text,
+        colour: c.kind === 'win' ? GREEN : c.kind === 'watch' ? AMBER : MUTED,
+      })),
+    },
+
+    /* the targets everything is scored against, which move with the weight */
+    targets: (() => {
+      const t = adaptiveTargets(src);
+      return {
+        ...t,
+        tdeeLabel: nf(t.tdee),
+        bmrLabel: nf(t.bmr),
+        calorieLabel: nf(t.calorieTarget),
+        proteinLabel: `${nf(t.proteinTarget)} g`,
+        confidenceLabel: `${Math.round(t.confidence * 100)}%`,
+      };
+    })(),
 
     /* the ribbon */
     ribbon,

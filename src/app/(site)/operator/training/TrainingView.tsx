@@ -654,6 +654,28 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
 function Dashboard({ v }: { v: TrainingVals }) {
   return (
     <div>
+      {/* The brief already decides what is worth saying about yesterday, so the
+          dashboard surfaces that rather than forming a second opinion beside it. */}
+      {v.brief.ok && (v.brief.cues.length > 0 || v.brief.staleNote) && (
+        <section style={{ marginTop: 36, paddingBottom: 24, borderBottom: RULE }}>
+          <Eyebrow>Worth knowing today</Eyebrow>
+          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {v.brief.staleNote && (
+              <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+                <span style={{ width: 5, height: 5, background: AMBER, flexShrink: 0, marginTop: 6 }} />
+                <span style={{ fontSize: 14, color: SOFT, lineHeight: 1.6 }}>{v.brief.staleNote}</span>
+              </div>
+            )}
+            {v.brief.cues.map((c) => (
+              <div key={c.key} style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+                <span style={{ width: 5, height: 5, background: c.colour, flexShrink: 0, marginTop: 6 }} />
+                <span style={{ fontSize: 14, color: SOFT, lineHeight: 1.6 }}>{c.text}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section style={{ ...card, marginTop: 44 }}>
         <div className="training-split" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr' }}>
           <div style={{ padding: PANEL_PAD, borderRight: RULE }}>
@@ -1242,6 +1264,28 @@ function HeadToHead({ v }: { v: TrainingVals }) {
         </div>
       )}
 
+      {/* What the rounds still in reach would actually take. */}
+      {h.connected && h.plan.length > 0 && (
+        <section style={{ marginBottom: GRID_GAP }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+            gap: 12, paddingBottom: 12, borderBottom: RULE, flexWrap: 'wrap',
+          }}>
+            <Eyebrow>Still in reach</Eyebrow>
+            <span style={{ fontSize: 12, color: SOFT }}>{h.planNote}</span>
+          </div>
+          {h.plan.map((p) => (
+            <div key={p.key} style={{
+              display: 'grid', gridTemplateColumns: '150px 1fr', gap: 20,
+              padding: '15px 0', borderBottom: RULE_SOFT, alignItems: 'baseline',
+            }}>
+              <span style={{ fontSize: 12.5, color: INK }}>{p.label}</span>
+              <span style={{ fontSize: 13, color: SOFT, lineHeight: 1.6 }}>{p.gap}</span>
+            </div>
+          ))}
+        </section>
+      )}
+
       {!h.connected && (
         <div style={{ marginTop: 24, padding: '20px 24px', background: TINT, border: RULE }}>
           <div style={{ fontSize: 13.5, color: SOFT, lineHeight: 1.7 }}>
@@ -1289,6 +1333,11 @@ function HeadToHead({ v }: { v: TrainingVals }) {
                 </div>
               </div>
               <div style={{ marginTop: 14 }}><Versus youShare={r.youShare} height={5} /></div>
+              {r.gap && (
+                <div style={{ fontSize: 11.5, color: PINK_DEEP, marginTop: 10, textAlign: 'center' }}>
+                  {r.gap}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -2245,9 +2294,38 @@ function Settings({ v }: { v: TrainingVals }) {
           </div>
         ))}
       </div>
+      <div style={{ ...card, marginTop: GRID_GAP, padding: CARD_PAD }}>
+        <Eyebrow>Today&rsquo;s computed targets</Eyebrow>
+        <p style={{ fontSize: 13.5, color: SOFT, margin: '12px 0 0', lineHeight: 1.7 }}>
+          {v.targets.note}
+        </p>
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+          marginTop: 20, paddingTop: 18, borderTop: RULE_SOFT,
+        }}>
+          {[
+            { label: 'BMR', value: v.targets.bmrLabel },
+            { label: 'TDEE', value: v.targets.tdeeLabel },
+            { label: 'Eat', value: v.targets.calorieLabel },
+            { label: 'Protein', value: v.targets.proteinLabel },
+            { label: 'Confidence', value: v.targets.confidenceLabel },
+          ].map((c) => (
+            <div key={c.label} style={{ paddingRight: 16 }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>
+                {c.label}
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: INK, marginTop: 6 }}>
+                {c.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px 0 0', lineHeight: 1.6 }}>
-        Targets are set in code for now, in <code>targets.ts</code>. Every score on this dashboard is
-        measured against them, so changing one changes what the dimensions mean.
+        Fixed defaults live in <code>targets.ts</code>; the figures above are recomputed from your
+        latest weigh-in, so they move as you do. Confidence is the share of the estimate resting on
+        measured rather than assumed signals.
       </p>
     </div>
   );

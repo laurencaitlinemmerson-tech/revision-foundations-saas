@@ -56,6 +56,46 @@ const ROUND_NOTES: Record<ChallengeId, string> = {
  * personal screens, where this side owns all the data and nobody else has to
  * agree with the arithmetic.
  */
+/**
+ * What it would take to win a round you are losing.
+ *
+ * A scoreboard that only reports the result is a thing to look at. Naming the
+ * gap in the round's own units — steps a day, one more session, grams of protein
+ * — turns it into something you can act on before the week is out.
+ */
+function gapFor(
+  id: ChallengeId,
+  mine: number | null,
+  theirs: number | null,
+  me: PeerPayload | null,
+): string | null {
+  if (mine === null || theirs === null || mine >= theirs) return null;
+  const short = theirs - mine;
+  const daysLeft = Math.max(1, 7 - (me?.score.daysElapsed ?? 7));
+
+  switch (id) {
+    case 'steps-week':
+      return `${nf(Math.ceil(short))} steps behind — about ${nf(Math.ceil(short / daysLeft))} a day for the rest of the week.`;
+    case 'protein-week': {
+      const target = me?.targets.proteinG;
+      if (!target) return 'Behind on protein against your own target.';
+      // The round is a ratio of a weekly target, so the gap converts back to grams.
+      const grams = short * target * 7;
+      return `${nf(Math.ceil(grams))} g of protein behind — roughly ${nf(Math.ceil(grams / daysLeft))} g a day to close it.`;
+    }
+    case 'weight-lost':
+      return 'Behind on progress toward your own goal — this one moves slowly and is not worth chasing inside a week.';
+    case 'gym-week':
+      return short <= 1
+        ? 'One more session takes this round.'
+        : `${Math.ceil(short)} more sessions to take this round.`;
+    case 'sleep-week':
+      return short <= 1
+        ? 'One more night of seven hours takes this round.'
+        : `${Math.ceil(short)} more nights of seven hours or more.`;
+  }
+}
+
 export type HeadToHeadState = { dayOffset: number };
 
 function cardFor(p: PeerPayload | null, day: DayEntry | null, accent: string, isLeader: boolean) {
@@ -154,6 +194,8 @@ export function deriveHeadToHead(
       youLead: winner === 'you',
       themLead: winner === 'them',
       youShare: `${share.toFixed(1)}%`,
+      // What closing it would actually take, in the round's own units.
+      gap: gapFor(c.id, a, b, you),
     };
   });
 
@@ -207,6 +249,16 @@ export function deriveHeadToHead(
     maxBack,
     you: cardFor(you, yourDay, PLUM, leader === 'you'),
     them: cardFor(them, theirDay, PINK, leader === 'them'),
+    // Rounds still in reach, closest first — worth spending the rest of the week
+    // on, rather than the ones already gone.
+    plan: rounds
+      .filter((r) => r.themLead && r.gap)
+      .map((r) => ({ key: r.key, label: r.label, gap: r.gap as string })),
+    planNote: theirPoints > yourPoints
+      ? `${theirPoints - yourPoints} round${theirPoints - yourPoints === 1 ? '' : 's'} behind, with the week still running.`
+      : yourPoints > theirPoints
+        ? 'Ahead. These are the rounds still in play.'
+        : 'Level. These are the rounds still in play.',
     fairnessNote:
       'Three of the five rounds are ratios against each of your own targets, so body size is never the contest. A number missing on either side leaves the round uncalled — an unsynced watch never hands the other person a win.',
   };
