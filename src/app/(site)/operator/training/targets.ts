@@ -39,9 +39,9 @@ export const TARGETS = {
  * that have nothing to do with what happened.
  */
 export const JOURNEY = {
-  /** Where this attempt began. */
-  startKg: 88.2,
-  startDate: '2026-08-26',
+  /** Where this attempt began — the 21 August weigh-in. */
+  startKg: 88.8,
+  startDate: '2026-08-21',
   goalKg: 68,
   /**
    * A rate to plan against. Roughly 0.5–1% of bodyweight a week is the range

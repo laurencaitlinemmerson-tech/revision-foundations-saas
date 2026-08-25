@@ -1595,10 +1595,26 @@ export function deriveVals(
     const sinceStart = weighAll.filter(
       (r) => r.weight > 0 && r.date.slice(0, 10) >= JOURNEY.startDate,
     );
-    const fit = sinceStart.length >= 4
+    // A rate needs a span, not just a count. Five readings across five days can
+    // fit a line implying 1.6 kg a week and a goal date in November — that is a
+    // water-weight swing being read as a trend, and projecting a twenty-kilogram
+    // journey off it would set a date the body was never going to meet.
+    const MIN_SPAN_DAYS = 21;
+    const spanDaysMeasured = sinceStart.length >= 2
+      ? (new Date(sinceStart[sinceStart.length - 1].date).getTime()
+        - new Date(sinceStart[0].date).getTime()) / DAY
+      : 0;
+
+    const fit = sinceStart.length >= 4 && spanDaysMeasured >= MIN_SPAN_DAYS
       ? fitReadings(sinceStart.map((r) => ({ date: r.date.slice(0, 10), weight: r.weight })))
       : null;
-    const perWeek = fit ? fit.slope * 7 : null;
+    // Loss faster than 1% of bodyweight a week is not sustained, so a fit
+    // claiming it is measuring noise rather than progress.
+    const rawPerWeek = fit ? fit.slope * 7 : null;
+    const perWeek = rawPerWeek !== null && Math.abs(rawPerWeek) <= (latest2('weight') ?? 90) * 0.012
+      ? rawPerWeek
+      : null;
+    const tooSoon = sinceStart.length >= 2 && spanDaysMeasured < MIN_SPAN_DAYS;
 
     // Only project when the weight is actually moving toward the goal.
     const weeksLeft = perWeek !== null && perWeek < -0.01 && toGo !== null && toGo > 0
@@ -1695,11 +1711,13 @@ export function deriveVals(
       targetEtaLabel: fmtDate(targetEta, true),
       note: latest === null
         ? 'No weigh-in yet.'
-        : sinceStart.length < 4
-          ? `Started ${fmtDate(JOURNEY.startDate, true)} at ${nf(start, 1)} kg. A rate needs at least four weigh-ins since then — there ${sinceStart.length === 1 ? 'is' : 'are'} ${sinceStart.length}.`
-          : eta
-            ? `At the current rate, ${nf(goal, 1)} kg lands around ${fmtDate(eta, true)}. At the planned ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week it would be ${fmtDate(targetEta, true)}.`
-            : `Weight is not currently moving toward ${nf(goal, 1)} kg, so there is nothing honest to project from. At the planned ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week the goal would land ${fmtDate(targetEta, true)}.`,
+        : tooSoon
+          ? `Started ${fmtDate(JOURNEY.startDate, true)} at ${nf(start, 1)} kg, ${nf(Math.round(spanDaysMeasured))} days ago. A rate needs about three weeks behind it — over a few days the scale is mostly reporting water, and a line through that would project a date nothing could meet. At the planned ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week the goal lands ${fmtDate(targetEta, true)}.`
+          : sinceStart.length < 4
+            ? `Started ${fmtDate(JOURNEY.startDate, true)} at ${nf(start, 1)} kg. A rate needs at least four weigh-ins since then — there ${sinceStart.length === 1 ? 'is' : 'are'} ${sinceStart.length}.`
+            : eta
+              ? `At the current rate, ${nf(goal, 1)} kg lands around ${fmtDate(eta, true)}. At the planned ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week it would be ${fmtDate(targetEta, true)}.`
+              : `Weight is not currently moving toward ${nf(goal, 1)} kg, so there is nothing honest to project from. At the planned ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week the goal would land ${fmtDate(targetEta, true)}.`,
     };
   })();
 
