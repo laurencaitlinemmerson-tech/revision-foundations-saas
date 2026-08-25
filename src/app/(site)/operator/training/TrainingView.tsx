@@ -451,7 +451,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
       </div>
 
       <section style={{ marginTop: SECTION_GAP }}>
-        <SectionHeading title="Multi-dimensional progress" aside="This period vs previous" />
+        <SectionHeading title="Multi-dimensional progress" aside={v.againstLabel} />
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -825,8 +825,7 @@ function PersonCard({ p, dayLabel, stepper }: { p: Card; dayLabel: string; stepp
 function HeadToHead({ v }: { v: TrainingVals }) {
   const h = v.h2h;
 
-  if (!h.loaded) return <Empty title="Reading both sides\u2026" note="Yours from here, theirs from their site." />;
-
+  if (!h.loaded) return <Empty title="Reading both sides…" note="Yours from here, theirs from their site." />;
   if (!h.you) {
     return <Empty title="Your own document could not be built." note="The peer endpoint reads from your stored data; check the sync has run." />;
   }
@@ -839,75 +838,99 @@ function HeadToHead({ v }: { v: TrainingVals }) {
   );
 
   return (
-    <div style={{ marginTop: 44 }}>
-      <section style={{ ...card, padding: PANEL_PAD }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: GRID_GAP, flexWrap: 'wrap' }}>
-          <div>
-            <Eyebrow>{h.weekLabel}</Eyebrow>
-            <h2 style={{ ...display(34), margin: '14px 0 0' }}>{h.scoreline}</h2>
-            <div style={{ fontSize: 13, color: SOFT, marginTop: 10 }}>
-              {h.connected
-                ? `${h.roundsDecided} of ${h.roundsTotal} rounds settled`
-                : 'Not connected'}
-            </div>
+    <div style={{ marginTop: 40 }}>
+      {/* A quiet line rather than a headline — the verdict belongs at the end,
+          after the numbers it is drawn from. */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+        gap: 16, flexWrap: 'wrap', paddingBottom: 14, borderBottom: RULE,
+      }}>
+        <Eyebrow>{h.weekLabel}</Eyebrow>
+        <span style={{ fontSize: 12.5, color: SOFT }}>
+          {h.connected ? `${h.roundsDecided} of ${h.roundsTotal} rounds settled` : 'Not connected'}
+        </span>
+      </div>
+
+      {!h.connected && (
+        <div style={{ marginTop: 24, padding: '20px 24px', background: TINT, border: RULE }}>
+          <div style={{ fontSize: 13.5, color: SOFT, lineHeight: 1.7 }}>
+            {h.configured ? h.peerMessage ?? 'The other side is not answering.'
+              : 'No peer endpoint is configured yet — set PEER_URL and PEER_KEY.'}
+          </div>
+          <div style={{ fontSize: 12, color: MUTED, marginTop: 10, fontStyle: 'italic' }}>
+            Your own figures below are unaffected.
           </div>
         </div>
+      )}
 
-        {!h.connected && (
-          <div style={{ marginTop: 28, padding: '20px 24px', background: TINT, border: RULE }}>
-            <div style={{ fontSize: 13.5, color: SOFT, lineHeight: 1.7 }}>
-              {h.configured
-                ? h.peerMessage ?? 'The other side is not answering.'
-                : 'No peer endpoint is configured yet — set PEER_URL and PEER_KEY.'}
+      {/* The two of you, side by side. This is the substance. */}
+      <div className="training-pair" style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP, marginTop: GRID_GAP,
+      }}>
+        <PersonCard p={h.you} dayLabel={h.dayLabel} stepper={stepper} />
+        {h.them
+          ? <PersonCard p={h.them} dayLabel={h.dayLabel} stepper={stepper} />
+          : (
+            <div style={{ ...card, padding: CARD_PAD, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Empty title="Not connected" note={h.peerMessage ?? 'Their side is not answering right now.'} />
             </div>
-            <div style={{ fontSize: 12, color: MUTED, marginTop: 10, fontStyle: 'italic' }}>
-              Your own figures below are unaffected.
-            </div>
-          </div>
-        )}
-      </section>
+          )}
+      </div>
 
+      {/* The rounds, as a quiet ledger. */}
       <section style={{ marginTop: SECTION_GAP }}>
         <SectionHeading title="The rounds" aside="A point each" />
         <div style={{ ...card, borderTop: 0 }}>
           {h.rounds.map((r) => (
-            <div key={r.key} style={{ padding: '24px 28px', borderBottom: RULE_SOFT }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 20, alignItems: 'baseline' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: r.youLead ? PLUM : INK }}>
+            <div key={r.key} style={{ padding: '20px 26px', borderBottom: RULE_SOFT }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 18, alignItems: 'baseline' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: r.youLead ? PLUM : INK }}>
                   {r.you}
-                  {r.youLead && <span style={{ fontSize: 11, marginLeft: 10, color: PLUM }}>{'\u25b2'}</span>}
+                  {r.youLead && <span style={{ fontSize: 10, marginLeft: 9, color: PLUM }}>{'\u25b2'}</span>}
                 </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 13, color: INK }}>{r.label}</div>
-                  <div style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>{r.note}</div>
+                <div style={{ textAlign: 'center', minWidth: 170 }}>
+                  <div style={{ fontSize: 12.5, color: INK }}>{r.label}</div>
+                  <div style={{ fontSize: 11, color: MUTED, marginTop: 3 }}>{r.note}</div>
                 </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, textAlign: 'right', color: r.themLead ? PINK : INK }}>
-                  {r.themLead && <span style={{ fontSize: 11, marginRight: 10, color: PINK }}>{'\u25b2'}</span>}
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, textAlign: 'right', color: r.themLead ? PINK : INK }}>
+                  {r.themLead && <span style={{ fontSize: 10, marginRight: 9, color: PINK }}>{'\u25b2'}</span>}
                   {r.them}
                 </div>
               </div>
-              <div style={{ marginTop: 16 }}><Versus youShare={r.youShare} /></div>
+              <div style={{ marginTop: 14 }}><Versus youShare={r.youShare} height={5} /></div>
             </div>
           ))}
         </div>
-        <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px 0 0', lineHeight: 1.75, maxWidth: '68ch' }}>
-          {h.fairnessNote}
-        </p>
       </section>
 
-      <section style={{ marginTop: SECTION_GAP }}>
-        <SectionHeading title="Side by side" aside={h.dayLabel} />
-        <div className="training-pair" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP, marginTop: GRID_GAP }}>
-          <PersonCard p={h.you} dayLabel={h.dayLabel} stepper={stepper} />
-          {h.them
-            ? <PersonCard p={h.them} dayLabel={h.dayLabel} stepper={stepper} />
-            : (
-              <div style={{ ...card, padding: CARD_PAD, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Empty title="Not connected" note={h.peerMessage ?? 'Their side is not answering right now.'} />
+      {/* The verdict, last — after everything it is drawn from. */}
+      {h.connected && (
+        <section style={{ marginTop: SECTION_GAP }}>
+          <div style={{ ...card, padding: PANEL_PAD, background: TINT }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ ...display(52, h.leader === 'you' ? PLUM : INK), lineHeight: 1 }}>{h.yourPoints}</div>
+                <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 10 }}>
+                  {h.you.name}
+                </div>
               </div>
-            )}
-        </div>
-      </section>
+              <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED }}>vs</div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ ...display(52, h.leader === 'them' ? PINK : INK), lineHeight: 1 }}>{h.theirPoints}</div>
+                <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 10 }}>
+                  {h.them?.name}
+                </div>
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', marginTop: 24, paddingTop: 20, borderTop: RULE }}>
+              <div style={{ ...display(22), color: INK }}>{h.scoreline}</div>
+            </div>
+          </div>
+          <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px auto 0', lineHeight: 1.75, maxWidth: '66ch', textAlign: 'center' }}>
+            {h.fairnessNote}
+          </p>
+        </section>
+      )}
     </div>
   );
 }

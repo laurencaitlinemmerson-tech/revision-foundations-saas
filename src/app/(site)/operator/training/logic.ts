@@ -1,7 +1,7 @@
 import type { LiveData, Lift, WeighIn, Workout } from '../daily-log/data';
 import { MUSCLE_GROUPS, equipmentOf, muscleGroupOf, sessionNameFor, type MuscleGroup } from './exercises';
 import {
-  DAY, DIMENSIONS, baselineOf, overallScore, scoreAll, statsFor, windows,
+  DAY, DIMENSIONS, baselineOf, overallScore, scoreAll, statsFor,
   type Baseline, type DimensionRow, type Sources,
 } from './scoring';
 import {
@@ -9,6 +9,7 @@ import {
   TAG_GOOD, TAG_INFO, TAG_WATCH,
 } from './palette';
 import { TARGETS, proteinTargetG } from './targets';
+import { PERIOD_IDS, periodWindows, type PeriodId } from './periods';
 import { workoutKindOf } from './workoutKind';
 import { deriveHeadToHead } from './headToHead';
 import type { PeerData } from './peerData';
@@ -35,16 +36,14 @@ export const SCREENS = [
 ] as const;
 export type Screen = (typeof SCREENS)[number];
 
-export const RANGES: Array<[string, number]> = [
-  ['7D', 7], ['30D', 30], ['90D', 90], ['1Y', 365],
-];
+
 
 export type BodyMetric = 'Weight' | 'Body fat %' | 'Lean mass';
 export type CardioMetric = 'Distance' | 'Pace' | 'Duration' | 'Heart rate';
 
 export type TrainingState = {
   screen: Screen;
-  range: string;
+  range: PeriodId;
   customFrom: string;
   customTo: string;
   body: BodyMetric;
@@ -66,7 +65,7 @@ const todayISO = () => new Date().toISOString().slice(0, 10);
 
 export const INITIAL_STATE: TrainingState = {
   screen: 'Dashboard',
-  range: '90D',
+  range: 'Week',
   customFrom: new Date(Date.now() - 90 * DAY).toISOString().slice(0, 10),
   customTo: todayISO(),
   body: 'Weight',
@@ -375,24 +374,21 @@ export function deriveVals(
 
   /* window ---------------------------------------------------------------- */
 
+  // Calendar-aligned, and compared against the same elapsed stretch of the
+  // previous period rather than the whole of it.
+  const win = periodWindows(st.range, { from: st.customFrom, to: st.customTo });
+  const nowWin = win.now;
+  const prevWin = win.prev;
+  const spanDays = win.spanDays;
+  const endsAt = nowWin.to;
   const custom = st.range === 'Custom';
-  const customTo = new Date(`${st.customTo}T23:59:59`).getTime();
-  const customFrom = new Date(`${st.customFrom}T00:00:00`).getTime();
-  const customSpan =
-    Number.isFinite(customTo) && Number.isFinite(customFrom) && customTo > customFrom
-      ? Math.max(1, Math.round((customTo - customFrom) / DAY))
-      : 90;
-  const spanDays = custom ? customSpan : (RANGES.find((r) => r[0] === st.range)?.[1] ?? 90);
-  const endsAt = custom && Number.isFinite(customTo) ? customTo : Date.now();
 
-  const { now: nowWin, prev: prevWin } = windows(endsAt, spanDays);
   const base: Baseline = baselineOf(src);
   const nowStats = statsFor(src, nowWin, base);
   const prevStats = statsFor(src, prevWin, base);
 
-  const rangeLabel = custom
-    ? `${fmtDate(new Date(nowWin.from))} – ${fmtDate(new Date(nowWin.to))}`
-    : `last ${spanDays} days`;
+  const rangeLabel = win.label;
+  const againstLabel = win.againstLabel;
 
   /* dimensions ------------------------------------------------------------ */
 
@@ -747,7 +743,7 @@ export function deriveVals(
         label: `Total volume, ${rangeLabel}`,
         value: nf(volumeTonnes, volumeTonnes >= 10 ? 0 : 1),
         unit: 'tonnes lifted',
-        trend: `${volumeDelta.text} vs previous`,
+        trend: `${volumeDelta.text} vs ${againstLabel}`,
         trendColor: volumeDelta.color,
         spark: linePath(volumeSpark, 200, 40, 4),
         note: `${nowStats.liftSessionDays} lift session${nowStats.liftSessionDays === 1 ? '' : 's'} of ${nowStats.plannedSessions} planned.`,
@@ -758,7 +754,7 @@ export function deriveVals(
         value: nowStats.strengthSessionDays ? nf(nowStats.strengthSessionDays) : DASH,
         unit: `of ${nf(nowStats.plannedSessions)} planned`,
         trend: nowStats.strengthSessionDays
-          ? `${pctDelta(nowStats.strengthSessionDays, prevStats.strengthSessionDays).text} vs previous`
+          ? `${pctDelta(nowStats.strengthSessionDays, prevStats.strengthSessionDays).text} vs ${againstLabel}`
           : 'No strength sessions in range',
         trendColor: nowStats.strengthSessionDays
           ? pctDelta(nowStats.strengthSessionDays, prevStats.strengthSessionDays).color
@@ -771,7 +767,7 @@ export function deriveVals(
       label: 'Estimated VO₂ max',
       value: num(nowStats.vo2, 1),
       unit: 'ml/kg/min',
-      trend: nowStats.vo2 === null ? 'No VO₂ estimate synced' : `${vo2Delta.text} vs previous`,
+      trend: nowStats.vo2 === null ? 'No VO₂ estimate synced' : `${vo2Delta.text} vs ${againstLabel}`,
       trendColor: nowStats.vo2 === null ? MUTED : vo2Delta.color,
       spark: linePath(vo2Spark, 200, 40, 4),
       note: nowStats.cardioDistanceKm > 0
@@ -1217,7 +1213,7 @@ export function deriveVals(
       tag: 'Strength',
       tagColor: TAG_GOOD,
       title: d.color === GREEN ? 'Strength volume is trending up' : d.text === 'held' ? 'Strength volume is holding' : 'Strength volume is down',
-      body: `You moved ${nf(nowStats.volumeKg)} kg across ${nowStats.liftSessionDays} lift session${nowStats.liftSessionDays === 1 ? '' : 's'} — ${d.text === DASH ? 'no comparable previous period' : `${d.text} against the period before`}.${exerciseRows[0]?.e1rmKg ? ` Best estimated one-rep max is ${nf(exerciseRows[0].e1rmKg, 1)} kg on the ${exerciseRows[0].name.toLowerCase()}.` : ''}`,
+      body: `You moved ${nf(nowStats.volumeKg)} kg across ${nowStats.liftSessionDays} lift session${nowStats.liftSessionDays === 1 ? '' : 's'} — ${d.text === DASH ? 'no comparable previous period' : `${d.text} against ${againstLabel}`}.${exerciseRows[0]?.e1rmKg ? ` Best estimated one-rep max is ${nf(exerciseRows[0].e1rmKg, 1)} kg on the ${exerciseRows[0].name.toLowerCase()}.` : ''}`,
       source: `From ${nowStats.lifts.length} logged lift${nowStats.lifts.length === 1 ? '' : 's'}, ${spanLabel}`,
     });
   }
@@ -1229,7 +1225,7 @@ export function deriveVals(
       tag: 'Strength',
       tagColor: TAG_GOOD,
       title: 'Strength is scored on sessions, not volume',
-      body: `${nowStats.strengthSessionDays} strength session${nowStats.strengthSessionDays === 1 ? '' : 's'} against ${nowStats.plannedSessions} planned — ${d.text === DASH ? 'no comparable previous period' : `${d.text} on the period before`}. Your sets and loads are recorded in your coaching app and never reach this project, so volume and personal bests cannot be shown.`,
+      body: `${nowStats.strengthSessionDays} strength session${nowStats.strengthSessionDays === 1 ? '' : 's'} against ${nowStats.plannedSessions} planned — ${d.text === DASH ? 'no comparable previous period' : `${d.text} on ${againstLabel}`}. Your sets and loads are recorded in your coaching app and never reach this project, so volume and personal bests cannot be shown.`,
       source: `From ${nowStats.workouts.length} synced workout${nowStats.workouts.length === 1 ? '' : 's'}, ${spanLabel}`,
     });
   }
@@ -1261,7 +1257,7 @@ export function deriveVals(
       tag: 'Recovery',
       tagColor: down ? TAG_WATCH : TAG_GOOD,
       title: down ? 'Recovery could improve' : 'Recovery is steady',
-      body: `Average sleep is ${fmtHours(nowStats.avgSleepH)}${sleepDelta.text === 'held' ? ', unchanged on the previous period' : `, ${sleepDelta.text} on the previous period`}${nowStats.avgHrv === null ? '' : `, and HRV is ${nf(nowStats.avgHrv)} ms (${hrvDelta.text})`}.`,
+      body: `Average sleep is ${fmtHours(nowStats.avgSleepH)}${sleepDelta.text === 'held' ? `, unchanged on ${againstLabel}` : `, ${sleepDelta.text} on ${againstLabel}`}${nowStats.avgHrv === null ? '' : `, and HRV is ${nf(nowStats.avgHrv)} ms (${hrvDelta.text})`}.`,
       source: `From ${nowStats.days.filter((d) => (d.sleep.totalMin ?? 0) > 0).length} nights of sleep data`,
     });
   }
@@ -1409,7 +1405,7 @@ export function deriveVals(
     active: st.screen === label,
   }));
 
-  const ranges = [...RANGES.map((r) => r[0]), 'Custom'].map((label) => ({
+  const ranges = PERIOD_IDS.map((label) => ({
     label,
     go: () => set({ range: label }),
     active: st.range === label,
@@ -1479,13 +1475,14 @@ export function deriveVals(
     pageTitle,
     pageSub,
     rangeLabel,
+    againstLabel: `vs ${againstLabel}`,
     loaded: live.loaded,
     hasAny,
     setupRequired: live.setupRequired,
 
     /* dashboard */
     overall: overall === null ? DASH : String(overall),
-    overallDelta: overall === null ? 'Nothing scored yet' : `${overallDelta.text} vs previous period`,
+    overallDelta: overall === null ? 'Nothing scored yet' : `${overallDelta.text} vs ${againstLabel}`,
     overallDeltaColor: overall === null ? MUTED : overallDelta.color,
     dims,
     dimNote,
@@ -1528,7 +1525,7 @@ export function deriveVals(
     sleepArea: areaPath(sleepSeries, 600, 210, 20),
     sleepNote: nowStats.avgSleepH === null
       ? 'No sleep data has synced for this window.'
-      : `Average sleep ${fmtHours(nowStats.avgSleepH)}, ${sleepDelta.text === 'held' ? 'unchanged on' : `${sleepDelta.text} on`} the previous period.`,
+      : `Average sleep ${fmtHours(nowStats.avgSleepH)}, ${sleepDelta.text === 'held' ? 'unchanged on' : `${sleepDelta.text} on`} ${againstLabel}.`,
     sleepTargetY: (() => {
       if (!sleepSeries.length) return '52';
       const min = Math.min(...sleepSeries);
@@ -1575,7 +1572,7 @@ export function deriveVals(
     cardioTabs,
     cardioBars,
     cardioTrend: cardioWorkouts.length
-      ? `${cardioTrendDelta.text} vs previous period`
+      ? `${cardioTrendDelta.text} vs ${againstLabel}`
       : 'No cardio workouts in this window',
     cardioTrendColor: cardioWorkouts.length ? cardioTrendDelta.color : MUTED,
 

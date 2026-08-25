@@ -228,7 +228,9 @@ export function statsFor(src: Sources, w: Window, base: Baseline): WindowStats {
     strengthSessionDays: strengthDates.size,
 
     sessionDays: sessions.size,
-    plannedSessions: Math.round((w.spanDays / 7) * TARGETS.sessionsPerWeek),
+    // Never zero: a single-day window would otherwise divide by it, and
+    // "1 of 0 planned" is not a sentence.
+    plannedSessions: Math.max(1, Math.round((w.spanDays / 7) * TARGETS.sessionsPerWeek)),
     longestGapDays,
   };
 }

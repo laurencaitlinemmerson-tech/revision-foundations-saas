@@ -48,6 +48,14 @@ const ROUND_NOTES: Record<ChallengeId, string> = {
   'sleep-week': 'Nights of seven hours or more',
 };
 
+/**
+ * Head to head runs on the week, and only the week.
+ *
+ * The contract publishes weekTotals under rules both sides compute identically,
+ * so both screens show the same result. Day and month views belong on the
+ * personal screens, where this side owns all the data and nobody else has to
+ * agree with the arithmetic.
+ */
 export type HeadToHeadState = { dayOffset: number };
 
 function cardFor(p: PeerPayload | null, day: DayEntry | null, accent: string, isLeader: boolean) {
