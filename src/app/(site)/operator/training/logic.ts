@@ -1858,6 +1858,59 @@ export function deriveVals(
     distributionNote: groupTotal
       ? `Share of ${nf(Math.round(groupTotal))} kg of volume over ${rangeLabel}.`
       : 'No lift volume in this window.',
+    // Where the training time actually goes. The old strength distribution was
+    // built from lift volume and sat empty whenever the sets lived elsewhere;
+    // this reads minutes off the synced workouts, which are always there.
+    trainingSplit: (() => {
+      const byKind = new Map<string, number>();
+      for (const w of nowStats.workouts) {
+        const kind = workoutKindOf(w) === 'strength' ? 'Strength'
+          : workoutKindOf(w) === 'cardio' ? 'Cardio' : 'Other';
+        byKind.set(kind, (byKind.get(kind) ?? 0) + (w.durationMin ?? 0));
+      }
+      // A lift-only day has no synced duration, so it is credited a nominal
+      // session length rather than counting as no time trained at all.
+      const liftOnlyDays = new Set(nowStats.lifts.map((l) => l.performedOn.slice(0, 10)));
+      for (const w of nowStats.workouts) liftOnlyDays.delete(w.startedAt.slice(0, 10));
+      if (liftOnlyDays.size) {
+        byKind.set('Strength', (byKind.get('Strength') ?? 0) + liftOnlyDays.size * 45);
+      }
+      const total = [...byKind.values()].reduce((a, b) => a + b, 0);
+      const colours: Record<string, string> = { Strength: PLUM, Cardio: PINK, Other: MUTED };
+      return {
+        total,
+        totalLabel: total ? fmtHours(total / 60) : DASH,
+        rows: [...byKind.entries()]
+          .filter(([, v]) => v > 0)
+          .sort((a, b) => b[1] - a[1])
+          .map(([label, mins]) => ({
+            label,
+            colour: colours[label] ?? MUTED,
+            value: fmtMinutes(mins),
+            share: total ? (mins / total) * 100 : 0,
+            pct: total ? `${Math.round((mins / total) * 100)}%` : '0%',
+          })),
+        note: total
+          ? `${fmtHours(total / 60)} of training across ${nowStats.workouts.length} session${nowStats.workouts.length === 1 ? '' : 's'} in ${rangeLabel}.`
+          : `No sessions with a recorded duration in ${rangeLabel}.`,
+      };
+    })(),
+
+    // The caption has to follow the metric on show — the box carries distance,
+    // pace, duration and heart rate, none of which is VO₂ max.
+    cardioNote: {
+      Distance: 'Distance is summed from workouts that recorded one; a gym session contributes nothing here.',
+      Pace: 'The quickest pace in each week, over sessions of at least a kilometre.',
+      Duration: 'Time spent on cardio, by week. Strength sessions are counted on the Strength dimension instead.',
+      'Heart rate': 'Average heart rate across cardio sessions, which moves with effort and with the weather.',
+    }[st.cardio],
+    cardioSummary: [
+      { label: 'Sessions', value: nf(cardioWorkouts.length) },
+      { label: 'Distance', value: nowStats.cardioDistanceKm ? `${nf(nowStats.cardioDistanceKm, 1)} km` : DASH },
+      { label: 'Time', value: nowStats.cardioMinutes ? fmtHours(nowStats.cardioMinutes / 60) : DASH },
+      { label: 'VO₂ max', value: nowStats.vo2 === null ? DASH : nf(nowStats.vo2, 1) },
+    ],
+
     cardioValue,
     cardioUnit,
     cardioTabs,

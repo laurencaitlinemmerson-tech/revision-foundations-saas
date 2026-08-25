@@ -1568,39 +1568,87 @@ function Progress({ v }: { v: TrainingVals }) {
       </section>
 
       <section className="training-pair" style={{ marginTop: GRID_GAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP }}>
+        {/* Training split, from workout minutes — the lift-volume version this
+            replaces sat empty whenever the sets lived in a coaching app. */}
         <div style={{ ...card, padding: CARD_PAD }}>
-          <Eyebrow>Strength distribution</Eyebrow>
-          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 19 }}>
-            {v.distribution.map((d) => (
-              <div key={d.label}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: INK }}>
-                  <span>{d.label}</span><span style={{ color: SOFT }}>{d.value}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+            <Eyebrow>Training split</Eyebrow>
+            <span style={{ fontSize: 12, color: SOFT }}>{v.trainingSplit.totalLabel}</span>
+          </div>
+
+          {v.trainingSplit.rows.length > 0 ? (
+            <>
+              <div style={{ display: 'flex', height: 10, marginTop: 18, background: TRACK, overflow: 'hidden' }}>
+                {v.trainingSplit.rows.map((r) => (
+                  <div key={r.label} title={`${r.label} — ${r.value}`}
+                    style={{ width: `${r.share}%`, background: r.colour, transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)' }} />
+                ))}
+              </div>
+              <div style={{ marginTop: 18 }}>
+                {v.trainingSplit.rows.map((r) => (
+                  <div key={r.label} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                    gap: 12, padding: '12px 0', borderBottom: RULE_SOFT,
+                  }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                      <span style={{ width: 8, height: 8, background: r.colour, flexShrink: 0 }} />
+                      <span style={{ fontSize: 13, color: INK }}>{r.label}</span>
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{r.value}</span>
+                      <span style={{ fontSize: 11.5, color: MUTED, minWidth: 34, textAlign: 'right' }}>{r.pct}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 13, color: MUTED, marginTop: 18 }}>{v.trainingSplit.note}</div>
+          )}
+
+          {v.trainingSplit.rows.length > 0 && (
+            <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '16px 0 0', lineHeight: 1.6 }}>
+              {v.trainingSplit.note}
+            </p>
+          )}
+        </div>
+
+        {/* Cardio. The tab row gets its own line rather than being squeezed into
+            190px beside the figure, and the caption follows the metric on show. */}
+        <div style={{ ...card, padding: CARD_PAD }}>
+          <Eyebrow>Cardio</Eyebrow>
+
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
+            <Figure value={v.cardioValue} style={display(40)} />
+            <span style={{ fontSize: 13, color: MUTED, paddingBottom: 6 }}>{v.cardioUnit}</span>
+          </div>
+          <div style={{ fontSize: 13, color: v.cardioTrendColor, marginTop: 8 }}>{v.cardioTrend}</div>
+
+          <div style={{ marginTop: 18 }}>
+            <Segmented items={v.cardioTabs} size="sm" />
+          </div>
+
+          <div style={{ marginTop: 18 }}>
+            <BarSeries bars={v.cardioBars} width={420} height={140} hint="By week — hover to read one" />
+          </div>
+
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+            marginTop: 18, paddingTop: 16, borderTop: RULE,
+          }}>
+            {v.cardioSummary.map((c) => (
+              <div key={c.label}>
+                <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>
+                  {c.label}
                 </div>
-                <Bar pct={d.pct} />
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: INK, marginTop: 5 }}>
+                  {c.value}
+                </div>
               </div>
             ))}
-            {!v.distribution.length && <div style={{ fontSize: 13, color: MUTED }}>No lift volume in this window.</div>}
           </div>
-          <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px 0 0' }}>{v.distributionNote}</p>
-        </div>
-        <div style={{ ...card, padding: CARD_PAD }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <Eyebrow>Cardio fitness</Eyebrow>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-                <Figure value={v.cardioValue} style={display(40)} />
-                <span style={{ fontSize: 13, color: MUTED, paddingBottom: 6 }}>{v.cardioUnit}</span>
-              </div>
-              <div style={{ fontSize: 13, color: v.cardioTrendColor, marginTop: 8 }}>{v.cardioTrend}</div>
-            </div>
-            <div style={{ maxWidth: 190 }}><Segmented items={v.cardioTabs} size="sm" /></div>
-          </div>
-          <div style={{ marginTop: 20 }}>
-            <BarSeries bars={v.cardioBars} width={420} height={150} hint="Cardio by week — hover to read one" />
-          </div>
-          <div style={{ fontSize: 12, color: SOFT, marginTop: 12 }}>
-            VO₂ max is estimated by your watch from pace and heart rate, not measured in a lab.
-          </div>
+
+          <p style={{ fontSize: 12, color: SOFT, marginTop: 14, lineHeight: 1.6 }}>{v.cardioNote}</p>
         </div>
       </section>
 
