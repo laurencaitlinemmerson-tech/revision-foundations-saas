@@ -1613,9 +1613,75 @@ export function deriveVals(
       new Date(`${JOURNEY.startDate}T12:00:00Z`).getTime() + targetWeeks * 7 * DAY,
     );
 
+    /* milestones ---------------------------------------------------------- */
+
+    // A twenty-kilogram goal is too far away to feel like anything. Every whole
+    // stone-ish step between here and there is a real event, and the next one is
+    // always close enough to be worth aiming at this month.
+    const stops: number[] = [];
+    for (let kg = Math.floor(start) - 1; kg > goal; kg -= 2.5) stops.push(kg);
+    stops.push(goal);
+
+    const rate = perWeek !== null && perWeek < -0.01 ? Math.abs(perWeek) : JOURNEY.targetKgPerWeek;
+    const milestones = stops.map((kg) => {
+      const done = latest !== null && latest <= kg;
+      const away = latest === null ? null : latest - kg;
+      const weeks = done || away === null || away <= 0 ? null : away / rate;
+      return {
+        key: String(kg),
+        label: `${nf(kg, kg % 1 ? 1 : 0)} kg`,
+        done,
+        isNext: false,
+        away: away === null || away <= 0 ? null : `${nf(away, 1)} kg away`,
+        eta: weeks === null ? null : fmtDate(new Date(Date.now() + weeks * 7 * DAY)),
+        isGoal: kg === goal,
+      };
+    });
+    const nextAt = milestones.findIndex((m) => !m.done);
+    if (nextAt >= 0) milestones[nextAt].isNext = true;
+
+    /* the trajectory ------------------------------------------------------- */
+
+    // The planned line from start to goal, with the real readings over it, so
+    // the plan and what actually happened share one picture.
+    const W = 900;
+    const H = 190;
+    const PAD = 16;
+    const startAt = new Date(`${JOURNEY.startDate}T12:00:00Z`).getTime();
+    const planWeeks = span > 0 ? span / JOURNEY.targetKgPerWeek : 1;
+    const endAt = startAt + planWeeks * 7 * DAY;
+    const lo = goal - 1;
+    const hi = start + 1.5;
+    const range = hi - lo || 1;
+    const x = (t: number) => ((t - startAt) / Math.max(1, endAt - startAt)) * W;
+    const y = (kg: number) => PAD + (1 - (kg - lo) / range) * (H - PAD * 2);
+
+    const actual = sinceStart.map((r) => ({
+      key: r.date.slice(0, 10),
+      cx: Number(x(new Date(`${r.date.slice(0, 10)}T12:00:00Z`).getTime()).toFixed(1)),
+      cy: Number(y(r.weight).toFixed(1)),
+      label: `${nf(r.weight, 1)} kg`,
+      sub: fmtDate(r.date, true),
+    }));
+
     return {
       startKg: nf(start, 1),
       goalKg: nf(goal, 1),
+      milestones,
+      nextMilestone: nextAt >= 0 ? milestones[nextAt] : null,
+      chart: {
+        width: W,
+        height: H,
+        planPath: `M${x(startAt).toFixed(1)} ${y(start).toFixed(1)} L${x(endAt).toFixed(1)} ${y(goal).toFixed(1)}`,
+        actualPath: actual.map((p, i) => `${i ? 'L' : 'M'}${p.cx} ${p.cy}`).join(' '),
+        marks: actual,
+        goalY: y(goal).toFixed(1),
+        startLabel: fmtDate(JOURNEY.startDate),
+        endLabel: fmtDate(new Date(endAt)),
+        milestoneLines: milestones
+          .filter((m) => !m.isGoal)
+          .map((m) => ({ key: m.key, y: y(Number(m.key)).toFixed(1), label: m.label })),
+      },
       currentKg: latest === null ? DASH : nf(latest, 1),
       lostKg: lost === null ? DASH : `${lost < 0 ? '+' : ''}${nf(Math.abs(lost), 1)}`,
       toGoKg: toGo === null ? DASH : nf(Math.max(0, toGo), 1),

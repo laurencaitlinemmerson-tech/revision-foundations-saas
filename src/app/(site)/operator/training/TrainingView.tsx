@@ -1784,41 +1784,90 @@ function Goals({ v }: { v: TrainingVals }) {
   const j = v.journey;
   return (
     <div style={{ marginTop: 40 }}>
-      {/* The journey leads: it is the one goal with an end rather than a rate. */}
-      <section style={{ paddingBottom: 40, borderBottom: RULE, marginBottom: SECTION_GAP }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 20, flexWrap: 'wrap' }}>
+      {/* The journey leads. It is the one goal here with an end rather than a
+          rate, and the only one worth a picture. */}
+      <section style={{ paddingBottom: 44, borderBottom: RULE, marginBottom: SECTION_GAP }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap' }}>
           <div>
             <Eyebrow>Fat loss journey</Eyebrow>
-            <h2 style={{ ...display(34), margin: '14px 0 0' }}>
+            <h2 style={{ ...display(38), margin: '14px 0 0' }}>
               {j.startKg} <span style={{ color: MUTED }}>→</span> {j.goalKg} kg
             </h2>
+            {j.nextMilestone && (
+              <div style={{ fontSize: 14, color: SOFT, marginTop: 12 }}>
+                Next stop <strong style={{ color: PLUM, fontWeight: 400 }}>{j.nextMilestone.label}</strong>
+                {j.nextMilestone.away && ` — ${j.nextMilestone.away}`}
+                {j.nextMilestone.eta && `, around ${j.nextMilestone.eta}`}
+              </div>
+            )}
           </div>
           <div style={{ textAlign: 'right' }}>
-            <Figure value={j.currentKg} style={{ ...display(46, PLUM), lineHeight: 1 }} />
-            <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED, marginTop: 9 }}>
-              kg today
+            <Figure value={j.currentKg} style={{ ...display(52, PLUM), lineHeight: 1 }} />
+            <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED, marginTop: 10 }}>
+              kg today · {j.pctLabel} of the way
             </div>
           </div>
         </div>
 
-        {/* Distance travelled against distance remaining, on one line. */}
-        <div style={{ marginTop: 28 }}>
-          <div style={{ display: 'flex', height: 12, background: TRACK, overflow: 'hidden' }}>
-            <div style={{
-              width: `${j.pct}%`, background: PLUM,
-              transition: 'width 620ms cubic-bezier(0.4,0,0.2,1)',
-            }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 10, fontSize: 11.5, color: MUTED }}>
-            <span>{j.startKg} kg</span>
-            <span style={{ color: INK }}>{j.pctLabel} of the way</span>
-            <span>{j.goalKg} kg</span>
+        {/* The plan and what actually happened, on one picture. */}
+        <div style={{ marginTop: 30 }}>
+          <svg viewBox={`0 0 ${j.chart.width} ${j.chart.height}`} preserveAspectRatio="none"
+            style={{ width: '100%', height: j.chart.height, display: 'block' }}
+            role="img" aria-label={`Weight from ${j.startKg} kg toward ${j.goalKg} kg`}>
+            {j.chart.milestoneLines.map((m) => (
+              <line key={m.key} x1="0" y1={m.y} x2={j.chart.width} y2={m.y}
+                stroke="rgba(34,28,36,0.06)" strokeWidth="0.5" />
+            ))}
+            <line x1="0" y1={j.chart.goalY} x2={j.chart.width} y2={j.chart.goalY}
+              stroke={PLUM} strokeWidth="0.75" strokeDasharray="5 4" />
+            <path d={j.chart.planPath} fill="none" stroke={PINK_LINE} strokeWidth="1.25"
+              strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
+            {j.chart.actualPath && (
+              <path d={j.chart.actualPath} fill="none" stroke={PLUM} strokeWidth="1.75" vectorEffect="non-scaling-stroke" />
+            )}
+            {j.chart.marks.map((m) => (
+              <circle key={m.key} cx={m.cx} cy={m.cy} r="2.5" fill={PLUM}><title>{`${m.label} — ${m.sub}`}</title></circle>
+            ))}
+          </svg>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 8, gap: 12 }}>
+            <span>{j.chart.startLabel}</span>
+            <span style={{ fontStyle: 'italic' }}>
+              Dashed is the plan at {j.targetRate}; solid is what the scale said
+            </span>
+            <span>{j.chart.endLabel}</span>
           </div>
         </div>
 
+        {/* Milestones, because twenty kilograms is too far away to aim at. */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-          marginTop: 30, paddingTop: 22, borderTop: RULE_SOFT,
+          display: 'flex', gap: 0, marginTop: 32, flexWrap: 'wrap',
+          borderTop: RULE_SOFT, paddingTop: 4,
+        }}>
+          {j.milestones.map((m) => (
+            <div key={m.key} style={{
+              flex: '1 1 84px', padding: '16px 12px 16px 0', minWidth: 84,
+              opacity: m.done ? 0.55 : 1,
+            }}>
+              <div style={{
+                height: 3, background: m.done ? PLUM : m.isNext ? PINK : TRACK, marginBottom: 12,
+              }} />
+              <div style={{
+                fontFamily: 'var(--font-display)', fontSize: 17,
+                color: m.done ? MUTED : m.isNext ? PINK : INK,
+              }}>
+                {m.label}
+                {m.isGoal && <span style={{ fontSize: 10, color: MUTED, marginLeft: 6 }}>goal</span>}
+              </div>
+              <div style={{ fontSize: 10.5, color: MUTED, marginTop: 5, lineHeight: 1.5 }}>
+                {m.done ? 'passed' : m.eta ?? m.away ?? ''}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(122px, 1fr))',
+          marginTop: 26, paddingTop: 22, borderTop: RULE_SOFT,
         }}>
           {[
             { label: 'Lost so far', value: `${j.lostKg} kg`, colour: INK },
@@ -1838,7 +1887,7 @@ function Goals({ v }: { v: TrainingVals }) {
           ))}
         </div>
 
-        <p style={{ fontSize: 13.5, lineHeight: 1.75, color: SOFT, margin: '22px 0 0', maxWidth: '66ch', textWrap: 'pretty' }}>
+        <p style={{ fontSize: 13.5, lineHeight: 1.75, color: SOFT, margin: '24px 0 0', maxWidth: '68ch', textWrap: 'pretty' }}>
           {j.note}
         </p>
       </section>
