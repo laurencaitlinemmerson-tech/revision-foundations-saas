@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { listPartnerDays, savePartnerDay } from '@/lib/operatorPartnerStorage';
 import { partnerHealthImport } from '@/lib/partnerHealthImport';
@@ -13,18 +14,62 @@ import { partnerHealthImport } from '@/lib/partnerHealthImport';
  * self-serve personal API, so the working route is Garmin Connect → Apple Health
  * → Health Auto Export. Accepting that payload verbatim means his phone runs the
  * same app as the operator's, pointed at this URL instead.
+ *
+ * Writes are authorised by a token derived for this route alone — see
+ * derivePartnerToken. Reads still need the operator password, because the
+ * dashboard is the only thing that reads.
  */
 
 export const dynamic = 'force-dynamic';
 
-/** The phone posts with the sync token; the dashboard reads with the password. */
+/**
+ * A write credential for this route alone, derived from the sync token.
+ *
+ * This is the one endpoint whose credential gets handed to another person, and
+ * OPERATOR_SYNC_TOKEN is far too much to hand over: it also authorises POSTs to
+ * the auto-sync route, which would let the holder overwrite the operator's own
+ * health history, and it reads the morning brief. Deriving a token by HMAC gives
+ * the partner's phone something that only works here and cannot be reversed back
+ * into the writing key — the same trade the brief route already makes, with no
+ * extra environment variable to keep in sync.
+ *
+ * Rotating it means rotating OPERATOR_SYNC_TOKEN, which also re-points the
+ * operator's own phone — so rotate both together.
+ */
+export function derivePartnerToken(syncToken: string) {
+  return createHmac('sha256', syncToken).update('partner-sync-v1').digest('hex');
+}
+
+function constantTimeEquals(a: string, b: string) {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
+}
+
+/** The partner's phone posts with the derived token; the operator's own tooling
+ *  and the dashboard keep working with what they already hold. */
 function authedWrite(req: NextRequest) {
   const syncToken = process.env.OPERATOR_SYNC_TOKEN;
+
   if (syncToken) {
-    if (new URL(req.url).searchParams.get('token') === syncToken) return true;
-    if (req.headers.get('authorization') === `Bearer ${syncToken}`) return true;
+    const presented = (req.headers.get('authorization') ?? '').replace(/^Bearer /, '');
+    const queryToken = new URL(req.url).searchParams.get('token') ?? '';
+
+    /* What the partner's phone holds — scoped to this route. */
+    const partnerToken = derivePartnerToken(syncToken);
+    if (presented && constantTimeEquals(presented, partnerToken)) return true;
+    if (queryToken && constantTimeEquals(queryToken, partnerToken)) return true;
+
+    /* The operator's own write token still works, so existing callers are
+       unaffected by the addition above. */
+    if (presented && constantTimeEquals(presented, syncToken)) return true;
+    if (queryToken && constantTimeEquals(queryToken, syncToken)) return true;
   }
-  return req.headers.get('x-operator-pw') === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+
+  const pw = req.headers.get('x-operator-pw') ?? '';
+  const expected = process.env.OPERATOR_PASSWORD ?? 'operator2026';
+  return Boolean(pw) && constantTimeEquals(pw, expected);
 }
 
 function authedRead(req: NextRequest) {
