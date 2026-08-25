@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { FITNESS_FALLBACK_TYPE } from '@/lib/operatorFitnessStorage';
 import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 import { computeTdee } from '@/lib/fitness/tdee';
 import { detectPlateau, plateauSuggestion, type Plateau } from '@/lib/fitness/plateau';
@@ -709,7 +710,7 @@ function buildWeekly(
 
 /* The weigh-in fallback stores readings as pseudo-workouts; they are not
    training and must never appear in the training section. */
-const FITNESS_FALLBACK_TYPE = '__operator_fitness_reading__';
+
 
 export interface BuildBriefOptions {
   /** Overrides "today" — only used for testing and backfills. */
