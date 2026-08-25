@@ -618,14 +618,27 @@ type RawWorkout = Record<string, unknown> & {
   durationUnits?: string;
 };
 
+/**
+ * A Health Auto Export timestamp as an ISO string.
+ *
+ * The format is "2026-08-25 07:05:00 +0100". Normalising it in two independent
+ * steps used to insert a second "T" — the offset became "T+01:00" and then the
+ * date's own space became "T" as well, producing "2026-08-25T07:05:00T+01:00",
+ * which is an Invalid Date. Every workout was therefore skipped for want of a
+ * start time, silently, because the parser drops undated entries. The whole
+ * shape is matched in one pass instead, the way parseAt already did it.
+ */
 function isoOrNull(value: string | undefined) {
   if (!value) return null;
-  const normalized = value.replace(/ ([+-]\d{2})(\d{2})$/, 'T$1:$2').replace(' ', 'T');
+  const normalized = value.trim()
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ?([+-]\d{2}):?(\d{2})$/, '$1T$2$3:$4')
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})Z$/, '$1T$2Z')
+    .replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})$/, '$1T$2');
   const d = new Date(normalized);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-function parseWorkouts(payload: Record<string, unknown>): WorkoutRow[] {
+export function parseWorkouts(payload: Record<string, unknown>): WorkoutRow[] {
   const root = (payload.data && typeof payload.data === 'object' && !Array.isArray(payload.data)
     ? payload.data
     : payload) as Record<string, unknown>;
@@ -638,7 +651,8 @@ function parseWorkouts(payload: Record<string, unknown>): WorkoutRow[] {
     if (!started) continue;
     const ended = isoOrNull(w.end ?? w.endDate);
 
-    const energyParsed = qtyOf(w.totalEnergyBurned ?? w.activeEnergyBurned);
+    // v2 calls this `totalEnergy`; v1 called it `totalEnergyBurned`.
+    const energyParsed = qtyOf(w.totalEnergy ?? w.totalEnergyBurned ?? w.activeEnergyBurned);
     const energy = energyParsed.qty !== null
       ? round(convertEnergyToKcal(energyParsed.qty, energyParsed.units ?? w.energyUnits), 1)
       : null;
@@ -648,13 +662,22 @@ function parseWorkouts(payload: Record<string, unknown>): WorkoutRow[] {
       ? round(convertDistanceToKm(distanceParsed.qty, distanceParsed.units ?? w.distanceUnits), 2)
       : null;
 
+    // Start and end are unambiguous, so they decide the duration whenever both
+    // are present. The `duration` field is only a fallback, because Health Auto
+    // Export sends a workout's duration as a bare number of SECONDS while the
+    // shared converter reads an unlabelled value as minutes — taking it at face
+    // value would record a 55-minute session as 55 hours.
     const durationParsed = qtyOf(w.duration);
-    let duration = durationParsed.qty !== null
-      ? round(convertDurationToMinutes(durationParsed.qty, durationParsed.units ?? w.durationUnits), 1)
-      : null;
-    if (duration === null && ended) {
-      const computed = minutesBetween(started, ended);
-      if (computed !== null) duration = computed;
+    const spanMin = ended ? minutesBetween(started, ended) : null;
+
+    let duration: number | null = null;
+    if (spanMin !== null) {
+      duration = round(spanMin, 1);
+    } else if (durationParsed.qty !== null) {
+      const units = durationParsed.units ?? w.durationUnits;
+      duration = units
+        ? round(convertDurationToMinutes(durationParsed.qty, units), 1)
+        : round(durationParsed.qty / 60, 1);
     }
 
     const avgHrParsed = qtyOf(w.avgHeartRate ?? w.averageHeartRate);
