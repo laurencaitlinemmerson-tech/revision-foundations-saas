@@ -11,7 +11,7 @@ const TOOLBAR_CSS = `
   top: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, #185FA5 0%, #0F6E56 50%, #534AB7 100%);
+  background: linear-gradient(90deg, var(--blue-600) 0%, var(--teal-600) 50%, var(--purple-600) 100%);
   z-index: 9999;
   transition: width 80ms linear;
   pointer-events: none;
@@ -30,7 +30,7 @@ const TOOLBAR_CSS = `
   background: rgba(250, 250, 248, 0.82);
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
-  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  border: 0.5px solid var(--hairline-firm);
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
   z-index: 9998;
@@ -71,12 +71,12 @@ const TOOLBAR_CSS = `
 
 .study-btn:hover {
   background: rgba(0, 0, 0, 0.04);
-  color: #2C2A27;
+  color: var(--ink-mid);
 }
 
 .study-btn-active {
   background: #1A1815 !important;
-  color: #FAFAF8 !important;
+  color: var(--surface-page) !important;
 }
 
 .study-btn svg {
@@ -325,7 +325,7 @@ export default function StudyToolbar() {
 
         <div className="study-btn-divider" />
 
-        <div className="study-btn" style={{ cursor: 'default', color: '#aaa', fontSize: '10px' }}>
+        <div className="study-btn" style={{ cursor: 'default', color: 'var(--ink-faint)', fontSize: '10px' }}>
           {Math.round(scrollProgress)}%
         </div>
       </div>

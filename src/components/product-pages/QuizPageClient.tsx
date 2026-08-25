@@ -17,17 +17,17 @@ const PREVIEW_TIME = 180;
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
 
-const ink = '#1C1510';
-const inkMid = '#5C4A38';
-const inkLight = '#9C8878';
-const cream = '#FAFAF8';
-const paper = '#FFFFFF';
-const border = 'rgba(28, 21, 16, 0.1)';
-const accent = '#2E67B1';
-const accentSoft = '#E7EEF8';
-const accentLine = 'rgba(46, 103, 177, 0.18)';
-const success = '#1E8A4D';
-const successSoft = '#E6F4EA';
+const ink = 'var(--ink-strong)';
+const inkMid = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
+const cream = 'var(--surface-page)';
+const paper = 'var(--surface-raised)';
+const border = 'var(--hairline-firm)';
+const accent = 'var(--topic-assessment-text)';
+const accentSoft = 'var(--topic-assessment-surface)';
+const accentLine = 'var(--topic-assessment-border)';
+const success = 'var(--state-correct-text)';
+const successSoft = 'var(--state-correct-surface)';
 
 const sectionLabel: CSSProperties = {
   fontFamily: serif,
@@ -386,7 +386,7 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
             <div style={{ background: paper, border: `0.5px solid ${border}`, padding: '22px 22px 20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <p style={{ ...sectionLabel, marginBottom: 0 }}>Interactive preview</p>
-                <div style={{ display: 'inline-flex', gap: '6px', padding: '4px', background: '#F4F7FC' }}>
+                <div style={{ display: 'inline-flex', gap: '6px', padding: '4px', background: 'var(--topic-assessment-surface)' }}>
                   {heroModes.map((mode, index) => {
                     const isActive = activeHeroMode === index;
                     return (
@@ -590,7 +590,7 @@ export default function QuizPageClient({ hasPremium }: { hasPremium: boolean }) 
               <div style={{ height: '1px', background: border, marginBottom: '20px' }} />
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '22px' }}>
                 {['17 topics', 'Instant feedback', 'Explanations', 'Future updates'].map((tag) => (
-                  <span key={tag} style={{ fontFamily: serif, fontSize: '12px', color: inkMid, background: '#F3F1EE', padding: '6px 12px' }}>
+                  <span key={tag} style={{ fontFamily: serif, fontSize: '12px', color: inkMid, background: 'var(--surface-sunken)', padding: '6px 12px' }}>
                     {tag}
                   </span>
                 ))}

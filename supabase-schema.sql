@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS entitlements (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     clerk_user_id TEXT NOT NULL,
-    product TEXT NOT NULL CHECK (product IN ('osce', 'quiz', 'bundle')),
+    product TEXT NOT NULL CHECK (product IN ('osce', 'quiz', 'bundle', 'template')),
     status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'expired')),
     stripe_customer_id TEXT,
     stripe_payment_intent_id TEXT,

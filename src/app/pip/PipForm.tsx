@@ -40,7 +40,7 @@ export default function PipForm() {
         margin: 12,
         filename: 'how-shes-doing.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, backgroundColor: '#FAFAF8' },
+        html2canvas: { scale: 2, backgroundColor: 'var(--surface-page)' },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       })
       .from(el)
@@ -265,9 +265,9 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: '100vh',
     width: '100%',
-    backgroundColor: '#FAFAF8',
+    backgroundColor: 'var(--surface-page)',
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
-    color: '#1A1815',
+    color: 'var(--ink-strong)',
   },
   inner: {
     maxWidth: 560,
@@ -282,25 +282,25 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
-    color: '#5A5750',
+    color: 'var(--ink-soft)',
     margin: '0 0 8px',
   },
   heading: {
     fontSize: 26,
     fontWeight: 600,
     margin: '0 0 12px',
-    color: '#1A1815',
+    color: 'var(--ink-strong)',
   },
   intro: {
     fontSize: 15,
     lineHeight: 1.6,
-    color: '#5A5750',
+    color: 'var(--ink-soft)',
     margin: '0 0 20px',
   },
   progressTrack: {
     height: 3,
     width: '100%',
-    backgroundColor: '#EDEAE3',
+    backgroundColor: 'var(--surface-sunken)',
   },
   progressFill: {
     height: '100%',
@@ -309,7 +309,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   progressLabel: {
     fontSize: 12,
-    color: '#5A5750',
+    color: 'var(--ink-soft)',
     margin: '8px 0 0',
   },
   list: {
@@ -330,11 +330,11 @@ const styles: Record<string, React.CSSProperties> = {
   rowName: {
     fontSize: 16,
     fontWeight: 600,
-    color: '#1A1815',
+    color: 'var(--ink-strong)',
   },
   rowSubtitle: {
     fontSize: 13,
-    color: '#5A5750',
+    color: 'var(--ink-soft)',
   },
   pillGroup: {
     display: 'flex',
@@ -347,8 +347,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
     fontWeight: 600,
     fontFamily: 'inherit',
-    color: '#1A1815',
-    backgroundColor: '#FFFFFF',
+    color: 'var(--ink-strong)',
+    backgroundColor: 'var(--surface-raised)',
     border: HAIRLINE,
     borderRadius: 0,
     cursor: 'pointer',
@@ -371,8 +371,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 10,
     fontFamily: 'inherit',
     fontSize: 14,
-    color: '#1A1815',
-    backgroundColor: '#FAFAF8',
+    color: 'var(--ink-strong)',
+    backgroundColor: 'var(--surface-page)',
     border: HAIRLINE,
     borderRadius: 0,
     resize: 'vertical',
@@ -380,7 +380,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   noteTextareaMissing: {
     border: `1px solid ${OPTION_COLORS['real-struggle']}`,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'var(--surface-raised)',
   },
   noteRequiredHint: {
     display: 'block',
@@ -395,11 +395,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 18,
     fontWeight: 600,
     margin: '0 0 6px',
-    color: '#1A1815',
+    color: 'var(--ink-strong)',
   },
   sectionHint: {
     fontSize: 13,
-    color: '#5A5750',
+    color: 'var(--ink-soft)',
     margin: '0 0 12px',
   },
   textarea: {
@@ -407,15 +407,15 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 12,
     fontFamily: 'inherit',
     fontSize: 15,
-    color: '#1A1815',
-    backgroundColor: '#FFFFFF',
+    color: 'var(--ink-strong)',
+    backgroundColor: 'var(--surface-raised)',
     border: HAIRLINE,
     borderRadius: 0,
     resize: 'vertical',
     boxSizing: 'border-box',
   },
   summarySheet: {
-    backgroundColor: '#FAFAF8',
+    backgroundColor: 'var(--surface-page)',
   },
   summaryList: {
     borderTop: HAIRLINE,
@@ -444,8 +444,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 15,
     fontWeight: 600,
     fontFamily: 'inherit',
-    color: '#1A1815',
-    backgroundColor: '#FFFFFF',
+    color: 'var(--ink-strong)',
+    backgroundColor: 'var(--surface-raised)',
     border: HAIRLINE,
     borderRadius: 0,
     cursor: 'pointer',
@@ -468,7 +468,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   summaryBadgeEmpty: {
     color: '#8A8178',
-    backgroundColor: '#F0EEE9',
+    backgroundColor: 'var(--surface-sunken)',
   },
   summaryRow: {
     padding: '14px 0',
@@ -481,7 +481,7 @@ const styles: Record<string, React.CSSProperties> = {
   summaryAreaName: {
     fontSize: 14,
     fontWeight: 600,
-    color: '#1A1815',
+    color: 'var(--ink-strong)',
     flex: '1 1 auto',
   },
   summaryBadge: {
@@ -492,7 +492,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   summaryNote: {
     fontSize: 13,
-    color: '#5A5750',
+    color: 'var(--ink-soft)',
     margin: '4px 0 0',
     width: '100%',
     lineHeight: 1.5,

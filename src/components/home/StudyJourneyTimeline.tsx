@@ -28,7 +28,7 @@ const steps = [
     eyebrow: '01 · Start small',
     title: 'Start where your head is at.',
     body: 'You do not need a massive plan to begin. Pick the next useful step that matches the thing that feels most urgent right now.',
-    accent: '#1E8A4D',
+    accent: 'var(--state-correct-text)',
     accentBg: greenBg,
     links: [
       { href: '#start-here', label: 'Use the start-here guide' },
@@ -39,7 +39,7 @@ const steps = [
     eyebrow: '02 · Build the basics',
     title: 'Build the core knowledge that keeps coming back.',
     body: 'Use quick guides, cheat sheets, and the glossary to stop lectures, notes, and clinical language from feeling scattered.',
-    accent: '#2E67B1',
+    accent: 'var(--topic-assessment-text)',
     accentBg: blueBg,
     links: [
       { href: '/hub', label: 'Open the revision hub' },
@@ -50,7 +50,7 @@ const steps = [
     eyebrow: '03 · Prepare for placement',
     title: 'Get placement-safe before shift.',
     body: 'Refresh observations, escalation, documentation, and practical details before placement days so the essentials feel close to hand.',
-    accent: '#2F8A7E',
+    accent: 'var(--topic-skills-text)',
     accentBg: tealBg,
     links: [
       { href: '/hub/resources/placement-survival', label: 'Open placement guide' },
@@ -61,7 +61,7 @@ const steps = [
     eyebrow: '04 · Practise under pressure',
     title: 'Move from reading into active practice.',
     body: 'Turn the knowledge into recall and repetition with short quiz blocks and steadier OSCE station practice.',
-    accent: '#D96C55',
+    accent: 'var(--state-incorrect-text)',
     accentBg: coralBg,
     links: [
       { href: '/quiz', label: 'Try quiz preview' },
@@ -202,7 +202,7 @@ export default function StudyJourneyTimeline() {
                 data-step-index={index}
                 style={{
                   border: `0.5px solid ${border}`,
-                  background: index === activeIndex ? panel : '#FCFBF8',
+                  background: index === activeIndex ? panel : 'var(--surface-raised)',
                   padding: '26px 24px 28px',
                   transition: 'background-color 0.2s ease, transform 0.2s ease',
                   transform: index === activeIndex ? 'translateY(-2px)' : 'translateY(0)',

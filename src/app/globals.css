@@ -56,9 +56,12 @@ html.lenis, html.lenis body {
   --amber-bg: #FDF3E3;
   --amber-text: #7A3F04;
 
-  /* Social-hub editorial: gold accent + warm neutrals (portal-wide vibe) */
+  /* Social-hub editorial: gold accent + warm neutrals (portal-wide vibe).
+     --gold stays as-is for large display type and rules; --gold-deep is
+     darkened from #8F7A54 (4.06:1) to clear 4.5:1, since it is used as
+     accent text inside headings. */
   --gold: #A6906B;
-  --gold-deep: #8F7A54;
+  --gold-deep: #7A6437;
   --hairline: #E7E4DD;
   --wash: #F6F4EF;
   --ink: #1E1E1C;
@@ -77,10 +80,13 @@ html.lenis, html.lenis body {
   --mint: #DFD49D;
   --peach: #FFDFB5;
 
-  /* Semantic colors */
+  /* Semantic colors
+     These were alpha-blended values that measured 3.81:1 and 2.42:1 on cream —
+     both under the 4.5:1 floor for body text. Now solid values from the ink
+     ramp at 7.49:1 and 5.08:1. */
   --text-primary: var(--charcoal);
-  --text-secondary: rgba(80, 76, 68, 0.7);
-  --text-muted: rgba(80, 76, 68, 0.5);
+  --text-secondary: #55524B;
+  --text-muted: #6B6760;
 
   /* Background */
   --bg-primary: var(--cream);
@@ -126,7 +132,343 @@ html.lenis, html.lenis body {
   --gray-50: #F1EFE8; --gray-600: #5F5E5A; --gray-800: #444441;
   --border: rgba(0,0,0,0.12);
   --border-strong: rgba(0,0,0,0.25);
+
+  /* =============================================
+     STUDY COLOUR SYSTEM
+     Colour here carries meaning — it is not decoration. Three separate
+     encodings, deliberately kept visually distinct from each other:
+
+       topic-*      CATEGORICAL. Seven subject families, seven hues. A hue
+                    always means the same subject, everywhere on the site,
+                    so students learn "blue = assessment" once.
+       state-*      FEEDBACK. correct / incorrect / warning / info / locked.
+                    Always paired with an icon or text — never colour alone.
+       mastery-*    SEQUENTIAL. One hue, five steps of depth. Ordered data
+                    gets a ramp, never a rainbow.
+
+     Every value below is contrast-checked in both themes:
+       -text   >= 4.5:1 on page, card, and its own -surface
+       -solid  >= 3.0:1 on page and its own -surface
+     Do not hand-edit these without re-running the audit.
+     ============================================= */
+
+  /* --- Topic families (categorical) --- */
+  --topic-assessment-surface: #E8F0FA;
+  --topic-assessment-border:  #ABC3DC;
+  --topic-assessment-text:    #15558F;
+  --topic-assessment-solid:   #2A6DAD;
+
+  --topic-emergency-surface:  #FBEAE7;
+  --topic-emergency-border:   #E3B5AB;
+  --topic-emergency-text:     #A32D18;
+  --topic-emergency-solid:    #BF3E24;
+
+  --topic-meds-surface:       #EEEBFA;
+  --topic-meds-border:        #C0B8E5;
+  --topic-meds-text:          #4C3F9E;
+  --topic-meds-solid:         #5F51BC;
+
+  --topic-skills-surface:     #E2F2ED;
+  --topic-skills-border:      #A0C9BD;
+  --topic-skills-text:        #0E6250;
+  --topic-skills-solid:       #157A64;
+
+  --topic-anatomy-surface:    #FBEDE4;
+  --topic-anatomy-border:     #DFBBA2;
+  --topic-anatomy-text:       #8F4715;
+  --topic-anatomy-solid:      #AB591E;
+
+  --topic-professional-surface: #EDF1EA;
+  --topic-professional-border:  #B7C5AE;
+  --topic-professional-text:    #42603C;
+  --topic-professional-solid:   #54764C;
+
+  --topic-foundations-surface: #FAF0DC;
+  --topic-foundations-border:  #D7BF8B;
+  --topic-foundations-text:    #7A5008;
+  --topic-foundations-solid:   #96650F;
+
+  /* --- Feedback states --- */
+  --state-correct-surface:   #E2F2ED;
+  --state-correct-border:    #A0C9BD;
+  --state-correct-text:      #0E6250;
+  --state-correct-solid:     #157A64;
+
+  --state-incorrect-surface: #FBEAE7;
+  --state-incorrect-border:  #E3B5AB;
+  --state-incorrect-text:    #A32D18;
+  --state-incorrect-solid:   #BF3E24;
+
+  --state-warning-surface:   #FAF0DC;
+  --state-warning-border:    #D7BF8B;
+  --state-warning-text:      #7A5008;
+  --state-warning-solid:     #96650F;
+
+  --state-info-surface:      #E8F0FA;
+  --state-info-border:       #ABC3DC;
+  --state-info-text:         #15558F;
+  --state-info-solid:        #2A6DAD;
+
+  --state-locked-surface:    #F1EFE9;
+  --state-locked-border:     #C5C2B9;
+  --state-locked-text:       #55524B;
+  --state-locked-solid:      #6B6760;
+
+  /* --- Mastery ramp (sequential, low -> high) --- */
+  --mastery-0: #E4E1DA;
+  --mastery-1: #BFD6CD;
+  --mastery-2: #8FBFAE;
+  --mastery-3: #4E9A82;
+  --mastery-4: #157A64;
+
+  /* --- Neutral ink ramp ---
+     Replaces the old alpha-based --text-secondary / --text-muted, which
+     rendered at 3.81:1 and 2.42:1 on cream: both below the 4.5:1 floor. */
+  --ink-strong: #1A1815;
+  --ink-mid:    #3A3833;
+  --ink-soft:   #55524B;
+  --ink-faint:  #6B6760;
+
+  /* Page + card surfaces, so night mode has a single place to swap them */
+  --surface-page:   #FDFDFB;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #F5F3F0;
+  --hairline-soft:  rgba(0,0,0,0.08);
+  --hairline-firm:  rgba(0,0,0,0.14);
+
+  /* The accessibility launcher stays a dark pill in both themes — inverting it
+     to a bright pill would make it the loudest thing on a night-mode page. */
+  --fab-bg:   #1A1815;
+  --fab-text: #FAFAF8;
+
+  /* Primary action. This pair inverts together in night mode, so the highest
+     contrast element on the page stays the highest contrast element. Keep the
+     two in sync — setting one without the other is how you get invisible text. */
+  --action-bg:       #1A1815;
+  --action-text:     #FAFAF8;
+  --action-bg-hover: #3A3833;
+
+  /* Inverted panels (footers, dark callouts) that should stay dark in both
+     themes rather than flipping. */
+  --surface-inverse:      #1A1815;
+  --surface-inverse-text: #FAFAF8;
+
+  /* Translucent nav — sits over page content with a backdrop blur, so it needs
+     an alpha value rather than a solid surface token. */
+  --nav-bg:          rgba(250,250,248,0.90);
+  --nav-bg-scrolled: rgba(250,250,248,0.97);
+  --surface-translucent: rgba(255,255,255,0.80);
 }
+
+/* =============================================
+   NIGHT READING MODE
+   Warm dark rather than pure black: #191713 instead of #000. Pure black on
+   a bright OLED panel maximises halation around light text, which is the
+   opposite of what you want at 1am the night before an OSCE.
+   ============================================= */
+html[data-a11y-theme='night'] {
+  color-scheme: dark;
+
+  --topic-assessment-surface: #152634;
+  --topic-assessment-border:  #30485C;
+  --topic-assessment-text:    #9CC7F0;
+  --topic-assessment-solid:   #7DB4E5;
+
+  --topic-emergency-surface:  #37201B;
+  --topic-emergency-border:   #5E3B32;
+  --topic-emergency-text:     #F3A491;
+  --topic-emergency-solid:    #E38A73;
+
+  --topic-meds-surface:       #25213C;
+  --topic-meds-border:        #464067;
+  --topic-meds-text:          #B5AAF0;
+  --topic-meds-solid:         #9C8FE6;
+
+  --topic-skills-surface:     #132A25;
+  --topic-skills-border:      #2F4D45;
+  --topic-skills-text:        #8FD3C0;
+  --topic-skills-solid:       #6FC2AB;
+
+  --topic-anatomy-surface:    #33231A;
+  --topic-anatomy-border:     #584030;
+  --topic-anatomy-text:       #EFAE84;
+  --topic-anatomy-solid:      #DE9668;
+
+  --topic-professional-surface: #1E2820;
+  --topic-professional-border:  #3B483A;
+  --topic-professional-text:    #AFC9A6;
+  --topic-professional-solid:   #96B78B;
+
+  --topic-foundations-surface: #332A17;
+  --topic-foundations-border:  #574A2E;
+  --topic-foundations-text:    #E5C283;
+  --topic-foundations-solid:   #D3AC64;
+
+  --state-correct-surface:   #132A25;
+  --state-correct-border:    #2F4D45;
+  --state-correct-text:      #8FD3C0;
+  --state-correct-solid:     #6FC2AB;
+
+  --state-incorrect-surface: #37201B;
+  --state-incorrect-border:  #5E3B32;
+  --state-incorrect-text:    #F3A491;
+  --state-incorrect-solid:   #E38A73;
+
+  --state-warning-surface:   #332A17;
+  --state-warning-border:    #574A2E;
+  --state-warning-text:      #E5C283;
+  --state-warning-solid:     #D3AC64;
+
+  --state-info-surface:      #152634;
+  --state-info-border:       #30485C;
+  --state-info-text:         #9CC7F0;
+  --state-info-solid:        #7DB4E5;
+
+  --state-locked-surface:    #252220;
+  --state-locked-border:     #47433F;
+  --state-locked-text:       #A8A29A;
+  --state-locked-solid:      #8D8880;
+
+  --mastery-0: #332F2B;
+  --mastery-1: #2F4D45;
+  --mastery-2: #47826F;
+  --mastery-3: #5FAE94;
+  --mastery-4: #8FD3C0;
+
+  --ink-strong: #F5F2EC;
+  --ink-mid:    #DED9D0;
+  --ink-soft:   #ADA79D;
+  --ink-faint:  #8D8880;
+
+  --surface-page:   #191713;
+  --surface-raised: #211E1A;
+  --surface-sunken: #131110;
+  --hairline-soft:  rgba(255,255,255,0.10);
+  --hairline-firm:  rgba(255,255,255,0.18);
+
+  --fab-bg:   #2C2822;
+  --fab-text: #F5F2EC;
+
+  /* Inverted: on a dark page the light button is the loud one. */
+  --action-bg:       #F0EBE2;
+  --action-text:     #191713;
+  --action-bg-hover: #FFFFFF;
+
+  /* Already dark — nudged up so an inverse panel still separates from page. */
+  --surface-inverse:      #2C2822;
+  --surface-inverse-text: #F5F2EC;
+
+  --nav-bg:          rgba(25,23,19,0.90);
+  --nav-bg-scrolled: rgba(25,23,19,0.97);
+  --surface-translucent: rgba(44,40,34,0.80);
+
+  /* Remap the legacy warm-editorial tokens so existing markup follows along
+     instead of leaving light-mode cream backgrounds stranded in the dark. */
+  --cream:        #191713;
+  --cream-pink:   #201D19;
+  --linen-light:  #211E1A;
+  --linen-deep:   #35312C;
+  --linen-medium: #423D37;
+  --wash:         #201D19;
+  --bg-primary:   #191713;
+  --bg-secondary: #211E1A;
+  --bg-card:      #211E1A;
+  --hairline:     rgba(255,255,255,0.10);
+
+  --espresso:        #F5F2EC;
+  --ink:             #F5F2EC;
+  --charcoal:        #DED9D0;
+  --charcoal-light:  #ADA79D;
+  --text-primary:    #DED9D0;
+  --text-secondary:  #ADA79D;
+  --text-muted:      #8D8880;
+
+  --gold:      #CBAE78;
+  --gold-deep: #DCC190;
+  --purple:    #DED9D0;
+  --plum:      #DED9D0;
+
+  --border:        rgba(255,255,255,0.16);
+  --border-strong: rgba(255,255,255,0.30);
+
+  /* Legacy warm-editorial accents. These are pale tints in light mode, so
+     without a night value they stay bright and strand dark text on them. */
+  --peach-warm:   #4A3A30;
+  --salmon:       #4E332E;
+  --straw:        #453F28;
+  --apricot:      #4A3B27;
+  --stone:        #3A3A34;
+  --amber-bg:     #332A17;
+  --lavender:     #4A3A30;
+  --lilac-soft:   #262320;
+  --lilac:        #35312C;
+  --lilac-medium: #3E3931;
+  --pink-soft:    #4E332E;
+  --mint:         #2F4D45;
+  --peach:        #4A3B27;
+  --sage-200:     #3B483A;
+
+  --blue-50: #152634;   --blue-600: #9CC7F0;  --blue-800: #C3DEF7;
+  --teal-50: #132A25;   --teal-600: #8FD3C0;  --teal-800: #B4E3D6;
+  --coral-50: #37201B;  --coral-600: #F3A491; --coral-800: #F8C6BA;
+  --purple-50: #25213C; --purple-600: #B5AAF0; --purple-800: #D0C9F6;
+  --amber-50: #332A17;  --amber-600: #E5C283; --amber-800: #F0D9AE;
+  --sage-50: #1E2820;   --sage-600: #AFC9A6;  --sage-800: #C9DCC3;
+  --red-50: #37201B;    --red-600: #F3A491;
+  --gray-50: #252220;   --gray-600: #A8A29A;  --gray-800: #C9C4BC;
+
+  --shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 16px 40px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.50);
+  --shadow-xl: 0 32px 72px rgba(0, 0, 0, 0.58);
+}
+
+/* Night mode has to reach hardcoded light values in components that predate
+   the token layer. Scoped to the night attribute so light mode is untouched. */
+html[data-a11y-theme='night'] body {
+  background: var(--surface-page);
+  color: var(--ink-mid);
+}
+
+/* ---------------------------------------------------------------------------
+   Tailwind compatibility layer for night mode.
+
+   A number of components style themselves with Tailwind palette utilities
+   rather than tokens. `bg-white` is the dangerous one: it pins a card to #fff
+   while the text colour follows the theme to near-white, which renders the
+   text invisible. These overrides re-point the utilities at tokens.
+
+   The attribute selector plus class beats a bare utility on specificity, so
+   these win without !important.
+
+   Deliberately NOT overridden:
+     .text-white  — sits on dark buttons and scrims, where white stays correct
+     .bg-black    — modal scrims, which should stay black in both themes
+   --------------------------------------------------------------------------- */
+html[data-a11y-theme='night'] .bg-white { background-color: var(--surface-raised); }
+html[data-a11y-theme='night'] .border-black { border-color: var(--hairline-firm); }
+
+html[data-a11y-theme='night'] .bg-red-50,
+html[data-a11y-theme='night'] .bg-red-100 { background-color: var(--state-incorrect-surface); }
+html[data-a11y-theme='night'] .border-red-100,
+html[data-a11y-theme='night'] .border-red-200 { border-color: var(--state-incorrect-border); }
+html[data-a11y-theme='night'] .text-red-600,
+html[data-a11y-theme='night'] .text-red-700,
+html[data-a11y-theme='night'] .text-red-800,
+html[data-a11y-theme='night'] .text-red-900 { color: var(--state-incorrect-text); }
+
+html[data-a11y-theme='night'] .bg-green-50,
+html[data-a11y-theme='night'] .bg-emerald-50,
+html[data-a11y-theme='night'] .bg-emerald-100 { background-color: var(--state-correct-surface); }
+html[data-a11y-theme='night'] .border-green-200,
+html[data-a11y-theme='night'] .border-emerald-200 { border-color: var(--state-correct-border); }
+html[data-a11y-theme='night'] .text-green-800,
+html[data-a11y-theme='night'] .text-emerald-600,
+html[data-a11y-theme='night'] .text-emerald-900 { color: var(--state-correct-text); }
+
+html[data-a11y-theme='night'] .bg-amber-50 { background-color: var(--state-warning-surface); }
+html[data-a11y-theme='night'] .border-amber-200 { border-color: var(--state-warning-border); }
+html[data-a11y-theme='night'] .text-amber-800 { color: var(--state-warning-text); }
 
 
 /* Dark mode transition for smooth switching */
@@ -1117,6 +1459,188 @@ img[loading="lazy"]:not([src=""]) {
   * {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* =============================================
+   STUDY COLOUR COMPONENTS
+   Shared chip / state / mastery primitives. Components set the family or
+   state with a data attribute and inherit the audited token values, so no
+   surface picks its own hex.
+   ============================================= */
+
+.topic-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  border: 1px solid var(--chip-border, var(--hairline-firm));
+  background: var(--chip-surface, transparent);
+  color: var(--chip-text, var(--ink-soft));
+}
+
+/* The dot repeats the hue as a second, larger block of colour. It also gives
+   the chip a non-text marker that survives being read at a glance. */
+.topic-chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--chip-solid, var(--ink-faint));
+  flex-shrink: 0;
+}
+
+.topic-chip[data-neutral='true']::before {
+  display: none;
+}
+
+.topic-chip[data-family='assessment'] {
+  --chip-surface: var(--topic-assessment-surface);
+  --chip-border: var(--topic-assessment-border);
+  --chip-text: var(--topic-assessment-text);
+  --chip-solid: var(--topic-assessment-solid);
+}
+.topic-chip[data-family='emergency'] {
+  --chip-surface: var(--topic-emergency-surface);
+  --chip-border: var(--topic-emergency-border);
+  --chip-text: var(--topic-emergency-text);
+  --chip-solid: var(--topic-emergency-solid);
+}
+.topic-chip[data-family='meds'] {
+  --chip-surface: var(--topic-meds-surface);
+  --chip-border: var(--topic-meds-border);
+  --chip-text: var(--topic-meds-text);
+  --chip-solid: var(--topic-meds-solid);
+}
+.topic-chip[data-family='skills'] {
+  --chip-surface: var(--topic-skills-surface);
+  --chip-border: var(--topic-skills-border);
+  --chip-text: var(--topic-skills-text);
+  --chip-solid: var(--topic-skills-solid);
+}
+.topic-chip[data-family='anatomy'] {
+  --chip-surface: var(--topic-anatomy-surface);
+  --chip-border: var(--topic-anatomy-border);
+  --chip-text: var(--topic-anatomy-text);
+  --chip-solid: var(--topic-anatomy-solid);
+}
+.topic-chip[data-family='professional'] {
+  --chip-surface: var(--topic-professional-surface);
+  --chip-border: var(--topic-professional-border);
+  --chip-text: var(--topic-professional-text);
+  --chip-solid: var(--topic-professional-solid);
+}
+.topic-chip[data-family='foundations'] {
+  --chip-surface: var(--topic-foundations-surface);
+  --chip-border: var(--topic-foundations-border);
+  --chip-text: var(--topic-foundations-text);
+  --chip-solid: var(--topic-foundations-solid);
+}
+
+/* Feedback states. Callers must also render an icon or word — the colour is
+   the fast channel, not the only one. */
+.state-block {
+  border: 1px solid var(--state-border, var(--hairline-firm));
+  background: var(--state-surface, transparent);
+  color: var(--state-text, var(--ink-mid));
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.state-block[data-state='correct'],
+.topic-chip[data-state='correct'] {
+  --state-surface: var(--state-correct-surface);
+  --state-border: var(--state-correct-border);
+  --state-text: var(--state-correct-text);
+  --chip-surface: var(--state-correct-surface);
+  --chip-border: var(--state-correct-border);
+  --chip-text: var(--state-correct-text);
+  --chip-solid: var(--state-correct-solid);
+}
+.state-block[data-state='incorrect'],
+.topic-chip[data-state='incorrect'] {
+  --state-surface: var(--state-incorrect-surface);
+  --state-border: var(--state-incorrect-border);
+  --state-text: var(--state-incorrect-text);
+  --chip-surface: var(--state-incorrect-surface);
+  --chip-border: var(--state-incorrect-border);
+  --chip-text: var(--state-incorrect-text);
+  --chip-solid: var(--state-incorrect-solid);
+}
+.state-block[data-state='warning'],
+.topic-chip[data-state='warning'] {
+  --state-surface: var(--state-warning-surface);
+  --state-border: var(--state-warning-border);
+  --state-text: var(--state-warning-text);
+  --chip-surface: var(--state-warning-surface);
+  --chip-border: var(--state-warning-border);
+  --chip-text: var(--state-warning-text);
+  --chip-solid: var(--state-warning-solid);
+}
+.state-block[data-state='info'],
+.topic-chip[data-state='info'] {
+  --state-surface: var(--state-info-surface);
+  --state-border: var(--state-info-border);
+  --state-text: var(--state-info-text);
+  --chip-surface: var(--state-info-surface);
+  --chip-border: var(--state-info-border);
+  --chip-text: var(--state-info-text);
+  --chip-solid: var(--state-info-solid);
+}
+.state-block[data-state='locked'],
+.topic-chip[data-state='locked'] {
+  --state-surface: var(--state-locked-surface);
+  --state-border: var(--state-locked-border);
+  --state-text: var(--state-locked-text);
+  --chip-surface: var(--state-locked-surface);
+  --chip-border: var(--state-locked-border);
+  --chip-text: var(--state-locked-text);
+  --chip-solid: var(--state-locked-solid);
+}
+
+/* Difficulty reads as weight, not hue: one to three filled dots. Ordered data
+   deserves a ramp, and dot-count still works with no colour at all. */
+.difficulty-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.difficulty-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--hairline-firm);
+}
+
+.difficulty-dot[data-filled='true'] {
+  background: var(--ink-soft);
+}
+
+/* Focus ring. One visible, high-contrast treatment everywhere, rather than the
+   browser default disappearing against cream. */
+:where(a, button, [role='button'], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--topic-assessment-solid);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Print: colour-coded chips must survive a black-and-white printout, which is
+   how most students actually revise. */
+@media print {
+  .topic-chip {
+    border: 1px solid #666 !important;
+    background: transparent !important;
+    color: #000 !important;
+  }
+  .topic-chip::before {
+    background: #000 !important;
   }
 }
 

@@ -41,8 +41,8 @@ const CSS = `
 
 .qt-page {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -66,7 +66,7 @@ const CSS = `
   letter-spacing: 0.02em;
 }
 .qt-breadcrumb a { color: var(--charcoal-light); text-decoration: none; transition: color 0.1s; }
-.qt-breadcrumb a:hover { color: #2C2A27; }
+.qt-breadcrumb a:hover { color: var(--ink-mid); }
 
 /* Layout */
 .qt-layout {
@@ -78,7 +78,7 @@ const CSS = `
 
 /* Question article */
 .qt-question {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 32px 36px;
   margin-bottom: 40px;
 }
@@ -107,8 +107,8 @@ const CSS = `
   padding: 3px 8px;
   display: inline-block;
 }
-.qt-q-status.answered { background: #E6F5F1; color: #0F6E56; }
-.qt-q-status.open { background: #FFF3E5; color: #993C1D; }
+.qt-q-status.answered { background: var(--topic-skills-surface); color: var(--teal-600); }
+.qt-q-status.open { background: var(--topic-anatomy-surface); color: var(--coral-600); }
 
 .qt-q-user {
   font-size: 10px;
@@ -125,7 +125,7 @@ const CSS = `
   font-size: clamp(1.8rem, 4vw, 2.8rem);
   font-weight: 400;
   line-height: 1.06;
-  color: #1A1815;
+  color: var(--ink-strong);
   letter-spacing: -0.01em;
   margin-bottom: 20px;
 }
@@ -133,14 +133,14 @@ const CSS = `
 .qt-q-body {
   font-size: 14px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   line-height: 1.9;
   white-space: pre-wrap;
   margin-bottom: 20px;
 }
 
 .qt-q-image {
-  border: 0.5px solid rgba(0,0,0,0.08);
+  border: 0.5px solid var(--hairline-soft);
   padding: 4px;
   display: inline-block;
   overflow: hidden;
@@ -151,16 +151,16 @@ const CSS = `
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  border-top: 0.5px solid rgba(0,0,0,0.08);
+  border-top: 0.5px solid var(--hairline-soft);
   padding-top: 16px;
 }
 .qt-q-tag {
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 2px 8px;
-  color: #5A5750;
+  color: var(--ink-soft);
 }
 
 /* Answers section */
@@ -169,7 +169,7 @@ const CSS = `
 }
 
 .qt-answers-header {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.95) 100%);
   box-shadow: 0 22px 42px rgba(26,24,21,0.05);
   padding: 24px 28px;
@@ -205,7 +205,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: clamp(1.75rem, 4vw, 2.4rem);
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 6px;
   line-height: 1;
 }
@@ -213,7 +213,7 @@ const CSS = `
 .qt-answers-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.65;
   max-width: 50ch;
 }
@@ -233,12 +233,12 @@ const CSS = `
   display: inline-block;
   border-radius: 999px;
 }
-.qt-badge.accepted { background: #E6F5F1; color: #0F6E56; }
-.qt-badge.lauren { border: 0.5px solid rgba(0,0,0,0.1); background: white; color: #1A1815; }
+.qt-badge.accepted { background: var(--topic-skills-surface); color: var(--teal-600); }
+.qt-badge.lauren { border: 0.5px solid var(--hairline-firm); background: white; color: var(--ink-strong); }
 
 /* No-answers state */
 .qt-no-answers {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 28px 32px;
   margin-bottom: 32px;
 }
@@ -254,13 +254,13 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 20px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 8px;
 }
 .qt-no-answers-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.65;
 }
 
@@ -276,7 +276,7 @@ const CSS = `
   padding: 26px 30px 24px;
   position: relative;
   overflow: hidden;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   box-shadow: 0 18px 34px rgba(26,24,21,0.04);
 }
 .qt-answer::after {
@@ -306,7 +306,7 @@ const CSS = `
   bottom: 18px;
   width: 4px;
 }
-.qt-answer-stripe.accepted { background: #0F6E56; }
+.qt-answer-stripe.accepted { background: var(--teal-600); }
 .qt-answer-stripe.lauren { background: rgba(47,138,126,0.4); }
 
 .qt-answer-highlight {
@@ -327,19 +327,19 @@ const CSS = `
   align-items: center;
 }
 .qt-answer-highlight-badge.accepted {
-  background: #0F6E56;
+  background: var(--teal-600);
   color: white;
 }
 .qt-answer-highlight-badge.lauren {
   background: white;
-  color: #1A1815;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  color: var(--ink-strong);
+  border: 0.5px solid var(--hairline-firm);
 }
 
 .qt-answer-highlight-copy {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.55;
   margin: 0;
 }
@@ -358,19 +358,19 @@ const CSS = `
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   font-size: 11px;
   letter-spacing: 0.06em;
   flex-shrink: 0;
 }
-.qt-answer-avatar.lauren-av { background: #0F6E56; color: white; border-color: #0F6E56; }
-.qt-answer-avatar.student-av { background: white; color: #5A5750; }
+.qt-answer-avatar.lauren-av { background: var(--teal-600); color: white; border-color: var(--teal-600); }
+.qt-answer-avatar.student-av { background: white; color: var(--ink-soft); }
 
 .qt-answer-name {
   font-family: 'Playfair Display', serif;
   font-size: 17px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
 }
 .qt-answer-time {
   font-size: 10px;
@@ -388,14 +388,14 @@ const CSS = `
 .qt-answer-body {
   font-size: 14px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   line-height: 1.9;
   white-space: pre-wrap;
   max-width: 68ch;
 }
 
 .qt-answer-image {
-  border: 0.5px solid rgba(0,0,0,0.08);
+  border: 0.5px solid var(--hairline-soft);
   background: white;
   padding: 6px;
   display: inline-block;
@@ -405,7 +405,7 @@ const CSS = `
 
 /* Reply form */
 .qt-reply {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.96) 100%);
   box-shadow: 0 24px 48px rgba(26,24,21,0.05);
   padding: 28px 32px;
@@ -439,13 +439,13 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 8px;
 }
 .qt-reply-desc {
   font-size: 14px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   margin-bottom: 24px;
   max-width: 54ch;
@@ -481,12 +481,12 @@ const CSS = `
 .qt-compose-note {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   margin: 0;
 }
 
 .qt-compose-surface {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: rgba(255,255,255,0.9);
   padding: 18px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
@@ -494,12 +494,12 @@ const CSS = `
 
 .qt-form-textarea {
   width: 100%;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  background: #FFFCF8;
+  border: 0.5px solid var(--hairline-firm);
+  background: var(--surface-raised);
   padding: 14px 16px;
   font-size: 14px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   outline: none;
   font-family: inherit;
   border-radius: 0;
@@ -508,7 +508,7 @@ const CSS = `
   min-height: 220px;
   margin-bottom: 14px;
 }
-.qt-form-textarea:focus { border-color: rgba(0,0,0,0.25); }
+.qt-form-textarea:focus { border-color: var(--border-strong); }
 .qt-form-textarea::placeholder { color: var(--charcoal-light); }
 
 .qt-form-actions {
@@ -531,7 +531,7 @@ const CSS = `
 .qt-compose-helper-limit {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   margin: 0;
 }
 
@@ -539,23 +539,23 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  border: 0.5px dashed rgba(0,0,0,0.18);
+  border: 0.5px dashed var(--hairline-firm);
   padding: 9px 14px;
   cursor: pointer;
   font-family: inherit;
   background: transparent;
-  color: #5A5750;
+  color: var(--ink-soft);
   display: inline-flex;
   align-items: center;
   gap: 7px;
 }
-.qt-upload-btn:hover { background: #F5F3F0; }
+.qt-upload-btn:hover { background: var(--surface-sunken); }
 .qt-upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .qt-img-preview {
   position: relative;
   display: inline-block;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 4px;
 }
 .qt-img-remove {
@@ -563,7 +563,7 @@ const CSS = `
   top: 7px;
   right: 7px;
   background: white;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 4px;
   cursor: pointer;
   display: flex;
@@ -577,7 +577,7 @@ const CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   border: none;
   padding: 10px 18px;
   cursor: pointer;
@@ -590,7 +590,7 @@ const CSS = `
 .qt-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .qt-reply-tip {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: rgba(255,255,255,0.78);
   padding: 20px 22px;
 }
@@ -605,13 +605,13 @@ const CSS = `
 .qt-reply-tip-title {
   font-size: 15px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 10px;
 }
 .qt-reply-tip-desc {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
 }
 
@@ -632,13 +632,13 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 20px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 8px;
 }
 .qt-signin-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.65;
   margin-bottom: 18px;
 }
@@ -648,7 +648,7 @@ const CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   border: 0.5px solid #1A1815;
   padding: 9px 18px;
   cursor: pointer;
@@ -663,15 +663,15 @@ const CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: transparent;
-  color: #1A1815;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  color: var(--ink-strong);
+  border: 0.5px solid var(--hairline-firm);
   padding: 9px 18px;
   cursor: pointer;
   font-family: inherit;
   text-decoration: none;
   display: inline-block;
 }
-.qt-btn-secondary:hover { background: #F5F3F0; }
+.qt-btn-secondary:hover { background: var(--surface-sunken); }
 
 /* Sidebar */
 .qt-sidebar {
@@ -682,14 +682,14 @@ const CSS = `
 }
 
 .qt-sidebar-panel {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.94) 100%);
   box-shadow: 0 20px 36px rgba(26,24,21,0.05);
   overflow: hidden;
 }
 
 .qt-sidebar-header {
-  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  border-bottom: 0.5px solid var(--hairline-soft);
   padding: 14px 18px;
   background: rgba(255,255,255,0.62);
 }
@@ -715,9 +715,9 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #1A1815;
+  color: var(--ink-strong);
   background: white;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 5px 9px;
   border-radius: 999px;
 }
@@ -726,14 +726,14 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 21px;
   line-height: 1.12;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 10px;
 }
 
 .qt-sidebar-summary-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   margin-bottom: 18px;
 }
@@ -763,14 +763,14 @@ const CSS = `
 .qt-sidebar-metric-value {
   font-family: 'Playfair Display', serif;
   font-size: 20px;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1;
 }
 
 .qt-sidebar-metric-copy {
   font-size: 12px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   line-height: 1.5;
 }
 
@@ -782,7 +782,7 @@ const CSS = `
 
 .qt-sidebar-row {
   padding: 14px 18px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  border-bottom: 0.5px solid var(--hairline-soft);
 }
 .qt-sidebar-row:last-child { border-bottom: none; }
 .qt-sidebar-row-label {
@@ -796,14 +796,14 @@ const CSS = `
 .qt-sidebar-row-value {
   font-size: 13px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   line-height: 1.5;
 }
 .qt-sidebar-num {
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-style: italic;
-  color: #1A1815;
+  color: var(--ink-strong);
   display: block;
   line-height: 1;
 }
@@ -817,10 +817,10 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: rgba(255,255,255,0.82);
   padding: 5px 9px;
-  color: #5A5750;
+  color: var(--ink-soft);
 }
 
 .qt-form-textarea:focus-visible,
@@ -845,7 +845,7 @@ const CSS = `
 .qt-sidebar-next-title {
   font-family: 'Playfair Display', serif;
   font-size: 18px;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1.15;
   margin-bottom: 8px;
 }
@@ -853,7 +853,7 @@ const CSS = `
 .qt-sidebar-next-desc {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.65;
   margin: 0;
 }

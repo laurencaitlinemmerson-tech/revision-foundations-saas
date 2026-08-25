@@ -21,7 +21,7 @@ export default function PremiumHubPageGate({
 
   if (!isSignedIn || !isPro) {
     return (
-      <div style={{ background: '#FAFAF8', minHeight: '100vh', padding: '120px 24px 72px' }}>
+      <div style={{ background: 'var(--surface-page)', minHeight: '100vh', padding: '120px 24px 72px' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
           <LockedContent
             title={`Unlock ${resourceTitle}`}

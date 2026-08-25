@@ -32,12 +32,12 @@ export default function ResourceBookmark({ resourceId }: ResourceBookmarkProps) 
       type="button"
       style={{
         flexShrink: 0,
-        background: bookmarked ? '#FBF8F3' : '#FFFFFF',
+        background: bookmarked ? 'var(--surface-sunken)' : '#FFFFFF',
         boxShadow: '0 1px 0 rgba(26,24,21,0.04)',
       }}
     >
       {bookmarked ? (
-        <BookmarkCheck className="w-5 h-5" style={{ color: '#185FA5' }} />
+        <BookmarkCheck className="w-5 h-5" style={{ color: 'var(--blue-600)' }} />
       ) : (
         <Bookmark className="w-5 h-5" style={{ color: '#9A948C' }} />
       )}

@@ -73,7 +73,7 @@ const STAGES = [
     label: 'Ready',
     tags: ['Bundle', 'Lifetime'],
     tone: '#9A948C',
-    toneBg: '#F3F1EE',
+    toneBg: 'var(--surface-sunken)',
     heading: 'Walk in calmer.',
     body: 'Still nervous, probably. Just less scrambled, better oriented, and clearer on the essentials.',
     actions: [
@@ -132,7 +132,7 @@ export default function NurseLabJourney() {
                     width: '12px',
                     height: '12px',
                     borderRadius: '999px',
-                    background: '#FAFAF8',
+                    background: 'var(--surface-page)',
                     border: `0.5px solid ${stage.tone}`,
                     position: 'relative',
                     zIndex: 1,

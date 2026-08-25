@@ -17,7 +17,7 @@ export default function QuizError({ reset }: { error: Error; reset: () => void }
           fontSize: '9px',
           letterSpacing: '0.2em',
           textTransform: 'uppercase' as const,
-          color: '#aaa',
+          color: 'var(--ink-faint)',
           marginBottom: '14px',
         }}>
           Quiz Tool
@@ -26,7 +26,7 @@ export default function QuizError({ reset }: { error: Error; reset: () => void }
           fontFamily: "'Playfair Display', Georgia, serif",
           fontSize: '28px',
           fontWeight: 400,
-          color: '#1A1815',
+          color: 'var(--ink-strong)',
           marginBottom: '12px',
         }}>
           Something went wrong loading the quiz.
@@ -34,7 +34,7 @@ export default function QuizError({ reset }: { error: Error; reset: () => void }
         <p style={{
           fontSize: '14px',
           fontWeight: 300,
-          color: '#5A5750',
+          color: 'var(--ink-soft)',
           lineHeight: 1.7,
           marginBottom: '24px',
         }}>
@@ -46,7 +46,7 @@ export default function QuizError({ reset }: { error: Error; reset: () => void }
             letterSpacing: '0.16em',
             textTransform: 'uppercase' as const,
             background: '#1A1815',
-            color: '#FAFAF8',
+            color: 'var(--surface-page)',
             border: 'none',
             padding: '10px 20px',
             cursor: 'pointer',
@@ -59,8 +59,8 @@ export default function QuizError({ reset }: { error: Error; reset: () => void }
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
             background: 'transparent',
-            color: '#1A1815',
-            border: '0.5px solid rgba(0,0,0,0.12)',
+            color: 'var(--ink-strong)',
+            border: '0.5px solid var(--hairline-firm)',
             padding: '10px 20px',
             textDecoration: 'none',
           }}>

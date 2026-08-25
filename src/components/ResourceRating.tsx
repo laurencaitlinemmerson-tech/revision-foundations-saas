@@ -35,7 +35,7 @@ export default function ResourceRating({ resourceId }: ResourceRatingProps) {
       >
         <svg
           className="h-6 w-6"
-          style={{ color: hover === 0 ? '#B8AD9E' : rating === 0 ? '#D8D0C5' : '#E8E1D7' }}
+          style={{ color: hover === 0 ? 'var(--border-strong)' : rating === 0 ? 'var(--hairline-firm)' : '#E8E1D7' }}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -55,7 +55,7 @@ export default function ResourceRating({ resourceId }: ResourceRatingProps) {
         >
           <svg
             className="h-6 w-6"
-            style={{ color: heart <= (hover !== null ? hover : rating) ? '#B76B4A' : '#D8D0C5' }}
+            style={{ color: heart <= (hover !== null ? hover : rating) ? '#B76B4A' : 'var(--hairline-firm)' }}
             fill="currentColor"
             viewBox="0 0 20 20"
           >

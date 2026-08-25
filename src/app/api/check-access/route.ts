@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { checkEntitlement } from '@/lib/entitlements';
+import { checkEntitlement, type Product } from '@/lib/entitlements';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,9 +11,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const product = searchParams.get('product') as 'osce' | 'quiz';
+    const product = searchParams.get('product') as Product;
 
-    if (!product || !['osce', 'quiz'].includes(product)) {
+    if (!product || !['osce', 'quiz', 'bundle', 'template'].includes(product)) {
       return NextResponse.json({ hasAccess: false });
     }
 

@@ -17,17 +17,17 @@ const PREVIEW_TIME = 180;
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
 
-const ink = '#1C1510';
-const inkMid = '#5C4A38';
-const inkLight = '#9C8878';
-const cream = '#FAFAF8';
-const paper = '#FFFFFF';
-const border = 'rgba(28, 21, 16, 0.1)';
-const accent = '#2F8A7E';
-const accentSoft = '#E6F3F1';
-const accentLine = 'rgba(47, 138, 126, 0.18)';
-const coral = '#D96C55';
-const coralSoft = '#F8E7E2';
+const ink = 'var(--ink-strong)';
+const inkMid = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
+const cream = 'var(--surface-page)';
+const paper = 'var(--surface-raised)';
+const border = 'var(--hairline-firm)';
+const accent = 'var(--topic-skills-text)';
+const accentSoft = 'var(--topic-skills-surface)';
+const accentLine = 'var(--topic-skills-border)';
+const coral = 'var(--state-incorrect-text)';
+const coralSoft = 'var(--state-incorrect-surface)';
 
 const sectionLabel: CSSProperties = {
   fontFamily: serif,
@@ -363,7 +363,7 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
             <div style={{ background: paper, border: `0.5px solid ${border}`, padding: '22px 22px 20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <p style={{ ...sectionLabel, marginBottom: 0 }}>Interactive preview</p>
-                <div style={{ display: 'inline-flex', gap: '6px', padding: '4px', background: '#F1F8F6' }}>
+                <div style={{ display: 'inline-flex', gap: '6px', padding: '4px', background: 'var(--surface-sunken)' }}>
                   {heroModes.map((mode, index) => {
                     const isActive = activeHeroMode === index;
                     return (
@@ -555,7 +555,7 @@ export default function OscePageClient({ hasPremium }: { hasPremium: boolean }) 
               <div style={{ height: '1px', background: border, marginBottom: '20px' }} />
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '22px' }}>
                 {['50+ stations', 'Timed mode', 'Checklists', 'Future updates'].map((tag) => (
-                  <span key={tag} style={{ fontFamily: serif, fontSize: '12px', color: inkMid, background: '#F3F1EE', padding: '6px 12px' }}>
+                  <span key={tag} style={{ fontFamily: serif, fontSize: '12px', color: inkMid, background: 'var(--surface-sunken)', padding: '6px 12px' }}>
                     {tag}
                   </span>
                 ))}

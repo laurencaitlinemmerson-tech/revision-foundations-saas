@@ -4,8 +4,8 @@ export const CSS = `
 
 .qb-page {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(180deg, #FAFAF8 0%, #F7F4EF 18%, #FAFAF8 42%, #FAFAF8 100%);
-  color: #2C2A27;
+  background: linear-gradient(180deg, var(--surface-page) 0%, var(--surface-sunken) 18%, var(--surface-page) 42%, var(--surface-page) 100%);
+  color: var(--ink-mid);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -40,7 +40,7 @@ export const CSS = `
   letter-spacing: 0.02em;
 }
 .qb-breadcrumb a { color: var(--charcoal-light); text-decoration: none; transition: color 0.1s; }
-.qb-breadcrumb a:hover { color: #2C2A27; }
+.qb-breadcrumb a:hover { color: var(--ink-mid); }
 
 .qb-kicker {
   font-size: 10px;
@@ -55,7 +55,7 @@ export const CSS = `
   font-size: clamp(2.4rem, 5vw, 3.6rem);
   font-weight: 400;
   line-height: 1.04;
-  color: #1A1815;
+  color: var(--ink-strong);
   letter-spacing: -0.01em;
   margin-bottom: 16px;
   max-width: 20ch;
@@ -64,7 +64,7 @@ export const CSS = `
 .qb-standfirst {
   font-size: 15px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   max-width: 560px;
 }
@@ -76,7 +76,7 @@ export const CSS = `
   grid-template-columns: minmax(0, 1fr) 280px;
   gap: 36px;
   align-items: end;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.96) 100%);
   box-shadow: 0 26px 48px rgba(26,24,21,0.05);
   padding: 34px 36px 32px;
@@ -122,14 +122,14 @@ export const CSS = `
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #5A5750;
+  color: var(--ink-soft);
   background: rgba(255,255,255,0.82);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 7px 11px;
 }
 
 .qb-hero-note {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: rgba(255,255,255,0.78);
   padding: 18px 20px;
 }
@@ -147,7 +147,7 @@ export const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 19px;
   line-height: 1.15;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 8px;
 }
 
@@ -155,7 +155,7 @@ export const CSS = `
   font-size: 12px;
   font-weight: 300;
   line-height: 1.7;
-  color: #5A5750;
+  color: var(--ink-soft);
 }
 
 /* Top bar */
@@ -179,7 +179,7 @@ export const CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   border: 0.5px solid #1A1815;
   padding: 10px 20px;
   cursor: pointer;
@@ -196,8 +196,8 @@ export const CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: transparent;
-  color: #1A1815;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  color: var(--ink-strong);
+  border: 0.5px solid var(--hairline-firm);
   padding: 10px 20px;
   cursor: pointer;
   font-family: inherit;
@@ -206,11 +206,11 @@ export const CSS = `
   align-items: center;
   gap: 8px;
 }
-.qb-btn-secondary:hover { background: #F5F3F0; }
+.qb-btn-secondary:hover { background: var(--surface-sunken); }
 
 /* Stats panel */
 .qb-stats {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 22px 24px;
 }
 .qb-stats-kicker {
@@ -229,7 +229,7 @@ export const CSS = `
   margin-bottom: 14px;
 }
 .qb-stat-cell {
-  background: #FAFAF8;
+  background: var(--surface-page);
   padding: 14px 16px;
 }
 .qb-stat-label {
@@ -245,20 +245,20 @@ export const CSS = `
   font-size: 28px;
   font-style: italic;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1;
   display: block;
 }
 .qb-stats-desc {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.6;
 }
 
 /* Starter prompts (empty state sidebar) */
 .qb-prompt-list { display: flex; flex-direction: column; gap: 0.5px; background: rgba(0,0,0,0.08); }
-.qb-prompt-card { background: #FAFAF8; padding: 14px 16px; }
+.qb-prompt-card { background: var(--surface-page); padding: 14px 16px; }
 .qb-prompt-card-eyebrow {
   font-size: 9px;
   letter-spacing: 0.14em;
@@ -271,13 +271,13 @@ export const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 14px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 4px;
 }
 .qb-prompt-card-desc {
   font-size: 11px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.55;
 }
 
@@ -285,7 +285,7 @@ export const CSS = `
 .qb-shelf {
   position: relative;
   overflow: hidden;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(247,244,239,0.96) 100%);
   box-shadow: 0 24px 48px rgba(26,24,21,0.05);
   padding: 24px 26px 22px;
@@ -325,7 +325,7 @@ export const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1.1;
 }
 
@@ -352,27 +352,27 @@ export const CSS = `
 }
 .qb-search {
   width: 100%;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   background: white;
   padding: 8px 12px 8px 30px;
   font-size: 12px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   outline: none;
   font-family: inherit;
   border-radius: 0;
   -webkit-appearance: none;
 }
-.qb-search:focus { border-color: rgba(0,0,0,0.25); }
+.qb-search:focus { border-color: var(--border-strong); }
 .qb-search::placeholder { color: var(--charcoal-light); }
 
 .qb-select {
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   background: white;
   padding: 8px 12px;
   font-size: 11px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   outline: none;
   font-family: inherit;
   border-radius: 0;
@@ -381,7 +381,7 @@ export const CSS = `
   width: 100%;
   cursor: pointer;
 }
-.qb-select:focus { border-color: rgba(0,0,0,0.25); }
+.qb-select:focus { border-color: var(--border-strong); }
 
 .qb-filter-meta {
   font-size: 11px;
@@ -426,23 +426,23 @@ export const CSS = `
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 8px 12px;
   cursor: pointer;
   background: rgba(255,255,255,0.78);
-  color: #5A5750;
+  color: var(--ink-soft);
   font-family: inherit;
   white-space: nowrap;
   transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
 }
 .qb-filter-pill:hover {
   transform: translateY(-1px);
-  border-color: rgba(0,0,0,0.22);
+  border-color: var(--border-strong);
   background: white;
 }
 .qb-filter-pill.active {
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   border-color: #1A1815;
   box-shadow: 0 12px 24px rgba(26,24,21,0.12);
 }
@@ -453,16 +453,16 @@ export const CSS = `
   gap: 8px;
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 0.5px solid rgba(0,0,0,0.08);
+  border-top: 0.5px solid var(--hairline-soft);
 }
 
 .qb-active-filter {
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #5A5750;
+  color: var(--ink-soft);
   background: rgba(255,255,255,0.82);
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 5px 9px;
   white-space: nowrap;
 }
@@ -471,18 +471,18 @@ export const CSS = `
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 8px 14px;
   cursor: pointer;
   background: rgba(255,255,255,0.82);
   font-family: inherit;
-  color: #5A5750;
+  color: var(--ink-soft);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-.qb-clear-btn:hover { background: white; border-color: rgba(0,0,0,0.22); }
+.qb-clear-btn:hover { background: white; border-color: var(--border-strong); }
 
 /* Question list */
 .qb-q-list {
@@ -496,7 +496,7 @@ export const CSS = `
   position: relative;
   overflow: hidden;
   padding: 26px 28px 24px;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   text-decoration: none;
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,250,248,1) 100%);
   box-shadow: 0 20px 36px rgba(26,24,21,0.04);
@@ -524,7 +524,7 @@ export const CSS = `
   border-color: rgba(15,110,86,0.14);
 }
 .qb-q-row.answered::before {
-  background: linear-gradient(180deg, #0F6E56 0%, rgba(15,110,86,0.3) 100%);
+  background: linear-gradient(180deg, var(--teal-600) 0%, rgba(15,110,86,0.3) 100%);
 }
 .qb-q-row.open {
   border-color: rgba(200,112,10,0.18);
@@ -560,13 +560,13 @@ export const CSS = `
   display: inline-block;
   border-radius: 999px;
 }
-.qb-q-status.answered { background: #E6F5F1; color: #0F6E56; }
-.qb-q-status.open { background: #FFF3E5; color: #993C1D; }
+.qb-q-status.answered { background: var(--topic-skills-surface); color: var(--teal-600); }
+.qb-q-status.open { background: var(--topic-anatomy-surface); color: var(--coral-600); }
 
 .qb-q-state-note {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.5;
 }
 
@@ -574,10 +574,10 @@ export const CSS = `
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #1A1815;
+  color: var(--ink-strong);
   white-space: nowrap;
   flex-shrink: 0;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   background: rgba(255,255,255,0.8);
   padding: 8px 11px;
   display: inline-flex;
@@ -605,7 +605,7 @@ export const CSS = `
   font-family: 'Playfair Display', Georgia, serif;
   font-size: clamp(1.35rem, 2.3vw, 1.75rem);
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   line-height: 1.08;
   margin-bottom: 10px;
   max-width: 24ch;
@@ -614,7 +614,7 @@ export const CSS = `
 .qb-q-preview {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.75;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -647,7 +647,7 @@ export const CSS = `
 
 .qb-q-user {
   font-size: 11px;
-  color: #1A1815;
+  color: var(--ink-strong);
   letter-spacing: 0.01em;
 }
 .qb-q-time {
@@ -673,17 +673,17 @@ export const CSS = `
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   background: rgba(255,255,255,0.82);
   padding: 6px 10px;
-  color: #5A5750;
+  color: var(--ink-soft);
 }
 .qb-q-tag-more { color: var(--charcoal-light); }
 
 /* Image attachment in list */
 .qb-q-image {
   margin: 0;
-  border: 0.5px solid rgba(0,0,0,0.08);
+  border: 0.5px solid var(--hairline-soft);
   background: white;
   display: inline-block;
   overflow: hidden;
@@ -694,7 +694,7 @@ export const CSS = `
 
 /* Empty / no-matches states */
 .qb-empty {
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 36px 40px;
   margin-bottom: 60px;
 }
@@ -710,13 +710,13 @@ export const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 10px;
 }
 .qb-empty-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.7;
   max-width: 520px;
   margin-bottom: 20px;
@@ -729,7 +729,7 @@ export const CSS = `
   margin-top: 24px;
 }
 .qb-empty-card {
-  background: #FAFAF8;
+  background: var(--surface-page);
   padding: 18px 20px;
 }
 .qb-empty-card-eye {
@@ -744,13 +744,13 @@ export const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 15px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 6px;
 }
 .qb-empty-card-desc {
   font-size: 12px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.55;
 }
 
@@ -769,7 +769,7 @@ export const CSS = `
 
 .qb-modal {
   background: linear-gradient(180deg, rgba(250,250,248,1) 0%, rgba(247,244,239,0.96) 100%);
-  border: 0.5px solid rgba(0,0,0,0.15);
+  border: 0.5px solid var(--hairline-firm);
   box-shadow: 0 40px 90px rgba(26,24,21,0.2);
   width: 100%;
   max-width: 640px;
@@ -785,7 +785,7 @@ export const CSS = `
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(247,244,239,0.24) 100%);
   padding: 28px 32px 24px;
 }
@@ -812,19 +812,19 @@ export const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 26px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 8px;
   line-height: 1.1;
 }
 .qb-modal-desc {
   font-size: 13px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.65;
   max-width: 44ch;
 }
 .qb-modal-close {
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 7px;
   cursor: pointer;
   background: white;
@@ -833,8 +833,8 @@ export const CSS = `
   align-items: center;
   justify-content: center;
 }
-.qb-modal-close:hover { background: #F5F3F0; }
-.qb-modal-close svg { width: 14px; height: 14px; color: #1A1815; }
+.qb-modal-close:hover { background: var(--surface-sunken); }
+.qb-modal-close svg { width: 14px; height: 14px; color: var(--ink-strong); }
 
 .qb-modal-body {
   padding: 28px 32px;
@@ -852,35 +852,35 @@ export const CSS = `
 }
 .qb-form-input {
   width: 100%;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   background: white;
   padding: 10px 14px;
   font-size: 13px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   outline: none;
   font-family: inherit;
   border-radius: 0;
   -webkit-appearance: none;
 }
-.qb-form-input:focus { border-color: rgba(0,0,0,0.25); }
+.qb-form-input:focus { border-color: var(--border-strong); }
 .qb-form-input::placeholder { color: var(--charcoal-light); }
 
 .qb-form-textarea {
   width: 100%;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   background: white;
   padding: 10px 14px;
   font-size: 13px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   outline: none;
   font-family: inherit;
   border-radius: 0;
   resize: none;
   -webkit-appearance: none;
 }
-.qb-form-textarea:focus { border-color: rgba(0,0,0,0.25); }
+.qb-form-textarea:focus { border-color: var(--border-strong); }
 .qb-form-textarea::placeholder { color: var(--charcoal-light); }
 
 .qb-form-hint {
@@ -909,39 +909,39 @@ export const CSS = `
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 5px 12px;
   cursor: pointer;
   font-family: inherit;
   background: transparent;
-  color: #5A5750;
+  color: var(--ink-soft);
   transition: all 0.1s;
 }
-.qb-form-tag-btn:hover { background: #F5F3F0; }
-.qb-form-tag-btn.active { background: #1A1815; color: #FAFAF8; border-color: #1A1815; }
+.qb-form-tag-btn:hover { background: var(--surface-sunken); }
+.qb-form-tag-btn.active { background: #1A1815; color: var(--surface-page); border-color: #1A1815; }
 
 .qb-upload-btn {
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  border: 0.5px dashed rgba(0,0,0,0.18);
+  border: 0.5px dashed var(--hairline-firm);
   padding: 9px 18px;
   cursor: pointer;
   font-family: inherit;
   background: transparent;
-  color: #5A5750;
+  color: var(--ink-soft);
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
-.qb-upload-btn:hover { border-color: rgba(0,0,0,0.3); background: #F5F3F0; }
+.qb-upload-btn:hover { border-color: var(--border-strong); background: var(--surface-sunken); }
 .qb-upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .qb-upload-btn svg { width: 13px; height: 13px; }
 
 .qb-img-preview {
   position: relative;
   display: inline-block;
-  border: 0.5px solid rgba(0,0,0,0.1);
+  border: 0.5px solid var(--hairline-firm);
   padding: 4px;
 }
 .qb-img-remove {
@@ -949,7 +949,7 @@ export const CSS = `
   top: 8px;
   right: 8px;
   background: white;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 4px;
   cursor: pointer;
   display: flex;
@@ -963,7 +963,7 @@ export const CSS = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   background: #1A1815;
-  color: #FAFAF8;
+  color: var(--surface-page);
   border: none;
   padding: 10px 22px;
   cursor: pointer;

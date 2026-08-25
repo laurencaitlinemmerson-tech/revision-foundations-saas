@@ -106,7 +106,7 @@ export default function PlacementCountdown() {
             const days = daysUntil(item.date);
             const color = urgencyColor(days);
             return (
-              <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderBottom: '0.5px solid rgba(0,0,0,0.05)' }}>
+              <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderBottom: '0.5px solid var(--hairline-soft)' }}>
                 {/* Countdown number */}
                 <span style={{ fontFamily: display, fontSize: '1.6rem', fontStyle: 'italic', fontWeight: 400, lineHeight: 1, color, minWidth: '44px', textAlign: 'right', flexShrink: 0 }}>
                   {days === 0 ? '!' : days}
@@ -166,8 +166,8 @@ export default function PlacementCountdown() {
                 style={{
                   fontFamily: serif, fontSize: '11px', padding: '4px 10px',
                   background: newLabel === p ? ink : 'transparent',
-                  color: newLabel === p ? '#FAFAF8' : mid,
-                  border: '0.5px solid rgba(0,0,0,0.12)',
+                  color: newLabel === p ? 'var(--surface-page)' : mid,
+                  border: '0.5px solid var(--hairline-firm)',
                   cursor: 'pointer', transition: 'all 0.12s',
                 }}
               >
@@ -183,21 +183,21 @@ export default function PlacementCountdown() {
               placeholder="Label (e.g. Final exam)"
               value={newLabel}
               onChange={e => setNewLabel(e.target.value)}
-              style={{ fontFamily: serif, fontSize: '13px', color: ink, background: '#FAFAF8', border, padding: '8px 10px', outline: 'none', flex: '1 1 140px', minWidth: 0 }}
+              style={{ fontFamily: serif, fontSize: '13px', color: ink, background: 'var(--surface-page)', border, padding: '8px 10px', outline: 'none', flex: '1 1 140px', minWidth: 0 }}
             />
             <input
               id={`${formId}-date`}
               type="date"
               value={newDate}
               onChange={e => setNewDate(e.target.value)}
-              style={{ fontFamily: serif, fontSize: '13px', color: ink, background: '#FAFAF8', border, padding: '8px 10px', outline: 'none', flex: '0 0 auto' }}
+              style={{ fontFamily: serif, fontSize: '13px', color: ink, background: 'var(--surface-page)', border, padding: '8px 10px', outline: 'none', flex: '0 0 auto' }}
             />
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button
               onClick={handleAdd}
               disabled={!newLabel.trim() || !newDate}
-              style={{ fontFamily: serif, fontSize: '12px', color: '#FAFAF8', background: ink, padding: '8px 16px', border: 'none', cursor: 'pointer', opacity: newLabel.trim() && newDate ? 1 : 0.4 }}
+              style={{ fontFamily: serif, fontSize: '12px', color: 'var(--surface-page)', background: ink, padding: '8px 16px', border: 'none', cursor: 'pointer', opacity: newLabel.trim() && newDate ? 1 : 0.4 }}
             >
               Save
             </button>

@@ -189,7 +189,7 @@ export default async function OnboardingPage({
               min-height: 100vh;
               background:
                 radial-gradient(circle at top left, rgba(250, 238, 218, 0.82), transparent 34%),
-                linear-gradient(180deg, #fcfbf8 0%, #f7f1e8 100%);
+                linear-gradient(180deg, var(--surface-raised) 0%, var(--surface-sunken) 100%);
               color: #1c1813;
               font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             }
@@ -235,7 +235,7 @@ export default async function OnboardingPage({
               max-width: 54ch;
               font-size: 15px;
               line-height: 1.9;
-              color: #5a5750;
+              color: var(--ink-soft);
               margin: 0;
             }
             .ob-recommendation {
@@ -262,7 +262,7 @@ export default async function OnboardingPage({
               margin: 0;
               font-size: 14px;
               line-height: 1.8;
-              color: #5a5750;
+              color: var(--ink-soft);
             }
             .ob-section-title {
               margin: 56px 0 18px;
@@ -288,7 +288,7 @@ export default async function OnboardingPage({
               text-transform: uppercase;
               letter-spacing: 0.18em;
               font-size: 10px;
-              color: #9c8878;
+              color: var(--ink-faint);
             }
             .ob-card-title {
               margin: 0 0 12px;
@@ -301,7 +301,7 @@ export default async function OnboardingPage({
               margin: 0 0 18px;
               font-size: 14px;
               line-height: 1.85;
-              color: #5a5750;
+              color: var(--ink-soft);
             }
             .ob-checklist {
               list-style: none;
@@ -331,11 +331,11 @@ export default async function OnboardingPage({
               padding: 18px 20px;
               text-decoration: none;
               border: 1px solid rgba(28, 24, 19, 0.1);
-              background: #fffdf9;
+              background: var(--surface-raised);
               color: inherit;
             }
             .ob-action:hover {
-              background: #fff7ef;
+              background: var(--surface-raised);
               border-color: rgba(28, 24, 19, 0.18);
             }
             .ob-action-label {
@@ -370,7 +370,7 @@ export default async function OnboardingPage({
               display: inline-flex;
               margin-bottom: 12px;
               padding: 4px 8px;
-              background: #faeeda;
+              background: var(--amber-50);
               color: #7a4b2e;
               text-transform: uppercase;
               letter-spacing: 0.12em;

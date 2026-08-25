@@ -44,15 +44,15 @@ export default async function SystemMocksPage({ params }: Props) {
 
         {mocks.length === 0 ? (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
-            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px', fontWeight: 400, color: '#1A1815', marginBottom: '10px' }}>
+            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px', fontWeight: 400, color: 'var(--ink-strong)', marginBottom: '10px' }}>
               No mocks available yet
             </p>
-            <p style={{ fontSize: '13px', fontWeight: 300, color: '#5A5750', marginBottom: '24px' }}>
+            <p style={{ fontSize: '13px', fontWeight: 300, color: 'var(--ink-soft)', marginBottom: '24px' }}>
               {system.label} mocks are coming soon. Try a different system in the meantime.
             </p>
             <Link
               href="/hub/mocks"
-              style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#FAFAF8', background: '#1A1815', padding: '10px 20px', textDecoration: 'none' }}
+              style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--surface-page)', background: '#1A1815', padding: '10px 20px', textDecoration: 'none' }}
             >
               View all systems
             </Link>

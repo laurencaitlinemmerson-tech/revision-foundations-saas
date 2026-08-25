@@ -45,7 +45,7 @@ export async function sendPurchaseConfirmation(
   <p style="font-size:13px;font-weight:300;color:#706A63;margin:0;">
     If anything looks wrong or you have questions, just reply to this email.
   </p>
-  <hr style="border:none;border-top:0.5px solid rgba(0,0,0,0.1);margin:32px 0;" />
+  <hr style="border:none;border-top:0.5px solid var(--hairline-firm);margin:32px 0;" />
   <p style="font-size:12px;font-weight:300;color:#9C8878;margin:0;">The Nurse Lab &mdash; nurselab.co.uk</p>
 </div>
   `.trim();

@@ -32,10 +32,10 @@ interface TestimonialsProps {
 // ─── configuration ────────────────────────────────────────────────────────────
 
 const accents = [
-  { color: '#2F8A7E', bg: '#E6F3F1' }, // teal
-  { color: '#2E67B1', bg: '#E7EEF8' }, // blue
-  { color: '#1E8A4D', bg: '#E6F4EA' }, // green
-  { color: '#D96C55', bg: '#F8E7E2' }, // coral
+  { color: 'var(--topic-skills-text)', bg: 'var(--topic-skills-surface)' }, // teal
+  { color: 'var(--topic-assessment-text)', bg: 'var(--topic-assessment-surface)' }, // blue
+  { color: 'var(--state-correct-text)', bg: 'var(--state-correct-surface)' }, // green
+  { color: 'var(--state-incorrect-text)', bg: 'var(--state-incorrect-surface)' }, // coral
 ];
 
 function getAccent(i: number) {
@@ -48,7 +48,7 @@ function Stars({ count }: { count: number }) {
   return (
     <div className="flex gap-[3px] mb-3.5">
       {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="13" height="13" viewBox="0 0 12 12" fill="#1E8A4D">
+        <svg key={i} width="13" height="13" viewBox="0 0 12 12" fill="var(--state-correct-text)">
           <path d="M6 0l1.545 3.13 3.455.502-2.5 2.436.59 3.44L6 7.895 2.91 9.508l.59-3.44L1 3.632l3.455-.502z" />
         </svg>
       ))}
@@ -64,7 +64,7 @@ function ProofGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
       {items.map((item) => (
-        <div key={item.label} className="border border-[var(--border)] bg-white p-[18px_20px]">
+        <div key={item.label} className="border border-[var(--border)] bg-[var(--surface-raised)] p-[18px_20px]">
           <span
             className="inline-flex items-center px-2.5 py-1 font-serif text-[11px] tracking-[0.08em] uppercase mb-2.5"
             style={{ color: item.accent, backgroundColor: item.bg }}
@@ -85,7 +85,7 @@ function ProofGrid({
 
 function ReviewCard({ r, isGoogleSource, accent }: { r: Review; isGoogleSource: boolean; accent: { color: string; bg: string; } }) {
   return (
-    <div className="flex flex-col p-[24px_24px_22px] border border-[var(--border)] bg-white transition-all duration-200 hover:border-[#B8AD9E] hover:shadow-[0_16px_40px_rgba(15,23,42,0.06)] cursor-default">
+    <div className="flex flex-col p-[24px_24px_22px] border border-[var(--border)] bg-[var(--surface-raised)] transition-all duration-200 hover:border-[var(--border-strong)] hover:shadow-[0_16px_40px_rgba(15,23,42,0.06)] cursor-default">
       <Stars count={r.rating} />
       <p
         className="font-display text-[40px] leading-[0.6] opacity-20 mb-2.5 select-none"
@@ -186,8 +186,8 @@ export default function Testimonials({ compact = false, showProof = true }: Test
       note: summary.totalCount > 0
         ? (isGoogleSource ? 'Ratings shown from your Google Business Profile' : 'Student feedback live on site')
         : 'First feedback cycle in progress',
-      accent: '#2F8A7E',
-      bg: '#E6F3F1',
+      accent: 'var(--topic-skills-text)',
+      bg: 'var(--topic-skills-surface)',
     },
     {
       label: 'Average rating',
@@ -195,22 +195,22 @@ export default function Testimonials({ compact = false, showProof = true }: Test
       note: summary.totalCount > 0
         ? (isGoogleSource ? 'Across Google ratings' : 'Across approved reviews')
         : "Built while studying children's nursing",
-      accent: '#2E67B1',
-      bg: '#E7EEF8',
+      accent: 'var(--topic-assessment-text)',
+      bg: 'var(--topic-assessment-surface)',
     },
     {
       label: 'Free to try',
       value: 'Hub pages',
       note: 'Browse free practical pages before paying',
-      accent: '#1E8A4D',
-      bg: '#E6F4EA',
+      accent: 'var(--state-correct-text)',
+      bg: 'var(--state-correct-surface)',
     },
     {
       label: 'Pricing model',
       value: 'One payment',
       note: 'No subscription or recurring charge',
-      accent: '#D96C55',
-      bg: '#F8E7E2',
+      accent: 'var(--state-incorrect-text)',
+      bg: 'var(--state-incorrect-surface)',
     },
   ], [isGoogleSource, summary.averageRating, summary.totalCount]);
 
@@ -236,7 +236,7 @@ export default function Testimonials({ compact = false, showProof = true }: Test
           <div className="flex flex-col items-end gap-1.5 shrink-0 mt-4 md:mt-0">
             <div className="flex gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
-                <svg key={i} width="16" height="16" viewBox="0 0 12 12" fill="#1E8A4D">
+                <svg key={i} width="16" height="16" viewBox="0 0 12 12" fill="var(--state-correct-text)">
                   <path d="M6 0l1.545 3.13 3.455.502-2.5 2.436.59 3.44L6 7.895 2.91 9.508l.59-3.44L1 3.632l3.455-.502z" />
                 </svg>
               ))}

@@ -84,23 +84,27 @@ export default function AccessibilitySettings() {
   }
 
   function togglePreset(enabled: boolean) {
-    setSettings(
+    // The preset covers reading comfort only. Theme is a separate axis — some
+    // people want easier reading in daylight — so it is preserved either way.
+    setSettings((prev) =>
       enabled
         ? {
             font: 'dyslexic',
             lineHeight: 'loose',
             motion: 'reduced',
+            theme: prev.theme,
           }
-        : DEFAULT_A11Y_SETTINGS,
+        : { ...DEFAULT_A11Y_SETTINGS, theme: prev.theme },
     );
   }
 
   const dyslexic = settings.font === 'dyslexic';
   const loose = settings.lineHeight === 'loose';
   const reduced = settings.motion === 'reduced';
+  const night = settings.theme === 'night';
   const presetEnabled = dyslexic && loose && reduced;
 
-  const anyOn = dyslexic || loose || reduced;
+  const anyOn = dyslexic || loose || reduced || night;
 
   return (
     <>
@@ -110,8 +114,8 @@ export default function AccessibilitySettings() {
           left: 16px;
           bottom: 16px;
           z-index: 90;
-          background: #1A1815;
-          color: #FAFAF8;
+          background: var(--fab-bg, #1A1815);
+          color: var(--fab-text, var(--surface-page));
           border: 0.5px solid rgba(255,255,255,0.14);
           padding: 10px 14px;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -131,7 +135,7 @@ export default function AccessibilitySettings() {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: ${anyOn ? '#EFCBB6' : '#5A5750'};
+          background: ${anyOn ? 'var(--topic-foundations-solid, #EFCBB6)' : '#8D8880'};
           display: inline-block;
         }
         .a11y-panel {
@@ -139,12 +143,15 @@ export default function AccessibilitySettings() {
           left: 16px;
           bottom: 68px;
           z-index: 91;
-          background: #FAFAF8;
-          color: #2C2A27;
-          border: 0.5px solid rgba(0,0,0,0.12);
+          background: var(--surface-raised, var(--surface-page));
+          color: var(--ink-mid, #2C2A27);
+          border: 0.5px solid var(--hairline-firm);
           padding: 18px 18px 14px;
           width: 300px;
           max-width: calc(100vw - 32px);
+          max-height: calc(100vh - 96px);
+          overflow-y: auto;
+          overscroll-behavior: contain;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         .a11y-panel h2 {
@@ -152,11 +159,11 @@ export default function AccessibilitySettings() {
           font-weight: 400;
           font-size: 18px;
           margin: 0 0 4px;
-          color: #1A1815;
+          color: var(--ink-strong, #1A1815);
         }
         .a11y-panel p.a11y-sub {
           font-size: 11px;
-          color: #8A8680;
+          color: var(--ink-faint, #8A8680);
           margin: 0 0 16px;
           line-height: 1.5;
         }
@@ -166,23 +173,23 @@ export default function AccessibilitySettings() {
           justify-content: space-between;
           gap: 12px;
           padding: 10px 0;
-          border-top: 0.5px solid rgba(0,0,0,0.08);
+          border-top: 0.5px solid var(--hairline-soft);
         }
         .a11y-row:first-of-type { border-top: none; padding-top: 0; }
         .a11y-row[data-feature="preset"] {
           padding-bottom: 14px;
           margin-bottom: 4px;
-          border-bottom: 0.5px solid rgba(0,0,0,0.08);
+          border-bottom: 0.5px solid var(--hairline-soft);
         }
         .a11y-row-label {
           font-size: 13px;
-          color: #2C2A27;
+          color: var(--ink-mid, #2C2A27);
           display: block;
           margin-bottom: 2px;
         }
         .a11y-row-hint {
           font-size: 11px;
-          color: #8A8680;
+          color: var(--ink-faint, #8A8680);
           line-height: 1.5;
         }
         .a11y-toggle {
@@ -190,7 +197,7 @@ export default function AccessibilitySettings() {
           -webkit-appearance: none;
           width: 36px;
           height: 20px;
-          background: #D8D3CB;
+          background: var(--linen-deep, var(--surface-sunken));
           position: relative;
           cursor: pointer;
           flex-shrink: 0;
@@ -204,14 +211,17 @@ export default function AccessibilitySettings() {
           position: absolute;
           top: 2px; left: 2px;
           width: 16px; height: 16px;
-          background: #FAFAF8;
+          background: var(--surface-raised, var(--surface-page));
           border-radius: 50%;
           transition: transform 0.15s ease;
         }
         .a11y-toggle:checked {
-          background: #1A1815;
+          background: var(--state-correct-solid, #1A1815);
         }
         .a11y-toggle:checked::after {
+          /* Stays literally white in both themes: the knob sits on the filled
+             green track, not on a page surface. */
+          background: var(--surface-raised);
           transform: translateX(16px);
         }
         .a11y-toggle:focus-visible {
@@ -224,13 +234,13 @@ export default function AccessibilitySettings() {
           align-items: center;
           margin-top: 14px;
           padding-top: 12px;
-          border-top: 0.5px solid rgba(0,0,0,0.08);
+          border-top: 0.5px solid var(--hairline-soft);
         }
         .a11y-reset {
           font-size: 11px;
           background: none;
           border: none;
-          color: #5A5750;
+          color: var(--ink-soft, var(--ink-soft));
           text-decoration: underline;
           text-underline-offset: 3px;
           cursor: pointer;
@@ -241,10 +251,10 @@ export default function AccessibilitySettings() {
           letter-spacing: 0.08em;
           text-transform: uppercase;
           background: none;
-          border: 0.5px solid rgba(0,0,0,0.15);
+          border: 0.5px solid var(--hairline-firm);
           padding: 6px 10px;
           cursor: pointer;
-          color: #2C2A27;
+          color: var(--ink-mid, #2C2A27);
         }
       `}</style>
 
@@ -326,6 +336,20 @@ export default function AccessibilitySettings() {
               className="a11y-toggle"
               checked={reduced}
               onChange={(e) => update('motion', e.target.checked, 'reduced')}
+            />
+          </div>
+
+          <div className="a11y-row">
+            <label htmlFor="a11y-theme">
+              <span className="a11y-row-label">Night reading mode</span>
+              <span className="a11y-row-hint">Warm dark background for late revision. Easier on your eyes than a bright screen in a dark room.</span>
+            </label>
+            <input
+              id="a11y-theme"
+              type="checkbox"
+              className="a11y-toggle"
+              checked={night}
+              onChange={(e) => update('theme', e.target.checked, 'night')}
             />
           </div>
 

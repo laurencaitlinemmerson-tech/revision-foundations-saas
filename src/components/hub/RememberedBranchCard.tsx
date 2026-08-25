@@ -39,8 +39,8 @@ export default function RememberedBranchCard() {
   return (
     <div
       style={{
-        border: '0.5px solid rgba(0,0,0,0.1)',
-        background: '#FBF8F3',
+        border: '0.5px solid var(--hairline-firm)',
+        background: 'var(--surface-sunken)',
         padding: '48px 52px 52px',
         marginBottom: '64px',
       }}
@@ -73,7 +73,7 @@ export default function RememberedBranchCard() {
               fontSize: '34px',
               lineHeight: 1.05,
               fontWeight: 400,
-              color: '#1A1815',
+              color: 'var(--ink-strong)',
             }}
           >
             {remembered.title}
@@ -83,7 +83,7 @@ export default function RememberedBranchCard() {
               margin: 0,
               fontSize: '13px',
               lineHeight: 1.7,
-              color: '#5A5750',
+              color: 'var(--ink-soft)',
               fontWeight: 300,
             }}
           >
@@ -99,7 +99,7 @@ export default function RememberedBranchCard() {
             gap: '8px',
             textDecoration: 'none',
             background: '#1A1815',
-            color: '#FAFAF8',
+            color: 'var(--surface-page)',
             padding: '12px 20px',
             fontSize: '11px',
             letterSpacing: '0.14em',

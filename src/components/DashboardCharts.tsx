@@ -139,7 +139,7 @@ function DonutChart({
               style={{
                 fontFamily: "'Playfair Display', Georgia, serif",
                 fontSize: '28px', fontStyle: 'italic', fontWeight: 400,
-                color: '#1A1815', lineHeight: 1, margin: 0,
+                color: 'var(--ink-strong)', lineHeight: 1, margin: 0,
               }}
             >
               {centreValue}
@@ -148,7 +148,7 @@ function DonutChart({
           {centreLabel && (
             <p style={{
               fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: '#9C8878', margin: '4px 0 0', fontWeight: 400,
+              color: 'var(--ink-faint)', margin: '4px 0 0', fontWeight: 400,
             }}>
               {centreLabel}
             </p>
@@ -180,13 +180,13 @@ function HorizontalBarChart({
             marginBottom: '4px',
           }}>
             <span style={{
-              fontSize: '12px', fontWeight: 300, color: '#2C2A27',
+              fontSize: '12px', fontWeight: 300, color: 'var(--ink-mid)',
             }}>
               {item.label}
             </span>
             <span style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: '14px', fontStyle: 'italic', color: '#1A1815',
+              fontSize: '14px', fontStyle: 'italic', color: 'var(--ink-strong)',
             }}>
               {item.value}
             </span>
@@ -239,7 +239,7 @@ function WeeklyBarGraph({ sessions }: { sessions: number[] }) {
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: i * 0.06 + 0.5 }}
                   style={{
-                    fontSize: '10px', color: '#9C8878', fontWeight: 300,
+                    fontSize: '10px', color: 'var(--ink-faint)', fontWeight: 300,
                     marginBottom: '4px',
                   }}
                 >
@@ -290,13 +290,13 @@ function ChartLegend({ items }: { items: { label: string; colour: string; value?
             display: 'inline-block',
           }} />
           <span style={{
-            fontSize: '12px', fontWeight: 300, color: '#2C2A27', flex: 1,
+            fontSize: '12px', fontWeight: 300, color: 'var(--ink-mid)', flex: 1,
           }}>
             {item.label}
           </span>
           {item.value && (
             <span style={{
-              fontSize: '12px', fontWeight: 400, color: '#1A1815',
+              fontSize: '12px', fontWeight: 400, color: 'var(--ink-strong)',
             }}>
               {item.value}
             </span>
@@ -388,19 +388,19 @@ export function StudyBreakdownChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: '#fff',
+        background: 'var(--surface-raised)',
         borderTop: '2px solid #D4A574',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        border: '0.5px solid var(--hairline-soft)',
       }}
     >
       <p style={{
         fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-        color: '#9C8878', marginBottom: '6px',
+        color: 'var(--ink-faint)', marginBottom: '6px',
       }}>
         Content by section
       </p>
       <p style={{
-        fontSize: '12px', fontWeight: 300, color: '#5A5750',
+        fontSize: '12px', fontWeight: 300, color: 'var(--ink-soft)',
         lineHeight: 1.6, marginBottom: '20px',
       }}>
         {total} resources across {slices.length} areas
@@ -461,9 +461,9 @@ export function WeeklyActivityChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: '#fff',
+        background: 'var(--surface-raised)',
         borderTop: '2px solid #8BBCAA',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        border: '0.5px solid var(--hairline-soft)',
       }}
     >
       <div style={{
@@ -472,20 +472,20 @@ export function WeeklyActivityChart() {
       }}>
         <p style={{
           fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: '#9C8878', margin: 0,
+          color: 'var(--ink-faint)', margin: 0,
         }}>
           Weekly activity
         </p>
         <div style={{ textAlign: 'right' }}>
           <p style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: '24px', fontStyle: 'italic', color: '#1A1815',
+            fontSize: '24px', fontStyle: 'italic', color: 'var(--ink-strong)',
             lineHeight: 1, margin: 0,
           }}>
             {thisWeek}
           </p>
           <p style={{
-            fontSize: '10px', color: diff > 0 ? '#1C7A67' : diff < 0 ? '#A14A57' : '#9C8878',
+            fontSize: '10px', color: diff > 0 ? 'var(--state-correct-text)' : diff < 0 ? '#A14A57' : '#9C8878',
             fontWeight: 300, margin: '2px 0 0',
           }}>
             {diff > 0 ? `+${diff} vs last week` : diff < 0 ? `${diff} vs last week` : 'same as last week'}
@@ -536,14 +536,14 @@ export function TopicStrengthChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: '#fff',
+        background: 'var(--surface-raised)',
         borderTop: '2px solid #7BA7CC',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        border: '0.5px solid var(--hairline-soft)',
       }}
     >
       <p style={{
         fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-        color: '#9C8878', marginBottom: '18px',
+        color: 'var(--ink-faint)', marginBottom: '18px',
       }}>
         {hasData ? 'Topic strength' : 'Topic strength (preview)'}
       </p>
@@ -559,7 +559,7 @@ export function TopicStrengthChart() {
 
       {!hasData && (
         <p style={{
-          fontSize: '11px', fontWeight: 300, color: '#9C8878',
+          fontSize: '11px', fontWeight: 300, color: 'var(--ink-faint)',
           marginTop: '14px', lineHeight: 1.6, fontStyle: 'italic',
         }}>
           This is sample data. Complete quiz sessions to see your real topic scores here.
@@ -617,14 +617,14 @@ export function MockExamProgressChart() {
       animate={isInView ? 'visible' : 'hidden'}
       style={{
         padding: '28px',
-        background: '#fff',
+        background: 'var(--surface-raised)',
         borderTop: '2px solid #C89BB0',
-        border: '0.5px solid rgba(0,0,0,0.08)',
+        border: '0.5px solid var(--hairline-soft)',
       }}
     >
       <p style={{
         fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-        color: '#9C8878', marginBottom: '18px',
+        color: 'var(--ink-faint)', marginBottom: '18px',
       }}>
         Written practice progress
       </p>
@@ -647,14 +647,14 @@ export function MockExamProgressChart() {
             <div>
               <p style={{
                 fontFamily: "'Playfair Display', serif",
-                fontSize: '20px', fontStyle: 'italic', color: '#1A1815',
+                fontSize: '20px', fontStyle: 'italic', color: 'var(--ink-strong)',
                 lineHeight: 1, margin: 0,
               }}>
                 {hasData ? wordCount.toLocaleString() : '—'}
               </p>
               <p style={{
                 fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
-                color: '#9C8878', margin: '4px 0 0',
+                color: 'var(--ink-faint)', margin: '4px 0 0',
               }}>
                 words written
               </p>
@@ -662,14 +662,14 @@ export function MockExamProgressChart() {
             <div>
               <p style={{
                 fontFamily: "'Playfair Display', serif",
-                fontSize: '20px', fontStyle: 'italic', color: '#1A1815',
+                fontSize: '20px', fontStyle: 'italic', color: 'var(--ink-strong)',
                 lineHeight: 1, margin: 0,
               }}>
                 {hasData ? `${Math.round((answered / total) * 100)}%` : '—'}
               </p>
               <p style={{
                 fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
-                color: '#9C8878', margin: '4px 0 0',
+                color: 'var(--ink-faint)', margin: '4px 0 0',
               }}>
                 complete
               </p>

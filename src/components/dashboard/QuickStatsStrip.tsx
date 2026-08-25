@@ -109,7 +109,7 @@ export default function QuickStatsStrip() {
         .qs-strip {
           display: flex;
           justify-content: space-between;
-          border-bottom: 0.5px solid rgba(0,0,0,0.08);
+          border-bottom: 0.5px solid var(--hairline-soft);
           margin-bottom: 8px;
           padding-bottom: 28px;
           overflow-x: auto;
@@ -146,7 +146,7 @@ export default function QuickStatsStrip() {
           font-size: 2.2rem;
           font-style: italic;
           line-height: 1;
-          color: #1A1815;
+          color: var(--ink-strong);
           margin: 0 0 6px;
         }
         .qs-label {
@@ -154,7 +154,7 @@ export default function QuickStatsStrip() {
           font-size: 10px;
           letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: #9C8878;
+          color: var(--ink-faint);
           margin: 0;
           font-weight: 400;
         }

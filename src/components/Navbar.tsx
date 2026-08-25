@@ -105,12 +105,12 @@ export default function Navbar() {
 
   const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   const display = "'Playfair Display', Georgia, serif";
-  const ink = '#1A1815';
-  const inkMid = '#5A5750';
-  const cream = '#FAFAF8';
-  const border = 'rgba(0,0,0,0.08)';
+  const ink = 'var(--ink-strong)';
+  const inkMid = 'var(--ink-soft)';
+  const cream = 'var(--surface-page)';
+  const border = 'var(--hairline-soft)';
   const navHeight = 'calc(68px + env(safe-area-inset-top))';
-  const navBackground = mobileMenuOpen || scrolled ? 'rgba(250,250,248,0.97)' : 'rgba(250,250,248,0.9)';
+  const navBackground = mobileMenuOpen || scrolled ? 'var(--nav-bg-scrolled)' : 'var(--nav-bg)';
 
   return (
     <nav
@@ -182,7 +182,7 @@ export default function Navbar() {
                   fontFamily: serif,
                   fontSize: '13px',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = ink; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,0,0,0.16)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = ink; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--hairline-firm)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = inkMid; (e.currentTarget as HTMLButtonElement).style.borderColor = border }}
               >
                 <Search className="w-4 h-4" />
@@ -193,19 +193,19 @@ export default function Navbar() {
             </SignedIn>
             <SignedOut>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Link href="/sign-in" style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: ink, background: 'rgba(255,255,255,0.8)', border: `0.5px solid ${border}`, padding: '8px 16px', textDecoration: 'none', transition: 'background-color 0.15s ease, border-color 0.15s ease' }}
+                <Link href="/sign-in" style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: ink, background: 'var(--surface-translucent)', border: `0.5px solid ${border}`, padding: '8px 16px', textDecoration: 'none', transition: 'background-color 0.15s ease, border-color 0.15s ease' }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = '#ffffff';
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,0,0,0.14)';
+                    (e.currentTarget as HTMLAnchorElement).style.background = 'var(--surface-raised)';
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--hairline-firm)';
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.8)';
+                    (e.currentTarget as HTMLAnchorElement).style.background = 'var(--surface-translucent)';
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = border;
                   }}>
                   Sign in / create account
                 </Link>
-                <Link href="/pricing" style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: cream, background: ink, padding: '8px 20px', textDecoration: 'none' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#3a2010'; }}
+                <Link href="/pricing" style={{ fontFamily: serif, fontSize: '13px', fontWeight: 400, color: 'var(--action-text)', background: 'var(--action-bg)', padding: '8px 20px', textDecoration: 'none' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--action-bg-hover)'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = ink; }}>
                   Get Access
                 </Link>
@@ -273,7 +273,7 @@ export default function Navbar() {
                 ))}
               </SignedOut>
               <div style={{ paddingTop: '18px' }}>
-                <p style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9C8878', marginBottom: '8px' }}>
+                <p style={{ fontFamily: serif, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-faint)', marginBottom: '8px' }}>
                   More
                 </p>
                 {mobileSecondaryLinks.map(link => (
@@ -291,7 +291,7 @@ export default function Navbar() {
                   <Link href="/sign-in" style={{ display: 'block', textAlign: 'center' as const, padding: '13px', fontFamily: serif, fontSize: '15px', color: inkMid, border: `0.5px solid ${border}`, textDecoration: 'none' }} onClick={closeMobileMenu}>
                     Sign in or create account
                   </Link>
-                  <Link href="/pricing" style={{ display: 'block', textAlign: 'center' as const, padding: '13px', fontFamily: serif, fontSize: '15px', color: cream, background: ink, textDecoration: 'none' }} onClick={closeMobileMenu}>
+                  <Link href="/pricing" style={{ display: 'block', textAlign: 'center' as const, padding: '13px', fontFamily: serif, fontSize: '15px', color: 'var(--action-text)', background: 'var(--action-bg)', textDecoration: 'none' }} onClick={closeMobileMenu}>
                     Get Access
                   </Link>
                 </div>
@@ -306,7 +306,7 @@ export default function Navbar() {
         .nav-mobile-toggle:focus-visible,
         .nav-mobile-toggle:hover {
           background: rgba(80, 76, 68, 0.06);
-          border-color: rgba(0,0,0,0.08);
+          border-color: var(--hairline-soft);
           outline: none;
         }
         @media (min-width: 768px) {

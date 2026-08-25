@@ -2,12 +2,14 @@ export type A11ySettings = {
   font: 'default' | 'dyslexic';
   lineHeight: 'default' | 'loose';
   motion: 'default' | 'reduced';
+  theme: 'default' | 'night';
 };
 
 export const DEFAULT_A11Y_SETTINGS: A11ySettings = {
   font: 'default',
   lineHeight: 'default',
   motion: 'default',
+  theme: 'default',
 };
 
 export const A11Y_STORAGE_KEY = 'nurselab.a11y';
@@ -29,6 +31,7 @@ export function applyA11ySettingsToRoot(
   root.setAttribute('data-a11y-font', settings.font);
   root.setAttribute('data-a11y-lineheight', settings.lineHeight);
   root.setAttribute('data-a11y-motion', settings.motion);
+  root.setAttribute('data-a11y-theme', settings.theme);
 }
 
 export function readA11ySettingsFromStorage(
@@ -66,6 +69,8 @@ export function readA11ySettingsFromDocument(
       root.getAttribute('data-a11y-motion') === 'reduced'
         ? 'reduced'
         : 'default',
+    theme:
+      root.getAttribute('data-a11y-theme') === 'night' ? 'night' : 'default',
   });
 }
 
@@ -77,6 +82,10 @@ export function getEffectiveReducedMotion(
 }
 
 export function getA11yBootstrapScript() {
+  // Runs blocking in <head> before first paint. Night mode in particular has
+  // to be resolved here — applying it after hydration means a full-brightness
+  // cream flash first, which is exactly what someone reading at 1am does not
+  // want. The background is also set inline for the same reason.
   return `
     (function () {
       try {
@@ -86,12 +95,18 @@ export function getA11yBootstrapScript() {
         var settings = {
           font: parsed && parsed.font === 'dyslexic' ? 'dyslexic' : 'default',
           lineHeight: parsed && parsed.lineHeight === 'loose' ? 'loose' : 'default',
-          motion: parsed && parsed.motion === 'reduced' ? 'reduced' : 'default'
+          motion: parsed && parsed.motion === 'reduced' ? 'reduced' : 'default',
+          theme: parsed && parsed.theme === 'night' ? 'night' : 'default'
         };
         var root = document.documentElement;
         root.setAttribute('data-a11y-font', settings.font);
         root.setAttribute('data-a11y-lineheight', settings.lineHeight);
         root.setAttribute('data-a11y-motion', settings.motion);
+        root.setAttribute('data-a11y-theme', settings.theme);
+        if (settings.theme === 'night') {
+          root.style.colorScheme = 'dark';
+          root.style.backgroundColor = '#191713';
+        }
       } catch (error) {
         /* no-op */
       }

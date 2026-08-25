@@ -108,7 +108,7 @@ async function handleCreateFolder(input: { name: string; emoji: string }) {
           padding: '6px 14px',
           fontSize: '11px',
           letterSpacing: '0.06em',
-          color: isSaved ? '#185FA5' : '#1A1815',
+          color: isSaved ? 'var(--blue-600)' : '#1A1815',
           cursor: 'pointer',
           transition: 'border-color 0.15s, background 0.15s',
         }}
@@ -122,7 +122,7 @@ async function handleCreateFolder(input: { name: string; emoji: string }) {
         )}
         <span>{isSaved ? 'Saved' : 'Save'}</span>
         {isSaved ? (
-          <span className="bg-white px-2 py-0.5 text-[11px] tracking-[0.04em] text-[#185FA5]">
+          <span className="bg-white px-2 py-0.5 text-[11px] tracking-[0.04em] text-[var(--blue-600)]">
             {savedCount || '1+'}
           </span>
         ) : null}
@@ -135,7 +135,7 @@ async function handleCreateFolder(input: { name: string; emoji: string }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute right-0 top-[calc(100%+0.75rem)] z-40 w-[23rem] overflow-hidden border border-black/8 bg-[#fcfbf8] shadow-[0_8px_32px_rgba(15,23,42,0.07)]"
+            className="absolute right-0 top-[calc(100%+0.75rem)] z-40 w-[23rem] overflow-hidden border border-black/8 bg-[var(--surface-raised)] shadow-[0_8px_32px_rgba(15,23,42,0.07)]"
           >
             <div className="border-b border-black/6 px-4 py-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/70">Save</p>

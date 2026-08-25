@@ -214,7 +214,7 @@ export default function CommandPalette() {
         .cp-shell {
           width: 100%;
           max-width: 580px;
-          background: #FFFFFF;
+          background: var(--surface-raised);
           border-radius: 12px;
           box-shadow: 0 16px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
           overflow: hidden;
@@ -252,7 +252,7 @@ export default function CommandPalette() {
           display: flex;
           align-items: center;
           color: ${mid};
-          background: #F5F3F0;
+          background: var(--surface-sunken);
           border: none;
           padding: 6px 10px;
           border-radius: 6px;
@@ -263,7 +263,7 @@ export default function CommandPalette() {
         }
         .cp-close-btn:hover {
           color: ${ink};
-          background: #E8E0D8;
+          background: var(--hairline-firm);
         }
 
         .cp-content {
@@ -301,7 +301,7 @@ export default function CommandPalette() {
           transition: background 0.15s ease, color 0.15s ease;
         }
         .cp-item:hover, .cp-item:focus {
-          background: #F5F3F0;
+          background: var(--surface-sunken);
           outline: none;
         }
         .cp-item:hover .cp-item-title {
@@ -333,7 +333,7 @@ export default function CommandPalette() {
         .cp-tag {
           font-family: ${serif};
           font-size: 10px;
-          background: #F5F3F0;
+          background: var(--surface-sunken);
           color: ${mid};
           padding: 2px 6px;
           border-radius: 4px;

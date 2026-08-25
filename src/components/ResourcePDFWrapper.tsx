@@ -222,7 +222,7 @@ const PDF_CSS = `
     font-weight: 400;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #FAFAF8;
+    color: var(--surface-page);
     background: #1A1815;
     border: none;
     cursor: pointer;
@@ -238,14 +238,14 @@ const PDF_CSS = `
   }
   .pdf-download-btn svg {
     flex-shrink: 0;
-    stroke: #FAFAF8;
+    stroke: var(--surface-page);
   }
 
   .pdf-download-spinner {
     width: 14px;
     height: 14px;
     border: 1.5px solid rgba(255,255,255,0.2);
-    border-top-color: #FAFAF8;
+    border-top-color: var(--surface-page);
     border-radius: 50%;
     animation: pdf-spin 0.7s linear infinite;
     flex-shrink: 0;
@@ -343,9 +343,9 @@ const PDF_CSS = `
     font-size: 9px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #aaa;
+    color: var(--ink-faint);
     padding: 32px 0 16px;
-    border-top: 0.5px solid rgba(0,0,0,0.08);
+    border-top: 0.5px solid var(--hairline-soft);
     margin-top: 48px;
   }
 
@@ -362,8 +362,8 @@ const PDF_CSS = `
     display: flex;
     align-items: center;
     gap: 0;
-    background: #FAFAF8;
-    border: 0.5px solid rgba(0,0,0,0.14);
+    background: var(--surface-page);
+    border: 0.5px solid var(--hairline-firm);
     box-shadow: 0 2px 16px rgba(0,0,0,0.10);
     animation: nudge-in 0.25s ease;
   }
@@ -380,38 +380,38 @@ const PDF_CSS = `
     font-size: 11px;
     font-weight: 400;
     letter-spacing: 0.08em;
-    color: #1A1815;
+    color: var(--ink-strong);
     background: none;
     border: none;
     cursor: pointer;
   }
-  .save-nudge-action:hover { background: #F5F3F0; }
+  .save-nudge-action:hover { background: var(--surface-sunken); }
   .save-nudge-dismiss {
     padding: 11px 13px;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
-    color: #999;
+    color: var(--ink-faint);
     background: none;
     border: none;
-    border-left: 0.5px solid rgba(0,0,0,0.08);
+    border-left: 0.5px solid var(--hairline-soft);
     cursor: pointer;
     line-height: 1;
   }
-  .save-nudge-dismiss:hover { color: #555; }
+  .save-nudge-dismiss:hover { color: var(--ink-soft); }
 
   /* ── Quiz/OSCE cross-link CTA ── */
   .resource-quiz-cta {
     margin-top: 48px;
     padding: 24px 28px;
-    border: 0.5px solid rgba(0,0,0,0.08);
-    background: #F5F3F0;
+    border: 0.5px solid var(--hairline-soft);
+    background: var(--surface-sunken);
   }
   .resource-quiz-cta-label {
     font-family: 'Inter', -apple-system, sans-serif;
     font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #9C8878;
+    color: var(--ink-faint);
     margin-bottom: 14px;
   }
   .resource-quiz-cta-links {
@@ -423,7 +423,7 @@ const PDF_CSS = `
     font-family: 'Inter', -apple-system, sans-serif;
     font-size: 13px;
     font-weight: 400;
-    color: #1A1815;
+    color: var(--ink-strong);
     text-decoration: underline;
     text-underline-offset: 4px;
     text-decoration-color: rgba(0,0,0,0.25);
@@ -436,7 +436,7 @@ const PDF_CSS = `
   .resource-discussion-wrap {
     margin-top: 48px;
     padding-top: 32px;
-    border-top: 0.5px solid rgba(0,0,0,0.08);
+    border-top: 0.5px solid var(--hairline-soft);
   }
 
   /* Hide non-print sections during PDF generation */

@@ -91,7 +91,7 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
   return (
     <>
       {showOverview && !activeFolder && folders.length > 0 ? (
-        <div className="mb-6 overflow-hidden border border-[var(--border)] bg-[#FAFAF8] px-6 py-6 md:px-8">
+        <div className="mb-6 overflow-hidden border border-[var(--border)] bg-[var(--surface-page)] px-6 py-6 md:px-8">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-end">
             <div>
               <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]/70">Saved library</p>

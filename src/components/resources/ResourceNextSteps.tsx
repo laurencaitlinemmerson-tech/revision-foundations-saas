@@ -30,8 +30,8 @@ export default function ResourceNextSteps() {
 
   const loopActions = getResourceLoopActions(slug, tags);
   const practiceCards = [
-    loopActions.quiz ? { tone: '#185FA5', soft: '#E7EEF8', eyebrow: 'Quiz next', ...loopActions.quiz } : null,
-    loopActions.osce ? { tone: '#2F8A7E', soft: '#E6F3F1', eyebrow: 'OSCE next', ...loopActions.osce } : null,
+    loopActions.quiz ? { tone: 'var(--blue-600)', soft: 'var(--topic-assessment-surface)', eyebrow: 'Quiz next', ...loopActions.quiz } : null,
+    loopActions.osce ? { tone: 'var(--topic-skills-text)', soft: 'var(--topic-skills-surface)', eyebrow: 'OSCE next', ...loopActions.osce } : null,
   ].filter(Boolean) as Array<{
     tone: string;
     soft: string;
@@ -98,7 +98,7 @@ export default function ResourceNextSteps() {
         <div
           style={{
             border: '0.5px solid rgba(26,24,21,0.11)',
-            background: '#FBF8F3',
+            background: 'var(--surface-sunken)',
             padding: '24px 24px 26px',
           }}
         >
@@ -108,7 +108,7 @@ export default function ResourceNextSteps() {
               fontSize: '10px',
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              color: '#185FA5',
+              color: 'var(--blue-600)',
             }}
           >
             Suggested next block
@@ -120,7 +120,7 @@ export default function ResourceNextSteps() {
               fontSize: 'clamp(28px, 3vw, 38px)',
               lineHeight: 1.08,
               fontWeight: 400,
-              color: '#1A1815',
+              color: 'var(--ink-strong)',
               maxWidth: '12ch',
             }}
           >
@@ -131,7 +131,7 @@ export default function ResourceNextSteps() {
               margin: '0 0 20px',
               fontSize: '14px',
               lineHeight: 1.8,
-              color: '#5A5750',
+              color: 'var(--ink-soft)',
               fontWeight: 300,
               maxWidth: '44ch',
             }}
@@ -148,9 +148,9 @@ export default function ResourceNextSteps() {
                   display: 'block',
                   textDecoration: 'none',
                   border: '0.5px solid rgba(26,24,21,0.11)',
-                  background: '#FFFFFF',
+                  background: 'var(--surface-raised)',
                   padding: '14px 15px 15px',
-                  color: '#1A1815',
+                  color: 'var(--ink-strong)',
                 }}
               >
                 <p
@@ -180,7 +180,7 @@ export default function ResourceNextSteps() {
                     margin: 0,
                     fontSize: '12px',
                     lineHeight: 1.7,
-                    color: '#5A5750',
+                    color: 'var(--ink-soft)',
                     fontWeight: 300,
                   }}
                 >
@@ -194,9 +194,9 @@ export default function ResourceNextSteps() {
                   display: 'block',
                   textDecoration: 'none',
                   border: '0.5px solid rgba(26,24,21,0.11)',
-                  background: '#FFFFFF',
+                  background: 'var(--surface-raised)',
                   padding: '14px 15px 15px',
-                  color: '#1A1815',
+                  color: 'var(--ink-strong)',
                 }}
               >
                 <p style={{ margin: '0 0 7px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A948C' }}>
@@ -205,7 +205,7 @@ export default function ResourceNextSteps() {
                 <p style={{ margin: '0 0 6px', fontFamily: "'Playfair Display', Georgia, serif", fontSize: '24px', lineHeight: 1.12, fontWeight: 400 }}>
                   Open more related refreshers.
                 </p>
-                <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.7, color: '#5A5750', fontWeight: 300 }}>
+                <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.7, color: 'var(--ink-soft)', fontWeight: 300 }}>
                   Stay in the same branch and keep the topic moving without opening a completely different lane.
                 </p>
               </Link>
@@ -221,7 +221,7 @@ export default function ResourceNextSteps() {
                 justifyContent: 'center',
                 gap: '8px',
                 background: 'transparent',
-                color: '#1A1815',
+                color: 'var(--ink-strong)',
                 textDecoration: 'none',
                 padding: '12px 18px',
                 border: '0.5px solid rgba(26,24,21,0.11)',
@@ -237,7 +237,7 @@ export default function ResourceNextSteps() {
         <div
           style={{
             border: '0.5px solid rgba(26,24,21,0.11)',
-            background: '#FFFEFC',
+            background: 'var(--surface-raised)',
             padding: '24px',
           }}
         >
@@ -263,8 +263,8 @@ export default function ResourceNextSteps() {
                   textDecoration: 'none',
                   padding: '14px 14px 16px',
                   border: '0.5px solid rgba(26,24,21,0.08)',
-                  color: '#1A1815',
-                  background: '#fff',
+                  color: 'var(--ink-strong)',
+                  background: 'var(--surface-raised)',
                 }}
               >
                 <p
@@ -283,7 +283,7 @@ export default function ResourceNextSteps() {
                     margin: 0,
                     fontSize: '12px',
                     lineHeight: 1.7,
-                    color: '#5A5750',
+                    color: 'var(--ink-soft)',
                     fontWeight: 300,
                   }}
                 >

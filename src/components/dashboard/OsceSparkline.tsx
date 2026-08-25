@@ -5,10 +5,10 @@ import { getOsceScores, type OsceScore } from '@/lib/dashboardTracking';
 
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
-const ink = '#1A1815';
-const mid = '#5A5750';
-const muted = '#999';
-const borderMid = 'rgba(0,0,0,0.12)';
+const ink = 'var(--ink-strong)';
+const mid = 'var(--ink-soft)';
+const muted = 'var(--ink-faint)';
+const borderMid = 'var(--hairline-firm)';
 
 const SEED_SCORES: OsceScore[] = [
   { date: '2026-03-18', score: 60, stationName: 'Hand Hygiene' },
@@ -51,7 +51,7 @@ function Sparkline({ scores }: { scores: OsceScore[] }) {
           const x = (i / (scores.length - 1)) * W;
           const y = H - ((s.score - min) / range) * H;
           return (
-            <circle key={i} cx={x.toFixed(1)} cy={y.toFixed(1)} r={i === scores.length - 1 ? 3.5 : 2} fill={i === scores.length - 1 ? lineColor : '#C8C4BE'} />
+            <circle key={i} cx={x.toFixed(1)} cy={y.toFixed(1)} r={i === scores.length - 1 ? 3.5 : 2} fill={i === scores.length - 1 ? lineColor : 'var(--hairline-firm)'} />
           );
         })}
       </svg>

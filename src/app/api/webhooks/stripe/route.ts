@@ -9,7 +9,7 @@ import Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-type Product = "osce" | "quiz" | "bundle";
+type Product = "osce" | "quiz" | "bundle" | "template";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();

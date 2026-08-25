@@ -9,16 +9,16 @@ import { Send, ArrowLeft, Loader2 } from 'lucide-react';
 const serif   = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
 
-const ink      = '#1A1815';
-const inkMid   = '#5A5750';
-const inkLight = '#9C8878';
-const cream    = '#FAFAF8';
-const parchment = '#F5F3F0';
-const panel    = '#FFFFFF';
+const ink      = 'var(--ink-strong)';
+const inkMid   = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
+const cream    = 'var(--surface-page)';
+const parchment = 'var(--surface-sunken)';
+const panel    = 'var(--surface-raised)';
 const border   = 'rgba(0,0,0,0.08)';
-const green    = '#1E8A4D';
-const greenBg  = '#E6F4EA';
-const tagBg    = '#F3F1EE';
+const green    = 'var(--state-correct-text)';
+const greenBg  = 'var(--state-correct-surface)';
+const tagBg    = 'var(--surface-sunken)';
 
 export default function ReviewPage() {
   const [name,          setName]          = useState('');
@@ -505,7 +505,7 @@ export default function ReviewPage() {
                 <div
                   style={{
                     padding: '14px 16px',
-                    background: '#F6E6E6',
+                    background: 'var(--state-incorrect-surface)',
                     border: '0.5px solid #E1B1B1',
                     fontFamily: serif,
                     fontSize: '13px',
@@ -578,11 +578,11 @@ export default function ReviewPage() {
 
       <style>{`
         .review-input::placeholder {
-          color: #B8AD9E;
+          color: var(--border-strong);
         }
         .review-input:focus {
-          border-color: #B8AD9E !important;
-          background: #FFFFFF !important;
+          border-color: var(--border-strong) !important;
+          background: var(--surface-raised) !important;
         }
         .star-btn:hover {
           transform: scale(1.18);

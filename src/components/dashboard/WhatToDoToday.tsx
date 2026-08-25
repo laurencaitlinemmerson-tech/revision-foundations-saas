@@ -130,11 +130,83 @@ function getSuggestion(): Suggestion {
   };
 }
 
+function getEnergySuggestion(level: string): Suggestion | null {
+  if (level === 'low') {
+    return {
+      headline: 'Low energy today? Keep it short and calm.',
+      text: 'No pressure for full mock exams today. Try a quick 5-question recall set or read a single clinical summary.',
+      href: '/quiz',
+      cta: 'Start 5-min Quiz',
+      accent: 'var(--blue-600, #7BA7CC)',
+      accentSoft: 'rgba(123,167,204,0.15)',
+      effort: '5 min',
+      secondaryHref: '/dashboard#saved-folders',
+      secondaryCta: 'Browse saved pages',
+    };
+  }
+  if (level === 'high') {
+    return {
+      headline: 'High energy! Tackle an OSCE station mock.',
+      text: 'You have full focus today. Run a timed 10-minute paediatric or clinical OSCE station checklist to max out retention.',
+      href: '/osce',
+      cta: 'Launch OSCE Station',
+      accent: 'var(--teal-600, #6B9E87)',
+      accentSoft: 'rgba(107,158,135,0.15)',
+      effort: '12 min',
+      secondaryHref: '/quiz',
+      secondaryCta: 'Run 15-question quiz',
+    };
+  }
+  if (level === 'crunch') {
+    return {
+      headline: 'Exam crunch mode: targeted weak spots.',
+      text: 'Focus exclusively on your lowest scoring topics and high-yield clinical red flags.',
+      href: '/dashboard#search',
+      cta: 'Search High-Yield Guides',
+      accent: 'var(--amber-600, #C89BB0)',
+      accentSoft: 'rgba(200,155,176,0.15)',
+      effort: '15 min',
+      secondaryHref: '/quiz',
+      secondaryCta: 'Practice weak topics',
+    };
+  }
+  return null;
+}
+
 export default function WhatToDoToday() {
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
 
   useEffect(() => {
-    setSuggestion(getSuggestion());
+    function loadSuggestion() {
+      try {
+        const energy = localStorage.getItem('rf_energy_level');
+        if (energy) {
+          const energySug = getEnergySuggestion(energy);
+          if (energySug) {
+            setSuggestion(energySug);
+            return;
+          }
+        }
+      } catch {}
+      setSuggestion(getSuggestion());
+    }
+
+    loadSuggestion();
+
+    function handleEnergyChange(e: Event) {
+      const customEv = e as CustomEvent<string>;
+      if (customEv.detail) {
+        const energySug = getEnergySuggestion(customEv.detail);
+        if (energySug) {
+          setSuggestion(energySug);
+          return;
+        }
+      }
+      setSuggestion(getSuggestion());
+    }
+
+    window.addEventListener('rf_energy_change', handleEnergyChange);
+    return () => window.removeEventListener('rf_energy_change', handleEnergyChange);
   }, []);
 
   if (!suggestion) return null;
@@ -191,12 +263,12 @@ export default function WhatToDoToday() {
           gap: 20px 28px;
           align-items: start;
           border: 0.5px solid ${borderMid};
-          background: #FFFFFF;
+          background: var(--surface-raised);
           padding: 40px 44px;
           transition: border-color 0.2s ease;
         }
         .dash-suggestion-shell:hover {
-          border-color: rgba(0,0,0,0.18);
+          border-color: var(--hairline-firm);
         }
 
         .dash-suggestion-meta {

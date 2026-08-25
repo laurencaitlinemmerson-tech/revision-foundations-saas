@@ -59,7 +59,7 @@ export default function RecentPagesStrip() {
           transition: background 0.2s ease, border-color 0.2s ease;
         }
         .rps-chip:hover {
-          background: #F5F2EE !important;
+          background: var(--surface-sunken) !important;
           border-color: ${borderMid} !important;
         }
       `}</style>

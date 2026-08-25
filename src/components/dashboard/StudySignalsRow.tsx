@@ -148,7 +148,7 @@ export default function StudySignalsRow() {
 
         .dash-signal-card {
           border: 0.5px solid ${border};
-          background: #fff;
+          background: var(--surface-raised);
           padding: 18px 18px 20px;
           min-height: 188px;
         }

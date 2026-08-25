@@ -19,7 +19,7 @@ export default function HomeStyles() {
         }
         .home-diagnostic-panel-controls {
           border-right: none !important;
-          border-bottom: 0.5px solid rgba(0,0,0,0.08) !important;
+          border-bottom: 0.5px solid var(--hairline-soft) !important;
         }
         .home-trust-grid {
           grid-template-columns: 1fr !important;
@@ -69,7 +69,7 @@ export default function HomeStyles() {
         }
         .home-journey-meta {
           border-left: none !important;
-          border-top: 0.5px solid rgba(0,0,0,0.08) !important;
+          border-top: 0.5px solid var(--hairline-soft) !important;
           padding-left: 0 !important;
           padding-top: 14px !important;
         }
@@ -106,7 +106,7 @@ export default function HomeStyles() {
         border-color: var(--editorial-input-focus) !important;
       }
       .home-diagnostic-panel-controls {
-        border-right: 0.5px solid rgba(0,0,0,0.08);
+        border-right: 0.5px solid var(--hairline-soft);
       }
       .home-osce-col {
         transition: background-color 0.2s ease;

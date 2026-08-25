@@ -87,8 +87,8 @@ const CSS = `
 .ma-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
-  background: #FAFAF8;
-  color: #2C2A27;
+  background: var(--surface-page);
+  color: var(--ink-mid);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -107,11 +107,11 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   text-decoration: none;
   margin-bottom: 44px;
 }
-.ma-back:hover { color: #555; }
+.ma-back:hover { color: var(--ink-soft); }
 .ma-back-arrow { font-style: normal; }
 
 /* Masthead */
@@ -119,7 +119,7 @@ const CSS = `
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 14px;
 }
 
@@ -128,7 +128,7 @@ const CSS = `
   font-size: 56px;
   font-weight: 400;
   line-height: 1.08;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 22px;
   letter-spacing: -0.01em;
 }
@@ -136,7 +136,7 @@ const CSS = `
 .ma-standfirst {
   font-size: 17px;
   font-weight: 300;
-  color: #5A5750;
+  color: var(--ink-soft);
   line-height: 1.68;
   max-width: 680px;
   margin-bottom: 14px;
@@ -144,17 +144,17 @@ const CSS = `
 
 .ma-byline {
   font-size: 10px;
-  color: #aaa;
+  color: var(--ink-faint);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-bottom: 24px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 36px;
 }
 
 /* Pearl / info callout */
 .ma-pearl {
-  background: #FAEEDA;
+  background: var(--amber-50);
   padding: 14px 18px;
   border-radius: 0;
 }
@@ -163,13 +163,13 @@ const CSS = `
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #633806;
+  color: var(--amber-800);
   margin-bottom: 6px;
 }
 
 .ma-pearl p {
   font-size: 12px;
-  color: #633806;
+  color: var(--amber-800);
   line-height: 1.6;
   font-weight: 300;
   margin: 0;
@@ -180,7 +180,7 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #A32D2D;
+  color: var(--red-600);
   margin-bottom: 7px;
 }
 
@@ -193,8 +193,8 @@ const CSS = `
 
 .ma-red-pill {
   font-size: 11px;
-  background: #FCEBEB;
-  color: #A32D2D;
+  background: var(--red-50);
+  color: var(--red-600);
   padding: 3px 11px;
   border-radius: 0;
   font-weight: 300;
@@ -205,13 +205,13 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 18px;
   padding-top: 24px;
   margin-top: 36px;
   padding-bottom: 16px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
+  border-bottom: 0.5px solid var(--hairline-firm);
 }
 
 /* Step sections — used for the 4 category tabs */
@@ -219,7 +219,7 @@ const CSS = `
   display: grid;
   grid-template-columns: 96px 1fr;
   margin-bottom: 36px;
-  border-top: 0.5px solid rgba(0,0,0,0.1);
+  border-top: 0.5px solid var(--hairline-firm);
   padding-top: 24px;
 }
 
@@ -228,7 +228,7 @@ const CSS = `
   flex-direction: column;
   align-items: flex-start;
   padding-right: 24px;
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-right: 0.5px solid var(--hairline-firm);
   padding-top: 4px;
 }
 
@@ -259,7 +259,7 @@ const CSS = `
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 400;
-  color: #1A1815;
+  color: var(--ink-strong);
   margin-bottom: 3px;
   line-height: 1.2;
 }
@@ -267,7 +267,7 @@ const CSS = `
 .ma-step-question {
   font-size: 13px;
   font-style: italic;
-  color: #999;
+  color: var(--ink-faint);
   margin-bottom: 22px;
 }
 
@@ -275,7 +275,7 @@ const CSS = `
 .ma-table {
   width: 100%;
   border-collapse: collapse;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   margin-bottom: 0;
   font-size: 13px;
 }
@@ -284,13 +284,13 @@ const CSS = `
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--ink-faint);
   font-weight: 400;
   padding: 11px 16px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
-  border-right: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
+  border-right: 0.5px solid var(--hairline-firm);
   text-align: left;
-  background: #F5F3F0;
+  background: var(--surface-sunken);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 .ma-table th:last-child { border-right: none; }
@@ -298,20 +298,20 @@ const CSS = `
 .ma-table td {
   padding: 10px 16px;
   font-size: 12px;
-  color: #555;
-  border-bottom: 0.5px solid rgba(0,0,0,0.08);
-  border-right: 0.5px solid rgba(0,0,0,0.08);
+  color: var(--ink-soft);
+  border-bottom: 0.5px solid var(--hairline-soft);
+  border-right: 0.5px solid var(--hairline-soft);
   font-weight: 300;
 }
 .ma-table td:last-child { border-right: none; }
 .ma-table tr:last-child td { border-bottom: none; }
-.ma-table td:first-child { font-weight: 400; color: #2C2A27; font-family: 'Courier New', Courier, monospace; }
+.ma-table td:first-child { font-weight: 400; color: var(--ink-mid); font-family: 'Courier New', Courier, monospace; }
 
 /* Tabs */
 .ma-tabs {
   display: flex;
   gap: 0;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid var(--hairline-firm);
   margin-bottom: 28px;
   flex-wrap: wrap;
 }
@@ -329,26 +329,26 @@ const CSS = `
 }
 
 .ma-tab-active {
-  color: #1A1815;
+  color: var(--ink-strong);
   border-bottom: 1.5px solid #1A1815;
   font-weight: 400;
 }
 
 .ma-tab-inactive {
-  color: #aaa;
+  color: var(--ink-faint);
   border-bottom: 1.5px solid transparent;
   font-weight: 300;
 }
 .ma-tab-inactive:hover {
-  color: #555;
+  color: var(--ink-soft);
 }
 
 /* Quiz card */
 .ma-quiz-card {
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: 0.5px solid var(--hairline-firm);
   padding: 24px;
   margin-bottom: 32px;
-  background: #fff;
+  background: var(--surface-raised);
 }
 
 .ma-quiz-option {
@@ -358,43 +358,43 @@ const CSS = `
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   font-weight: 300;
-  color: #2C2A27;
+  color: var(--ink-mid);
   padding: 10px 14px;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  background: #FAFAF8;
+  border: 0.5px solid var(--hairline-firm);
+  background: var(--surface-page);
   cursor: pointer;
   transition: background 0.12s;
 }
-.ma-quiz-option:hover { background: #F5F3F0; }
+.ma-quiz-option:hover { background: var(--surface-sunken); }
 
 .ma-quiz-correct {
-  background: #E1F5EE !important;
-  border-color: #0F6E56 !important;
-  color: #085041 !important;
+  background: var(--teal-50) !important;
+  border-color: var(--teal-600) !important;
+  color: var(--teal-800) !important;
 }
 
 .ma-quiz-wrong {
-  background: #FCEBEB !important;
-  border-color: #A32D2D !important;
-  color: #A32D2D !important;
+  background: var(--red-50) !important;
+  border-color: var(--red-600) !important;
+  color: var(--red-600) !important;
 }
 
 /* Step colour system */
-.ma-numeral-1 { color: #185FA5; }
-.ma-badge-1 { background: #E6F1FB; color: #0C447C; }
-.ma-numeral-2 { color: #0F6E56; }
-.ma-badge-2 { background: #E1F5EE; color: #085041; }
-.ma-numeral-3 { color: #993C1D; }
-.ma-badge-3 { background: #FAECE7; color: #712B13; }
-.ma-numeral-4 { color: #534AB7; }
-.ma-badge-4 { background: #EEEDFE; color: #3C3489; }
+.ma-numeral-1 { color: var(--blue-600); }
+.ma-badge-1 { background: var(--blue-50); color: var(--blue-800); }
+.ma-numeral-2 { color: var(--teal-600); }
+.ma-badge-2 { background: var(--teal-50); color: var(--teal-800); }
+.ma-numeral-3 { color: var(--coral-600); }
+.ma-badge-3 { background: var(--coral-50); color: var(--coral-800); }
+.ma-numeral-4 { color: var(--purple-600); }
+.ma-badge-4 { background: var(--purple-50); color: var(--purple-800); }
 
 /* Responsive */
 @media (max-width: 800px) {
   .ma-wrap { padding: 24px 20px 60px; }
   .ma-headline { font-size: 34px; }
   .ma-step { grid-template-columns: 1fr; }
-  .ma-step-sidebar { flex-direction: row; align-items: center; gap: 12px; border-right: none; border-bottom: 0.5px solid rgba(0,0,0,0.1); padding-bottom: 12px; padding-right: 0; margin-bottom: 16px; }
+  .ma-step-sidebar { flex-direction: row; align-items: center; gap: 12px; border-right: none; border-bottom: 0.5px solid var(--hairline-firm); padding-bottom: 12px; padding-right: 0; margin-bottom: 16px; }
   .ma-step-numeral { font-size: 48px; }
   .ma-step-content { padding-left: 0; }
   .ma-tabs { gap: 0; }
@@ -519,14 +519,14 @@ export default function MedicationAbbreviationsPage() {
             {!quizComplete ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <span style={{ fontSize: '9px', color: '#aaa', letterSpacing: '0.18em', textTransform: 'uppercase' as const }}>
+                  <span style={{ fontSize: '9px', color: 'var(--ink-faint)', letterSpacing: '0.18em', textTransform: 'uppercase' as const }}>
                     Question {currentQuestion + 1} of {quizQuestions.length}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#2C2A27' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--ink-mid)' }}>
                     Score: {score}/{currentQuestion + (showResult ? 1 : 0)}
                   </span>
                 </div>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', color: '#1A1815', marginBottom: '16px' }}>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', color: 'var(--ink-strong)', marginBottom: '16px' }}>
                   {quizQuestions[currentQuestion].question}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '16px' }}>
@@ -549,13 +549,13 @@ export default function MedicationAbbreviationsPage() {
               </>
             ) : (
               <div style={{ textAlign: 'center' as const }}>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#1A1815', marginBottom: '8px' }}>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: 'var(--ink-strong)', marginBottom: '8px' }}>
                   {score}/{quizQuestions.length}
                 </p>
-                <p style={{ fontSize: '14px', color: '#5A5750', marginBottom: '16px', fontWeight: 300 }}>
+                <p style={{ fontSize: '14px', color: 'var(--ink-soft)', marginBottom: '16px', fontWeight: 300 }}>
                   {score >= 8 ? 'Excellent. These abbreviations are looking solid.' : score >= 5 ? 'Good effort. Review the ones you missed and you will be fine.' : 'Keep practising. Use the guide below and try again.'}
                 </p>
-                <button onClick={resetQuiz} style={{ background: 'transparent', color: '#2C2A27', border: '0.5px solid rgba(0,0,0,0.2)', padding: '8px 18px', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase' as const }}>
+                <button onClick={resetQuiz} style={{ background: 'transparent', color: 'var(--ink-mid)', border: '0.5px solid var(--hairline-firm)', padding: '8px 18px', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase' as const }}>
                   Try Again
                 </button>
               </div>
@@ -590,10 +590,10 @@ export default function MedicationAbbreviationsPage() {
                     <tr key={item.abbr}>
                       <td>{item.abbr}</td>
                       <td>{item.meaning}</td>
-                      {activeTab === 'frequency' && <td style={{ fontStyle: 'italic', color: '#999', fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>{item.latin || '—'}</td>}
+                      {activeTab === 'frequency' && <td style={{ fontStyle: 'italic', color: 'var(--ink-faint)', fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>{item.latin || '—'}</td>}
                       {(activeTab === 'frequency' || activeTab === 'routes') && <td style={{ fontSize: '11px' }}>{item.example || '—'}</td>}
                       {activeTab === 'units' && <td>{item.conversion || '—'}</td>}
-                      <td style={{ color: item.warning?.includes('SPECIALIST') || item.warning?.includes('NEVER') || item.note?.includes('NEVER') ? '#A32D2D' : '#555', fontWeight: item.warning?.includes('SPECIALIST') || item.note?.includes('NEVER') ? 400 : 300 }}>
+                      <td style={{ color: item.warning?.includes('SPECIALIST') || item.warning?.includes('NEVER') || item.note?.includes('NEVER') ? 'var(--red-600)' : '#555', fontWeight: item.warning?.includes('SPECIALIST') || item.note?.includes('NEVER') ? 400 : 300 }}>
                         {item.warning || item.note || '—'}
                       </td>
                     </tr>

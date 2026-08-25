@@ -59,7 +59,7 @@ export async function sendPipSummary(input: PipSubmission) {
           .map(
             (r) => `
           <tr>
-            <td style="padding:12px;border-bottom:1px solid rgba(0,0,0,0.08);vertical-align:top;">
+            <td style="padding:12px;border-bottom:1px solid var(--hairline-soft);vertical-align:top;">
               <strong>${escapeHtml(r.name)}</strong> — ${escapeHtml(r.label)}
               <div style="color:#8A8178;font-size:13px;">${escapeHtml(r.subtitle)}</div>
               ${r.note ? `<div style="color:#5A5750;margin-top:6px;white-space:pre-wrap;">${escapeHtml(r.note)}</div>` : ''}
@@ -71,7 +71,7 @@ export async function sendPipSummary(input: PipSubmission) {
       ${
         input.extra.trim()
           ? `<p style="margin:20px 0 4px;"><strong>Anything else:</strong></p>
-             <div style="white-space:pre-wrap;border:1px solid rgba(0,0,0,0.08);padding:16px;background:#FAFAF8;">${escapeHtml(input.extra.trim())}</div>`
+             <div style="white-space:pre-wrap;border:1px solid var(--hairline-soft);padding:16px;background:#FAFAF8;">${escapeHtml(input.extra.trim())}</div>`
           : ''
       }
     </div>

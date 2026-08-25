@@ -25,6 +25,9 @@ import {
   StreakChip,
   TickerNumber,
 } from '@/components/operator/fitness/dynamic-extras';
+import { OperatorChecklist } from '@/components/operator/fitness/OperatorChecklist';
+import { WeightProjectionCalculator } from '@/components/operator/fitness/WeightProjectionCalculator';
+import { OperatorNotes } from '@/components/operator/fitness/OperatorNotes';
 
 export default function DailyLogView({ v }: { v: DailyLogVals }) {
   return (
@@ -108,6 +111,11 @@ export default function DailyLogView({ v }: { v: DailyLogVals }) {
       </React.Fragment>))}
       </div>
       </div>
+      </div>
+      <OperatorChecklist />
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: '16px', marginBottom: '16px' }}>
+        <WeightProjectionCalculator currentWeightKg={parseFloat(v.heroWeight) || 75.0} />
+        <OperatorNotes />
       </div>
       {(v.targetsOpen) ? (<>
       <div data-cols-2 style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', padding: '22px 26px', marginBottom: '16px', background: '#FFFFFF', border: '0.5px solid rgba(26,24,21,0.12)', borderRadius: '12px' }}>

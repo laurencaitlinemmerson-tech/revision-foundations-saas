@@ -1510,7 +1510,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
       };
       case 'tip': return {
         bg: '#EAF1FA',
-        border: '#185FA5',
+        border: 'var(--blue-600)',
         color: '#1F4568',
         label: 'Tip',
       };

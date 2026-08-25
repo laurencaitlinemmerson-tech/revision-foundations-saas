@@ -9,13 +9,13 @@ import Footer from '@/components/Footer';
 const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const display = "'Playfair Display', Georgia, serif";
 
-const ink = '#1C1510';
-const inkMid = '#5A5750';
-const inkLight = '#8D887F';
-const cream = '#FAFAF8';
-const softLine = 'rgba(26, 24, 21, 0.08)';
-const accent = '#B76B4A';
-const sage = '#5E6D61';
+const ink = 'var(--ink-strong)';
+const inkMid = 'var(--ink-soft)';
+const inkLight = 'var(--ink-faint)';
+const cream = 'var(--surface-page)';
+const softLine = 'var(--hairline-soft)';
+const accent = 'var(--topic-anatomy-text)';
+const sage = 'var(--topic-professional-text)';
 
 const sectionLabel: CSSProperties = {
   fontFamily: serif,
@@ -80,25 +80,25 @@ const timelineEntries = [
     period: '2021',
     title: 'Graduated with a first class in photography',
     text: 'That training taught me to care about composition, clarity, and what a person actually notices first when they are looking at a page.',
-    color: '#185FA5',
+    color: 'var(--blue-600)',
   },
   {
     period: '2023',
     title: 'Completed a PgCert in medical illustration',
     text: 'I spent more time translating clinical information into visuals and wording that make sense quickly, especially when the subject matter is dense.',
-    color: '#185FA5',
+    color: 'var(--blue-600)',
   },
   {
     period: 'After that',
     title: 'Moved toward healthcare more directly',
     text: 'It became obvious that I did not just want to design around healthcare. I wanted to be part of it properly, which is what brought me back into training.',
-    color: '#185FA5',
+    color: 'var(--blue-600)',
   },
   {
     period: 'Now',
     title: 'Building The Nurse Lab alongside nursing study',
     text: 'The site is shaped while I am doing lectures, placement prep, OSCE practice, and the same last-minute topic refreshes that other students are dealing with too.',
-    color: '#185FA5',
+    color: 'var(--blue-600)',
   },
 ];
 
@@ -196,7 +196,7 @@ export default function AboutPage() {
                   border: `0.5px solid ${softLine}`,
                 }}
               >
-                <div style={{ aspectRatio: '4 / 5', position: 'relative', background: '#E9E1D9' }}>
+                <div style={{ aspectRatio: '4 / 5', position: 'relative', background: 'var(--surface-sunken)' }}>
                   <Image
                     src="/DSC00374.jpg"
                     alt="Lauren"
@@ -249,7 +249,7 @@ export default function AboutPage() {
             {/* Story */}
             <div>
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '20px' }}>
-                <div style={{ width: '3px', minHeight: '1.4rem', flexShrink: 0, marginTop: '4px', background: '#185FA5', borderRadius: '0' }} />
+                <div style={{ width: '3px', minHeight: '1.4rem', flexShrink: 0, marginTop: '4px', background: 'var(--blue-600)', borderRadius: '0' }} />
                 <div>
                   <p style={sectionLabel}>The route here</p>
                   <h2
@@ -333,7 +333,7 @@ export default function AboutPage() {
                         width: '8px',
                         height: '8px',
                         borderRadius: '50%',
-                        background: '#C8C4BE',
+                        background: 'var(--hairline-firm)',
                         border: `0.5px solid rgba(26,24,21,0.15)`,
                       }}
                     />
@@ -366,7 +366,7 @@ export default function AboutPage() {
 
             <div>
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '20px' }}>
-                <div style={{ width: '3px', minHeight: '1.4rem', flexShrink: 0, marginTop: '4px', background: '#0F6E56', borderRadius: '0' }} />
+                <div style={{ width: '3px', minHeight: '1.4rem', flexShrink: 0, marginTop: '4px', background: 'var(--teal-600)', borderRadius: '0' }} />
                 <div>
                   <p style={sectionLabel}>Why I made it</p>
                   <h2
@@ -404,7 +404,7 @@ export default function AboutPage() {
                 <div
                   key={item.title}
                   style={{
-                    background: '#fff',
+                    background: 'var(--surface-raised)',
                     padding: '20px 22px',
                     display: 'flex',
                     gap: '14px',
@@ -433,7 +433,7 @@ export default function AboutPage() {
 
             <div>
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '20px' }}>
-                <div style={{ width: '3px', minHeight: '1.4rem', flexShrink: 0, marginTop: '4px', background: '#854F0B', borderRadius: '0' }} />
+                <div style={{ width: '3px', minHeight: '1.4rem', flexShrink: 0, marginTop: '4px', background: 'var(--amber-600)', borderRadius: '0' }} />
                 <div>
                   <p style={sectionLabel}>A small note</p>
                   <h2
@@ -471,7 +471,7 @@ export default function AboutPage() {
             </div>
 
             <div style={{ display: 'grid', gap: '1px', background: softLine, border: `0.5px solid ${softLine}`, overflow: 'hidden', alignSelf: 'start' }}>
-              <div style={{ background: '#fff', padding: '20px 22px', borderBottom: `0.5px solid ${softLine}` }}>
+              <div style={{ background: 'var(--surface-raised)', padding: '20px 22px', borderBottom: `0.5px solid ${softLine}` }}>
                 <p style={{ ...sectionLabel, marginBottom: '12px' }}>What you can expect</p>
                 <div style={{ display: 'grid', gap: '10px' }}>
                   {supportNotes.map((item) => (
@@ -479,7 +479,7 @@ export default function AboutPage() {
                   ))}
                 </div>
               </div>
-              <div style={{ background: '#fff', padding: '20px 22px' }}>
+              <div style={{ background: 'var(--surface-raised)', padding: '20px 22px' }}>
                 <p style={{ ...sectionLabel, marginBottom: '10px' }}>A few lighter details</p>
                 <p style={{ ...body, fontSize: '13px', margin: 0, lineHeight: 1.9 }}>
                   {lighterDetails.join(' · ')}
