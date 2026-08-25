@@ -4,7 +4,7 @@ import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
   AMBER, CARD, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
-  PLUM, PLUM_FILL_FAINT, RULE, RULE_SOFT, SIDEBAR, SOFT, SPARK, TINT,
+  PLUM, PLUM_FILL, PLUM_FILL_FAINT, RULE, RULE_SOFT, SIDEBAR, SOFT, SPARK, TINT,
   TRACK, TRACK_PREV,
 } from './palette';
 import { BarSeries, Figure, LineSeries, Sparkline } from './charts';
@@ -318,7 +318,7 @@ function HistoryBrush({ history }: { history: NonNullable<TrainingVals['history'
  * a pattern and useless for answering "what did I do on the 14th". This is the
  * same information with the dates on it.
  */
-function Calendar({ cal }: { cal: TrainingVals['calendar'] }) {
+function Calendar({ cal, detail }: { cal: TrainingVals['calendar']; detail: TrainingVals['dayDetail'] }) {
   return (
     <div style={{ ...card, padding: CARD_PAD }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -353,17 +353,25 @@ function Calendar({ cal }: { cal: TrainingVals['calendar'] }) {
         {cal.cells.map((c) => c.pad ? (
           <div key={c.key} />
         ) : (
-          <div
+          <button
             key={c.key}
-            title={c.hasSession
-              ? `${c.date} — ${[c.strength && `${c.strength} strength`, c.cardio && `${c.cardio} cardio`, c.other && `${c.other} other`].filter(Boolean).join(', ')}`
-              : c.date}
+            type="button"
+            onClick={c.select}
+            disabled={c.future}
+            aria-pressed={c.selected}
+            aria-label={`${c.date}${c.hasSession ? ', has a session' : ''}`}
+            className={c.future ? undefined : 'hv-tab'}
             style={{
+              all: 'unset', boxSizing: 'border-box',
+              cursor: c.future ? 'default' : 'pointer',
               minHeight: 62, padding: '7px 8px',
-              background: c.tint,
-              border: c.isToday ? `1px solid ${PLUM}` : RULE_SOFT,
+              background: c.selected ? TINT : c.tint,
+              border: c.selected
+                ? `1px solid ${PLUM}`
+                : c.isToday ? `1px solid ${PINK}` : RULE_SOFT,
               opacity: c.future ? 0.4 : 1,
               display: 'flex', flexDirection: 'column', gap: 4,
+              transition: 'background 150ms',
             }}
           >
             <span style={{
@@ -393,7 +401,7 @@ function Calendar({ cal }: { cal: TrainingVals['calendar'] }) {
                 {c.weight}
               </span>
             )}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -404,8 +412,64 @@ function Calendar({ cal }: { cal: TrainingVals['calendar'] }) {
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: PINK }} />Cardio
         </span>
-        <span style={{ marginLeft: 'auto' }}>Small figure is that day&rsquo;s weigh-in</span>
+        <span style={{ marginLeft: 'auto' }}>Select a day to open it</span>
       </div>
+
+      {detail && (
+        <div style={{ marginTop: 24, paddingTop: 22, borderTop: RULE }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ ...display(20) }}>{detail.label}</div>
+            <button
+              type="button" onClick={detail.close} className="hv-tab"
+              style={{
+                all: 'unset', cursor: 'pointer', padding: '4px 11px', fontSize: 11.5,
+                color: SOFT, border: RULE, background: CARD,
+              }}
+            >
+              Close
+            </button>
+          </div>
+
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(112px, 1fr))',
+            gap: 0, marginTop: 18, borderTop: RULE_SOFT,
+          }}>
+            {detail.metrics.map((m) => (
+              <div key={m.label} style={{ padding: '14px 14px 14px 0' }}>
+                <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>
+                  {m.label}
+                </div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: INK, marginTop: 5 }}>
+                  {m.value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 14, paddingTop: 16, borderTop: RULE_SOFT }}>
+            {detail.empty ? (
+              <div style={{ fontSize: 12.5, color: MUTED, fontStyle: 'italic' }}>
+                No session logged on this day.
+              </div>
+            ) : detail.sessions.map((sn) => (
+              <div key={sn.key} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                gap: 14, padding: '11px 0', borderBottom: RULE_SOFT, flexWrap: 'wrap',
+              }}>
+                <span style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+                  <span style={{
+                    width: 6, height: 6, flexShrink: 0,
+                    background: sn.kind === 'Cardio' ? PINK : sn.kind === 'Other' ? MUTED : PLUM,
+                  }} />
+                  <span style={{ fontSize: 13, color: INK }}>{sn.name}</span>
+                  {sn.source && <span style={{ fontSize: 11, color: MUTED }}>{sn.source}</span>}
+                </span>
+                <span style={{ fontSize: 12, color: SOFT }}>{sn.detail}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -686,12 +750,45 @@ function Dashboard({ v }: { v: TrainingVals }) {
               ))}
             </div>
           </div>
-          <div style={{ padding: PANEL_PAD, background: TINT, display: 'flex', alignItems: 'center' }}>
-            <div style={{ width: '100%' }}>
-              <Ribbon ribbon={v.ribbon} />
+          <div style={{ padding: PANEL_PAD, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: TINT }}>
+            <div style={{ ...eyebrow, alignSelf: 'flex-start' }}>Six dimensions</div>
+            <svg
+              viewBox="0 0 420 360"
+              style={{ width: '100%', maxWidth: 420, marginTop: 8 }}
+              role="img"
+              aria-label={`Radar of six dimensions: ${v.dims.map((d) => `${d.label} ${d.score}`).join(', ')}`}
+            >
+              <g fill="none" stroke="rgba(34,28,36,0.09)" strokeWidth="0.5">
+                {v.radarRings.map((r, i) => <polygon key={i} points={r.points} />)}
+              </g>
+              <g stroke="rgba(34,28,36,0.07)" strokeWidth="0.5">
+                {v.radarSpokes.map((sp, i) => <line key={i} x1={sp.x1} y1={sp.y1} x2={sp.x2} y2={sp.y2} />)}
+              </g>
+              <polygon points={v.radarPrev} fill="none" stroke={PINK_LINE} strokeWidth="1" strokeDasharray="3 3" />
+              <polygon points={v.radarNow} fill={PLUM_FILL} stroke={PLUM} strokeWidth="1.25" />
+              <g>{v.radarDots.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="2.75" fill={PLUM} />)}</g>
+              <g fontFamily="Inter, sans-serif" fontSize="10.5" fill={SOFT}>
+                {v.radarLabels.map((l, i) => (
+                  <text key={i} x={l.x} y={l.y} textAnchor={l.anchor}>{l.label}</text>
+                ))}
+              </g>
+            </svg>
+            <div style={{ display: 'flex', gap: 20, fontSize: 11, color: MUTED, marginTop: 4 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ width: 16, height: 1.5, background: PLUM }} />This period
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ width: 16, height: 0, borderTop: `1px dashed ${PINK_LINE}` }} />Previous
+              </span>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* The ribbon gets its own width — six rows of twelve months were cramped
+          in a side panel, and the whole point is reading across them. */}
+      <section style={{ ...card, marginTop: GRID_GAP, padding: PANEL_PAD }}>
+        <Ribbon ribbon={v.ribbon} />
       </section>
 
       <div className="training-split-3" style={{ ...card, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', marginTop: GRID_GAP }}>
@@ -1467,7 +1564,7 @@ function Progress({ v }: { v: TrainingVals }) {
       )}
 
       <section style={{ marginTop: GRID_GAP }}>
-        <Calendar cal={v.calendar} />
+        <Calendar cal={v.calendar} detail={v.dayDetail} />
       </section>
 
       <section className="training-pair" style={{ marginTop: GRID_GAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP }}>
@@ -1530,55 +1627,93 @@ function Progress({ v }: { v: TrainingVals }) {
 
 function Goals({ v }: { v: TrainingVals }) {
   return (
-    <div style={{ marginTop: 44 }}>
-      <div className="training-pair" style={{ ...card, display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+    <div style={{ marginTop: 40 }}>
+      <div className="training-pair" style={{
+        display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: GRID_GAP,
+      }}>
         {v.goals.map((g) => (
-          <div key={g.key} style={{ padding: CARD_PAD, borderRight: RULE_SOFT, borderBottom: RULE_SOFT }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-              <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED }}>{g.dimension}</div>
-              <div style={{ fontSize: 11, color: g.statusColor }}>{g.status}</div>
+          <div key={g.key} style={{ ...card, padding: PANEL_PAD }}>
+            <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              {/* A ring rather than a bar: progress toward something has an end,
+                  and a ring shows how much of it is left as well as done. */}
+              <div style={{ position: 'relative', flexShrink: 0, width: 108, height: 108 }}>
+                <svg viewBox="0 0 108 108" style={{ width: 108, height: 108, transform: 'rotate(-90deg)' }} aria-hidden="true">
+                  <circle cx="54" cy="54" r={g.radius} fill="none" stroke={TRACK} strokeWidth="7" />
+                  <circle
+                    cx="54" cy="54" r={g.radius} fill="none"
+                    stroke={g.statusColor} strokeWidth="7" strokeLinecap="butt"
+                    strokeDasharray={g.dash}
+                    style={{ transition: 'stroke-dasharray 600ms cubic-bezier(0.4,0,0.2,1)' }}
+                  />
+                </svg>
+                <div style={{
+                  position: 'absolute', inset: 0, display: 'flex',
+                  flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: INK, lineHeight: 1 }}>
+                    {g.pct}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED }}>
+                    {g.dimension}
+                  </span>
+                  <span style={{
+                    fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase',
+                    color: g.statusColor, border: `0.5px solid ${g.statusColor}`,
+                    padding: '3px 9px', whiteSpace: 'nowrap',
+                  }}>
+                    {g.status}
+                  </span>
+                </div>
+
+                <h3 style={{ ...display(23), margin: '12px 0 0' }}>{g.title}</h3>
+
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 12 }}>
+                  <Figure value={g.current} style={{ fontFamily: 'var(--font-display)', fontSize: 30, color: INK }} />
+                  <span style={{ fontSize: 13, color: MUTED }}>of {g.target}</span>
+                </div>
+
+                <div style={{ fontSize: 11.5, color: MUTED, marginTop: 8 }}>{g.due}</div>
+              </div>
             </div>
-            <h3 style={{ ...display(23), margin: '12px 0 0' }}>{g.title}</h3>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 14 }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 34, color: INK }}>{g.current}</span>
-              <span style={{ fontSize: 13, color: MUTED }}>of {g.target}</span>
-            </div>
-            <div style={{ height: 5, background: TRACK, marginTop: 16 }}>
-              <div style={{ height: 5, width: g.pct, background: PLUM }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: SOFT, marginTop: 10 }}>
-              <span>{g.pct} complete</span><span>{g.due}</span>
-            </div>
-            <div style={{ fontSize: 12.5, color: SOFT, marginTop: 18, paddingTop: 18, borderTop: RULE_SOFT, lineHeight: 1.65 }}>{g.note}</div>
+
+            <p style={{
+              fontSize: 12.5, color: SOFT, margin: '22px 0 0', paddingTop: 18,
+              borderTop: RULE_SOFT, lineHeight: 1.7,
+            }}>
+              {g.note}
+            </p>
           </div>
         ))}
       </div>
+
       <button
-        type="button"
-        onClick={v.newGoal}
-        aria-expanded={v.goalDraft}
-        className="hv-solid"
+        type="button" onClick={v.newGoal} aria-expanded={v.goalDraft} className="hv-solid"
         style={{
-          all: 'unset', cursor: 'pointer', marginTop: GRID_GAP, padding: '12px 24px',
+          all: 'unset', cursor: 'pointer', marginTop: GRID_GAP, padding: '13px 26px',
           background: PLUM, color: '#FBF8FA', fontSize: 14, transition: 'background 200ms',
         }}
       >
         New goal →
       </button>
+
       {v.goalDraft && (
-        <div style={{ marginTop: 20, border: RULE, background: TINT, padding: CARD_PAD, maxWidth: 520 }}>
+        <div style={{ marginTop: 20, border: RULE, background: TINT, padding: CARD_PAD, maxWidth: 560 }}>
           <Eyebrow>New goal</Eyebrow>
-          <p style={{ fontSize: 13.5, color: SOFT, margin: '12px 0 0', lineHeight: 1.6 }}>
-            The four goals above are the targets set in Settings, measured against what you have
-            logged — nothing is entered twice. Custom goals with their own target and date are not
-            stored yet; change a target in Settings to move one of these.
+          <p style={{ fontSize: 13.5, color: SOFT, margin: '12px 0 0', lineHeight: 1.7 }}>
+            The four above are the targets set in Settings, measured against what you have logged —
+            nothing is entered twice. Custom goals with their own target and date are not stored yet;
+            change a target in Settings to move one of these.
           </p>
           <button
-            type="button"
-            onClick={v.newGoal}
+            type="button" onClick={v.newGoal}
             style={{
               all: 'unset', cursor: 'pointer', marginTop: 16, fontSize: 13,
-              color: INK, borderBottom: '0.5px solid rgba(0,0,0,0.24)',
+              color: INK, borderBottom: `0.5px solid ${MUTED}`,
             }}
           >
             Close
@@ -1840,20 +1975,75 @@ function Recovery({ v }: { v: TrainingVals }) {
 
 /* ── Insights ────────────────────────────────────────────────────────────── */
 
+/** A subject label, outlined in the subject's own colour. */
+function Tag({ label, colour }: { label: string; colour: string }) {
+  return (
+    <span style={{
+      fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
+      color: colour, border: `0.5px solid ${colour}`, padding: '4px 10px',
+      whiteSpace: 'nowrap',
+    }}>
+      {label}
+    </span>
+  );
+}
+
 function Insights({ v }: { v: TrainingVals }) {
   if (!v.insights.length) {
     return <Empty title="No observations yet." note="Insights appear once a source has enough logged days to compare." />;
   }
+
+  // The first observation leads at full width. Ranking them and then rendering
+  // them all identically wastes the ranking.
+  const [lead, ...rest] = v.insights;
+
   return (
-    <div className="training-pair" style={{ ...card, marginTop: 44, display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-      {v.insights.map((i) => (
-        <div key={i.key} style={{ padding: 36, borderRight: RULE_SOFT, borderBottom: RULE_SOFT }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: i.tagColor }}>{i.tag}</div>
-          <h3 style={{ ...display(23), margin: '12px 0 0' }}>{i.title}</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.75, color: SOFT, margin: '14px 0 0', textWrap: 'pretty' }}>{i.body}</p>
-          <div style={{ fontSize: 11.5, color: MUTED, marginTop: 16, paddingTop: 14, borderTop: RULE_SOFT }}>{i.source}</div>
+    <div style={{ marginTop: 40 }}>
+      <article style={{
+        ...card, padding: PANEL_PAD,
+        // A hairline in the tag's colour, so the card is tinted by its subject
+        // without a full coloured panel shouting across the page.
+        borderLeft: `2px solid ${lead.tagColor}`,
+      }}>
+        <Tag label={lead.tag} colour={lead.tagColor} />
+        <h2 style={{ ...display(32), margin: '18px 0 0', maxWidth: '24ch' }}>{lead.title}</h2>
+        <p style={{
+          fontSize: 16, lineHeight: 1.75, color: SOFT, margin: '16px 0 0',
+          maxWidth: '62ch', textWrap: 'pretty',
+        }}>
+          {lead.body}
+        </p>
+        <div style={{
+          fontSize: 11.5, color: MUTED, marginTop: 22, paddingTop: 16, borderTop: RULE_SOFT,
+        }}>
+          {lead.source}
         </div>
-      ))}
+      </article>
+
+      <div className="training-pair" style={{
+        display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gap: GRID_GAP, marginTop: GRID_GAP,
+      }}>
+        {rest.map((i) => (
+          <article key={i.key} style={{
+            ...card, padding: CARD_PAD, borderLeft: `2px solid ${i.tagColor}`,
+            display: 'flex', flexDirection: 'column',
+          }}>
+            <Tag label={i.tag} colour={i.tagColor} />
+            <h3 style={{ ...display(21), margin: '16px 0 0' }}>{i.title}</h3>
+            <p style={{
+              fontSize: 14, lineHeight: 1.75, color: SOFT, margin: '12px 0 0', textWrap: 'pretty',
+            }}>
+              {i.body}
+            </p>
+            <div style={{
+              fontSize: 11, color: MUTED, marginTop: 'auto', paddingTop: 18,
+            }}>
+              {i.source}
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

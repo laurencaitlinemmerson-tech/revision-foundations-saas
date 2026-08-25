@@ -64,6 +64,8 @@ export type TrainingState = {
   focus: string | null;
   /** Which month the calendar is showing, as YYYY-MM. */
   calendarMonth: string | null;
+  /** A day opened from the calendar, as YYYY-MM-DD. */
+  selectedDay: string | null;
   /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
 };
@@ -89,6 +91,7 @@ export const INITIAL_STATE: TrainingState = {
   openDim: null,
   focus: null,
   calendarMonth: null,
+  selectedDay: null,
   dayOffset: 0,
 };
 
@@ -1248,8 +1251,15 @@ export function deriveVals(
   ) => {
     const pct = current === null ? 0 : Math.min(100, (current / target) * 100);
     const status = current === null ? 'No data' : pct >= 95 ? 'On track' : pct >= 75 ? 'Close' : 'Behind';
+    // An arc reads as progress toward something in a way a bar does not, and a
+    // ring has a natural end where a bar just stops.
+    const R = 46;
+    const circumference = 2 * Math.PI * R;
     return {
       key: title,
+      radius: R,
+      circumference: circumference.toFixed(1),
+      dash: `${((pct / 100) * circumference).toFixed(1)} ${circumference.toFixed(1)}`,
       dimension,
       title,
       current: current === null ? DASH : fmtV(current),
@@ -1506,6 +1516,65 @@ export function deriveVals(
 
   /* chrome ---------------------------------------------------------------- */
 
+  /* the opened day -------------------------------------------------------- */
+
+  const dayDetail = (() => {
+    const date = st.selectedDay;
+    if (!date) return null;
+
+    const health = src.days.find((d) => d.date.slice(0, 10) === date) ?? null;
+    const sessions = src.workouts.filter((w) => w.startedAt.slice(0, 10) === date);
+    const lifts = src.lifts.filter((l) => l.performedOn.slice(0, 10) === date);
+    const weigh = weighAll.find((r) => r.date.slice(0, 10) === date && r.weight > 0) ?? null;
+
+    const active = health?.activity.activeEnergyKcal ?? null;
+    const basal = health?.activity.basalEnergyKcal ?? null;
+    const inKcal = health?.nutrition.dietaryEnergyKcal ?? null;
+    const outKcal = active !== null && basal !== null ? Math.round(active + basal) : null;
+
+    const metrics = [
+      { label: 'Steps', value: health?.activity.steps == null ? DASH : nf(health.activity.steps) },
+      { label: 'Exercise', value: health?.activity.exerciseMinutes == null ? DASH : `${nf(health.activity.exerciseMinutes)} min` },
+      { label: 'Calories in', value: inKcal == null ? DASH : nf(Math.round(inKcal)) },
+      { label: 'Calories out', value: outKcal == null ? DASH : nf(outKcal) },
+      { label: 'Protein', value: health?.nutrition.proteinG == null ? DASH : `${nf(health.nutrition.proteinG)} g` },
+      { label: 'Sleep', value: health?.sleep.totalMin ? fmtHours(health.sleep.totalMin / 60) : DASH },
+      { label: 'Resting HR', value: health?.heart.restingHr == null ? DASH : `${nf(health.heart.restingHr)} bpm` },
+      { label: 'Weight', value: weigh ? `${nf(weigh.weight, 1)} kg` : DASH },
+    ];
+
+    return {
+      date,
+      label: new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+      }),
+      close: () => set({ selectedDay: null }),
+      metrics,
+      sessions: [
+        ...sessions.map((w) => ({
+          key: w.id,
+          name: prettyType(w.type),
+          kind: workoutKindOf(w) === 'strength' ? 'Strength' : workoutKindOf(w) === 'cardio' ? 'Cardio' : 'Other',
+          detail: [
+            w.durationMin ? fmtMinutes(w.durationMin) : null,
+            w.distanceKm ? `${nf(w.distanceKm, 1)} km` : null,
+            w.energyKcal ? `${nf(Math.round(w.energyKcal))} kcal` : null,
+            w.avgHr ? `${nf(Math.round(w.avgHr))} bpm avg` : null,
+          ].filter(Boolean).join('  ·  ') || 'No detail recorded',
+          source: w.source ?? null,
+        })),
+        ...lifts.map((l) => ({
+          key: l.id,
+          name: l.exercise,
+          kind: 'Lift',
+          detail: `${setsLabel(l)}  ·  ${nf(Math.round(l.volumeKg))} kg volume`,
+          source: null,
+        })),
+      ],
+      empty: !sessions.length && !lifts.length,
+    };
+  })();
+
   /* the calendar ---------------------------------------------------------- */
 
   const calendar = (() => {
@@ -1542,6 +1611,7 @@ export function deriveVals(
         key: `pad-${i}`, pad: true as const, day: 0, date: '', future: false, isToday: false,
         strength: 0, cardio: 0, other: 0, hasSession: false,
         weight: null as string | null, steps: null as string | null, tint: 'transparent',
+        selected: false, select: () => {},
       })),
       ...Array.from({ length: daysInMonth }, (_, i) => {
         const date = `${anchor}-${String(i + 1).padStart(2, '0')}`;
@@ -1562,6 +1632,8 @@ export function deriveVals(
           hasSession: Boolean(s),
           weight: weight === null ? null : `${nf(weight, 1)}`,
           steps: steps ? nf(steps) : null,
+          selected: st.selectedDay === date,
+          select: () => set({ selectedDay: st.selectedDay === date ? null : date }),
           // A quiet wash behind a day that carried work, so the month reads at a glance.
           tint: future ? 'transparent'
             : s ? (s.strength ? 'rgba(95,68,114,0.10)' : 'rgba(192,108,132,0.10)')
@@ -1869,6 +1941,7 @@ export function deriveVals(
     /* the ribbon */
     ribbon,
     calendar,
+    dayDetail,
 
     /* body composition */
     bodyAnalysis,
