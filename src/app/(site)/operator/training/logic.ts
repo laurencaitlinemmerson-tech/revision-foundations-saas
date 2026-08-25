@@ -10,6 +10,7 @@ import {
 } from './palette';
 import { TARGETS, proteinTargetG } from './targets';
 import { PERIOD_IDS, periodWindows, type PeriodId } from './periods';
+import { historyInsights } from './historyInsights';
 import { workoutKindOf } from './workoutKind';
 import { deriveHeadToHead } from './headToHead';
 import type { PeerData } from './peerData';
@@ -1288,10 +1289,14 @@ export function deriveVals(
     });
   }
 
+  // What only the history can say: how this month ranks, where the weight is
+  // heading, what the training week actually looks like.
+  insights.push(...historyInsights(src, nowWin));
+
   // Dimensions with too little behind them get named rather than left blank —
   // an empty panel reads as a bad score instead of an absent one.
   for (const d of DIMENSIONS) {
-    if (insights.length >= 6) break;
+    if (insights.length >= 12) break;
     const row = rows.find((r) => r.label === d);
     if (row?.score !== null) continue;
     insights.push({
@@ -1582,7 +1587,7 @@ export function deriveVals(
     newGoal: () => set({ goalDraft: !st.goalDraft }),
 
     /* insights + settings */
-    insights: insights.slice(0, 6),
+    insights: insights.slice(0, 12),
     settings,
 
     /* head to head */
