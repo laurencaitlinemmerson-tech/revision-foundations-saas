@@ -13,6 +13,7 @@ import { PERIOD_IDS, periodWindows, type PeriodId } from './periods';
 import { historyInsights } from './historyInsights';
 import { buildEnergy, energyDays } from './energy';
 import { buildActivities } from './activities';
+import { buildBodyAnalysis } from './bodyAnalysis';
 import { workoutKindOf } from './workoutKind';
 import { deriveHeadToHead } from './headToHead';
 import type { PeerData } from './peerData';
@@ -58,6 +59,8 @@ export type TrainingState = {
   goalDraft: boolean;
   /** Which dimension has been opened up to show its parts. */
   openDim: string | null;
+  /** Which body-composition series the Progress chart is showing. */
+  bodySeries: string;
   /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
 };
@@ -81,6 +84,7 @@ export const INITIAL_STATE: TrainingState = {
   group: 'All',
   goalDraft: false,
   openDim: null,
+  bodySeries: 'weight',
   dayOffset: 0,
 };
 
@@ -1408,6 +1412,16 @@ export function deriveVals(
     spanDays,
   );
 
+  /* body composition ------------------------------------------------------ */
+
+  const bodyAnalysis = buildBodyAnalysis(
+    inRangeWeigh.length >= 2 ? inRangeWeigh : weighAll.slice(-90),
+    inRangeWeigh.length >= 2 ? rangeLabel : `the last ${Math.min(90, weighAll.length)} weigh-ins`,
+  );
+  const bodySeriesTab = bodyAnalysis.series.find((x) => x.key === st.bodySeries)
+    ?? bodyAnalysis.series[0]
+    ?? null;
+
   /* activities ------------------------------------------------------------ */
 
   const activityRows = buildActivities(src.workouts, nowStats.workouts, prevStats.workouts, spanDays);
@@ -1516,7 +1530,10 @@ export function deriveVals(
     Exercises: src.lifts.length
       ? ['Exercises', 'Every movement you have logged, with its best lift and estimated one-rep max.']
       : ['Activities', `Every kind of session you have done — ${nf(src.workouts.length)} on record, with how often, how far and how long.`],
-    Progress: ['Progress', 'Strength, cardio and the events that moved the score.'],
+    Progress: [
+      'Progress',
+      'What the weight change was actually made of — fat, lean tissue, or water.',
+    ],
     Goals: ['Goals', 'Four targets from Settings. Current values come from logged sessions.'],
     Nutrition: ['Nutrition', 'Targets are guides. Consistency across the week is what counts.'],
     Recovery: ['Recovery', 'Sleep, heart rate and variability — what the training has to fit around.'],
@@ -1688,6 +1705,15 @@ export function deriveVals(
     /* insights + settings */
     insights: insights.slice(0, 12),
     settings,
+
+    /* body composition */
+    bodyAnalysis,
+    bodySeriesTab,
+    bodySeriesTabs: bodyAnalysis.series.map((x) => ({
+      label: x.label,
+      go: () => set({ bodySeries: x.key }),
+      active: (bodySeriesTab?.key ?? '') === x.key,
+    })),
 
     /* energy */
     energy: {

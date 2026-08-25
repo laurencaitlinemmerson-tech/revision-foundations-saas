@@ -1129,51 +1129,105 @@ function Exercises({ v }: { v: TrainingVals }) {
 /* ── Progress ────────────────────────────────────────────────────────────── */
 
 function Progress({ v }: { v: TrainingVals }) {
+  const b = v.bodyAnalysis;
+  const tab = v.bodySeriesTab;
+
   return (
-    <div style={{ marginTop: 44 }}>
-      <section style={{ ...card, padding: CARD_PAD }}>
-        {v.exSel ? (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: GRID_GAP, flexWrap: 'wrap' }}>
-              <div>
-                <Eyebrow>Strength progression</Eyebrow>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-                  <span style={display(44)}>{v.exSel.pr}</span>
-                  <span style={{ fontSize: 13, color: v.exSel.trendColor, paddingBottom: 7 }}>{v.exSel.trend}</span>
-                </div>
-                <div style={{ fontSize: 13, color: SOFT, marginTop: 8 }}>
-                  {v.exSel.name} — previous best {v.exSel.prev}, estimated 1RM {v.exSel.e1rm}, {v.exSel.sessions} session{v.exSel.sessions === 1 ? '' : 's'} in range
-                </div>
+    <div style={{ marginTop: 40 }}>
+      {/* Body composition replaces lift progression: weight alone conflates fat,
+          lean tissue and water, and the split is the part worth knowing. */}
+      <section style={{ ...card, padding: PANEL_PAD }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: GRID_GAP, flexWrap: 'wrap' }}>
+          <div style={{ maxWidth: '52ch' }}>
+            <Eyebrow>Body composition</Eyebrow>
+            {b.verdict
+              ? <h2 style={{ ...display(30, b.verdictColor), margin: '14px 0 0' }}>{b.verdict}</h2>
+              : <h2 style={{ ...display(30), margin: '14px 0 0' }}>Not enough weigh-ins yet</h2>}
+            {b.detail && (
+              <p style={{ fontSize: 14.5, lineHeight: 1.75, color: SOFT, margin: '14px 0 0', textWrap: 'pretty' }}>
+                {b.detail}
+              </p>
+            )}
+          </div>
+          {b.fatShare !== null && (
+            <div style={{ minWidth: 210 }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
+                {b.fatShareLabel}
               </div>
-              <select
-                value={v.exKey}
-                onChange={(e) => v.onExercise(e.target.value)}
-                aria-label="Choose an exercise"
-                style={{
-                  fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: 13, padding: '10px 12px',
-                  border: RULE, background: CARD, color: INK, outline: 'none',
-                }}
-              >
-                {v.exercises.map((e) => <option key={e.key} value={e.name}>{e.name}</option>)}
-              </select>
+              <div style={{ display: 'flex', height: 10, marginTop: 12, background: TRACK, overflow: 'hidden' }}>
+                <div style={{ width: `${b.fatShare}%`, background: PINK, transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)' }} />
+                <div style={{ flex: 1, background: '#8E6FA3' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 8 }}>
+                <span>Fat</span><span>Lean</span>
+              </div>
             </div>
-            <svg viewBox="0 0 900 220" preserveAspectRatio="none" style={{ width: '100%', height: 220, marginTop: 22 }} role="img" aria-label="Strength progression for the selected exercise">
-              <g stroke="rgba(0,0,0,0.06)" strokeWidth="0.5">
-                <line x1="0" y1="30" x2="900" y2="30" />
-                <line x1="0" y1="95" x2="900" y2="95" />
-                <line x1="0" y1="160" x2="900" y2="160" />
-              </g>
-              {v.exSel.area && <path d={v.exSel.area} fill={PLUM_FILL_FAINT} />}
-              {v.exSel.path && <path d={v.exSel.path} fill="none" stroke={PLUM} strokeWidth="1.5" />}
-            </svg>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 8 }}>
-              <span>{v.exSel.span}</span><span>Most recent</span>
-            </div>
-          </>
-        ) : (
-          <Empty title="No lifts logged yet." note="Progression needs at least one recorded set." />
+          )}
+        </div>
+
+        {b.rows.length > 0 && (
+          <div className="table-scroll" style={{ overflowX: 'auto', marginTop: 32 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
+              <thead>
+                <tr>
+                  <th style={{ ...th(), paddingLeft: 0 }}>Measure</th>
+                  <th style={th('right')}>Start</th>
+                  <th style={th('right')}>Now</th>
+                  <th style={th('right')}>Change</th>
+                  <th style={{ ...th(), paddingRight: 0 }}>What it is</th>
+                </tr>
+              </thead>
+              <tbody>
+                {b.rows.map((r) => (
+                  <tr key={r.label}>
+                    <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: INK }}>{r.label}</td>
+                    <td style={{ ...td, textAlign: 'right', color: MUTED }}>{r.from}</td>
+                    <td style={{ ...td, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{r.to}</td>
+                    <td style={{ ...td, textAlign: 'right', color: r.color }}>{r.change}</td>
+                    <td style={{ ...td, paddingRight: 0, fontSize: 12, color: SOFT }}>{r.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
+
+      {tab ? (
+        <section style={{ ...card, padding: CARD_PAD, marginTop: GRID_GAP }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap' }}>
+            <div>
+              <Eyebrow>{tab.label}</Eyebrow>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 12 }}>
+                <Figure value={tab.latest} style={display(40, tab.color)} />
+                <span style={{ fontSize: 13, color: tab.changeColor, paddingBottom: 6 }}>{tab.change}</span>
+              </div>
+              <div style={{ fontSize: 12.5, color: SOFT, marginTop: 8 }}>
+                {tab.rate} · low {tab.lo} · high {tab.hi} · {tab.points_n} readings
+              </div>
+            </div>
+            <Segmented items={v.bodySeriesTabs} size="sm" />
+          </div>
+
+          <div style={{ marginTop: 22 }}>
+            <LineSeries
+              marks={tab.points} path={tab.path} area={tab.area}
+              width={680} height={150} stroke={tab.color} fill={PLUM_FILL_FAINT}
+              gridY={[24, 75, 126]}
+              hint={`${tab.label} across ${b.spanLabel} — hover to read one`}
+            />
+          </div>
+
+          <p style={{ fontSize: 12, color: MUTED, marginTop: 14, fontStyle: 'italic', lineHeight: 1.7 }}>
+            Fitted trend accounts for {tab.fit} of the movement. Points are spaced by date, so a gap in
+            weighing shows as a gap rather than being smoothed away.
+          </p>
+        </section>
+      ) : (
+        <section style={{ ...card, padding: PANEL_PAD, marginTop: GRID_GAP }}>
+          <Empty title="Nothing to plot yet." note={b.emptyNote || 'Weigh in a few times and the trends fill in.'} />
+        </section>
+      )}
 
       <section className="training-pair" style={{ marginTop: GRID_GAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP }}>
         <div style={{ ...card, padding: CARD_PAD }}>
@@ -1196,7 +1250,7 @@ function Progress({ v }: { v: TrainingVals }) {
             <div>
               <Eyebrow>Cardio fitness</Eyebrow>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-                <span style={display(40)}>{v.cardioValue}</span>
+                <Figure value={v.cardioValue} style={display(40)} />
                 <span style={{ fontSize: 13, color: MUTED, paddingBottom: 6 }}>{v.cardioUnit}</span>
               </div>
               <div style={{ fontSize: 13, color: v.cardioTrendColor, marginTop: 8 }}>{v.cardioTrend}</div>
@@ -1204,10 +1258,7 @@ function Progress({ v }: { v: TrainingVals }) {
             <div style={{ maxWidth: 190 }}><Segmented items={v.cardioTabs} size="sm" /></div>
           </div>
           <div style={{ marginTop: 20 }}>
-            <BarSeries
-              bars={v.cardioBars} width={420} height={150}
-              hint="Cardio by week — hover to read one"
-            />
+            <BarSeries bars={v.cardioBars} width={420} height={150} hint="Cardio by week — hover to read one" />
           </div>
           <div style={{ fontSize: 12, color: SOFT, marginTop: 12 }}>
             VO₂ max is estimated by your watch from pace and heart rate, not measured in a lab.
