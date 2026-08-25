@@ -311,6 +311,105 @@ function HistoryBrush({ history }: { history: NonNullable<TrainingVals['history'
   );
 }
 
+/**
+ * A month at a time, the way a calendar is actually read.
+ *
+ * The heatmap shows twelve weeks as an abstract grid, which is good for spotting
+ * a pattern and useless for answering "what did I do on the 14th". This is the
+ * same information with the dates on it.
+ */
+function Calendar({ cal }: { cal: TrainingVals['calendar'] }) {
+  return (
+    <div style={{ ...card, padding: CARD_PAD }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <div>
+          <Eyebrow>Calendar</Eyebrow>
+          <div style={{ ...display(22), marginTop: 8 }}>{cal.monthLabel}</div>
+          <div style={{ fontSize: 11.5, color: MUTED, marginTop: 5 }}>{cal.summary}</div>
+        </div>
+        <div style={{ display: 'flex', border: RULE, background: CARD }}>
+          <button type="button" onClick={cal.prev} aria-label="Previous month" className="hv-tab"
+            style={{ all: 'unset', cursor: 'pointer', padding: '8px 15px', fontSize: 15, color: SOFT }}>‹</button>
+          <button type="button" onClick={cal.next} aria-label="Next month" disabled={!cal.canNext}
+            className={cal.canNext ? 'hv-tab' : undefined}
+            style={{
+              all: 'unset', cursor: cal.canNext ? 'pointer' : 'default', padding: '8px 15px',
+              fontSize: 15, color: cal.canNext ? SOFT : 'rgba(34,28,36,0.18)',
+              borderLeft: RULE,
+            }}>›</button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, marginTop: 22 }}>
+        {cal.dayNames.map((d) => (
+          <div key={d} style={{
+            fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
+            color: MUTED, paddingBottom: 8, textAlign: 'center',
+          }}>
+            {d}
+          </div>
+        ))}
+
+        {cal.cells.map((c) => c.pad ? (
+          <div key={c.key} />
+        ) : (
+          <div
+            key={c.key}
+            title={c.hasSession
+              ? `${c.date} — ${[c.strength && `${c.strength} strength`, c.cardio && `${c.cardio} cardio`, c.other && `${c.other} other`].filter(Boolean).join(', ')}`
+              : c.date}
+            style={{
+              minHeight: 62, padding: '7px 8px',
+              background: c.tint,
+              border: c.isToday ? `1px solid ${PLUM}` : RULE_SOFT,
+              opacity: c.future ? 0.4 : 1,
+              display: 'flex', flexDirection: 'column', gap: 4,
+            }}
+          >
+            <span style={{
+              fontSize: 11, color: c.isToday ? PLUM : c.hasSession ? INK : MUTED,
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              {c.day}
+            </span>
+
+            {/* One dot per session, coloured by what kind it was. */}
+            {c.hasSession && (
+              <span style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                {Array.from({ length: Math.min(3, c.strength) }, (_, i) => (
+                  <span key={`s${i}`} style={{ width: 5, height: 5, borderRadius: '50%', background: PLUM }} />
+                ))}
+                {Array.from({ length: Math.min(3, c.cardio) }, (_, i) => (
+                  <span key={`c${i}`} style={{ width: 5, height: 5, borderRadius: '50%', background: PINK }} />
+                ))}
+                {Array.from({ length: Math.min(2, c.other) }, (_, i) => (
+                  <span key={`o${i}`} style={{ width: 5, height: 5, borderRadius: '50%', background: MUTED }} />
+                ))}
+              </span>
+            )}
+
+            {c.weight && (
+              <span style={{ fontSize: 10, color: SOFT, marginTop: 'auto', fontVariantNumeric: 'tabular-nums' }}>
+                {c.weight}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 18, marginTop: 16, fontSize: 11, color: MUTED, flexWrap: 'wrap' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: PLUM }} />Strength
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: PINK }} />Cardio
+        </span>
+        <span style={{ marginLeft: 'auto' }}>Small figure is that day&rsquo;s weigh-in</span>
+      </div>
+    </div>
+  );
+}
+
 function Empty({ title, note }: { title: string; note: string }) {
   return (
     <div style={{ padding: '56px 0', textAlign: 'center' }}>
@@ -465,7 +564,6 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
             {v.screen === 'Dashboard' && <Dashboard v={v} />}
             {v.screen === 'Head to head' && <HeadToHead v={v} />}
             {v.screen === 'Workouts' && <Workouts v={v} />}
-            {v.screen === 'Exercises' && <Exercises v={v} />}
             {v.screen === 'Progress' && <Progress v={v} />}
             {v.screen === 'Goals' && <Goals v={v} />}
             {v.screen === 'Nutrition' && <Nutrition v={v} />}
@@ -1110,10 +1208,18 @@ function HeadToHead({ v }: { v: TrainingVals }) {
 
 function Workouts({ v }: { v: TrainingVals }) {
   if (!v.workouts.length) {
-    return <Empty title="No sessions logged yet." note="Lifts you log and workouts Apple Health syncs both land here." />;
+    return (
+      <div style={{ marginTop: 40 }}>
+        <ActivityStrip v={v} />
+        <Empty title="No sessions in this window." note="Lifts you log and workouts Apple Health syncs both land here." />
+      </div>
+    );
   }
   return (
-    <div className="training-pair" style={{ marginTop: 44, display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 32, alignItems: 'start' }}>
+    <div style={{ marginTop: 40 }}>
+      <ActivityStrip v={v} />
+
+      <div className="training-pair" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 32, alignItems: 'start', marginTop: SECTION_GAP }}>
       <div>
         <div style={{ ...eyebrow, paddingBottom: 12, borderBottom: RULE }}>{v.workoutsHeading}</div>
         {v.workouts.map((w) => (
@@ -1178,148 +1284,72 @@ function Workouts({ v }: { v: TrainingVals }) {
           <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '16px 0 0' }}>{v.sel.note}</p>
         </div>
       )}
+      </div>
     </div>
   );
 }
 
 /* ── Exercises ───────────────────────────────────────────────────────────── */
 
-function Exercises({ v }: { v: TrainingVals }) {
-  // The lift log stays empty because a coaching app holds the sets, but 1,500
-  // workouts did sync — so this asks the same question of activity types.
-  const useLifts = v.exercises.length > 0;
-
-  if (!useLifts && !v.activities.length) {
-    return <Empty title="Nothing logged yet." note="Synced workouts and logged lifts both build this table." />;
-  }
-
-  if (useLifts) {
-    const heads: Array<[string, 'left' | 'right']> = [
-      ['Exercise', 'left'], ['Muscle group', 'left'], ['Equipment', 'left'],
-      ['PR', 'right'], ['Est. 1RM', 'right'], ['Volume in range', 'right'],
-      ['Trend', 'right'], ['History', 'right'],
-    ];
-    return (
-      <div style={{ marginTop: 40 }}>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          <input
-            type="text" value={v.query} onChange={(e) => v.onQuery(e.target.value)}
-            placeholder="Search exercises" aria-label="Search exercises"
-            style={{
-              fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: 14, padding: '11px 14px',
-              border: RULE, background: CARD, color: INK, width: 260, outline: 'none',
-            }}
-          />
-          <Segmented items={v.groups} />
-          <span style={{ fontSize: 12, color: MUTED, marginLeft: 'auto' }}>{v.exerciseCount}</span>
-        </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: GRID_GAP, minWidth: 780 }}>
-            <thead>
-              <tr>
-                {heads.map(([label, align], i) => (
-                  <th key={label} style={{ ...th(align), paddingLeft: i === 0 ? 0 : 12, paddingRight: i === heads.length - 1 ? 0 : 12 }}>{label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {v.exercisesFiltered.map((e) => (
-                <tr key={e.key} className="hv-cell" style={{ background: CARD }}>
-                  <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: INK }}>{e.name}</td>
-                  <td style={{ ...td, fontSize: 12.5 }}>{e.group}</td>
-                  <td style={{ ...td, fontSize: 12.5 }}>{e.equipment}</td>
-                  <td style={{ ...td, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{e.pr}</td>
-                  <td style={{ ...td, textAlign: 'right' }}>{e.e1rm}</td>
-                  <td style={{ ...td, textAlign: 'right' }}>{e.volume}</td>
-                  <td style={{ ...td, textAlign: 'right', color: e.trendColor }}>{e.trend}</td>
-                  <td style={{ ...td, padding: `${CELL_Y}px 0 ${CELL_Y}px 12px`, width: 104 }}>
-                    <svg viewBox="0 0 100 26" preserveAspectRatio="none" style={{ width: 100, height: 26, display: 'block' }} aria-hidden="true">
-                      {e.spark && <path d={e.spark} fill="none" stroke={SPARK} strokeWidth="1.25" />}
-                    </svg>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {v.noExercises && (
-          <div style={{ borderBottom: RULE_SOFT }}>
-            <Empty title="No exercises match that search." note="Try a muscle group, or clear the filters." />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  const heads: Array<[string, 'left' | 'right']> = [
-    ['Activity', 'left'], ['Kind', 'left'], ['Sessions', 'right'], ['All time', 'right'],
-    ['Time', 'right'], ['Distance', 'right'], ['Best', 'right'], ['Best pace', 'right'],
-    ['Last', 'right'], ['Trend', 'right'], ['History', 'right'],
-  ];
-  const q = v.query.trim().toLowerCase();
-  const shown = v.activities.filter((a) => !q || a.name.toLowerCase().includes(q) || a.kind.toLowerCase().includes(q));
+/**
+ * The kinds of training, as a light strip rather than an eleven-column table.
+ *
+ * Selecting one filters every screen. The table this replaces carried the same
+ * figures but read as a wall — most of its columns were empty for most rows,
+ * because a walk has no pace worth showing and a gym session has no distance.
+ */
+function ActivityStrip({ v }: { v: TrainingVals }) {
+  if (!v.activities.length) return null;
 
   return (
-    <div style={{ marginTop: 40 }}>
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-        <input
-          type="text" value={v.query} onChange={(e) => v.onQuery(e.target.value)}
-          placeholder="Search activities" aria-label="Search activities"
-          style={{
-            fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: 14, padding: '11px 14px',
-            border: RULE, background: CARD, color: INK, width: 260, outline: 'none',
-          }}
-        />
-        <span style={{ fontSize: 12, color: MUTED, marginLeft: 'auto' }}>{v.activityCount}</span>
+    <div style={{ marginTop: 4 }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+        gap: 12, paddingBottom: 12, borderBottom: RULE, flexWrap: 'wrap',
+      }}>
+        <Eyebrow>Kinds of training</Eyebrow>
+        <span style={{ fontSize: 11.5, color: MUTED }}>
+          {v.focus ? 'Selected — click again to clear' : 'Select one to filter every screen'}
+        </span>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: GRID_GAP, minWidth: 900 }}>
-          <thead>
-            <tr>
-              {heads.map(([label, align], i) => (
-                <th key={label} style={{ ...th(align), paddingLeft: i === 0 ? 0 : 12, paddingRight: i === heads.length - 1 ? 0 : 12 }}>{label}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((a) => (
-              <tr
-                key={a.key}
-                className="hv-cell"
-                onClick={a.focus}
-                style={{
-                  background: a.focused ? TINT : CARD,
-                  cursor: 'pointer',
-                }}
-              >
-                <td style={{ ...td, paddingLeft: 0, fontSize: 14, color: a.focused ? PLUM : INK }}>
-                  {a.name}
-                  {a.focused && <span style={{ fontSize: 10, marginLeft: 8, color: PLUM }}>filtered</span>}
-                </td>
-                <td style={{ ...td, fontSize: 12.5, color: a.kind === 'Strength' ? PLUM : a.kind === 'Cardio' ? PINK : MUTED }}>{a.kind}</td>
-                <td style={{ ...td, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{a.sessions}</td>
-                <td style={{ ...td, textAlign: 'right', color: MUTED }}>{a.allTime}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{a.time}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{a.distance}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{a.best}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{a.pace}</td>
-                <td style={{ ...td, textAlign: 'right', color: MUTED }}>{a.last}</td>
-                <td style={{ ...td, textAlign: 'right', color: a.trendColor }}>{a.trend}</td>
-                <td style={{ ...td, padding: `${CELL_Y}px 0 ${CELL_Y}px 12px`, width: 104 }}>
-                  <Sparkline path={a.spark} stroke={SPARK} width={100} height={26} label={`${a.name} history`} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(212px, 1fr))',
+        gap: 0,
+      }}>
+        {v.activities.slice(0, 12).map((a) => (
+          <button
+            key={a.key}
+            type="button"
+            onClick={a.focus}
+            aria-pressed={a.focused}
+            className="hv-tab"
+            style={{
+              all: 'unset', cursor: 'pointer', display: 'block', boxSizing: 'border-box',
+              padding: '18px 20px 20px 0', borderBottom: RULE_SOFT,
+              background: a.focused ? TINT : 'transparent',
+              transition: 'background 150ms',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{
+                width: 7, height: 7, flexShrink: 0,
+                background: a.kind === 'Strength' ? PLUM : a.kind === 'Cardio' ? PINK : MUTED,
+              }} />
+              <span style={{ fontSize: 13.5, color: a.focused ? PLUM : INK }}>{a.name}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, marginTop: 9, paddingLeft: 15 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: INK }}>{a.sessions}</span>
+              <span style={{ fontSize: 11.5, color: MUTED }}>in range · {a.allTime} all time</span>
+            </div>
+            <div style={{ fontSize: 11.5, color: SOFT, marginTop: 6, paddingLeft: 15 }}>
+              {[a.time !== '—' ? a.time : null, a.distance !== '—' ? a.distance : null, a.last !== '—' ? `last ${a.last}` : null]
+                .filter(Boolean).join('  ·  ')}
+            </div>
+          </button>
+        ))}
       </div>
-
-      {!shown.length && <Empty title="No activities match that search." note="Clear the search to see everything." />}
-
-      <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '18px 0 0', lineHeight: 1.7, maxWidth: '70ch' }}>
-        Select a row to filter every screen to that activity. {v.activityNote}
-      </p>
     </div>
   );
 }
@@ -1328,7 +1358,6 @@ function Exercises({ v }: { v: TrainingVals }) {
 
 function Progress({ v }: { v: TrainingVals }) {
   const b = v.bodyAnalysis;
-  const tab = v.bodySeriesTab;
 
   return (
     <div style={{ marginTop: 40 }}>
@@ -1392,41 +1421,54 @@ function Progress({ v }: { v: TrainingVals }) {
         )}
       </section>
 
-      {tab ? (
-        <section style={{ ...card, padding: CARD_PAD, marginTop: GRID_GAP }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap' }}>
-            <div>
-              <Eyebrow>{tab.label}</Eyebrow>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 12 }}>
-                <Figure value={tab.latest} style={display(40, tab.color)} />
-                <span style={{ fontSize: 13, color: tab.changeColor, paddingBottom: 6 }}>{tab.change}</span>
+      {/* Four series side by side rather than one at a time behind a tab row —
+          the comparison between them is the whole point. */}
+      {b.series.length > 0 ? (
+        <section className="training-pair" style={{
+          // Two across, so four series read as a 2×2 block rather than a row of
+          // three with an orphan under it.
+          display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+          gap: GRID_GAP, marginTop: GRID_GAP,
+        }}>
+          {b.series.map((sx) => (
+            <div key={sx.key} style={{ ...card, padding: CARD_PAD }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 7, height: 7, background: sx.color }} />
+                  <span style={{ fontSize: 12.5, color: INK }}>{sx.label}</span>
+                </span>
+                <span style={{ fontSize: 11.5, color: sx.changeColor }}>{sx.change}</span>
               </div>
-              <div style={{ fontSize: 12.5, color: SOFT, marginTop: 8 }}>
-                {tab.rate} · low {tab.lo} · high {tab.hi} · {tab.points_n} readings
+
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginTop: 12 }}>
+                <Figure value={sx.latest} style={display(30, sx.color)} />
+                <span style={{ fontSize: 11.5, color: MUTED, paddingBottom: 5 }}>{sx.rate}</span>
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <LineSeries
+                  marks={sx.points} path={sx.path} area={sx.area}
+                  width={680} height={110} stroke={sx.color} fill={PLUM_FILL_FAINT}
+                  gridY={[20, 55, 90]}
+                  hint={`${sx.points_n} readings · low ${sx.lo} · high ${sx.hi}`}
+                />
+              </div>
+
+              <div style={{ fontSize: 11, color: MUTED, marginTop: 8 }}>
+                Trend explains {sx.fit} of the movement
               </div>
             </div>
-            <Segmented items={v.bodySeriesTabs} size="sm" />
-          </div>
-
-          <div style={{ marginTop: 22 }}>
-            <LineSeries
-              marks={tab.points} path={tab.path} area={tab.area}
-              width={680} height={150} stroke={tab.color} fill={PLUM_FILL_FAINT}
-              gridY={[24, 75, 126]}
-              hint={`${tab.label} across ${b.spanLabel} — hover to read one`}
-            />
-          </div>
-
-          <p style={{ fontSize: 12, color: MUTED, marginTop: 14, fontStyle: 'italic', lineHeight: 1.7 }}>
-            Fitted trend accounts for {tab.fit} of the movement. Points are spaced by date, so a gap in
-            weighing shows as a gap rather than being smoothed away.
-          </p>
+          ))}
         </section>
       ) : (
         <section style={{ ...card, padding: PANEL_PAD, marginTop: GRID_GAP }}>
           <Empty title="Nothing to plot yet." note={b.emptyNote || 'Weigh in a few times and the trends fill in.'} />
         </section>
       )}
+
+      <section style={{ marginTop: GRID_GAP }}>
+        <Calendar cal={v.calendar} />
+      </section>
 
       <section className="training-pair" style={{ marginTop: GRID_GAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP }}>
         <div style={{ ...card, padding: CARD_PAD }}>

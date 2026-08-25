@@ -36,7 +36,7 @@ export {
 const DASH = '—';
 
 export const SCREENS = [
-  'Dashboard', 'Head to head', 'Workouts', 'Exercises', 'Progress',
+  'Dashboard', 'Head to head', 'Workouts', 'Progress',
   'Goals', 'Nutrition', 'Recovery', 'Insights', 'Settings',
 ] as const;
 export type Screen = (typeof SCREENS)[number];
@@ -60,10 +60,10 @@ export type TrainingState = {
   goalDraft: boolean;
   /** Which dimension has been opened up to show its parts. */
   openDim: string | null;
-  /** Which body-composition series the Progress chart is showing. */
-  bodySeries: string;
   /** An activity type everything is filtered to, or null for all of them. */
   focus: string | null;
+  /** Which month the calendar is showing, as YYYY-MM. */
+  calendarMonth: string | null;
   /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
 };
@@ -87,8 +87,8 @@ export const INITIAL_STATE: TrainingState = {
   group: 'All',
   goalDraft: false,
   openDim: null,
-  bodySeries: 'weight',
   focus: null,
+  calendarMonth: null,
   dayOffset: 0,
 };
 
@@ -1431,9 +1431,6 @@ export function deriveVals(
     inRangeWeigh.length >= 2 ? inRangeWeigh : weighAll.slice(-90),
     inRangeWeigh.length >= 2 ? rangeLabel : `the last ${Math.min(90, weighAll.length)} weigh-ins`,
   );
-  const bodySeriesTab = bodyAnalysis.series.find((x) => x.key === st.bodySeries)
-    ?? bodyAnalysis.series[0]
-    ?? null;
 
   /* activities ------------------------------------------------------------ */
 
@@ -1509,6 +1506,94 @@ export function deriveVals(
 
   /* chrome ---------------------------------------------------------------- */
 
+  /* the calendar ---------------------------------------------------------- */
+
+  const calendar = (() => {
+    const anchor = st.calendarMonth || `${todayISO().slice(0, 7)}`;
+    const [cy, cm] = anchor.split('-').map(Number);
+    const firstOfMonth = new Date(Date.UTC(cy, cm - 1, 1));
+    const daysInMonth = new Date(Date.UTC(cy, cm, 0)).getUTCDate();
+    // Monday-first, like the rest of the dashboard.
+    const lead = (firstOfMonth.getUTCDay() + 6) % 7;
+
+    const sessionsByDate = new Map<string, { strength: number; cardio: number; other: number }>();
+    for (const w of src.workouts) {
+      const key = w.startedAt.slice(0, 10);
+      const kind = workoutKindOf(w);
+      const at = sessionsByDate.get(key) ?? { strength: 0, cardio: 0, other: 0 };
+      at[kind] += 1;
+      sessionsByDate.set(key, at);
+    }
+    for (const l of src.lifts) {
+      const key = l.performedOn.slice(0, 10);
+      const at = sessionsByDate.get(key) ?? { strength: 0, cardio: 0, other: 0 };
+      at.strength += 1;
+      sessionsByDate.set(key, at);
+    }
+    const weightByDate = new Map(
+      weighAll.filter((r) => r.weight > 0).map((r) => [r.date.slice(0, 10), r.weight] as const),
+    );
+    const stepsByDate2 = new Map(
+      src.days.map((d) => [d.date.slice(0, 10), d.activity.steps ?? 0] as const),
+    );
+
+    const cells = [
+      ...Array.from({ length: lead }, (_, i) => ({
+        key: `pad-${i}`, pad: true as const, day: 0, date: '', future: false, isToday: false,
+        strength: 0, cardio: 0, other: 0, hasSession: false,
+        weight: null as string | null, steps: null as string | null, tint: 'transparent',
+      })),
+      ...Array.from({ length: daysInMonth }, (_, i) => {
+        const date = `${anchor}-${String(i + 1).padStart(2, '0')}`;
+        const s = sessionsByDate.get(date);
+        const weight = weightByDate.get(date) ?? null;
+        const steps = stepsByDate2.get(date) ?? 0;
+        const future = date > todayISO();
+        return {
+          key: date,
+          pad: false as const,
+          day: i + 1,
+          date,
+          future,
+          isToday: date === todayISO(),
+          strength: s?.strength ?? 0,
+          cardio: s?.cardio ?? 0,
+          other: s?.other ?? 0,
+          hasSession: Boolean(s),
+          weight: weight === null ? null : `${nf(weight, 1)}`,
+          steps: steps ? nf(steps) : null,
+          // A quiet wash behind a day that carried work, so the month reads at a glance.
+          tint: future ? 'transparent'
+            : s ? (s.strength ? 'rgba(95,68,114,0.10)' : 'rgba(192,108,132,0.10)')
+              : steps >= TARGETS.stepGoal ? 'rgba(95,68,114,0.04)' : 'transparent',
+        };
+      }),
+    ];
+
+    const monthLabel = firstOfMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    const shift = (delta: number) => {
+      const d = new Date(Date.UTC(cy, cm - 1 + delta, 1));
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    };
+
+    // Padding cells carry no data, and a day that has not happened is not a
+    // day you failed to train on.
+    const inMonth = cells.filter(
+      (c): c is Extract<typeof c, { pad: false }> => !c.pad && !c.future,
+    );
+    const sessionDays = inMonth.filter((c) => c.hasSession).length;
+
+    return {
+      monthLabel,
+      cells,
+      dayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      prev: () => set({ calendarMonth: shift(-1) }),
+      next: () => set({ calendarMonth: shift(1) }),
+      canNext: anchor < todayISO().slice(0, 7),
+      summary: `${sessionDays} session day${sessionDays === 1 ? '' : 's'} of ${inMonth.length}`,
+    };
+  })();
+
   const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const nav = SCREENS.map((label, i) => ({
     label,
@@ -1539,10 +1624,10 @@ export function deriveVals(
         ? `You and ${peer.them.athlete}, same week, five rounds. A round only counts when you have both published it.`
         : 'Two trackers, same week, five rounds — once the other side answers.',
     ],
-    Workouts: ['Workouts', `${allSessions.length} session${allSessions.length === 1 ? '' : 's'} on record. Select one to see every set.`],
-    Exercises: src.lifts.length
-      ? ['Exercises', 'Every movement you have logged, with its best lift and estimated one-rep max.']
-      : ['Activities', `Every kind of session you have done — ${nf(src.workouts.length)} on record, with how often, how far and how long.`],
+    Workouts: [
+      'Workouts',
+      `${allSessions.length} session${allSessions.length === 1 ? '' : 's'} on record across ${activityRows.length} kinds of training.`,
+    ],
     Progress: [
       'Progress',
       'What the weight change was actually made of — fat, lean tissue, or water.',
@@ -1719,7 +1804,7 @@ export function deriveVals(
     insights: insights.slice(0, 12),
     settings,
 
-    /* the full-history brush ------------------------------------------------ */
+  /* the full-history brush ------------------------------------------------ */
 
     history: (() => {
       const W = 900;
@@ -1783,15 +1868,10 @@ export function deriveVals(
 
     /* the ribbon */
     ribbon,
+    calendar,
 
     /* body composition */
     bodyAnalysis,
-    bodySeriesTab,
-    bodySeriesTabs: bodyAnalysis.series.map((x) => ({
-      label: x.label,
-      go: () => set({ bodySeries: x.key }),
-      active: (bodySeriesTab?.key ?? '') === x.key,
-    })),
 
     /* energy */
     energy: {
