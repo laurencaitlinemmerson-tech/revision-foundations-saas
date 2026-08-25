@@ -10,10 +10,8 @@ import {
 } from './palette';
 import { TARGETS, proteinTargetG } from './targets';
 import { workoutKindOf } from './workoutKind';
-import {
-  daysFromPartner, daysFromSources, deriveHeadToHead, mondayOf,
-} from './headToHead';
-import type { PartnerData } from './partnerData';
+import { deriveHeadToHead } from './headToHead';
+import type { PeerData } from './peerData';
 
 /**
  * Everything the Training dashboard displays, derived from logged data.
@@ -56,10 +54,8 @@ export type TrainingState = {
   query: string;
   group: string;
   goalDraft: boolean;
-  /** Head to head: which day inside the shown week, 0 = Monday. */
+  /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
-  /** Head to head: 0 is this week, negative steps back. */
-  weekOffset: number;
 };
 
 export type SetState = (
@@ -80,8 +76,7 @@ export const INITIAL_STATE: TrainingState = {
   query: '',
   group: 'All',
   goalDraft: false,
-  dayOffset: Math.floor((Date.now() - mondayOf(Date.now())) / 86_400_000),
-  weekOffset: 0,
+  dayOffset: 0,
 };
 
 /* ── formatting ──────────────────────────────────────────────────────────── */
@@ -356,7 +351,7 @@ export function deriveVals(
   setState: SetState,
   props: TrainingProps,
   live: LiveData,
-  partner: PartnerData,
+  peer: PeerData,
 ) {
   const set = (patch: Partial<TrainingState>) => setState(patch);
 
@@ -1354,9 +1349,9 @@ export function deriveVals(
     ],
     'Head to head': [
       'Head to head',
-      partner.days?.length
-        ? `You and ${partner.name}, same week, five rounds. A round only counts when you both logged it.`
-        : 'Two people, same week, five rounds — once the second feed is connected.',
+      peer.them
+        ? `You and ${peer.them.athlete}, same week, five rounds. A round only counts when you have both published it.`
+        : 'Two trackers, same week, five rounds — once the other side answers.',
     ],
     Workouts: ['Workouts', `${allSessions.length} session${allSessions.length === 1 ? '' : 's'} on record. Select one to see every set.`],
     Exercises: ['Exercises', 'Every movement you have logged, with its best lift and estimated one-rep max.'],
@@ -1371,32 +1366,20 @@ export function deriveVals(
 
   /* head to head ---------------------------------------------------------- */
 
-  // Both sides are built over the same 120-day span so streaks and the weight
-  // journey have history behind them, not just the week on screen.
-  const h2hFrom = mondayOf(Date.now()) - 119 * DAY;
-  const h2hTo = mondayOf(Date.now()) + 6 * DAY;
-  const headToHead = deriveHeadToHead(
-    { name: props.operatorName, days: daysFromSources(src, h2hFrom, h2hTo) },
-    { name: partner.name, days: daysFromPartner(partner.days ?? [], h2hFrom, h2hTo) },
-    { dayOffset: st.dayOffset, weekOffset: st.weekOffset },
-    Boolean(partner.days?.length),
-  );
+  // Both sides come from the peer contract rather than from this project's own
+  // sources, so the two screens agree: the scoreboard is a pure function of two
+  // documents both people already hold.
+  const headToHead = deriveHeadToHead(peer.you, peer.them, { dayOffset: st.dayOffset }, {
+    loaded: peer.loaded,
+    configured: peer.configured,
+    peerError: peer.peerError,
+  });
   const h2h = {
     ...headToHead,
-    partnerLoaded: partner.loaded,
-    partnerSetupRequired: partner.setupRequired,
-    prevDay: () => set({ dayOffset: Math.max(0, st.dayOffset - 1) }),
-    nextDay: () => set({ dayOffset: Math.min(6, st.dayOffset + 1) }),
-    prevWeek: () => set({ weekOffset: st.weekOffset - 1, dayOffset: 0 }),
-    nextWeek: () => set({
-      weekOffset: Math.min(0, st.weekOffset + 1),
-      dayOffset: st.weekOffset + 1 === 0
-        ? Math.floor((Date.now() - mondayOf(Date.now())) / DAY)
-        : 0,
-    }),
-    canGoForwardDay: st.dayOffset < 6,
-    canGoBackDay: st.dayOffset > 0,
-    canGoForwardWeek: st.weekOffset < 0,
+    prevDay: () => set({ dayOffset: Math.min(headToHead.maxBack, st.dayOffset + 1) }),
+    nextDay: () => set({ dayOffset: Math.max(0, st.dayOffset - 1) }),
+    canGoBackDay: st.dayOffset < headToHead.maxBack,
+    canGoForwardDay: st.dayOffset > 0,
   };
 
   const today = new Date();

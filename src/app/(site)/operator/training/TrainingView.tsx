@@ -598,12 +598,9 @@ function Stepper({
 }: {
   label: string; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean;
 }) {
-  const arrow = (dir: '‹' | '›', on: () => void, enabled: boolean, name: string) => (
+  const arrow = (dir: string, on: () => void, enabled: boolean, aria: string) => (
     <button
-      type="button"
-      onClick={on}
-      disabled={!enabled}
-      aria-label={name}
+      type="button" onClick={on} disabled={!enabled} aria-label={aria}
       className={enabled ? 'hv-tab' : undefined}
       style={{
         all: 'unset', cursor: enabled ? 'pointer' : 'default', padding: '8px 16px',
@@ -615,45 +612,42 @@ function Stepper({
   );
   return (
     <div style={{ display: 'flex', alignItems: 'center', border: RULE, background: CARD }}>
-      {arrow('‹', onPrev, canPrev, `Previous ${name(label)}`)}
+      {arrow('\u2039', onPrev, canPrev, 'Previous day')}
       <span style={{
         flex: 1, textAlign: 'center', fontSize: 11, letterSpacing: '0.14em',
-        textTransform: 'uppercase', color: INK, padding: '0 12px', minWidth: 130,
+        textTransform: 'uppercase', color: INK, padding: '0 12px', minWidth: 140,
       }}>
         {label}
       </span>
-      {arrow('›', onNext, canNext, `Next ${name(label)}`)}
+      {arrow('\u203a', onNext, canNext, 'Next day')}
     </div>
   );
 }
-const name = (label: string) => (label.toLowerCase().includes('week') ? 'week' : 'day');
 
-function PersonCard({
-  p, accent, dayLabel, stepper,
-}: {
-  p: TrainingVals['h2h']['you'];
-  accent: string;
-  dayLabel: string;
-  stepper: ReactNode;
-}) {
+type Card = NonNullable<TrainingVals['h2h']['you']>;
+
+function PersonCard({ p, dayLabel, stepper }: { p: Card; dayLabel: string; stepper: ReactNode }) {
   return (
     <div style={{ ...card, padding: CARD_PAD }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <div style={{
-          width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
-          border: `1px solid ${accent}`, background: CARD,
+          width: 52, height: 52, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+          border: `1px solid ${p.accent}`, background: CARD,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-display)', fontSize: 20, color: accent,
+          fontFamily: 'var(--font-display)', fontSize: 20, color: p.accent,
         }}>
-          {p.initial}
+          {/* The peer's own https URL on their domain, so next/image's optimiser
+              has no configured loader for it — a plain img is correct here. */}
+          {p.avatarUrl
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img src={p.avatarUrl} alt="" width={52} height={52} style={{ objectFit: 'cover' }} />
+            : p.initial}
         </div>
         <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
             <span style={display(24)}>{p.name}</span>
             {p.isLeader && (
-              <span style={{
-                fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: accent,
-              }}>
+              <span style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: p.accent }}>
                 Leading
               </span>
             )}
@@ -669,7 +663,7 @@ function PersonCard({
       <div style={{ marginTop: 20 }}>{stepper}</div>
 
       <div style={{ marginTop: 22, paddingBottom: 20, borderBottom: RULE }}>
-        <div style={{ ...display(40) }}>{p.headline}</div>
+        <div style={display(40)}>{p.headline}</div>
         <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED, marginTop: 8 }}>
           Steps · {p.headlineNote}
         </div>
@@ -706,11 +700,37 @@ function PersonCard({
           <Eyebrow>{p.goalLabel}</Eyebrow>
           <span style={{ fontSize: 12, color: SOFT }}>{p.goalText}</span>
         </div>
-        <Bar pct={p.goalPct} color={accent} height={5} />
-        <div style={{ fontSize: 11.5, color: MUTED, marginTop: 12 }}>
-          {p.streak ? `${p.streak}-day session streak` : 'No active streak'}
-        </div>
+        <Bar pct={p.goalPct} color={p.accent} height={5} />
       </div>
+
+      {/* [] is "logged nothing today"; null is "does not publish food". */}
+      {p.food !== null && (
+        <div style={{ marginTop: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+            <Eyebrow>Food</Eyebrow>
+            <span style={{ fontSize: 12, color: SOFT }}>{p.foodTotal}</span>
+          </div>
+          {p.food.length === 0 && (
+            <div style={{ fontSize: 12.5, color: MUTED, marginTop: 12, fontStyle: 'italic' }}>
+              Nothing logged today.
+            </div>
+          )}
+          {p.food.map((f) => (
+            <div key={f.key} style={{ padding: `${ROW_Y}px 0`, borderBottom: RULE_SOFT }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'baseline' }}>
+                <span style={{ fontSize: 13, color: INK }}>{f.name}</span>
+                <span style={{ fontSize: 12.5, color: SOFT, flexShrink: 0 }}>{f.kcal}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, marginTop: 5 }}>
+                <span style={{ fontSize: 11.5, color: MUTED }}>{f.meta}</span>
+                <span style={{ fontSize: 11.5, color: MUTED, flexShrink: 0 }}>{f.macros}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ fontSize: 11, color: MUTED, marginTop: 18 }}>Published {p.updatedAt}</div>
     </div>
   );
 }
@@ -718,122 +738,64 @@ function PersonCard({
 function HeadToHead({ v }: { v: TrainingVals }) {
   const h = v.h2h;
 
-  if (!h.partnerLoaded) {
-    return <Empty title="Reading the second feed…" note="One moment." />;
+  if (!h.loaded) return <Empty title="Reading both sides\u2026" note="Yours from here, theirs from their site." />;
+
+  if (!h.you) {
+    return <Empty title="Your own document could not be built." note="The peer endpoint reads from your stored data; check the sync has run." />;
   }
 
-  if (!h.hasPartnerData) {
-    return (
-      <div style={{ ...card, marginTop: 44, padding: PANEL_PAD, maxWidth: 720 }}>
-        <Eyebrow>Head to head</Eyebrow>
-        <h2 style={{ ...display(28), margin: '14px 0 0' }}>
-          {h.partnerSetupRequired ? 'The second feed is not set up yet' : 'Nothing logged on the second side yet'}
-        </h2>
-        <p style={{ fontSize: 14.5, lineHeight: 1.75, color: SOFT, margin: '16px 0 0', textWrap: 'pretty' }}>
-          {h.partnerSetupRequired
-            ? 'Run supabase-operator-partner.sql against the project, and this screen starts working as soon as the first day lands.'
-            : 'The table is there and empty. Post a day to /api/operator/partner and it appears here.'}
-        </p>
-        <div style={{
-          marginTop: 24, padding: '18px 20px', background: TINT, border: RULE,
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12,
-          color: SOFT, lineHeight: 1.7, overflowX: 'auto',
-        }}>
-          POST /api/operator/partner<br />
-          {'{ "person": "james", "date": "2026-08-25", "steps": 8420,'}<br />
-          {'  "gymSessions": 1, "runs": 0, "caloriesIn": 2100,'}<br />
-          {'  "proteinG": 140, "sleepMin": 443, "weightKg": 83.5 }'}
-        </div>
-        <p style={{ fontSize: 12.5, lineHeight: 1.75, color: MUTED, margin: '20px 0 0', fontStyle: 'italic' }}>
-          Every field is optional except the date, and re-sending a date corrects that day rather than
-          duplicating it — so a phone shortcut can post as the day fills in.
-        </p>
-      </div>
-    );
-  }
+  const stepper = (
+    <Stepper
+      label={h.dayLabel} onPrev={h.prevDay} onNext={h.nextDay}
+      canPrev={h.canGoBackDay} canNext={h.canGoForwardDay}
+    />
+  );
 
   return (
     <div style={{ marginTop: 44 }}>
       <section style={{ ...card, padding: PANEL_PAD }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-          gap: GRID_GAP, flexWrap: 'wrap',
-        }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: GRID_GAP, flexWrap: 'wrap' }}>
           <div>
-            <Eyebrow>{h.weekLabel} · {h.weekRange}</Eyebrow>
+            <Eyebrow>{h.weekLabel}</Eyebrow>
             <h2 style={{ ...display(34), margin: '14px 0 0' }}>{h.scoreline}</h2>
             <div style={{ fontSize: 13, color: SOFT, marginTop: 10 }}>
-              {h.roundsDecided} of {h.roundsTotal} rounds settled
+              {h.connected
+                ? `${h.roundsDecided} of ${h.roundsTotal} rounds settled`
+                : 'Not connected'}
             </div>
-          </div>
-          <div style={{ minWidth: 210 }}>
-            <Stepper
-              label={h.weekLabel}
-              onPrev={h.prevWeek}
-              onNext={h.nextWeek}
-              canPrev
-              canNext={h.canGoForwardWeek}
-            />
           </div>
         </div>
 
-        {/* the week's headline round */}
-        <div style={{ marginTop: 32, padding: '28px 32px', background: TINT, border: RULE }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-            <Eyebrow>{h.challenge.title}</Eyebrow>
-            <span style={{ fontSize: 12, color: SOFT }}>{h.challenge.timeLeft}</span>
-          </div>
-          <div style={{
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-            gap: 24, marginTop: 22, flexWrap: 'wrap',
-          }}>
-            <div>
-              <div style={display(46, h.challenge.youLead ? PLUM : INK)}>{h.challenge.you}</div>
-              <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 10 }}>
-                {h.you.name}
-              </div>
+        {!h.connected && (
+          <div style={{ marginTop: 28, padding: '20px 24px', background: TINT, border: RULE }}>
+            <div style={{ fontSize: 13.5, color: SOFT, lineHeight: 1.7 }}>
+              {h.configured
+                ? h.peerMessage ?? 'The other side is not answering.'
+                : 'No peer endpoint is configured yet — set PEER_URL and PEER_KEY.'}
             </div>
-            <div style={{ fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED, paddingBottom: 16 }}>
-              vs
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={display(46, h.challenge.themLead ? PINK : INK)}>{h.challenge.them}</div>
-              <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 10 }}>
-                {h.them.name}
-              </div>
+            <div style={{ fontSize: 12, color: MUTED, marginTop: 10, fontStyle: 'italic' }}>
+              Your own figures below are unaffected.
             </div>
           </div>
-          <div style={{ marginTop: 22 }}><Versus youShare={h.challenge.youShare} height={8} /></div>
-          <div style={{ fontSize: 12, color: MUTED, marginTop: 12 }}>{h.challenge.note}</div>
-        </div>
+        )}
       </section>
 
-      {/* the five rounds */}
       <section style={{ marginTop: SECTION_GAP }}>
-        <SectionHeading title="The rounds" aside={`${h.weekLabel} · a point each`} />
-        <div style={{ ...card, marginTop: 0, borderTop: 0 }}>
+        <SectionHeading title="The rounds" aside="A point each" />
+        <div style={{ ...card, borderTop: 0 }}>
           {h.rounds.map((r) => (
             <div key={r.key} style={{ padding: '24px 28px', borderBottom: RULE_SOFT }}>
-              <div style={{
-                display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 20,
-                alignItems: 'baseline',
-              }}>
-                <div style={{
-                  fontFamily: 'var(--font-display)', fontSize: 22,
-                  color: r.youLead ? PLUM : INK,
-                }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 20, alignItems: 'baseline' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: r.youLead ? PLUM : INK }}>
                   {r.you}
-                  {r.youLead && <span style={{ fontSize: 11, marginLeft: 10, color: PLUM }}>▲</span>}
+                  {r.youLead && <span style={{ fontSize: 11, marginLeft: 10, color: PLUM }}>{'\u25b2'}</span>}
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 13, color: INK }}>{r.label}</div>
                   <div style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>{r.note}</div>
                 </div>
-                <div style={{
-                  fontFamily: 'var(--font-display)', fontSize: 22, textAlign: 'right',
-                  color: r.themLead ? PINK : INK,
-                }}>
-                  {r.themLead && <span style={{ fontSize: 11, marginRight: 10, color: PINK }}>▲</span>}
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, textAlign: 'right', color: r.themLead ? PINK : INK }}>
+                  {r.themLead && <span style={{ fontSize: 11, marginRight: 10, color: PINK }}>{'\u25b2'}</span>}
                   {r.them}
                 </div>
               </div>
@@ -846,40 +808,17 @@ function HeadToHead({ v }: { v: TrainingVals }) {
         </p>
       </section>
 
-      {/* the two cards, sharing one day navigator */}
       <section style={{ marginTop: SECTION_GAP }}>
         <SectionHeading title="Side by side" aside={h.dayLabel} />
-        <div className="training-pair" style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP, marginTop: GRID_GAP,
-        }}>
-          <PersonCard
-            p={h.you}
-            accent={PLUM}
-            dayLabel={h.dayLabel}
-            stepper={
-              <Stepper
-                label={h.dayLabel}
-                onPrev={h.prevDay}
-                onNext={h.nextDay}
-                canPrev={h.canGoBackDay}
-                canNext={h.canGoForwardDay}
-              />
-            }
-          />
-          <PersonCard
-            p={h.them}
-            accent={PINK}
-            dayLabel={h.dayLabel}
-            stepper={
-              <Stepper
-                label={h.dayLabel}
-                onPrev={h.prevDay}
-                onNext={h.nextDay}
-                canPrev={h.canGoBackDay}
-                canNext={h.canGoForwardDay}
-              />
-            }
-          />
+        <div className="training-pair" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP, marginTop: GRID_GAP }}>
+          <PersonCard p={h.you} dayLabel={h.dayLabel} stepper={stepper} />
+          {h.them
+            ? <PersonCard p={h.them} dayLabel={h.dayLabel} stepper={stepper} />
+            : (
+              <div style={{ ...card, padding: CARD_PAD, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Empty title="Not connected" note={h.peerMessage ?? 'Their side is not answering right now.'} />
+              </div>
+            )}
         </div>
       </section>
     </div>

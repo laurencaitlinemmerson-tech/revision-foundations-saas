@@ -1,39 +1,8 @@
-import type { Workout } from '../daily-log/data';
-
 /**
- * What kind of training a synced workout actually was.
- *
- * This matters more than it looks. Everfit writes logged gym sessions into Apple
- * Health as "Cross Training", so without this a strength session arrives looking
- * like an aerobic one: it would inflate the cardio score and leave the strength
- * score with nothing behind it at all.
- *
- * The source is checked before the type, because a coaching app that only ever
- * writes strength work is better evidence than Apple's catch-all activity label.
+ * Re-exported from the shared module so the server-side peer publisher and the
+ * dashboard classify a workout the same way. See src/lib/workoutKind.ts.
  */
-
-export type WorkoutKind = 'strength' | 'cardio' | 'other';
-
-/** Apps that only ever log resistance training, whatever type they stamp on it. */
-const STRENGTH_SOURCES = /everfit|strong|hevy|jefit|fitbod/i;
-
-const STRENGTH_TYPES =
-  /cross ?training|strength|weight ?lifting|weight ?training|resistance|functional|pilates|core/i;
-
-const CARDIO_TYPES =
-  /run|jog|cycl|bike|ride|swim|row|walk|hike|elliptical|stair|treadmill|cardio|dance|skip/i;
-
-export function workoutKindOf(w: Pick<Workout, 'type' | 'source' | 'distanceKm'>): WorkoutKind {
-  const type = w.type ?? '';
-  const source = w.source ?? '';
-
-  // Anything that covered real ground is cardio regardless of how it is labelled.
-  if ((w.distanceKm ?? 0) >= 0.5) return 'cardio';
-  if (STRENGTH_SOURCES.test(source)) return 'strength';
-  if (CARDIO_TYPES.test(type)) return 'cardio';
-  if (STRENGTH_TYPES.test(type)) return 'strength';
-  return 'other';
-}
-
-export const isStrengthWorkout = (w: Workout) => workoutKindOf(w) === 'strength';
-export const isCardioWorkout = (w: Workout) => workoutKindOf(w) === 'cardio';
+export {
+  workoutKindOf, isStrengthWorkout, isCardioWorkout, isRunWorkout,
+  type WorkoutKind, type WorkoutLike,
+} from '@/lib/workoutKind';

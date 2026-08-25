@@ -261,6 +261,7 @@ type DailyMetricRow = {
   date: string;
   steps: number | null;
   active_energy_kcal: number | null;
+  basal_energy_kcal: number | null;
   exercise_minutes: number | null;
   stand_hours: number | null;
   distance_km: number | null;
@@ -288,13 +289,14 @@ type DailyMetricRow = {
  * Columns introduced after the table's original migration. If the operator has
  * not run the corresponding .sql yet, the sync drops these rather than failing.
  */
-const OPTIONAL_COLUMNS = ['menstrual_flow'] as const;
+const OPTIONAL_COLUMNS = ['menstrual_flow', 'basal_energy_kcal'] as const;
 
 function emptyDaily(date: string): DailyMetricRow {
   return {
     date,
     steps: null,
     active_energy_kcal: null,
+    basal_energy_kcal: null,
     exercise_minutes: null,
     stand_hours: null,
     distance_km: null,
@@ -520,6 +522,12 @@ function parseDailyMetrics(payload: Record<string, unknown>): DailyMetricRow[] {
 
   const energy = get('active_energy', 'active_energy_burned');
   if (energy?.data) setSum(target, 'active_energy_kcal', energy.data, (q) => convertEnergyToKcal(q, energy.units));
+
+  // Total burn is basal + active. Active alone is the Move ring, typically a
+  // few hundred kcal, and publishing it as a day's expenditure would make every
+  // energy comparison against a Garmin (which reports the total) meaningless.
+  const basal = get('basal_energy_burned', 'basal_energy', 'resting_energy');
+  if (basal?.data) setSum(target, 'basal_energy_kcal', basal.data, (q) => convertEnergyToKcal(q, basal.units));
 
   const exercise = get('apple_exercise_time', 'exercise_time');
   if (exercise?.data) setSum(target, 'exercise_minutes', exercise.data, (q) => Math.round(convertDurationToMinutes(q, exercise.units)));
