@@ -1,5 +1,5 @@
 import { fitReadings } from '@/lib/fitness/regression';
-import type { HealthDay, WeighIn } from '../daily-log/data';
+import type { HealthDay, WeighIn, Workout } from '../daily-log/data';
 import { AMBER, GREEN, MUTED, PINK, PLUM, ROSE, SOFT } from './palette';
 
 /**
@@ -21,12 +21,45 @@ const KCAL_PER_KG = 7700;
 const nf = (n: number, d = 0) =>
   n.toLocaleString('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d });
 
+/**
+ * Where a day's burn came from.
+ *
+ * Expenditure is BMR + NEAT + EAT + TEF, and three of those four are measured
+ * here rather than modelled:
+ *
+ *  - BMR is Apple Health's basal energy, not a Mifflin–St Jeor guess.
+ *  - EAT is the energy the watch recorded against actual workouts.
+ *  - NEAT is what is left of active energy once workouts are taken out — the
+ *    walking, standing and fidgeting that is not training.
+ *  - TEF is the only estimate, and it is computed from the macros rather than
+ *    as a flat percentage: protein costs about 25% of its own energy to digest,
+ *    carbohydrate about 8%, fat about 2%. A protein-heavy day genuinely burns
+ *    more than a fat-heavy one of the same size, and a flat 10% hides that.
+ *
+ * Apple's active energy already folds NEAT and EAT together, and its total burn
+ * leaves TEF out entirely — so the figure here is deliberately higher than the
+ * watch's own, and the deficit correspondingly larger.
+ */
 export type EnergyDay = {
   date: string;
   inKcal: number | null;
   outKcal: number | null;
   net: number | null;
+  bmr: number | null;
+  neat: number | null;
+  eat: number | null;
+  tef: number | null;
 };
+
+/** Protein ~25%, carbohydrate ~8%, fat ~2% of their own energy. */
+export function thermicEffect(d: HealthDay): number | null {
+  const { proteinG, carbsG, fatG, dietaryEnergyKcal } = d.nutrition;
+  if (proteinG !== null || carbsG !== null || fatG !== null) {
+    return (proteinG ?? 0) * 4 * 0.25 + (carbsG ?? 0) * 4 * 0.08 + (fatG ?? 0) * 9 * 0.02;
+  }
+  // No macros logged, so fall back to the conventional flat share of intake.
+  return dietaryEnergyKcal === null ? null : dietaryEnergyKcal * 0.10;
+}
 
 export type EnergyView = {
   /** Days where both sides were recorded — the only ones that can be scored. */
@@ -59,26 +92,56 @@ export type EnergyView = {
   impliedTdeeNote: string;
   /** False when the figure is arithmetically valid but cannot be true. */
   impliedTdeeCredible: boolean;
+  /** BMR, NEAT, EAT and TEF averaged across the window. */
+  components: Array<{
+    key: string; label: string; note: string; measured: boolean;
+    value: number | null; valueLabel: string; share: number; pct: string;
+  }>;
+  componentsNote: string;
 
-  bars: Array<{ key: string; x: string; y: string; w: string; h: string; fill: string }>;
-  zeroY: string;
+  bars: Array<{
+    key: string; x: number; cx: number; y: number; w: number; h: number;
+    fill: string; label: string; sub: string;
+  }>;
+  zeroY: number;
   coverageNote: string;
 };
 
-/** Intake and expenditure for one day, with expenditure as total burn. */
-export function energyDays(days: HealthDay[]): EnergyDay[] {
+/** Intake and expenditure for one day, broken into its four components. */
+export function energyDays(days: HealthDay[], workouts: Workout[]): EnergyDay[] {
+  // Energy the watch attributed to deliberate training, by day.
+  const eatByDate = new Map<string, number>();
+  for (const w of workouts) {
+    const key = w.startedAt.slice(0, 10);
+    eatByDate.set(key, (eatByDate.get(key) ?? 0) + (w.energyKcal ?? 0));
+  }
+
   return days.map((d) => {
+    const date = d.date.slice(0, 10);
     const inKcal = d.nutrition.dietaryEnergyKcal ?? null;
     const active = d.activity.activeEnergyKcal ?? null;
-    // Total burn needs basal. Active alone is the Move ring, a few hundred kcal,
-    // and calling that a day's expenditure would invent an enormous deficit.
-    const basal = d.activity.basalEnergyKcal ?? null;
-    const outKcal = active !== null && basal !== null ? active + basal : null;
+    const bmr = d.activity.basalEnergyKcal ?? null;
+    const tef = thermicEffect(d);
+
+    // Workouts are already inside Apple's active energy, so EAT is capped at it
+    // and NEAT is the remainder — never the two added on top of each other.
+    const eatRaw = eatByDate.get(date) ?? null;
+    const eat = active === null ? eatRaw : Math.min(eatRaw ?? 0, active);
+    const neat = active === null ? null : Math.max(0, active - (eat ?? 0));
+
+    // Without basal there is no total: active alone is the Move ring, and
+    // calling that a day's expenditure would invent an enormous deficit.
+    const outKcal = bmr === null || active === null ? null : bmr + active + (tef ?? 0);
+
     return {
-      date: d.date.slice(0, 10),
+      date,
       inKcal,
       outKcal,
       net: inKcal !== null && outKcal !== null ? inKcal - outKcal : null,
+      bmr,
+      neat,
+      eat,
+      tef,
     };
   });
 }
@@ -94,6 +157,24 @@ export function buildEnergy(
   const avgIn = mean(rows.map((r) => r.inKcal).filter((v): v is number => v !== null));
   const avgOut = mean(rows.map((r) => r.outKcal).filter((v): v is number => v !== null));
   const avgNet = mean(complete.map((r) => r.net as number));
+
+  const avgOf = (pick: (r: EnergyDay) => number | null) =>
+    mean(rows.map(pick).filter((v): v is number => v !== null));
+
+  const parts = [
+    { key: 'bmr', label: 'BMR', value: avgOf((r) => r.bmr), note: 'Resting burn, measured by the watch', measured: true },
+    { key: 'neat', label: 'NEAT', value: avgOf((r) => r.neat), note: 'Everything active that was not a workout', measured: true },
+    { key: 'eat', label: 'EAT', value: avgOf((r) => r.eat), note: 'Energy recorded against logged workouts', measured: true },
+    { key: 'tef', label: 'TEF', value: avgOf((r) => r.tef), note: 'Digestion, from the macros logged', measured: false },
+  ];
+  const partsTotal = parts.reduce((a, p) => a + (p.value ?? 0), 0) || 1;
+  const components = parts.map((p) => ({
+    ...p,
+    label: p.label,
+    valueLabel: p.value === null ? '—' : nf(Math.round(p.value)),
+    share: p.value === null ? 0 : (p.value / partsTotal) * 100,
+    pct: p.value === null ? '0%' : `${((p.value / partsTotal) * 100).toFixed(0)}%`,
+  }));
 
   const direction: EnergyView['direction'] = avgNet === null
     ? 'unknown'
@@ -160,20 +241,32 @@ export function buildEnergy(
   const zeroY = H / 2;
   const step = W / Math.max(1, window.length);
 
+  const dateLabel = (d: string) =>
+    new Date(`${d}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
   const bars = window.map((r, i) => {
     const v = r.net;
+    const base = { key: r.date, x: i * step, cx: i * step + step * 0.35, w: step * 0.7, sub: dateLabel(r.date) };
+
     if (v === null) {
-      return { key: r.date, x: (i * step).toFixed(1), y: String(zeroY - 1), w: (step * 0.7).toFixed(1), h: '2', fill: '#E6DCE8' };
+      // Drawn as a stub on the baseline: a day with only one side logged is
+      // visibly present and visibly not counted.
+      return {
+        ...base, y: zeroY - 1, h: 2, fill: '#E6DCE8',
+        label: r.inKcal === null && r.outKcal === null
+          ? 'Nothing logged'
+          : r.inKcal === null ? 'No intake logged' : 'No expenditure recorded',
+      };
     }
+
     const h = Math.max(1.5, (Math.abs(v) / bound) * (H / 2));
     return {
-      key: r.date,
-      x: (i * step).toFixed(1),
-      y: (v < 0 ? zeroY : zeroY - h).toFixed(1),
-      w: (step * 0.7).toFixed(1),
-      h: h.toFixed(1),
+      ...base,
+      y: v < 0 ? zeroY : zeroY - h,
+      h,
       // Deficit hangs below the line in plum, surplus rises above it in rose.
       fill: v < 0 ? PLUM : PINK,
+      label: `${nf(Math.abs(v))} kcal ${v < 0 ? 'deficit' : 'surplus'}  ·  in ${nf(r.inKcal ?? 0)} / out ${nf(r.outKcal ?? 0)}`,
     };
   });
 
@@ -203,8 +296,12 @@ export function buildEnergy(
         ? `This works out at ${nf(Math.round(impliedRaw))} kcal, which is below any plausible resting metabolism and well under the ${nf(Math.round(avgOut ?? 0))} your watch measured. That is not a finding about your body — it is what the arithmetic does when food goes unlogged. Only ${complete.length} of ${rows.length} days here have intake recorded.`
         : 'Needs both a logged intake and a weight trend over the same window.',
     impliedTdeeCredible: credible,
+    components,
+    componentsNote: parts.every((p) => p.value !== null)
+      ? 'Three of these four are measured rather than modelled — only digestion is estimated, and from the macros rather than a flat share.'
+      : 'Some components have no data in this window, so the total below is incomplete.',
     bars,
-    zeroY: String(zeroY),
+    zeroY,
     coverageNote: `${complete.length} of ${rows.length} days have both sides recorded${
       complete.length < rows.length
         ? '. A day missing either one is not counted, rather than being treated as a zero.'

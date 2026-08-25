@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
   AMBER, CARD, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
   PLUM, PLUM_FILL, PLUM_FILL_FAINT, RULE, RULE_SOFT, SIDEBAR, SOFT, SPARK, TINT,
   TRACK, TRACK_PREV,
 } from './palette';
+import { BarSeries, Figure, LineSeries, Sparkline } from './charts';
 
 /**
  * The Training dashboard, as drawn.
@@ -111,93 +112,6 @@ function Bar({ pct, color = PLUM, height = 4 }: { pct: string; color?: string; h
   return (
     <div style={{ height, background: TRACK, marginTop: 8 }}>
       <div style={{ height, width: pct, background: color }} />
-    </div>
-  );
-}
-
-/**
- * The body-composition trend.
- *
- * Points arrive already positioned by date rather than by index, so an irregular
- * run of weigh-ins draws the shape it actually has. Hovering reads a point back:
- * the nearest one horizontally, so it stays usable when readings cluster.
- */
-function TrendChart({
-  points, path, area, ariaLabel,
-}: {
-  points: TrainingVals['bodyPoints'];
-  path: string;
-  area: string;
-  ariaLabel: string;
-}) {
-  const [active, setActive] = useState<number | null>(null);
-  const W = 680;
-  const H = 166;
-
-  const pick = (clientX: number, rect: DOMRect) => {
-    if (!points.length) return null;
-    const x = ((clientX - rect.left) / rect.width) * W;
-    let best = 0;
-    for (let i = 1; i < points.length; i++) {
-      if (Math.abs(points[i].x - x) < Math.abs(points[best].x - x)) best = i;
-    }
-    return best;
-  };
-
-  const p = active === null ? null : points[active] ?? null;
-
-  return (
-    <div style={{ position: 'relative', marginTop: 22 }}>
-      <svg
-        viewBox={`0 0 ${W} ${H + 24}`}
-        preserveAspectRatio="none"
-        style={{ width: '100%', height: 190, display: 'block', touchAction: 'pan-y' }}
-        role="img"
-        aria-label={ariaLabel}
-        onMouseLeave={() => setActive(null)}
-        onMouseMove={(e) => setActive(pick(e.clientX, e.currentTarget.getBoundingClientRect()))}
-        onTouchStart={(e) => setActive(pick(e.touches[0].clientX, e.currentTarget.getBoundingClientRect()))}
-        onTouchMove={(e) => setActive(pick(e.touches[0].clientX, e.currentTarget.getBoundingClientRect()))}
-        onTouchEnd={() => setActive(null)}
-      >
-        <g stroke="rgba(34,28,36,0.06)" strokeWidth="0.5">
-          <line x1="0" y1="24" x2={W} y2="24" />
-          <line x1="0" y1="83" x2={W} y2="83" />
-          <line x1="0" y1="142" x2={W} y2="142" />
-        </g>
-        {area && <path d={area} fill={PLUM_FILL_FAINT} stroke="none" />}
-        {path && <path d={path} fill="none" stroke={PLUM} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
-
-        {/* Every reading is marked, so a cluster reads as a cluster. */}
-        {points.map((pt) => (
-          <circle key={pt.key} cx={pt.x} cy={pt.y} r="2" fill={PLUM} opacity={0.35} />
-        ))}
-
-        {p && (
-          <g>
-            <line x1={p.x} y1="0" x2={p.x} y2={H} stroke={PLUM} strokeWidth="0.75" strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
-            <circle cx={p.x} cy={p.y} r="4" fill={PLUM} />
-          </g>
-        )}
-      </svg>
-
-      {/* Read out beside the chart rather than in it, so the SVG can stay
-          non-uniformly scaled without stretching the type. */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-        gap: 12, marginTop: 6, minHeight: 18,
-      }}>
-        {p ? (
-          <>
-            <span style={{ fontSize: 12, color: INK }}>{p.valueLabel}</span>
-            <span style={{ fontSize: 11, color: MUTED }}>{p.dateLabel}</span>
-          </>
-        ) : (
-          <span style={{ fontSize: 11, color: MUTED, fontStyle: 'italic' }}>
-            Hover or drag across the chart to read a weigh-in.
-          </span>
-        )}
-      </div>
     </div>
   );
 }
@@ -367,7 +281,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
           <div style={{ padding: PANEL_PAD, borderRight: RULE }}>
             <Eyebrow>Fitness overview</Eyebrow>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20, marginTop: 18 }}>
-              <div style={{ ...display(76, PLUM), lineHeight: 0.9, letterSpacing: '-0.02em' }}>{v.overall}</div>
+              <Figure value={v.overall} style={{ ...display(76, PLUM), lineHeight: 0.9, letterSpacing: '-0.02em' }} />
               <div style={{ paddingBottom: 10 }}>
                 <div style={{ fontSize: 13, color: MUTED }}>/ 100</div>
                 <div style={{ fontSize: 13, color: v.overallDeltaColor, marginTop: 4 }}>{v.overallDelta}</div>
@@ -505,9 +419,9 @@ function Dashboard({ v }: { v: TrainingVals }) {
               <span style={{ fontSize: 13, color: MUTED, paddingBottom: 5 }}>{c.unit}</span>
             </div>
             <div style={{ fontSize: 12, color: c.trendColor, marginTop: 8 }}>{c.trend}</div>
-            <svg viewBox="0 0 200 44" preserveAspectRatio="none" style={{ width: '100%', height: 44, marginTop: 16 }} aria-hidden="true">
-              {c.spark && <path d={c.spark} fill="none" stroke={SPARK} strokeWidth="1.25" />}
-            </svg>
+            <div style={{ marginTop: 16 }}>
+              <Sparkline path={c.spark} stroke={SPARK} label={`${c.label} over ${v.rangeLabel}`} />
+            </div>
             <div style={{ fontSize: 12.5, color: SOFT, marginTop: 12, lineHeight: 1.65 }}>{c.note}</div>
           </div>
         ))}
@@ -558,12 +472,18 @@ function Dashboard({ v }: { v: TrainingVals }) {
             </div>
             <Segmented items={v.bodyTabs} size="sm" />
           </div>
-          <TrendChart
-            points={v.bodyPoints}
-            path={v.bodyPath}
-            area={v.bodyArea}
-            ariaLabel={`Body composition trend: ${v.bodyCount} weigh-ins from ${v.bodyStart} to ${v.bodyEnd}, low ${v.bodyMin}, high ${v.bodyMax}`}
-          />
+          <div style={{ marginTop: 22 }}>
+            <LineSeries
+              marks={v.bodyPoints}
+              path={v.bodyPath}
+              area={v.bodyArea}
+              width={680}
+              height={166}
+              gridY={[24, 83, 142]}
+              fill={PLUM_FILL_FAINT}
+              hint={`${v.bodyCount} weigh-ins, ${v.bodyStart} to ${v.bodyEnd} — hover to read one`}
+            />
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 4, gap: 12 }}>
             <span>{v.bodyStart}</span>
             <span>{v.bodyMin} – {v.bodyMax}</span>
@@ -628,9 +548,9 @@ function Dashboard({ v }: { v: TrainingVals }) {
               </div>
             ))}
           </div>
-          <svg viewBox="0 0 320 70" preserveAspectRatio="none" style={{ width: '100%', height: 70, marginTop: 12 }} role="img" aria-label="Sleep duration trend">
-            {v.sleepPath && <path d={v.sleepPath} fill="none" stroke={PINK} strokeWidth="1.4" />}
-          </svg>
+          <div style={{ marginTop: 12 }}>
+            <Sparkline path={v.sleepPath} stroke={PINK} width={320} height={70} label="Sleep duration trend" />
+          </div>
           <div style={{ fontSize: 12, color: SOFT, marginTop: 10 }}>{v.sleepNote}</div>
         </div>
       </section>
@@ -1189,9 +1109,7 @@ function Exercises({ v }: { v: TrainingVals }) {
                 <td style={{ ...td, textAlign: 'right', color: MUTED }}>{a.last}</td>
                 <td style={{ ...td, textAlign: 'right', color: a.trendColor }}>{a.trend}</td>
                 <td style={{ ...td, padding: `${CELL_Y}px 0 ${CELL_Y}px 12px`, width: 104 }}>
-                  <svg viewBox="0 0 100 26" preserveAspectRatio="none" style={{ width: 100, height: 26, display: 'block' }} aria-hidden="true">
-                    {a.spark && <path d={a.spark} fill="none" stroke={SPARK} strokeWidth="1.25" />}
-                  </svg>
+                  <Sparkline path={a.spark} stroke={SPARK} width={100} height={26} label={`${a.name} history`} />
                 </td>
               </tr>
             ))}
@@ -1285,9 +1203,12 @@ function Progress({ v }: { v: TrainingVals }) {
             </div>
             <div style={{ maxWidth: 190 }}><Segmented items={v.cardioTabs} size="sm" /></div>
           </div>
-          <svg viewBox="0 0 420 150" preserveAspectRatio="none" style={{ width: '100%', height: 150, marginTop: 20 }} role="img" aria-label="Cardio metric over the selected period">
-            {v.cardioBars.map((b) => <rect key={b.key} x={b.x} y={b.y} width={b.w} height={b.h} fill={b.fill} />)}
-          </svg>
+          <div style={{ marginTop: 20 }}>
+            <BarSeries
+              bars={v.cardioBars} width={420} height={150}
+              hint="Cardio by week — hover to read one"
+            />
+          </div>
           <div style={{ fontSize: 12, color: SOFT, marginTop: 12 }}>
             VO₂ max is estimated by your watch from pace and heart rate, not measured in a lab.
           </div>
@@ -1410,10 +1331,14 @@ function Nutrition({ v }: { v: TrainingVals }) {
           <Eyebrow>Weekly consistency</Eyebrow>
           <span style={{ fontSize: 12, color: SOFT }}>{v.nutritionConsistency}</span>
         </div>
-        <svg viewBox="0 0 560 220" preserveAspectRatio="none" style={{ width: '100%', height: 220, marginTop: 20 }} role="img" aria-label="Daily calorie intake against target over the last 4 weeks">
-          <line x1="0" y1={v.calTargetY} x2="560" y2={v.calTargetY} stroke={PLUM} strokeWidth="0.75" strokeDasharray="4 4" />
-          {v.nutritionBars.map((b) => <rect key={b.key} x={b.x} y={b.y} width={b.w} height={b.h} fill={b.fill} />)}
-        </svg>
+        <div style={{ marginTop: 20 }}>
+          <BarSeries
+            bars={v.nutritionBars} width={560} height={220}
+            hint="Daily intake against target — hover to read a day"
+          >
+            <line x1="0" y1={v.calTargetY} x2="560" y2={v.calTargetY} stroke={PLUM} strokeWidth="0.75" strokeDasharray="4 4" />
+          </BarSeries>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 10, gap: 12 }}>
           <span>4 weeks ago</span><span>Dashed line — {v.nutritionTargetNote}</span><span>Today</span>
         </div>
@@ -1459,6 +1384,46 @@ function EnergySection({ v }: { v: TrainingVals }) {
             </div>
           </div>
 
+          {/* Where the burn goes. BMR, NEAT and EAT are measured; only TEF is modelled. */}
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: RULE }}>
+            <Eyebrow>Where the burn goes</Eyebrow>
+
+            <div style={{ display: 'flex', height: 10, marginTop: 14, background: TRACK, overflow: 'hidden' }}>
+              {e.components.map((c, i) => (
+                <div
+                  key={c.key}
+                  title={`${c.label} — ${c.valueLabel} kcal`}
+                  style={{
+                    width: `${c.share}%`,
+                    background: [PLUM, '#8E6FA3', PINK, PINK_LINE][i],
+                    transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                  }}
+                />
+              ))}
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              {e.components.map((c, i) => (
+                <div key={c.key} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                  gap: 12, padding: '10px 0', borderBottom: RULE_SOFT,
+                }}>
+                  <span style={{ display: 'flex', alignItems: 'baseline', gap: 9, minWidth: 0 }}>
+                    <span style={{ width: 9, height: 9, background: [PLUM, '#8E6FA3', PINK, PINK_LINE][i], flexShrink: 0 }} />
+                    <span style={{ fontSize: 12.5, color: INK }}>{c.label}</span>
+                    <span style={{ fontSize: 11, color: MUTED }}>{c.note}</span>
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{c.valueLabel}</span>
+                    <span style={{ fontSize: 11, color: MUTED, minWidth: 32, textAlign: 'right' }}>{c.pct}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ fontSize: 11.5, color: SOFT, marginTop: 12, lineHeight: 1.6 }}>{e.componentsNote}</div>
+          </div>
+
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: RULE }}>
             <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
               Projected from the log
@@ -1484,11 +1449,12 @@ function EnergySection({ v }: { v: TrainingVals }) {
             </span>
           </div>
 
-          <svg viewBox="0 0 560 200" preserveAspectRatio="none" style={{ width: '100%', height: 200, marginTop: 18 }}
-            role="img" aria-label="Daily energy balance, deficit below the line and surplus above">
-            <line x1="0" y1={e.zeroY} x2="560" y2={e.zeroY} stroke="rgba(34,28,36,0.22)" strokeWidth="0.75" />
-            {e.bars.map((b) => <rect key={b.key} x={b.x} y={b.y} width={b.w} height={b.h} fill={b.fill} />)}
-          </svg>
+          <div style={{ marginTop: 18 }}>
+            <BarSeries
+              bars={e.bars} width={560} height={200} zeroY={e.zeroY}
+              hint="Daily balance — hover to read a day"
+            />
+          </div>
           <div style={{ fontSize: 11.5, color: MUTED, marginTop: 10 }}>{e.coverageNote}</div>
 
           {e.reconciliation && (
@@ -1555,11 +1521,13 @@ function Recovery({ v }: { v: TrainingVals }) {
         </div>
         <div style={{ padding: PANEL_PAD, background: TINT }}>
           <Eyebrow>Sleep duration — last {v.sleepCount} night{v.sleepCount === 1 ? '' : 's'}</Eyebrow>
-          <svg viewBox="0 0 600 230" preserveAspectRatio="none" style={{ width: '100%', height: 230, marginTop: 18 }} role="img" aria-label="Sleep duration over recent nights against the target">
-            <line x1="0" y1={v.sleepTargetY} x2="600" y2={v.sleepTargetY} stroke="rgba(0,0,0,0.18)" strokeWidth="0.75" strokeDasharray="4 4" />
-            {v.sleepArea && <path d={v.sleepArea} fill={PINK_FILL} />}
-            {v.sleepBig && <path d={v.sleepBig} fill="none" stroke={PINK} strokeWidth="1.5" />}
-          </svg>
+          <div style={{ marginTop: 18 }}>
+            <LineSeries
+              marks={v.sleepMarks} path={v.sleepBig} area={v.sleepArea}
+              width={600} height={230} stroke={PINK} fill={PINK_FILL}
+              hint={`Last ${v.sleepCount} nights — hover to read one`}
+            />
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 8, gap: 12 }}>
             <span>{v.sleepCount} nights ago</span><span>8h target</span><span>Last night</span>
           </div>

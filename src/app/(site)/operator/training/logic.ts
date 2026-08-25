@@ -353,9 +353,13 @@ export type BodyPoint = {
   key: string;
   x: number;
   y: number;
+  cx: number;
+  cy: number;
   value: number;
   valueLabel: string;
   dateLabel: string;
+  label: string;
+  sub: string;
 };
 
 export type TrainingProps = { operatorName: string };
@@ -627,13 +631,17 @@ export function deriveVals(
     const v = d.nutrition.dietaryEnergyKcal ?? 0;
     const ceiling = Math.max(TARGETS.calorieTarget * 1.6, ...calWindow.map((x) => x.nutrition.dietaryEnergyKcal ?? 0));
     const h = v > 0 ? Math.max(6, (v / ceiling) * 200) : 0;
+    const step = 560 / Math.max(1, calWindow.length);
     return {
       key: d.date,
-      x: (i * (560 / Math.max(1, calWindow.length))).toFixed(1),
-      y: (208 - h).toFixed(0),
-      w: (560 / Math.max(1, calWindow.length)) * 0.72,
-      h: h.toFixed(0),
+      x: i * step,
+      cx: i * step + step * 0.36,
+      y: 208 - h,
+      w: step * 0.72,
+      h,
       fill: v > 0 && Math.abs(v - TARGETS.calorieTarget) <= TARGETS.calorieTarget * 0.1 ? PLUM : PINK_SOFT,
+      label: v > 0 ? `${nf(Math.round(v))} kcal` : 'Nothing logged',
+      sub: fmtDate(d.date, true),
     };
   });
   const calTargetY = (() => {
@@ -673,10 +681,11 @@ export function deriveVals(
 
   /* recovery -------------------------------------------------------------- */
 
-  const sleepSeries = src.days
-    .slice(-30)
-    .map((d) => (d.sleep.totalMin ?? 0) / 60)
-    .filter((v) => v > 0);
+  const sleepNights = src.days
+    .slice(-60)
+    .filter((d) => (d.sleep.totalMin ?? 0) > 0)
+    .slice(-30);
+  const sleepSeries = sleepNights.map((d) => (d.sleep.totalMin as number) / 60);
 
   const recoveryScore = rows.find((r) => r.label === 'Recovery')?.score ?? null;
   const recoveryPrev = rows.find((r) => r.label === 'Recovery')?.prev ?? null;
@@ -1073,15 +1082,25 @@ export function deriveVals(
 
   const cardioMax = Math.max(...cardioWeekly, 0.0001);
   const cardioStep = 420 / Math.max(1, cardioWeekly.length);
+  const cardioUnitFor: Record<CardioMetric, (n: number) => string> = {
+    Distance: (n) => `${nf(n, 1)} km`,
+    Pace: (n) => `${fmtPace(n)} /km`,
+    Duration: (n) => fmtMinutes(n),
+    'Heart rate': (n) => `${nf(Math.round(n))} bpm`,
+  };
+  const bucketWidth = (nowWin.to - nowWin.from) / Math.max(1, cardioWeekly.length);
   const cardioBars = cardioWeekly.map((v, i) => {
     const h = (v / cardioMax) * 128;
     return {
-      key: i,
-      x: (i * cardioStep + cardioStep * 0.16).toFixed(1),
-      y: (138 - h).toFixed(1),
-      w: (cardioStep * 0.68).toFixed(1),
-      h: Math.max(0, h).toFixed(1),
+      key: String(i),
+      x: i * cardioStep + cardioStep * 0.16,
+      cx: i * cardioStep + cardioStep * 0.5,
+      y: 138 - h,
+      w: cardioStep * 0.68,
+      h: Math.max(0, h),
       fill: i === cardioWeekly.length - 1 ? PLUM : PINK_SOFT,
+      label: v ? cardioUnitFor[st.cardio](v) : 'Nothing recorded',
+      sub: `${fmtDate(new Date(nowWin.from + i * bucketWidth))} – ${fmtDate(new Date(nowWin.from + (i + 1) * bucketWidth - DAY))}`,
     };
   });
 
@@ -1383,7 +1402,11 @@ export function deriveVals(
 
   /* energy balance -------------------------------------------------------- */
 
-  const energy = buildEnergy(energyDays(nowStats.days), inRangeWeigh.length >= 4 ? inRangeWeigh : weighAll.slice(-60), spanDays);
+  const energy = buildEnergy(
+    energyDays(nowStats.days, nowStats.workouts),
+    inRangeWeigh.length >= 4 ? inRangeWeigh : weighAll.slice(-60),
+    spanDays,
+  );
 
   /* activities ------------------------------------------------------------ */
 
@@ -1431,9 +1454,13 @@ export function deriveVals(
       key: `${p.date}-${p.value}`,
       x: Number(x(p.date).toFixed(1)),
       y: Number(y(p.value).toFixed(1)),
+      cx: Number(x(p.date).toFixed(1)),
+      cy: Number(y(p.value).toFixed(1)),
       value: p.value,
       valueLabel: `${nf(p.value, dp)} ${bodyUnit}`,
       dateLabel: fmtDate(p.date, true),
+      label: `${nf(p.value, dp)} ${bodyUnit}`,
+      sub: fmtDate(p.date, true),
     }));
 
     const path = points.map((p, i) => `${i ? 'L' : 'M'}${p.x} ${p.y}`).join(' ');
@@ -1584,6 +1611,19 @@ export function deriveVals(
     recoveryNeedsAttention: recoveryScore !== null && recoveryScore < 70,
     recoveryStats,
     recoveryRows,
+    sleepMarks: (() => {
+      if (sleepSeries.length < 2) return [];
+      const lo = Math.min(...sleepSeries);
+      const hi = Math.max(...sleepSeries);
+      const span = hi - lo || 1;
+      return sleepNights.map((d, i) => ({
+        key: d.date,
+        cx: (i / (sleepSeries.length - 1)) * 600,
+        cy: 20 + (1 - (sleepSeries[i] - lo) / span) * (210 - 40),
+        label: fmtHours(sleepSeries[i]),
+        sub: fmtDate(d.date, true),
+      }));
+    })(),
     sleepPath: linePath(sleepSeries, 320, 60, 6),
     sleepBig: linePath(sleepSeries, 600, 210, 20),
     sleepArea: areaPath(sleepSeries, 600, 210, 20),
