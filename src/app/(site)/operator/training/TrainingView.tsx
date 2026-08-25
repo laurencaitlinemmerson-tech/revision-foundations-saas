@@ -1312,75 +1312,133 @@ function Workouts({ v }: { v: TrainingVals }) {
       </div>
     );
   }
+
+  // Grouped by week, so the list reads as a training history rather than an
+  // undifferentiated stack — a quiet fortnight looks quiet.
+  const weeks: Array<{ key: string; label: string; rows: typeof v.workouts }> = [];
+  for (const w of v.workouts) {
+    const last = weeks[weeks.length - 1];
+    if (last && last.key === w.week) last.rows.push(w);
+    else weeks.push({ key: w.week, label: w.weekLabel, rows: [w] });
+  }
+
   return (
     <div style={{ marginTop: 40 }}>
       <ActivityStrip v={v} />
 
-      <div className="training-pair" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 32, alignItems: 'start', marginTop: SECTION_GAP }}>
-      <div>
-        <div style={{ ...eyebrow, paddingBottom: 12, borderBottom: RULE }}>{v.workoutsHeading}</div>
-        {v.workouts.map((w) => (
-          <button
-            key={w.key}
-            type="button"
-            onClick={w.go}
-            aria-pressed={w.active}
-            className="hv-row"
-            style={{
-              all: 'unset', cursor: 'pointer', display: 'block', width: '100%', boxSizing: 'border-box',
-              padding: '24px 20px 24px 0', borderBottom: RULE_SOFT,
-              background: w.active ? TINT : 'transparent', transition: 'background 150ms',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-              <span style={{ ...display(20), paddingLeft: w.active ? 16 : 0 }}>{w.name}</span>
-              <span style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: MUTED }}>{w.date}</span>
-            </div>
-            <div style={{ display: 'flex', gap: 22, marginTop: 10, fontSize: 12.5, color: SOFT, flexWrap: 'wrap', paddingLeft: w.active ? 16 : 0 }}>
-              {w.meta.map((m) => <span key={m}>{m}</span>)}
-              <span style={{ color: w.prColor }}>{w.prs}</span>
-            </div>
-          </button>
-        ))}
-      </div>
-      {v.sel && (
-        <div style={{ ...card, padding: CARD_PAD, position: 'sticky', top: 32 }}>
-          <Eyebrow>{v.sel.date}</Eyebrow>
-          <h2 style={{ ...display(28), margin: '10px 0 0' }}>{v.sel.name}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', marginTop: 22, borderTop: RULE, borderBottom: RULE }}>
-            {v.sel.stats.map((s) => (
-              <div key={s.label} style={{ padding: '20px 14px 20px 0' }}>
-                <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>{s.label}</div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: INK, marginTop: 5 }}>{s.value}</div>
+      <div className="training-pair" style={{
+        display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 48,
+        alignItems: 'start', marginTop: SECTION_GAP,
+      }}>
+        <div>
+          <div style={{ ...eyebrow, paddingBottom: 14, borderBottom: RULE }}>{v.workoutsHeading}</div>
+
+          {weeks.map((wk) => (
+            <div key={wk.key}>
+              <div style={{
+                fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: MUTED, padding: '26px 0 10px',
+              }}>
+                {wk.label}
               </div>
-            ))}
-          </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
-            <thead>
-              <tr>
-                <th style={{ ...th(), paddingLeft: 0 }}>Exercise</th>
-                <th style={th('right')}>Sets × reps</th>
-                <th style={th('right')}>Weight</th>
-                <th style={{ ...th('right'), paddingRight: 0 }}>Volume</th>
-              </tr>
-            </thead>
-            <tbody>
-              {v.sel.rows.map((s, i) => (
-                <tr key={`${s.name}-${i}`}>
-                  <td style={{ ...td, padding: `${CELL_Y}px 10px ${CELL_Y}px 0`, fontSize: 13.5, color: INK }}>
-                    {s.name}
-                    {s.pr && <span style={{ color: PINK, fontSize: 11, marginLeft: 6 }}>{s.pr}</span>}
-                  </td>
-                  <td style={{ ...td, padding: `${CELL_Y}px 10px`, textAlign: 'right' }}>{s.sets}</td>
-                  <td style={{ ...td, padding: `${CELL_Y}px 10px`, textAlign: 'right' }}>{s.weight}</td>
-                  <td style={{ ...td, padding: `${CELL_Y}px 0 ${CELL_Y}px 10px`, textAlign: 'right' }}>{s.volume}</td>
-                </tr>
+
+              {wk.rows.map((w) => (
+                <button
+                  key={w.key}
+                  type="button"
+                  onClick={w.go}
+                  aria-pressed={w.active}
+                  className="hv-row"
+                  style={{
+                    all: 'unset', cursor: 'pointer', display: 'block', width: '100%',
+                    boxSizing: 'border-box', padding: '15px 14px 15px 0',
+                    borderBottom: RULE_SOFT, transition: 'background 150ms',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                    {/* A thin rule in the session's own colour, marking the
+                        selected row without shifting the layout under it. */}
+                    <span style={{
+                      width: 2, alignSelf: 'stretch', minHeight: 30, flexShrink: 0,
+                      background: w.active ? (w.kind === 'Cardio' ? PINK : PLUM) : 'transparent',
+                    }} />
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+                        <span style={{ ...display(19), color: w.active ? PLUM : INK }}>{w.name}</span>
+                        <span style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: MUTED, flexShrink: 0 }}>
+                          {w.date}
+                        </span>
+                      </span>
+
+                      <span style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 12, color: SOFT, flexWrap: 'wrap' }}>
+                        {w.meta.map((m) => <span key={m}>{m}</span>)}
+                        {w.prs !== 'No PRs' && <span style={{ color: w.prColor }}>{w.prs}</span>}
+                      </span>
+
+                      {/* Effort, scaled against the hardest session in view. */}
+                      <span style={{ display: 'block', height: 2, background: TRACK, marginTop: 10 }}>
+                        <span style={{
+                          display: 'block', height: 2, width: w.effort,
+                          background: w.kind === 'Cardio' ? PINK : PLUM,
+                          opacity: w.active ? 1 : 0.5,
+                          transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                        }} />
+                      </span>
+                    </span>
+                  </div>
+                </button>
               ))}
-            </tbody>
-          </table>
-          <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '16px 0 0' }}>{v.sel.note}</p>
+            </div>
+          ))}
         </div>
-      )}
+
+        {v.sel && (
+          <div style={{ position: 'sticky', top: 32 }}>
+            <Eyebrow>{v.sel.date}</Eyebrow>
+            <h2 style={{ ...display(30), margin: '12px 0 0' }}>{v.sel.name}</h2>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+              marginTop: 24, paddingTop: 20, borderTop: RULE,
+            }}>
+              {v.sel.stats.map((st2) => (
+                <div key={st2.label}>
+                  <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
+                    {st2.label}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: INK, marginTop: 6 }}>
+                    {st2.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* A list rather than a four-column table: most sessions have two or
+                three values worth reading, and a table pads the rest with dashes. */}
+            <div style={{ marginTop: 26 }}>
+              {v.sel.rows.map((r, i) => (
+                <div key={`${r.name}-${i}`} style={{ padding: '13px 0', borderBottom: RULE_SOFT }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14 }}>
+                    <span style={{ fontSize: 13.5, color: INK }}>
+                      {r.name}
+                      {r.pr && <span style={{ color: PINK, fontSize: 10.5, marginLeft: 8, letterSpacing: '0.08em' }}>{r.pr}</span>}
+                    </span>
+                    <span style={{ fontSize: 12.5, color: SOFT, flexShrink: 0 }}>{r.sets}</span>
+                  </div>
+                  {(r.weight !== '—' || r.volume !== '—') && (
+                    <div style={{ fontSize: 11.5, color: MUTED, marginTop: 4 }}>
+                      {[r.weight, r.volume].filter((x) => x !== '—').join('  ·  ')}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 12.5, fontStyle: 'italic', color: MUTED, margin: '20px 0 0', lineHeight: 1.7 }}>
+              {v.sel.note}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1674,8 +1732,68 @@ function Progress({ v }: { v: TrainingVals }) {
 /* ── Goals ───────────────────────────────────────────────────────────────── */
 
 function Goals({ v }: { v: TrainingVals }) {
+  const j = v.journey;
   return (
     <div style={{ marginTop: 40 }}>
+      {/* The journey leads: it is the one goal with an end rather than a rate. */}
+      <section style={{ paddingBottom: 40, borderBottom: RULE, marginBottom: SECTION_GAP }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 20, flexWrap: 'wrap' }}>
+          <div>
+            <Eyebrow>Fat loss journey</Eyebrow>
+            <h2 style={{ ...display(34), margin: '14px 0 0' }}>
+              {j.startKg} <span style={{ color: MUTED }}>→</span> {j.goalKg} kg
+            </h2>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <Figure value={j.currentKg} style={{ ...display(46, PLUM), lineHeight: 1 }} />
+            <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED, marginTop: 9 }}>
+              kg today
+            </div>
+          </div>
+        </div>
+
+        {/* Distance travelled against distance remaining, on one line. */}
+        <div style={{ marginTop: 28 }}>
+          <div style={{ display: 'flex', height: 12, background: TRACK, overflow: 'hidden' }}>
+            <div style={{
+              width: `${j.pct}%`, background: PLUM,
+              transition: 'width 620ms cubic-bezier(0.4,0,0.2,1)',
+            }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 10, fontSize: 11.5, color: MUTED }}>
+            <span>{j.startKg} kg</span>
+            <span style={{ color: INK }}>{j.pctLabel} of the way</span>
+            <span>{j.goalKg} kg</span>
+          </div>
+        </div>
+
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+          marginTop: 30, paddingTop: 22, borderTop: RULE_SOFT,
+        }}>
+          {[
+            { label: 'Lost so far', value: `${j.lostKg} kg`, colour: INK },
+            { label: 'Still to go', value: `${j.toGoKg} kg`, colour: INK },
+            { label: 'Current rate', value: j.rate, colour: j.rateColor },
+            { label: 'Planned rate', value: j.targetRate, colour: MUTED },
+            { label: 'On plan', value: j.targetEtaLabel, colour: MUTED },
+          ].map((c) => (
+            <div key={c.label} style={{ paddingRight: 18 }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>
+                {c.label}
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: c.colour, marginTop: 6 }}>
+                {c.value}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p style={{ fontSize: 13.5, lineHeight: 1.75, color: SOFT, margin: '22px 0 0', maxWidth: '66ch', textWrap: 'pretty' }}>
+          {j.note}
+        </p>
+      </section>
+
       <div className="training-pair" style={{
         display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: GRID_GAP,
       }}>
@@ -2041,54 +2159,69 @@ function Insights({ v }: { v: TrainingVals }) {
     return <Empty title="No observations yet." note="Insights appear once a source has enough logged days to compare." />;
   }
 
-  // The first observation leads at full width. Ranking them and then rendering
-  // them all identically wastes the ranking.
+  // No cards. Observations are prose, and prose in a box reads as a form field —
+  // these are separated by rules and space instead, the way a column is.
   const [lead, ...rest] = v.insights;
 
   return (
-    <div style={{ marginTop: 40 }}>
-      <article style={{
-        ...card, padding: PANEL_PAD,
-        // A hairline in the tag's colour, so the card is tinted by its subject
-        // without a full coloured panel shouting across the page.
-        borderLeft: `2px solid ${lead.tagColor}`,
-      }}>
-        <Tag label={lead.tag} colour={lead.tagColor} />
-        <h2 style={{ ...display(32), margin: '18px 0 0', maxWidth: '24ch' }}>{lead.title}</h2>
-        <p style={{
-          fontSize: 16, lineHeight: 1.75, color: SOFT, margin: '16px 0 0',
-          maxWidth: '62ch', textWrap: 'pretty',
-        }}>
-          {lead.body}
-        </p>
+    <div style={{ marginTop: 44 }}>
+      <article style={{ paddingBottom: 40, borderBottom: RULE }}>
         <div style={{
-          fontSize: 11.5, color: MUTED, marginTop: 22, paddingTop: 16, borderTop: RULE_SOFT,
+          display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto',
+          gap: 40, alignItems: 'start',
         }}>
-          {lead.source}
+          <div>
+            <Tag label={lead.tag} colour={lead.tagColor} />
+            <h2 style={{ ...display(34), margin: '18px 0 0', maxWidth: '22ch' }}>{lead.title}</h2>
+            <p style={{
+              fontSize: 16.5, lineHeight: 1.8, color: SOFT, margin: '18px 0 0',
+              maxWidth: '58ch', textWrap: 'pretty',
+            }}>
+              {lead.body}
+            </p>
+            <div style={{ fontSize: 11.5, color: MUTED, marginTop: 20 }}>{lead.source}</div>
+          </div>
+
+          {/* The figure the observation turns on, beside the claim rather than
+              buried in it. */}
+          {lead.metric && (
+            <div style={{ textAlign: 'right', minWidth: 130, paddingTop: 4 }}>
+              <div style={{ ...display(46, lead.tagColor), lineHeight: 1 }}>{lead.metric.value}</div>
+              <div style={{
+                fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: MUTED, marginTop: 10, maxWidth: 150, marginLeft: 'auto',
+              }}>
+                {lead.metric.unit}
+              </div>
+            </div>
+          )}
         </div>
       </article>
 
       <div className="training-pair" style={{
         display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-        gap: GRID_GAP, marginTop: GRID_GAP,
+        columnGap: 56, rowGap: 0,
       }}>
         {rest.map((i) => (
-          <article key={i.key} style={{
-            ...card, padding: CARD_PAD, borderLeft: `2px solid ${i.tagColor}`,
-            display: 'flex', flexDirection: 'column',
-          }}>
-            <Tag label={i.tag} colour={i.tagColor} />
-            <h3 style={{ ...display(21), margin: '16px 0 0' }}>{i.title}</h3>
-            <p style={{
-              fontSize: 14, lineHeight: 1.75, color: SOFT, margin: '12px 0 0', textWrap: 'pretty',
-            }}>
+          <article key={i.key} style={{ padding: '32px 0', borderBottom: RULE_SOFT }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20 }}>
+              <Tag label={i.tag} colour={i.tagColor} />
+              {i.metric && (
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: i.tagColor, lineHeight: 1 }}>
+                    {i.metric.value}
+                  </div>
+                  <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED, marginTop: 6 }}>
+                    {i.metric.unit}
+                  </div>
+                </div>
+              )}
+            </div>
+            <h3 style={{ ...display(22), margin: '16px 0 0' }}>{i.title}</h3>
+            <p style={{ fontSize: 14.5, lineHeight: 1.8, color: SOFT, margin: '12px 0 0', textWrap: 'pretty' }}>
               {i.body}
             </p>
-            <div style={{
-              fontSize: 11, color: MUTED, marginTop: 'auto', paddingTop: 18,
-            }}>
-              {i.source}
-            </div>
+            <div style={{ fontSize: 11, color: MUTED, marginTop: 16 }}>{i.source}</div>
           </article>
         ))}
       </div>

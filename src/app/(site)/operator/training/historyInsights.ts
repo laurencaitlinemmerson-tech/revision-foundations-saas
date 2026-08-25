@@ -25,6 +25,12 @@ export type Insight = {
   title: string;
   body: string;
   source: string;
+  /**
+   * The figure the observation turns on, pulled out so the claim and its
+   * evidence sit together. An insight that cannot name a number is usually one
+   * that has not really found anything.
+   */
+  metric?: { value: string; unit: string } | null;
 };
 
 const DAY = 86_400_000;
@@ -110,6 +116,12 @@ function yearOnYear(src: Sources, win: Window): Insight | null {
     title: 'The same stretch, last year',
     body: `Measured over the same calendar days twelve months apart: ${bits.join(', and ')}.`,
     source: 'From the same calendar window in the previous year',
+    metric: nowSteps !== null && thenSteps !== null
+      ? {
+        value: `${((nowSteps - thenSteps) / thenSteps) * 100 >= 0 ? '+' : ''}${(((nowSteps - thenSteps) / thenSteps) * 100).toFixed(0)}%`,
+        unit: 'steps a day',
+      }
+      : { value: String(nowSessions), unit: 'sessions' },
   };
 }
 
@@ -142,6 +154,7 @@ function trainingWeek(src: Sources): Insight | null {
     title: `${top.day} is your training day`,
     body: `Across the last year, ${top.n} of ${total} strength sessions landed on a ${top.day} and only ${bottom.n} on a ${bottom.day}. That is the shape of the week you actually train, which is worth knowing when you plan around it.`,
     source: `From ${total} strength days over 12 months`,
+    metric: { value: `${Math.round((top.n / total) * 100)}%`, unit: `on a ${top.day}` },
   };
 }
 
@@ -177,6 +190,7 @@ function monthRanking(src: Sources): Insight | null {
       : `${ordinal(rank)} busiest month of ${counts.length + 1} on record`,
     body: `${current} session day${current === 1 ? '' : 's'} so far this month, against a median of ${median} across ${counts.length} recorded months. Your best was ${best.n} in ${MONTHS[Number(bm) - 1]} ${by}.`,
     source: `From ${counts.length + 1} months of logged sessions`,
+    metric: { value: ordinal(rank), unit: `of ${counts.length + 1} months` },
   };
 }
 
@@ -214,6 +228,7 @@ function weightTrajectory(src: Sources): Insight | null {
     title: flat ? 'Weight is holding' : `Weight is trending ${direction}`,
     body,
     source: `Least-squares fit over ${readings.length} weigh-ins, 90 days`,
+    metric: { value: `${perWeek < 0 ? '−' : '+'}${nf(Math.abs(perWeek), 2)}`, unit: 'kg a week' },
   };
 }
 
@@ -241,6 +256,7 @@ function sleepAndActivity(src: Sources): Insight | null {
     title: 'Sleep and the next day move together',
     body: `Across ${pairs.length} nights, longer sleep is associated with ${dir} steps the following day — ${strength(r)} relationship (r = ${r.toFixed(2)}). Which way the causation runs is not something this data can tell you: a day that was always going to be busy also shortens the night before it.`,
     source: `From ${pairs.length} nights paired with the following day`,
+    metric: { value: `r ${r.toFixed(2)}`, unit: 'association' },
   };
 }
 
@@ -279,6 +295,7 @@ function streakRecord(src: Sources): Insight | null {
     title: current >= best && current > 1 ? 'Your longest streak, right now' : `Longest streak: ${best} days`,
     body: `${best} consecutive days with a session, ending ${new Date(`${bestEnd}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.${current > 1 ? ` You are on ${current} days now.` : ' Nothing running at the moment.'}`,
     source: `From ${days.length} session days on record`,
+    metric: { value: String(best), unit: 'day best streak' },
   };
 }
 
@@ -298,6 +315,7 @@ function coverage(src: Sources): Insight | null {
     title: `${pct}% of days this year hit the step goal`,
     body: `${active} of ${thisYear.length} recorded days in ${year} reached ${nf(TARGETS.stepGoal * 0.8)} steps or more. The dashboard holds ${nf(src.days.length)} days going back to ${src.days[0]?.date.slice(0, 10)}.`,
     source: `From ${thisYear.length} recorded days in ${year}`,
+    metric: { value: `${pct}%`, unit: 'of days at goal' },
   };
 }
 

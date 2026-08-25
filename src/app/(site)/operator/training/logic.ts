@@ -8,13 +8,14 @@ import {
   AMBER, GREEN, HEAT, MUTED, PINK, PINK_SOFT, PLUM, PLUM_SOFT, ROSE, SOFT,
   TAG_GOOD, TAG_INFO, TAG_WATCH,
 } from './palette';
-import { TARGETS, proteinTargetG } from './targets';
+import { JOURNEY, TARGETS, proteinTargetG } from './targets';
 import { PERIOD_IDS, periodWindows, type PeriodId } from './periods';
 import { historyInsights } from './historyInsights';
 import { buildEnergy, energyDays } from './energy';
 import { buildActivities, prettyType } from './activities';
 import { buildBodyAnalysis } from './bodyAnalysis';
 import { buildRibbon } from './trends';
+import { fitReadings } from '@/lib/fitness/regression';
 import { workoutKindOf } from './workoutKind';
 import { deriveHeadToHead } from './headToHead';
 import type { PeerData } from './peerData';
@@ -199,6 +200,9 @@ export type Session = {
   energy: string;
   prCount: number;
   note: string;
+  minutes: number | null;
+  energyKcal: number | null;
+  kind: string;
   rows: Array<{ name: string; sets: string; weight: string; volume: string; pr: string }>;
 };
 
@@ -250,7 +254,10 @@ function buildSessions(lifts: Lift[], workouts: Workout[]): Session[] {
     .sort((a, b) => b[0].localeCompare(a[0]))
     .map(([date, day]) => {
       const groups = day.lifts.map((l) => muscleGroupOf(l.exercise));
-      const cardioNames = [...new Set(day.workouts.map((w) => w.type ?? 'Workout'))];
+      // The Health export writes "CrossTraining" while the phone sync writes
+      // "Cross Training", so the same activity would otherwise appear twice in
+      // one session's name. Normalise before deduplicating.
+      const cardioNames = [...new Set(day.workouts.map((w) => prettyType(w.type)))];
       const name = day.lifts.length
         ? sessionNameFor(groups)
         : cardioNames.join(' + ') || 'Session';
@@ -305,6 +312,10 @@ function buildSessions(lifts: Lift[], workouts: Workout[]): Session[] {
         energy: energy > 0 ? `${nf(Math.round(energy))} kcal` : DASH,
         prCount,
         note: notes.join(' ') || 'No note on this session.',
+        minutes: minutes || null,
+        energyKcal: energy || null,
+        kind: day.lifts.length ? 'Strength'
+          : day.workouts.some((w) => workoutKindOf(w) === 'cardio') ? 'Cardio' : 'Strength',
         rows: [...liftRows, ...cardioRows],
       };
     });
@@ -558,6 +569,14 @@ export function deriveVals(
     go: () => set({ body: label }),
     active: st.body === label,
   }));
+
+  const latest2 = <K extends keyof WeighIn>(k: K) => {
+    for (let i = weighAll.length - 1; i >= 0; i--) {
+      const v = scaleVal(weighAll[i][k] as number);
+      if (v !== null) return v;
+    }
+    return null;
+  };
 
   const latest = <K extends keyof WeighIn>(k: K) => {
     for (let i = weighAll.length - 1; i >= 0; i--) {
@@ -937,6 +956,21 @@ export function deriveVals(
   const selIndex = Math.min(st.workout, Math.max(0, sessionList.length - 1));
   const selected = sessionList[selIndex] ?? null;
 
+  // Effort per session, scaled against the hardest in view, so the list carries
+  // shape rather than being a uniform stack of identical rows.
+  const effortOf = (s: Session) => {
+    const mins = s.minutes ?? 0;
+    const kcal = s.energyKcal ?? 0;
+    return kcal || mins * 6;
+  };
+  const peakEffort = Math.max(1, ...sessionList.map(effortOf));
+
+  const weekOf = (iso: string) => {
+    const d = new Date(`${iso}T12:00:00Z`);
+    const monday = new Date(d.getTime() - ((d.getUTCDay() + 6) % 7) * DAY);
+    return monday.toISOString().slice(0, 10);
+  };
+
   const workouts = sessionList.map((s, i) => ({
     key: s.key,
     name: s.name,
@@ -951,6 +985,18 @@ export function deriveVals(
     prColor: s.prCount ? PINK : MUTED,
     go: () => set({ workout: i }),
     active: selIndex === i,
+    effort: `${Math.max(4, (effortOf(s) / peakEffort) * 100).toFixed(0)}%`,
+    kind: s.kind,
+    week: weekOf(s.date),
+    weekLabel: (() => {
+      const monday = weekOf(s.date);
+      const thisMonday = weekOf(todayISO());
+      if (monday === thisMonday) return 'This week';
+      if (monday === new Date(new Date(`${thisMonday}T12:00:00Z`).getTime() - 7 * DAY).toISOString().slice(0, 10)) {
+        return 'Last week';
+      }
+      return `Week of ${fmtDate(monday)}`;
+    })(),
   }));
 
   const sel = selected
@@ -1292,7 +1338,10 @@ export function deriveVals(
   /* insights -------------------------------------------------------------- */
 
   const spanLabel = `${fmtDate(new Date(nowWin.from))} – ${fmtDate(new Date(nowWin.to))}`;
-  const insights: Array<{ key: string; tag: string; tagColor: string; title: string; body: string; source: string }> = [];
+  const insights: Array<{
+    key: string; tag: string; tagColor: string; title: string; body: string; source: string;
+    metric?: { value: string; unit: string } | null;
+  }> = [];
 
   if (nowStats.lifts.length) {
     const d = pctDelta(volumeTonnes || null, prevVolumeTonnes || null);
@@ -1303,6 +1352,7 @@ export function deriveVals(
       title: d.color === GREEN ? 'Strength volume is trending up' : d.text === 'held' ? 'Strength volume is holding' : 'Strength volume is down',
       body: `You moved ${nf(nowStats.volumeKg)} kg across ${nowStats.liftSessionDays} lift session${nowStats.liftSessionDays === 1 ? '' : 's'} — ${d.text === DASH ? 'no comparable previous period' : `${d.text} against ${againstLabel}`}.${exerciseRows[0]?.e1rmKg ? ` Best estimated one-rep max is ${nf(exerciseRows[0].e1rmKg, 1)} kg on the ${exerciseRows[0].name.toLowerCase()}.` : ''}`,
       source: `From ${nowStats.lifts.length} logged lift${nowStats.lifts.length === 1 ? '' : 's'}, ${spanLabel}`,
+      metric: { value: `${nf(Math.round(volumeTonnes))}t`, unit: 'lifted' },
     });
   }
 
@@ -1315,6 +1365,7 @@ export function deriveVals(
       title: 'Strength is scored on sessions, not volume',
       body: `${nowStats.strengthSessionDays} strength session${nowStats.strengthSessionDays === 1 ? '' : 's'} against ${nowStats.plannedSessions} planned — ${d.text === DASH ? 'no comparable previous period' : `${d.text} on ${againstLabel}`}. Your sets and loads are recorded in your coaching app and never reach this project, so volume and personal bests cannot be shown.`,
       source: `From ${nowStats.workouts.length} synced workout${nowStats.workouts.length === 1 ? '' : 's'}, ${spanLabel}`,
+      metric: { value: String(nowStats.strengthSessionDays), unit: `of ${nowStats.plannedSessions} planned` },
     });
   }
 
@@ -1335,6 +1386,7 @@ export function deriveVals(
         ? `${nowStats.sessionDays} sessions against ${nowStats.plannedSessions} planned — ${extra} more than the plan asks for${gapNote}.`
         : `${nowStats.sessionDays} of ${nowStats.plannedSessions} planned sessions completed — ${pct}% adherence${gapNote}.`,
       source: `From the session log, ${spanLabel}`,
+      metric: { value: `${pct}%`, unit: 'adherence' },
     });
   }
 
@@ -1347,6 +1399,7 @@ export function deriveVals(
       title: down ? 'Recovery could improve' : 'Recovery is steady',
       body: `Average sleep is ${fmtHours(nowStats.avgSleepH)}${sleepDelta.text === 'held' ? `, unchanged on ${againstLabel}` : `, ${sleepDelta.text} on ${againstLabel}`}${nowStats.avgHrv === null ? '' : `, and HRV is ${nf(nowStats.avgHrv)} ms (${hrvDelta.text})`}.`,
       source: `From ${nowStats.days.filter((d) => (d.sleep.totalMin ?? 0) > 0).length} nights of sleep data`,
+      metric: { value: fmtHours(nowStats.avgSleepH), unit: 'a night' },
     });
   }
 
@@ -1360,6 +1413,7 @@ export function deriveVals(
       title: 'What the scale is showing',
       body: `${st.body} moved from ${nf(bodyFirst, 1)} to ${nf(bodyLast, 1)} ${bodyUnit} across this window.${leanNow !== null && leanStart !== null ? ` Lean mass went from ${nf(leanStart, 1)} to ${nf(leanNow, 1)} kg over the same span, so the change is in composition as well as total.` : ''}`,
       source: `From ${inRangeWeigh.length || weighSeries.length} weigh-in${(inRangeWeigh.length || weighSeries.length) === 1 ? '' : 's'}`,
+      metric: bodyLast === null ? null : { value: `${nf(bodyLast, 1)}`, unit: bodyUnit },
     });
   }
 
@@ -1373,6 +1427,7 @@ export function deriveVals(
         : 'Calories are the gap, not protein',
       body: `Calories landed within ${nf(TARGETS.calorieTarget * 0.1)} kcal of the ${nf(TARGETS.calorieTarget)} target on ${nowStats.calOnTarget} of ${nowStats.nutritionDays} logged days. Protein averaged ${num(nowStats.avgProtein)} g against a ${nf(proteinTarget)} g target.`,
       source: `From ${nowStats.nutritionDays} logged day${nowStats.nutritionDays === 1 ? '' : 's'}`,
+      metric: { value: `${nowStats.calOnTarget}/${nowStats.nutritionDays}`, unit: 'days on target' },
     });
   }
 
@@ -1393,6 +1448,7 @@ export function deriveVals(
       title: 'Not enough data yet',
       body: `${d} has nothing logged in ${rangeLabel}, so it is not being scored and is not pulling the overall figure down.`,
       source: 'Waiting on data from this source',
+      metric: null,
     });
   }
 
@@ -1515,6 +1571,66 @@ export function deriveVals(
   })();
 
   /* chrome ---------------------------------------------------------------- */
+
+  /* the fat loss journey -------------------------------------------------- */
+
+  const journey = (() => {
+    const latest = latest2('weight');
+    const start = JOURNEY.startKg;
+    const goal = JOURNEY.goalKg;
+    const span = start - goal;
+
+    // Progress is measured from the declared start, so an older weigh-in
+    // arriving in an import cannot rewrite where this began.
+    const lost = latest === null ? null : start - latest;
+    const pct = lost === null || span <= 0 ? null : Math.max(0, Math.min(100, (lost / span) * 100));
+    const toGo = latest === null ? null : latest - goal;
+
+    // Rate from the fitted trend over the journey so far, not first-vs-last.
+    const sinceStart = weighAll.filter(
+      (r) => r.weight > 0 && r.date.slice(0, 10) >= JOURNEY.startDate,
+    );
+    const fit = sinceStart.length >= 4
+      ? fitReadings(sinceStart.map((r) => ({ date: r.date.slice(0, 10), weight: r.weight })))
+      : null;
+    const perWeek = fit ? fit.slope * 7 : null;
+
+    // Only project when the weight is actually moving toward the goal.
+    const weeksLeft = perWeek !== null && perWeek < -0.01 && toGo !== null && toGo > 0
+      ? toGo / Math.abs(perWeek)
+      : null;
+    const eta = weeksLeft === null
+      ? null
+      : new Date(Date.now() + weeksLeft * 7 * DAY);
+
+    const targetWeeks = span > 0 ? span / JOURNEY.targetKgPerWeek : 0;
+    const targetEta = new Date(
+      new Date(`${JOURNEY.startDate}T12:00:00Z`).getTime() + targetWeeks * 7 * DAY,
+    );
+
+    return {
+      startKg: nf(start, 1),
+      goalKg: nf(goal, 1),
+      currentKg: latest === null ? DASH : nf(latest, 1),
+      lostKg: lost === null ? DASH : `${lost < 0 ? '+' : ''}${nf(Math.abs(lost), 1)}`,
+      toGoKg: toGo === null ? DASH : nf(Math.max(0, toGo), 1),
+      pct: pct === null ? 0 : pct,
+      pctLabel: pct === null ? DASH : `${pct.toFixed(0)}%`,
+      rate: perWeek === null ? DASH : `${perWeek < 0 ? '−' : '+'}${nf(Math.abs(perWeek), 2)} kg/wk`,
+      rateColor: perWeek === null ? MUTED : perWeek < -0.01 ? GREEN : perWeek > 0.01 ? ROSE : MUTED,
+      readings: sinceStart.length,
+      etaLabel: eta ? fmtDate(eta, true) : null,
+      targetRate: `${nf(JOURNEY.targetKgPerWeek, 1)} kg/wk`,
+      targetEtaLabel: fmtDate(targetEta, true),
+      note: latest === null
+        ? 'No weigh-in yet.'
+        : sinceStart.length < 4
+          ? `Started ${fmtDate(JOURNEY.startDate, true)} at ${nf(start, 1)} kg. A rate needs at least four weigh-ins since then — there ${sinceStart.length === 1 ? 'is' : 'are'} ${sinceStart.length}.`
+          : eta
+            ? `At the current rate, ${nf(goal, 1)} kg lands around ${fmtDate(eta, true)}. At the planned ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week it would be ${fmtDate(targetEta, true)}.`
+            : `Weight is not currently moving toward ${nf(goal, 1)} kg, so there is nothing honest to project from. At the planned ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week the goal would land ${fmtDate(targetEta, true)}.`,
+    };
+  })();
 
   /* the opened day -------------------------------------------------------- */
 
@@ -1995,6 +2111,7 @@ export function deriveVals(
     ribbon,
     calendar,
     dayDetail,
+    journey,
 
     /* body composition */
     bodyAnalysis,

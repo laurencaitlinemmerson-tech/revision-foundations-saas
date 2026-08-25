@@ -34,14 +34,42 @@ export type ActivityRow = {
   history: number[];
 };
 
+/**
+ * The same activity under two source names.
+ *
+ * The Health export writes Apple's raw identifiers — Walking, Running, Cycling —
+ * while Health Auto Export writes the display names the Fitness app shows,
+ * "Outdoor Walk" and the like. They are the same training, and leaving both
+ * makes a session read as "Walking + Outdoor Walk" and splits its history across
+ * two rows. Indoor and outdoor are folded together deliberately: nothing on this
+ * dashboard treats them differently.
+ */
+const ALIASES: Array<[RegExp, string]> = [
+  [/^(outdoor|indoor) walk$/i, 'Walking'],
+  [/^(outdoor|indoor) run$/i, 'Running'],
+  [/^(outdoor|indoor) cycle$/i, 'Cycling'],
+  [/^(outdoor|indoor) rowing$/i, 'Rowing'],
+  [/^(pool|open water) swim$/i, 'Swimming'],
+  [/^traditional strength training$/i, 'Strength Training'],
+  [/^functional strength training$/i, 'Functional Strength'],
+];
+
 /** Apple's activity names arrive camel-cased from the export. */
 export function prettyType(raw: string | null): string {
   if (!raw) return 'Workout';
-  return raw
+  const cleaned = raw
     .replace(/^HKWorkoutActivityType/, '')
+    // "CrossTraining" from the Health export and "Cross Training" from the phone
+    // sync are the same activity, and both have to land on the same string.
     .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\s+/g, ' ')
     .replace(/\bHiit\b/i, 'HIIT')
     .trim();
+
+  for (const [pattern, name] of ALIASES) {
+    if (pattern.test(cleaned)) return name;
+  }
+  return cleaned;
 }
 
 const monthsIn = (spanDays: number) => Math.max(0.25, spanDays / 30.437);

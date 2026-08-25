@@ -29,6 +29,27 @@ export const TARGETS = {
   weeklyVolumeKg: 12_000,
 } as const;
 
+/**
+ * The fat loss journey.
+ *
+ * Deliberately anchored to an explicit start rather than derived from the
+ * earliest weigh-in on record. A derived start slides every time an older
+ * reading is imported, and it cannot tell a fresh attempt apart from the
+ * scattered history behind it — progress would appear to reset for reasons
+ * that have nothing to do with what happened.
+ */
+export const JOURNEY = {
+  /** Where this attempt began. */
+  startKg: 88.2,
+  startDate: '2026-08-26',
+  goalKg: 68,
+  /**
+   * A rate to plan against. Roughly 0.5–1% of bodyweight a week is the range
+   * usually held to preserve lean tissue; this sits at the gentle end.
+   */
+  targetKgPerWeek: 0.5,
+} as const;
+
 /** Protein target in grams for a given bodyweight, rounded to something sayable. */
 export function proteinTargetG(weightKg: number | null): number {
   if (!weightKg) return 130;
