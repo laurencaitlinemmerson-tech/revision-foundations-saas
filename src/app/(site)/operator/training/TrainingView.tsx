@@ -1,6 +1,6 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
   AMBER, CARD, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
@@ -111,6 +111,93 @@ function Bar({ pct, color = PLUM, height = 4 }: { pct: string; color?: string; h
   return (
     <div style={{ height, background: TRACK, marginTop: 8 }}>
       <div style={{ height, width: pct, background: color }} />
+    </div>
+  );
+}
+
+/**
+ * The body-composition trend.
+ *
+ * Points arrive already positioned by date rather than by index, so an irregular
+ * run of weigh-ins draws the shape it actually has. Hovering reads a point back:
+ * the nearest one horizontally, so it stays usable when readings cluster.
+ */
+function TrendChart({
+  points, path, area, ariaLabel,
+}: {
+  points: TrainingVals['bodyPoints'];
+  path: string;
+  area: string;
+  ariaLabel: string;
+}) {
+  const [active, setActive] = useState<number | null>(null);
+  const W = 680;
+  const H = 166;
+
+  const pick = (clientX: number, rect: DOMRect) => {
+    if (!points.length) return null;
+    const x = ((clientX - rect.left) / rect.width) * W;
+    let best = 0;
+    for (let i = 1; i < points.length; i++) {
+      if (Math.abs(points[i].x - x) < Math.abs(points[best].x - x)) best = i;
+    }
+    return best;
+  };
+
+  const p = active === null ? null : points[active] ?? null;
+
+  return (
+    <div style={{ position: 'relative', marginTop: 22 }}>
+      <svg
+        viewBox={`0 0 ${W} ${H + 24}`}
+        preserveAspectRatio="none"
+        style={{ width: '100%', height: 190, display: 'block', touchAction: 'pan-y' }}
+        role="img"
+        aria-label={ariaLabel}
+        onMouseLeave={() => setActive(null)}
+        onMouseMove={(e) => setActive(pick(e.clientX, e.currentTarget.getBoundingClientRect()))}
+        onTouchStart={(e) => setActive(pick(e.touches[0].clientX, e.currentTarget.getBoundingClientRect()))}
+        onTouchMove={(e) => setActive(pick(e.touches[0].clientX, e.currentTarget.getBoundingClientRect()))}
+        onTouchEnd={() => setActive(null)}
+      >
+        <g stroke="rgba(34,28,36,0.06)" strokeWidth="0.5">
+          <line x1="0" y1="24" x2={W} y2="24" />
+          <line x1="0" y1="83" x2={W} y2="83" />
+          <line x1="0" y1="142" x2={W} y2="142" />
+        </g>
+        {area && <path d={area} fill={PLUM_FILL_FAINT} stroke="none" />}
+        {path && <path d={path} fill="none" stroke={PLUM} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
+
+        {/* Every reading is marked, so a cluster reads as a cluster. */}
+        {points.map((pt) => (
+          <circle key={pt.key} cx={pt.x} cy={pt.y} r="2" fill={PLUM} opacity={0.35} />
+        ))}
+
+        {p && (
+          <g>
+            <line x1={p.x} y1="0" x2={p.x} y2={H} stroke={PLUM} strokeWidth="0.75" strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
+            <circle cx={p.x} cy={p.y} r="4" fill={PLUM} />
+          </g>
+        )}
+      </svg>
+
+      {/* Read out beside the chart rather than in it, so the SVG can stay
+          non-uniformly scaled without stretching the type. */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+        gap: 12, marginTop: 6, minHeight: 18,
+      }}>
+        {p ? (
+          <>
+            <span style={{ fontSize: 12, color: INK }}>{p.valueLabel}</span>
+            <span style={{ fontSize: 11, color: MUTED }}>{p.dateLabel}</span>
+          </>
+        ) : (
+          <span style={{ fontSize: 11, color: MUTED, fontStyle: 'italic' }}>
+            Hover or drag across the chart to read a weigh-in.
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -408,18 +495,18 @@ function Dashboard({ v }: { v: TrainingVals }) {
             </div>
             <Segmented items={v.bodyTabs} size="sm" />
           </div>
-          <svg viewBox="0 0 680 190" preserveAspectRatio="none" style={{ width: '100%', height: 190, marginTop: 22 }} role="img" aria-label="Body composition trend over the selected period">
-            <g stroke="rgba(0,0,0,0.06)" strokeWidth="0.5">
-              <line x1="0" y1="24" x2="680" y2="24" />
-              <line x1="0" y1="83" x2="680" y2="83" />
-              <line x1="0" y1="142" x2="680" y2="142" />
-            </g>
-            {v.bodyArea && <path d={v.bodyArea} fill={PLUM_FILL_FAINT} stroke="none" />}
-            {v.bodyPath && <path d={v.bodyPath} fill="none" stroke={PLUM} strokeWidth="1.5" />}
-          </svg>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 8 }}>
-            <span>{v.bodyStart}</span><span>{v.bodyEnd}</span>
+          <TrendChart
+            points={v.bodyPoints}
+            path={v.bodyPath}
+            area={v.bodyArea}
+            ariaLabel={`Body composition trend: ${v.bodyCount} weigh-ins from ${v.bodyStart} to ${v.bodyEnd}, low ${v.bodyMin}, high ${v.bodyMax}`}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 4, gap: 12 }}>
+            <span>{v.bodyStart}</span>
+            <span>{v.bodyMin} – {v.bodyMax}</span>
+            <span>{v.bodyEnd}</span>
           </div>
+          <div style={{ fontSize: 11.5, color: MUTED, marginTop: 10 }}>{v.bodySpanNote}</div>
           <p style={{ fontSize: 12.5, lineHeight: 1.75, color: SOFT, margin: '22px 0 0', paddingTop: 20, borderTop: RULE, textWrap: 'pretty' }}>
             {v.bodyNote}
           </p>

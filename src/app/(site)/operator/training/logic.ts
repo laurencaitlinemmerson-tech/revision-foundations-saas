@@ -343,6 +343,16 @@ function buildExercises(all: Lift[], inRange: Lift[]): ExerciseRow[] {
 
 /* ── the derivation ──────────────────────────────────────────────────────── */
 
+/** One plotted weigh-in, already positioned in the chart's viewBox. */
+export type BodyPoint = {
+  key: string;
+  x: number;
+  y: number;
+  value: number;
+  valueLabel: string;
+  dateLabel: string;
+};
+
 export type TrainingProps = { operatorName: string };
 export const DEFAULT_PROPS: TrainingProps = { operatorName: 'Lauren' };
 
@@ -462,7 +472,11 @@ export function deriveVals(
     const t = new Date(r.date).getTime();
     return t >= nowWin.from && t < nowWin.to;
   });
-  const weighSeries = inRangeWeigh.length >= 2 ? inRangeWeigh : weighAll.slice(-30);
+  // Falling back to recent history when the window is thin is fine, but the
+  // header still says "last 7 days", so the chart has to admit when it is
+  // showing something else.
+  const usingFallback = inRangeWeigh.length < 2;
+  const weighSeries = usingFallback ? weighAll.slice(-30) : inRangeWeigh;
 
   const pickScale = (r: WeighIn, metric: BodyMetric) =>
     metric === 'Weight' ? scaleVal(r.weight)
@@ -1321,6 +1335,70 @@ export function deriveVals(
     },
   ];
 
+  /* the body chart -------------------------------------------------------- */
+
+  // Weigh-ins are irregular — several in a week, then nothing for a month. Laying
+  // them out evenly by index would draw a 39-day gap the same width as a one-day
+  // gap, which is exactly the shape a weight trend must not lie about. Points are
+  // positioned by their actual date instead.
+  const bodyChart = (() => {
+    const W = 680;
+    const H = 166;
+    const PAD = 14;
+
+    const pts = weighSeries
+      .map((r) => ({ date: r.date.slice(0, 10), value: pickScale(r, st.body) }))
+      .filter((p): p is { date: string; value: number } => p.value !== null);
+
+    if (pts.length === 0) {
+      return {
+        bodyPath: '', bodyArea: '', bodyPoints: [] as BodyPoint[],
+        bodyStart: DASH, bodyEnd: DASH, bodyMin: DASH, bodyMax: DASH,
+        bodyCount: 0, bodySpanNote: 'No weigh-ins to plot in this window.',
+      };
+    }
+
+    const t = (d: string) => new Date(`${d}T12:00:00Z`).getTime();
+    const first = t(pts[0].date);
+    const last = t(pts[pts.length - 1].date);
+    // A single reading, or several on one day, would divide by zero.
+    const span = last - first || 1;
+
+    const values = pts.map((p) => p.value);
+    const lo = Math.min(...values);
+    const hi = Math.max(...values);
+    const range = hi - lo || 1;
+
+    const x = (d: string) => ((t(d) - first) / span) * W;
+    const y = (v: number) => PAD + (1 - (v - lo) / range) * (H - PAD * 2);
+
+    const dp = st.body === 'Body fat %' ? 1 : 1;
+    const points: BodyPoint[] = pts.map((p) => ({
+      key: `${p.date}-${p.value}`,
+      x: Number(x(p.date).toFixed(1)),
+      y: Number(y(p.value).toFixed(1)),
+      value: p.value,
+      valueLabel: `${nf(p.value, dp)} ${bodyUnit}`,
+      dateLabel: fmtDate(p.date, true),
+    }));
+
+    const path = points.map((p, i) => `${i ? 'L' : 'M'}${p.x} ${p.y}`).join(' ');
+
+    return {
+      bodyPath: path,
+      bodyArea: `${path} L${W} ${H} L0 ${H} Z`,
+      bodyPoints: points,
+      bodyStart: fmtDate(pts[0].date),
+      bodyEnd: fmtDate(pts[pts.length - 1].date),
+      bodyMin: `${nf(lo, dp)} ${bodyUnit}`,
+      bodyMax: `${nf(hi, dp)} ${bodyUnit}`,
+      bodyCount: pts.length,
+      bodySpanNote: usingFallback
+        ? `Only ${inRangeWeigh.length} weigh-in${inRangeWeigh.length === 1 ? '' : 's'} in ${rangeLabel}, so the chart shows the last ${pts.length} on record.`
+        : `${pts.length} weigh-in${pts.length === 1 ? '' : 's'} across ${rangeLabel}, spaced by date.`,
+    };
+  })();
+
   /* chrome ---------------------------------------------------------------- */
 
   const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
@@ -1418,10 +1496,7 @@ export function deriveVals(
     bodyUnit,
     bodyValue: bodyLast === null ? DASH : nf(bodyLast, 1),
     bodyDelta: bodyDelta.text === DASH ? 'No weigh-ins in this window' : `${bodyDelta.text} over ${rangeLabel}`,
-    bodyPath: linePath(bodyVals, 680, 166, 14),
-    bodyArea: areaPath(bodyVals, 680, 166, 14),
-    bodyStart: weighSeries.length ? fmtDate(weighSeries[0].date) : DASH,
-    bodyEnd: weighSeries.length ? fmtDate(weighSeries[weighSeries.length - 1].date) : DASH,
+    ...bodyChart,
     bodyNote: (() => {
       const leanNow = latest('muscleMass');
       const leanStart = earliestInRange('muscleMass');
