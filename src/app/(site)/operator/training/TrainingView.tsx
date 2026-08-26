@@ -3,8 +3,9 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
-  AMBER, CARD, GREEN, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
-  PINK_SOFT, PLUM, PLUM_FILL, PLUM_FILL_FAINT, ROSE, RULE, RULE_SOFT, SIDEBAR,
+  AMBER, BLUE, BLUE_LINE, BLUE_SOFT, CARD, GREEN, INK, LILAC_HAZE, MUTED, PAPER,
+  PINK, PINK_DEEP, PINK_FILL, PINK_LINE, PINK_SOFT, PLUM, PLUM_FILL, PLUM_FILL_FAINT,
+  PLUM_SOFT, ROSE, RULE, RULE_SOFT, SIDEBAR,
   SOFT, SPARK, TINT, TRACK, TRACK_PREV,
 } from './palette';
 import { BarSeries, Figure, LineSeries, Sparkline } from './charts';
@@ -2299,16 +2300,17 @@ function Goals({ v }: { v: TrainingVals }) {
             ))}
             {j.chart.goalY !== null && (
               <line x1="0" y1={j.chart.goalY} x2={j.chart.width} y2={j.chart.goalY}
-                stroke={PLUM} strokeWidth="0.75" strokeDasharray="5 4" />
+                stroke={BLUE} strokeWidth="0.75" strokeDasharray="5 4" />
             )}
-            <path d={j.chart.planPath} fill="none" stroke={PINK_LINE} strokeWidth="1.25"
+            <path d={j.chart.planPath} fill="none" stroke={BLUE_LINE} strokeWidth="1.5"
               strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
           </LineSeries>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 4, gap: 12 }}>
             <span>{j.chart.startLabel}</span>
             <span style={{ fontStyle: 'italic' }}>
-              Dashed is the plan at {j.targetRate}; solid is what the scale said
+              <span style={{ color: BLUE }}>Dashed blue</span> is the plan at {j.targetRate};
+              {' '}<span style={{ color: PLUM }}>solid violet</span> is what the scale said
             </span>
             <span>{j.chart.endLabel}</span>
           </div>
@@ -2577,7 +2579,7 @@ function Nutrition({ v }: { v: TrainingVals }) {
             bars={v.nutritionBars} width={560} height={220}
             hint="Daily intake against target — hover to read a day"
           >
-            <line x1="0" y1={v.calTargetY} x2="560" y2={v.calTargetY} stroke={PLUM} strokeWidth="0.75" strokeDasharray="4 4" />
+            <line x1="0" y1={v.calTargetY} x2="560" y2={v.calTargetY} stroke={BLUE} strokeWidth="0.75" strokeDasharray="4 4" />
           </BarSeries>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 10, gap: 12 }}>
@@ -2636,7 +2638,7 @@ function EnergySection({ v }: { v: TrainingVals }) {
                   title={`${c.label} — ${c.valueLabel} kcal`}
                   style={{
                     width: `${c.share}%`,
-                    background: [PLUM, '#8E6FA3', PINK, PINK_LINE][i],
+                    background: [PLUM, PLUM_SOFT, PINK, BLUE_SOFT][i],
                     transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
                   }}
                 />
@@ -2650,7 +2652,7 @@ function EnergySection({ v }: { v: TrainingVals }) {
                   gap: 12, padding: '10px 0', borderBottom: RULE_SOFT,
                 }}>
                   <span style={{ display: 'flex', alignItems: 'baseline', gap: 9, minWidth: 0 }}>
-                    <span style={{ width: 9, height: 9, background: [PLUM, '#8E6FA3', PINK, PINK_LINE][i], flexShrink: 0 }} />
+                    <span style={{ width: 9, height: 9, background: [PLUM, PLUM_SOFT, PINK, BLUE_SOFT][i], flexShrink: 0 }} />
                     <span style={{ fontSize: 12.5, color: INK }}>{c.label}</span>
                     <span style={{ fontSize: 11, color: MUTED }}>{c.note}</span>
                   </span>

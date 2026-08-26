@@ -43,39 +43,71 @@ All values live in `palette.ts`. Never hard-code a hex in a component.
 | `TINT` | `#FBF4F7` | Soft panel fill — radar, selected row, verdict |
 | `LILAC_HAZE` | `#F4EFF6` | Active nav row |
 
+### Ground
+The approved design, untouched — cream page, hairline rules, sharp corners.
+
+| Token | Value | Use |
+|---|---|---|
+| `PAPER` | `#FAFAF8` | Page |
+| `SIDEBAR` | `#F5F3F0` | Nav column |
+| `CARD` | `#FFFFFF` | Panels |
+| `TINT` | `#FBF8F3` | Selected row, panel wash |
+| `LILAC_HAZE` | `#F3EFF8` | Active nav row |
+
 ### Type
 | Token | Value | Use |
 |---|---|---|
-| `INK` | `#221C24` | Headings, figures, primary text |
-| `SOFT` | `#57515A` | Body copy, table cells |
-| `MUTED` | `#9C8894` | Eyebrows, captions, axis labels |
+| `INK` | `#1A1815` | Headings, table figures, primary text |
+| `SOFT` | `#5A5750` | Body copy, table cells |
+| `MUTED` | `#9C8878` | Eyebrows, captions, axis labels |
 
 ### Data marks
+
+Three accents, one meaning each, so a colour never has to be read twice.
+
+**Violet — you, now.** The primary series and the figure that leads a panel.
+
 | Token | Value | Use |
 |---|---|---|
-| `PLUM` | `#5F4472` | Primary series, active chrome, hero figure |
-| `PLUM_SOFT` | `#8E6FA3` | Secondary bar state |
-| `PLUM_FILL` | `rgba(95,68,114,0.08)` | Radar fill |
-| `PLUM_FILL_FAINT` | `rgba(95,68,114,0.05)` | Area under a line |
-| `PINK` | `#C06C84` | Second person, PR marks, sleep line |
-| `PINK_DEEP` | `#8A4459` | Badge text on tint |
-| `PINK_SOFT` | `#F2DCE4` | Off-target bars |
-| `PINK_LINE` | `#D9AFC0` | Previous-period dashed series |
+| `PLUM` | `#6A4A8F` | Primary series, active chrome, hero figure |
+| `PLUM_SOFT` | `#9B85BE` | Secondary bar state |
+| `PLUM_FILL` | `rgba(106,74,143,0.10)` | Radar fill |
+| `PLUM_FILL_FAINT` | `rgba(106,74,143,0.055)` | Area under a line |
+
+**Pink — the other side.** A peer, a previous period, a second series, a shortfall.
+
+| Token | Value | Use |
+|---|---|---|
+| `PINK` | `#C2497E` | Second person, PR marks, cardio series |
+| `PINK_DEEP` | `#8A2F58` | Badge text on tint |
+| `PINK_SOFT` | `#F0D8E4` | Off-target bars |
+| `PINK_LINE` | `#D3B4C6` | Previous-period dashed series |
+| `PINK_FILL` | `rgba(194,73,126,0.09)` | Area under a second series |
+
+**Blue — the target.** A plan line, a goal, the level being measured against.
+
+| Token | Value | Use |
+|---|---|---|
+| `BLUE` | `#3B6EA8` | Goal and target lines, info tags |
+| `BLUE_SOFT` | `#8FAED2` | The last band of a stacked split |
+| `BLUE_LINE` | `#7FA3CC` | The plan, dashed |
+| `BLUE_FILL` | `rgba(59,110,168,0.09)` | Target band |
 
 ### Furniture
 | Token | Value |
 |---|---|
-| `TRACK` | `#F1EBF0` — bar track |
-| `TRACK_PREV` | `#E6DCE8` — previous value behind a bar |
-| `SPARK` | `#C3AECC` — sparkline stroke |
-| `RULE` | `0.5px solid rgba(34,28,36,0.10)` |
-| `RULE_SOFT` | `0.5px solid rgba(34,28,36,0.07)` |
+| `TRACK` | `#F1EDF5` — bar track |
+| `TRACK_PREV` | `#DFD6E8` — previous value behind a bar |
+| `SPARK` | `#B9A9CE` — sparkline stroke |
+| `RULE` | `0.5px solid rgba(0,0,0,0.08)` |
+| `RULE_SOFT` | `0.5px solid rgba(0,0,0,0.06)` |
 
 ### Semantic
-`GREEN #1E8A4D` · `AMBER #C8700A` · `ROSE #A14A57`
+`GREEN #1E8A4D` · `AMBER #C8700A` · `ROSE #A14A57` — good, needs attention, falling.
+Never decorative, and never one of the three accents above.
 
 ### Heatmap ramp
-`HEAT` — palest to darkest: `#F7F3F6` → `#EEDFE9` → `#DFBFD3` → `#A87CA8` → `PLUM`
+`HEAT` — palest to darkest: `#F3F0F2` → `#E8DFF2` → `#C7B2E0` → `#9270C0` → `#5B3B87`
 
 Levels: nothing logged · steps only · light day · session logged · session and cardio.
 
