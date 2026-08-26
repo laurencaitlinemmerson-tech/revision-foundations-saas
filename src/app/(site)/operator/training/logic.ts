@@ -71,6 +71,8 @@ export type TrainingState = {
   selectedDay: string | null;
   /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
+  /** Whether the journey breakdown is grouped by week or by month. */
+  journeyGrain: 'week' | 'month';
 };
 
 export type SetState = (
@@ -96,6 +98,7 @@ export const INITIAL_STATE: TrainingState = {
   calendarMonth: null,
   selectedDay: null,
   dayOffset: 0,
+  journeyGrain: 'week',
 };
 
 /* ── formatting ──────────────────────────────────────────────────────────── */
@@ -1689,6 +1692,100 @@ export function deriveVals(
     const nextAt = milestones.findIndex((m) => !m.done);
     if (nextAt >= 0) milestones[nextAt].isNext = true;
 
+    /* week and month views -------------------------------------------------- */
+
+    /**
+     * Grouped means rather than endpoints.
+     *
+     * A week's weight is the average of its readings, and the change is the gap
+     * between one week's average and the last. Comparing Monday to Monday would
+     * report whatever the water did on two particular mornings; averaging a
+     * week's worth is the standard way to see through that, and it is why a
+     * weekly figure can be trusted where a daily one cannot.
+     */
+    const buildBuckets = (grain: 'week' | 'month') => {
+      const keyOf = (iso: string) => {
+        if (grain === 'month') return iso.slice(0, 7);
+        const d = new Date(`${iso}T12:00:00Z`);
+        return new Date(d.getTime() - ((d.getUTCDay() + 6) % 7) * DAY).toISOString().slice(0, 10);
+      };
+
+      const groups = new Map<string, number[]>();
+      for (const r of weighAll) {
+        if (r.weight <= 0) continue;
+        const k = keyOf(r.date.slice(0, 10));
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k)!.push(r.weight);
+      }
+
+      const ordered = [...groups.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, vals]) => ({
+          key,
+          mean: vals.reduce((a, b) => a + b, 0) / vals.length,
+          count: vals.length,
+        }));
+
+      // Enough to read a pattern, not so many that the page becomes a ledger.
+      const shown = ordered.slice(-(grain === 'week' ? 10 : 8)).reverse();
+      const targetPerBucket = grain === 'week'
+        ? JOURNEY.targetKgPerWeek
+        : JOURNEY.targetKgPerWeek * 4.35;
+
+      // How many buckets apart two keys are, so a gap in weighing is not
+      // presented as a week-over-week change when it spans three weeks.
+      const spanBetween = (a: string, b: string) => {
+        if (grain === 'month') {
+          const [ay, am] = a.split('-').map(Number);
+          const [by, bm] = b.split('-').map(Number);
+          return (ay - by) * 12 + (am - bm);
+        }
+        return Math.round(
+          (Date.parse(`${a}T12:00:00Z`) - Date.parse(`${b}T12:00:00Z`)) / (7 * DAY),
+        );
+      };
+
+      return shown.map((b, i) => {
+        const older = shown[i + 1];
+        const gap = older ? spanBetween(b.key, older.key) : 0;
+        const change = older ? b.mean - older.mean : null;
+
+        // A change across a gap is not a rate. Scaling the target to the span
+        // keeps "on plan" meaning the same thing however far apart the two
+        // readings are.
+        const scaledTarget = targetPerBucket * Math.max(1, gap);
+        const onPlan = change !== null && change <= -scaledTarget * 0.9;
+        const drifting = change !== null && change > 0;
+
+        return {
+          key: b.key,
+          label: grain === 'month'
+            ? new Date(`${b.key}-01T12:00:00Z`).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+            : `Week of ${fmtDate(b.key)}`,
+          weight: `${nf(b.mean, 1)} kg`,
+          readings: `${b.count} reading${b.count === 1 ? '' : 's'}`,
+          change: change === null
+            ? 'first on record'
+            : Math.abs(change) < 0.05 ? 'held' : `${change < 0 ? '−' : '+'}${nf(Math.abs(change), 2)} kg`,
+          changeColor: change === null ? MUTED : Math.abs(change) < 0.05 ? MUTED : change < 0 ? GREEN : ROSE,
+          // Bar drawn from the middle: loss left, gain right, against the target.
+          barPct: change === null ? '0%' : `${Math.min(50, (Math.abs(change) / (scaledTarget * 2)) * 50).toFixed(1)}%`,
+          losing: change !== null && change < 0,
+          onPlan,
+          drifting,
+          // A skipped bucket is named rather than hidden, because a fortnight's
+          // change sitting in a week's row would read as twice the rate it was.
+          gapNote: gap > 1 ? `over ${gap} ${grain}s` : null,
+          note: change === null
+            ? ''
+            : gap > 1
+              ? `over ${gap} ${grain}s`
+              : onPlan ? 'on plan' : drifting ? 'up' : 'under plan',
+          beforeStart: b.key < JOURNEY.startDate.slice(0, grain === 'month' ? 7 : 10),
+        };
+      });
+    };
+
     /* the trajectory ------------------------------------------------------- */
 
     // The planned line from start to goal, with the real readings over it, so
@@ -1718,6 +1815,15 @@ export function deriveVals(
       goalKg: nf(goal, 1),
       milestones,
       nextMilestone: nextAt >= 0 ? milestones[nextAt] : null,
+      buckets: buildBuckets(st.journeyGrain === 'month' ? 'month' : 'week'),
+      grainTabs: (['week', 'month'] as const).map((g) => ({
+        label: g === 'week' ? 'By week' : 'By month',
+        go: () => set({ journeyGrain: g }),
+        active: (st.journeyGrain ?? 'week') === g,
+      })),
+      grainNote: (st.journeyGrain ?? 'week') === 'week'
+        ? `Each row is that week's average weight, and the change against the week before. Averages rather than endpoints, because Monday against Monday reports whatever the water did on two mornings. Target is ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week.`
+        : `Each row is that month's average weight against the month before. Target is about ${nf(JOURNEY.targetKgPerWeek * 4.35, 1)} kg a month.`,
       chart: {
         width: W,
         height: H,

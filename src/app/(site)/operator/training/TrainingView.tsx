@@ -4,8 +4,8 @@ import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
   AMBER, CARD, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
-  PLUM, PLUM_FILL, PLUM_FILL_FAINT, RULE, RULE_SOFT, SIDEBAR, SOFT, SPARK, TINT,
-  TRACK, TRACK_PREV,
+  PINK_SOFT, PLUM, PLUM_FILL, PLUM_FILL_FAINT, ROSE, RULE, RULE_SOFT, SIDEBAR,
+  SOFT, SPARK, TINT, TRACK, TRACK_PREV,
 } from './palette';
 import { BarSeries, Figure, LineSeries, Sparkline } from './charts';
 import { TAGS } from './palette';
@@ -2195,6 +2195,71 @@ function Goals({ v }: { v: TrainingVals }) {
         <p style={{ fontSize: 13.5, lineHeight: 1.75, color: SOFT, margin: '24px 0 0', maxWidth: '68ch', textWrap: 'pretty' }}>
           {j.note}
         </p>
+
+        {/* The journey week by week, where the accountability actually lives —
+            the trajectory shows the shape, this shows whether last week counted. */}
+        {j.buckets.length > 0 && (
+          <div style={{ marginTop: 38, paddingTop: 26, borderTop: RULE }}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+              gap: 16, flexWrap: 'wrap', marginBottom: 18,
+            }}>
+              <Eyebrow>The journey, broken down</Eyebrow>
+              <Segmented items={j.grainTabs} size="sm" />
+            </div>
+
+            <div>
+              {j.buckets.map((b) => (
+                <div key={b.key} style={{
+                  display: 'grid',
+                  gridTemplateColumns: '168px 88px 1fr 104px',
+                  gap: 18, alignItems: 'center',
+                  padding: '13px 0', borderBottom: RULE_SOFT,
+                  opacity: b.beforeStart ? 0.55 : 1,
+                }}>
+                  <span style={{ fontSize: 12.5, color: INK }}>
+                    {b.label}
+                    {b.beforeStart && (
+                      <span style={{ fontSize: 10, color: MUTED, marginLeft: 7 }}>before</span>
+                    )}
+                  </span>
+
+                  <span style={{
+                    fontFamily: 'var(--font-display)', fontSize: 17, color: INK,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {b.weight}
+                  </span>
+
+                  {/* Drawn from the centre: loss to the left, gain to the right,
+                      scaled so the target rate reaches halfway. */}
+                  <span style={{ display: 'block', position: 'relative', height: 6, background: TRACK }}>
+                    <span style={{
+                      position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1,
+                      background: TRACK_PREV,
+                    }} />
+                    <span style={{
+                      position: 'absolute', top: 0, height: 6,
+                      width: b.barPct,
+                      [b.losing ? 'right' : 'left']: '50%',
+                      background: b.onPlan ? INK : b.drifting ? ROSE : PINK_SOFT,
+                      transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                    } as CSSProperties} />
+                  </span>
+
+                  <span style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: 12.5, color: b.changeColor, display: 'block' }}>{b.change}</span>
+                    <span style={{ fontSize: 10.5, color: MUTED }}>{b.note || b.readings}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 12, fontStyle: 'italic', color: MUTED, margin: '16px 0 0', lineHeight: 1.7, maxWidth: '72ch' }}>
+              {j.grainNote}
+            </p>
+          </div>
+        )}
       </section>
 
       <div className="training-pair" style={{
