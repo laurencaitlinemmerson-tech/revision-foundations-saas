@@ -13,6 +13,10 @@
   --tint: #FBF8F3;
   --lilac-haze: #FAFAF8;
 
+  /* The page gutter, shared by the main column and the masthead so the two
+     stay in line at every width. */
+  --gutter: clamp(18px, 5.2vw, 64px);
+
   --ink: #1A1815;
   --ink-soft: #5A5750;
   --ink-mute: #9C8878;
@@ -55,31 +59,234 @@
   outline-offset: 2px;
 }
 
+/* -------------------------------------------------------------
+   Narrow screens.
+
+   The dashboard is drawn with inline styles, which beat a plain
+   stylesheet rule, so every override below that has to win
+   against one is marked `!important`. That is the price of
+   leaving the drawing itself untouched.
+   ------------------------------------------------------------- */
+
 /* The layout collapses to a single column before the sidebar would crowd
    the content out; the nav becomes a scrolling strip along the top. */
 @media (max-width: 900px) {
-  .training-shell .training-grid { grid-template-columns: 1fr; }
+  .training-shell .training-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+  }
+  .training-shell .training-aside,
+  .training-shell .training-main { min-width: 0; }
+
+  /* The sidebar becomes a masthead: the wordmark and the operator on one
+     line, the nav as a strip under them. */
   .training-shell .training-aside {
-    position: static;
-    height: auto;
-    border-right: 0;
+    position: static !important;
+    height: auto !important;
+    padding: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0.5px solid var(--rule);
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'brand operator' 'nav nav';
+    min-width: 0;
+    align-items: center;
+  }
+  .training-shell .training-brand {
+    grid-area: brand;
+    padding: 18px var(--gutter) 16px !important;
+  }
+  .training-shell .training-id {
+    grid-area: operator;
+    margin-top: 0 !important;
+    padding: 18px var(--gutter) 16px !important;
+    border-top: 0 !important;
+  }
+  .training-shell .training-id > div { gap: 10px !important; }
+
+  /* Twelve screens will not fit across a phone, so the nav becomes a strip that
+     scrolls sideways under the masthead. */
+  .training-shell .training-nav {
+    grid-area: nav;
+    min-width: 0;
+    flex-direction: row !important;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    background: var(--sidebar);
+    border-top: 0.5px solid var(--rule);
     border-bottom: 0.5px solid var(--rule);
   }
-  .training-shell .training-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    border-top: 0.5px solid var(--rule);
-  }
+  .training-shell .training-nav::-webkit-scrollbar { display: none; }
   .training-shell .training-nav button {
-    border-bottom: 0;
-    border-right: 0.5px solid var(--rule-soft);
-    white-space: nowrap;
+    border-bottom: 0 !important;
+    border-right: 0.5px solid var(--rule-soft) !important;
+    white-space: nowrap !important;
+    padding: 14px 16px !important;
+    flex: 0 0 auto;
   }
-  .training-shell .training-main { padding: 28px 20px 64px; }
+
+  .training-shell .training-main { padding-bottom: 96px !important; }
+
+  /* Every side-by-side pair stacks. */
   .training-shell .training-split,
   .training-shell .training-split-3,
   .training-shell .training-pair { grid-template-columns: 1fr !important; }
-  .training-shell .training-split > * { border-right: 0 !important; }
+  .training-shell .training-split > *,
+  .training-shell .training-split-3 > * { border-right: 0 !important; }
+
+  /* A panel pinned beside a scrolling column has nothing to sit beside once
+     the two are stacked. */
+  .training-shell .t-sticky { position: static !important; }
+}
+
+/* -------------------------------------------------------------
+   The content column, re-cut for the width it actually has.
+
+   The window is the wrong thing to measure here: the same column
+   is ~350px wide on a phone and ~550px wide beside the sidebar on
+   a small laptop, and both need the same treatment. So the column
+   declares itself a container and the rules below ask it, not the
+   window, how much room there is.
+   ------------------------------------------------------------- */
+.training-shell .training-main {
+  container-type: inline-size;
+  container-name: training-col;
+}
+
+/* Narrow enough that the drawn pixel column counts no longer fit. */
+@container training-col (max-width: 660px) {
+  /* Side-by-side pairs stack, as they do when the sidebar collapses. This is
+     the other case: the sidebar is still there and has left the column narrow
+     anyway — which the width of the window alone cannot see. */
+  .training-shell .training-split,
+  .training-shell .training-split-3,
+  .training-shell .training-pair { grid-template-columns: 1fr !important; }
+  .training-shell .training-split > *,
+  .training-shell .training-split-3 > * { border-right: 0 !important; }
+  .training-shell .t-sticky { position: static !important; }
+
+  /* The tab rows hold their width beside a heading on a wide screen. Here they
+     have to give: they wrap onto a second line rather than run off the edge. */
+  .training-shell .t-segmented {
+    flex-shrink: 1 !important;
+    max-width: 100%;
+  }
+
+  /* Table-shaped rows the design cut in fixed pixels. Each one keeps its
+     figures and drops the bar beside them: the bar is the only part of the row
+     that carries no reading of its own. */
+  .training-shell .t-row-period {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 1.05fr) minmax(0, 0.8fr) minmax(0, 0.9fr) !important;
+    gap: 8px !important;
+  }
+  .training-shell .t-row-period > *:nth-child(3) { display: none !important; }
+
+  .training-shell .t-row-journey {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.1fr) !important;
+    gap: 12px !important;
+  }
+  .training-shell .t-row-journey > *:nth-child(3) { display: none !important; }
+
+  /* Rows too wide to re-cut are folded instead: the label and its headline
+     figure on one line, the working underneath. */
+  .training-shell .t-row-episode {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-areas: 'phase span span' 'length change rate' !important;
+    gap: 8px 12px !important;
+  }
+  .training-shell .t-row-episode > *:nth-child(1) { grid-area: phase; }
+  .training-shell .t-row-episode > *:nth-child(2) { grid-area: span; }
+  .training-shell .t-row-episode > *:nth-child(3) { grid-area: length; text-align: left !important; }
+  .training-shell .t-row-episode > *:nth-child(4) { grid-area: change; text-align: center !important; }
+  .training-shell .t-row-episode > *:nth-child(5) { grid-area: rate; }
+
+  .training-shell .t-row-contrast {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: 'label figure' 'bars bars' !important;
+    gap: 10px 14px !important;
+    align-items: baseline !important;
+  }
+  .training-shell .t-row-contrast > *:nth-child(1) { grid-area: label; }
+  .training-shell .t-row-contrast > *:nth-child(2) { grid-area: bars; }
+  .training-shell .t-row-contrast > *:nth-child(3) { grid-area: figure; }
+
+  .training-shell .t-row-lever {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: 'label now' 'bar bar' 'note note' !important;
+    gap: 8px 14px !important;
+  }
+  .training-shell .t-row-lever > *:nth-child(1) { grid-area: label; }
+  .training-shell .t-row-lever > *:nth-child(2) { grid-area: now; }
+  .training-shell .t-row-lever > *:nth-child(3) { grid-area: bar; }
+  .training-shell .t-row-lever > *:nth-child(4) { grid-area: note; text-align: left !important; }
+
+  /* A round reads across in one line on a wide screen. Here the question goes
+     above and the two answers sit under it, rather than three columns each too
+     narrow for the figure in it. */
+  .training-shell .t-round {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-areas: 'label label' 'you them' !important;
+    gap: 12px 14px !important;
+  }
+  .training-shell .t-round > *:nth-child(1) { grid-area: you; }
+  .training-shell .t-round > *:nth-child(2) { grid-area: label; min-width: 0 !important; }
+  .training-shell .t-round > *:nth-child(3) { grid-area: them; }
+
+  /* Tables keep every column but give back the gutters between them, and one
+     drawn wide enough to scroll sideways fits instead — giving up the column
+     that is prose rather than a figure. */
+  .training-shell .t-table { min-width: 0 !important; }
+  .training-shell .t-table th,
+  .training-shell .t-table td {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  .training-shell .t-table th:first-child,
+  .training-shell .t-table td:first-child { padding-left: 0 !important; }
+  .training-shell .t-table th:last-child,
+  .training-shell .t-table td:last-child { padding-right: 0 !important; }
+  .training-shell .t-drop-2 th:nth-child(2),
+  .training-shell .t-drop-2 td:nth-child(2) { display: none !important; }
+  .training-shell .t-drop-last th:last-child,
+  .training-shell .t-drop-last td:last-child { display: none !important; }
+  .training-shell .t-drop-last th:nth-last-child(2),
+  .training-shell .t-drop-last td:nth-last-child(2) { padding-right: 0 !important; }
+}
+
+/* A phone's column. Everything here is about a screen held in one hand. */
+@container training-col (max-width: 480px) {
+  /* Four figures across is two. */
+  .training-shell .t-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    row-gap: 20px;
+  }
+
+  /* Rows of stat tiles wrap here, so they need the air between rows that they
+     never needed side by side. */
+  .training-shell .t-tiles { row-gap: 22px; }
+
+  /* Days read as a wrapping set of cards rather than seven slivers. */
+  .training-shell .t-period-cols {
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)) !important;
+    column-gap: 14px;
+  }
+  .training-shell .t-period-cols > * { padding-right: 0 !important; }
+
+  /* The month grid always keeps its seven columns — a calendar that wrapped
+     would stop being one — so the cells give up their padding instead. */
+  .training-shell .t-calendar { grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
+  .training-shell .t-calendar > button {
+    padding: 7px 4px !important;
+    min-height: 76px !important;
+  }
+  /* A cell is about 44px across here, so the day's two figures have to hold one
+     line each rather than wrap and drag the whole row taller. */
+  .training-shell .t-calendar > button span span {
+    font-size: 9.5px !important;
+    white-space: nowrap !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

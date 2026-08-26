@@ -144,16 +144,25 @@ element; never uppercase body copy.
 A named scale at the top of `TrainingView.tsx`. Change a value there and the
 rhythm moves everywhere — that is the point.
 
+The horizontal steps are fluid. Each holds its drawn value on a wide screen and
+closes down to a phone's proportions on a narrow one, so the page never has to
+choose between the design's air and fitting on the glass. The row and cell
+paddings stay fixed — a phone is short of width, not of scroll.
+
 ```
-PAGE_X      64    main gutter
-PAGE_TOP    56
-SECTION_GAP 56    between major sections
-CARD_PAD    32    inside a bordered card
-PANEL_PAD   40    inside a large split panel
-GRID_GAP    28    between side-by-side cards
-ROW_Y       16    a list row's vertical padding
-CELL_Y      18    a table cell's vertical padding
+PAGE_X      var(--gutter)              main gutter, shared with the masthead
+PAGE_TOP    clamp(28px,  5vw,   56px)
+SECTION_GAP clamp(36px,  6vw,   56px)  between major sections
+CARD_PAD    clamp(20px,  4.4vw, 32px)  inside a bordered card
+PANEL_PAD   clamp(22px,  5.4vw, 40px)  inside a large split panel
+GRID_GAP    clamp(18px,  3.6vw, 28px)  between side-by-side cards
+ROW_Y       16                         a list row's vertical padding
+CELL_Y      18                         a table cell's vertical padding
 ```
+
+`--gutter` is `clamp(18px, 5.2vw, 64px)`, declared on `.training-shell` so the
+masthead and the main column stay in line at every width. Every clamp reaches its
+drawn maximum by about 1230px, so a desk sees exactly what was drawn.
 
 Heatmap grid: `HEAT_CELL 16` · `HEAT_GAP 5` · `HEAT_WEEKS 12`. The month strip is
 pinned to `HEAT_WEEKS * (HEAT_CELL + HEAT_GAP) - HEAT_GAP` so labels sit under the
@@ -192,12 +201,48 @@ nothing, never a blank panel.
 
 Two columns: a 252px sticky nav and the main content, max-width 1320.
 
-Below 900px the grid collapses to one column, the nav becomes a horizontal
-scrolling strip, and `.training-split` / `.training-split-3` / `.training-pair`
-all fall to a single column. Wide content scrolls inside its own container — the
-page body never scrolls horizontally.
+Below 900px the grid collapses to one column and the sidebar becomes a masthead:
+the wordmark and the operator on one line, the nav as a strip under them that
+scrolls sideways. The strip opens on whichever screen you are on, so a refresh on
+Settings does not leave it pointing at the Dashboard.
+
+`.training-split` / `.training-split-3` / `.training-pair` fall to a single
+column. Wide content scrolls inside its own container — the page body never
+scrolls horizontally.
 
 `@media (prefers-reduced-motion: reduce)` disables every transition.
+
+### The content column measures itself
+
+The window is the wrong thing to ask about the content. The same column is about
+350px wide on a phone and about 550px wide beside the sidebar on a small laptop,
+and both need the same treatment — so `.training-main` declares itself a
+container (`container-name: training-col`) and the re-cut rules in `training.css`
+query it rather than the viewport.
+
+| Column width | What changes |
+|---|---|
+| ≤ 660px | Pairs stack, tab rows wrap, and the rows the design cut in fixed pixels are re-cut as fractions or folded onto two lines |
+| ≤ 480px | Four-figure rows become two, wrapped tile rows gain a row gap, the week reads as wrapping cards, and the month grid tightens its cells |
+
+Because the dashboard is drawn in inline styles, which beat a plain stylesheet
+rule, every override that has to win against one is marked `!important`. That is
+the price of leaving the desktop drawing untouched.
+
+Rows that need re-cutting carry a `t-` class as the hook. Add one when you add a
+grid the design fixed in pixels:
+
+| Class | What it does on a narrow column |
+|---|---|
+| `t-row-period` `t-row-journey` | Keep the figures, drop the decorative bar |
+| `t-row-episode` `t-row-contrast` `t-row-lever` `t-round` | Fold onto two or three lines |
+| `t-cols-4` | Four across becomes two |
+| `t-tiles` | Row gap for a wrapped row of stat tiles |
+| `t-period-cols` | Seven day-columns become wrapping cards |
+| `t-calendar` | The month grid tightens rather than wraps |
+| `t-table` `t-drop-2` `t-drop-last` | Tighter cells; drop the column that is a bar or prose |
+| `t-segmented` | Let a tab row wrap instead of overflowing |
+| `t-sticky` | A pinned side panel goes static once the pair has stacked |
 
 ---
 

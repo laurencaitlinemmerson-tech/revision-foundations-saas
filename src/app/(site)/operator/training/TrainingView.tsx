@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
   AMBER, BLUE, BLUE_LINE, BLUE_SOFT, CARD, GREEN, INK, LILAC_HAZE, MUTED, PAPER,
@@ -28,12 +28,15 @@ import { TAGS } from './palette';
  * page has room to breathe. Changing a value here moves every instance of it,
  * which is the point — the rhythm is one decision, not sixty.
  */
-const PAGE_X = 64;      // main gutter
-const PAGE_TOP = 56;
-const SECTION_GAP = 56; // between major sections
-const CARD_PAD = 32;    // inside a bordered card
-const PANEL_PAD = 40;   // inside a large split panel
-const GRID_GAP = 28;    // between side-by-side cards
+/* The horizontal steps are fluid: each one holds its drawn value on a wide
+   screen and closes down to a phone's proportions on a narrow one, so the page
+   never has to choose between the design's air and fitting on the glass. */
+const PAGE_X = 'var(--gutter)';           // main gutter, shared with the masthead
+const PAGE_TOP = 'clamp(28px, 5vw, 56px)';
+const SECTION_GAP = 'clamp(36px, 6vw, 56px)'; // between major sections
+const CARD_PAD = 'clamp(20px, 4.4vw, 32px)';  // inside a bordered card
+const PANEL_PAD = 'clamp(22px, 5.4vw, 40px)'; // inside a large split panel
+const GRID_GAP = 'clamp(18px, 3.6vw, 28px)';  // between side-by-side cards
 const ROW_Y = 16;       // a list row's vertical padding
 const CELL_Y = 18;      // a table cell's vertical padding
 
@@ -69,7 +72,7 @@ const toneFor = (tag: string): keyof typeof TAGS => {
   if (/activity/.test(t)) return 'green';
   return 'grey';
 };
-const display = (size: number, color = INK): CSSProperties => ({
+const display = (size: number | string, color = INK): CSSProperties => ({
   fontFamily: 'var(--font-display)', fontSize: size, fontWeight: 400,
   letterSpacing: '-0.015em', lineHeight: 1, color,
 });
@@ -107,7 +110,7 @@ function Segmented({
   size?: 'sm' | 'md';
 }) {
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', border: RULE, background: CARD, flexShrink: 0 }}>
+    <div className="t-segmented" style={{ display: 'flex', flexWrap: 'wrap', border: RULE, background: CARD, flexShrink: 0 }}>
       {items.map((t) => (
         <button
           key={t.label}
@@ -455,7 +458,7 @@ function Calendar({ cal, detail }: { cal: TrainingVals['calendar']; detail: Trai
             </button>
           </div>
 
-          <div style={{
+          <div className="t-tiles" style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(112px, 1fr))',
             gap: 0, marginTop: 18, borderTop: RULE_SOFT,
           }}>
@@ -509,6 +512,21 @@ function Empty({ title, note }: { title: string; note: string }) {
 }
 
 export default function TrainingView({ v }: { v: TrainingVals }) {
+  const nav = useRef<HTMLElement>(null);
+  const current = useRef<HTMLButtonElement>(null);
+  const currentLabel = v.nav.find((item) => item.active)?.label;
+
+  // On a phone the nav is a strip that scrolls sideways, and it opens showing
+  // the first screen whichever one you are on — so a refresh on Settings would
+  // leave the strip pointing at the Dashboard. Bring the current screen into
+  // view. On a wide screen the strip does not scroll and this does nothing.
+  useEffect(() => {
+    const strip = nav.current;
+    const here = current.current;
+    if (!strip || !here || strip.scrollWidth <= strip.clientWidth) return;
+    strip.scrollLeft = here.offsetLeft - (strip.clientWidth - here.offsetWidth) / 2;
+  }, [currentLabel]);
+
   return (
     <div
       className="training-grid"
@@ -521,14 +539,15 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
           position: 'sticky', top: 0, height: '100vh', display: 'flex', flexDirection: 'column',
         }}
       >
-        <div style={{ padding: '0 28px 32px' }}>
+        <div className="training-brand" style={{ padding: '0 28px 32px' }}>
           <Eyebrow>The Nurse Lab</Eyebrow>
           <div style={{ ...display(24), marginTop: 6 }}>Training</div>
         </div>
-        <nav className="training-nav" style={{ display: 'flex', flexDirection: 'column', borderTop: RULE }}>
+        <nav ref={nav} className="training-nav" style={{ display: 'flex', flexDirection: 'column', borderTop: RULE }}>
           {v.nav.map((item) => (
             <button
               key={item.label}
+              ref={item.active ? current : undefined}
               type="button"
               onClick={item.go}
               aria-current={item.active ? 'page' : undefined}
@@ -549,7 +568,7 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
             </button>
           ))}
         </nav>
-        <div style={{ marginTop: 'auto', padding: CARD_PAD, borderTop: RULE }}>
+        <div className="training-id" style={{ marginTop: 'auto', padding: CARD_PAD, borderTop: RULE }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: '50%', background: '#E9C0D0',
@@ -566,14 +585,14 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
         </div>
       </aside>
 
-      <main className="training-main" style={{ padding: `${PAGE_TOP}px ${PAGE_X}px 120px`, maxWidth: 1320, margin: '0 auto', width: '100%' }}>
+      <main className="training-main" style={{ padding: `${PAGE_TOP} ${PAGE_X} 120px`, maxWidth: 1320, margin: '0 auto', width: '100%' }}>
         <header style={{
           display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
           gap: 40, paddingBottom: 32, borderBottom: RULE, flexWrap: 'wrap',
         }}>
           <div>
             <Eyebrow>{v.todayLabel}</Eyebrow>
-            <h1 style={{ ...display(38), margin: '10px 0 8px' }}>{v.pageTitle}</h1>
+            <h1 style={{ ...display('clamp(27px, 8vw, 38px)'), margin: '10px 0 8px' }}>{v.pageTitle}</h1>
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.65, color: SOFT, maxWidth: '54ch', textWrap: 'pretty' }}>
               {v.pageSub}
             </p>
@@ -722,7 +741,7 @@ function PeriodView({ pv }: { pv: TrainingVals['periodView'] }) {
       <SectionHeading title={pv.title} aside={countLabel} />
 
       {asColumns ? (
-        <div style={{
+        <div className="t-period-cols" style={{
           display: 'grid', gridTemplateColumns: `repeat(${pv.units.length}, 1fr)`,
           marginTop: 6, borderTop: RULE_SOFT,
         }}>
@@ -768,7 +787,7 @@ function PeriodView({ pv }: { pv: TrainingVals['periodView'] }) {
         </div>
       ) : (
         <div style={{ marginTop: 6, borderTop: RULE_SOFT }}>
-          <div style={{
+          <div className="t-row-period" style={{
             display: 'grid', gridTemplateColumns: '150px 104px 1fr 96px 84px 88px',
             gap: 20, padding: '10px 0', ...eyebrow,
           }}>
@@ -780,7 +799,7 @@ function PeriodView({ pv }: { pv: TrainingVals['periodView'] }) {
             <span style={{ textAlign: 'right' }}>Weight</span>
           </div>
           {pv.units.map((u) => (
-            <div key={u.key} style={{
+            <div key={u.key} className="t-row-period" style={{
               display: 'grid', gridTemplateColumns: '150px 104px 1fr 96px 84px 88px',
               gap: 20, alignItems: 'center',
               padding: `${ROW_Y}px 0`, borderTop: RULE_SOFT,
@@ -1018,7 +1037,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
 
       <section style={{ marginTop: SECTION_GAP }}>
         <SectionHeading title="Multi-dimensional progress" aside={v.againstLabel} />
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table className="t-table t-drop-2" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
               <th style={{ ...th(), paddingLeft: 0 }}>Dimension</th>
@@ -1241,7 +1260,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
               </span>
             </div>
 
-            <div style={{
+            <div className="t-tiles" style={{
               display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(108px, 1fr))',
               marginTop: 16, borderTop: RULE_SOFT,
             }}>
@@ -1579,7 +1598,7 @@ function HeadToHead({ v }: { v: TrainingVals }) {
         <div style={{ ...card, borderTop: 0 }}>
           {h.rounds.map((r) => (
             <div key={r.key} style={{ padding: '20px 26px', borderBottom: RULE_SOFT }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 18, alignItems: 'baseline' }}>
+              <div className="t-round" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 18, alignItems: 'baseline' }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: r.youLead ? PLUM : INK }}>
                   {r.you}
                   {r.youLead && <span style={{ fontSize: 10, marginLeft: 9, color: PLUM }}>{'\u25b2'}</span>}
@@ -1703,11 +1722,11 @@ function Workouts({ v }: { v: TrainingVals }) {
         </div>
 
         {v.sel && (
-          <div style={{ position: 'sticky', top: 32 }}>
+          <div className="t-sticky" style={{ position: 'sticky', top: 32 }}>
             <Eyebrow>{v.sel.date}</Eyebrow>
             <h2 style={{ ...display(30), margin: '12px 0 0' }}>{v.sel.name}</h2>
 
-            <div style={{
+            <div className="t-cols-4" style={{
               display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
               marginTop: 24, paddingTop: 20, borderTop: RULE,
             }}>
@@ -1853,7 +1872,7 @@ function CalendarScreen({ v }: { v: TrainingVals }) {
         </div>
 
         {/* What the month came to, so the grid is not the only thing here. */}
-        <div style={{
+        <div className="t-tiles" style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(116px, 1fr))',
           marginTop: 28, paddingTop: 22, borderTop: RULE,
         }}>
@@ -1875,7 +1894,7 @@ function CalendarScreen({ v }: { v: TrainingVals }) {
         gap: GRID_GAP, marginTop: GRID_GAP, alignItems: 'start',
       }}>
         <div style={{ ...card, padding: CARD_PAD }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
+          <div className="t-calendar" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
             {cal.dayNames.map((d) => (
               <div key={d} style={{
                 fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
@@ -1950,7 +1969,7 @@ function CalendarScreen({ v }: { v: TrainingVals }) {
         </div>
 
         {detail && (
-          <div style={{ ...card, padding: CARD_PAD, position: 'sticky', top: 32 }}>
+          <div className="t-sticky" style={{ ...card, padding: CARD_PAD, position: 'sticky', top: 32 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
               <Eyebrow>Selected</Eyebrow>
               <button
@@ -2054,7 +2073,7 @@ function Progress({ v }: { v: TrainingVals }) {
 
         {b.rows.length > 0 && (
           <div className="table-scroll" style={{ overflowX: 'auto', marginTop: 32 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
+            <table className="t-table t-drop-last" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
               <thead>
                 <tr>
                   <th style={{ ...th(), paddingLeft: 0 }}>Measure</th>
@@ -2194,7 +2213,7 @@ function Progress({ v }: { v: TrainingVals }) {
             <BarSeries bars={v.cardioBars} width={420} height={140} hint="By week — hover to read one" />
           </div>
 
-          <div style={{
+          <div className="t-cols-4" style={{
             display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
             marginTop: 18, paddingTop: 16, borderTop: RULE,
           }}>
@@ -2362,7 +2381,7 @@ function Goals({ v }: { v: TrainingVals }) {
           ))}
         </div>
 
-        <div style={{
+        <div className="t-tiles" style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(122px, 1fr))',
           marginTop: 26, paddingTop: 22, borderTop: RULE_SOFT,
         }}>
@@ -2399,7 +2418,7 @@ function Goals({ v }: { v: TrainingVals }) {
               </span>
             </div>
 
-            <div style={{
+            <div className="t-tiles" style={{
               display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
               marginTop: 18,
             }}>
@@ -2448,7 +2467,7 @@ function Goals({ v }: { v: TrainingVals }) {
 
             <div>
               {j.buckets.map((b) => (
-                <div key={b.key} style={{
+                <div key={b.key} className="t-row-journey" style={{
                   display: 'grid',
                   gridTemplateColumns: '168px 88px 1fr 104px',
                   gap: 18, alignItems: 'center',
@@ -2893,7 +2912,7 @@ function Review({ v }: { v: TrainingVals }) {
 
           <div style={{ marginTop: 6, borderTop: RULE_SOFT }}>
             {r.levers.map((l) => (
-              <div key={l.key} style={{
+              <div key={l.key} className="t-row-lever" style={{
                 display: 'grid', gridTemplateColumns: '160px 96px 1fr 190px',
                 gap: 20, alignItems: 'center', padding: `${ROW_Y}px 0`, borderBottom: RULE_SOFT,
               }}>
@@ -3022,7 +3041,7 @@ function Evidence({ v }: { v: TrainingVals }) {
 
           <div style={{ marginTop: 24, borderTop: RULE_SOFT }}>
             {e.episodes.map((ep) => (
-              <div key={`row-${ep.key}`} style={{
+              <div key={`row-${ep.key}`} className="t-row-episode" style={{
                 display: 'grid', gridTemplateColumns: '92px 1fr 110px 130px 110px',
                 gap: 18, alignItems: 'center', padding: '13px 0', borderBottom: RULE_SOFT,
               }}>
@@ -3064,7 +3083,7 @@ function Evidence({ v }: { v: TrainingVals }) {
 
           <div style={{ marginTop: 16, borderTop: RULE_SOFT }}>
             {e.contrasts.map((c) => (
-              <div key={c.key} style={{
+              <div key={c.key} className="t-row-contrast" style={{
                 display: 'grid', gridTemplateColumns: '170px 1fr 96px',
                 gap: 22, alignItems: 'center', padding: '18px 0', borderBottom: RULE_SOFT,
               }}>
@@ -3136,7 +3155,7 @@ function Evidence({ v }: { v: TrainingVals }) {
               </span>
             </div>
 
-            <div style={{
+            <div className="t-tiles" style={{
               display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
               marginTop: 26, paddingTop: 20, borderTop: RULE_SOFT,
             }}>
@@ -3290,7 +3309,7 @@ function Settings({ v }: { v: TrainingVals }) {
         <p style={{ fontSize: 13.5, color: SOFT, margin: '12px 0 0', lineHeight: 1.7 }}>
           {v.targets.note}
         </p>
-        <div style={{
+        <div className="t-tiles" style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
           marginTop: 20, paddingTop: 18, borderTop: RULE_SOFT,
         }}>
