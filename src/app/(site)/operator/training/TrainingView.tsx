@@ -766,6 +766,16 @@ function Dashboard({ v }: { v: TrainingVals }) {
                           {d.lever}
                         </div>
                       )}
+                      <button
+                        type="button"
+                        onClick={d.openScreen}
+                        style={{
+                          all: 'unset', cursor: 'pointer', marginTop: 12, fontSize: 11.5,
+                          color: PLUM, borderBottom: `1px solid ${TRACK_PREV}`,
+                        }}
+                      >
+                        Open {d.screen} →
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1034,15 +1044,26 @@ function Dashboard({ v }: { v: TrainingVals }) {
           <div style={{ marginTop: 26, paddingTop: 22, borderTop: RULE }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
               <div style={display(20)}>{v.dayDetail.label}</div>
-              <button
-                type="button" onClick={v.dayDetail.close} className="hv-tab"
-                style={{
-                  all: 'unset', cursor: 'pointer', padding: '4px 11px', fontSize: 11.5,
-                  color: SOFT, border: RULE, background: CARD,
-                }}
-              >
-                Close
-              </button>
+              <span style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button" onClick={v.dayDetail.openSessions} className="hv-tab"
+                  style={{
+                    all: 'unset', cursor: 'pointer', padding: '4px 11px', fontSize: 11.5,
+                    color: PLUM, border: RULE, background: CARD,
+                  }}
+                >
+                  All sessions →
+                </button>
+                <button
+                  type="button" onClick={v.dayDetail.close} className="hv-tab"
+                  style={{
+                    all: 'unset', cursor: 'pointer', padding: '4px 11px', fontSize: 11.5,
+                    color: SOFT, border: RULE, background: CARD,
+                  }}
+                >
+                  Close
+                </button>
+              </span>
             </div>
 
             <div style={{
@@ -2367,7 +2388,21 @@ function Insights({ v }: { v: TrainingVals }) {
                 {i.body}
               </p>
 
-              <div style={{ fontSize: 11, color: MUTED, marginTop: 14 }}>{i.source}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 11, color: MUTED }}>{i.source}</span>
+                {i.open && (
+                  <button
+                    type="button"
+                    onClick={i.open}
+                    style={{
+                      all: 'unset', cursor: 'pointer', fontSize: 11.5,
+                      color: i.tagColor, borderBottom: `1px solid ${TRACK_PREV}`,
+                    }}
+                  >
+                    Open {i.screen} →
+                  </button>
+                )}
+              </div>
             </div>
 
             {i.metric && (

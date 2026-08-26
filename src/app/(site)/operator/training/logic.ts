@@ -466,6 +466,18 @@ export function deriveVals(
         : null,
       open: st.openDim === r.label,
       toggle: () => set({ openDim: st.openDim === r.label ? null : r.label }),
+      // Every dimension has a screen that explains it in full, so the score is
+      // a way in rather than a dead end.
+      screen: ({
+        Strength: 'Workouts', Cardio: 'Progress', Activity: 'Progress',
+        Nutrition: 'Nutrition', Recovery: 'Recovery', Consistency: 'Workouts',
+      } as Record<string, Screen>)[r.label],
+      openScreen: () => set({
+        screen: ({
+          Strength: 'Workouts', Cardio: 'Progress', Activity: 'Progress',
+          Nutrition: 'Nutrition', Recovery: 'Recovery', Consistency: 'Workouts',
+        } as Record<string, Screen>)[r.label],
+      }),
       score: r.score === null ? DASH : String(r.score),
       prev: r.prev === null ? DASH : String(r.prev),
       pct: `${r.score ?? 0}%`,
@@ -1775,6 +1787,8 @@ export function deriveVals(
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
       }),
       close: () => set({ selectedDay: null }),
+      // Following a day into the session list is the natural next question.
+      openSessions: () => set({ screen: 'Workouts', selectedDay: null }),
       metrics,
       sessions: [
         ...sessions.map((w) => ({
@@ -2152,7 +2166,20 @@ export function deriveVals(
     newGoal: () => set({ goalDraft: !st.goalDraft }),
 
     /* insights + settings */
-    insights: insights.slice(0, 12),
+    insights: insights.slice(0, 12).map((i) => {
+      // The tag already names the subject, so it also names where the working is.
+      const target = ({
+        Strength: 'Workouts', Consistency: 'Workouts', Cardio: 'Progress',
+        Activity: 'Progress', Recovery: 'Recovery', Nutrition: 'Nutrition',
+        'Body composition': 'Progress', Plateau: 'Progress', Pattern: 'Workouts',
+        'A year ago': 'Progress',
+      } as Record<string, Screen>)[i.tag];
+      return {
+        ...i,
+        screen: target ?? null,
+        open: target ? () => set({ screen: target }) : null,
+      };
+    }),
     settings,
 
   /* the full-history brush ------------------------------------------------ */
