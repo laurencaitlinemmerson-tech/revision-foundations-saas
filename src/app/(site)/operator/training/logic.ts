@@ -1906,10 +1906,22 @@ export function deriveVals(
     };
   })();
 
-  const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
-  const nav = SCREENS.map((label, i) => ({
+  // Icons rather than numerals. The screens are places, not an ordered
+  // sequence, and the reference labels every page with one.
+  const ICONS: Record<Screen, string> = {
+    Dashboard: '🏠',
+    'Head to head': '🥊',
+    Workouts: '🏋️',
+    Progress: '📈',
+    Goals: '🎯',
+    Nutrition: '🥗',
+    Recovery: '🌙',
+    Insights: '💡',
+    Settings: '⚙️',
+  };
+  const nav = SCREENS.map((label) => ({
     label,
-    numeral: numerals[i],
+    numeral: ICONS[label],
     go: () => set({ screen: label }),
     active: st.screen === label,
   }));
@@ -1951,6 +1963,7 @@ export function deriveVals(
     Settings: ['Settings', 'Units, targets and the sources feeding this dashboard.'],
   };
   const [pageTitle, pageSub] = titles[st.screen];
+  const pageIcon = ICONS[st.screen];
 
   /* head to head ---------------------------------------------------------- */
 
@@ -1987,6 +2000,7 @@ export function deriveVals(
     operatorInitial: props.operatorName.slice(0, 1),
     operatorNote: lastSync ? `Synced to ${fmtDate(lastSync)}` : 'No sync yet',
     pageTitle,
+    pageIcon,
     pageSub,
     rangeLabel,
     againstLabel: `vs ${againstLabel}`,

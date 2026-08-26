@@ -31,6 +31,10 @@
   --amber: #C8700A;
   --rose: #A14A57;
 
+  --radius-card: 10px;
+  --radius-panel: 12px;
+  --radius-control: 7px;
+
   background: var(--paper);
   color: var(--ink-soft);
   font-family: var(--font-body);
@@ -84,4 +88,32 @@
 
 @media (prefers-reduced-motion: reduce) {
   .training-shell * { transition: none !important; }
+}
+
+/* ── Soft edges, from the Notion reference ─────────────────────────────── */
+
+/* Every bordered surface rounds. Applied here rather than per-component so a
+   panel that gains a border later cannot forget to. */
+.training-shell .rounded-card { border-radius: var(--radius-card); }
+.training-shell .rounded-panel { border-radius: var(--radius-panel); }
+
+.training-shell button,
+.training-shell input,
+.training-shell select { border-radius: var(--radius-control); }
+
+/* The nav reads as a list of pages, the way a Notion sidebar does. */
+.training-shell .training-nav button {
+  border-radius: var(--radius-control);
+  margin: 1px 10px;
+  padding-left: 14px;
+  padding-right: 14px;
+  border-bottom: 0 !important;
+}
+
+/* Notion's own view switcher: no outer frame, a soft fill on the active one. */
+.training-shell .view-tabs { border: 0 !important; background: transparent !important; gap: 2px; }
+.training-shell .view-tabs button {
+  border-right: 0 !important;
+  border-radius: var(--radius-control);
+  padding: 6px 12px !important;
 }

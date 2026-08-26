@@ -8,6 +8,7 @@ import {
   TRACK, TRACK_PREV,
 } from './palette';
 import { BarSeries, Figure, LineSeries, Sparkline } from './charts';
+import { COVERS, RADIUS, TAGS } from './palette';
 
 /**
  * The Training dashboard, as drawn.
@@ -43,7 +44,45 @@ const HEAT_WEEKS = 12;
 const eyebrow: CSSProperties = {
   fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED,
 };
-const card: CSSProperties = { border: RULE, background: CARD };
+const card: CSSProperties = {
+  border: RULE, background: CARD, borderRadius: RADIUS.card,
+};
+
+/** A soft band of colour at the top of a card, standing in for a cover photo. */
+function Cover({ gradient, height = 64 }: { gradient: string; height?: number }) {
+  return (
+    <div style={{
+      height,
+      margin: `-${CARD_PAD}px -${CARD_PAD}px ${20}px`,
+      background: gradient,
+      borderRadius: `${RADIUS.card} ${RADIUS.card} 0 0`,
+    }} />
+  );
+}
+
+/** A soft-filled label, the way a Notion select option reads. */
+function Pill({ label, tone = 'grey' }: { label: string; tone?: keyof typeof TAGS }) {
+  const t = TAGS[tone] ?? TAGS.grey;
+  return (
+    <span style={{
+      display: 'inline-block', background: t.bg, color: t.fg,
+      fontSize: 11, padding: '3px 10px', borderRadius: RADIUS.pill,
+      whiteSpace: 'nowrap', letterSpacing: '0.01em',
+    }}>
+      {label}
+    </span>
+  );
+}
+
+/** Which pill colour a subject takes. */
+const toneFor = (tag: string): keyof typeof TAGS => {
+  const t = tag.toLowerCase();
+  if (/strength|consistency|pattern/.test(t)) return 'plum';
+  if (/cardio|recovery|plateau/.test(t)) return 'pink';
+  if (/body|year|nutrition/.test(t)) return 'blue';
+  if (/activity/.test(t)) return 'green';
+  return 'grey';
+};
 const display = (size: number, color = INK): CSSProperties => ({
   fontFamily: 'var(--font-display)', fontSize: size, fontWeight: 400,
   letterSpacing: '-0.015em', lineHeight: 1, color,
@@ -58,13 +97,16 @@ function Eyebrow({ children }: { children: ReactNode }) {
   return <div style={eyebrow}>{children}</div>;
 }
 
-function SectionHeading({ title, aside }: { title: string; aside?: string }) {
+function SectionHeading({ title, aside, icon }: { title: string; aside?: string; icon?: string }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
       gap: 16, borderBottom: RULE, paddingBottom: 12,
     }}>
-      <h2 style={{ ...display(24), margin: 0 }}>{title}</h2>
+      <h2 style={{ ...display(24), margin: 0, display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        {icon && <span style={{ fontSize: 19 }} aria-hidden="true">{icon}</span>}
+        {title}
+      </h2>
       {aside && (
         <span style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
           {aside}
@@ -82,7 +124,7 @@ function Segmented({
   size?: 'sm' | 'md';
 }) {
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', border: RULE, background: CARD, flexShrink: 0 }}>
+    <div className="view-tabs" style={{ display: 'flex', flexWrap: 'wrap', flexShrink: 0 }}>
       {items.map((t) => (
         <button
           key={t.label}
@@ -96,8 +138,8 @@ function Segmented({
             fontSize: size === 'sm' ? 11.5 : 12,
             letterSpacing: '0.04em',
             borderRight: RULE,
-            background: t.active ? PLUM : 'transparent',
-            color: t.active ? '#FBF8FA' : SOFT,
+            background: t.active ? TAGS.plum.bg : 'transparent',
+            color: t.active ? TAGS.plum.fg : SOFT,
             transition: 'background 150ms',
           }}
         >
@@ -498,7 +540,9 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
       >
         <div style={{ padding: '0 28px 32px' }}>
           <Eyebrow>The Nurse Lab</Eyebrow>
-          <div style={{ ...display(24), marginTop: 6 }}>Training</div>
+          <div style={{ ...display(24), marginTop: 6, display: 'flex', alignItems: 'baseline', gap: 9 }}>
+            <span style={{ fontSize: 19 }} aria-hidden="true">💪</span>Training
+          </div>
         </div>
         <nav className="training-nav" style={{ display: 'flex', flexDirection: 'column', borderTop: RULE }}>
           {v.nav.map((item) => (
@@ -517,7 +561,7 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
                 transition: 'background 200ms cubic-bezier(0.4,0,0.2,1)',
               }}
             >
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: MUTED, minWidth: 18 }}>
+              <span style={{ fontSize: 14, minWidth: 20, lineHeight: 1 }} aria-hidden="true">
                 {item.numeral}
               </span>
               <span>{item.label}</span>
@@ -548,7 +592,13 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
         }}>
           <div>
             <Eyebrow>{v.todayLabel}</Eyebrow>
-            <h1 style={{ ...display(38), margin: '10px 0 8px' }}>{v.pageTitle}</h1>
+            <h1 style={{
+              ...display(38), margin: '10px 0 8px',
+              display: 'flex', alignItems: 'baseline', gap: 14,
+            }}>
+              <span style={{ fontSize: 30 }} aria-hidden="true">{v.pageIcon}</span>
+              {v.pageTitle}
+            </h1>
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.65, color: SOFT, maxWidth: '54ch', textWrap: 'pretty' }}>
               {v.pageSub}
             </p>
@@ -842,7 +892,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
       </div>
 
       <section style={{ marginTop: SECTION_GAP }}>
-        <SectionHeading title="Multi-dimensional progress" aside={v.againstLabel} />
+        <SectionHeading icon="📊" title="Multi-dimensional progress" aside={v.againstLabel} />
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -1107,7 +1157,9 @@ function Dashboard({ v }: { v: TrainingVals }) {
 
       <section className="training-pair" style={{ marginTop: SECTION_GAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP }}>
         <div>
-          <h2 style={{ ...display(24), margin: '0 0 4px' }}>Progress timeline</h2>
+          <h2 style={{ ...display(24), margin: '0 0 4px', display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            <span style={{ fontSize: 19 }} aria-hidden="true">🗓️</span>Progress timeline
+          </h2>
           <div style={{ borderTop: RULE, marginTop: 14 }}>
             {v.timeline.length === 0 && (
               <Empty title="Nothing to show yet." note="Log a session and the moments that moved the score appear here." />
@@ -1124,7 +1176,9 @@ function Dashboard({ v }: { v: TrainingVals }) {
           </div>
         </div>
         <div>
-          <h2 style={{ ...display(24), margin: '0 0 4px' }}>Personal records</h2>
+          <h2 style={{ ...display(24), margin: '0 0 4px', display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            <span style={{ fontSize: 19 }} aria-hidden="true">🏆</span>Personal records
+          </h2>
           <div style={{ ...card, display: 'grid', gridTemplateColumns: '1fr 1fr', marginTop: 14 }}>
             {v.prs.map((p) => (
               <div key={p.key} style={{ padding: 24, borderRight: RULE_SOFT, borderBottom: RULE_SOFT }}>
@@ -1400,7 +1454,7 @@ function HeadToHead({ v }: { v: TrainingVals }) {
 
       {/* The rounds, as a quiet ledger. */}
       <section style={{ marginTop: SECTION_GAP }}>
-        <SectionHeading title="The rounds" aside="A point each" />
+        <SectionHeading icon="🥊" title="The rounds" aside="A point each" />
         <div style={{ ...card, borderTop: 0 }}>
           {h.rounds.map((r) => (
             <div key={r.key} style={{ padding: '20px 26px', borderBottom: RULE_SOFT }}>
@@ -1628,6 +1682,9 @@ function ActivityStrip({ v }: { v: TrainingVals }) {
                 background: a.kind === 'Strength' ? PLUM : a.kind === 'Cardio' ? PINK : MUTED,
               }} />
               <span style={{ fontSize: 13.5, color: a.focused ? PLUM : INK }}>{a.name}</span>
+              <span style={{ marginLeft: 'auto' }}>
+                <Pill label={a.kind} tone={a.kind === 'Strength' ? 'plum' : a.kind === 'Cardio' ? 'pink' : 'grey'} />
+              </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, marginTop: 9, paddingLeft: 15 }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: INK }}>{a.sessions}</span>
@@ -1846,7 +1903,9 @@ function Progress({ v }: { v: TrainingVals }) {
       </section>
 
       <section style={{ marginTop: SECTION_GAP }}>
-        <h2 style={{ ...display(24), margin: '0 0 14px' }}>Timeline</h2>
+        <h2 style={{ ...display(24), margin: '0 0 14px', display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <span style={{ fontSize: 19 }} aria-hidden="true">🗓️</span>Timeline
+        </h2>
         <div style={{ borderTop: RULE }}>
           {v.timeline.map((t) => (
             <div key={t.key} style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 20, padding: '22px 0', borderBottom: RULE_SOFT }}>
@@ -2011,13 +2070,10 @@ function Goals({ v }: { v: TrainingVals }) {
                   <span style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED }}>
                     {g.dimension}
                   </span>
-                  <span style={{
-                    fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase',
-                    color: g.statusColor, border: `0.5px solid ${g.statusColor}`,
-                    padding: '3px 9px', whiteSpace: 'nowrap',
-                  }}>
-                    {g.status}
-                  </span>
+                  <Pill
+                    label={g.status}
+                    tone={g.status === 'On track' ? 'green' : g.status === 'Close' ? 'amber' : g.status === 'Behind' ? 'pink' : 'grey'}
+                  />
                 </div>
 
                 <h3 style={{ ...display(23), margin: '12px 0 0' }}>{g.title}</h3>
@@ -2140,10 +2196,11 @@ function EnergySection({ v }: { v: TrainingVals }) {
   const e = v.energy;
   return (
     <section style={{ marginTop: SECTION_GAP }}>
-      <SectionHeading title="Energy balance" aside={`${e.complete} complete days`} />
+      <SectionHeading icon="🔥" title="Energy balance" aside={`${e.complete} complete days`} />
 
       <div className="training-pair" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: GRID_GAP, marginTop: GRID_GAP }}>
-        <div style={{ ...card, padding: CARD_PAD }}>
+        <div style={{ ...card, padding: CARD_PAD, overflow: 'hidden' }}>
+          <Cover gradient={COVERS.sand} />
           <Eyebrow>{e.title}</Eyebrow>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
             <Figure value={e.headline} style={display(46, e.headlineColor)} />
@@ -2218,7 +2275,8 @@ function EnergySection({ v }: { v: TrainingVals }) {
           </div>
         </div>
 
-        <div style={{ ...card, padding: CARD_PAD }}>
+        <div style={{ ...card, padding: CARD_PAD, overflow: 'hidden' }}>
+          <Cover gradient={COVERS.dawn} />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
             <Eyebrow>Daily balance</Eyebrow>
             <span style={{ fontSize: 11.5, color: MUTED }}>
@@ -2363,12 +2421,7 @@ function Insights({ v }: { v: TrainingVals }) {
 
             <div style={{ minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-                <span style={{
-                  fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
-                  color: i.tagColor,
-                }}>
-                  {i.tag}
-                </span>
+                <Pill label={i.tag} tone={toneFor(i.tag)} />
                 {i.when && (
                   <span style={{ fontSize: 11, color: MUTED }}>{i.when}</span>
                 )}

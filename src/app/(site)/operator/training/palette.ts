@@ -54,3 +54,41 @@ export const HEAT = ['#F7F3F6', '#EEDFE9', '#DFBFD3', '#A87CA8', PLUM];
 export const TAG_GOOD = PLUM;
 export const TAG_WATCH = '#A8506B';
 export const TAG_INFO = '#7A5FA0';
+
+/* ── Soft edges ──────────────────────────────────────────────────────────
+   The reference is Notion: rounded cards, pill tags, nothing with a hard
+   corner. Radii are small enough to read as considered rather than bubbly. */
+
+export const RADIUS = {
+  card: '10px',
+  panel: '12px',
+  pill: '999px',
+  control: '7px',
+  cell: '6px',
+} as const;
+
+/** A tag's fill and text, the way Notion colours its select options. */
+export const TAGS: Record<string, { bg: string; fg: string }> = {
+  plum:   { bg: '#EFE7F3', fg: '#5F4472' },
+  pink:   { bg: '#FBE4EC', fg: '#8A4459' },
+  blue:   { bg: '#E4ECF7', fg: '#3A5F8A' },
+  green:  { bg: '#E2F0E8', fg: '#26694A' },
+  amber:  { bg: '#FBEEDC', fg: '#8A5A18' },
+  grey:   { bg: '#EEEAEF', fg: '#6A6270' },
+};
+
+/**
+ * Soft covers, standing in for the reference's photography.
+ *
+ * The Notion boards are topped with dreamy pastel photographs. A fitness
+ * dashboard has no photographs to use and stock imagery would be worse than
+ * none, so the same job — a soft band of colour that makes a card feel like a
+ * card — is done with gradients drawn from the palette already in use.
+ */
+export const COVERS = {
+  plum:  'linear-gradient(135deg, #E8DCF0 0%, #F6EAF2 55%, #FDF4F8 100%)',
+  pink:  'linear-gradient(135deg, #FAD9E6 0%, #FCE9F0 55%, #FEF5F8 100%)',
+  dawn:  'linear-gradient(135deg, #F3E2EC 0%, #E9E2F3 50%, #F7F1FA 100%)',
+  sea:   'linear-gradient(135deg, #DDEAF2 0%, #E9F0F6 55%, #F6FAFC 100%)',
+  sand:  'linear-gradient(135deg, #F6E7DC 0%, #FBF0E8 55%, #FEF9F5 100%)',
+} as const;
