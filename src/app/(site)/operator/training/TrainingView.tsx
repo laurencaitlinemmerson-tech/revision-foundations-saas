@@ -2239,87 +2239,89 @@ function Recovery({ v }: { v: TrainingVals }) {
 
 /* ── Insights ────────────────────────────────────────────────────────────── */
 
-/** A subject label, outlined in the subject's own colour. */
-function Tag({ label, colour }: { label: string; colour: string }) {
-  return (
-    <span style={{
-      fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
-      color: colour, border: `0.5px solid ${colour}`, padding: '4px 10px',
-      whiteSpace: 'nowrap',
-    }}>
-      {label}
-    </span>
-  );
-}
-
 function Insights({ v }: { v: TrainingVals }) {
   if (!v.insights.length) {
     return <Empty title="No observations yet." note="Insights appear once a source has enough logged days to compare." />;
   }
 
-  // No cards. Observations are prose, and prose in a box reads as a form field —
-  // these are separated by rules and space instead, the way a column is.
-  const [lead, ...rest] = v.insights;
-
   return (
-    <div style={{ marginTop: 44 }}>
-      <article style={{ paddingBottom: 40, borderBottom: RULE }}>
+    <div style={{ marginTop: 44, maxWidth: 860 }}>
+      {/* A spine rather than a grid. Most of these observations are about a
+          stretch of time — a flat fortnight, a year-on-year comparison, a streak
+          that ended in 2023 — and reading them in order is how they add up. */}
+      <div style={{ position: 'relative' }}>
         <div style={{
-          display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto',
-          gap: 40, alignItems: 'start',
-        }}>
-          <div>
-            <Tag label={lead.tag} colour={lead.tagColor} />
-            <h2 style={{ ...display(34), margin: '18px 0 0', maxWidth: '22ch' }}>{lead.title}</h2>
-            <p style={{
-              fontSize: 16.5, lineHeight: 1.8, color: SOFT, margin: '18px 0 0',
-              maxWidth: '58ch', textWrap: 'pretty',
-            }}>
-              {lead.body}
-            </p>
-            <div style={{ fontSize: 11.5, color: MUTED, marginTop: 20 }}>{lead.source}</div>
-          </div>
+          position: 'absolute', left: 6, top: 10, bottom: 10, width: 1,
+          background: TRACK_PREV,
+        }} />
 
-          {/* The figure the observation turns on, beside the claim rather than
-              buried in it. */}
-          {lead.metric && (
-            <div style={{ textAlign: 'right', minWidth: 130, paddingTop: 4 }}>
-              <div style={{ ...display(46, lead.tagColor), lineHeight: 1 }}>{lead.metric.value}</div>
-              <div style={{
-                fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase',
-                color: MUTED, marginTop: 10, maxWidth: 150, marginLeft: 'auto',
-              }}>
-                {lead.metric.unit}
+        {v.insights.map((i, idx) => (
+          <article
+            key={i.key}
+            style={{
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1fr) auto',
+              gap: 32,
+              padding: idx === 0 ? '0 0 38px 40px' : '38px 0 38px 40px',
+              borderTop: idx === 0 ? 'none' : RULE_SOFT,
+              alignItems: 'start',
+            }}
+          >
+            {/* The marker sits on the spine, in the subject's own colour. */}
+            <span style={{
+              position: 'absolute', left: 0, top: idx === 0 ? 4 : 42,
+              width: 13, height: 13, borderRadius: '50%',
+              background: PAPER, border: `2px solid ${i.tagColor}`,
+            }} />
+
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
+                  color: i.tagColor,
+                }}>
+                  {i.tag}
+                </span>
+                {i.when && (
+                  <span style={{ fontSize: 11, color: MUTED }}>{i.when}</span>
+                )}
               </div>
-            </div>
-          )}
-        </div>
-      </article>
 
-      <div className="training-pair" style={{
-        display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-        columnGap: 56, rowGap: 0,
-      }}>
-        {rest.map((i) => (
-          <article key={i.key} style={{ padding: '32px 0', borderBottom: RULE_SOFT }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20 }}>
-              <Tag label={i.tag} colour={i.tagColor} />
-              {i.metric && (
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: i.tagColor, lineHeight: 1 }}>
-                    {i.metric.value}
-                  </div>
-                  <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED, marginTop: 6 }}>
-                    {i.metric.unit}
-                  </div>
-                </div>
-              )}
+              <h3 style={{
+                ...display(idx === 0 ? 27 : 22),
+                margin: '12px 0 0', maxWidth: '26ch',
+              }}>
+                {i.title}
+              </h3>
+
+              <p style={{
+                fontSize: idx === 0 ? 15.5 : 14.5, lineHeight: 1.8, color: SOFT,
+                margin: '12px 0 0', maxWidth: '62ch', textWrap: 'pretty',
+              }}>
+                {i.body}
+              </p>
+
+              <div style={{ fontSize: 11, color: MUTED, marginTop: 14 }}>{i.source}</div>
             </div>
-            <h3 style={{ ...display(22), margin: '16px 0 0' }}>{i.title}</h3>
-            <p style={{ fontSize: 14.5, lineHeight: 1.8, color: SOFT, margin: '12px 0 0', textWrap: 'pretty' }}>
-              {i.body}
-            </p>
-            <div style={{ fontSize: 11, color: MUTED, marginTop: 16 }}>{i.source}</div>
+
+            {i.metric && (
+              <div style={{ textAlign: 'right', flexShrink: 0, paddingTop: 2 }}>
+                <div style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: idx === 0 ? 38 : 27,
+                  color: i.tagColor, lineHeight: 1,
+                }}>
+                  {i.metric.value}
+                </div>
+                <div style={{
+                  fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: MUTED, marginTop: 8, maxWidth: 120, marginLeft: 'auto',
+                }}>
+                  {i.metric.unit}
+                </div>
+              </div>
+            )}
           </article>
         ))}
       </div>

@@ -1346,12 +1346,16 @@ export function deriveVals(
   const insights: Array<{
     key: string; tag: string; tagColor: string; title: string; body: string; source: string;
     metric?: { value: string; unit: string } | null;
+    when?: string;
+    age?: number;
   }> = [];
 
   if (nowStats.lifts.length) {
     const d = pctDelta(volumeTonnes || null, prevVolumeTonnes || null);
     insights.push({
       key: 'strength',
+      when: rangeLabel.charAt(0).toUpperCase() + rangeLabel.slice(1),
+      age: 0,
       tag: 'Strength',
       tagColor: TAG_GOOD,
       title: d.color === GREEN ? 'Strength volume is trending up' : d.text === 'held' ? 'Strength volume is holding' : 'Strength volume is down',
@@ -1365,6 +1369,8 @@ export function deriveVals(
     const d = pctDelta(nowStats.strengthSessionDays, prevStats.strengthSessionDays);
     insights.push({
       key: 'strength-sessions',
+      when: rangeLabel.charAt(0).toUpperCase() + rangeLabel.slice(1),
+      age: 0,
       tag: 'Strength',
       tagColor: TAG_GOOD,
       title: 'Strength is scored on sessions, not volume',
@@ -1382,6 +1388,8 @@ export function deriveVals(
       : `, with no gap longer than ${nf(nowStats.longestGapDays, 0)} days`;
     insights.push({
       key: 'consistency',
+      when: rangeLabel.charAt(0).toUpperCase() + rangeLabel.slice(1),
+      age: 0,
       tag: 'Consistency',
       tagColor: pct >= 85 ? TAG_GOOD : TAG_WATCH,
       title: extra > 0 ? 'Ahead of the planned schedule'
@@ -1399,6 +1407,8 @@ export function deriveVals(
     const down = sleepDelta.color === ROSE || sleepDelta.text.startsWith('↓');
     insights.push({
       key: 'recovery',
+      when: rangeLabel.charAt(0).toUpperCase() + rangeLabel.slice(1),
+      age: 0,
       tag: 'Recovery',
       tagColor: down ? TAG_WATCH : TAG_GOOD,
       title: down ? 'Recovery could improve' : 'Recovery is steady',
@@ -1413,6 +1423,8 @@ export function deriveVals(
     const leanStart = earliestInRange('muscleMass');
     insights.push({
       key: 'body',
+      when: rangeLabel.charAt(0).toUpperCase() + rangeLabel.slice(1),
+      age: 0,
       tag: 'Body composition',
       tagColor: TAG_INFO,
       title: 'What the scale is showing',
@@ -1425,6 +1437,8 @@ export function deriveVals(
   if (nowStats.nutritionDays) {
     insights.push({
       key: 'nutrition',
+      when: rangeLabel.charAt(0).toUpperCase() + rangeLabel.slice(1),
+      age: 0,
       tag: 'Nutrition',
       tagColor: TAG_INFO,
       title: nowStats.proteinOnTarget / nowStats.nutritionDays < nowStats.calOnTarget / nowStats.nutritionDays
@@ -1448,6 +1462,8 @@ export function deriveVals(
     if (row?.score !== null) continue;
     insights.push({
       key: `empty-${d}`,
+      when: rangeLabel.charAt(0).toUpperCase() + rangeLabel.slice(1),
+      age: 1,
       tag: d,
       tagColor: MUTED,
       title: 'Not enough data yet',

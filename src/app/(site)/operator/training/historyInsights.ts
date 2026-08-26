@@ -33,6 +33,14 @@ export type Insight = {
    * that has not really found anything.
    */
   metric?: { value: string; unit: string } | null;
+  /**
+   * When the observation is about, for the spine. Most of these are inherently
+   * temporal — a flat fortnight, a year-on-year comparison, a streak that ended
+   * in 2023 — and reading them in time order is how they make sense together.
+   */
+  when?: string;
+  /** Sort key: days ago the observation centres on. Recent first. */
+  age?: number;
 };
 
 const DAY = 86_400_000;
@@ -118,6 +126,8 @@ function yearOnYear(src: Sources, win: Window): Insight | null {
     title: 'The same stretch, last year',
     body: `Measured over the same calendar days twelve months apart: ${bits.join(', and ')}.`,
     source: 'From the same calendar window in the previous year',
+    when: '12 months ago',
+    age: 365,
     metric: nowSteps !== null && thenSteps !== null
       ? {
         value: `${((nowSteps - thenSteps) / thenSteps) * 100 >= 0 ? '+' : ''}${(((nowSteps - thenSteps) / thenSteps) * 100).toFixed(0)}%`,
@@ -156,6 +166,8 @@ function trainingWeek(src: Sources): Insight | null {
     title: `${top.day} is your training day`,
     body: `Across the last year, ${top.n} of ${total} strength sessions landed on a ${top.day} and only ${bottom.n} on a ${bottom.day}. That is the shape of the week you actually train, which is worth knowing when you plan around it.`,
     source: `From ${total} strength days over 12 months`,
+    when: 'Across the year',
+    age: 180,
     metric: { value: `${Math.round((top.n / total) * 100)}%`, unit: `on a ${top.day}` },
   };
 }
@@ -192,6 +204,8 @@ function monthRanking(src: Sources): Insight | null {
       : `${ordinal(rank)} busiest month of ${counts.length + 1} on record`,
     body: `${current} session day${current === 1 ? '' : 's'} so far this month, against a median of ${median} across ${counts.length} recorded months. Your best was ${best.n} in ${MONTHS[Number(bm) - 1]} ${by}.`,
     source: `From ${counts.length + 1} months of logged sessions`,
+    when: 'This month',
+    age: 15,
     metric: { value: ordinal(rank), unit: `of ${counts.length + 1} months` },
   };
 }
@@ -230,6 +244,8 @@ function weightTrajectory(src: Sources): Insight | null {
     title: flat ? 'Weight is holding' : `Weight is trending ${direction}`,
     body,
     source: `Least-squares fit over ${readings.length} weigh-ins, 90 days`,
+    when: 'Last 90 days',
+    age: 45,
     metric: { value: `${perWeek < 0 ? '−' : '+'}${nf(Math.abs(perWeek), 2)}`, unit: 'kg a week' },
   };
 }
@@ -258,6 +274,8 @@ function sleepAndActivity(src: Sources): Insight | null {
     title: 'Sleep and the next day move together',
     body: `Across ${pairs.length} nights, longer sleep is associated with ${dir} steps the following day — ${strength(r)} relationship (r = ${r.toFixed(2)}). Which way the causation runs is not something this data can tell you: a day that was always going to be busy also shortens the night before it.`,
     source: `From ${pairs.length} nights paired with the following day`,
+    when: 'All recorded nights',
+    age: 300,
     metric: { value: `r ${r.toFixed(2)}`, unit: 'association' },
   };
 }
@@ -297,6 +315,8 @@ function streakRecord(src: Sources): Insight | null {
     title: current >= best && current > 1 ? 'Your longest streak, right now' : `Longest streak: ${best} days`,
     body: `${best} consecutive days with a session, ending ${new Date(`${bestEnd}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.${current > 1 ? ` You are on ${current} days now.` : ' Nothing running at the moment.'}`,
     source: `From ${days.length} session days on record`,
+    when: new Date(`${bestEnd}T12:00:00Z`).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+    age: Math.round((Date.now() - Date.parse(`${bestEnd}T12:00:00Z`)) / DAY),
     metric: { value: String(best), unit: 'day best streak' },
   };
 }
@@ -317,6 +337,8 @@ function coverage(src: Sources): Insight | null {
     title: `${pct}% of days this year hit the step goal`,
     body: `${active} of ${thisYear.length} recorded days in ${year} reached ${nf(TARGETS.stepGoal * 0.8)} steps or more. The dashboard holds ${nf(src.days.length)} days going back to ${src.days[0]?.date.slice(0, 10)}.`,
     source: `From ${thisYear.length} recorded days in ${year}`,
+    when: String(year),
+    age: 120,
     metric: { value: `${pct}%`, unit: 'of days at goal' },
   };
 }
@@ -349,6 +371,8 @@ function plateau(src: Sources): Insight | null {
     title: `Flat for ${found.days} days`,
     body: `Weight has moved ${nf(Math.abs(found.slopePerWeek), 2)} kg a week over the last ${found.days} days, around a mean of ${nf(found.meanWeight, 1)} kg — inside the noise of the scale rather than a direction. ${plateauSuggestion(found, Math.round(intake), targets.tdee)}`,
     source: `From ${readings.length} weigh-ins, flat window ${found.startDate} to ${found.endDate}`,
+    when: `Last ${found.days} days`,
+    age: Math.round(found.days / 2),
     metric: { value: String(found.days), unit: 'days flat' },
   };
 }
@@ -388,13 +412,15 @@ function longDecline(src: Sources): Insight | null {
     title: 'Steps have been sliding for months',
     body: `Averaging ${nf(Math.round(last))} a day across the last two months against ${nf(Math.round(first))} four months before that — down ${Math.abs(change).toFixed(0)}%. A month-on-month comparison would not have caught this, because no single month fell far enough to notice.`,
     source: 'From six months of daily step counts',
+    when: 'Last 6 months',
+    age: 90,
     metric: { value: `${change.toFixed(0)}%`, unit: 'over six months' },
   };
 }
 
-/** Everything the history can say, best-evidence first. */
+/** Everything the history can say, most recent first. */
 export function historyInsights(src: Sources, win: Window): Insight[] {
-  return [
+  return ([
     plateau(src),
     longDecline(src),
     monthRanking(src),
@@ -404,5 +430,7 @@ export function historyInsights(src: Sources, win: Window): Insight[] {
     streakRecord(src),
     sleepAndActivity(src),
     coverage(src),
-  ].filter((x): x is Insight => x !== null);
+  ].filter((x): x is Insight => x !== null))
+    // Newest first, so the timeline reads down from what is happening now.
+    .sort((a, b) => (a.age ?? 999) - (b.age ?? 999));
 }
