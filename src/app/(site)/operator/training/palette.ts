@@ -1,46 +1,49 @@
 /**
- * The Training dashboard's colours.
+ * The Training dashboard's colours — the approved design, as drawn.
  *
- * The design arrived in warm neutrals with near-black data marks. This keeps its
- * restraint — cream ground, hairline rules, editorial type — and moves the ink
- * that *carries data* into plum, with rose as the second series. Text stays
- * near-black so nothing pays for the colour in legibility.
+ * Warm editorial: cream ground, hairline rules, near-black ink carrying the
+ * data, and a warm taupe for everything secondary. Green, amber and rose are
+ * semantic — good, needs attention, falling — and are never decorative.
  *
- * Green, amber and rose keep their jobs: they mean good, attention and falling,
- * and are never used decoratively.
+ * Every value here comes from the design file itself rather than being derived,
+ * so the dashboard and the original agree exactly.
  */
 
 /* Ground */
-export const PAPER = '#FBF8FA';
-export const SIDEBAR = '#F5F1F5';
+export const PAPER = '#FAFAF8';
+export const SIDEBAR = '#F5F3F0';
 export const CARD = '#FFFFFF';
-/** The soft panel tint behind the radar and the selected session. */
-export const TINT = '#FBF4F7';
-/** The faintest lilac, for an active nav row. */
-export const LILAC_HAZE = '#F4EFF6';
+/** The soft panel tint behind the radar and a selected row. */
+export const TINT = '#FBF8F3';
+/** An active nav row sits on the page's own ground, lifted out of the sidebar. */
+export const LILAC_HAZE = '#FAFAF8';
 
 /* Type */
-export const INK = '#221C24';
-export const SOFT = '#57515A';
-export const MUTED = '#9C8894';
+export const INK = '#1A1815';
+export const SOFT = '#5A5750';
+export const MUTED = '#9C8878';
 
-/* Data marks */
-export const PLUM = '#5F4472';
-export const PLUM_SOFT = '#8E6FA3';
-export const PLUM_FILL = 'rgba(95, 68, 114, 0.08)';
-export const PLUM_FILL_FAINT = 'rgba(95, 68, 114, 0.05)';
-export const PINK = '#C06C84';
-export const PINK_DEEP = '#8A4459';
-export const PINK_SOFT = '#F2DCE4';
-export const PINK_LINE = '#D9AFC0';
-export const PINK_FILL = 'rgba(192, 108, 132, 0.10)';
+/* Data marks.
+   The design draws its primary series in ink and its previous period in a light
+   warm grey. The names below are kept from the two-series version so every
+   consumer keeps working; what changed is the values, back to the original. */
+export const PLUM = INK;
+export const PLUM_SOFT = '#8A857C';
+export const PLUM_FILL = 'rgba(26, 24, 21, 0.06)';
+export const PLUM_FILL_FAINT = 'rgba(26, 24, 21, 0.045)';
+/** The second series — the other person, a personal best, a surplus. */
+export const PINK = '#C8700A';
+export const PINK_DEEP = '#7A3F04';
+export const PINK_SOFT = '#D8D3CB';
+export const PINK_LINE = '#C8C4BE';
+export const PINK_FILL = 'rgba(200, 112, 10, 0.08)';
 
 /* Neutral chart furniture */
-export const TRACK = '#F1EBF0';
-export const TRACK_PREV = '#E6DCE8';
-export const SPARK = '#C3AECC';
-export const RULE = '0.5px solid rgba(34, 28, 36, 0.10)';
-export const RULE_SOFT = '0.5px solid rgba(34, 28, 36, 0.07)';
+export const TRACK = '#F5F3F0';
+export const TRACK_PREV = '#E4E0DA';
+export const SPARK = '#C8C4BE';
+export const RULE = '0.5px solid rgba(0, 0, 0, 0.08)';
+export const RULE_SOFT = '0.5px solid rgba(0, 0, 0, 0.06)';
 
 /* Semantic */
 export const GREEN = '#1E8A4D';
@@ -48,47 +51,35 @@ export const AMBER = '#C8700A';
 export const ROSE = '#A14A57';
 
 /** The activity heatmap ramp, palest to darkest. */
-export const HEAT = ['#F7F3F6', '#EEDFE9', '#DFBFD3', '#A87CA8', PLUM];
+export const HEAT = ['#F5F3F0', '#E4DED4', '#C8BCA9', '#8A7A66', '#3A322A'];
 
-/** Insight tag colours — plum for good, rose for attention, violet for context. */
-export const TAG_GOOD = PLUM;
-export const TAG_WATCH = '#A8506B';
-export const TAG_INFO = '#7A5FA0';
-
-/* ── Soft edges ──────────────────────────────────────────────────────────
-   The reference is Notion: rounded cards, pill tags, nothing with a hard
-   corner. Radii are small enough to read as considered rather than bubbly. */
-
-export const RADIUS = {
-  card: '10px',
-  panel: '12px',
-  pill: '999px',
-  control: '7px',
-  cell: '6px',
-} as const;
-
-/** A tag's fill and text, the way Notion colours its select options. */
-export const TAGS: Record<string, { bg: string; fg: string }> = {
-  plum:   { bg: '#EFE7F3', fg: '#5F4472' },
-  pink:   { bg: '#FBE4EC', fg: '#8A4459' },
-  blue:   { bg: '#E4ECF7', fg: '#3A5F8A' },
-  green:  { bg: '#E2F0E8', fg: '#26694A' },
-  amber:  { bg: '#FBEEDC', fg: '#8A5A18' },
-  grey:   { bg: '#EEEAEF', fg: '#6A6270' },
-};
+/** Insight tag colours, as the design set them. */
+export const TAG_GOOD = '#1C7A67';
+export const TAG_WATCH = '#7A3F04';
+export const TAG_INFO = '#185FA5';
 
 /**
- * Soft covers, standing in for the reference's photography.
+ * Sharp corners, kept as tokens.
  *
- * The Notion boards are topped with dreamy pastel photographs. A fitness
- * dashboard has no photographs to use and stock imagery would be worse than
- * none, so the same job — a soft band of colour that makes a card feel like a
- * card — is done with gradients drawn from the palette already in use.
+ * The design has no rounding anywhere: it separates things with hairlines and
+ * space rather than with soft edges. These stay as named values so the choice is
+ * visible and reversible in one place instead of being scattered through the
+ * markup as literals.
  */
-export const COVERS = {
-  plum:  'linear-gradient(135deg, #E8DCF0 0%, #F6EAF2 55%, #FDF4F8 100%)',
-  pink:  'linear-gradient(135deg, #FAD9E6 0%, #FCE9F0 55%, #FEF5F8 100%)',
-  dawn:  'linear-gradient(135deg, #F3E2EC 0%, #E9E2F3 50%, #F7F1FA 100%)',
-  sea:   'linear-gradient(135deg, #DDEAF2 0%, #E9F0F6 55%, #F6FAFC 100%)',
-  sand:  'linear-gradient(135deg, #F6E7DC 0%, #FBF0E8 55%, #FEF9F5 100%)',
+export const RADIUS = {
+  card: '0px',
+  panel: '0px',
+  pill: '0px',
+  control: '0px',
+  cell: '0px',
 } as const;
+
+/** Subject labels are set in their own colour, not filled. */
+export const TAGS: Record<string, { bg: string; fg: string }> = {
+  plum: { bg: 'transparent', fg: TAG_GOOD },
+  pink: { bg: 'transparent', fg: TAG_WATCH },
+  blue: { bg: 'transparent', fg: TAG_INFO },
+  green: { bg: 'transparent', fg: GREEN },
+  amber: { bg: 'transparent', fg: AMBER },
+  grey: { bg: 'transparent', fg: MUTED },
+};

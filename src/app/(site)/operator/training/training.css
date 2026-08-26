@@ -7,33 +7,29 @@
    ============================================================= */
 
 .training-shell {
-  --paper: #FBF8FA;
-  --sidebar: #F5F1F5;
+  --paper: #FAFAF8;
+  --sidebar: #F5F3F0;
   --card: #FFFFFF;
-  --tint: #FBF4F7;
-  --lilac-haze: #F4EFF6;
+  --tint: #FBF8F3;
+  --lilac-haze: #FAFAF8;
 
-  --ink: #221C24;
-  --ink-soft: #57515A;
-  --ink-mute: #9C8894;
+  --ink: #1A1815;
+  --ink-soft: #5A5750;
+  --ink-mute: #9C8878;
 
-  --rule: rgba(34, 28, 36, 0.10);
-  --rule-soft: rgba(34, 28, 36, 0.07);
+  --rule: rgba(0, 0, 0, 0.08);
+  --rule-soft: rgba(0, 0, 0, 0.06);
 
-  /* Data marks: plum leads, rose is the second series. */
-  --plum: #5F4472;
-  --plum-soft: #8E6FA3;
-  --pink: #C06C84;
-  --pink-deep: #8A4459;
-  --pink-soft: #F2DCE4;
+  /* Data marks: ink leads, amber is the second series. */
+  --plum: #1A1815;
+  --plum-soft: #8A857C;
+  --pink: #C8700A;
+  --pink-deep: #7A3F04;
+  --pink-soft: #D8D3CB;
 
   --green: #1E8A4D;
   --amber: #C8700A;
   --rose: #A14A57;
-
-  --radius-card: 10px;
-  --radius-panel: 12px;
-  --radius-control: 7px;
 
   background: var(--paper);
   color: var(--ink-soft);
@@ -46,11 +42,11 @@
 .training-shell a:hover { color: var(--ink-soft); }
 
 /* Hover states lifted out of the template's `style-hover` attributes. */
-.training-shell .hv-nav:hover { background: var(--lilac-haze); }
+.training-shell .hv-nav:hover { background: #EFEBE6; }
 .training-shell .hv-tab:hover { background: var(--tint); }
 .training-shell .hv-row:hover { background: var(--tint); }
 .training-shell .hv-cell:hover { background: var(--tint); }
-.training-shell .hv-solid:hover { background: #4A3459; }
+.training-shell .hv-solid:hover { background: #3A2010; }
 
 .training-shell button:focus-visible,
 .training-shell input:focus-visible,
@@ -88,32 +84,4 @@
 
 @media (prefers-reduced-motion: reduce) {
   .training-shell * { transition: none !important; }
-}
-
-/* ── Soft edges, from the Notion reference ─────────────────────────────── */
-
-/* Every bordered surface rounds. Applied here rather than per-component so a
-   panel that gains a border later cannot forget to. */
-.training-shell .rounded-card { border-radius: var(--radius-card); }
-.training-shell .rounded-panel { border-radius: var(--radius-panel); }
-
-.training-shell button,
-.training-shell input,
-.training-shell select { border-radius: var(--radius-control); }
-
-/* The nav reads as a list of pages, the way a Notion sidebar does. */
-.training-shell .training-nav button {
-  border-radius: var(--radius-control);
-  margin: 1px 10px;
-  padding-left: 14px;
-  padding-right: 14px;
-  border-bottom: 0 !important;
-}
-
-/* Notion's own view switcher: no outer frame, a soft fill on the active one. */
-.training-shell .view-tabs { border: 0 !important; background: transparent !important; gap: 2px; }
-.training-shell .view-tabs button {
-  border-right: 0 !important;
-  border-radius: var(--radius-control);
-  padding: 6px 12px !important;
 }
