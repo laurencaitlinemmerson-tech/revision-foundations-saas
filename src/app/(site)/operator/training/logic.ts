@@ -12,6 +12,9 @@ import { JOURNEY, TARGETS, proteinTargetG } from './targets';
 import { PERIOD_IDS, periodWindows, type PeriodId } from './periods';
 import { historyInsights } from './historyInsights';
 import { buildEnergy, energyDays } from './energy';
+import { buildEvidence } from './evidence';
+import { buildReview } from './review';
+import type { HistoryData } from './historyData';
 import { buildActivities, prettyType } from './activities';
 import { buildBodyAnalysis } from './bodyAnalysis';
 import { buildPeriodView } from './periodView';
@@ -41,7 +44,7 @@ const DASH = '—';
 
 export const SCREENS = [
   'Dashboard', 'Head to head', 'Workouts', 'Calendar', 'Progress',
-  'Goals', 'Nutrition', 'Recovery', 'Insights', 'Settings',
+  'Goals', 'Nutrition', 'Recovery', 'Review', 'Evidence', 'Insights', 'Settings',
 ] as const;
 export type Screen = (typeof SCREENS)[number];
 
@@ -419,6 +422,7 @@ export function deriveVals(
   live: LiveData,
   peer: PeerData,
   brief: BriefData = { loaded: false, cues: [], staleNote: null, ok: false },
+  history: HistoryData = { loaded: false, findings: null },
 ) {
   const set = (patch: Partial<TrainingState>) => setState(patch);
 
@@ -1548,6 +1552,24 @@ export function deriveVals(
     spanDays,
   );
 
+  /* what the whole record says -------------------------------------------- */
+
+  // The measured maintenance is only worth anything beside the modelled one, so
+  // the two are brought together here rather than in either module alone.
+  // Average expenditure across the days where both sides were recorded. The
+  // component sum is the fallback, and only when every component is present —
+  // a partial sum would understate the total and turn a full food log into an
+  // apparent under-log.
+  const modelledTdee = energy.avgOut
+    ?? (energy.components.every((c) => c.value !== null)
+      ? energy.components.reduce((a, c) => a + (c.value ?? 0), 0)
+      : null);
+  const evidence = buildEvidence(history.findings, history.loaded, modelledTdee);
+
+  // A weekly review is weekly whatever the period control says, so this reads
+  // the last seven days rather than the selected window.
+  const review = buildReview(src, history.findings, history.loaded, JOURNEY.targetKgPerWeek, todayISO());
+
   /* the period, laid out as the units it is made of ------------------------ */
 
   const periodView = buildPeriodView(src, st.range, nowWin, todayISO());
@@ -1864,6 +1886,54 @@ export function deriveVals(
         });
     };
 
+    /* the forecast, from rates actually held ------------------------------- */
+
+    /**
+     * Three dates rather than one.
+     *
+     * A single arrival date is a number that will be wrong, and its precision is
+     * the least honest thing on the page. The spread here is the quartiles of
+     * the rolling rates measured inside your own past losing stretches, so the
+     * fast and slow ends are speeds already held for weeks at a time rather than
+     * percentages invented around the plan.
+     */
+    const forecast = (() => {
+      const r = history.findings?.rates;
+      if (!r || r.samples < 30) return null;
+      if (r.p25 === null || r.median === null || r.p75 === null) return null;
+      if (toGo === null || toGo <= 0 || latest === null) return null;
+
+      // Sorted ascending and all negative, so p25 is the fastest loss.
+      const legs = ([
+        ['fast', r.p25], ['likely', r.median], ['slow', r.p75],
+      ] as const).map(([key, perWeek]) => {
+        const weeks = toGo / Math.abs(perWeek);
+        return {
+          key,
+          perWeek,
+          rateLabel: `${nf(Math.abs(perWeek), 2)} kg/wk`,
+          weeks,
+          eta: new Date(Date.now() + weeks * 7 * DAY),
+        };
+      });
+
+      return {
+        legs: legs.map((l) => ({
+          key: l.key,
+          label: l.key === 'fast' ? 'If it goes as well as it has'
+            : l.key === 'likely' ? 'At your usual pace' : 'If it goes slowly',
+          rateLabel: l.rateLabel,
+          etaLabel: fmtDate(l.eta, true),
+          monthsLabel: `${nf(l.weeks / 4.35, 0)} months`,
+        })),
+        fastPerWeek: legs[0].perWeek,
+        likelyPerWeek: legs[1].perWeek,
+        slowPerWeek: legs[2].perWeek,
+        note: `Drawn from ${nf(r.samples)} four-week rates measured inside the stretches where your weight was actually falling — the middle half of them ran between ${nf(Math.abs(r.p75), 2)} and ${nf(Math.abs(r.p25), 2)} kg a week. The plan's ${nf(JOURNEY.targetKgPerWeek, 1)} sits ${Math.abs(r.median) >= JOURNEY.targetKgPerWeek ? 'inside' : 'above'} that, which is the useful thing to know about it.`,
+        planIsRealistic: Math.abs(r.median) >= JOURNEY.targetKgPerWeek,
+      };
+    })();
+
     /**
      * Four views of the same journey.
      *
@@ -1948,6 +2018,24 @@ export function deriveVals(
 
       const planStartY = clamp(y(start));
       const planEndY = clamp(y(start - ((to - from) / (7 * DAY)) * JOURNEY.targetKgPerWeek));
+
+      // The cone of rates you have actually held, projected from the last
+      // reading to the right edge. Only on the whole-plan view: over three weeks
+      // every rate lands in the same pixel and the cone says nothing.
+      const lastKg = readingPoints.length ? readingPoints[readingPoints.length - 1].kg : null;
+      const cone = forecast && view === 'plan' && lastKg !== null && lastAt < to
+        ? (() => {
+          const weeks = (to - lastAt) / (7 * DAY);
+          const endOf = (perWeek: number) =>
+            clamp(y(Math.max(goal, lastKg + perWeek * weeks)));
+          const x0 = x(lastAt).toFixed(1);
+          const y0 = clamp(y(lastKg)).toFixed(1);
+          return {
+            path: `M${x0} ${y0} L${W} ${endOf(forecast.fastPerWeek).toFixed(1)} L${W} ${endOf(forecast.slowPerWeek).toFixed(1)} Z`,
+            likelyPath: `M${x0} ${y0} L${W} ${endOf(forecast.likelyPerWeek).toFixed(1)}`,
+          };
+        })()
+        : null;
       const unit = view === 'month' ? 'month' : 'week';
       const weeksIn = Math.max(1, Math.round((lastAt - startAt) / (7 * DAY)));
 
@@ -1956,6 +2044,7 @@ export function deriveVals(
         width: W,
         height: H,
         planPath: `M${x(from).toFixed(1)} ${planStartY.toFixed(1)} L${W} ${planEndY.toFixed(1)}`,
+        cone,
         actualPath: marks.map((p, i) => `${i ? 'L' : 'M'}${p.cx} ${p.cy}`).join(' '),
         marks,
         ghosts,
@@ -2041,6 +2130,7 @@ export function deriveVals(
       })),
       chartFollows: st.journeyChart === null,
       chartThinNote: thinNote,
+      forecast,
       currentKg: latest === null ? DASH : nf(latest, 1),
       lostKg: lost === null ? DASH : `${lost < 0 ? '+' : ''}${nf(Math.abs(lost), 1)}`,
       toGoKg: toGo === null ? DASH : nf(Math.max(0, toGo), 1),
@@ -2241,7 +2331,7 @@ export function deriveVals(
     };
   })();
 
-  const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+  const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
   const nav = SCREENS.map((label, i) => ({
     label,
     numeral: numerals[i],
@@ -2270,6 +2360,18 @@ export function deriveVals(
       peer.them
         ? `You and ${peer.them.athlete}, same week, five rounds. A round only counts when you have both published it.`
         : 'Two trackers, same week, five rounds — once the other side answers.',
+    ],
+    Review: [
+      'This week',
+      review.ok
+        ? 'The week against the levels you were running at when the weight actually came off.'
+        : 'The week, once the record can be read.',
+    ],
+    Evidence: [
+      'What has worked',
+      evidence.ok
+        ? evidence.spanLabel
+        : 'Every stretch where the weight actually moved, and what was different about it.',
     ],
     Workouts: [
       'Workouts',
@@ -2611,6 +2713,10 @@ export function deriveVals(
 
     /* the period, in the shape of the period */
     periodView,
+
+    /* what eight years of logging say */
+    evidence,
+    review,
 
     /* the ribbon */
     ribbon,

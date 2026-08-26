@@ -658,6 +658,8 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
             {v.screen === 'Goals' && <Goals v={v} />}
             {v.screen === 'Nutrition' && <Nutrition v={v} />}
             {v.screen === 'Recovery' && <Recovery v={v} />}
+            {v.screen === 'Review' && <Review v={v} />}
+            {v.screen === 'Evidence' && <Evidence v={v} />}
             {v.screen === 'Insights' && <Insights v={v} />}
             {v.screen === 'Settings' && <Settings v={v} />}
           </>
@@ -2293,6 +2295,16 @@ function Goals({ v }: { v: TrainingVals }) {
               <line key={g.key} x1="0" y1={g.y} x2={j.chart.width} y2={g.y}
                 stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
             ))}
+            {/* The cone of rates actually held before, projected from the last
+                reading. Drawn first so everything else sits on top of it. */}
+            {j.chart.cone && (
+              <>
+                <path d={j.chart.cone.path} fill={PLUM_FILL_FAINT} stroke="none" />
+                <path d={j.chart.cone.likelyPath} fill="none" stroke={PLUM_SOFT}
+                  strokeWidth="1" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
+              </>
+            )}
+
             {/* The weigh-ins an averaged line is built from, left visible so the
                 smoothing hides nothing. */}
             {j.chart.ghosts.map((g) => (
@@ -2375,6 +2387,47 @@ function Goals({ v }: { v: TrainingVals }) {
         <p style={{ fontSize: 13.5, lineHeight: 1.75, color: SOFT, margin: '24px 0 0', maxWidth: '68ch', textWrap: 'pretty' }}>
           {j.note}
         </p>
+
+        {/* Three dates rather than one. A single arrival date is the least
+            honest number on the page; these are speeds already held. */}
+        {j.forecast && (
+          <div style={{ marginTop: 30, paddingTop: 24, borderTop: RULE }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
+              <Eyebrow>When 68 kg arrives</Eyebrow>
+              <span style={{ fontSize: 11.5, color: j.forecast.planIsRealistic ? GREEN : AMBER }}>
+                {j.forecast.planIsRealistic ? 'the plan is inside what you have held' : 'the plan is faster than your usual'}
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+              marginTop: 18,
+            }}>
+              {j.forecast.legs.map((leg) => (
+                <div key={leg.key} style={{
+                  paddingRight: 22,
+                  borderLeft: leg.key === 'likely' ? `2px solid ${PLUM}` : `1px solid ${TRACK_PREV}`,
+                  paddingLeft: 16,
+                }}>
+                  <div style={{ fontSize: 11, color: MUTED, lineHeight: 1.5, minHeight: 32 }}>{leg.label}</div>
+                  <div style={{
+                    fontFamily: 'var(--font-display)', fontSize: 22,
+                    color: leg.key === 'likely' ? PLUM : INK, marginTop: 8,
+                  }}>
+                    {leg.etaLabel}
+                  </div>
+                  <div style={{ fontSize: 11, color: MUTED, marginTop: 6 }}>
+                    {leg.rateLabel} · {leg.monthsLabel}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 12, color: MUTED, margin: '18px 0 0', lineHeight: 1.75, maxWidth: '76ch' }}>
+              {j.forecast.note}
+            </p>
+          </div>
+        )}
 
         {/* The journey week by week, where the accountability actually lives —
             the trajectory shows the shape, this shows whether last week counted. */}
@@ -2790,6 +2843,332 @@ function Recovery({ v }: { v: TrainingVals }) {
 }
 
 /* ── Insights ────────────────────────────────────────────────────────────── */
+
+/**
+ * This week, against the levels that actually worked.
+ *
+ * The rest of the dashboard measures the week against a target someone chose.
+ * This measures it against what she was doing during the stretches where the
+ * weight came off, which is a bar already cleared for weeks at a time.
+ */
+function Review({ v }: { v: TrainingVals }) {
+  const r = v.review;
+
+  if (!r.ok) return <div style={{ marginTop: 40 }}><Empty title="Not yet" note={r.note} /></div>;
+
+  return (
+    <div style={{ marginTop: 40 }}>
+      <section style={{ paddingBottom: 36, borderBottom: RULE }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 20, flexWrap: 'wrap' }}>
+          <Eyebrow>{r.weekLabel}</Eyebrow>
+          <span style={{ fontSize: 11.5, color: MUTED }}>{r.spanLabel}</span>
+        </div>
+
+        <p style={{
+          ...display(26, r.headlineColour), margin: '18px 0 0', lineHeight: 1.4,
+          maxWidth: '32ch', textWrap: 'pretty',
+        }}>
+          {r.headline}
+        </p>
+
+        <p style={{ fontSize: 14, lineHeight: 1.75, color: r.weightColour, margin: '18px 0 0', maxWidth: '64ch' }}>
+          {r.weightLine}
+        </p>
+      </section>
+
+      {/* One thing to change, named. A review that lists eight is a list. */}
+      {r.focus && (
+        <section style={{ marginTop: SECTION_GAP, padding: PANEL_PAD, background: TINT, border: RULE }}>
+          <Eyebrow>The one to move</Eyebrow>
+          <div style={{ ...display(30, PLUM), marginTop: 14 }}>{r.focus.label}</div>
+          <p style={{ fontSize: 14, lineHeight: 1.75, color: SOFT, margin: '14px 0 0', maxWidth: '62ch', textWrap: 'pretty' }}>
+            {r.focus.line}
+          </p>
+        </section>
+      )}
+
+      {r.levers.length > 0 && (
+        <section style={{ marginTop: SECTION_GAP }}>
+          <SectionHeading title="Every lever, against what worked" aside={`${r.levers.length} measured`} />
+
+          <div style={{ marginTop: 6, borderTop: RULE_SOFT }}>
+            {r.levers.map((l) => (
+              <div key={l.key} style={{
+                display: 'grid', gridTemplateColumns: '160px 96px 1fr 190px',
+                gap: 20, alignItems: 'center', padding: `${ROW_Y}px 0`, borderBottom: RULE_SOFT,
+              }}>
+                <span>
+                  <span style={{ fontSize: 13.5, color: INK, display: 'block' }}>{l.label}</span>
+                  <span style={{ fontSize: 10.5, color: MUTED }}>{l.unit}</span>
+                </span>
+
+                <span style={{
+                  fontFamily: 'var(--font-display)', fontSize: 19, color: l.colour,
+                  textAlign: 'right', fontVariantNumeric: 'tabular-nums',
+                }}>
+                  {l.nowLabel}
+                </span>
+
+                {/* This week as a bar against the level that worked, which is
+                    marked on it. The track runs to 140% of that level so the
+                    mark sits inside the bar rather than at its end. */}
+                <span style={{ display: 'block', position: 'relative', height: 8, background: TRACK }}>
+                  <span style={{
+                    display: 'block', height: 8, width: `${(Math.min(l.pct, 140) / 140) * 100}%`,
+                    background: l.colour,
+                    transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                  }} />
+                  <span
+                    title={`Worked at ${l.workedLabel} ${l.unit}`}
+                    style={{
+                      position: 'absolute', top: -4, bottom: -4, left: `${(100 / 140) * 100}%`,
+                      borderLeft: `1.5px solid ${BLUE}`,
+                    }}
+                  />
+                </span>
+
+                <span style={{ fontSize: 11.5, color: SOFT, textAlign: 'right', lineHeight: 1.5 }}>
+                  <span style={{ color: BLUE }}>{l.workedLabel}</span> when it worked
+                  <br />
+                  <span style={{ color: MUTED }}>{l.gapLabel}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontSize: 12, color: MUTED, margin: '16px 0 0', lineHeight: 1.7, maxWidth: '72ch' }}>
+            {r.benchNote}
+            {r.setAside.length > 0 && (
+              <> Set aside because the record disagrees with the body about which way it runs: {r.setAside.join(', ').toLowerCase()}.</>
+            )}
+          </p>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Every stretch where the weight actually moved, and what was different.
+ *
+ * This is the only screen that can say something she does not already know, and
+ * it earns that by refusing to say anything the coverage will not carry.
+ */
+function Evidence({ v }: { v: TrainingVals }) {
+  const e = v.evidence;
+
+  if (!e.ok) {
+    return (
+      <div style={{ marginTop: 40 }}>
+        <Empty title={e.loading ? 'Reading eight years' : 'Not yet'} note={e.note || 'The record is still loading.'} />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 40 }}>
+      {/* The floor of the record. It is the single most useful fact here: this
+          has been done before, and the data knows how far. */}
+      <section style={{ paddingBottom: 36, borderBottom: RULE, display: 'flex', gap: 56, flexWrap: 'wrap' }}>
+        {e.lowest && (
+          <div>
+            <Eyebrow>Lowest on record</Eyebrow>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 14 }}>
+              <Figure value={e.lowest.kg} style={{ ...display(56, PLUM), lineHeight: 1 }} />
+              <span style={{ fontSize: 14, color: MUTED }}>kg</span>
+            </div>
+            <div style={{ fontSize: 12.5, color: SOFT, marginTop: 10 }}>
+              {e.lowest.when} · {e.lowest.agoLabel}
+            </div>
+          </div>
+        )}
+
+        {e.best && (
+          <div style={{ maxWidth: '40ch' }}>
+            <Eyebrow>Longest stretch that worked</Eyebrow>
+            <div style={{ ...display(26), marginTop: 14 }}>{e.best.range}</div>
+            <div style={{ fontSize: 13, color: SOFT, marginTop: 10, lineHeight: 1.7 }}>
+              {e.best.lengthLabel} · {e.best.changeLabel} · {e.best.rateLabel}
+              <br />
+              <span style={{ color: GREEN }}>{e.best.lostLabel} off</span>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* The whole record as one bar, so the shape of five years is visible at
+          a glance rather than as a table of dates. */}
+      {e.episodes.length > 0 && (
+        <section style={{ marginTop: SECTION_GAP }}>
+          <SectionHeading title="Every stretch, in order" aside={`${e.episodes.length} on record`} />
+
+          <div style={{ position: 'relative', height: 26, background: TRACK, marginTop: 18 }}>
+            {e.episodes.map((ep) => (
+              <span
+                key={ep.key}
+                title={`${ep.range} — ${ep.rateLabel}`}
+                style={{
+                  position: 'absolute', top: 0, bottom: 0,
+                  left: `${ep.leftPct}%`, width: `${ep.widthPct}%`,
+                  background: ep.colour, opacity: 0.85,
+                }}
+              />
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 6 }}>
+            <span>{e.timelineFrom}</span>
+            <span>{e.timelineTo}</span>
+          </div>
+
+          <div style={{ marginTop: 24, borderTop: RULE_SOFT }}>
+            {e.episodes.map((ep) => (
+              <div key={`row-${ep.key}`} style={{
+                display: 'grid', gridTemplateColumns: '92px 1fr 110px 130px 110px',
+                gap: 18, alignItems: 'center', padding: '13px 0', borderBottom: RULE_SOFT,
+              }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: SOFT }}>
+                  <span style={{ width: 8, height: 8, background: ep.colour, flexShrink: 0 }} />
+                  {ep.phase}
+                </span>
+                <span style={{ fontSize: 13, color: INK }}>{ep.range}</span>
+                <span style={{ fontSize: 12, color: MUTED, textAlign: 'right' }}>{ep.lengthLabel}</span>
+                <span style={{ fontSize: 12.5, color: SOFT, textAlign: 'right' }}>{ep.changeLabel}</span>
+                <span style={{
+                  fontFamily: 'var(--font-display)', fontSize: 16, color: ep.colour, textAlign: 'right',
+                }}>
+                  {ep.rateLabel}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* The contrast — the actual finding. */}
+      {e.contrasts.length > 0 && (
+        <section style={{ marginTop: SECTION_GAP }}>
+          <SectionHeading title="What was different when it worked" aside="losing vs the rest" />
+
+          {/* Two unlabelled bars is a puzzle, so the pair is named once here
+              rather than on every row. */}
+          <div style={{ display: 'flex', gap: 24, marginTop: 12, flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: SOFT }}>
+              <span style={{ width: 16, height: 8, background: GREEN }} />
+              in the stretches where the weight was falling
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: MUTED }}>
+              <span style={{ width: 16, height: 8, background: TRACK_PREV }} />
+              in the stretches where it was holding or rising
+            </span>
+          </div>
+
+          <div style={{ marginTop: 16, borderTop: RULE_SOFT }}>
+            {e.contrasts.map((c) => (
+              <div key={c.key} style={{
+                display: 'grid', gridTemplateColumns: '170px 1fr 96px',
+                gap: 22, alignItems: 'center', padding: '18px 0', borderBottom: RULE_SOFT,
+              }}>
+                <span>
+                  <span style={{ fontSize: 13.5, color: INK, display: 'block' }}>{c.label}</span>
+                  <span style={{ fontSize: 10.5, color: MUTED }}>{c.unit}</span>
+                </span>
+
+                <span style={{ display: 'block' }}>
+                  {/* Losing on top in green, everything else beneath in grey,
+                      both drawn against the larger of the two. */}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ display: 'block', flex: 1, height: 9, background: TRACK }}>
+                      <span style={{
+                        display: 'block', height: 9, width: `${c.pct}%`, background: GREEN,
+                        transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                      }} />
+                    </span>
+                    <span style={{ fontSize: 12.5, color: GREEN, minWidth: 62, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                      {c.losing}
+                    </span>
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5 }}>
+                    <span style={{ display: 'block', flex: 1, height: 9, background: TRACK }}>
+                      <span style={{
+                        display: 'block', height: 9, width: `${c.otherPct}%`, background: TRACK_PREV,
+                        transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                      }} />
+                    </span>
+                    <span style={{ fontSize: 12.5, color: MUTED, minWidth: 62, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                      {c.other}
+                    </span>
+                  </span>
+                  <span style={{ display: 'block', fontSize: 10.5, color: MUTED, marginTop: 7 }}>
+                    {c.coverNote}
+                  </span>
+                </span>
+
+                <span style={{
+                  fontFamily: 'var(--font-display)', fontSize: 20,
+                  color: c.higher ? GREEN : ROSE, textAlign: 'right',
+                }}>
+                  {c.diff}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontSize: 12.5, color: MUTED, margin: '18px 0 0', lineHeight: 1.75, maxWidth: '76ch' }}>
+            {e.contrastNote}
+            {e.thinContrasts.length > 0 && (
+              <> Not shown for want of coverage on one side or the other: {e.thinContrasts.join(', ').toLowerCase()}.</>
+            )}
+          </p>
+        </section>
+      )}
+
+      {/* Maintenance, solved for rather than modelled. */}
+      <section style={{ marginTop: SECTION_GAP, padding: PANEL_PAD, border: RULE, background: CARD }}>
+        <Eyebrow>Maintenance, measured</Eyebrow>
+
+        {e.maintenance.ok ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
+              <Figure value={e.maintenance.measured} style={{ ...display(52, e.maintenance.colour), lineHeight: 1 }} />
+              <span style={{ fontSize: 13, color: MUTED }}>kcal/day</span>
+              <span style={{ fontSize: 12, color: MUTED, marginLeft: 8 }}>
+                middle half {e.maintenance.band} · {e.maintenance.windows} four-week stretches
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              marginTop: 26, paddingTop: 20, borderTop: RULE_SOFT,
+            }}>
+              {[
+                { label: 'Measured', value: e.maintenance.measured, colour: e.maintenance.colour },
+                { label: 'Modelled', value: e.maintenance.modelled, colour: BLUE },
+                { label: 'You logged', value: e.maintenance.logged, colour: INK },
+              ].map((c) => (
+                <div key={c.label} style={{ paddingRight: 20 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>
+                    {c.label}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 21, color: c.colour, marginTop: 7 }}>
+                    {c.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 13.5, lineHeight: 1.8, color: SOFT, margin: '22px 0 0', maxWidth: '72ch', textWrap: 'pretty' }}>
+              {e.maintenance.verdict}
+            </p>
+          </>
+        ) : (
+          <p style={{ fontSize: 13.5, lineHeight: 1.8, color: SOFT, margin: '16px 0 0', maxWidth: '72ch' }}>
+            {e.maintenance.note}
+          </p>
+        )}
+      </section>
+    </div>
+  );
+}
 
 function Insights({ v }: { v: TrainingVals }) {
   if (!v.insights.length) {

@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useOperatorData } from '../daily-log/data';
 import { usePeerData } from './peerData';
 import { useBrief } from './briefData';
+import { useHistory } from './historyData';
 import { stateFromUrl, useUrlState } from './urlState';
 import TrainingView from './TrainingView';
 import {
@@ -31,6 +32,7 @@ export default function TrainingClient({ props = DEFAULT_PROPS }: { props?: Trai
   const live = useOperatorData();
   const peer = usePeerData();
   const brief = useBrief();
+  const history = useHistory();
 
   const setState = useCallback<
     (patch: Partial<TrainingState> | ((s: TrainingState) => Partial<TrainingState>)) => void
@@ -41,8 +43,8 @@ export default function TrainingClient({ props = DEFAULT_PROPS }: { props?: Trai
   useUrlState(state, setState);
 
   const vals = useMemo(
-    () => deriveVals(state, setState, props, live, peer, brief),
-    [state, setState, props, live, peer, brief],
+    () => deriveVals(state, setState, props, live, peer, brief, history),
+    [state, setState, props, live, peer, brief, history],
   );
 
   return (
