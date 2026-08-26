@@ -3,7 +3,7 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
-  AMBER, CARD, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
+  AMBER, CARD, GREEN, INK, LILAC_HAZE, MUTED, PAPER, PINK, PINK_DEEP, PINK_FILL, PINK_LINE,
   PINK_SOFT, PLUM, PLUM_FILL, PLUM_FILL_FAINT, ROSE, RULE, RULE_SOFT, SIDEBAR,
   SOFT, SPARK, TINT, TRACK, TRACK_PREV,
 } from './palette';
@@ -676,6 +676,151 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
 
 /* ── Dashboard ───────────────────────────────────────────────────────────── */
 
+/**
+ * The selected period, drawn as the thing it is made of.
+ *
+ * Week becomes seven days side by side, month becomes its weeks, year becomes
+ * its months. A single day has nothing smaller to break into — the data is daily
+ * totals all the way down — so Day shows the day itself against yesterday.
+ * Changing the period changes what you are looking at, not only what it says.
+ */
+function PeriodView({ pv }: { pv: TrainingVals['periodView'] }) {
+  if (pv.shape === 'day') {
+    return (
+      <section style={{ marginTop: SECTION_GAP }}>
+        <SectionHeading title={pv.title} aside="Against yesterday" />
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(168px, 1fr))',
+          marginTop: 6,
+        }}>
+          {pv.tiles.map((t) => (
+            <div key={t.label} style={{ padding: '22px 24px 22px 0', borderBottom: RULE_SOFT }}>
+              <div style={eyebrow}>{t.label}</div>
+              <div style={{ marginTop: 10 }}>
+                <Figure value={t.value} style={display(30, t.colour)} />
+              </div>
+              <div style={{ fontSize: 11.5, color: SOFT, marginTop: 8, lineHeight: 1.55 }}>{t.note}</div>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontSize: 12.5, color: MUTED, margin: '18px 0 0', lineHeight: 1.7, maxWidth: '68ch' }}>
+          {pv.note}
+        </p>
+      </section>
+    );
+  }
+
+  /* Seven days fit as columns; weeks and months read better as rows. */
+  const asColumns = pv.shape === 'days';
+  const countLabel = `${pv.units.length} ${pv.shape === 'days' ? 'days' : pv.shape}`;
+
+  return (
+    <section style={{ marginTop: SECTION_GAP }}>
+      <SectionHeading title={pv.title} aside={countLabel} />
+
+      {asColumns ? (
+        <div style={{
+          display: 'grid', gridTemplateColumns: `repeat(${pv.units.length}, 1fr)`,
+          marginTop: 6, borderTop: RULE_SOFT,
+        }}>
+          {pv.units.map((u) => (
+            <div key={u.key} style={{
+              padding: '18px 14px 18px 0',
+              background: u.current ? TINT : 'transparent',
+              borderBottom: RULE_SOFT,
+              opacity: u.empty ? 0.42 : 1,
+            }}>
+              <div style={{
+                fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: u.current ? PLUM : INK,
+              }}>
+                {u.label}
+              </div>
+              <div style={{ fontSize: 10.5, color: MUTED, marginTop: 3 }}>{u.sub}</div>
+
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: INK, marginTop: 14, letterSpacing: '-0.01em' }}>
+                {u.stepsLabel}
+              </div>
+              <div style={{ height: 3, background: TRACK, marginTop: 8 }}>
+                <div style={{
+                  height: 3, width: `${u.stepPct}%`, background: u.stepPct >= 100 ? GREEN : PLUM,
+                  transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                }} />
+              </div>
+
+              <div style={{ marginTop: 14, display: 'flex', gap: 4, alignItems: 'center', minHeight: 12 }}>
+                {u.sessions > 0
+                  ? Array.from({ length: Math.min(4, u.sessions) }, (_, i) => (
+                      <span key={i} style={{ width: 5, height: 5, background: PINK }} />
+                    ))
+                  : <span style={{ fontSize: 10.5, color: MUTED }}>rest</span>}
+              </div>
+
+              <div style={{ fontSize: 10.5, color: SOFT, marginTop: 12, lineHeight: 1.7 }}>
+                <div>{u.sleepLabel === '—' ? <span style={{ color: MUTED }}>no sleep</span> : u.sleepLabel}</div>
+                <div>{u.weightLabel === '—' ? <span style={{ color: MUTED }}>—</span> : u.weightLabel}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ marginTop: 6, borderTop: RULE_SOFT }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: '150px 104px 1fr 96px 84px 88px',
+            gap: 20, padding: '10px 0', ...eyebrow,
+          }}>
+            <span />
+            <span style={{ textAlign: 'right' }}>Steps</span>
+            <span />
+            <span style={{ textAlign: 'right' }}>Sessions</span>
+            <span style={{ textAlign: 'right' }}>Sleep</span>
+            <span style={{ textAlign: 'right' }}>Weight</span>
+          </div>
+          {pv.units.map((u) => (
+            <div key={u.key} style={{
+              display: 'grid', gridTemplateColumns: '150px 104px 1fr 96px 84px 88px',
+              gap: 20, alignItems: 'center',
+              padding: `${ROW_Y}px 0`, borderTop: RULE_SOFT,
+              background: u.current ? TINT : 'transparent',
+              opacity: u.empty ? 0.42 : 1,
+            }}>
+              <span>
+                <span style={{ fontSize: 13.5, color: u.current ? PLUM : INK, display: 'block' }}>{u.label}</span>
+                <span style={{ fontSize: 10.5, color: MUTED }}>{u.sub}</span>
+              </span>
+
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: 19, color: INK,
+                textAlign: 'right', fontVariantNumeric: 'tabular-nums',
+              }}>
+                {u.stepsLabel}
+              </span>
+
+              <span style={{ display: 'block', height: 5, background: TRACK }}>
+                <span style={{
+                  display: 'block', height: 5, width: `${u.stepPct}%`,
+                  background: u.stepPct >= 100 ? GREEN : PLUM,
+                  transition: 'width 420ms cubic-bezier(0.4,0,0.2,1)',
+                }} />
+              </span>
+
+              <span style={{ fontSize: 12.5, color: u.sessions ? SOFT : MUTED, textAlign: 'right' }}>
+                {u.sessions ? `${u.sessions} session${u.sessions === 1 ? '' : 's'}` : 'none'}
+              </span>
+              <span style={{ fontSize: 12.5, color: u.sleepLabel === '—' ? MUTED : SOFT, textAlign: 'right' }}>{u.sleepLabel}</span>
+              <span style={{ fontSize: 12.5, color: u.weightLabel === '—' ? MUTED : SOFT, textAlign: 'right' }}>{u.weightLabel}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p style={{ fontSize: 12.5, color: MUTED, margin: '18px 0 0', lineHeight: 1.7, maxWidth: '68ch' }}>
+        {pv.note}
+      </p>
+    </section>
+  );
+}
+
 function Dashboard({ v }: { v: TrainingVals }) {
   return (
     <div>
@@ -701,7 +846,9 @@ function Dashboard({ v }: { v: TrainingVals }) {
         </section>
       )}
 
-      <section style={{ ...card, marginTop: 44 }}>
+      <PeriodView pv={v.periodView} />
+
+      <section style={{ ...card, marginTop: SECTION_GAP }}>
         <div className="training-split" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr' }}>
           <div style={{ padding: PANEL_PAD, borderRight: RULE }}>
             <Eyebrow>Fitness overview</Eyebrow>

@@ -14,6 +14,7 @@ import { historyInsights } from './historyInsights';
 import { buildEnergy, energyDays } from './energy';
 import { buildActivities, prettyType } from './activities';
 import { buildBodyAnalysis } from './bodyAnalysis';
+import { buildPeriodView } from './periodView';
 import { buildRibbon } from './trends';
 import { fitReadings } from '@/lib/fitness/regression';
 import { isRunWorkout, workoutKindOf } from './workoutKind';
@@ -1535,6 +1536,10 @@ export function deriveVals(
     spanDays,
   );
 
+  /* the period, laid out as the units it is made of ------------------------ */
+
+  const periodView = buildPeriodView(src, st.range, nowWin, todayISO());
+
   /* the dimension ribbon -------------------------------------------------- */
 
   const ribbon = buildRibbon({ ...src, workouts: allWorkouts }, 12);
@@ -2494,6 +2499,9 @@ export function deriveVals(
         confidenceLabel: `${Math.round(t.confidence * 100)}%`,
       };
     })(),
+
+    /* the period, in the shape of the period */
+    periodView,
 
     /* the ribbon */
     ribbon,
