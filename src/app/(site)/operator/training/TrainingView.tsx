@@ -2269,7 +2269,14 @@ function Goals({ v }: { v: TrainingVals }) {
             display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
             gap: 12, marginBottom: 12, flexWrap: 'wrap',
           }}>
-            <span style={{ fontSize: 11.5, color: MUTED }}>Showing {j.chart.rangeLabel}</span>
+            <span style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 11.5, color: MUTED }}>Showing {j.chart.rangeLabel}</span>
+              {j.chartFollows && (
+                <span style={{ fontSize: 11, color: MUTED, fontStyle: 'italic' }}>
+                  following the period above
+                </span>
+              )}
+            </span>
             <Segmented items={j.chartTabs} size="sm" />
           </div>
 
@@ -2284,6 +2291,11 @@ function Goals({ v }: { v: TrainingVals }) {
             {j.chart.gridLines.map((g) => (
               <line key={g.key} x1="0" y1={g.y} x2={j.chart.width} y2={g.y}
                 stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
+            ))}
+            {/* The weigh-ins an averaged line is built from, left visible so the
+                smoothing hides nothing. */}
+            {j.chart.ghosts.map((g) => (
+              <circle key={`g-${g.key}`} cx={g.cx} cy={g.cy} r="1.6" fill={PINK} opacity={0.4} />
             ))}
             {j.chart.goalY !== null && (
               <line x1="0" y1={j.chart.goalY} x2={j.chart.width} y2={j.chart.goalY}
@@ -2301,8 +2313,11 @@ function Goals({ v }: { v: TrainingVals }) {
             <span>{j.chart.endLabel}</span>
           </div>
 
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 8 }}>
-            Vertical axis covers {j.chart.bandLabel}, not the whole journey.
+          <div style={{ fontSize: 11, color: MUTED, marginTop: 8, lineHeight: 1.7 }}>
+            {j.chart.pointNote} Vertical axis covers {j.chart.bandLabel}, not the whole journey.
+            {j.chartThinNote && (
+              <span style={{ color: AMBER, marginLeft: 6 }}>{j.chartThinNote}</span>
+            )}
           </div>
         </div>
 
@@ -2370,7 +2385,7 @@ function Goals({ v }: { v: TrainingVals }) {
               <span style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
                 <Eyebrow>The journey, broken down</Eyebrow>
                 {j.grainFollows && (
-                  <span style={{ fontSize: 11, color: MUTED }}>following the period above</span>
+                  <span style={{ fontSize: 11, color: MUTED }}>matching the chart above</span>
                 )}
               </span>
               <Segmented items={j.grainTabs} size="sm" />

@@ -50,6 +50,15 @@ export type Screen = (typeof SCREENS)[number];
 export type BodyMetric = 'Weight' | 'Body fat %' | 'Lean mass';
 export type CardioMetric = 'Distance' | 'Pace' | 'Duration' | 'Heart rate';
 
+/**
+ * The four ways of drawing the same journey.
+ *
+ * `reading` plots every weigh-in, `week` and `month` plot that period's average
+ * with the individual weigh-ins left faint behind it, and `plan` pulls the axes
+ * out to the whole twenty kilograms.
+ */
+export type JourneyChartView = 'reading' | 'week' | 'month' | 'plan';
+
 export type TrainingState = {
   screen: Screen;
   range: PeriodId;
@@ -78,8 +87,11 @@ export type TrainingState = {
    * clicking "Week" up there is asking for.
    */
   journeyGrain: 'week' | 'month' | null;
-  /** Whether the journey chart fits what has happened, or the whole plan. */
-  journeyChart: 'sofar' | 'plan' | null;
+  /**
+   * Which shape the journey chart is drawn in. Null means it follows the
+   * period control at the top of the page.
+   */
+  journeyChart: JourneyChartView | null;
 };
 
 export type SetState = (
@@ -1798,30 +1810,76 @@ export function deriveVals(
       });
     };
 
-    // Day and Week show weeks; Month, Year and a long custom range show months.
-    // The control at the top of the page is the one people reach for, so it
-    // drives this unless a choice has been pinned below.
-    const grain: 'week' | 'month' = st.journeyGrain
-      ?? (st.range === 'Day' || st.range === 'Week' ? 'week'
-        : st.range === 'Custom' && spanDays <= 60 ? 'week'
-          : 'month');
-
     /* the trajectory ------------------------------------------------------- */
 
+    /** Every weigh-in since the journey began, as points on a time axis. */
+    const readingPoints = sinceStart.map((r) => ({
+      key: r.date.slice(0, 10),
+      t: Date.parse(`${r.date.slice(0, 10)}T12:00:00Z`),
+      kg: r.weight,
+      label: `${nf(r.weight, 1)} kg`,
+      sub: fmtDate(r.date, true),
+    }));
+
     /**
-     * Two ways to look at the same journey.
+     * The same readings rolled into weeks or months.
+     *
+     * A bucket is plotted at the mean date of its readings rather than at its
+     * first day, so a week weighed only on Sunday sits where the weighing
+     * happened instead of six days before it. The value is the mean, for the
+     * same reason the breakdown uses means: endpoint-to-endpoint reports
+     * whatever the water did on two particular mornings.
+     */
+    const groupedPoints = (by: 'week' | 'month') => {
+      const keyOf = (iso: string) => {
+        if (by === 'month') return iso.slice(0, 7);
+        const d = new Date(`${iso}T12:00:00Z`);
+        return new Date(d.getTime() - ((d.getUTCDay() + 6) % 7) * DAY).toISOString().slice(0, 10);
+      };
+
+      const groups = new Map<string, { t: number[]; kg: number[] }>();
+      for (const p of readingPoints) {
+        const k = keyOf(p.key);
+        if (!groups.has(k)) groups.set(k, { t: [], kg: [] });
+        groups.get(k)!.t.push(p.t);
+        groups.get(k)!.kg.push(p.kg);
+      }
+
+      const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+
+      return [...groups.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, v]) => {
+          const kg = mean(v.kg);
+          const n = v.kg.length;
+          return {
+            key,
+            t: mean(v.t),
+            kg,
+            label: `${nf(kg, 1)} kg avg`,
+            sub: by === 'month'
+              ? `${MONTHS[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)} · ${n} weigh-in${n === 1 ? '' : 's'}`
+              : `week of ${fmtDate(`${key}T12:00:00Z`, true)} · ${n} weigh-in${n === 1 ? '' : 's'}`,
+          };
+        });
+    };
+
+    /**
+     * Four views of the same journey.
      *
      * Drawn across the whole plan, the first weeks are a squiggle in the corner:
      * the x-axis runs to next June and the y-axis spans twenty kilograms, so a
      * kilogram of actual movement is a pixel. That view is right for seeing the
-     * distance and useless for seeing progress, which is the thing you look at
-     * a chart every week for.
+     * distance and useless for seeing progress, which is the thing you look at a
+     * chart every week for. So the others fit both axes to what has happened,
+     * with the plan line still drawn through them.
      *
-     * So the default fits both axes to what has happened, with the plan line
-     * still drawn through it — near enough to read a week against, while "whole
-     * plan" stays a click away for the long view.
+     * Picking week or month changes what a point *is* — one week's average
+     * rather than one morning's reading — which is a different chart, not the
+     * same chart filtered. The individual weigh-ins stay visible behind the
+     * aggregate so nothing is hidden by the smoothing.
      */
-    const chartFor = (mode: 'sofar' | 'plan') => {
+    const chartFor = (view: JourneyChartView) => {
       const W = 900;
       const H = 190;
       const PAD = 16;
@@ -1829,17 +1887,18 @@ export function deriveVals(
       const planWeeks = span > 0 ? span / JOURNEY.targetKgPerWeek : 1;
       const planEnd = startAt + planWeeks * 7 * DAY;
 
-      const values = sinceStart.map((r) => r.weight);
-      const lastAt = sinceStart.length
-        ? new Date(`${sinceStart[sinceStart.length - 1].date.slice(0, 10)}T12:00:00Z`).getTime()
-        : startAt;
+      const pts = view === 'week' ? groupedPoints('week')
+        : view === 'month' ? groupedPoints('month')
+          : readingPoints;
+
+      const lastAt = readingPoints.length ? readingPoints[readingPoints.length - 1].t : startAt;
 
       const from = startAt;
       let to = planEnd;
       let lo = goal - 1;
       let hi = start + 1.5;
 
-      if (mode === 'sofar') {
+      if (view !== 'plan') {
         // A quarter again of the elapsed time as forward room, and at least a
         // fortnight, so the newest reading is never pinned to the right edge.
         const elapsed = Math.max(14 * DAY, lastAt - startAt);
@@ -1848,9 +1907,10 @@ export function deriveVals(
         // The plan's own position at the right edge has to stay on the chart,
         // or the target line leaves the frame and the comparison is lost.
         const planAtEnd = start - ((to - startAt) / (7 * DAY)) * JOURNEY.targetKgPerWeek;
-        const seen = values.length ? values : [start];
-        const seenLo = Math.min(...seen, planAtEnd, start);
-        const seenHi = Math.max(...seen, start);
+        const seen = [...readingPoints.map((p) => p.kg), ...pts.map((p) => p.kg)];
+        const all = seen.length ? seen : [start];
+        const seenLo = Math.min(...all, planAtEnd, start);
+        const seenHi = Math.max(...all, start);
         const pad = Math.max(0.4, (seenHi - seenLo) * 0.18);
         lo = seenLo - pad;
         hi = seenHi + pad;
@@ -1860,19 +1920,24 @@ export function deriveVals(
       const x = (t: number) => ((t - from) / Math.max(1, to - from)) * W;
       const y = (kg: number) => PAD + (1 - (kg - lo) / range) * (H - PAD * 2);
       const clamp = (v: number) => Math.max(0, Math.min(H, v));
+      const visible = (t: number) => t >= from && t <= to;
 
-      const marks = sinceStart
-        .filter((r) => {
-          const t = new Date(`${r.date.slice(0, 10)}T12:00:00Z`).getTime();
-          return t >= from && t <= to;
-        })
-        .map((r) => ({
-          key: r.date.slice(0, 10),
-          cx: Number(x(new Date(`${r.date.slice(0, 10)}T12:00:00Z`).getTime()).toFixed(1)),
-          cy: Number(clamp(y(r.weight)).toFixed(1)),
-          label: `${nf(r.weight, 1)} kg`,
-          sub: fmtDate(r.date, true),
-        }));
+      const marks = pts.filter((p) => visible(p.t)).map((p) => ({
+        key: p.key,
+        cx: Number(x(p.t).toFixed(1)),
+        cy: Number(clamp(y(p.kg)).toFixed(1)),
+        label: p.label,
+        sub: p.sub,
+      }));
+
+      // The readings an aggregate line is built from, kept faint behind it.
+      const ghosts = view === 'week' || view === 'month'
+        ? readingPoints.filter((p) => visible(p.t)).map((p) => ({
+          key: p.key,
+          cx: Number(x(p.t).toFixed(1)),
+          cy: Number(clamp(y(p.kg)).toFixed(1)),
+        }))
+        : [];
 
       // Whole kilograms across the visible band, so the axis says something.
       const gridLines: Array<{ key: string; y: string; label: string }> = [];
@@ -1883,13 +1948,17 @@ export function deriveVals(
 
       const planStartY = clamp(y(start));
       const planEndY = clamp(y(start - ((to - from) / (7 * DAY)) * JOURNEY.targetKgPerWeek));
+      const unit = view === 'month' ? 'month' : 'week';
+      const weeksIn = Math.max(1, Math.round((lastAt - startAt) / (7 * DAY)));
 
       return {
+        view,
         width: W,
         height: H,
         planPath: `M${x(from).toFixed(1)} ${planStartY.toFixed(1)} L${W} ${planEndY.toFixed(1)}`,
         actualPath: marks.map((p, i) => `${i ? 'L' : 'M'}${p.cx} ${p.cy}`).join(' '),
         marks,
+        ghosts,
         // Only meaningful when the goal is inside the visible band.
         goalY: goal >= lo && goal <= hi ? y(goal).toFixed(1) : null,
         gridLines,
@@ -1898,16 +1967,49 @@ export function deriveVals(
         // The visible band, said plainly — a fitted axis must never be mistaken
         // for the whole twenty kilograms.
         bandLabel: `${nf(lo, 1)} – ${nf(hi, 1)} kg`,
-        rangeLabel: mode === 'sofar'
-          ? (() => {
-            const wks = Math.max(1, Math.round((lastAt - startAt) / (7 * DAY)));
-            return `${wks} week${wks === 1 ? '' : 's'} in`;
-          })()
-          : 'the whole plan',
+        rangeLabel: view === 'plan'
+          ? 'the whole plan'
+          : view === 'reading'
+            ? `every weigh-in, ${weeksIn} week${weeksIn === 1 ? '' : 's'} in`
+            : `${marks.length} ${unit}${marks.length === 1 ? '' : 's'}`,
+        // What a point on this chart actually is.
+        pointNote: view === 'plan'
+          ? 'Every weigh-in, across the full twenty kilograms.'
+          : view === 'reading'
+            ? 'Each dot is one weigh-in.'
+            : `Each dot is that ${unit}'s average weight; the faint dots behind are the weigh-ins it averages.`,
       };
     };
 
-    const chartMode: 'sofar' | 'plan' = st.journeyChart ?? 'sofar';
+    /* Which view to draw ---------------------------------------------------- */
+
+    // The control at the top of the page is the one people reach for, so it
+    // drives the chart's shape unless a view has been pinned beneath it.
+    const followedView: JourneyChartView =
+      st.range === 'Day' ? 'reading'
+        : st.range === 'Week' ? 'week'
+          : st.range === 'Month' || st.range === 'Year' ? 'month'
+            : spanDays <= 60 ? 'week' : 'month';
+
+    const askedView: JourneyChartView = st.journeyChart ?? followedView;
+
+    // A line needs two points to have a shape. One week in, a weekly chart is a
+    // single dot with nothing to say, so it falls back to the weigh-ins and
+    // says why rather than drawing a chart that looks broken.
+    const askedCount = askedView === 'week' ? groupedPoints('week').length
+      : askedView === 'month' ? groupedPoints('month').length
+        : 2;
+    const thin = askedCount < 2;
+    const chartMode: JourneyChartView = thin ? 'reading' : askedView;
+    const thinNote = !thin ? null
+      : askedCount === 0
+        ? 'No weigh-ins yet, so there is nothing to average.'
+        : `Only one ${askedView === 'month' ? 'month' : 'week'} of weigh-ins so far — showing each one until there are two to draw a line between.`;
+
+    // The breakdown beneath reads at the same grain as the chart above, so the
+    // two are never describing different things at once.
+    const grain: 'week' | 'month' = st.journeyGrain
+      ?? (askedView === 'month' ? 'month' : 'week');
 
     return {
       startKg: nf(start, 1),
@@ -1927,11 +2029,18 @@ export function deriveVals(
         ? `Each row is that week's average weight, and the change against the week before. Averages rather than endpoints, because Monday against Monday reports whatever the water did on two mornings. Target is ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week.`
         : `Each row is that month's average weight against the month before. Target is about ${nf(JOURNEY.targetKgPerWeek * 4.35, 1)} kg a month.`,
       chart: chartFor(chartMode),
-      chartTabs: (['sofar', 'plan'] as const).map((m) => ({
-        label: m === 'sofar' ? 'So far' : 'Whole plan',
-        go: () => set({ journeyChart: m }),
-        active: chartMode === m,
+      chartTabs: (['reading', 'week', 'month', 'plan'] as const).map((m) => ({
+        label: m === 'reading' ? 'Weigh-ins'
+          : m === 'week' ? 'By week'
+            : m === 'month' ? 'By month'
+              : 'Whole plan',
+        // Choosing the view the period control already implies releases the pin,
+        // the same way the breakdown's grain works.
+        go: () => set({ journeyChart: st.journeyChart === m ? null : m }),
+        active: askedView === m,
       })),
+      chartFollows: st.journeyChart === null,
+      chartThinNote: thinNote,
       currentKg: latest === null ? DASH : nf(latest, 1),
       lostKg: lost === null ? DASH : `${lost < 0 ? '+' : ''}${nf(Math.abs(lost), 1)}`,
       toGoKg: toGo === null ? DASH : nf(Math.max(0, toGo), 1),
