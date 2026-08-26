@@ -652,6 +652,7 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
             {v.screen === 'Dashboard' && <Dashboard v={v} />}
             {v.screen === 'Head to head' && <HeadToHead v={v} />}
             {v.screen === 'Workouts' && <Workouts v={v} />}
+            {v.screen === 'Calendar' && <CalendarScreen v={v} />}
             {v.screen === 'Progress' && <Progress v={v} />}
             {v.screen === 'Goals' && <Goals v={v} />}
             {v.screen === 'Nutrition' && <Nutrition v={v} />}
@@ -1663,6 +1664,200 @@ function ActivityStrip({ v }: { v: TrainingVals }) {
             </div>
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The calendar as a screen rather than a panel.
+ *
+ * On Progress it sat under everything else and had to earn its space against
+ * four charts. A month is a period in its own right — it is how the training
+ * week actually repeats — so it gets the width, its own totals, and the opened
+ * day alongside instead of underneath.
+ */
+function CalendarScreen({ v }: { v: TrainingVals }) {
+  const cal = v.calendar;
+  const detail = v.dayDetail;
+
+  return (
+    <div style={{ marginTop: 40 }}>
+      <section style={{ ...card, padding: PANEL_PAD }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap' }}>
+          <div>
+            <Eyebrow>Month</Eyebrow>
+            <h2 style={{ ...display(32), margin: '12px 0 0' }}>{cal.monthLabel}</h2>
+            <div style={{ fontSize: 13, color: SOFT, marginTop: 8 }}>{cal.summary}</div>
+          </div>
+          <div style={{ display: 'flex', border: RULE, background: CARD }}>
+            <button type="button" onClick={cal.prev} aria-label="Previous month" className="hv-tab"
+              style={{ all: 'unset', cursor: 'pointer', padding: '9px 17px', fontSize: 16, color: SOFT }}>‹</button>
+            <button type="button" onClick={cal.next} aria-label="Next month" disabled={!cal.canNext}
+              className={cal.canNext ? 'hv-tab' : undefined}
+              style={{
+                all: 'unset', cursor: cal.canNext ? 'pointer' : 'default', padding: '9px 17px',
+                fontSize: 16, color: cal.canNext ? SOFT : 'rgba(26,24,21,0.18)', borderLeft: RULE,
+              }}>›</button>
+          </div>
+        </div>
+
+        {/* What the month came to, so the grid is not the only thing here. */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(116px, 1fr))',
+          marginTop: 28, paddingTop: 22, borderTop: RULE,
+        }}>
+          {cal.stats.map((c) => (
+            <div key={c.label} style={{ paddingRight: 18 }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>
+                {c.label}
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: INK, marginTop: 6 }}>
+                {c.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="training-pair" style={{
+        display: 'grid', gridTemplateColumns: detail ? '1.5fr 1fr' : '1fr',
+        gap: GRID_GAP, marginTop: GRID_GAP, alignItems: 'start',
+      }}>
+        <div style={{ ...card, padding: CARD_PAD }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
+            {cal.dayNames.map((d) => (
+              <div key={d} style={{
+                fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: MUTED, paddingBottom: 10, textAlign: 'center',
+              }}>
+                {d}
+              </div>
+            ))}
+
+            {cal.cells.map((c) => c.pad ? <div key={c.key} /> : (
+              <button
+                key={c.key}
+                type="button"
+                onClick={c.select}
+                disabled={c.future}
+                aria-pressed={c.selected}
+                aria-label={`${c.date}${c.hasSession ? ', has a session' : ''}`}
+                className={c.future ? undefined : 'hv-tab'}
+                style={{
+                  all: 'unset', boxSizing: 'border-box',
+                  cursor: c.future ? 'default' : 'pointer',
+                  minHeight: 86, padding: '9px 10px',
+                  background: c.selected ? TINT : c.tint,
+                  border: c.selected ? `1px solid ${INK}` : c.isToday ? `1px solid ${AMBER}` : RULE_SOFT,
+                  opacity: c.future ? 0.4 : 1,
+                  display: 'flex', flexDirection: 'column', gap: 5,
+                  transition: 'background 150ms',
+                }}
+              >
+                <span style={{
+                  fontSize: 12, color: c.isToday ? AMBER : c.hasSession ? INK : MUTED,
+                  fontVariantNumeric: 'tabular-nums',
+                }}>
+                  {c.day}
+                </span>
+
+                {c.hasSession && (
+                  <span style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                    {Array.from({ length: Math.min(3, c.strength) }, (_, i) => (
+                      <span key={`s${i}`} style={{ width: 5, height: 5, borderRadius: '50%', background: INK }} />
+                    ))}
+                    {Array.from({ length: Math.min(3, c.cardio) }, (_, i) => (
+                      <span key={`c${i}`} style={{ width: 5, height: 5, borderRadius: '50%', background: AMBER }} />
+                    ))}
+                    {Array.from({ length: Math.min(2, c.other) }, (_, i) => (
+                      <span key={`o${i}`} style={{ width: 5, height: 5, borderRadius: '50%', background: MUTED }} />
+                    ))}
+                  </span>
+                )}
+
+                <span style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {c.weight && (
+                    <span style={{ fontSize: 10.5, color: SOFT, fontVariantNumeric: 'tabular-nums' }}>{c.weight} kg</span>
+                  )}
+                  {c.steps && (
+                    <span style={{ fontSize: 10, color: MUTED, fontVariantNumeric: 'tabular-nums' }}>{c.steps}</span>
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 20, marginTop: 18, fontSize: 11, color: MUTED, flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: INK }} />Strength
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: AMBER }} />Cardio
+            </span>
+            <span style={{ marginLeft: 'auto' }}>Figures are that day&rsquo;s weigh-in and step count</span>
+          </div>
+        </div>
+
+        {detail && (
+          <div style={{ ...card, padding: CARD_PAD, position: 'sticky', top: 32 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+              <Eyebrow>Selected</Eyebrow>
+              <button
+                type="button" onClick={detail.close} className="hv-tab"
+                style={{
+                  all: 'unset', cursor: 'pointer', padding: '4px 11px', fontSize: 11.5,
+                  color: SOFT, border: RULE, background: CARD,
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <h3 style={{ ...display(22), margin: '12px 0 0' }}>{detail.label}</h3>
+
+            <div style={{ marginTop: 20, borderTop: RULE }}>
+              {detail.metrics.map((m) => (
+                <div key={m.label} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                  padding: '12px 0', borderBottom: RULE_SOFT,
+                }}>
+                  <span style={{ fontSize: 12.5, color: SOFT }}>{m.label}</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: INK }}>{m.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <Eyebrow>Sessions</Eyebrow>
+              {detail.empty ? (
+                <div style={{ fontSize: 12.5, color: MUTED, fontStyle: 'italic', marginTop: 12 }}>
+                  Nothing logged on this day.
+                </div>
+              ) : detail.sessions.map((sn) => (
+                <div key={sn.key} style={{ padding: '12px 0', borderBottom: RULE_SOFT }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+                    <span style={{
+                      width: 6, height: 6, flexShrink: 0,
+                      background: sn.kind === 'Cardio' ? AMBER : sn.kind === 'Other' ? MUTED : INK,
+                    }} />
+                    <span style={{ fontSize: 13, color: INK }}>{sn.name}</span>
+                  </div>
+                  <div style={{ fontSize: 11.5, color: SOFT, marginTop: 5, paddingLeft: 15 }}>{sn.detail}</div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button" onClick={detail.openSessions}
+              style={{
+                all: 'unset', cursor: 'pointer', marginTop: 18, fontSize: 12,
+                color: INK, borderBottom: `1px solid ${TRACK_PREV}`,
+              }}
+            >
+              All sessions →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

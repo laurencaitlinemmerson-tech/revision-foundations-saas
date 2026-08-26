@@ -1,4 +1,4 @@
-import type { LiveData, Lift, WeighIn, Workout } from '../daily-log/data';
+import type { HealthDay, LiveData, Lift, WeighIn, Workout } from '../daily-log/data';
 import { MUSCLE_GROUPS, equipmentOf, muscleGroupOf, sessionNameFor, type MuscleGroup } from './exercises';
 import {
   DAY, DIMENSIONS, baselineOf, breakdownOf, overallScore, partsFor, scoreAll, statsFor,
@@ -39,7 +39,7 @@ export {
 const DASH = '—';
 
 export const SCREENS = [
-  'Dashboard', 'Head to head', 'Workouts', 'Progress',
+  'Dashboard', 'Head to head', 'Workouts', 'Calendar', 'Progress',
   'Goals', 'Nutrition', 'Recovery', 'Insights', 'Settings',
 ] as const;
 export type Screen = (typeof SCREENS)[number];
@@ -1903,6 +1903,31 @@ export function deriveVals(
       next: () => set({ calendarMonth: shift(1) }),
       canNext: anchor < todayISO().slice(0, 7),
       summary: `${sessionDays} session day${sessionDays === 1 ? '' : 's'} of ${inMonth.length}`,
+      // A month is a period in its own right, so the screen can total it.
+      stats: (() => {
+        const monthDays = src.days.filter((d) => d.date.slice(0, 7) === anchor);
+        const sum = (pick: (d: HealthDay) => number | null | undefined) => {
+          const live = monthDays.map(pick).filter((v): v is number => !!v);
+          return live.length ? live.reduce((a, b) => a + b, 0) : null;
+        };
+        const avg = (pick: (d: HealthDay) => number | null | undefined) => {
+          const live = monthDays.map(pick).filter((v): v is number => !!v);
+          return live.length ? live.reduce((a, b) => a + b, 0) / live.length : null;
+        };
+        const mins = src.workouts
+          .filter((w) => w.startedAt.slice(0, 7) === anchor)
+          .reduce((a, w) => a + (w.durationMin ?? 0), 0);
+        const weighed = weighAll.filter((r) => r.date.slice(0, 7) === anchor && r.weight > 0);
+
+        return [
+          { label: 'Session days', value: `${sessionDays}` },
+          { label: 'Training time', value: mins ? fmtHours(mins / 60) : DASH },
+          { label: 'Avg steps', value: avg((d) => d.activity.steps) === null ? DASH : nf(Math.round(avg((d) => d.activity.steps) as number)) },
+          { label: 'Total steps', value: sum((d) => d.activity.steps) === null ? DASH : nf(Math.round(sum((d) => d.activity.steps) as number)) },
+          { label: 'Avg sleep', value: avg((d) => d.sleep.totalMin) === null ? DASH : fmtHours((avg((d) => d.sleep.totalMin) as number) / 60) },
+          { label: 'Weigh-ins', value: weighed.length ? `${weighed.length}` : DASH },
+        ];
+      })(),
     };
   })();
 
@@ -1939,6 +1964,10 @@ export function deriveVals(
     Workouts: [
       'Workouts',
       `${allSessions.length} session${allSessions.length === 1 ? '' : 's'} on record across ${activityRows.length} kinds of training.`,
+    ],
+    Calendar: [
+      'Calendar',
+      `Every day on record — ${calendar.summary.replace(' session day', ' training day')} this month. Select one to open it.`,
     ],
     Progress: [
       'Progress',
