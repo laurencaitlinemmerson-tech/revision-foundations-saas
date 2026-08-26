@@ -2114,9 +2114,18 @@ function Goals({ v }: { v: TrainingVals }) {
           </div>
         </div>
 
-        {/* The plan and what actually happened, on one picture — and readable
-            the same way every other chart here is. */}
+        {/* The plan and what actually happened. Fitted to what has happened by
+            default, because across the whole plan the first weeks are a
+            squiggle in the corner. */}
         <div style={{ marginTop: 30 }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+            gap: 12, marginBottom: 12, flexWrap: 'wrap',
+          }}>
+            <span style={{ fontSize: 11.5, color: MUTED }}>Showing {j.chart.rangeLabel}</span>
+            <Segmented items={j.chartTabs} size="sm" />
+          </div>
+
           <LineSeries
             marks={j.chart.marks}
             path={j.chart.actualPath}
@@ -2125,21 +2134,28 @@ function Goals({ v }: { v: TrainingVals }) {
             stroke={PLUM}
             hint={`Weight from ${j.startKg} kg toward ${j.goalKg} kg — hover to read a weigh-in`}
           >
-            {j.chart.milestoneLines.map((m) => (
-              <line key={m.key} x1="0" y1={m.y} x2={j.chart.width} y2={m.y}
-                stroke="rgba(34,28,36,0.06)" strokeWidth="0.5" />
+            {j.chart.gridLines.map((g) => (
+              <line key={g.key} x1="0" y1={g.y} x2={j.chart.width} y2={g.y}
+                stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
             ))}
-            <line x1="0" y1={j.chart.goalY} x2={j.chart.width} y2={j.chart.goalY}
-              stroke={PLUM} strokeWidth="0.75" strokeDasharray="5 4" />
+            {j.chart.goalY !== null && (
+              <line x1="0" y1={j.chart.goalY} x2={j.chart.width} y2={j.chart.goalY}
+                stroke={PLUM} strokeWidth="0.75" strokeDasharray="5 4" />
+            )}
             <path d={j.chart.planPath} fill="none" stroke={PINK_LINE} strokeWidth="1.25"
               strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
           </LineSeries>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 4, gap: 12 }}>
             <span>{j.chart.startLabel}</span>
             <span style={{ fontStyle: 'italic' }}>
               Dashed is the plan at {j.targetRate}; solid is what the scale said
             </span>
             <span>{j.chart.endLabel}</span>
+          </div>
+
+          <div style={{ fontSize: 11, color: MUTED, marginTop: 8 }}>
+            Vertical axis covers {j.chart.bandLabel}, not the whole journey.
           </div>
         </div>
 
@@ -2204,7 +2220,12 @@ function Goals({ v }: { v: TrainingVals }) {
               display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
               gap: 16, flexWrap: 'wrap', marginBottom: 18,
             }}>
-              <Eyebrow>The journey, broken down</Eyebrow>
+              <span style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+                <Eyebrow>The journey, broken down</Eyebrow>
+                {j.grainFollows && (
+                  <span style={{ fontSize: 11, color: MUTED }}>following the period above</span>
+                )}
+              </span>
               <Segmented items={j.grainTabs} size="sm" />
             </div>
 

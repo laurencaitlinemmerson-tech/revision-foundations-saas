@@ -71,8 +71,14 @@ export type TrainingState = {
   selectedDay: string | null;
   /** Head to head: 0 is today, counting back through the published fortnight. */
   dayOffset: number;
-  /** Whether the journey breakdown is grouped by week or by month. */
-  journeyGrain: 'week' | 'month';
+  /**
+   * An explicit override for the journey breakdown's grain. Null means it
+   * follows the period control at the top of the page, which is what someone
+   * clicking "Week" up there is asking for.
+   */
+  journeyGrain: 'week' | 'month' | null;
+  /** Whether the journey chart fits what has happened, or the whole plan. */
+  journeyChart: 'sofar' | 'plan' | null;
 };
 
 export type SetState = (
@@ -98,7 +104,8 @@ export const INITIAL_STATE: TrainingState = {
   calendarMonth: null,
   selectedDay: null,
   dayOffset: 0,
-  journeyGrain: 'week',
+  journeyGrain: null,
+  journeyChart: null,
 };
 
 /* ── formatting ──────────────────────────────────────────────────────────── */
@@ -1786,57 +1793,140 @@ export function deriveVals(
       });
     };
 
+    // Day and Week show weeks; Month, Year and a long custom range show months.
+    // The control at the top of the page is the one people reach for, so it
+    // drives this unless a choice has been pinned below.
+    const grain: 'week' | 'month' = st.journeyGrain
+      ?? (st.range === 'Day' || st.range === 'Week' ? 'week'
+        : st.range === 'Custom' && spanDays <= 60 ? 'week'
+          : 'month');
+
     /* the trajectory ------------------------------------------------------- */
 
-    // The planned line from start to goal, with the real readings over it, so
-    // the plan and what actually happened share one picture.
-    const W = 900;
-    const H = 190;
-    const PAD = 16;
-    const startAt = new Date(`${JOURNEY.startDate}T12:00:00Z`).getTime();
-    const planWeeks = span > 0 ? span / JOURNEY.targetKgPerWeek : 1;
-    const endAt = startAt + planWeeks * 7 * DAY;
-    const lo = goal - 1;
-    const hi = start + 1.5;
-    const range = hi - lo || 1;
-    const x = (t: number) => ((t - startAt) / Math.max(1, endAt - startAt)) * W;
-    const y = (kg: number) => PAD + (1 - (kg - lo) / range) * (H - PAD * 2);
+    /**
+     * Two ways to look at the same journey.
+     *
+     * Drawn across the whole plan, the first weeks are a squiggle in the corner:
+     * the x-axis runs to next June and the y-axis spans twenty kilograms, so a
+     * kilogram of actual movement is a pixel. That view is right for seeing the
+     * distance and useless for seeing progress, which is the thing you look at
+     * a chart every week for.
+     *
+     * So the default fits both axes to what has happened, with the plan line
+     * still drawn through it — near enough to read a week against, while "whole
+     * plan" stays a click away for the long view.
+     */
+    const chartFor = (mode: 'sofar' | 'plan') => {
+      const W = 900;
+      const H = 190;
+      const PAD = 16;
+      const startAt = new Date(`${JOURNEY.startDate}T12:00:00Z`).getTime();
+      const planWeeks = span > 0 ? span / JOURNEY.targetKgPerWeek : 1;
+      const planEnd = startAt + planWeeks * 7 * DAY;
 
-    const actual = sinceStart.map((r) => ({
-      key: r.date.slice(0, 10),
-      cx: Number(x(new Date(`${r.date.slice(0, 10)}T12:00:00Z`).getTime()).toFixed(1)),
-      cy: Number(y(r.weight).toFixed(1)),
-      label: `${nf(r.weight, 1)} kg`,
-      sub: fmtDate(r.date, true),
-    }));
+      const values = sinceStart.map((r) => r.weight);
+      const lastAt = sinceStart.length
+        ? new Date(`${sinceStart[sinceStart.length - 1].date.slice(0, 10)}T12:00:00Z`).getTime()
+        : startAt;
+
+      const from = startAt;
+      let to = planEnd;
+      let lo = goal - 1;
+      let hi = start + 1.5;
+
+      if (mode === 'sofar') {
+        // A quarter again of the elapsed time as forward room, and at least a
+        // fortnight, so the newest reading is never pinned to the right edge.
+        const elapsed = Math.max(14 * DAY, lastAt - startAt);
+        to = Math.min(planEnd, startAt + elapsed * 1.25);
+
+        // The plan's own position at the right edge has to stay on the chart,
+        // or the target line leaves the frame and the comparison is lost.
+        const planAtEnd = start - ((to - startAt) / (7 * DAY)) * JOURNEY.targetKgPerWeek;
+        const seen = values.length ? values : [start];
+        const seenLo = Math.min(...seen, planAtEnd, start);
+        const seenHi = Math.max(...seen, start);
+        const pad = Math.max(0.4, (seenHi - seenLo) * 0.18);
+        lo = seenLo - pad;
+        hi = seenHi + pad;
+      }
+
+      const range = hi - lo || 1;
+      const x = (t: number) => ((t - from) / Math.max(1, to - from)) * W;
+      const y = (kg: number) => PAD + (1 - (kg - lo) / range) * (H - PAD * 2);
+      const clamp = (v: number) => Math.max(0, Math.min(H, v));
+
+      const marks = sinceStart
+        .filter((r) => {
+          const t = new Date(`${r.date.slice(0, 10)}T12:00:00Z`).getTime();
+          return t >= from && t <= to;
+        })
+        .map((r) => ({
+          key: r.date.slice(0, 10),
+          cx: Number(x(new Date(`${r.date.slice(0, 10)}T12:00:00Z`).getTime()).toFixed(1)),
+          cy: Number(clamp(y(r.weight)).toFixed(1)),
+          label: `${nf(r.weight, 1)} kg`,
+          sub: fmtDate(r.date, true),
+        }));
+
+      // Whole kilograms across the visible band, so the axis says something.
+      const gridLines: Array<{ key: string; y: string; label: string }> = [];
+      for (let kg = Math.ceil(lo); kg <= Math.floor(hi); kg++) {
+        if (gridLines.length > 9) break;
+        gridLines.push({ key: String(kg), y: y(kg).toFixed(1), label: `${kg} kg` });
+      }
+
+      const planStartY = clamp(y(start));
+      const planEndY = clamp(y(start - ((to - from) / (7 * DAY)) * JOURNEY.targetKgPerWeek));
+
+      return {
+        width: W,
+        height: H,
+        planPath: `M${x(from).toFixed(1)} ${planStartY.toFixed(1)} L${W} ${planEndY.toFixed(1)}`,
+        actualPath: marks.map((p, i) => `${i ? 'L' : 'M'}${p.cx} ${p.cy}`).join(' '),
+        marks,
+        // Only meaningful when the goal is inside the visible band.
+        goalY: goal >= lo && goal <= hi ? y(goal).toFixed(1) : null,
+        gridLines,
+        startLabel: fmtDate(new Date(from)),
+        endLabel: fmtDate(new Date(to)),
+        // The visible band, said plainly — a fitted axis must never be mistaken
+        // for the whole twenty kilograms.
+        bandLabel: `${nf(lo, 1)} – ${nf(hi, 1)} kg`,
+        rangeLabel: mode === 'sofar'
+          ? (() => {
+            const wks = Math.max(1, Math.round((lastAt - startAt) / (7 * DAY)));
+            return `${wks} week${wks === 1 ? '' : 's'} in`;
+          })()
+          : 'the whole plan',
+      };
+    };
+
+    const chartMode: 'sofar' | 'plan' = st.journeyChart ?? 'sofar';
 
     return {
       startKg: nf(start, 1),
       goalKg: nf(goal, 1),
       milestones,
       nextMilestone: nextAt >= 0 ? milestones[nextAt] : null,
-      buckets: buildBuckets(st.journeyGrain === 'month' ? 'month' : 'week'),
+      buckets: buildBuckets(grain),
       grainTabs: (['week', 'month'] as const).map((g) => ({
         label: g === 'week' ? 'By week' : 'By month',
-        go: () => set({ journeyGrain: g }),
-        active: (st.journeyGrain ?? 'week') === g,
+        // Choosing here pins the grain; the period control stops driving it
+        // until the same choice is made again, which releases it.
+        go: () => set({ journeyGrain: st.journeyGrain === g ? null : g }),
+        active: grain === g,
       })),
-      grainNote: (st.journeyGrain ?? 'week') === 'week'
+      grainFollows: st.journeyGrain === null,
+      grainNote: grain === 'week'
         ? `Each row is that week's average weight, and the change against the week before. Averages rather than endpoints, because Monday against Monday reports whatever the water did on two mornings. Target is ${nf(JOURNEY.targetKgPerWeek, 1)} kg a week.`
         : `Each row is that month's average weight against the month before. Target is about ${nf(JOURNEY.targetKgPerWeek * 4.35, 1)} kg a month.`,
-      chart: {
-        width: W,
-        height: H,
-        planPath: `M${x(startAt).toFixed(1)} ${y(start).toFixed(1)} L${x(endAt).toFixed(1)} ${y(goal).toFixed(1)}`,
-        actualPath: actual.map((p, i) => `${i ? 'L' : 'M'}${p.cx} ${p.cy}`).join(' '),
-        marks: actual,
-        goalY: y(goal).toFixed(1),
-        startLabel: fmtDate(JOURNEY.startDate),
-        endLabel: fmtDate(new Date(endAt)),
-        milestoneLines: milestones
-          .filter((m) => !m.isGoal)
-          .map((m) => ({ key: m.key, y: y(Number(m.key)).toFixed(1), label: m.label })),
-      },
+      chart: chartFor(chartMode),
+      chartTabs: (['sofar', 'plan'] as const).map((m) => ({
+        label: m === 'sofar' ? 'So far' : 'Whole plan',
+        go: () => set({ journeyChart: m }),
+        active: chartMode === m,
+      })),
       currentKg: latest === null ? DASH : nf(latest, 1),
       lostKg: lost === null ? DASH : `${lost < 0 ? '+' : ''}${nf(Math.abs(lost), 1)}`,
       toGoKg: toGo === null ? DASH : nf(Math.max(0, toGo), 1),
