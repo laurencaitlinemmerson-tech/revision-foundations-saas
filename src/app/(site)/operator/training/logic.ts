@@ -942,6 +942,11 @@ export function deriveVals(
         key,
         color: future ? 'transparent' : heatColors[level],
         tip: future ? '' : `${fmtDate(key)} — ${heatTips[level]}`,
+        future,
+        selected: st.selectedDay === key,
+        // The calendar opens a day on click; the heatmap plots the same days and
+        // should not behave differently for being drawn as squares.
+        select: () => set({ selectedDay: st.selectedDay === key ? null : key }),
       };
     }),
   }));

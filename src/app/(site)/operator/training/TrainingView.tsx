@@ -819,7 +819,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
             <Eyebrow>{c.eyebrow}</Eyebrow>
             <div style={{ fontSize: 13, color: INK, marginTop: 14 }}>{c.label}</div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginTop: 6 }}>
-              <span style={display(40)}>{c.value}</span>
+              <Figure value={c.value} style={display(40)} />
               <span style={{ fontSize: 13, color: MUTED, paddingBottom: 5 }}>{c.unit}</span>
             </div>
             <div style={{ fontSize: 12, color: c.trendColor, marginTop: 8 }}>{c.trend}</div>
@@ -869,7 +869,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
             <div>
               <Eyebrow>Body composition — one of six dimensions</Eyebrow>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-                <span style={display(44)}>{v.bodyValue}</span>
+                <Figure value={v.bodyValue} style={display(44)} />
                 <span style={{ fontSize: 14, color: MUTED, paddingBottom: 6 }}>{v.bodyUnit}</span>
               </div>
               <div style={{ fontSize: 13, color: SOFT, marginTop: 8 }}>{v.bodyDelta}</div>
@@ -940,7 +940,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
             {v.recoveryNeedsAttention && <span style={{ fontSize: 11, color: AMBER }}>Needs attention</span>}
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-            <span style={display(44)}>{v.recoveryScore}</span>
+            <Figure value={v.recoveryScore} style={display(44)} />
             <span style={{ fontSize: 14, color: MUTED, paddingBottom: 6 }}>/ 100</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', marginTop: 22, borderTop: RULE }}>
@@ -964,7 +964,7 @@ function Dashboard({ v }: { v: TrainingVals }) {
           <div>
             <Eyebrow>Consistency</Eyebrow>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: 12 }}>
-              <span style={display(44)}>{v.consistencyScore}</span>
+              <Figure value={v.consistencyScore} style={display(44)} />
               <span style={{ fontSize: 13, color: SOFT, paddingBottom: 7, fontStyle: 'italic' }}>{v.consistencyNote}</span>
             </div>
           </div>
@@ -988,14 +988,23 @@ function Dashboard({ v }: { v: TrainingVals }) {
               {v.heatmap.map((week) => (
                 <div key={week.key} style={{ display: 'flex', flexDirection: 'column', gap: HEAT_GAP }}>
                   {week.days.map((day) => (
-                    <div
+                    <button
                       key={day.key}
+                      type="button"
+                      onClick={day.select}
+                      disabled={day.future}
+                      aria-pressed={day.selected}
+                      aria-label={day.tip || 'No data'}
                       title={day.tip}
                       style={{
+                        all: 'unset', boxSizing: 'border-box', display: 'block',
+                        cursor: day.future ? 'default' : 'pointer',
                         width: HEAT_CELL, height: HEAT_CELL, background: day.color,
-                        border: day.color === 'transparent'
-                          ? '0.5px dashed rgba(34,28,36,0.07)'
-                          : '0.5px solid rgba(34,28,36,0.06)',
+                        border: day.selected
+                          ? `1.5px solid ${PLUM}`
+                          : day.color === 'transparent'
+                            ? '0.5px dashed rgba(34,28,36,0.07)'
+                            : '0.5px solid rgba(34,28,36,0.06)',
                       }}
                     />
                   ))}
@@ -1015,8 +1024,64 @@ function Dashboard({ v }: { v: TrainingVals }) {
           <div style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.85, maxWidth: 210, paddingTop: 2 }}>
             <div>Each square is one day.</div>
             <div>Darker means more work logged — strength, cardio or steps.</div>
+            <div style={{ marginTop: 10, color: SOFT }}>Select one to open it.</div>
           </div>
         </div>
+
+        {/* The same panel the calendar opens. Both plot the same days, so
+            selecting one should not behave differently for being a square. */}
+        {v.dayDetail && (
+          <div style={{ marginTop: 26, paddingTop: 22, borderTop: RULE }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+              <div style={display(20)}>{v.dayDetail.label}</div>
+              <button
+                type="button" onClick={v.dayDetail.close} className="hv-tab"
+                style={{
+                  all: 'unset', cursor: 'pointer', padding: '4px 11px', fontSize: 11.5,
+                  color: SOFT, border: RULE, background: CARD,
+                }}
+              >
+                Close
+              </button>
+            </div>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(108px, 1fr))',
+              marginTop: 16, borderTop: RULE_SOFT,
+            }}>
+              {v.dayDetail.metrics.map((m) => (
+                <div key={m.label} style={{ padding: '14px 14px 14px 0' }}>
+                  <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>{m.label}</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: INK, marginTop: 5 }}>{m.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {v.dayDetail.empty ? (
+              <div style={{ fontSize: 12.5, color: MUTED, fontStyle: 'italic', marginTop: 14 }}>
+                No session logged on this day.
+              </div>
+            ) : (
+              <div style={{ marginTop: 12, paddingTop: 14, borderTop: RULE_SOFT }}>
+                {v.dayDetail.sessions.map((sn) => (
+                  <div key={sn.key} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                    gap: 14, padding: '10px 0', borderBottom: RULE_SOFT, flexWrap: 'wrap',
+                  }}>
+                    <span style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+                      <span style={{
+                        width: 6, height: 6, flexShrink: 0,
+                        background: sn.kind === 'Cardio' ? PINK : sn.kind === 'Other' ? MUTED : PLUM,
+                      }} />
+                      <span style={{ fontSize: 13, color: INK }}>{sn.name}</span>
+                    </span>
+                    <span style={{ fontSize: 12, color: SOFT }}>{sn.detail}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="training-pair" style={{ marginTop: SECTION_GAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP }}>
@@ -1137,7 +1202,7 @@ function PersonCard({ p, dayLabel, stepper }: { p: Card; dayLabel: string; stepp
       <div style={{ marginTop: 20 }}>{stepper}</div>
 
       <div style={{ marginTop: 22, paddingBottom: 20, borderBottom: RULE }}>
-        <div style={display(40)}>{p.headline}</div>
+        <Figure value={p.headline} style={display(40)} />
         <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED, marginTop: 8 }}>
           Steps · {p.headlineNote}
         </div>
@@ -1232,14 +1297,14 @@ function HeadToHead({ v }: { v: TrainingVals }) {
         <div style={{ ...card, padding: '30px 40px', background: TINT, marginBottom: GRID_GAP }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ ...display(46, h.leader === 'you' ? PLUM : INK), lineHeight: 1 }}>{h.yourPoints}</div>
+              <Figure value={String(h.yourPoints)} style={{ ...display(46, h.leader === 'you' ? PLUM : INK), lineHeight: 1 }} />
               <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 9 }}>
                 {h.you.name}
               </div>
             </div>
             <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED }}>vs</div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ ...display(46, h.leader === 'them' ? PINK : INK), lineHeight: 1 }}>{h.theirPoints}</div>
+              <Figure value={String(h.theirPoints)} style={{ ...display(46, h.leader === 'them' ? PINK : INK), lineHeight: 1 }} />
               <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: MUTED, marginTop: 9 }}>
                 {h.them?.name}
               </div>
@@ -1809,11 +1874,17 @@ function Goals({ v }: { v: TrainingVals }) {
           </div>
         </div>
 
-        {/* The plan and what actually happened, on one picture. */}
+        {/* The plan and what actually happened, on one picture — and readable
+            the same way every other chart here is. */}
         <div style={{ marginTop: 30 }}>
-          <svg viewBox={`0 0 ${j.chart.width} ${j.chart.height}`} preserveAspectRatio="none"
-            style={{ width: '100%', height: j.chart.height, display: 'block' }}
-            role="img" aria-label={`Weight from ${j.startKg} kg toward ${j.goalKg} kg`}>
+          <LineSeries
+            marks={j.chart.marks}
+            path={j.chart.actualPath}
+            width={j.chart.width}
+            height={j.chart.height}
+            stroke={PLUM}
+            hint={`Weight from ${j.startKg} kg toward ${j.goalKg} kg — hover to read a weigh-in`}
+          >
             {j.chart.milestoneLines.map((m) => (
               <line key={m.key} x1="0" y1={m.y} x2={j.chart.width} y2={m.y}
                 stroke="rgba(34,28,36,0.06)" strokeWidth="0.5" />
@@ -1822,14 +1893,8 @@ function Goals({ v }: { v: TrainingVals }) {
               stroke={PLUM} strokeWidth="0.75" strokeDasharray="5 4" />
             <path d={j.chart.planPath} fill="none" stroke={PINK_LINE} strokeWidth="1.25"
               strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
-            {j.chart.actualPath && (
-              <path d={j.chart.actualPath} fill="none" stroke={PLUM} strokeWidth="1.75" vectorEffect="non-scaling-stroke" />
-            )}
-            {j.chart.marks.map((m) => (
-              <circle key={m.key} cx={m.cx} cy={m.cy} r="2.5" fill={PLUM}><title>{`${m.label} — ${m.sub}`}</title></circle>
-            ))}
-          </svg>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 8, gap: 12 }}>
+          </LineSeries>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: MUTED, marginTop: 4, gap: 12 }}>
             <span>{j.chart.startLabel}</span>
             <span style={{ fontStyle: 'italic' }}>
               Dashed is the plan at {j.targetRate}; solid is what the scale said
@@ -1997,7 +2062,7 @@ function Nutrition({ v }: { v: TrainingVals }) {
       <div style={{ ...card, padding: CARD_PAD }}>
         <Eyebrow>{v.nutritionDayLabel}</Eyebrow>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-          <span style={display(44)}>{v.nutritionHeadline}</span>
+          <Figure value={v.nutritionHeadline} style={display(44)} />
           <span style={{ fontSize: 14, color: MUTED, paddingBottom: 6 }}>of {v.nutritionTargetShort}</span>
         </div>
         <div style={{ marginTop: 26, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -2060,7 +2125,7 @@ function EnergySection({ v }: { v: TrainingVals }) {
         <div style={{ ...card, padding: CARD_PAD }}>
           <Eyebrow>{e.title}</Eyebrow>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-            <span style={display(46, e.headlineColor)}>{e.headline}</span>
+            <Figure value={e.headline} style={display(46, e.headlineColor)} />
             <span style={{ fontSize: 13, color: MUTED, paddingBottom: 7 }}>{e.headlineUnit}</span>
           </div>
 
@@ -2186,7 +2251,7 @@ function Recovery({ v }: { v: TrainingVals }) {
         <div style={{ padding: PANEL_PAD, borderRight: RULE }}>
           <Eyebrow>Recovery score</Eyebrow>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: 16 }}>
-            <span style={{ ...display(70, PLUM), lineHeight: 0.9 }}>{v.recoveryScore}</span>
+            <Figure value={v.recoveryScore} style={{ ...display(70, PLUM), lineHeight: 0.9 }} />
             <span style={{ fontSize: 13, color: MUTED, paddingBottom: 10 }}>/ 100</span>
           </div>
           <div style={{

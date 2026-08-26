@@ -150,7 +150,7 @@ export function BarSeries({
 export type LineMark = Mark & { cy: number };
 
 export function LineSeries({
-  marks, path, area, width, height, hint, stroke = PLUM, fill, gridY = [],
+  marks, path, area, width, height, hint, stroke = PLUM, fill, gridY = [], children,
 }: {
   marks: LineMark[];
   path: string;
@@ -161,6 +161,8 @@ export function LineSeries({
   stroke?: string;
   fill?: string;
   gridY?: number[];
+  /** Drawn beneath the series — target lines, bands, reference marks. */
+  children?: ReactNode;
 }) {
   const { active, ref, handlers } = usePicker(marks, width);
   const mounted = useMounted(60);
@@ -180,6 +182,7 @@ export function LineSeries({
         <g stroke="rgba(34,28,36,0.06)" strokeWidth="0.5">
           {gridY.map((y) => <line key={y} x1="0" y1={y} x2={width} y2={y} />)}
         </g>
+        {children}
         {area && fill && <path d={area} fill={fill} stroke="none" opacity={mounted ? 1 : 0} style={{ transition: 'opacity 500ms' }} />}
         {path && (
           <path
