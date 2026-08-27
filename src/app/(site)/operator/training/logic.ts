@@ -415,6 +415,36 @@ export type BodyPoint = {
 export type TrainingProps = { operatorName: string };
 export const DEFAULT_PROPS: TrainingProps = { operatorName: 'Lauren' };
 
+/**
+ * One session, one row.
+ *
+ * The same workout arrives twice when two things are syncing it: the phone
+ * writes "Cross Training" while the Health export writes "CrossTraining", so a
+ * single Everfit session lands as two rows on the same timestamp. The names were
+ * already being merged for display, but the durations and calories were still
+ * being added together — a 67-minute session was reading as 134 minutes and
+ * nearly a thousand calories.
+ *
+ * Two rows are the same session when they start within a minute of each other
+ * and normalise to the same kind of training. The one kept is whichever carries
+ * more detail, since the pair rarely agree on everything and the fuller row is
+ * the better record of what happened.
+ */
+function dedupeWorkouts(workouts: Workout[]): Workout[] {
+  const detail = (w: Workout) =>
+    [w.avgHr, w.maxHr, w.distanceKm, w.energyKcal, w.durationMin, w.source]
+      .filter((v) => v !== null && v !== undefined).length;
+
+  const kept = new Map<string, Workout>();
+  for (const w of workouts) {
+    // To the minute: the two writers round the start differently by seconds.
+    const key = `${w.startedAt.slice(0, 16)}|${prettyType(w.type).toLowerCase()}`;
+    const held = kept.get(key);
+    if (!held || detail(w) > detail(held)) kept.set(key, w);
+  }
+  return [...kept.values()].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+}
+
 export function deriveVals(
   st: TrainingState,
   setState: SetState,
@@ -426,7 +456,7 @@ export function deriveVals(
 ) {
   const set = (patch: Partial<TrainingState>) => setState(patch);
 
-  const allWorkouts = live.workouts ?? [];
+  const allWorkouts = dedupeWorkouts(live.workouts ?? []);
 
   // One filter, applied at the source, so every screen agrees about what is
   // being looked at rather than each deciding for itself.
