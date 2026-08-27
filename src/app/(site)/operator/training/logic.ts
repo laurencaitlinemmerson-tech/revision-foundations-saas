@@ -14,6 +14,11 @@ import { historyInsights } from './historyInsights';
 import { buildEnergy, energyDays } from './energy';
 import { buildEvidence } from './evidence';
 import { buildReview } from './review';
+import { buildHabits } from './habits';
+import { buildSessionView } from './sessionView';
+import { EMPTY_PLAN, type PlanData } from './planData';
+import type { LiftEntry } from './liftEntry';
+import type { SessionData } from './sessionData';
 import type { HistoryData } from './historyData';
 import { buildActivities, prettyType } from './activities';
 import { buildBodyAnalysis } from './bodyAnalysis';
@@ -44,7 +49,7 @@ const DASH = '—';
 
 export const SCREENS = [
   'Dashboard', 'Head to head', 'Workouts', 'Calendar', 'Progress',
-  'Goals', 'Nutrition', 'Recovery', 'Review', 'Evidence', 'Insights', 'Settings',
+  'Goals', 'Nutrition', 'Recovery', 'Habits', 'Review', 'Evidence', 'Insights', 'Settings',
 ] as const;
 export type Screen = (typeof SCREENS)[number];
 
@@ -95,6 +100,8 @@ export type TrainingState = {
    * period control at the top of the page.
    */
   journeyChart: JourneyChartView | null;
+  /** The session whose per-minute record is open, by id. */
+  openSession: string | null;
 };
 
 export type SetState = (
@@ -122,6 +129,7 @@ export const INITIAL_STATE: TrainingState = {
   dayOffset: 0,
   journeyGrain: null,
   journeyChart: null,
+  openSession: null,
 };
 
 /* ── formatting ──────────────────────────────────────────────────────────── */
@@ -137,6 +145,9 @@ const unitNum = (v: number | null | undefined, d: number, unit: string) =>
   v === null || v === undefined || !Number.isFinite(v) ? DASH : `${nf(v, d)} ${unit}`;
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** First letter up, for a kind name that is stored lowercase. */
+const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
 function fmtDate(d: Date | string, withYear = false) {
   const dt = typeof d === 'string' ? new Date(d) : d;
@@ -231,7 +242,11 @@ export type Session = {
   minutes: number | null;
   energyKcal: number | null;
   kind: string;
-  rows: Array<{ name: string; sets: string; weight: string; volume: string; pr: string }>;
+  rows: Array<{
+    /** The synced workout behind this row, when there is one to open. */
+    workoutId: string | null;
+    name: string; sets: string; weight: string; volume: string; pr: string;
+  }>;
 };
 
 /** Every lift, tagged with whether its top set beat everything before it. */
@@ -296,6 +311,9 @@ function buildSessions(lifts: Lift[], workouts: Workout[]): Session[] {
       const energy = day.workouts.reduce((a, w) => a + (w.energyKcal ?? 0), 0);
 
       const liftRows = day.lifts.map((l) => ({
+        // Typed lifts have no synced workout behind them, so no minute-by-minute
+        // record to open.
+        workoutId: null as string | null,
         name: l.exercise,
         sets: setsLabel(l),
         weight: l.topSetKg > 0 ? `${nf(l.topSetKg, l.topSetKg % 1 ? 1 : 0)} kg` : DASH,
@@ -312,6 +330,7 @@ function buildSessions(lifts: Lift[], workouts: Workout[]): Session[] {
         const kcal = w.energyKcal ?? 0;
         const isCardio = workoutKindOf(w) === 'cardio' && km > 0;
         return {
+          workoutId: w.id as string | null,
           name: w.type ?? 'Workout',
           sets: isCardio ? `${nf(km, 1)} km` : fmtMinutes(mins || null),
           weight: isCardio && mins > 0
@@ -453,6 +472,9 @@ export function deriveVals(
   peer: PeerData,
   brief: BriefData = { loaded: false, cues: [], staleNote: null, ok: false },
   history: HistoryData = { loaded: false, findings: null },
+  plan: PlanData = EMPTY_PLAN,
+  session: SessionData = { loading: false, id: null, detail: null, summaryOnly: false },
+  lift: LiftEntry = { save: async () => false, saving: false, error: null, lastSaved: null },
 ) {
   const set = (patch: Partial<TrainingState>) => setState(patch);
 
@@ -1600,6 +1622,95 @@ export function deriveVals(
   // the last seven days rather than the selected window.
   const review = buildReview(src, history.findings, history.loaded, JOURNEY.targetKgPerWeek, todayISO());
 
+  /* the daily things ------------------------------------------------------- */
+
+  const habits = buildHabits(src, todayISO());
+
+  /* one session, opened ---------------------------------------------------- */
+
+  // The zones are cut from the highest rate this heart has actually reached,
+  // which needs every workout rather than the window's.
+  const observedMaxHr = allWorkouts.reduce<number | null>(
+    (a, w) => (w.maxHr && (a === null || w.maxHr > a) ? w.maxHr : a), null,
+  );
+  const sessionView = buildSessionView(
+    session.detail, session.loading, session.id !== null, observedMaxHr,
+  );
+
+  /* the intended week ------------------------------------------------------ */
+
+  const planView = (() => {
+    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const shift = (d: string, n: number) =>
+      new Date(Date.parse(`${d}T12:00:00Z`) + n * DAY).toISOString().slice(0, 10);
+
+    // This calendar week, Monday first, so a plan row sits beside the day it
+    // was a plan for rather than beside a rolling seven days.
+    const today = todayISO();
+    const dow = (new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7;
+    const monday = shift(today, -dow);
+
+    const sessionDates = new Set<string>([
+      ...src.lifts.map((l) => l.performedOn.slice(0, 10)),
+      ...allWorkouts.map((w) => w.startedAt.slice(0, 10)),
+    ]);
+    const kindOn = new Map<string, string>();
+    for (const w of allWorkouts) {
+      const key = w.startedAt.slice(0, 10);
+      const kind = workoutKindOf(w);
+      // Strength wins the day's label: it is the harder thing to have done.
+      if (kind === 'strength' || !kindOn.has(key)) kindOn.set(key, kind);
+    }
+
+    const days = names.map((name, i) => {
+      const date = shift(monday, i);
+      const planned = plan.plan.find((d) => d.weekday === i + 1) ?? { weekday: i + 1, kind: 'rest' as const, label: null };
+      const done = sessionDates.has(date);
+      const didKind = kindOn.get(date) ?? null;
+      const past = date < today;
+      const isToday = date === today;
+
+      return {
+        key: date,
+        name,
+        date,
+        dateLabel: fmtDate(date),
+        planned: planned.kind,
+        plannedLabel: planned.kind === 'rest' ? 'Rest' : cap(planned.kind),
+        label: planned.label,
+        done,
+        didKind,
+        didLabel: didKind ? cap(didKind) : done ? 'Session' : null,
+        isToday,
+        // Only a day that has already been can have been missed.
+        missed: past && planned.kind !== 'rest' && !done,
+        extra: planned.kind === 'rest' && done,
+        set: (kind: 'strength' | 'cardio' | 'other' | 'rest') => plan.save(i + 1, kind),
+      };
+    });
+
+    const asked = days.filter((d) => d.planned !== 'rest').length;
+    const kept = days.filter((d) => d.planned !== 'rest' && d.done).length;
+
+    return {
+      loaded: plan.loaded,
+      setupRequired: plan.setupRequired,
+      days,
+      asked,
+      kept,
+      headline: !plan.loaded ? 'Reading the plan…'
+        : plan.setupRequired
+          ? 'The plan table has not been created yet.'
+          : asked === 0
+            ? 'No week planned yet. Set a kind against each day and the dashboard can say what is left, not only what is done.'
+            : `${kept} of ${asked} planned session${asked === 1 ? '' : 's'} done this week.`,
+      setupNote: 'Run supabase-operator-plan.sql in the Supabase SQL editor, then reload.',
+      kinds: (['strength', 'cardio', 'other', 'rest'] as const).map((k) => ({
+        key: k, label: k === 'rest' ? 'Rest' : cap(k),
+      })),
+    };
+  })();
+
   /* the period, laid out as the units it is made of ------------------------ */
 
   const periodView = buildPeriodView(src, st.range, nowWin, todayISO());
@@ -2361,7 +2472,7 @@ export function deriveVals(
     };
   })();
 
-  const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+  const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII'];
   const nav = SCREENS.map((label, i) => ({
     label,
     numeral: numerals[i],
@@ -2390,6 +2501,10 @@ export function deriveVals(
       peer.them
         ? `You and ${peer.them.athlete}, same week, five rounds. A round only counts when you have both published it.`
         : 'Two trackers, same week, five rounds — once the other side answers.',
+    ],
+    Habits: [
+      'Habits',
+      `${habits.todayMet} of ${habits.todayTotal} done today. Read out of what synced, not ticked off by hand.`,
     ],
     Review: [
       'This week',
@@ -2747,6 +2862,21 @@ export function deriveVals(
     /* what eight years of logging say */
     evidence,
     review,
+    habits,
+    sessionView,
+    plan: planView,
+
+    /* logging a lift */
+    lift: {
+      save: lift.save,
+      saving: lift.saving,
+      error: lift.error,
+      lastSaved: lift.lastSaved,
+      today: todayISO(),
+    },
+    openSessionId: st.openSession,
+    openSession: (id: string) => set({ openSession: id }),
+    closeSession: () => set({ openSession: null }),
 
     /* the ribbon */
     ribbon,

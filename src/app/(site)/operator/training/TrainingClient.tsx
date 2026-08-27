@@ -5,6 +5,9 @@ import { useOperatorData } from '../daily-log/data';
 import { usePeerData } from './peerData';
 import { useBrief } from './briefData';
 import { useHistory } from './historyData';
+import { usePlan } from './planData';
+import { useLiftEntry } from './liftEntry';
+import { useSessionDetail } from './sessionData';
 import { stateFromUrl, useUrlState } from './urlState';
 import TrainingView from './TrainingView';
 import {
@@ -33,6 +36,11 @@ export default function TrainingClient({ props = DEFAULT_PROPS }: { props?: Trai
   const peer = usePeerData();
   const brief = useBrief();
   const history = useHistory();
+  const plan = usePlan();
+
+  // The open session's per-minute record, fetched only while one is open.
+  const session = useSessionDetail(state.openSession);
+  const lift = useLiftEntry(live.refresh);
 
   const setState = useCallback<
     (patch: Partial<TrainingState> | ((s: TrainingState) => Partial<TrainingState>)) => void
@@ -43,8 +51,8 @@ export default function TrainingClient({ props = DEFAULT_PROPS }: { props?: Trai
   useUrlState(state, setState);
 
   const vals = useMemo(
-    () => deriveVals(state, setState, props, live, peer, brief, history),
-    [state, setState, props, live, peer, brief, history],
+    () => deriveVals(state, setState, props, live, peer, brief, history, plan, session, lift),
+    [state, setState, props, live, peer, brief, history, plan, session, lift],
   );
 
   return (

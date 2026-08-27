@@ -659,6 +659,7 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
             {v.screen === 'Nutrition' && <Nutrition v={v} />}
             {v.screen === 'Recovery' && <Recovery v={v} />}
             {v.screen === 'Review' && <Review v={v} />}
+            {v.screen === 'Habits' && <Habits v={v} />}
             {v.screen === 'Evidence' && <Evidence v={v} />}
             {v.screen === 'Insights' && <Insights v={v} />}
             {v.screen === 'Settings' && <Settings v={v} />}
@@ -1726,22 +1727,53 @@ function Workouts({ v }: { v: TrainingVals }) {
             {/* A list rather than a four-column table: most sessions have two or
                 three values worth reading, and a table pads the rest with dashes. */}
             <div style={{ marginTop: 26 }}>
-              {v.sel.rows.map((r, i) => (
-                <div key={`${r.name}-${i}`} style={{ padding: '13px 0', borderBottom: RULE_SOFT }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14 }}>
-                    <span style={{ fontSize: 13.5, color: INK }}>
-                      {r.name}
-                      {r.pr && <span style={{ color: PINK, fontSize: 10.5, marginLeft: 8, letterSpacing: '0.08em' }}>{r.pr}</span>}
+              {v.sel.rows.map((r, i) => {
+                const open = r.workoutId !== null && v.openSessionId === r.workoutId;
+                const body = (
+                  <>
+                    <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14 }}>
+                      <span style={{ fontSize: 13.5, color: open ? PLUM : INK }}>
+                        {r.name}
+                        {r.pr && <span style={{ color: PINK, fontSize: 10.5, marginLeft: 8, letterSpacing: '0.08em' }}>{r.pr}</span>}
+                      </span>
+                      <span style={{ fontSize: 12.5, color: SOFT, flexShrink: 0 }}>{r.sets}</span>
                     </span>
-                    <span style={{ fontSize: 12.5, color: SOFT, flexShrink: 0 }}>{r.sets}</span>
+                    {(r.weight !== '—' || r.volume !== '—') && (
+                      <span style={{ display: 'block', fontSize: 11.5, color: MUTED, marginTop: 4 }}>
+                        {[r.weight, r.volume].filter((x) => x !== '—').join('  ·  ')}
+                      </span>
+                    )}
+                  </>
+                );
+
+                // A synced workout has a per-minute record behind it; a typed
+                // lift is already showing everything it knows.
+                return r.workoutId === null ? (
+                  <div key={`${r.name}-${i}`} style={{ padding: '13px 0', borderBottom: RULE_SOFT }}>
+                    {body}
                   </div>
-                  {(r.weight !== '—' || r.volume !== '—') && (
-                    <div style={{ fontSize: 11.5, color: MUTED, marginTop: 4 }}>
-                      {[r.weight, r.volume].filter((x) => x !== '—').join('  ·  ')}
-                    </div>
-                  )}
-                </div>
-              ))}
+                ) : (
+                  <button
+                    key={`${r.name}-${i}`}
+                    type="button"
+                    onClick={() => (open ? v.closeSession() : v.openSession(r.workoutId as string))}
+                    aria-expanded={open}
+                    className="hv-row"
+                    style={{
+                      all: 'unset', cursor: 'pointer', display: 'block', width: '100%',
+                      boxSizing: 'border-box', padding: '13px 10px 13px 0', margin: '0 -10px 0 0',
+                      borderBottom: RULE_SOFT, transition: 'background 150ms',
+                    }}
+                  >
+                    {body}
+                    <span style={{ display: 'block', fontSize: 10.5, color: open ? PLUM : MUTED, marginTop: 6, letterSpacing: '0.06em' }}>
+                      {open ? 'close the trace' : 'minute by minute →'}
+                    </span>
+                  </button>
+                );
+              })}
+
+              {v.openSessionId && <SessionTrace s={v.sessionView} onClose={v.closeSession} />}
             </div>
 
             <p style={{ fontSize: 12.5, fontStyle: 'italic', color: MUTED, margin: '20px 0 0', lineHeight: 1.7 }}>
@@ -1750,6 +1782,8 @@ function Workouts({ v }: { v: TrainingVals }) {
           </div>
         )}
       </div>
+
+      <LiftForm lift={v.lift} />
     </div>
   );
 }
@@ -2851,14 +2885,428 @@ function Recovery({ v }: { v: TrainingVals }) {
  * This measures it against what she was doing during the stretches where the
  * weight came off, which is a bar already cleared for weeks at a time.
  */
-function Review({ v }: { v: TrainingVals }) {
-  const r = v.review;
+/**
+ * One session, minute by minute.
+ *
+ * The list knows a session lasted an hour and burned four hundred calories. This
+ * is the hour: where the heart rate went, how long it stayed there, and how fast
+ * it came back down afterwards.
+ */
+function SessionTrace({ s, onClose }: { s: TrainingVals['sessionView']; onClose: () => void }) {
+  if (s.state === 'closed') return null;
 
-  if (!r.ok) return <div style={{ marginTop: 40 }}><Empty title="Not yet" note={r.note} /></div>;
+  if (s.state !== 'rich') {
+    return (
+      <div style={{ marginTop: 20, padding: CARD_PAD, background: TINT, border: RULE }}>
+        <p style={{ fontSize: 12.5, color: SOFT, margin: 0, lineHeight: 1.7 }}>{s.note}</p>
+        <button type="button" onClick={onClose} style={{
+          all: 'unset', cursor: 'pointer', fontSize: 11, color: MUTED, marginTop: 12,
+          letterSpacing: '0.08em', textTransform: 'uppercase',
+        }}>
+          Close
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 20, padding: CARD_PAD, background: TINT, border: RULE }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14 }}>
+        <Eyebrow>Heart rate</Eyebrow>
+        <span style={{ fontSize: 11, color: MUTED }}>{s.startLabel} – {s.endLabel}</span>
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <LineSeries
+          marks={s.hrMarks}
+          path={s.hrPath}
+          width={s.width}
+          height={s.height}
+          stroke={PINK}
+          hint="Heart rate through the session — hover to read a minute"
+        >
+          {s.hrGrid.map((g) => (
+            <line key={g.key} x1="0" y1={g.y} x2={s.width} y2={g.y} stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
+          ))}
+          {s.hrAvgY && (
+            <line x1="0" y1={s.hrAvgY} x2={s.width} y2={s.hrAvgY}
+              stroke={BLUE} strokeWidth="0.75" strokeDasharray="4 4" />
+          )}
+        </LineSeries>
+      </div>
+
+      {s.zones.length > 0 && (
+        <div style={{ marginTop: 22 }}>
+          <Eyebrow>Time in each band</Eyebrow>
+          <div style={{ display: 'flex', height: 10, marginTop: 12, background: TRACK, overflow: 'hidden' }}>
+            {s.zones.map((z) => (
+              <div key={z.key} title={`${z.label} — ${z.minutes}`}
+                style={{ width: `${z.pct}%`, background: z.colour }} />
+            ))}
+          </div>
+          <div style={{ marginTop: 14 }}>
+            {s.zones.map((z) => (
+              <div key={z.key} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                gap: 12, padding: '8px 0', borderBottom: RULE_SOFT, fontSize: 12,
+              }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <span style={{ width: 8, height: 8, background: z.colour, flexShrink: 0 }} />
+                  <span style={{ color: INK }}>{z.label}</span>
+                  <span style={{ color: MUTED, fontSize: 11 }}>{z.range} bpm</span>
+                </span>
+                <span style={{ color: SOFT }}>{z.minutes}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 11, color: MUTED, margin: '12px 0 0', lineHeight: 1.7 }}>{s.zoneNote}</p>
+        </div>
+      )}
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+        marginTop: 24, paddingTop: 18, borderTop: RULE_SOFT,
+      }}>
+        {s.stats.map((st2) => (
+          <div key={st2.label} style={{ paddingRight: 16, paddingBottom: 12 }}>
+            <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED }}>
+              {st2.label}
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: INK, marginTop: 6 }}>
+              {st2.value}
+            </div>
+            <div style={{ fontSize: 10.5, color: MUTED, marginTop: 4, lineHeight: 1.5 }}>{st2.note}</div>
+          </div>
+        ))}
+      </div>
+
+      {s.conditions && (
+        <div style={{ fontSize: 11.5, color: SOFT, marginTop: 8 }}>{s.conditions}</div>
+      )}
+      {s.recoveryLine && (
+        <p style={{ fontSize: 12, color: SOFT, margin: '14px 0 0', lineHeight: 1.7, maxWidth: '62ch' }}>
+          {s.recoveryLine}
+        </p>
+      )}
+
+      <button type="button" onClick={onClose} style={{
+        all: 'unset', cursor: 'pointer', fontSize: 11, color: MUTED, marginTop: 18,
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+      }}>
+        Close
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Logging a lift.
+ *
+ * The only thing on this dashboard that is typed rather than synced, because
+ * Apple Health records that a session happened and never what was lifted in it.
+ */
+function LiftForm({ lift }: { lift: TrainingVals['lift'] }) {
+  const [date, setDate] = useState(lift.today);
+  const [exercise, setExercise] = useState('');
+  const [sets, setSets] = useState<Array<{ reps: string; weight: string }>>([
+    { reps: '', weight: '' }, { reps: '', weight: '' }, { reps: '', weight: '' },
+  ]);
+  const [note, setNote] = useState('');
+  const [done, setDone] = useState(false);
+
+  const field: CSSProperties = {
+    fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: 13,
+    padding: '9px 11px', border: RULE, background: CARD, color: INK,
+    outline: 'none', width: '100%', boxSizing: 'border-box',
+  };
+
+  const submit = async () => {
+    const parsed = sets
+      .map((s) => ({ reps: Number(s.reps) || 0, weightKg: Number(s.weight) || 0 }))
+      .filter((s) => s.reps > 0);
+    const ok = await lift.save({ performedOn: date, exercise, sets: parsed, note: note || null });
+    if (ok) {
+      setExercise('');
+      setSets([{ reps: '', weight: '' }, { reps: '', weight: '' }, { reps: '', weight: '' }]);
+      setNote('');
+      setDone(true);
+      window.setTimeout(() => setDone(false), 2600);
+    }
+  };
+
+  return (
+    <section style={{ marginTop: SECTION_GAP, padding: PANEL_PAD, border: RULE, background: CARD }}>
+      <SectionHeading title="Log a lift" aside="sets and load" />
+
+      <p style={{ fontSize: 12.5, color: SOFT, margin: '10px 0 22px', lineHeight: 1.7, maxWidth: '62ch' }}>
+        Everfit and Apple Health both record that a session happened; neither passes on
+        what was lifted in it. Typed here, it feeds the strength score, the volume totals
+        and the personal bests straight away.
+      </p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: GRID_GAP, alignItems: 'start' }}>
+        <label style={{ display: 'block' }}>
+          <span style={eyebrow}>Movement</span>
+          <input
+            value={exercise}
+            onChange={(e) => setExercise(e.target.value)}
+            placeholder="Back squat"
+            style={{ ...field, marginTop: 8 }}
+          />
+        </label>
+        <label style={{ display: 'block' }}>
+          <span style={eyebrow}>Date</span>
+          <input type="date" value={date} max={lift.today}
+            onChange={(e) => setDate(e.target.value)} style={{ ...field, marginTop: 8 }} />
+        </label>
+      </div>
+
+      <div style={{ marginTop: 24 }}>
+        <span style={eyebrow}>Sets</span>
+        <div style={{ marginTop: 10 }}>
+          {sets.map((s, i) => (
+            <div key={i} style={{
+              display: 'grid', gridTemplateColumns: '28px 1fr 1fr', gap: 12,
+              alignItems: 'center', marginBottom: 8,
+            }}>
+              <span style={{ fontSize: 11, color: MUTED }}>{i + 1}</span>
+              <input
+                inputMode="numeric" value={s.reps} placeholder="reps"
+                onChange={(e) => setSets(sets.map((x, j) => (j === i ? { ...x, reps: e.target.value } : x)))}
+                style={field}
+              />
+              <input
+                inputMode="decimal" value={s.weight} placeholder="kg"
+                onChange={(e) => setSets(sets.map((x, j) => (j === i ? { ...x, weight: e.target.value } : x)))}
+                style={field}
+              />
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setSets([...sets, { reps: '', weight: '' }])}
+          style={{
+            all: 'unset', cursor: 'pointer', fontSize: 11.5, color: PLUM,
+            letterSpacing: '0.06em', marginTop: 4,
+          }}
+        >
+          + another set
+        </button>
+      </div>
+
+      <label style={{ display: 'block', marginTop: 22 }}>
+        <span style={eyebrow}>Note</span>
+        <input value={note} onChange={(e) => setNote(e.target.value)}
+          placeholder="felt heavy, last set was a grind"
+          style={{ ...field, marginTop: 8 }} />
+      </label>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginTop: 26, flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          onClick={submit}
+          disabled={lift.saving}
+          style={{
+            all: 'unset', cursor: lift.saving ? 'default' : 'pointer',
+            padding: '11px 22px', background: lift.saving ? TRACK_PREV : PLUM,
+            color: '#FBF8FA', fontSize: 13, letterSpacing: '0.04em',
+            transition: 'background 200ms',
+          }}
+        >
+          {lift.saving ? 'Saving…' : 'Save the lift'}
+        </button>
+
+        {done && <span style={{ fontSize: 12.5, color: GREEN }}>Saved{lift.lastSaved ? ` — ${lift.lastSaved}` : ''}.</span>}
+        {lift.error && <span style={{ fontSize: 12.5, color: ROSE }}>{lift.error}</span>}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The intended week beside the week that happened.
+ *
+ * Nothing syncs a plan, so this is the one thing here that is typed. Without it
+ * the dashboard can only report backwards — "three sessions" with no answer to
+ * "out of how many".
+ */
+function PlanStrip({ p }: { p: TrainingVals['plan'] }) {
+  return (
+    <section style={{ marginTop: SECTION_GAP }}>
+      <SectionHeading title="The week as planned" aside={p.asked ? `${p.kept}/${p.asked} kept` : 'not set'} />
+
+      <p style={{ fontSize: 13, color: SOFT, margin: '10px 0 0', lineHeight: 1.7, maxWidth: '64ch' }}>
+        {p.headline}
+        {p.setupRequired && <span style={{ color: AMBER }}> {p.setupNote}</span>}
+      </p>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
+        gap: 1, marginTop: 20, borderTop: RULE_SOFT,
+      }}>
+        {p.days.map((d) => (
+          <div key={d.key} style={{
+            padding: '16px 12px 14px 0',
+            background: d.isToday ? TINT : 'transparent',
+            borderBottom: RULE_SOFT,
+          }}>
+            <div style={{
+              fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
+              color: d.isToday ? PLUM : INK,
+            }}>
+              {d.name}
+            </div>
+            <div style={{ fontSize: 10.5, color: MUTED, marginTop: 3 }}>{d.dateLabel}</div>
+
+            {/* What was asked for, chosen here. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 12 }}>
+              {p.kinds.map((k) => (
+                <button
+                  key={k.key}
+                  type="button"
+                  onClick={() => d.set(k.key)}
+                  aria-pressed={d.planned === k.key}
+                  className="hv-tab"
+                  style={{
+                    all: 'unset', cursor: 'pointer', fontSize: 11,
+                    padding: '4px 7px', margin: '0 -7px',
+                    color: d.planned === k.key ? '#FBF8FA' : MUTED,
+                    background: d.planned === k.key ? PLUM : 'transparent',
+                    transition: 'background 150ms',
+                  }}
+                >
+                  {k.label}
+                </button>
+              ))}
+            </div>
+
+            {/* What actually happened. */}
+            <div style={{ marginTop: 12, fontSize: 10.5, lineHeight: 1.6 }}>
+              {d.done && <span style={{ color: GREEN }}>{d.didLabel} done</span>}
+              {!d.done && d.missed && <span style={{ color: ROSE }}>missed</span>}
+              {!d.done && !d.missed && <span style={{ color: MUTED }}>—</span>}
+              {d.extra && <span style={{ color: PINK, display: 'block' }}>unplanned</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The daily things, and how long each run has held.
+ *
+ * Derived rather than ticked: there is nothing to remember to do, because the
+ * data already says whether the day happened.
+ */
+function Habits({ v }: { v: TrainingVals }) {
+  const h = v.habits;
+
+  if (!h.ok) {
+    return <div style={{ marginTop: 40 }}><Empty title="Nothing to hold yet" note="Habits are read out of what syncs — steps, sessions, food, the scale. None of it has arrived." /></div>;
+  }
 
   return (
     <div style={{ marginTop: 40 }}>
-      <section style={{ paddingBottom: 36, borderBottom: RULE }}>
+      <section style={{ paddingBottom: 32, borderBottom: RULE }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
+          <Figure value={String(h.todayMet)} style={{ ...display(56, h.todayMet === h.todayTotal ? GREEN : PLUM), lineHeight: 1 }} />
+          <span style={{ fontSize: 15, color: MUTED }}>of {h.todayTotal} today</span>
+        </div>
+        <p style={{ fontSize: 12.5, color: MUTED, margin: '16px 0 0', lineHeight: 1.75, maxWidth: '70ch' }}>
+          {h.note}
+        </p>
+      </section>
+
+      <section style={{ marginTop: SECTION_GAP }}>
+        <SectionHeading title="Every day, for the last eight weeks" aside={h.spanLabel} />
+
+        <div style={{ marginTop: 18 }}>
+          {h.habits.map((hb) => (
+            <div key={hb.key} style={{ padding: '20px 0', borderBottom: RULE_SOFT }}>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                gap: 16, flexWrap: 'wrap',
+              }}>
+                <span style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{
+                    width: 7, height: 7, flexShrink: 0,
+                    background: hb.today === true ? GREEN : hb.today === false ? TRACK_PREV : 'transparent',
+                    border: hb.today === null ? `1px solid ${TRACK_PREV}` : 'none',
+                  }} />
+                  <span style={{ fontSize: 14.5, color: INK }}>{hb.label}</span>
+                  <span style={{ fontSize: 11, color: MUTED }}>{hb.rule}</span>
+                </span>
+
+                <span style={{ display: 'flex', gap: 22, alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 11.5, color: MUTED }}>
+                    best <span style={{ color: SOFT }}>{hb.best}</span>
+                  </span>
+                  <span style={{ fontSize: 11.5, color: MUTED }}>
+                    <span style={{ color: SOFT }}>{hb.hitLabel}</span> of {hb.recorded} days
+                  </span>
+                  <span style={{
+                    fontFamily: 'var(--font-display)', fontSize: 21,
+                    color: hb.streak > 0 ? GREEN : MUTED, minWidth: 40, textAlign: 'right',
+                  }}>
+                    {hb.streak}
+                  </span>
+                </span>
+              </div>
+
+              {hb.neverMet && (
+                <div style={{ fontSize: 11.5, color: AMBER, marginTop: 10, lineHeight: 1.6 }}>
+                  {hb.neverMet}
+                </div>
+              )}
+
+              {/* Eight weeks of days. A met day is filled, a missed day is the
+                  track, and an unrecorded day is left hollow. */}
+              <div style={{ display: 'flex', gap: 2, marginTop: 14, flexWrap: 'wrap' }}>
+                {hb.days.map((d) => (
+                  <span
+                    key={d.date}
+                    title={d.label}
+                    style={{
+                      width: 9, height: 14, flexShrink: 0,
+                      background: d.state === true ? GREEN : d.state === false ? TRACK : 'transparent',
+                      border: d.state === null ? `1px solid ${TRACK}` : 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Review({ v }: { v: TrainingVals }) {
+  const r = v.review;
+
+  // The plan is typed rather than derived, so it stands whether or not the
+  // record behind the rest of this screen could be read.
+  if (!r.ok) {
+    return (
+      <div style={{ marginTop: 40 }}>
+        <PlanStrip p={v.plan} />
+        <div style={{ marginTop: SECTION_GAP }}>
+          <Empty title="Nothing to review it against yet" note={r.note} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 40 }}>
+      <PlanStrip p={v.plan} />
+
+      <section style={{ marginTop: SECTION_GAP, paddingBottom: 36, borderBottom: RULE }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 20, flexWrap: 'wrap' }}>
           <Eyebrow>{r.weekLabel}</Eyebrow>
           <span style={{ fontSize: 11.5, color: MUTED }}>{r.spanLabel}</span>
