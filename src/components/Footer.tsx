@@ -53,7 +53,7 @@ export default function Footer() {
           <nav aria-label="Company">
             <div style={colStyle}>
               <p style={headingStyle}>Company</p>
-              {[{ href: '/study-skills', label: 'Study Skills' }, { href: '/about', label: 'About' }, { href: '/contact', label: 'Contact' }, { href: '/privacy', label: 'Privacy Policy' }, { href: '/terms', label: 'Terms of Service' }, { href: '/delete-data', label: 'Delete My Data' }].map(l => (
+              {[{ href: '/study-skills', label: 'Study Skills' }, { href: '/blog', label: 'Blog' }, { href: '/about', label: 'About' }, { href: '/contact', label: 'Contact' }, { href: '/privacy', label: 'Privacy Policy' }, { href: '/terms', label: 'Terms of Service' }, { href: '/delete-data', label: 'Delete My Data' }].map(l => (
                 <Link key={l.href} href={l.href} style={linkStyle}
                   onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink-strong)'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink-faint)'; }}>

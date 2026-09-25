@@ -97,6 +97,7 @@ export default function Navbar() {
   const mobileSecondaryLinks = [
     { href: '/', label: 'Home' },
     { href: '/study-skills', label: 'Study Skills' },
+    { href: '/blog', label: 'Blog' },
     { href: '/hub/questions', label: 'Q&A Board' },
     { href: '/hub/glossary', label: 'Glossary' },
     { href: '/about', label: 'About' },
