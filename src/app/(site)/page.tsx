@@ -3,6 +3,7 @@ import Testimonials from '@/components/Testimonials';
 import HeroSection from '@/components/home/HeroSection';
 import ToolsShowcase from '@/components/home/ToolsShowcase';
 import WhatsIncluded from '@/components/home/WhatsIncluded';
+import AccessibilityNote from '@/components/home/AccessibilityNote';
 import AccessPaths from '@/components/home/AccessPaths';
 import SamplePreviews from '@/components/home/SamplePreviews';
 import FinalCTA from '@/components/home/FinalCTA';
@@ -24,6 +25,7 @@ export default function HomePage() {
       <SamplePreviews />
       <ToolsShowcase />
       <WhatsIncluded />
+      <AccessibilityNote />
       <AccessPaths />
       <FinalCTA />
       <HomeStyles />
