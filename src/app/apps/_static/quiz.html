@@ -9,11 +9,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,300;1,8..60,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
 
-  * { font-family: 'Source Serif 4', Georgia, serif; font-weight: 300; }
+  :root {
+    /* Mirrors the warm-editorial tokens in src/app/globals.css — this file
+       can't import that stylesheet, so the values are duplicated here. */
+    --wash: #F6F4EF;
+    --linen-light: #F5F3F0;
+    --hairline: #E7E4DD;
+    --gold: #A6906B;
+    --gold-deep: #7A6437;
+    --espresso: #1A1815;
+    --charcoal: #5A5750;
+    --text-muted: #6B6760;
+  }
+
+  * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 300; }
   h1, h2, h3, h4, .font-bold, .font-extrabold, .font-semibold { font-family: 'Playfair Display', Georgia, serif; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
+  .mono { font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace; }
 
   body { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; overflow: auto; }
@@ -21,7 +34,7 @@
 
   /* ---------- Background ---------- */
   .gradient-bg {
-    background: #F9F6F0;
+    background: var(--wash);
     position: relative;
     overflow: hidden;
   }
@@ -30,21 +43,21 @@
 
   /* ---------- Cards ---------- */
   .glass-card {
-    background: #F3EEE4;
-    border: 1px solid #D9D0C1;
+    background: var(--linen-light);
+    border: 1px solid var(--hairline);
     box-shadow: none;
   }
   .glass-card:hover {
-    border-color: #B8AD9E;
+    border-color: var(--gold);
   }
 
   /* ---------- Buttons ---------- */
   .btn-gradient {
-    background: #1C1510;
+    background: var(--espresso);
     transition: all 0.2s ease;
   }
   .btn-gradient:hover:not(:disabled) {
-    background: #2A2118;
+    background: var(--gold-deep);
   }
   .btn-gradient:focus-visible {
     outline: 3px solid rgba(28, 21, 16, 0.3);
@@ -52,13 +65,13 @@
   }
 
   .btn-secondary {
-    background: #F7F2E8;
-    border: 1px solid #D9D0C1;
+    background: var(--wash);
+    border: 1px solid var(--hairline);
     transition: all 0.2s ease;
   }
   .btn-secondary:hover:not(:disabled) {
-    background: #F3EEE4;
-    border-color: #B8AD9E;
+    background: var(--linen-light);
+    border-color: var(--gold);
   }
   .btn-secondary:focus-visible {
     outline: 3px solid rgba(28, 21, 16, 0.3);
@@ -67,13 +80,13 @@
 
   /* ---------- Topic Cards ---------- */
   .topic-card {
-    background: #F7F2E8;
-    border: 1px solid #D9D0C1;
+    background: var(--wash);
+    border: 1px solid var(--hairline);
     transition: all 0.2s ease;
     cursor: pointer;
   }
   .topic-card:hover {
-    border-color: #B8AD9E;
+    border-color: var(--gold);
     transform: translateY(-2px);
     box-shadow: 0 2px 8px rgba(28,21,16,0.06);
   }
@@ -82,14 +95,14 @@
     outline-offset: 2px;
   }
   .topic-card.selected {
-    border-color: #1C1510;
-    background: #F3EEE4;
+    border-color: var(--espresso);
+    background: var(--linen-light);
   }
 
   /* ---------- Checklist Items ---------- */
   .checklist-item {
-    background: #F9F6F0;
-    border-left: 3px solid #D9D0C1;
+    background: var(--wash);
+    border-left: 3px solid var(--hairline);
     transition: all 0.2s ease;
   }
   .checklist-item.checked {
@@ -105,11 +118,11 @@
   .tab-button {
     transition: all 0.2s ease;
     border-bottom: 2px solid transparent;
-    color: #9C8878;
+    color: var(--text-muted);
   }
   .tab-button.active {
-    border-bottom-color: #1C1510;
-    color: #1C1510;
+    border-bottom-color: var(--espresso);
+    color: var(--espresso);
   }
   .tab-button:focus-visible {
     outline: 3px solid rgba(28, 21, 16, 0.3);
@@ -131,8 +144,8 @@
     right: -400px;
     width: 400px;
     height: 100%;
-    background: #F9F6F0;
-    border-left: 1px solid #D9D0C1;
+    background: var(--wash);
+    border-left: 1px solid var(--hairline);
     transition: right 0.3s ease;
     z-index: 1000;
     overflow-y: auto;
@@ -169,7 +182,7 @@
   .hint-reveal { animation: highlightPulse 2s ease-out; }
   @keyframes highlightPulse {
     0% { background: rgba(28, 21, 16, 0.08); transform: scale(1.02); }
-    100% { background: #F3EEE4; transform: scale(1); }
+    100% { background: var(--linen-light); transform: scale(1); }
   }
 
   @keyframes redPulseGlow {
@@ -188,14 +201,14 @@
     font-size: 12px;
     font-weight: 600;
     letter-spacing: .04em;
-    border: 1px solid #D9D0C1;
-    background: #F7F2E8;
-    color: #5C4A38;
+    border: 1px solid var(--hairline);
+    background: var(--wash);
+    color: var(--gold-deep);
     text-transform: uppercase;
   }
   .pill-badge .dot {
     width: 8px; height: 8px; border-radius: 999px;
-    background: #B8AD9E;
+    background: var(--gold);
   }
   .pill-easy .dot { background: rgba(34,197,94,0.9); }
   .pill-medium .dot { background: rgba(250,204,21,0.9); }
@@ -205,14 +218,14 @@
   .pill-multiselect .dot { background: rgba(236,72,153,0.9); }
 
   /* ---------- Tailwind overrides for light background ---------- */
-  .text-white { color: #1C1510 !important; }
-  .btn-gradient { color: #F9F6F0 !important; }
+  .text-white { color: var(--espresso) !important; }
+  .btn-gradient { color: var(--wash) !important; }
   .text-slate-100, .text-slate-200 { color: #3A2F25 !important; }
-  .text-slate-300 { color: #9C8878 !important; }
-  .text-slate-400, .text-slate-500 { color: #9C8878 !important; }
+  .text-slate-300 { color: var(--text-muted) !important; }
+  .text-slate-400, .text-slate-500 { color: var(--text-muted) !important; }
   .bg-white { background-color: rgba(249,246,240,0.7) !important; }
   .blur-3xl { display: none !important; }
-  .border-transparent { border-color: #D9D0C1 !important; }
+  .border-transparent { border-color: var(--hairline) !important; }
 
   /* Accent icon colors → muted editorial tones */
   .text-cyan-400 { color: #5C7A6A !important; }
@@ -228,7 +241,7 @@
 
   /* Glass-card opacity backgrounds → editorial card fill */
   .bg-opacity-5, .bg-opacity-10, .bg-opacity-20 { background-color: transparent !important; }
-  .bg-white.bg-opacity-5, .bg-white.bg-opacity-10 { background-color: #F5F2EE !important; }
+  .bg-white.bg-opacity-5, .bg-white.bg-opacity-10 { background-color: var(--wash) !important; }
   .border-white { border-color: rgba(0,0,0,0.08) !important; }
   .border-opacity-10, .border-opacity-30 { border-opacity: 1 !important; }
 
@@ -395,7 +408,7 @@ function getDifficultyClass(q){
       app_title: "Nursing Theory Quiz",
       app_subtitle: "Year 1 Revision Tool",
       primary_color: "#301906",
-      secondary_color: "#5C4A38",
+      secondary_color: "#7A6437",
       background_color: "#FAFAF8",
       text_color: "#2C2A27",
       accent_color: "#22c55e",
@@ -8864,8 +8877,8 @@ function getDifficultyClass(q){
             <div class="fade-in" style="max-width:600px; margin:0 auto; text-align:center; padding:80px 16px;">
               <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:12px;">Under Construction</div>
               <h1 style="font-family:'Playfair Display',Georgia,serif; font-size:36px; font-weight:700; color:#1A1815; margin:0 0 12px;">Coming Soon</h1>
-              <p style="font-family:'Source Serif 4',Georgia,serif; font-size:16px; color:#5A5750; margin-bottom:32px;">This feature is being built. Head back to the selection screen to get started.</p>
-              <button onclick="currentView='selection'; render();" style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; background:#1C1510; color:#F9F6F0; border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">
+              <p style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:16px; color:var(--charcoal); margin-bottom:32px;">This feature is being built. Head back to the selection screen to get started.</p>
+              <button onclick="currentView='selection'; render();" style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; font-weight:600; background:var(--espresso); color:var(--wash); border:none; border-radius:4px; padding:14px 32px; cursor:pointer;">
                 Back to Selection
               </button>
             </div>
@@ -9506,7 +9519,7 @@ function getDifficultyClass(q){
 
       <div style="margin-bottom:40px;">
         <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#999; margin-bottom:10px;">Session summary</div>
-        <div style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#5A5750; line-height:1.7;">
+        <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; color:var(--charcoal); line-height:1.7;">
           ${whatToWorkOnNext}
         </div>
       </div>
@@ -9517,12 +9530,12 @@ function getDifficultyClass(q){
         ${topicPerformance.map(tp => {
           const isPriority = tp.percentage < 75 && tp.total > 0;
           return `
-            <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+            <div style="background:var(--wash); border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
               <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
                 <div>
-                  <span style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; color:#1A1815;">${safe(tp.topic.name)}</span>
+                  <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; font-weight:600; color:#1A1815;">${safe(tp.topic.name)}</span>
                   ${isPriority ? '<span style="display:inline-block; margin-left:8px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; background:#FCEBEB; color:#A32D2D; border-radius:3px; padding:2px 7px; font-weight:600;">Revise</span>' : ''}
-                  <div style="font-size:13px; color:#5A5750; margin-top:2px;">${tp.correct} of ${tp.total} correct</div>
+                  <div style="font-size:13px; color:var(--charcoal); margin-top:2px;">${tp.correct} of ${tp.total} correct</div>
                 </div>
                 <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:${tp.percentage >= 75 ? '#2E7D32' : tp.percentage >= 50 ? '#633806' : '#A32D2D'};">${tp.percentage}%</div>
               </div>
@@ -9539,7 +9552,7 @@ function getDifficultyClass(q){
       <div style="background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:4px; padding:20px 24px; margin-bottom:40px;">
         <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#633806; margin-bottom:10px;">What to Work on Next</div>
         <ul style="margin:0; padding:0; list-style:none;">
-          ${insights.map(ins => `<li style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;">${ins.text}</li>`).join('')}
+          ${insights.map(ins => `<li style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;">${ins.text}</li>`).join('')}
         </ul>
       </div>
       ` : ''}
@@ -9547,16 +9560,16 @@ function getDifficultyClass(q){
       <div style="margin-bottom:40px;">
         <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:20px;">Keep the Loop Moving</div>
         <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px;">
-          <a href="${loopRoute.guideHref}" target="_top" style="display:block; text-decoration:none; background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px;">
+          <a href="${loopRoute.guideHref}" target="_top" style="display:block; text-decoration:none; background:var(--wash); border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px;">
             <div style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#999; margin-bottom:8px;">Read next</div>
             <div style="font-family:'Playfair Display',Georgia,serif; font-size:24px; line-height:1.08; color:#1A1815; margin-bottom:8px;">${safe(loopRoute.guideTitle)}</div>
-            <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; line-height:1.6; color:#5A5750; margin-bottom:14px;">Use one guide to tighten the exact topic that stayed slow in this session.</div>
+            <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; line-height:1.6; color:var(--charcoal); margin-bottom:14px;">Use one guide to tighten the exact topic that stayed slow in this session.</div>
             <span style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#1A1815;">${safe(loopRoute.guideLabel)} &rarr;</span>
           </a>
           <a href="${loopRoute.nextHref}" target="_top" style="display:block; text-decoration:none; background:#FBF8F3; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px;">
             <div style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#999; margin-bottom:8px;">Then practise</div>
             <div style="font-family:'Playfair Display',Georgia,serif; font-size:24px; line-height:1.08; color:#1A1815; margin-bottom:8px;">Use a different format next.</div>
-            <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; line-height:1.6; color:#5A5750; margin-bottom:14px;">Once the recall is steadier, switch into a more spoken or structured practice block while the topic is still fresh.</div>
+            <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; line-height:1.6; color:var(--charcoal); margin-bottom:14px;">Once the recall is steadier, switch into a more spoken or structured practice block while the topic is still fresh.</div>
             <span style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#1A1815;">${safe(loopRoute.nextLabel)} &rarr;</span>
           </a>
         </div>
@@ -9567,9 +9580,9 @@ function getDifficultyClass(q){
         <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:#1A1815; border-top:1px solid rgba(0,0,0,0.12); border-bottom:1px solid rgba(0,0,0,0.12); padding:10px 0; margin-bottom:16px;">Question Review</div>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
-          <button onclick="setQuizReviewFilter('all')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'all' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'all' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">All (${totalQ})</button>
-          <button onclick="setQuizReviewFilter('incorrect')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'incorrect' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'incorrect' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">Incorrect (${incorrectCount})</button>
-          <button onclick="setQuizReviewFilter('flagged')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'flagged' ? '#1C1510' : '#F5F2EE'}; color:${window.__quizReviewFilter === 'flagged' ? '#F9F6F0' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">Flagged (${flaggedQuestions.length})</button>
+          <button onclick="setQuizReviewFilter('all')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'all' ? 'var(--espresso)' : 'var(--wash)'}; color:${window.__quizReviewFilter === 'all' ? 'var(--wash)' : 'var(--charcoal)'}; cursor:pointer; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">All (${totalQ})</button>
+          <button onclick="setQuizReviewFilter('incorrect')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'incorrect' ? 'var(--espresso)' : 'var(--wash)'}; color:${window.__quizReviewFilter === 'incorrect' ? 'var(--wash)' : 'var(--charcoal)'}; cursor:pointer; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Incorrect (${incorrectCount})</button>
+          <button onclick="setQuizReviewFilter('flagged')" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:5px 14px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.18); background:${window.__quizReviewFilter === 'flagged' ? 'var(--espresso)' : 'var(--wash)'}; color:${window.__quizReviewFilter === 'flagged' ? 'var(--wash)' : 'var(--charcoal)'}; cursor:pointer; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Flagged (${flaggedQuestions.length})</button>
         </div>
 
         ${reviewList.map(({ q, idx }) => {
@@ -9592,20 +9605,20 @@ function getDifficultyClass(q){
                     <span style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:${isCorrect ? '#2E7D32' : '#A32D2D'}; font-weight:600;">${isCorrect ? 'Correct' : 'Incorrect'} · Q${idx + 1}</span>
                     <span style="font-size:11px; color:#999; background:rgba(0,0,0,0.06); border-radius:2px; padding:1px 6px;">${safe(topic.name)}</span>
                   </div>
-                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#1A1815; line-height:1.5;">${safe(q.question)}</div>
+                  <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; color:#1A1815; line-height:1.5;">${safe(q.question)}</div>
                 </div>
-                <button onclick="toggleFlagQuestion(${idx})" style="flex-shrink:0; font-size:11px; padding:4px 10px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.15); background:${isFlagged ? '#FAEEDA' : '#F5F2EE'}; color:${isFlagged ? '#633806' : '#5A5750'}; cursor:pointer; font-family:'Source Serif 4',Georgia,serif;">${isFlagged ? 'Flagged' : 'Flag'}</button>
+                <button onclick="toggleFlagQuestion(${idx})" style="flex-shrink:0; font-size:11px; padding:4px 10px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.15); background:${isFlagged ? '#FAEEDA' : 'var(--wash)'}; color:${isFlagged ? '#633806' : 'var(--charcoal)'}; cursor:pointer; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${isFlagged ? 'Flagged' : 'Flag'}</button>
               </div>
               <div style="border-top:0.5px solid rgba(0,0,0,0.1); padding-top:12px;">
                 <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Correct answer</div>
-                <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#2E7D32; font-weight:600; margin-bottom:${!isCorrect ? '10px' : '0'};">${safe(correctText)}</div>
+                <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; color:#2E7D32; font-weight:600; margin-bottom:${!isCorrect ? '10px' : '0'};">${safe(correctText)}</div>
                 ${!isCorrect ? `
                   <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Your answer</div>
-                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#A32D2D; font-weight:600; margin-bottom:10px;">${safe(yourText)}</div>
+                  <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; color:#A32D2D; font-weight:600; margin-bottom:10px;">${safe(yourText)}</div>
                 ` : ''}
                 ${q.explanation ? `
                   <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:#999; margin-bottom:4px;">Explanation</div>
-                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:14px; color:#5A5750; line-height:1.6;">${safe(q.explanation)}</div>
+                  <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; color:var(--charcoal); line-height:1.6;">${safe(q.explanation)}</div>
                 ` : ''}
               </div>
             </div>
@@ -9614,10 +9627,10 @@ function getDifficultyClass(q){
       </div>
 
       <!-- LEARNING RESOURCES (collapsed) -->
-      <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; margin-bottom:40px; overflow:hidden;">
+      <div style="background:var(--wash); border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; margin-bottom:40px; overflow:hidden;">
         <button onclick="toggleLearningResources()" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:none; border:none; cursor:pointer; text-align:left;">
           <span style="font-family:'Playfair Display',Georgia,serif; font-size:18px; font-weight:700; color:#1A1815;">Revision Material Bank</span>
-          <i id="resources-chevron" data-lucide="chevron-down" style="color:#5A5750; width:18px; height:18px;"></i>
+          <i id="resources-chevron" data-lucide="chevron-down" style="color:var(--charcoal); width:18px; height:18px;"></i>
         </button>
         <div id="learning-resources" class="hidden" style="padding:0 24px 20px;">
           ${renderLearningResources()}
@@ -10076,12 +10089,12 @@ function renderOSCE(container) {
         ${domainArray.map(d => {
           const isPriority = d.total > 0 && d.percentage < 75;
           return `
-            <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+            <div style="background:var(--wash); border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
               <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
                 <div>
-                  <span style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; font-weight:600; color:#1A1815;">${d.label}</span>
+                  <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; font-weight:600; color:#1A1815;">${d.label}</span>
                   ${isPriority ? '<span style="display:inline-block; margin-left:8px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; background:#FCEBEB; color:#A32D2D; border-radius:3px; padding:2px 7px; font-weight:600;">Revise</span>' : ''}
-                  <div style="font-size:13px; color:#5A5750; margin-top:2px;">${d.checked} of ${d.total} items</div>
+                  <div style="font-size:13px; color:var(--charcoal); margin-top:2px;">${d.checked} of ${d.total} items</div>
                 </div>
                 <div style="font-family:'Playfair Display',Georgia,serif; font-size:22px; font-weight:700; color:${d.percentage >= 75 ? '#2E7D32' : d.percentage >= 50 ? '#633806' : '#A32D2D'};">${d.percentage}%</div>
               </div>
@@ -10100,12 +10113,12 @@ function renderOSCE(container) {
           const topic = topics.find(t => t.id === sr.station.topic);
           const pctColor = sr.percentage >= 75 ? '#2E7D32' : sr.percentage >= 50 ? '#633806' : '#A32D2D';
           return `
-            <div style="background:#F5F2EE; border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
+            <div style="background:var(--wash); border:0.5px solid rgba(0,0,0,0.1); border-radius:4px; padding:20px 24px; margin-bottom:10px;">
               <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;">
                 <div style="flex:1;">
                   <div style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#999; margin-bottom:4px;">Station ${idx + 1}${sr.isFlagged ? ' · Flagged' : ''}${topic ? ' · ' + topic.name : ''}</div>
-                  <div style="font-family:'Source Serif 4',Georgia,serif; font-size:16px; font-weight:600; color:#1A1815;">${sr.station.title}</div>
-                  <div style="font-size:13px; color:#5A5750; margin-top:3px;">${sr.checkedCount} of ${sr.totalCount} items · ${sr.station.estimatedMinutes} min · ${sr.station.difficulty}</div>
+                  <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:16px; font-weight:600; color:#1A1815;">${sr.station.title}</div>
+                  <div style="font-size:13px; color:var(--charcoal); margin-top:3px;">${sr.checkedCount} of ${sr.totalCount} items · ${sr.station.estimatedMinutes} min · ${sr.station.difficulty}</div>
                 </div>
                 <div style="font-family:'Playfair Display',Georgia,serif; font-size:28px; font-weight:700; color:${pctColor}; flex-shrink:0;">${sr.percentage}%</div>
               </div>
@@ -10127,7 +10140,7 @@ function renderOSCE(container) {
               ${sr.notes ? `
                 <div style="margin-top:12px; background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:3px; padding:10px 14px;">
                   <div style="font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#633806; margin-bottom:4px;">Your Notes</div>
-                  <p style="font-family:'Source Serif 4',Georgia,serif; font-size:13px; color:#3D2200; line-height:1.5; margin:0;">${sr.notes.substring(0, 180)}${sr.notes.length > 180 ? '...' : ''}</p>
+                  <p style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:13px; color:#3D2200; line-height:1.5; margin:0;">${sr.notes.substring(0, 180)}${sr.notes.length > 180 ? '...' : ''}</p>
                 </div>
               ` : ''}
             </div>
@@ -10140,12 +10153,12 @@ function renderOSCE(container) {
       <div style="background:#FAEEDA; border:0.5px solid rgba(99,56,6,0.2); border-radius:4px; padding:20px 24px; margin-bottom:40px;">
         <div style="font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:#633806; margin-bottom:10px;">What to Focus On</div>
         <ul style="margin:0; padding:0; list-style:none;">
-          ${insights.map(ins => `<li style="font-family:'Source Serif 4',Georgia,serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;"><strong>${ins.title}:</strong> ${ins.text}</li>`).join('')}
+          ${insights.map(ins => `<li style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; color:#3D2200; line-height:1.6; padding:4px 0;"><strong>${ins.title}:</strong> ${ins.text}</li>`).join('')}
         </ul>
         ${missedSafetyItems.length ? `
           <div style="margin-top:14px; border-top:0.5px solid rgba(163,45,45,0.25); padding-top:14px;">
             <div style="font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#A32D2D; margin-bottom:8px;">Critical Safety Items Missed</div>
-            ${missedSafetyItems.map(m => `<div style="font-family:'Source Serif 4',Georgia,serif; font-size:13px; color:#A32D2D; padding:3px 0;"><strong>Station ${m.stationIndex + 1}:</strong> ${m.item}</div>`).join('')}
+            ${missedSafetyItems.map(m => `<div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:13px; color:#A32D2D; padding:3px 0;"><strong>Station ${m.stationIndex + 1}:</strong> ${m.item}</div>`).join('')}
           </div>
         ` : ''}
       </div>
