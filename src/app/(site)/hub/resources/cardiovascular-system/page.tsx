@@ -371,6 +371,44 @@ const CSS = `
   line-height: 1.7;
 }
 
+/* Diagram */
+.cv-diagram {
+  border: 0.5px solid var(--hairline-firm);
+  padding: 20px 16px 14px;
+  margin-bottom: 18px;
+  background: var(--surface-page);
+}
+.cv-diagram svg { display: block; width: 100%; height: auto; }
+.cv-diagram-caption {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: center;
+  margin-top: 10px;
+}
+.cv-diagram-key {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.cv-diagram-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+.cv-diagram-key i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 /* Responsive */
 @media (max-width: 860px) {
   .cv-wrap { padding: 24px 20px 48px; }
@@ -698,6 +736,16 @@ const SECTIONS = [
   },
 ];
 
+const flowDiagramBoxes = [
+  { id: 'body-1', label: 'BODY', sub: 'systemic', fill: 'var(--surface-sunken)', text: 'var(--ink-mid)', border: 'var(--hairline-firm)' },
+  { id: 'ra', label: 'RA', sub: 'right atrium', fill: 'var(--blue-50)', text: 'var(--blue-800)', border: 'var(--blue-600)' },
+  { id: 'rv', label: 'RV', sub: 'right ventricle', fill: 'var(--blue-50)', text: 'var(--blue-800)', border: 'var(--blue-600)' },
+  { id: 'lungs', label: 'LUNGS', sub: 'gas exchange', fill: 'var(--teal-50)', text: 'var(--teal-800)', border: 'var(--teal-600)' },
+  { id: 'la', label: 'LA', sub: 'left atrium', fill: 'var(--coral-50)', text: 'var(--coral-800)', border: 'var(--coral-600)' },
+  { id: 'lv', label: 'LV', sub: 'left ventricle', fill: 'var(--coral-50)', text: 'var(--coral-800)', border: 'var(--coral-600)' },
+  { id: 'body-2', label: 'BODY', sub: 'systemic', fill: 'var(--surface-sunken)', text: 'var(--ink-mid)', border: 'var(--hairline-firm)' },
+];
+
 const anatomyRows = [
   { structure: 'Right atrium', what: 'The chamber that receives oxygen-poor blood coming back from the body through the superior and inferior vena cava.', why: 'Think of it as the heart\'s receiving room on the right side before blood moves down into the right ventricle.' },
   { structure: 'Right ventricle', what: 'Pumps oxygen-poor blood through the pulmonary valve into the pulmonary arteries.', why: 'Its job is to send blood to the lungs. It does not need as much muscle as the left ventricle because the lungs are a lower-pressure circuit.' },
@@ -974,6 +1022,35 @@ export default function CardiovascularSystemPage() {
         <h2 className="cv-section-title">Blood Flow Path</h2>
         <div className="cv-mono">
           SVC + IVC &rarr; Right Atrium &rarr; Tricuspid Valve &rarr; Right Ventricle &rarr; Pulmonary Valve &rarr; Pulmonary Arteries &rarr; Lungs &rarr; Pulmonary Veins &rarr; Left Atrium &rarr; Mitral Valve &rarr; Left Ventricle &rarr; Aortic Valve &rarr; Aorta &rarr; Body
+        </div>
+
+        <div className="cv-diagram">
+          <svg viewBox="0 0 900 140" role="img" aria-label="Diagram of blood flow: body to right atrium to right ventricle to lungs to left atrium to left ventricle and back to body">
+            <defs>
+              <marker id="cv-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" style={{ fill: 'var(--ink-faint)' }} />
+              </marker>
+            </defs>
+            {flowDiagramBoxes.map((box, i) => {
+              const x = 20 + i * 126;
+              return (
+                <g key={box.id}>
+                  <rect x={x} y={30} width={100} height={60} rx={4} style={{ fill: box.fill, stroke: box.border, strokeWidth: 1 }} />
+                  <text x={x + 50} y={56} textAnchor="middle" style={{ fill: box.text, fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600 }}>{box.label}</text>
+                  <text x={x + 50} y={74} textAnchor="middle" style={{ fill: box.text, fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: '0.02em' }}>{box.sub}</text>
+                  {i < flowDiagramBoxes.length - 1 && (
+                    <line x1={x + 100} y1={60} x2={x + 126} y2={60} style={{ stroke: 'var(--ink-faint)', strokeWidth: 1.5 }} markerEnd="url(#cv-arrow)" />
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+          <div className="cv-diagram-key">
+            <span><i style={{ background: 'var(--blue-600)' }} />Right heart &mdash; deoxygenated</span>
+            <span><i style={{ background: 'var(--teal-600)' }} />Lungs &mdash; gas exchange</span>
+            <span><i style={{ background: 'var(--coral-600)' }} />Left heart &mdash; oxygenated</span>
+          </div>
+          <p className="cv-diagram-caption">One full circuit: body &rarr; right heart &rarr; lungs &rarr; left heart &rarr; body</p>
         </div>
 
         {/* Anatomy detail table */}

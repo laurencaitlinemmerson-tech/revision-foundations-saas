@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { siteUrl } from '@/lib/seo';
+import { blogPosts } from '@/lib/blog';
 
 type ChangeFrequency = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
 
@@ -22,6 +23,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/study-skills',
     '/how-to-use',
     '/neurodivergent-guide',
+    '/blog',
+    ...blogPosts.map((post) => post.href),
   ];
   const hubResourceRoutes = [
     '/hub/resources/9-rights-medication',
@@ -29,17 +32,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/hub/resources/ae-assessment-guide',
     '/hub/resources/brain-nervous-system',
     '/hub/resources/cardiovascular-system',
+    '/hub/resources/congenital-heart-disease',
     '/hub/resources/cell-biology',
     '/hub/resources/drug-calculations-cheat-sheet',
+    '/hub/resources/fluids-electrolytes-homeostasis',
     '/hub/resources/glossary-terms',
     '/hub/resources/im-sc-injection',
     '/hub/resources/medication-abbreviations',
+    '/hub/resources/musculoskeletal-system',
     '/hub/resources/ng-tube-insertion',
+    '/hub/resources/paediatric-respiratory-conditions',
     '/hub/resources/paeds-vital-signs-cheat-sheet',
     '/hub/resources/palliative-care-adult',
     '/hub/resources/palliative-care-children',
     '/hub/resources/placement-survival',
     '/hub/resources/renal-system',
+    '/hub/resources/shock-recognition-management',
     '/hub/resources/respiratory-system',
     '/hub/resources/theories-of-development',
     '/hub/resources/y1-anatomy-physiology',
