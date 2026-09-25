@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
             ? rawClerkUserId
             : null;
 
-        const product = session.metadata?.product as Product | undefined;
+        const product = session.metadata?.product_key as Product | undefined;
         if (!product) {
           console.error("Missing product in checkout session metadata");
           break;
