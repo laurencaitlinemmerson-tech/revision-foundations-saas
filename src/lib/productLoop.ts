@@ -30,6 +30,15 @@ const resourceTopicOverrides: Record<string, { quizTopic?: string; osceTopic?: s
   'palliative-care-children': { osceTopic: 'communication' },
   'y1-pain-assessment': { osceTopic: 'pain' },
   'y1-paeds-medications': { quizTopic: 'numeracy', osceTopic: 'medication' },
+  'congenital-heart-disease': { quizTopic: 'cardiovascular', osceTopic: 'circulation' },
+  'ecg-cardiac-conduction': { quizTopic: 'cardiovascular', osceTopic: 'circulation' },
+  'shock-recognition-management': { quizTopic: 'cardiovascular', osceTopic: 'deteriorating' },
+  'paediatric-respiratory-conditions': { quizTopic: 'respiratory', osceTopic: 'respiratory' },
+  'tracheostomy-care': { quizTopic: 'respiratory', osceTopic: 'respiratory' },
+  'disability-assessment-neuro-observations': { osceTopic: 'deteriorating' },
+  'dehydration': { quizTopic: 'fluidsElectrolytes', osceTopic: 'deteriorating' },
+  'fluids-electrolytes-homeostasis': { quizTopic: 'fluidsElectrolytes' },
+  'endocrine-system': { quizTopic: 'homeostasis' },
 };
 
 function buildQuizHref(topic: string, fromSlug?: string) {

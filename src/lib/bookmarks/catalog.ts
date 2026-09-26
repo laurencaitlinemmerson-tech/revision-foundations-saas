@@ -194,6 +194,90 @@ const catalog: CatalogItem[] = [
     href: '/hub/glossary',
     tags: ['Y1 Essentials', 'Revision Plans'],
   },
+  {
+    hubItemId: 'cell-biology',
+    title: 'Cell Biology',
+    href: '/hub/resources/cell-biology',
+    tags: ['Paeds', 'Y1 Essentials', 'Revision Plans'],
+  },
+  {
+    hubItemId: 'congenital-heart-disease',
+    title: 'Congenital Heart Disease',
+    href: '/hub/resources/congenital-heart-disease',
+    tags: ['Paeds', 'Year 2', 'Cardiac'],
+  },
+  {
+    hubItemId: 'dehydration',
+    title: 'Dehydration & Fluid Replacement',
+    href: '/hub/resources/dehydration',
+    tags: ['Paeds', 'Y1 Essentials', 'Fluids & Electrolytes'],
+  },
+  {
+    hubItemId: 'disability-assessment-neuro-observations',
+    title: 'Disability Assessment & Neuro Observations',
+    href: '/hub/resources/disability-assessment-neuro-observations',
+    tags: ['Paeds', 'Year 2', 'Neuro'],
+  },
+  {
+    hubItemId: 'ecg-cardiac-conduction',
+    title: 'ECG & Cardiac Conduction',
+    href: '/hub/resources/ecg-cardiac-conduction',
+    tags: ['Paeds', 'Year 2', 'Cardiac'],
+  },
+  {
+    hubItemId: 'endocrine-system',
+    title: 'Endocrine System',
+    href: '/hub/resources/endocrine-system',
+    tags: ['Paeds', 'Y1 Essentials', 'Endocrine'],
+  },
+  {
+    hubItemId: 'fluids-electrolytes-homeostasis',
+    title: 'Fluids, Electrolytes & Homeostasis',
+    href: '/hub/resources/fluids-electrolytes-homeostasis',
+    tags: ['Paeds', 'Y1 Essentials', 'Fluids & Electrolytes'],
+  },
+  {
+    hubItemId: 'gastrointestinal-system',
+    title: 'Gastrointestinal System',
+    href: '/hub/resources/gastrointestinal-system',
+    tags: ['Paeds', 'Y1 Essentials', 'Gastro'],
+  },
+  {
+    hubItemId: 'glossary-terms',
+    title: 'Clinical Nursing Glossary',
+    href: '/hub/resources/glossary-terms',
+    tags: ['Y1 Essentials', 'Glossary'],
+  },
+  {
+    hubItemId: 'musculoskeletal-system',
+    title: 'Musculoskeletal System',
+    href: '/hub/resources/musculoskeletal-system',
+    tags: ['Paeds', 'Y1 Essentials', 'Musculoskeletal'],
+  },
+  {
+    hubItemId: 'osce-survival',
+    title: 'OSCE Survival Guide',
+    href: '/hub/resources/osce-survival',
+    tags: ['Paeds', 'OSCE', 'Placement'],
+  },
+  {
+    hubItemId: 'paediatric-respiratory-conditions',
+    title: 'Common Respiratory Conditions',
+    href: '/hub/resources/paediatric-respiratory-conditions',
+    tags: ['Paeds', 'Year 2', 'Respiratory'],
+  },
+  {
+    hubItemId: 'shock-recognition-management',
+    title: 'Shock: Recognition & Management',
+    href: '/hub/resources/shock-recognition-management',
+    tags: ['Paeds', 'Year 2', 'Emergency/ABCDE'],
+  },
+  {
+    hubItemId: 'tracheostomy-care',
+    title: 'Tracheostomy Care',
+    href: '/hub/resources/tracheostomy-care',
+    tags: ['Paeds', 'Year 2', 'Respiratory'],
+  },
 ];
 
 const catalogMap = new Map(catalog.map((item) => [item.hubItemId, item]));
