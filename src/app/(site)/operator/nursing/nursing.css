@@ -290,3 +290,32 @@
 /* the reasoning line */
 .ns-why { display: block; margin-top: 8px; padding-left: 14px; border-left: 2px solid var(--gold); font-size: 12.5px; line-height: 1.7; font-style: italic; color: var(--ink-soft); }
 .ns-why b { font-style: normal; font-weight: 500; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-deep, #8a7350); margin-right: 8px; }
+
+.ns-nav-split { justify-content: space-between; }
+
+/* Shift log */
+.sl-status { margin: 0 0 14px; }
+.sl-look { margin-bottom: 22px; padding: 16px 20px; border: 0.5px solid var(--hairline-firm); border-left: 3px solid var(--gold); }
+.sl-look ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.sl-look li { display: flex; gap: 14px; padding: 6px 0; font-size: 13.5px; line-height: 1.6; color: var(--charcoal); border-top: 0.5px solid var(--hairline-soft); }
+.sl-look li:first-child { border-top: none; }
+.sl-look li span { flex: 0 0 76px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding-top: 3px; }
+.sl-list { list-style: none; margin: 0; padding: 0; border-top: 0.5px solid var(--hairline-soft); }
+.sl-item { border-bottom: 0.5px solid var(--hairline-soft); }
+.sl-head { width: 100%; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 16px 2px; background: none; border: none; text-align: left; cursor: pointer; font: inherit; }
+.sl-date { font-family: var(--font-display); font-size: 1.15rem; color: var(--espresso); min-width: 120px; }
+.sl-meta { flex: 1; font-size: 12.5px; color: var(--ink-faint); }
+.sl-tag { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 10px; border: 0.5px solid var(--hairline-firm); border-radius: 999px; color: var(--ink-faint); }
+.sl-tag.is-logged { border-color: var(--teal-600, #0f6e56); color: var(--teal-600, #0f6e56); }
+.sl-body { padding: 4px 2px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+.sl-field { display: flex; flex-direction: column; gap: 6px; }
+.sl-field:first-child { grid-column: 1 / -1; }
+.sl-field span { font-size: 12px; font-weight: 500; color: var(--espresso); }
+.sl-field em { display: block; font-style: normal; font-weight: 300; font-size: 11.5px; color: var(--ink-faint); margin-top: 1px; }
+.sl-field textarea { font: inherit; font-size: 13.5px; line-height: 1.6; padding: 10px 12px; border: 0.5px solid var(--hairline-firm); background: transparent; color: var(--charcoal); border-radius: 2px; resize: vertical; }
+.sl-field textarea:focus { outline: none; border-color: var(--gold); }
+@media (max-width: 640px) { .sl-body { grid-template-columns: 1fr; } }
+
+.ns-live { margin: 2px 0 0; font-size: 11.5px; font-weight: 300; color: var(--ink-faint); max-width: 70ch; }
+.ns-live-live::before, .ns-live-partial::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--teal-600, #0f6e56); margin-right: 8px; vertical-align: 1px; }
+.ns-live-partial::before { background: var(--gold); }

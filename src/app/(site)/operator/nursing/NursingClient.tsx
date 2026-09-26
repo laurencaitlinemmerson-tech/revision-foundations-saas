@@ -2,6 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useOperatorState } from '@/lib/useOperatorState';
+import ShiftLog from './ShiftLog';
+import { useNotionLive, type LiveState } from './useNotionLive';
 import '../../dashboard/dashboard-premium.css';
 import './nursing.css';
 import {
@@ -74,25 +77,36 @@ function saveTicks(key: string, ticks: boolean[]) {
 }
 
 export default function NursingClient() {
+  const live = useNotionLive();
+  const { deadlines, rota, hours, sessions } = live;
   const [today, setToday] = useState<Date | null>(null);
-  const [prep, setPrep] = useState<boolean[]>(() => PLACEMENT_PREP.map(() => false));
-  const [tasks, setTasks] = useState<boolean[]>(() => CASE_STUDY.tasks.map(() => false));
+  const [prep, setPrep, prepStatus] = useOperatorState<boolean[]>('nursing.prep', PLACEMENT_PREP.map(() => false));
+  const [tasks, setTasks] = useOperatorState<boolean[]>('nursing.caseTasks', CASE_STUDY.tasks.map(() => false));
   const [showRota, setShowRota] = useState(false);
 
   useEffect(() => {
     setToday(startOfDay(new Date()));
-    setPrep(loadTicks(PREP_KEY, PLACEMENT_PREP.length));
-    setTasks(loadTicks(TASKS_KEY, CASE_STUDY.tasks.length));
   }, []);
+
+  // One-off: carry over ticks saved in this browser before they synced.
+  useEffect(() => {
+    if (prepStatus === 'loading') return;
+    const oldPrep = loadTicks(PREP_KEY, PLACEMENT_PREP.length);
+    if (oldPrep.some(Boolean) && !prep.some(Boolean)) setPrep(oldPrep);
+    const oldTasks = loadTicks(TASKS_KEY, CASE_STUDY.tasks.length);
+    if (oldTasks.some(Boolean) && !tasks.some(Boolean)) setTasks(oldTasks);
+    try {
+      window.localStorage.removeItem(PREP_KEY);
+      window.localStorage.removeItem(TASKS_KEY);
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prepStatus === 'loading']);
 
   const toggle = (which: 'prep' | 'tasks', i: number) => {
     const setter = which === 'prep' ? setPrep : setTasks;
-    const key = which === 'prep' ? PREP_KEY : TASKS_KEY;
-    setter((cur) => {
-      const next = cur.map((v, j) => (j === i ? !v : v));
-      saveTicks(key, next);
-      return next;
-    });
+    setter((cur) => cur.map((v, j) => (j === i ? !v : v)));
   };
 
   const hour = today ? new Date().getHours() : 12;
@@ -106,14 +120,14 @@ export default function NursingClient() {
   const nextStatus = nextPlacement ? statusOf(nextPlacement, today) : null;
 
   const upcomingShifts: Shift[] = useMemo(
-    () => (today ? ROTA.filter((s) => daysFrom(s.date, today) >= 0) : ROTA),
+    () => (today ? rota.filter((s) => daysFrom(s.date, today) >= 0) : rota),
     [today],
   );
   const nextShift = upcomingShifts[0] ?? null;
   const daysToShift = nextShift && today ? daysFrom(nextShift.date, today) : null;
 
   const upcomingDeadlines: Deadline[] = useMemo(
-    () => (today ? DEADLINES.filter((d) => daysFrom(d.date, today) >= 0) : DEADLINES),
+    () => (today ? deadlines.filter((d) => daysFrom(d.date, today) >= 0) : deadlines),
     [today],
   );
   const nextDeadline = upcomingDeadlines[0] ?? null;
@@ -124,11 +138,11 @@ export default function NursingClient() {
   const y1Credits = y1.modules.reduce((s, m) => s + (m.grade ? m.credits : 0), 0);
   const y1Average = Math.round(y1.modules.reduce((s, m) => s + (m.grade ? m.grade * m.credits : 0), 0) / y1Credits);
   const creditPct = Math.round((DEGREE.earnedCredits / DEGREE.totalCredits) * 100);
-  const signedOff = HOURS.signedOff.clinical + HOURS.signedOff.simulated + HOURS.signedOff.rpl;
-  const planned = HOURS.y2Planned.placements + HOURS.y2Planned.simulated;
-  const sessionsTotal = Y2_SESSIONS.reduce((s, m) => s + m.done + m.inProgress + m.todo, 0);
-  const sessionsDone = Y2_SESSIONS.reduce((s, m) => s + m.done, 0);
-  const sessionsProg = Y2_SESSIONS.reduce((s, m) => s + m.inProgress, 0);
+  const signedOff = hours.signedOff.clinical + hours.signedOff.simulated + hours.signedOff.rpl;
+  const planned = hours.y2Planned.placements + hours.y2Planned.simulated;
+  const sessionsTotal = sessions.reduce((s, m) => s + m.done + m.inProgress + m.todo, 0);
+  const sessionsDone = sessions.reduce((s, m) => s + m.done, 0);
+  const sessionsProg = sessions.reduce((s, m) => s + m.inProgress, 0);
   const prepDone = prep.filter(Boolean).length;
   const overBy = CASE_STUDY.words - CASE_STUDY.limit;
 
@@ -137,8 +151,9 @@ export default function NursingClient() {
   return (
     <div className="dash-shell ns-page">
       <div className="ns-container">
-        <nav className="ns-nav" aria-label="Operator">
+        <nav className="ns-nav ns-nav-split" aria-label="Operator">
           <Link href="/operator" className="ns-back"><span aria-hidden="true">&larr;</span> Training</Link>
+          <Link href="/operator/study" className="ns-back">Study &amp; today <span aria-hidden="true">&rarr;</span></Link>
         </nav>
 
         {/* ── Hero ── */}
@@ -149,11 +164,12 @@ export default function NursingClient() {
             {DEGREE.course} at {DEGREE.university}. Your shifts, deadlines, hours and results in one place, with the guides that go with them.
           </p>
           <p className="ns-byline">{dateChip ? `${dateChip} \u00b7 ` : ''}Year {DEGREE.currentYear} of {DEGREE.totalYears} &middot; Private</p>
+          <p className={`ns-live ns-live-${live.state}`}>{liveText(live.state, live.fetchedAt, Object.keys(live.errors))}</p>
           <svg className="dash-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L520,30 L536,30 L544,24 L552,30 L572,30 L578,36 L586,4 L594,44 L600,30 L620,30 L636,20 L652,30 L1000,30" fill="none" />
           </svg>
           <nav className="ns-jump" aria-label="On this page">
-            {[['up-next', 'Next shift'], ['deadlines', 'Deadlines'], ['case-study', 'Case study'], ['hours', 'Hours'], ['placements', 'Placements'], ['learnt', 'What I\'ve learnt'], ['this-year', 'This year'], ['results', 'Results']].map(([id, label]) => (
+            {[['up-next', 'Next shift'], ['shiftlog', 'Shift log'], ['deadlines', 'Deadlines'], ['case-study', 'Case study'], ['hours', 'Hours'], ['placements', 'Placements'], ['learnt', 'What I\'ve learnt'], ['this-year', 'This year'], ['results', 'Results']].map(([id, label]) => (
               <a key={id} href={`#${id}`}>{label}</a>
             ))}
           </nav>
@@ -214,9 +230,9 @@ export default function NursingClient() {
                 </p>
 
                 <div className="ns-meter">
-                  <div className="ns-meter-top"><span>Placement 1 hours</span><span>{HOURS.placement1.rostered} of {HOURS.placement1.required} rostered</span></div>
-                  <div className="ns-meter-bar" aria-hidden="true"><span style={{ width: `${(HOURS.placement1.rostered / HOURS.placement1.required) * 100}%` }} /></div>
-                  <p className="ns-meter-note">{HOURS.placement1.balance}h still to find. The 19 rostered long days come to {HOURS.placement1.rostered}h, and Part 2 needs {HOURS.placement1.required}h.</p>
+                  <div className="ns-meter-top"><span>Placement 1 hours</span><span>{hours.placement1.rostered} of {hours.placement1.required} rostered</span></div>
+                  <div className="ns-meter-bar" aria-hidden="true"><span style={{ width: `${(hours.placement1.rostered / hours.placement1.required) * 100}%` }} /></div>
+                  <p className="ns-meter-note">{hours.placement1.balance}h still to find. The 19 rostered long days come to {hours.placement1.rostered}h, and Part 2 needs {hours.placement1.required}h.</p>
                 </div>
 
                 <div className="ns-guides">
@@ -251,11 +267,11 @@ export default function NursingClient() {
               <div className="ns-rota-head">
                 <p className="ns-eyebrow">Your rota</p>
                 <button type="button" className="ns-toggle" onClick={() => setShowRota((v) => !v)}>
-                  {showRota ? 'Show fewer' : `Show all ${ROTA.length} shifts`}
+                  {showRota ? 'Show fewer' : `Show all ${rota.length} shifts`}
                 </button>
               </div>
               <ul className="ns-shifts">
-                {(showRota ? ROTA : upcomingShifts.slice(0, 6)).map((s, i) => {
+                {(showRota ? rota : upcomingShifts.slice(0, 6)).map((s, i) => {
                   const d = today ? daysFrom(s.date, today) : null;
                   const past = d !== null && d < 0;
                   return (
@@ -272,11 +288,17 @@ export default function NursingClient() {
           </section>
         )}
 
+        {/* ── Shift log ── */}
+        <section className="ns-step">
+          <Heading label="Shift log" id="shiftlog" context="Saved across devices" />
+          <ShiftLog rota={rota} />
+        </section>
+
         {/* ── Deadlines ── */}
         <section className="ns-step">
           <Heading label="Coming up" id="deadlines" context={`${upcomingDeadlines.length} assessments this year`} />
           <div className="ns-deadlines">
-            {DEADLINES.map((d) => {
+            {deadlines.map((d) => {
               const days = today ? daysFrom(d.date, today) : null;
               const dt = parse(d.date);
               return (
@@ -352,20 +374,20 @@ export default function NursingClient() {
           <Heading label="Practice hours" id="hours" context={`${num(NMC_HOURS)} needed for the NMC`} />
           <div className="ns-hours">
             <div className="ns-hours-bar" role="img" aria-label={`${signedOff} hours signed off, ${planned} planned for Year 2, out of ${NMC_HOURS}`}>
-              <span className="ns-h-clinical" style={{ width: `${(HOURS.signedOff.clinical / NMC_HOURS) * 100}%` }} />
-              <span className="ns-h-sim" style={{ width: `${(HOURS.signedOff.simulated / NMC_HOURS) * 100}%` }} />
-              <span className="ns-h-rpl" style={{ width: `${(HOURS.signedOff.rpl / NMC_HOURS) * 100}%` }} />
+              <span className="ns-h-clinical" style={{ width: `${(hours.signedOff.clinical / NMC_HOURS) * 100}%` }} />
+              <span className="ns-h-sim" style={{ width: `${(hours.signedOff.simulated / NMC_HOURS) * 100}%` }} />
+              <span className="ns-h-rpl" style={{ width: `${(hours.signedOff.rpl / NMC_HOURS) * 100}%` }} />
               <span className="ns-h-plan" style={{ width: `${(planned / NMC_HOURS) * 100}%` }} />
             </div>
             <div className="ns-hours-key">
-              <span><i className="ns-h-clinical" />Clinical shifts {HOURS.signedOff.clinical}h</span>
-              <span><i className="ns-h-sim" />Simulated {HOURS.signedOff.simulated}h</span>
-              <span><i className="ns-h-rpl" />Prior learning {HOURS.signedOff.rpl}h</span>
+              <span><i className="ns-h-clinical" />Clinical shifts {hours.signedOff.clinical}h</span>
+              <span><i className="ns-h-sim" />Simulated {hours.signedOff.simulated}h</span>
+              <span><i className="ns-h-rpl" />Prior learning {hours.signedOff.rpl}h</span>
               <span><i className="ns-h-plan" />Year 2 planned {planned}h</span>
             </div>
             <div className="ns-hours-grid">
-              <div><p className="ns-eyebrow">Signed off</p><p className="ns-h-num">{num(signedOff)}h</p><p className="ns-h-sub">Year 1: {HOURS.y1Shifts.longDays} long days and {HOURS.y1Shifts.nights} nights, plus simulated and prior learning</p></div>
-              <div><p className="ns-eyebrow">Planned for Year 2</p><p className="ns-h-num">{num(planned)}h</p><p className="ns-h-sub">{HOURS.y2Planned.placements}h of placements and {HOURS.y2Planned.simulated}h of KCL simulation</p></div>
+              <div><p className="ns-eyebrow">Signed off</p><p className="ns-h-num">{num(signedOff)}h</p><p className="ns-h-sub">Year 1: {hours.y1Shifts.longDays} long days and {hours.y1Shifts.nights} nights, plus simulated and prior learning</p></div>
+              <div><p className="ns-eyebrow">Planned for Year 2</p><p className="ns-h-num">{num(planned)}h</p><p className="ns-h-sub">{hours.y2Planned.placements}h of placements and {hours.y2Planned.simulated}h of KCL simulation</p></div>
               <div><p className="ns-eyebrow">After Year 2</p><p className="ns-h-num">{num(signedOff + planned)}h</p><p className="ns-h-sub">{Math.round(((signedOff + planned) / NMC_HOURS) * 100)}% of {num(NMC_HOURS)}, with Year 3 still to come</p></div>
             </div>
           </div>
@@ -411,7 +433,7 @@ export default function NursingClient() {
           <Heading label="This year" id="this-year" context="Year 2 · 2026–27" />
           <div className="ns-sessions">
             <p className="ns-eyebrow">Lectures, seminars and simulation</p>
-            {Y2_SESSIONS.map((m) => {
+            {sessions.map((m) => {
               const total = m.done + m.inProgress + m.todo;
               return (
                 <div key={m.code} className="ns-session">
@@ -492,7 +514,7 @@ export default function NursingClient() {
 
         <footer className="ns-end">
           <p>
-            Snapshot of your Notion Nursing Dashboard, {fmt(AS_OF, true)}. Notion can&apos;t feed this page live, so it needs refreshing when new results, shifts or deadlines land. Countdowns and statuses update themselves.
+            Deadlines, hours, rota and lecture progress come live from Notion when connected, and otherwise from the snapshot of {fmt(AS_OF, true)}. Results, placements and the study notes are still snapshots. Countdowns and statuses always update themselves.
           </p>
           <a href={NOTION_URL} target="_blank" rel="noreferrer">Open in Notion →</a>
         </footer>
@@ -620,4 +642,13 @@ function LearntSection() {
       </div>
     </div>
   );
+}
+
+function liveText(state: LiveState, at: string | null, failed: string[]) {
+  const time = at ? new Date(at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+  if (state === 'live') return `Live from Notion, updated ${time}`;
+  if (state === 'partial') return `Live from Notion, updated ${time}. Not shared with the integration yet: ${failed.join(', ')}. Those show the snapshot`;
+  if (state === 'loading') return 'Checking Notion\u2026';
+  if (state === 'error') return 'Could not reach Notion. Showing the snapshot';
+  return `Snapshot of ${fmt(AS_OF, true)}. Add NOTION_TOKEN to make deadlines, hours, rota and lectures live`;
 }

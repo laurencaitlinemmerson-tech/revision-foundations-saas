@@ -562,6 +562,14 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: MUTED, minWidth: 18 }}>→</span>
             <span>Nursing</span>
           </Link>
+          <Link
+            href="/operator/study"
+            className="hv-nav tr-nav-link"
+            style={{ display: 'flex', alignItems: 'baseline', gap: 12, padding: '15px 28px', borderBottom: RULE_SOFT, fontSize: 14, fontWeight: 300, color: SOFT }}
+          >
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: MUTED, minWidth: 18 }}>→</span>
+            <span>Study &amp; today</span>
+          </Link>
         </nav>
         <div style={{ marginTop: 'auto', padding: CARD_PAD, borderTop: RULE }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
