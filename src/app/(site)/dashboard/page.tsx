@@ -161,7 +161,7 @@ export default async function DashboardPage() {
       <div style={{ display: 'flex', flexDirection: 'column' }}>
 
         {/* ━━ 1 · PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section>
+        <section className="dash-step">
           <SectionDivider label="How you're doing" context="This week" />
 
           {/* 4-col analytics row */}
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* ━━ 2 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section>
+        <section className="dash-step">
           <SectionDivider label="Today's plan" id="todays-plan" />
           
           <InteractiveEnergySelector />
@@ -278,19 +278,19 @@ export default async function DashboardPage() {
         </section>
 
         {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section>
+        <section className="dash-step">
           <SectionDivider label="A week that could work for you" id="revision-week" context="Adjust to your schedule" />
           <RevisionWeekPlanner />
         </section>
 
         {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section>
+        <section className="dash-step">
           <SectionDivider label="Find a guide" id="search" />
           <QuickTopicSearch />
         </section>
 
         {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section>
+        <section className="dash-step">
           <SectionDivider label="Your saved pages" id="saved-folders" />
           <SavedFoldersDashboard />
         </section>

@@ -34,16 +34,6 @@ function daysUntil(dateStr: string): number {
 // ── Animation constants ────────────────────────────────────────────────────────
 const ease = [0.16, 1, 0.3, 1] as const;
 
-const railContainerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.22 } },
-};
-
-const railItemVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease } },
-};
-
 // ── Component ──────────────────────────────────────────────────────────────────
 export default function DashboardClient({
   children,
@@ -120,120 +110,84 @@ export default function DashboardClient({
     <div className="dash-shell min-h-screen">
 
       <section className="dash-hero">
-        <div className="mx-auto max-w-[1120px] px-6 pb-10 pt-[104px] md:px-10 md:pb-14">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
+        <div className="mx-auto max-w-[1120px] px-6 pb-4 pt-[104px] md:px-10">
+          <motion.p {...fadeUp(0)} className="dash-kicker">Your dashboard</motion.p>
 
-            {/* ── Left: greeting ── */}
-            <div>
-              <motion.div {...fadeUp(0)} className="mb-7 flex flex-wrap items-center gap-2.5">
-                <span className="dash-chip">
-                  <span className="dash-chip-dot" aria-hidden="true" />
-                  {formatToday()}
-                </span>
-                {placementDays !== null && (
-                  <span className="dash-chip dash-chip-gold">
-                    {placementDays} {placementDays === 1 ? 'day' : 'days'} to placement
-                  </span>
-                )}
-              </motion.div>
+          <motion.h1 {...fadeUp(0.08)} className="dash-headline">
+            {trimmedName ? (
+              <>{greeting}, <em>{trimmedName}</em>.</>
+            ) : (
+              <>{greeting}.</>
+            )}
+          </motion.h1>
 
-              <motion.h1
-                {...fadeUp(0.08)}
-                className="font-display text-[clamp(2.8rem,5.4vw,4.6rem)] leading-[1.04] tracking-[-0.012em] text-[var(--espresso)]"
+          <motion.p {...fadeUp(0.15)} className="dash-standfirst">
+            Your revision desk. Pick up exactly where you left off, check your weak spots, and start practice without the set-up.
+          </motion.p>
+
+          <p className="dash-byline">
+            {formatToday()}
+            {placementDays !== null && <> &middot; {placementDays} {placementDays === 1 ? 'day' : 'days'} to placement</>}
+          </p>
+
+          <svg className="dash-pulse dash-pulse-wide" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L520,30 L536,30 L544,24 L552,30 L572,30 L578,36 L586,4 L594,44 L600,30 L620,30 L636,20 L652,30 L1000,30" fill="none" />
+          </svg>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {quickLinks.map((item, i) => (
+              <motion.div
+                key={item.label}
+                {...(anim ? {
+                  initial: { opacity: 0, y: 8 },
+                  animate: { opacity: 1, y: 0 },
+                  transition: { delay: 0.28 + i * 0.05, duration: 0.38, ease },
+                  whileTap: { scale: 0.97 },
+                } : {})}
               >
-                {trimmedName ? (
-                  <>{greeting}, <em>{trimmedName}</em>.</>
-                ) : (
-                  <>{greeting}.</>
-                )}
-              </motion.h1>
-
-              <svg className="dash-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L1000,30" fill="none" />
-              </svg>
-
-              <motion.p
-                {...fadeUp(0.15)}
-                className="max-w-[50ch] text-[16px] font-light leading-8 text-[var(--charcoal)]/80"
-              >
-                Your revision desk. Pick up exactly where you left off, check your weak spots, and start practice without the set-up.
-              </motion.p>
-
-              <div className="mt-9 flex flex-wrap items-center gap-2.5">
-                {quickLinks.map((item, i) => (
-                  <motion.div
-                    key={item.label}
-                    {...(anim ? {
-                      initial: { opacity: 0, y: 8 },
-                      animate: { opacity: 1, y: 0 },
-                      transition: { delay: 0.28 + i * 0.05, duration: 0.38, ease },
-                      whileTap: { scale: 0.97 },
-                    } : {})}
-                  >
-                    <Link
-                      href={item.href}
-                      className={`dash-pill group/ql ${item.available ? '' : 'is-locked'}`}
-                    >
-                      <span>{item.label}</span>
-                      {!item.available ? (
-                        <span className="dash-pill-tag">Locked</span>
-                      ) : (
-                        <span className="dash-pill-arrow">→</span>
-                      )}
-                    </Link>
-                  </motion.div>
-                ))}
-
-                <motion.button
-                  type="button"
-                  onClick={() => setIsCommandPaletteOpen(true)}
-                  {...(anim ? {
-                    initial: { opacity: 0, y: 8 },
-                    animate: { opacity: 1, y: 0 },
-                    transition: { delay: 0.48, duration: 0.38, ease },
-                    whileTap: { scale: 0.97 },
-                  } : {})}
-                  className="dash-pill dash-pill-dark"
+                <Link
+                  href={item.href}
+                  className={`dash-pill group/ql ${item.available ? '' : 'is-locked'}`}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                  <span>Search</span>
-                  <span className="dash-kbd">⌘K</span>
-                </motion.button>
-              </div>
-
-              <motion.div {...fadeUp(0.2)} className="mt-6">
-                <Link href="/onboarding?entry=signup" className="dash-textlink">
-                  New here? Use the start-here guide →
+                  <span>{item.label}</span>
+                  {!item.available ? (
+                    <span className="dash-pill-tag">Locked</span>
+                  ) : (
+                    <span className="dash-pill-arrow">→</span>
+                  )}
                 </Link>
               </motion.div>
-            </div>
+            ))}
 
-            {/* ── Right: jump rail ── */}
-            <motion.div
-              variants={railContainerVariants}
-              initial="hidden"
-              animate="visible"
-              className="dash-rail lg:mt-8"
+            <motion.button
+              type="button"
+              onClick={() => setIsCommandPaletteOpen(true)}
+              {...(anim ? {
+                initial: { opacity: 0, y: 8 },
+                animate: { opacity: 1, y: 0 },
+                transition: { delay: 0.48, duration: 0.38, ease },
+                whileTap: { scale: 0.97 },
+              } : {})}
+              className="dash-pill dash-pill-dark"
             >
-              <p className="dash-rail-title">Jump to</p>
-              {railLinks.map((link, index) => (
-                <motion.div
-                  key={link.label}
-                  {...(anim ? { variants: railItemVariants } : {})}
-                >
-                  <Link href={link.href} className="dash-rail-item group/rail">
-                    <span className="dash-rail-num">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="dash-rail-name">{link.label}</span>
-                      <span className="dash-rail-note">{link.note}</span>
-                    </span>
-                    <span className="dash-rail-arrow">→</span>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              <span>Search</span>
+              <span className="dash-kbd">⌘K</span>
+            </motion.button>
           </div>
+
+          <nav className="dash-jump" aria-label="On this page">
+            <span className="dash-jump-label">On this page</span>
+            {railLinks.map((link) => (
+              <a key={link.label} href={link.href}>{link.label}</a>
+            ))}
+          </nav>
+
+          <motion.div {...fadeUp(0.2)} className="mt-6">
+            <Link href="/onboarding?entry=signup" className="dash-textlink">
+              New here? Use the start-here guide →
+            </Link>
+          </motion.div>
         </div>
       </section>
 
