@@ -215,7 +215,7 @@ export default function NursingClient() {
             <Heading label="Next shift" id="up-next" context={nextStatus === 'current' ? 'Placement in progress' : 'Placement starts soon'} />
             <div className="ns-next">
               <div className="ns-next-main">
-                <p className="ns-eyebrow">Year {nextPlacement.year} placement · {nextPlacement.name}</p>
+                <p className="ns-eyebrow">Year {nextPlacement.year} placement · {nextPlacement.name}{nextPlacement.specialty ? ` · ${nextPlacement.specialty}` : ''}</p>
                 {nextShift ? (
                   <>
                     <h3 className="ns-next-title">{fmtLong(nextShift.date)}</h3>
@@ -237,7 +237,7 @@ export default function NursingClient() {
 
                 <div className="ns-guides">
                   <p className="ns-eyebrow">Revise before you go</p>
-                  {PLACEMENT_GUIDES.map((g) => (
+                  {[...(nextPlacement.guides ?? []), ...PLACEMENT_GUIDES].map((g) => (
                     <Link key={g.href} href={g.href} className="ns-link">
                       <span>{g.label}</span><span aria-hidden="true">→</span>
                     </Link>
@@ -589,7 +589,7 @@ function LearntSection() {
           </button>
         ))}
       </div>
-      <p className="ns-eyebrow">{note.name}{note.setting ? ` \u00b7 ${note.setting}` : ''}</p>
+      <p className="ns-eyebrow">{note.name}{note.setting ? ` \u00b7 ${note.setting}` : ''}{note.prep ? ' \u00b7 Written before the placement' : ''}</p>
       <p className="ns-learnt-intro">{note.intro}</p>
 
       <div className="ns-cols">
@@ -602,14 +602,18 @@ function LearntSection() {
           </ul>
         </div>
         <div>
-          <p className="ns-eyebrow">Skills I practised</p>
+          <p className="ns-eyebrow">{note.prep ? 'Skills to practise' : 'Skills I practised'}</p>
           <ul className="ns-know">{note.skills.map((k) => <li key={k}>{k}</li>)}</ul>
-          <p className="ns-eyebrow" style={{ marginTop: 26 }}>What supervisors said</p>
-          <ul className="ns-know">{note.said.map((k) => <li key={k}>{k}</li>)}</ul>
+          {note.said.length > 0 && (
+            <>
+              <p className="ns-eyebrow" style={{ marginTop: 26 }}>What supervisors said</p>
+              <ul className="ns-know">{note.said.map((k) => <li key={k}>{k}</li>)}</ul>
+            </>
+          )}
         </div>
       </div>
 
-      <p className="ns-eyebrow" style={{ marginTop: 34 }}>Conditions I met</p>
+      <p className="ns-eyebrow" style={{ marginTop: 34 }}>{note.prep ? 'Conditions to expect' : 'Conditions I met'}</p>
       {groups.map((g) => (
         <div key={g} className="ns-cond-group">
           <p className="ns-group-name">{g}</p>
@@ -624,7 +628,7 @@ function LearntSection() {
         </div>
       ))}
 
-      <p className="ns-eyebrow" style={{ marginTop: 34 }}>Drugs I met</p>
+      <p className="ns-eyebrow" style={{ marginTop: 34 }}>{note.prep ? 'Drugs to expect' : 'Drugs I met'}</p>
       <div className="ns-drugs">
         {note.drugs.map((d) => (
           <div key={d.name} className="ns-drug">

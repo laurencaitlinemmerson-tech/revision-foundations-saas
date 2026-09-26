@@ -172,12 +172,19 @@ export type Placement = {
   start: string | null; // ISO
   end: string | null;
   signOff?: boolean;
+  guides?: { label: string; href: string }[]; // specialty revision, shown ahead of PLACEMENT_GUIDES
 };
 
 export const PLACEMENTS: Placement[] = [
   { name: 'February 2026', year: 1, specialty: 'Oncology', start: '2026-02-02', end: '2026-03-15' },
   { name: 'July 2026', year: 1, specialty: 'Neurosurgery', start: '2026-07-13', end: '2026-08-15' },
-  { name: 'October 2026', year: 2, specialty: null, start: '2026-09-28', end: '2026-11-08' },
+  {
+    name: 'October 2026', year: 2, specialty: 'Renal', start: '2026-09-28', end: '2026-11-08',
+    guides: [
+      { label: 'Renal system', href: '/hub/resources/renal-system' },
+      { label: 'Fluids, electrolytes and homeostasis', href: '/hub/resources/fluids-electrolytes-homeostasis' },
+    ],
+  },
   { name: 'February 2027', year: 2, specialty: null, start: '2027-02-22', end: '2027-03-21' },
   { name: 'July 2027', year: 2, specialty: null, start: null, end: null },
   { name: 'November 2027', year: 3, specialty: null, start: null, end: null },
@@ -354,6 +361,7 @@ export type PlacementNote = {
   skills: string[];
   said: string[];        // themes from supervisor feedback
   guides: { label: string; href: string }[];
+  prep?: boolean;        // written before the placement: what to expect rather than what I met
 };
 
 export const PLACEMENT_NOTES: PlacementNote[] = [
@@ -459,6 +467,63 @@ export const PLACEMENT_NOTES: PlacementNote[] = [
       { label: 'A–E assessment', href: '/hub/resources/ae-assessment-guide' },
     ],
   },
+  {
+    name: 'October 2026',
+    specialty: 'Renal',
+    setting: 'Eagle ward',
+    prep: true,
+    intro:
+      'Children with kidney disease, from nephrotic syndrome and AKI to dialysis and transplants. Nearly everything comes back to fluid, electrolytes and blood pressure, and in a small child small numbers matter.',
+    know: [
+      'Fluid balance is the core job. Strict input and output, daily weights on the same scales at the same time, and stick to any fluid restriction. Weigh nappies: 1 g is 1 mL.',
+      'Urine output should be at least 1 mL/kg/h. Under 0.5 mL/kg/h in a child (under 1 mL/kg/h in an infant) is oliguria, so escalate it.',
+      'Blood pressure matters more here than anywhere. Use the right cuff size and compare with centiles for age, sex and height, not adult numbers.',
+      'Potassium is the dangerous electrolyte. A high potassium can stop the heart, so know the latest result before giving anything that contains it.',
+      'Many drugs are cleared by the kidneys. Doses are adjusted to kidney function, NSAIDs are usually avoided, and gentamicin, vancomycin and tacrolimus need levels.',
+      'Transplant and steroid patients are immunosuppressed. Fever, chickenpox contact and live vaccines all need flagging to the team.',
+      'Dialysis access is precious. Keep PD exit sites and haemodialysis lines clean and secure, and cloudy PD fluid means peritonitis until proven otherwise.',
+    ],
+    conditions: [
+      { group: 'Glomerular', name: 'Nephrotic syndrome', know: 'Heavy proteinuria, low albumin and oedema, usually starting around the eyes. Most children aged 2–5 have minimal change disease, which responds to steroids.', flag: 'Abdominal pain, cold peripheries or a long CRT despite oedema (hypovolaemia); fever with abdominal pain (peritonitis); a swollen limb (clot)' },
+      { group: 'Glomerular', name: 'Nephritic syndrome (post-infectious, IgA, HSP nephritis)', know: 'Blood in the urine (often cola-coloured), high blood pressure, oedema and less urine. Often follows a throat or skin infection.', flag: 'Headache, visual change or seizure (hypertensive encephalopathy); falling urine output' },
+      { group: 'Kidney failure', name: 'Acute kidney injury (AKI)', know: 'Creatinine rises or urine output falls. In children dehydration (pre-renal) is the commonest cause, so fluid status comes first.', flag: 'High potassium, fluid overload with breathlessness, no urine' },
+      { group: 'Kidney failure', name: 'Haemolytic uraemic syndrome (HUS)', know: 'Usually follows bloody diarrhoea from E. coli O157. Anaemia from broken red cells, low platelets and AKI. Care is supportive, and some children need dialysis.', flag: 'Stops passing urine, seizures, pallor with bruising' },
+      { group: 'Kidney failure', name: 'Chronic kidney disease (CKD)', know: 'Affects the whole child: growth, anaemia, bone health, blood pressure and diet. Congenital kidney and urinary tract problems are the commonest cause in children.', flag: 'High potassium, fluid overload, rising blood pressure' },
+      { group: 'Kidney failure', name: 'Dialysis (peritoneal and haemodialysis)', know: 'PD uses the lining of the abdomen as the filter, often overnight at home. Haemodialysis uses a central line or fistula, usually in hospital several times a week.', flag: 'Cloudy PD fluid or abdominal pain (peritonitis); fever with a line (line infection)' },
+      { group: 'Transplant', name: 'Kidney transplant', know: 'Lifelong immunosuppression with tacrolimus levels checked regularly. Strict fluid balance straight after surgery.', flag: 'Rising creatinine, less urine, fever or a tender graft (rejection or infection)' },
+      { group: 'Urological', name: 'UTI and pyelonephritis', know: 'Infants present vaguely: fever, vomiting, poor feeding. Any fever in a baby under 3 months needs a urine sample.', flag: 'Signs of sepsis; recurrent UTIs, which can scar the kidneys' },
+      { group: 'Urological', name: 'Congenital anomalies (CAKUT, reflux, posterior urethral valves)', know: 'Often found as hydronephrosis on antenatal scans. Valves only affect boys and cause a poor urine stream.', flag: 'Poor stream or a palpable bladder in a boy; recurrent UTIs' },
+    ],
+    drugs: [
+      { name: 'Prednisolone', cls: 'Corticosteroid', use: 'First-line treatment for nephrotic syndrome' },
+      { name: 'Furosemide', cls: 'Loop diuretic', use: 'Oedema and fluid overload' },
+      { name: 'Human albumin 20%', cls: 'Blood product', use: 'Severe nephrotic oedema or hypovolaemia, often with furosemide' },
+      { name: 'Tacrolimus', cls: 'Immunosuppressant', use: 'Prevents transplant rejection; trough levels guide the dose' },
+      { name: 'Mycophenolate mofetil', cls: 'Immunosuppressant', use: 'Transplant and steroid-dependent nephrotic syndrome' },
+      { name: 'Amlodipine', cls: 'Antihypertensive', use: 'High blood pressure' },
+      { name: 'Enalapril', cls: 'ACE inhibitor', use: 'High blood pressure and reducing protein leak' },
+      { name: 'Erythropoietin', cls: 'Haematology', use: 'Anaemia of CKD' },
+      { name: 'Alfacalcidol', cls: 'Vitamin D', use: 'Bone health in CKD' },
+      { name: 'Phosphate binders', cls: 'Electrolyte', use: 'Calcium carbonate or sevelamer with meals to lower phosphate' },
+      { name: 'Sodium bicarbonate', cls: 'Electrolyte', use: 'Metabolic acidosis in CKD' },
+      { name: 'Hyperkalaemia treatment', cls: 'Emergency', use: 'Calcium gluconate, salbutamol and insulin with glucose' },
+      { name: 'Trimethoprim', cls: 'Antibiotic', use: 'UTI treatment and prophylaxis' },
+    ],
+    skills: [
+      'Strict fluid balance charts and daily weights',
+      'Blood pressure with the right cuff, checked against centiles',
+      'Urinalysis and collecting a clean urine sample',
+      'Timing drug levels (tacrolimus troughs, gentamicin)',
+      'PD exit site care and watching a PD set-up',
+      'Central line care with ANTT',
+    ],
+    said: [],
+    guides: [
+      { label: 'Renal system', href: '/hub/resources/renal-system' },
+      { label: 'Fluids, electrolytes and homeostasis', href: '/hub/resources/fluids-electrolytes-homeostasis' },
+      { label: 'Paediatric vital signs', href: '/hub/resources/paeds-vital-signs-cheat-sheet' },
+    ],
+  },
 ];
 
 // ── The reasoning behind the notes above (know[] is index-aligned; conditions/drugs keyed by name) ──
@@ -522,6 +587,43 @@ export const PLACEMENT_WHY: Record<string, { know: string[]; cond: Record<string
       'Co-amoxiclav': 'It covers the bacteria most likely to enter during surgery. A penicillin allergy risks anaphylaxis, so always check allergy status first.',
       'Metronidazole': 'It targets anaerobic bacteria that live in the bowel and cause infection when the bowel is perforated.',
       'Gentamicin': 'It covers Gram-negative gut bacteria. Like other aminoglycosides it can harm the kidneys, so follow local dosing.',
+    },
+  },
+  'October 2026': {
+    know: [
+      'Damaged kidneys cannot get rid of extra water, so fluid builds up. Weight is the most reliable way to track fluid over a day, and small errors matter in a small child.',
+      'Urine output shows how well the kidneys are perfused and working. It drops before creatinine rises, so it is the earliest warning.',
+      'The kidneys control blood pressure through salt, water and renin. When they are diseased, blood pressure rises, and high pressure damages the kidneys further.',
+      'The kidneys are the main way the body gets rid of potassium. When they fail, it builds up and disturbs the electrical activity of the heart.',
+      'A drug the kidneys cannot clear builds up to toxic levels. NSAIDs reduce blood flow to the kidneys, and some antibiotics damage them directly.',
+      'Immunosuppression blunts the immune response, so infections progress fast and may show fewer signs. Live vaccines can cause the disease they protect against.',
+      'Children may need dialysis for years, and each line or catheter has a limited life. Bacteria entering the abdomen through the PD catheter turn the fluid cloudy.',
+    ],
+    cond: {
+      'Nephrotic syndrome': 'Leaky glomeruli let albumin out. With less albumin in the blood, fluid moves into the tissues, so a child can be oedematous and dry inside the vessels at the same time. The liver makes more clotting factors, which is why clots happen.',
+      'Nephritic syndrome (post-infectious, IgA, HSP nephritis)': 'Inflamed glomeruli leak blood and filter less, so salt and water are retained. That causes the oedema and high blood pressure.',
+      'Acute kidney injury (AKI)': 'With less blood reaching the kidneys they filter less. Correcting the fluid early often reverses it before the kidney itself is damaged.',
+      'Haemolytic uraemic syndrome (HUS)': 'The bacterial toxin damages the lining of small blood vessels, especially in the kidney. Clots form there, using up platelets and shredding red cells as they pass.',
+      'Chronic kidney disease (CKD)': 'The kidneys also make the hormone that drives red cell production, activate vitamin D and balance acid. Losing them affects blood, bones and growth.',
+      'Dialysis (peritoneal and haemodialysis)': 'Both work by diffusion across a membrane: waste moves from high to low concentration. PD uses the abdominal lining, and haemodialysis uses a machine filter.',
+      'Kidney transplant': 'The immune system sees the new kidney as foreign. Tacrolimus has a narrow window between rejection and toxicity, which is why levels matter.',
+      'UTI and pyelonephritis': 'Infants cannot tell you where it hurts, and infection can climb to the kidneys and scar them. That scarring can lead to high blood pressure and CKD later.',
+      'Congenital anomalies (CAKUT, reflux, posterior urethral valves)': 'A blockage or backflow raises pressure in the kidney before birth, and that damages it while it is still developing.',
+    },
+    drug: {
+      'Prednisolone': 'It calms the immune process that makes the glomeruli leak. Long courses affect growth, mood, blood pressure and blood sugar.',
+      'Furosemide': 'It blocks salt reabsorption in the loop of Henle, so water follows the salt out. It can drop potassium and blood pressure.',
+      'Human albumin 20%': 'It pulls fluid back into the vessels. Giving furosemide afterwards clears that fluid through the kidneys.',
+      'Tacrolimus': 'It blocks T-cell activation. It can itself harm the kidneys, so levels are timed just before the next dose (the trough).',
+      'Mycophenolate mofetil': 'It stops lymphocytes multiplying, so less steroid or tacrolimus is needed. Watch for low white cells and gut upset.',
+      'Amlodipine': 'It relaxes the muscle in artery walls, so blood pressure falls without affecting the kidneys much.',
+      'Enalapril': 'It lowers pressure inside the glomerulus, so less protein leaks. It can raise potassium and creatinine, so bloods are checked.',
+      'Erythropoietin': 'It replaces the hormone the failing kidney no longer makes, so the marrow produces red cells again.',
+      'Alfacalcidol': 'The kidney normally activates vitamin D. This is already active, so calcium absorption and bone growth continue.',
+      'Phosphate binders': 'Failing kidneys retain phosphate, which weakens bone. Binders taken with food stop it being absorbed from the gut.',
+      'Sodium bicarbonate': 'The kidneys normally excrete acid. Bicarbonate buffers the acid that builds up, which protects bones and growth.',
+      'Hyperkalaemia treatment': 'Calcium stabilises the heart muscle straight away. Salbutamol and insulin move potassium into cells, which buys time but does not remove it.',
+      'Trimethoprim': 'It blocks folate production in bacteria and is concentrated in urine, which makes it a good choice for the urinary tract.',
     },
   },
 };
