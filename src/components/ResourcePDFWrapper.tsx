@@ -109,10 +109,26 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
         }),
       );
 
+      // Sections that fade in as they scroll into view start at opacity 0; anything not
+      // yet scrolled to would come out blank, so show them all for the capture.
+      el.querySelectorAll<HTMLElement>('[class*="-reveal"]').forEach((node) => {
+        node.style.opacity = '1';
+        node.style.transform = 'none';
+        node.style.transition = 'none';
+        swaps.push(() => {
+          node.style.opacity = '';
+          node.style.transform = '';
+          node.style.transition = '';
+        });
+      });
+
       // Render the labelled organ diagrams to pictures ourselves (styles baked in),
       // because html2canvas draws inline SVG text and images unreliably.
-      const svgProps = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'font-family', 'font-size', 'font-weight', 'letter-spacing', 'opacity', 'text-anchor'];
-      for (const svg of Array.from(el.querySelectorAll<SVGSVGElement>('svg.ad-svg, svg.cd-svg'))) {
+      const svgProps = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'stroke-linejoin', 'stroke-opacity', 'fill-opacity', 'paint-order', 'font-family', 'font-size', 'font-weight', 'font-style', 'letter-spacing', 'opacity', 'text-anchor'];
+      const labelled = Array.from(el.querySelectorAll<SVGSVGElement>('svg')).filter(
+        (svg) => svg.viewBox.baseVal.width > 0 && Boolean(svg.querySelector('text, image, pattern')),
+      );
+      for (const svg of labelled) {
         try {
           const vb = svg.viewBox.baseVal;
           const w = 1600;
@@ -122,7 +138,7 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
           const clones = clone.querySelectorAll('*');
           originals.forEach((node, i) => {
             const cs = getComputedStyle(node);
-            clones[i].setAttribute('style', svgProps.map((prop) => `${prop}:${cs.getPropertyValue(prop)}`).join(';'));
+            clones[i].setAttribute('style', svgProps.map((prop) => `${prop}:${cs.getPropertyValue(prop)}`).join(';') + `;display:${cs.display};visibility:${cs.visibility}`);
             clones[i].removeAttribute('class');
           });
           clone.removeAttribute('class');
