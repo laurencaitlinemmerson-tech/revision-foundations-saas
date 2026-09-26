@@ -135,12 +135,6 @@ const catalog: CatalogItem[] = [
     tags: ['Paeds', 'Y1 Essentials', 'Ethics'],
   },
   {
-    hubItemId: 'y1-paeds-medications',
-    title: 'Y1 Paediatric Medications Guide',
-    href: '/hub/resources/y1-paeds-medications',
-    tags: ['Paeds', 'Y1 Essentials', 'Meds & Calculations'],
-  },
-  {
     hubItemId: 'y1-child-communication',
     title: 'Y1 Communicating with Children',
     href: '/hub/resources/y1-child-communication',
@@ -229,6 +223,18 @@ const catalog: CatalogItem[] = [
     title: 'Endocrine System',
     href: '/hub/resources/endocrine-system',
     tags: ['Paeds', 'Y1 Essentials', 'Endocrine'],
+  },
+  {
+    hubItemId: 'pharmacokinetics',
+    title: 'Pharmacokinetics',
+    href: '/hub/resources/pharmacokinetics',
+    tags: ['Paeds', 'Year 2', 'Meds & Calculations'],
+  },
+  {
+    hubItemId: 'pharmacodynamics',
+    title: 'Pharmacodynamics',
+    href: '/hub/resources/pharmacodynamics',
+    tags: ['Paeds', 'Year 2', 'Meds & Calculations'],
   },
   {
     hubItemId: 'fluids-electrolytes-homeostasis',

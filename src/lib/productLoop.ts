@@ -30,6 +30,8 @@ const resourceTopicOverrides: Record<string, { quizTopic?: string; osceTopic?: s
   'palliative-care-children': { osceTopic: 'communication' },
   'y1-pain-assessment': { osceTopic: 'pain' },
   'y1-paeds-medications': { quizTopic: 'numeracy', osceTopic: 'medication' },
+  'pharmacokinetics': { quizTopic: 'numeracy', osceTopic: 'medication' },
+  'pharmacodynamics': { quizTopic: 'numeracy', osceTopic: 'medication' },
   'congenital-heart-disease': { quizTopic: 'cardiovascular', osceTopic: 'circulation' },
   'ecg-cardiac-conduction': { quizTopic: 'cardiovascular', osceTopic: 'circulation' },
   'shock-recognition-management': { quizTopic: 'cardiovascular', osceTopic: 'deteriorating' },
