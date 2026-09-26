@@ -606,7 +606,9 @@ const CSS = `
 .ecg-step { border-top-color: var(--hairline-soft); }
 .ecg-step-letter { text-shadow: 0 6px 24px rgba(203, 174, 120, 0.35); }
 .ecg-step-badge, .ecg-red-pill { border-radius: 999px; }
-.ecg-pearl { border-radius: 2px; border-left: 3px solid var(--gold); }
+.ecg-pearl { background: transparent; border: 0.5px solid var(--hairline-firm); border-left: 3px solid var(--gold); border-radius: 2px; padding: 18px 24px; }
+.ecg-pearl-label { color: var(--gold-deep, #8a7350); font-size: 10px; letter-spacing: 0.18em; margin-bottom: 8px; }
+.ecg-pearl p { color: var(--ink-mid); font-size: 13.5px; line-height: 1.75; }
 
 .ecg-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .ecg-reveal.is-in { opacity: 1; transform: none; }
