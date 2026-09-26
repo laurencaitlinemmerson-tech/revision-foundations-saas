@@ -9,6 +9,7 @@ import ConductionDiagram from '@/components/hub/ConductionDiagram';
 import SheetLinks from '@/components/hub/SheetLinks';
 import { TwelveLeadFigure, ThreeLeadFigure } from '@/components/hub/EcgElectrodes';
 import EcgTrace from '@/components/hub/EcgTrace';
+import { EcgStrip, EcgStripStyles } from '@/components/hub/EcgStrips';
 import { InteractiveHeart, InteractiveEcgBeat } from '@/components/hub/InteractiveHeart';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -1373,9 +1374,10 @@ export default function EcgCardiacConductionPage() {
           <p>Heart block is graded by how much the AV node delay is disrupted: 1st degree just prolongs the PR interval; 2nd degree drops occasional beats; 3rd degree (complete) loses the connection entirely, so atria and ventricles beat independently of each other.</p>
         </div>
 
+        <EcgStripStyles />
         <h2 className="ecg-section-title">Normal vs Abnormal: See the Difference</h2>
         <p style={{ fontSize: '13px', color: 'var(--ink-soft)', lineHeight: 1.7, marginBottom: '20px', maxWidth: '70ch' }}>
-          Five simplified rhythm strips, redrawn to make the shape of each problem obvious &mdash; not exact patient traces, but the same pattern you would learn to spot one.
+          Five rhythm strips drawn in the same style as the real trace above, with the line changed to show each problem. They are simulated teaching strips, not patient recordings, but each is the pattern you would learn to spot.
         </p>
 
         <div className="ecg-rhythm-card">
@@ -1383,11 +1385,7 @@ export default function EcgCardiacConductionPage() {
             <span className="ecg-rhythm-name">Normal Sinus Rhythm</span>
             <span className="ecg-rhythm-badge normal">Normal</span>
           </div>
-          <div className="ecg-rhythm-svg-wrap">
-            <svg viewBox="0 0 600 100" role="img" aria-label="Normal sinus rhythm: regular, evenly spaced P-QRS-T complexes">
-              <path d="M0,50 L20,50 L24,44 L28,50 L46,50 L48,58 L50,8 L52,64 L54,50 L62,50 L74,50 L80,40 L92,50 L200,50 L220,50 L224,44 L228,50 L246,50 L248,58 L250,8 L252,64 L254,50 L262,50 L274,50 L280,40 L292,50 L400,50 L420,50 L424,44 L428,50 L446,50 L448,58 L450,8 L452,64 L454,50 L462,50 L474,50 L480,40 L492,50 L600,50" fill="none" style={{ stroke: 'var(--teal-600)', strokeWidth: 2 }} />
-            </svg>
-          </div>
+          <EcgStrip kind="normal" />
           <p className="ecg-rhythm-explain">
             <strong>Why it&apos;s normal:</strong> every QRS is preceded by a P wave, the P–R gap is consistent, the QRS is narrow, and the beats are evenly spaced. This is the SA node driving the heart exactly as it should.
           </p>
@@ -1398,11 +1396,7 @@ export default function EcgCardiacConductionPage() {
             <span className="ecg-rhythm-name">Atrial Fibrillation</span>
             <span className="ecg-rhythm-badge abnormal">Abnormal</span>
           </div>
-          <div className="ecg-rhythm-svg-wrap">
-            <svg viewBox="0 0 600 100" role="img" aria-label="Atrial fibrillation: irregularly spaced QRS complexes with no clear P waves and a wavy baseline">
-              <path d="M0,50 L2,53 L6,47 L10,52 L14,48 L16,56 L18,8 L20,64 L22,50 L30,50 L36,40 L46,50 L50,53 L58,47 L66,52 L74,48 L82,53 L90,47 L98,52 L106,48 L114,53 L122,47 L130,52 L138,48 L140,56 L142,8 L144,64 L146,50 L154,50 L160,40 L170,50 L176,53 L184,47 L192,52 L200,48 L208,53 L216,47 L224,52 L232,48 L234,56 L236,8 L238,64 L240,50 L248,50 L254,40 L264,50 L270,53 L278,47 L286,52 L294,48 L302,53 L310,47 L318,52 L326,48 L334,53 L342,47 L350,52 L358,48 L366,53 L374,47 L382,52 L390,48 L392,56 L394,8 L396,64 L398,50 L406,50 L412,40 L422,50 L430,53 L438,47 L446,52 L454,48 L462,53 L470,47 L478,52 L486,48 L494,53 L502,47 L510,52 L518,48 L520,56 L522,8 L524,64 L526,50 L534,50 L540,40 L550,50 L558,53 L566,47 L574,52 L582,48 L590,53 L598,47 L600,50" fill="none" style={{ stroke: 'var(--red-600)', strokeWidth: 2 }} />
-            </svg>
-          </div>
+          <EcgStrip kind="af" />
           <p className="ecg-rhythm-explain">
             <strong>Why it&apos;s abnormal:</strong> no organised P waves &mdash; just a chaotic, wavy baseline from disorganised atrial activity &mdash; and the gap between QRS complexes keeps changing. This is the &ldquo;irregularly irregular&rdquo; pattern that defines AF.
           </p>
@@ -1413,11 +1407,7 @@ export default function EcgCardiacConductionPage() {
             <span className="ecg-rhythm-name">SVT (Supraventricular Tachycardia)</span>
             <span className="ecg-rhythm-badge abnormal">Abnormal</span>
           </div>
-          <div className="ecg-rhythm-svg-wrap">
-            <svg viewBox="0 0 600 100" role="img" aria-label="SVT: very fast, regular, narrow-complex rhythm with no visible P waves">
-              <path d="M0,50 L4,56 L6,10 L8,62 L10,50 L18,50 L24,42 L34,50 L75,50 L79,56 L81,10 L83,62 L85,50 L93,50 L99,42 L109,50 L150,50 L154,56 L156,10 L158,62 L160,50 L168,50 L174,42 L184,50 L225,50 L229,56 L231,10 L233,62 L235,50 L243,50 L249,42 L259,50 L300,50 L304,56 L306,10 L308,62 L310,50 L318,50 L324,42 L334,50 L375,50 L379,56 L381,10 L383,62 L385,50 L393,50 L399,42 L409,50 L450,50 L454,56 L456,10 L458,62 L460,50 L468,50 L474,42 L484,50 L525,50 L529,56 L531,10 L533,62 L535,50 L543,50 L549,42 L559,50 L600,50" fill="none" style={{ stroke: 'var(--red-600)', strokeWidth: 2 }} />
-            </svg>
-          </div>
+          <EcgStrip kind="svt" />
           <p className="ecg-rhythm-explain">
             <strong>Why it&apos;s abnormal:</strong> the rate is far too fast for the P waves to be seen at all, but the QRS stays narrow and regular &mdash; the signal is still using the normal conduction pathway, just firing much too quickly and starting/stopping suddenly.
           </p>
@@ -1428,11 +1418,7 @@ export default function EcgCardiacConductionPage() {
             <span className="ecg-rhythm-name">Ventricular Tachycardia</span>
             <span className="ecg-rhythm-badge abnormal">Abnormal</span>
           </div>
-          <div className="ecg-rhythm-svg-wrap">
-            <svg viewBox="0 0 600 100" role="img" aria-label="Ventricular tachycardia: fast, regular, wide and bizarre-shaped complexes">
-              <path d="M0,50 L10,50 L20,70 L35,15 L55,75 L75,45 L90,50 L120,50 L130,50 L140,70 L155,15 L175,75 L195,45 L210,50 L240,50 L250,50 L260,70 L275,15 L295,75 L315,45 L330,50 L360,50 L370,50 L380,70 L395,15 L415,75 L435,45 L450,50 L480,50 L490,50 L500,70 L515,15 L535,75 L555,45 L570,50 L600,50" fill="none" style={{ stroke: 'var(--red-600)', strokeWidth: 2.5 }} />
-            </svg>
-          </div>
+          <EcgStrip kind="vt" />
           <p className="ecg-rhythm-explain">
             <strong>Why it&apos;s abnormal:</strong> the complexes are wide and oddly shaped instead of the usual sharp, narrow spike &mdash; the signal is spreading through the ventricles abnormally rather than down the normal conduction pathway. Fast, wide, and regular like this needs urgent attention.
           </p>
@@ -1443,18 +1429,9 @@ export default function EcgCardiacConductionPage() {
             <span className="ecg-rhythm-name">Complete Heart Block</span>
             <span className="ecg-rhythm-badge abnormal">Abnormal</span>
           </div>
-          <div className="ecg-rhythm-svg-wrap">
-            <svg viewBox="0 0 600 100" role="img" aria-label="Complete heart block: P waves and QRS complexes each regular but running at independent rates">
-              <path d="M0,50 L2,58 L4,8 L6,64 L8,50 L16,50 L22,40 L34,50 L150,50 L152,58 L154,8 L156,64 L158,50 L166,50 L172,40 L184,50 L300,50 L302,58 L304,8 L306,64 L308,50 L316,50 L322,40 L334,50 L450,50 L452,58 L454,8 L456,64 L458,50 L466,50 L472,40 L484,50 L600,50" fill="none" style={{ stroke: 'var(--red-600)', strokeWidth: 2.5 }} />
-              <path d="M0,50 L4,44 L8,50 L65,50 L69,44 L73,50 L130,50 L134,44 L138,50 L195,50 L199,44 L203,50 L260,50 L264,44 L268,50 L325,50 L329,44 L333,50 L390,50 L394,44 L398,50 L455,50 L459,44 L463,50 L520,50 L524,44 L528,50 L585,50 L589,44 L593,50 L600,50" fill="none" style={{ stroke: 'var(--blue-600)', strokeWidth: 1.5, strokeDasharray: '3 2' }} />
-            </svg>
-          </div>
-          <div className="ecg-rhythm-key">
-            <span><i style={{ background: 'var(--blue-600)' }} />P waves (atrial rate)</span>
-            <span><i style={{ background: 'var(--red-600)' }} />QRS-T (ventricular rate)</span>
-          </div>
+          <EcgStrip kind="chb" />
           <p className="ecg-rhythm-explain">
-            <strong>Why it&apos;s abnormal:</strong> the dashed P waves march along at their own steady (faster) rate, completely independent of the solid QRS-T complexes at their own steady (slower) rate. The AV node connection has been lost entirely &mdash; atria and ventricles are no longer &ldquo;talking&rdquo; to each other at all.
+            <strong>Why it&apos;s abnormal:</strong> the P waves (blue arrows) march along at their own steady, faster rate, completely independent of the QRS complexes, which run at their own steady, much slower rate. Some P waves land inside a QRS or T wave, and none is reliably followed by a QRS. The AV node connection has been lost entirely &mdash; atria and ventricles are no longer &ldquo;talking&rdquo; to each other at all.
           </p>
         </div>
 
