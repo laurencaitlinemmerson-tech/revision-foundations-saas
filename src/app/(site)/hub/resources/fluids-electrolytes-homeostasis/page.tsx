@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import KidneyDiagram from '@/components/hub/KidneyDiagram';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -843,6 +844,8 @@ export default function FluidsElectrolytesHomeostasisPage() {
           <p className="fe-pearl-label">Student note</p>
           <p>A cation is a positively charged ion (sodium and potassium are the two you will use most). Osmosis is water moving towards a higher solute concentration. ORS stands for oral rehydration solution. U&amp;Es refers to the urea and electrolytes blood test used to check kidney function and electrolyte balance.</p>
         </div>
+
+        <KidneyDiagram caption="The kidney &mdash; where fluid and electrolyte balance is fine-tuned" />
 
         <div className="fe-golden">
           {[

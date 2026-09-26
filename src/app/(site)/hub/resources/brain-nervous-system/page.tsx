@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
-import AnnotatedDiagram from '@/components/hub/AnnotatedDiagram';
+import BrainDiagram from '@/components/hub/BrainDiagram';
 import PremiumHubPageGate from '@/components/PremiumHubPageGate';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
@@ -777,14 +777,7 @@ export default function BrainNervousSystemPage() {
         </div>
 
         {/* Golden rules */}
-        <AnnotatedDiagram
-          src="/hub-diagrams/organ-brain.webp"
-          width={1120}
-          height={970}
-          alt="Side view of the brain with the lobes shown in different colours, plus the cerebellum and brainstem. The leader lines are left blank for you to label."
-          caption="The brain from the side &mdash; try naming each colour-coded region before checking your notes"
-          minWidth={520}
-        />
+        <BrainDiagram />
         <div className="ns-golden">
           {[
             {

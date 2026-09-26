@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
-import AnnotatedDiagram from '@/components/hub/AnnotatedDiagram';
+import LungsDiagram from '@/components/hub/LungsDiagram';
+import BrainDiagram from '@/components/hub/BrainDiagram';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import {
   STUDY_COMPONENTS_CSS,
@@ -695,6 +696,54 @@ const SECTIONS = [
     pearl:
       'A full respiratory assessment is not just "count the rate and check the sats". It is how the child looks, how hard they are working, how well they are feeding or talking, what their colour is doing, what their circulation looks like, and whether the trend is improving or drifting the wrong way.',
   },
+  {
+    number: '7',
+    colour: '6',
+    diagram: true,
+    name: 'Brain & Breathing Control',
+    question: 'Who tells the lungs how fast and how deep to go, and what can switch that off?',
+    cols: [
+      {
+        header: 'Respiratory centres (brainstem)',
+        items: [
+          'Medulla sets the basic rhythm of breathing',
+          'Pons smooths it (pneumotaxic and apneustic centres)',
+          'Automatic: works when you are asleep or unconscious',
+          'Damage or raised ICP here can stop breathing',
+        ],
+      },
+      {
+        header: 'Central chemoreceptors',
+        items: [
+          'Sit in the medulla, bathed in CSF',
+          'Detect a rise in CO\u2082 (via H\u207a in the CSF)',
+          'Rising CO\u2082 means faster, deeper breaths',
+          'Blunted in long-term CO\u2082 retention (e.g. COPD)',
+        ],
+      },
+      {
+        header: 'Peripheral chemoreceptors',
+        items: [
+          'Carotid bodies and aortic arch',
+          'Main trigger is a low O\u2082 (PaO\u2082 falling well below normal)',
+          'Also respond to high CO\u2082 and low pH',
+          'Signal the medulla via the glossopharyngeal (IX) and vagus (X) nerves',
+        ],
+      },
+      {
+        header: 'Other influences',
+        items: [
+          'Cerebral cortex: voluntary control (breath-holding, talking)',
+          'Emotion, pain and fever raise the rate',
+          'Opioids, sedatives and head injury depress the centres',
+          'Infants: immature control, so pauses and periodic breathing',
+        ],
+      },
+    ],
+    redFlags: ['Slow or irregular breathing', 'Apnoeas', 'Falling GCS with slow breathing', 'Pinpoint pupils with slow breathing'],
+    pearl:
+      'A slow respiratory rate is not reassuring if the child is drowsy. After opioids, sedation or a head injury, the brain may simply be sending fewer breathing signals. Check the rate, the effort and how rousable they are, and escalate early.',
+  },
 ];
 
 const airwayFunctions = [
@@ -884,22 +933,7 @@ export default function RespiratorySystemPage() {
         ]} />
 
         {/* Golden rules */}
-        <AnnotatedDiagram
-          src="/hub-diagrams/organ-lungs.webp"
-          width={1460}
-          height={980}
-          alt="The lungs and airways: the trachea splits into the main bronchi, which branch into smaller bronchi and bronchioles, ending in clusters of alveoli shown magnified in a circle. Right and left lung are labelled."
-          caption="The airways &mdash; trachea to bronchi to bronchioles to alveoli, where gas exchange happens"
-          labels={[
-            { text: 'Trachea', x: 985, y: 203 },
-            { text: 'Main bronchus', x: 985, y: 367 },
-            { text: 'Bronchi', x: 985, y: 481 },
-            { text: 'Bronchioles', x: 985, y: 580 },
-            { text: 'Alveoli', x: 1055, y: 875, anchor: 'middle' },
-            { text: 'Right lung', x: 223, y: 940, anchor: 'end' },
-            { text: 'Left lung', x: 908, y: 940 },
-          ]}
-        />
+        <LungsDiagram caption="The airways &mdash; trachea to bronchi to bronchioles to alveoli, where gas exchange happens" />
         <div className="rs-golden">
           {[
             { n: '01', title: 'Airway order', text: 'Never Phone Liam To Buy Brownies Always — Nose, Pharynx, Larynx, Trachea, Bronchi, Bronchioles, Alveoli.' },
@@ -944,6 +978,10 @@ export default function RespiratorySystemPage() {
               </div>
 
               {/* Red flags */}
+              {(section as { diagram?: boolean }).diagram && (
+                <BrainDiagram caption={'The brainstem (medulla and pons) holds the respiratory centres and the central chemoreceptors \u2014 name the numbered lines yourself'} />
+              )}
+
               {section.redFlags.length > 0 && (
                 <>
                   <p className="rs-redflags-label">Red flags</p>
@@ -1436,8 +1474,8 @@ export default function RespiratorySystemPage() {
         <div style={{
           marginTop: '48px',
           padding: '28px 32px',
-          background: 'linear-gradient(135deg, rgba(234,241,250,0.4) 0%, rgba(250,250,248,0.6) 100%)',
-          border: '0.5px solid rgba(24,95,165,0.12)',
+          background: 'var(--surface-page)',
+          border: '0.5px solid var(--hairline-firm)',
           display: 'flex',
           flexWrap: 'wrap',
           gap: '20px',

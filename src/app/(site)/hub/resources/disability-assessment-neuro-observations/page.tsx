@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import BrainDiagram from '@/components/hub/BrainDiagram';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -779,6 +780,8 @@ export default function DisabilityAssessmentPage() {
           <p className="da-pearl-label">Student note</p>
           <p>CNS is the brain and spinal cord; PNS is everything outside them (cranial nerves, spinal nerves, autonomic nerves). AVPU stands for Alert, Voice, Pain, Unresponsive. GCS is the Glasgow Coma Scale, scored across Eye, Verbal, and Motor responses. PERRL means pupils equal, round, and reactive to light.</p>
         </div>
+
+        <BrainDiagram />
 
         <div className="da-golden">
           {[

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import KidneyDiagram from '@/components/hub/KidneyDiagram';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -814,6 +815,8 @@ export default function DehydrationPage() {
         </div>
 
         {/* Golden rules */}
+        <KidneyDiagram caption="The kidney &mdash; it holds on to water when a child is dehydrated" />
+
         <div className="dh-golden">
           {[
             {

@@ -6,6 +6,7 @@ import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 import ConductionDiagram from '@/components/hub/ConductionDiagram';
+import SheetLinks from '@/components/hub/SheetLinks';
 import { InteractiveHeart, InteractiveEcgBeat } from '@/components/hub/InteractiveHeart';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -1042,6 +1043,7 @@ export default function EcgCardiacConductionPage() {
         <div className="ecg-diagram">
           <InteractiveHeart />
           <p className="ecg-diagram-caption">Tap the dots to explore the heart, or follow one full loop of blood &mdash; worth holding in mind as you read the conduction pathway below</p>
+          <div className="ad-sheet"><SheetLinks slug="heart" /></div>
         </div>
 
         <div className="ecg-golden">
@@ -1107,6 +1109,7 @@ export default function EcgCardiacConductionPage() {
         <div className="ecg-diagram">
           <ConductionDiagram />
           <p className="ecg-diagram-caption">The conduction system, step by step &mdash; each label shows what happens and where it appears on the ECG</p>
+          <div className="ad-sheet"><SheetLinks slug="conduction" /></div>
         </div>
 
         <h2 className="ecg-section-title">Try it: Explore One Heartbeat</h2>

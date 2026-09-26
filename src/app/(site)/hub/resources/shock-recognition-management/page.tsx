@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import { HeartFlowFigure } from '@/components/hub/HeartFigures';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -817,6 +818,8 @@ export default function ShockRecognitionManagementPage() {
           <p className="sh-pearl-label">Student note</p>
           <p>Perfusion means blood actually reaching tissues. An inotrope changes how strongly the heart contracts. A chronotrope changes heart rate. A vasopressor narrows blood vessels to raise blood pressure. CRT is capillary refill time. D NACHOS is a mnemonic for the seven shock types: Distributive, Neurogenic, Anaphylactic, Cardiogenic, Hypovolaemic, Obstructive, Septic.</p>
         </div>
+
+        <HeartFlowFigure caption="The heart and circulation &mdash; shock is a failure of this loop to deliver oxygen where it is needed" />
 
         <div className="sh-golden">
           {[

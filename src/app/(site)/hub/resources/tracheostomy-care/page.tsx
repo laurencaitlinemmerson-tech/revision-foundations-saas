@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import LungsDiagram from '@/components/hub/LungsDiagram';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -791,6 +792,8 @@ export default function TracheostomyCarePage() {
           <p className="tc-pearl-label">Student note</p>
           <p>A stoma is the surgically created opening into the trachea. The cannula is the tube sitting in the stoma. Flanges are the side wings that hold the securing tapes. The hub is the outer connector for oxygen, humidification, or ventilator tubing. HME stands for heat and moisture exchanger. NPA here means nasopharyngeal airway (not to be confused with a nasopharyngeal aspirate sample).</p>
         </div>
+
+        <LungsDiagram caption="The airway a tracheostomy bypasses and protects &mdash; trachea, bronchi and lungs" />
 
         <div className="tc-golden">
           {[

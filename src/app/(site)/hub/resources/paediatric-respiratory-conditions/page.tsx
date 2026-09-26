@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import LungsDiagram from '@/components/hub/LungsDiagram';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -793,6 +794,8 @@ export default function PaediatricRespiratoryConditionsPage() {
           <p className="prc-pearl-label">Student note</p>
           <p>Recession means visible indrawing of soft tissue from increased work of breathing. Stridor is a harsh sound from upper airway narrowing; wheeze is from lower airway narrowing. CFTR is the gene/protein faulty in cystic fibrosis. HFNC means high-flow nasal cannula (e.g. Optiflow). A silent chest in asthma is an emergency, not an improvement.</p>
         </div>
+
+        <LungsDiagram caption="The airways &mdash; most paediatric respiratory conditions affect one level of this tree" />
 
         <div className="prc-golden">
           {[

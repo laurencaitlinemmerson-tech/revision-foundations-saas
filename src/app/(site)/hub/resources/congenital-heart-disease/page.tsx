@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import { HeartFlowFigure } from '@/components/hub/HeartFigures';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -789,6 +790,8 @@ export default function CongenitalHeartDiseasePage() {
           <p className="chd-pearl-label">Student note</p>
           <p>Duct-dependent means a baby&apos;s circulation relies on the ductus arteriosus staying open. Prostin is the prostaglandin infusion used to keep it open. Cyanotic means low-oxygen blood is reaching the body (visible blue tinge). Acyanotic means the main problem is shunting or obstruction, often without obvious cyanosis at first. A tet spell (TOF spell) is a sudden drop in pulmonary blood flow in Tetralogy of Fallot.</p>
         </div>
+
+        <HeartFlowFigure caption="The normal heart and direction of blood flow &mdash; the starting point for every congenital defect" />
 
         <div className="chd-golden">
           {[

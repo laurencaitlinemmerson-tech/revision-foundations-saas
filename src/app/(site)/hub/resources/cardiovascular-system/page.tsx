@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import { HeartFlowFigure, ConductionFigure } from '@/components/hub/HeartFigures';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -952,6 +953,10 @@ export default function CardiovascularSystemPage() {
         </div>
 
         {/* Golden rules */}
+        <HeartFlowFigure />
+
+        <ConductionFigure />
+
         <div className="cv-golden">
           {[
             { n: '01', title: 'Flow order', text: 'Body \u2192 Right heart \u2192 Lungs \u2192 Left heart \u2192 Body. SVC/IVC \u2192 RA \u2192 RV \u2192 lungs \u2192 LA \u2192 LV \u2192 aorta.' },
