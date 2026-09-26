@@ -70,7 +70,7 @@ export default function InteractiveFocusTimer({ compact = false }: InteractiveFo
         particleCount: 60,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#8BBCAA', '#D4A574', '#C89BB0', '#7BA7CC'],
+        colors: ['#3B8F7A', '#A6906B', '#B0664A', '#4F79A8'],
       });
     } catch {}
 
@@ -142,7 +142,7 @@ export default function InteractiveFocusTimer({ compact = false }: InteractiveFo
               width: '7px',
               height: '7px',
               borderRadius: '50%',
-              background: isRunning ? '#6B9E87' : isCompleted ? '#D4A574' : 'rgba(0,0,0,0.25)',
+              background: isRunning ? '#6B9E87' : isCompleted ? '#A6906B' : 'rgba(0,0,0,0.25)',
               display: 'inline-block',
               boxShadow: isRunning ? '0 0 8px rgba(107,158,135,0.6)' : 'none',
               transition: 'all 0.3s ease',
@@ -173,7 +173,7 @@ export default function InteractiveFocusTimer({ compact = false }: InteractiveFo
               fontWeight: 500,
             }}
           >
-            ⚡ {todayMinutes}m logged today
+            {todayMinutes}m logged today
           </span>
         )}
       </div>
@@ -286,7 +286,7 @@ export default function InteractiveFocusTimer({ compact = false }: InteractiveFo
                 flex: 2,
                 padding: '9px 14px',
                 border: 'none',
-                background: isRunning ? '#D4A574' : ink,
+                background: isRunning ? '#A6906B' : ink,
                 color: 'white',
                 fontFamily: serif,
                 fontSize: '12px',
@@ -299,7 +299,7 @@ export default function InteractiveFocusTimer({ compact = false }: InteractiveFo
                 transition: 'background 0.2s ease',
               }}
             >
-              <span>{isRunning ? '⏸ Pause' : isCompleted ? '🔄 Start Again' : '▶ Start Focus'}</span>
+              <span>{isRunning ? 'Pause' : isCompleted ? 'Start again' : 'Start focus'}</span>
             </button>
 
             <button

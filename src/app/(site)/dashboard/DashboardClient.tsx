@@ -117,36 +117,29 @@ export default function DashboardClient({
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--cream)]">
+    <div className="dash-shell min-h-screen">
 
-      <section className="border-b border-[var(--border)] bg-[var(--cream)]">
-        <div className="mx-auto max-w-[1120px] px-6 pb-16 pt-[112px] md:px-10 md:pb-20">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_272px] lg:items-start">
+      <section className="dash-hero">
+        <div className="mx-auto max-w-[1120px] px-6 pb-10 pt-[104px] md:px-10 md:pb-14">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
 
             {/* ── Left: greeting ── */}
             <div>
-              {/* Meta line — date + placement days */}
-              <motion.div
-                {...fadeUp(0)}
-                className="mb-8 flex items-center gap-3"
-              >
-                <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--charcoal)]/40">
+              <motion.div {...fadeUp(0)} className="mb-7 flex flex-wrap items-center gap-2.5">
+                <span className="dash-chip">
+                  <span className="dash-chip-dot" aria-hidden="true" />
                   {formatToday()}
-                </p>
+                </span>
                 {placementDays !== null && (
-                  <>
-                    <div className="h-3 w-[0.5px] bg-[var(--charcoal)]/12" />
-                    <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--charcoal)]/55">
-                      {placementDays} {placementDays === 1 ? 'day' : 'days'} to placement
-                    </p>
-                  </>
+                  <span className="dash-chip dash-chip-gold">
+                    {placementDays} {placementDays === 1 ? 'day' : 'days'} to placement
+                  </span>
                 )}
               </motion.div>
 
-              {/* Greeting heading */}
               <motion.h1
                 {...fadeUp(0.08)}
-                className="font-display text-[clamp(2.8rem,5vw,4.4rem)] leading-[1.02] tracking-[-0.01em] text-[var(--espresso)]"
+                className="font-display text-[clamp(2.8rem,5.4vw,4.6rem)] leading-[1.04] tracking-[-0.012em] text-[var(--espresso)]"
               >
                 {trimmedName ? (
                   <>{greeting}, <em>{trimmedName}</em>.</>
@@ -155,28 +148,18 @@ export default function DashboardClient({
                 )}
               </motion.h1>
 
-              {/* Supporting copy */}
+              <svg className="dash-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L1000,30" fill="none" />
+              </svg>
+
               <motion.p
                 {...fadeUp(0.15)}
-                className="mt-8 max-w-[48ch] text-[15px] font-light leading-8 text-[var(--charcoal)]/75"
+                className="max-w-[50ch] text-[16px] font-light leading-8 text-[var(--charcoal)]/80"
               >
                 Your revision desk. Pick up exactly where you left off, check your weak spots, and start practice without the set-up.
               </motion.p>
-              <motion.div
-                {...fadeUp(0.2)}
-                className="mt-5"
-              >
-                <Link
-                  href="/onboarding?entry=signup"
-                  className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[var(--charcoal)]/55 transition-colors duration-200 hover:text-[var(--espresso)]"
-                >
-                  <span>Need a clearer start?</span>
-                  <span>Use the start-here guide →</span>
-                </Link>
-              </motion.div>
 
-              {/* Navigation pills */}
-              <div className="mt-12 flex flex-wrap gap-2 items-center">
+              <div className="mt-9 flex flex-wrap items-center gap-2.5">
                 {quickLinks.map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -189,30 +172,18 @@ export default function DashboardClient({
                   >
                     <Link
                       href={item.href}
-                      className={`group/ql inline-flex items-center gap-2 border px-5 py-2.5 text-sm transition-all duration-200 ${
-                        item.available
-                          ? 'border-[var(--linen-deep)] bg-white text-[var(--espresso)] hover:border-[var(--espresso)] hover:bg-[var(--espresso)] hover:text-white'
-                          : 'border-[var(--linen-light)] bg-[var(--linen-light)]/50 text-[var(--charcoal)]/50 hover:border-[var(--linen-deep)] hover:text-[var(--charcoal)]'
-                      }`}
+                      className={`dash-pill group/ql ${item.available ? '' : 'is-locked'}`}
                     >
-                      <span className="transition-[letter-spacing] duration-200 group-hover/ql:tracking-[0.04em]">
-                        {item.label}
-                      </span>
-                      {!item.available && (
-                        <span className="text-[9px] font-medium uppercase tracking-[0.12em] opacity-60">
-                          Locked
-                        </span>
-                      )}
-                      {item.available && (
-                        <span className="text-[10px] opacity-40 transition-all duration-200 group-hover/ql:translate-x-0.5 group-hover/ql:opacity-100">
-                          →
-                        </span>
+                      <span>{item.label}</span>
+                      {!item.available ? (
+                        <span className="dash-pill-tag">Locked</span>
+                      ) : (
+                        <span className="dash-pill-arrow">→</span>
                       )}
                     </Link>
                   </motion.div>
                 ))}
 
-                {/* Spotlight Command Palette trigger pill */}
                 <motion.button
                   type="button"
                   onClick={() => setIsCommandPaletteOpen(true)}
@@ -222,14 +193,19 @@ export default function DashboardClient({
                     transition: { delay: 0.48, duration: 0.38, ease },
                     whileTap: { scale: 0.97 },
                   } : {})}
-                  className="inline-flex items-center gap-2 border border-[var(--espresso)] bg-[var(--espresso)] text-white px-4 py-2.5 text-sm transition-all duration-200 hover:bg-[#2C2A27]"
+                  className="dash-pill dash-pill-dark"
                 >
-                  <span>🔍 Search</span>
-                  <span className="text-[10px] opacity-60 border border-white/30 px-1.5 py-0.5 rounded">
-                    ⌘K
-                  </span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                  <span>Search</span>
+                  <span className="dash-kbd">⌘K</span>
                 </motion.button>
               </div>
+
+              <motion.div {...fadeUp(0.2)} className="mt-6">
+                <Link href="/onboarding?entry=signup" className="dash-textlink">
+                  New here? Use the start-here guide →
+                </Link>
+              </motion.div>
             </div>
 
             {/* ── Right: jump rail ── */}
@@ -237,37 +213,21 @@ export default function DashboardClient({
               variants={railContainerVariants}
               initial="hidden"
               animate="visible"
-              className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-white lg:mt-10 overflow-hidden"
+              className="dash-rail lg:mt-8"
             >
+              <p className="dash-rail-title">Jump to</p>
               {railLinks.map((link, index) => (
                 <motion.div
                   key={link.label}
-                  {...(anim ? {
-                    variants: railItemVariants,
-                    whileHover: { y: -1 },
-                    whileTap: { scale: 0.985 },
-                  } : {})}
-                  className={
-                    index < railLinks.length - 1
-                      ? 'border-b border-[var(--border)]'
-                      : ''
-                  }
+                  {...(anim ? { variants: railItemVariants } : {})}
                 >
-                  <Link
-                    href={link.href}
-                    className="group/rail flex items-center justify-between gap-4 px-5 py-[17px] transition-colors duration-200 hover:bg-[var(--surface-page)]"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-[var(--charcoal)]/35 transition-colors duration-200 group-hover/rail:text-[var(--charcoal)]/65">
-                        {link.label}
-                      </p>
-                      <p className="mt-1 text-[13px] font-light leading-snug text-[var(--espresso)]/75 transition-colors duration-200 group-hover/rail:text-[var(--espresso)]">
-                        {link.note}
-                      </p>
-                    </div>
-                    <span className="flex-shrink-0 text-[13px] text-[var(--charcoal)]/15 transition-all duration-200 group-hover/rail:translate-x-1 group-hover/rail:text-[var(--espresso)]">
-                      →
+                  <Link href={link.href} className="dash-rail-item group/rail">
+                    <span className="dash-rail-num">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="dash-rail-name">{link.label}</span>
+                      <span className="dash-rail-note">{link.note}</span>
                     </span>
+                    <span className="dash-rail-arrow">→</span>
                   </Link>
                 </motion.div>
               ))}
@@ -277,7 +237,7 @@ export default function DashboardClient({
         </div>
       </section>
 
-      <main className="pb-20 pt-8 md:pt-10">
+      <main className="pb-24 pt-2 md:pt-4">
         <div className="mx-auto max-w-[1120px] px-6 md:px-10">
           {children}
         </div>

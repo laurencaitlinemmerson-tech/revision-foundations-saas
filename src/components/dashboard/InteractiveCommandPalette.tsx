@@ -162,7 +162,7 @@ export default function InteractiveCommandPalette({ isOpen, onClose }: Interacti
             borderBottom: '0.5px solid rgba(0,0,0,0.12)',
           }}
         >
-          <span style={{ fontSize: '16px', opacity: 0.5 }}>🔍</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" style={{ opacity: 0.5 }} aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <input
             ref={inputRef}
             type="text"
@@ -231,12 +231,12 @@ export default function InteractiveCommandPalette({ isOpen, onClose }: Interacti
                           padding: '2px 6px',
                           background:
                             item.category === 'Quiz'
-                              ? '#C89BB0'
+                              ? '#B0664A'
                               : item.category === 'OSCE'
-                              ? '#8BBCAA'
+                              ? '#3B8F7A'
                               : item.category === 'Guide'
-                              ? '#D4A574'
-                              : '#7BA7CC',
+                              ? '#A6906B'
+                              : '#4F79A8',
                           color: 'white',
                           fontWeight: 500,
                         }}

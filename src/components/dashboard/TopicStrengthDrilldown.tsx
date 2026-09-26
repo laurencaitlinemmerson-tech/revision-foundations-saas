@@ -122,7 +122,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
                     <span>{t.label}</span>
                     <span style={{ fontSize: '10px', color: muted }}>{isExpanded ? '▲' : '▼'}</span>
                   </span>
-                  <span style={{ fontFamily: serif, fontSize: '11px', color: '#B4A89C' }}>{t.pct}%</span>
+                  <span style={{ fontFamily: serif, fontSize: '11px', color: 'var(--ink-faint)' }}>{t.pct}%</span>
                 </div>
 
                 <div style={{ height: '5px', background: 'rgba(0,0,0,0.06)', borderRadius: '2.5px', overflow: 'hidden' }}>

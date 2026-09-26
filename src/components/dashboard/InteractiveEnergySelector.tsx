@@ -13,40 +13,48 @@ export type EnergyLevel = 'high' | 'steady' | 'low' | 'crunch';
 
 interface EnergyOption {
   key: EnergyLevel;
-  icon: string;
+  icon: 'bolt' | 'cup' | 'moon' | 'target';
   label: string;
   desc: string;
   accent: string;
 }
 
+function EnergyIcon({ name, colour }: { name: EnergyOption['icon']; colour: string }) {
+  const common = { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: colour, strokeWidth: 1.7, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
+  if (name === 'bolt') return <svg {...common}><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" /></svg>;
+  if (name === 'cup') return <svg {...common}><path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z" /><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17" /><path d="M8 3v2M12 3v2" /></svg>;
+  if (name === 'moon') return <svg {...common}><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z" /></svg>;
+  return <svg {...common}><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.2" /></svg>;
+}
+
 const OPTIONS: EnergyOption[] = [
   {
     key: 'high',
-    icon: '⚡',
+    icon: 'bolt',
     label: 'High energy',
     desc: 'Good day for a full OSCE run or a longer mock.',
-    accent: '#6B9E87',
+    accent: '#0F6E56',
   },
   {
     key: 'steady',
-    icon: '☕',
+    icon: 'cup',
     label: 'Steady focus',
     desc: 'A solid day for quizzes and guided reading.',
-    accent: '#D4A574',
+    accent: '#A6906B',
   },
   {
     key: 'low',
-    icon: '🌙',
+    icon: 'moon',
     label: 'Low energy',
     desc: 'Keep it light — a quick recall set is plenty.',
-    accent: '#7BA7CC',
+    accent: '#185FA5',
   },
   {
     key: 'crunch',
-    icon: '🎯',
+    icon: 'target',
     label: 'Crunch time',
     desc: "Let's zero in on weak spots and red flags.",
-    accent: '#C89BB0',
+    accent: '#B0664A',
   },
 ];
 
@@ -128,7 +136,7 @@ export default function InteractiveEnergySelector({ onSelectEnergy }: Interactiv
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                <span style={{ fontSize: '14px' }}>{opt.icon}</span>
+                <EnergyIcon name={opt.icon} colour={isSelected ? opt.accent : 'currentColor'} />
                 <span
                   style={{
                     fontFamily: serif,

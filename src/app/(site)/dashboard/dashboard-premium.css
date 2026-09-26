@@ -1,0 +1,207 @@
+/* Dashboard premium layer — warm editorial: cream, hairlines, gold, Playfair.
+   Scoped to .dash-shell so nothing leaks to other pages. */
+
+.dash-shell {
+  background: var(--cream);
+}
+
+/* ── Hero ─────────────────────────────────────────────── */
+.dash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+}
+.dash-chip-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--gold); }
+.dash-chip-gold { background: rgba(203, 174, 120, 0.16); border-color: rgba(166, 144, 107, 0.4); color: var(--gold-deep, #8f7a54); }
+
+.dash-pulse {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: 36px;
+  margin: 18px 0 20px;
+  overflow: visible;
+}
+.dash-pulse path {
+  stroke: var(--gold);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: dash-pulse-draw 2.4s ease-out 0.3s forwards;
+}
+@keyframes dash-pulse-draw { to { stroke-dashoffset: 0; } }
+
+.dash-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 0.5px solid rgba(0, 0, 0, 0.14);
+  background: #fff;
+  color: var(--espresso);
+  font-size: 13.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.dash-pill:hover { border-color: var(--gold); transform: translateY(-1px); box-shadow: 0 6px 18px -10px rgba(90, 70, 30, 0.35); }
+.dash-pill-arrow { font-size: 11px; opacity: 0.4; transition: transform 0.2s ease, opacity 0.2s ease; }
+.dash-pill:hover .dash-pill-arrow { transform: translateX(3px); opacity: 1; color: var(--gold-deep, #8f7a54); }
+.dash-pill.is-locked { background: transparent; color: var(--charcoal); opacity: 0.75; }
+.dash-pill-tag { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; }
+.dash-pill-dark { background: var(--espresso); color: #fff; border-color: var(--espresso); }
+.dash-pill-dark:hover { border-color: var(--gold); background: #2a261f; }
+.dash-kbd { font-size: 10px; padding: 1px 7px; border-radius: 6px; border: 0.5px solid rgba(255, 255, 255, 0.35); opacity: 0.7; }
+
+.dash-textlink {
+  font-size: 12.5px;
+  color: var(--charcoal);
+  text-decoration: underline;
+  text-decoration-color: rgba(166, 144, 107, 0.6);
+  text-underline-offset: 4px;
+  transition: color 0.2s ease;
+}
+.dash-textlink:hover { color: var(--gold-deep, #8f7a54); }
+
+.dash-rail {
+  border: 0.5px solid var(--hairline-firm);
+  border-radius: 2px;
+  background: var(--surface-raised, #fff);
+  padding: 8px 22px 6px;
+}
+.dash-rail-title {
+  margin: 12px 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.dash-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 2px;
+  border-top: 0.5px solid var(--hairline-soft);
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.dash-rail-item:hover { transform: translateX(3px); }
+.dash-rail-num { font-family: var(--font-display); font-style: italic; font-size: 22px; color: var(--gold); width: 30px; line-height: 1; }
+.dash-rail-name { display: block; font-family: var(--font-display); font-size: 17px; color: var(--espresso); line-height: 1.2; }
+.dash-rail-note { display: block; margin-top: 2px; font-size: 12px; font-weight: 300; color: var(--charcoal); opacity: 0.75; }
+.dash-rail-arrow { color: var(--gold); opacity: 0; transform: translateX(-4px); transition: opacity 0.2s ease, transform 0.2s ease; }
+.dash-rail-item:hover .dash-rail-arrow { opacity: 1; transform: none; }
+
+/* ── Section headings ─────────────────────────────────── */
+.dash-section-head {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding-top: 20px;
+  margin: 76px 0 26px;
+}
+.dash-section-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--gold);
+}
+.dash-section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+  line-height: 1.15;
+  color: var(--espresso);
+}
+.dash-section-context { margin: 0 0 0 auto; font-size: 12px; font-weight: 300; color: var(--ink-faint); }
+
+/* ── Stat cards: sharp hairline boxes ─────────────────── */
+.dash-analytics-row { gap: 12px !important; }
+.dash-stat-card {
+  border: 0.5px solid var(--hairline-firm);
+  border-radius: 2px;
+  background: var(--surface-raised, #fff);
+  padding: 24px 22px 22px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.dash-stat-card:hover { border-color: var(--gold); transform: translateY(-1px); }
+.dash-stat-label { margin: 0 0 12px; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-deep, #8f7a54); font-weight: 500; }
+.dash-stat-value { margin: 0; font-family: var(--font-display); font-size: 2.7rem; line-height: 1; color: var(--espresso); letter-spacing: -0.02em; }
+.dash-stat-unit { margin: 8px 0 0; font-size: 12px; font-weight: 300; color: var(--charcoal); opacity: 0.8; }
+.dash-stat-delta { display: inline-block; margin: 12px 0 0; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+.dash-stat-delta.up { background: var(--teal-50, #e1f5ee); color: var(--teal-800, #085041); }
+.dash-stat-delta.down { background: var(--red-50, #fceaea); color: var(--red-600, #a32d2d); }
+.dash-pips { display: flex; gap: 6px; margin-top: 14px; }
+.dash-pip { width: 12px; height: 12px; border-radius: 999px; background: rgba(0, 0, 0, 0.09); }
+.dash-pip.on { background: var(--gold); }
+.dash-pip.today { box-shadow: 0 0 0 2px var(--cream), 0 0 0 3.5px var(--espresso); background: var(--espresso); }
+
+/* ── Hairline boxes everywhere else (sharp, flat, no shadow) ── */
+.dash-shell main [style*="border:0.5px solid"]:not([style*="50%"]):not([style*="999px"]),
+.dash-shell main [style*="border: 0.5px solid"]:not([style*="50%"]):not([style*="999px"]),
+.dash-shell main [style*="border:1px solid"]:not([style*="50%"]):not([style*="999px"]),
+.dash-shell main [style*="border: 1px solid"]:not([style*="50%"]):not([style*="999px"]) {
+  border-radius: 2px !important;
+  box-shadow: none !important;
+}
+.dash-shell main section > div:not(.dash-section-head):not(.dash-analytics-row):not(.dash-prog-pair)[style*="border"],
+.dash-shell main .dash-prog-pair > div,
+.dash-shell main .dash-countdown-panel,
+.dash-shell main .dash-signal-card,
+.dash-shell main .rwp-day-tile {
+  border: 0.5px solid var(--hairline-firm) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.dash-shell main .dash-signals-grid { gap: 12px !important; }
+.dash-shell main .dash-empty-actions a {
+  border: 0.5px solid var(--hairline-firm) !important;
+  border-radius: 2px !important;
+  background: var(--surface-raised, #fff) !important;
+}
+.dash-shell main .dash-empty-actions a:hover { border-color: var(--gold) !important; }
+
+/* controls */
+.dash-shell main button[style*="border:0.5px"],
+.dash-shell main button[style*="border: 0.5px"] { border-radius: 4px !important; }
+.dash-shell main button[style*="background"]:not([style*="50%"]):not([style*="999px"]),
+.dash-shell main a[style*="background"]:not([style*="50%"]) { border-radius: 4px !important; }
+.dash-shell main button, .dash-shell main a[style*="background"] {
+  transition: transform 0.18s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.dash-shell main button:not(:disabled):hover { transform: translateY(-1px); }
+
+.dash-shell main [style*="height: 3px"],
+.dash-shell main [style*="height:3px"] { border-radius: 999px; overflow: hidden; }
+.dash-shell main [style*="height: 3px"] > div,
+.dash-shell main [style*="height:3px"] > div { border-radius: 999px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-pulse path { animation: none; stroke-dashoffset: 0; }
+  .dash-shell * { transition: none !important; }
+}
+@media (max-width: 560px) {
+  .dash-section-head { margin-top: 56px; }
+  .dash-stat-card { padding: 18px 18px 16px; }
+  .dash-stat-value { font-size: 2.3rem; }
+}

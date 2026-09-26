@@ -71,7 +71,7 @@ export default function InteractiveDailyChecklist() {
           particleCount: 80,
           spread: 90,
           origin: { y: 0.6 },
-          colors: ['#8BBCAA', '#D4A574', '#C89BB0', '#7BA7CC'],
+          colors: ['#3B8F7A', '#A6906B', '#B0664A', '#4F79A8'],
         });
       } catch {}
     }
@@ -168,7 +168,7 @@ Today&apos;s micro-wins
           style={{
             height: '100%',
             width: `${pct}%`,
-            background: pct === 100 ? '#6B9E87' : '#D4A574',
+            background: pct === 100 ? '#0F6E56' : '#A6906B',
             transition: 'width 0.4s ease, background 0.3s ease',
           }}
         />
@@ -221,8 +221,8 @@ Today&apos;s micro-wins
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '10px 14px',
-              border: `0.5px solid ${g.completed ? 'rgba(107,158,135,0.3)' : 'rgba(0,0,0,0.08)'}`,
-              background: g.completed ? 'rgba(107,158,135,0.05)' : 'transparent',
+              border: `0.5px solid ${g.completed ? 'rgba(15,110,86,0.3)' : 'rgba(0,0,0,0.08)'}`,
+              background: g.completed ? 'rgba(15,110,86,0.05)' : 'transparent',
               cursor: 'pointer',
               userSelect: 'none',
               transition: 'all 0.2s ease',
@@ -234,8 +234,8 @@ Today&apos;s micro-wins
                   width: '18px',
                   height: '18px',
                   borderRadius: '3px',
-                  border: `1.5px solid ${g.completed ? '#6B9E87' : 'rgba(0,0,0,0.25)'}`,
-                  background: g.completed ? '#6B9E87' : 'transparent',
+                  border: `1.5px solid ${g.completed ? '#0F6E56' : 'rgba(0,0,0,0.25)'}`,
+                  background: g.completed ? '#0F6E56' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

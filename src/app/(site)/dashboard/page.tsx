@@ -3,6 +3,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import DashboardClient from './DashboardClient';
+import './dashboard-premium.css';
 import { getUserEntitlements, hasAccessToContent } from '@/lib/entitlements';
 import SavedFoldersDashboard from '@/components/SavedFoldersDashboard';
 import WeakAreaBanner from '@/components/dashboard/WeakAreaBanner';
@@ -36,7 +37,6 @@ const border  = "var(--border)";
 function SectionDivider({
   label,
   id,
-  accent,
   context,
 }: {
   label: string;
@@ -44,39 +44,18 @@ function SectionDivider({
   accent?: string;
   context?: string;
 }) {
+  const words = label.split(' ');
+  const last = words.pop();
   return (
     <div
       id={id}
-      style={{
-        borderTop: `0.5px solid ${border}`,
-        paddingTop: '16px',
-        marginBottom: '28px',
-        marginTop: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-      }}
+      className="dash-section-head"
     >
-      {accent && (
-        <span style={{
-          width: '6px', height: '6px', borderRadius: '50%',
-          background: accent, flexShrink: 0,
-        }} />
-      )}
-      <p style={{
-        fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em',
-        textTransform: 'uppercase', color: muted, margin: 0,
-      }}>
-        {label}
-      </p>
-      {context && (
-        <p style={{
-          marginLeft: 'auto', fontFamily: serif, fontSize: '11px',
-          color: '#C4B4A8', fontWeight: 300, margin: 0,
-        }}>
-          {context}
-        </p>
-      )}
+      <span className="dash-section-bar" aria-hidden="true" />
+      <h2 className="dash-section-title">
+        {words.length > 0 ? `${words.join(' ')} ` : ''}<em>{last}</em>
+      </h2>
+      {context && <p className="dash-section-context">{context}</p>}
     </div>
   );
 }
@@ -98,37 +77,12 @@ function StatCard({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="dash-stat-card" style={{
-      background: 'var(--surface-raised)',
-      border: '0.5px solid var(--hairline-firm)',
-      borderRadius: 'var(--radius-sm)',
-      padding: '24px 22px',
-    }}>
-      <p style={{
-        fontFamily: serif, fontSize: '9px', letterSpacing: '0.16em',
-        textTransform: 'uppercase', color: muted, marginBottom: '11px',
-      }}>
-        {label}
-      </p>
-      <p style={{
-        fontFamily: display, fontSize: '2rem', fontStyle: 'italic',
-        color: ink, lineHeight: 1,
-      }}>
-        {value}
-      </p>
-      <p style={{
-        fontFamily: serif, fontSize: '10px', color: '#B4A89C',
-        fontWeight: 300, marginTop: '4px',
-      }}>
-        {unit}
-      </p>
+    <div className="dash-stat-card">
+      <p className="dash-stat-label">{label}</p>
+      <p className="dash-stat-value">{value}</p>
+      <p className="dash-stat-unit">{unit}</p>
       {delta && (
-        <p style={{
-          fontFamily: serif, fontSize: '10px',
-          color: deltaUp ? '#6B9E87' : '#B07A8E',
-          marginTop: '10px', paddingTop: '9px',
-          borderTop: `0.5px solid rgba(0,0,0,0.06)`,
-        }}>
+        <p className={`dash-stat-delta ${deltaUp ? 'up' : 'down'}`}>
           {deltaUp ? '↑' : '↓'} {delta}
         </p>
       )}
@@ -153,7 +107,7 @@ function ProgressBar({
     <div className="dash-pb-row" style={{ marginBottom: '13px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
         <span style={{ fontFamily: serif, fontSize: '12px', color: 'var(--ink-mid)' }}>{label}</span>
-        <span style={{ fontFamily: serif, fontSize: '11px', color: '#B4A89C' }}>{pct}%</span>
+        <span style={{ fontFamily: serif, fontSize: '11px', color: 'var(--ink-faint)' }}>{pct}%</span>
       </div>
       <div style={{ height: '3px', background: 'rgba(0,0,0,0.06)' }}>
         <div
@@ -194,12 +148,13 @@ export default async function DashboardPage() {
       : null;
 
   // Derive weak/strong areas for progress bars
-  const topicStrength = quizStats?.topicBreakdown ?? [
-    { label: 'Respiratory',  pct: 60, color: '#8BBCAA' },
-    { label: 'Cardiac',      pct: 54, color: '#D4A574' },
-    { label: 'Neurological', pct: 46, color: '#7BA7CC' },
-    { label: 'Pharmacology', pct: 38, color: '#C89BB0' },
-  ];
+  const strengthColour = (pct: number) => (pct >= 75 ? '#0F6E56' : pct >= 55 ? '#A6906B' : '#B0664A');
+  const topicStrength = (quizStats?.topicBreakdown ?? [
+    { label: 'Respiratory',  pct: 60 },
+    { label: 'Cardiac',      pct: 54 },
+    { label: 'Neurological', pct: 46 },
+    { label: 'Pharmacology', pct: 38 },
+  ]).map((t: { label: string; pct: number }) => ({ label: t.label, pct: t.pct, color: strengthColour(t.pct) }));
 
   return (
     <DashboardClient firstName={firstName} hasOsce={hasOsce} hasQuiz={hasQuiz} hasMocks={hasMocks}>
@@ -207,7 +162,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 1 · PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="How you're doing" accent="#D4A574" context="This week" />
+          <SectionDivider label="How you're doing" context="This week" />
 
           {/* 4-col analytics row */}
           <div className="dash-analytics-row">
@@ -218,13 +173,9 @@ export default async function DashboardPage() {
             >
               {/* Streak pips — 7 squares mapped to last 7 days */}
               {effectiveStreak && (
-                <div style={{ display: 'flex', gap: '4px', marginTop: '11px' }}>
-                  {effectiveStreak.lastSevenDays.map((active, i) => (
-                    <span key={i} style={{
-                      width: '9px', height: '9px',
-                      background: active ? (i === 6 ? '#2C2A27' : '#8BBCAA') : 'rgba(0,0,0,0.08)',
-                      display: 'inline-block',
-                    }} />
+                <div className="dash-pips" aria-label="Last seven days">
+                  {effectiveStreak.lastSevenDays.map((active: boolean, i: number) => (
+                    <span key={i} className={`dash-pip${active ? ' on' : ''}${i === 6 ? ' today' : ''}`} />
                   ))}
                 </div>
               )}
@@ -283,10 +234,10 @@ export default async function DashboardPage() {
 
           {/* Topic strength + quiz accuracy interactive drilldown */}
           <div className="dash-prog-pair" style={{ marginTop: '12px' }}>
-            <TopicStrengthDrilldown topics={topicStrength} title="Where you're strong" />
+            <TopicStrengthDrilldown topics={topicStrength} title="Topic by topic" />
             <TopicStrengthDrilldown
-              topics={topicStrength.map((t) => ({ ...t, pct: Math.min(t.pct + 14, 100) }))}
-              title="Where accuracy stands"
+              topics={topicStrength.map((t: { label: string; pct: number }) => { const pct = Math.min(t.pct + 14, 100); return { label: t.label, pct, color: strengthColour(pct) }; })}
+              title="Accuracy by topic"
             />
           </div>
 
@@ -298,7 +249,7 @@ export default async function DashboardPage() {
 
         {/* ━━ 2 · TODAY'S PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Today's plan" id="todays-plan" accent="#8BBCAA" />
+          <SectionDivider label="Today's plan" id="todays-plan" />
           
           <InteractiveEnergySelector />
           <WhatToDoToday />
@@ -328,30 +279,32 @@ export default async function DashboardPage() {
 
         {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="A week that could work for you" id="revision-week" accent="#D4B896" context="Adjust to your schedule" />
+          <SectionDivider label="A week that could work for you" id="revision-week" context="Adjust to your schedule" />
           <RevisionWeekPlanner />
         </section>
 
         {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Looking for something?" id="search" accent="#7BA7CC" />
+          <SectionDivider label="Find a guide" id="search" />
           <QuickTopicSearch />
         </section>
 
         {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Your saved pages" id="saved-folders" accent="#D4B896" />
+          <SectionDivider label="Your saved pages" id="saved-folders" />
           <SavedFoldersDashboard />
         </section>
 
         {/* ━━ 6 · CLOSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <div style={{
-          marginTop: '56px',
-          paddingTop: '30px',
-          borderTop: `0.5px solid rgba(0,0,0,0.07)`,
+          marginTop: '72px',
+          paddingTop: '8px',
           textAlign: 'center',
           paddingBottom: '8px',
         }}>
+          <svg className="dash-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true" style={{ marginBottom: '32px', marginLeft: 'auto', marginRight: 'auto' }}>
+            <path d="M0,30 L400,30 L416,30 L424,24 L432,30 L452,30 L458,36 L466,4 L474,44 L480,30 L500,30 L516,20 L532,30 L1000,30" fill="none" />
+          </svg>
           <p style={{
             fontFamily: display, fontSize: '1.2rem', fontStyle: 'italic',
             color: 'var(--ink-mid)', lineHeight: 1.5, maxWidth: '44ch',
@@ -360,7 +313,7 @@ export default async function DashboardPage() {
             "Keep the next step smaller than your stress."
           </p>
           <p style={{
-            fontFamily: serif, fontSize: '11px', color: '#C4B4A8', fontWeight: 300,
+            fontFamily: serif, fontSize: '11px', color: 'var(--ink-faint)', fontWeight: 300,
           }}>
             One guide, one station, one question — then rest if you need to.
           </p>
@@ -426,17 +379,6 @@ export default async function DashboardPage() {
           .dash-analytics-row { grid-template-columns: 1fr; }
           .dash-stat-card { padding: 16px 16px !important; }
           .dash-empty-actions { grid-template-columns: 1fr; }
-        }
-
-        /* ── Stat card hover ── */
-        .dash-stat-card {
-          transition: transform 0.2s ease, border-color 0.2s ease;
-          cursor: default;
-        }
-        .dash-stat-card:hover {
-          border-color: var(--gold);
-          transform: translateY(-1px);
-          box-shadow: var(--shadow-sm);
         }
 
         /* ── Progress bar animate-in ── */

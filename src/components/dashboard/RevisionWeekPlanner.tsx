@@ -86,9 +86,9 @@ const WEEK = [
 ];
 
 const TYPE_COLORS: Record<string, string> = {
-  hub:  '#D4A574',
-  osce: '#8BBCAA',
-  quiz: '#C89BB0',
+  hub:  '#A6906B',
+  osce: '#3B8F7A',
+  quiz: '#B0664A',
   rest: 'rgba(0,0,0,0.1)',
 };
 
@@ -256,7 +256,7 @@ export default function RevisionWeekPlanner() {
               <p style={{
                 fontFamily: serif, fontSize: '11px',
                 fontWeight: d.rest ? 400 : 500,
-                color: d.rest ? '#B4A89C' : ink,
+                color: d.rest ? 'var(--ink-faint)' : ink,
                 lineHeight: 1.3,
               }}>
                 {d.theme}
@@ -275,7 +275,7 @@ export default function RevisionWeekPlanner() {
                     lineHeight: 1.4,
                     borderLeft: `2px solid ${TYPE_COLORS[t.type] ?? 'transparent'}`,
                     background: 'rgba(250,248,246,0.8)',
-                    color: t.type === 'rest' ? '#B4A89C' : '#2C2A27',
+                    color: t.type === 'rest' ? 'var(--ink-faint)' : '#2C2A27',
                     fontFamily: serif,
                   }}
                 >
@@ -286,7 +286,7 @@ export default function RevisionWeekPlanner() {
 
             {/* Time estimate */}
             <p style={{
-              fontFamily: serif, fontSize: '9px', color: '#C4B4A8',
+              fontFamily: serif, fontSize: '9px', color: 'var(--ink-faint)',
               padding: '0 12px 10px', fontWeight: 300,
             }}>
               {d.durationHrs ? `~${d.durationHrs} hrs` : 'Rest — enjoy it'}
@@ -298,9 +298,9 @@ export default function RevisionWeekPlanner() {
       {/* Legend */}
       <div style={{ display: 'flex', gap: '16px', marginTop: '14px', flexWrap: 'wrap' }}>
         {[
-          { label: 'Hub / reading', color: '#D4A574' },
-          { label: 'OSCE practice', color: '#8BBCAA' },
-          { label: 'Quiz',          color: '#C89BB0' },
+          { label: 'Hub / reading', color: '#A6906B' },
+          { label: 'OSCE practice', color: '#3B8F7A' },
+          { label: 'Quiz',          color: '#B0664A' },
           { label: 'Rest',          color: 'rgba(0,0,0,0.12)' },
         ].map((l) => (
           <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -317,7 +317,7 @@ export default function RevisionWeekPlanner() {
 
       {/* Export note */}
       <p style={{
-        fontFamily: serif, fontSize: '11px', color: '#B4A89C',
+        fontFamily: serif, fontSize: '11px', color: 'var(--ink-faint)',
         fontWeight: 300, lineHeight: 1.7, marginTop: '18px',
         paddingTop: '16px', borderTop: border,
       }}>

@@ -81,10 +81,10 @@ export default function QuickStatsStrip() {
 
   const thisWeek = stats.weekSessions.reduce((a, b) => a + b, 0);
   const metrics = [
-    { value: streak.currentStreak, label: 'day streak', accent: '#8BBCAA' },
-    { value: thisWeek, label: 'this week', accent: '#D4A574' },
-    { value: stats.totalQuestions, label: 'questions', accent: '#7BA7CC' },
-    { value: stats.totalOsceStations, label: 'stations', accent: '#C89BB0' },
+    { value: streak.currentStreak, label: 'day streak', accent: '#3B8F7A' },
+    { value: thisWeek, label: 'this week', accent: '#A6906B' },
+    { value: stats.totalQuestions, label: 'questions', accent: '#4F79A8' },
+    { value: stats.totalOsceStations, label: 'stations', accent: '#B0664A' },
     ...(stats.totalMocks !== undefined ? [{ value: stats.totalMocks, label: 'written practice', accent: '#D9A7A7' }] : []),
   ];
 
