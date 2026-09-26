@@ -186,7 +186,7 @@ export const hubItems: HubItem[] = [
   {
     id: 'ecg-cardiac-conduction',
     title: 'ECG & Cardiac Conduction',
-    description: 'Where the heartbeat starts, how to read a waveform, a structured way to approach any rhythm strip, and the common arrhythmias compared side by side.',
+    description: 'Where the heartbeat starts, where the stickers go (3-lead vs 12-lead), how to read a waveform, a structured way to approach any rhythm strip, and the common arrhythmias compared side by side.',
     tags: ['Paeds', 'Y2 Essentials', 'Assessment', 'Deep Dive'],
     difficulty: 'Deep Dive',
     isLocked: false,
@@ -648,7 +648,7 @@ export const adultHubItems: HubItem[] = [
   {
     id: 'adult-ecg-cardiac-conduction',
     title: 'ECG & Cardiac Conduction',
-    description: 'Where the heartbeat starts, how to read a waveform, a structured way to approach any rhythm strip, and the common arrhythmias (including AF) compared side by side.',
+    description: 'Where the heartbeat starts, where the stickers go (3-lead vs 12-lead), how to read a waveform, a structured way to approach any rhythm strip, and the common arrhythmias (including AF) compared side by side.',
     tags: ['Adult', 'Y2 Essentials', 'Assessment', 'Deep Dive'],
     difficulty: 'Deep Dive',
     isLocked: false,

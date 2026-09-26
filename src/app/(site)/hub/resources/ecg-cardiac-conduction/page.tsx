@@ -7,6 +7,7 @@ import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 import ConductionDiagram from '@/components/hub/ConductionDiagram';
 import SheetLinks from '@/components/hub/SheetLinks';
+import { TwelveLeadFigure, ThreeLeadFigure } from '@/components/hub/EcgElectrodes';
 import { InteractiveHeart, InteractiveEcgBeat } from '@/components/hub/InteractiveHeart';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -496,6 +497,7 @@ const CSS = `
   .ecg-step-content { padding-left: 18px; }
 }
 /* ── Polish layer ───────────────────────────────────────────── */
+.ecg-subtitle { font-family: 'Playfair Display', Georgia, serif; font-weight: 400; font-size: 22px; font-style: italic; color: var(--gold-deep, #8a7350); margin: 40px 0 16px; }
 .ecg-guide { background: var(--surface-page); }
 .ecg-kicker { color: var(--gold-deep, #8a7350); }
 .ecg-headline { font-size: 60px; }
@@ -925,7 +927,61 @@ const paediatricRateRows = [
   { age: 'Adolescent/adult', rate: '60–100 bpm' },
 ];
 
+const leadCompareRows = [
+  { item: 'Electrodes (stickers)', three: '3', five: '5', twelve: '10' },
+  { item: 'Views of the heart', three: 'One at a time: lead I, II or III', five: 'The 6 limb leads plus 1 chest lead', twelve: '12: 6 limb leads and 6 chest leads' },
+  { item: 'Recording', three: 'Continuous', five: 'Continuous', twelve: 'A snapshot, usually about 10 seconds' },
+  { item: 'Best for', three: 'Watching rate and rhythm, and quick checks', five: 'Monitoring on wards and HDU, including some ST changes', twelve: 'Diagnosing: where the problem is, ischaemia, conduction blocks' },
+  { item: 'Cannot tell you', three: 'Which part of the heart is affected, or most ischaemia and blocks', five: 'The full picture of every wall of the heart', twelve: 'How the rhythm changes over time. It is one moment' },
+];
+
+const threeLeadRows = [
+  { colour: 'Red (RA)', where: 'Right shoulder, just below the collarbone' },
+  { colour: 'Yellow (LA)', where: 'Left shoulder, just below the collarbone' },
+  { colour: 'Green (LL)', where: 'Left lower chest or abdomen' },
+];
+
+const limbRows = [
+  { colour: 'Red (RA)', where: 'Right wrist', lead: 'Right arm' },
+  { colour: 'Yellow (LA)', where: 'Left wrist', lead: 'Left arm' },
+  { colour: 'Green (LL)', where: 'Left ankle', lead: 'Left leg' },
+  { colour: 'Black (RL)', where: 'Right ankle', lead: 'Earth only. It gives no view of its own' },
+];
+
+const chestRows = [
+  { lead: 'V1', colour: 'Red', where: '4th intercostal space, right of the sternum' },
+  { lead: 'V2', colour: 'Yellow', where: '4th intercostal space, left of the sternum' },
+  { lead: 'V3', colour: 'Green', where: 'Halfway between V2 and V4' },
+  { lead: 'V4', colour: 'Brown', where: '5th intercostal space, mid-clavicular line' },
+  { lead: 'V5', colour: 'Black', where: 'Same level as V4, anterior axillary line' },
+  { lead: 'V6', colour: 'Violet', where: 'Same level as V4, mid-axillary line' },
+];
+
+const territoryRows = [
+  { wall: 'Septal', leads: 'V1, V2' },
+  { wall: 'Anterior', leads: 'V3, V4' },
+  { wall: 'Lateral', leads: 'I, aVL, V5, V6' },
+  { wall: 'Inferior', leads: 'II, III, aVF' },
+];
+
 const quizQuestions = [
+  {
+    question: 'A 12-lead ECG uses how many electrodes, and why does that give 12 leads?',
+    options: [
+      '12 electrodes, one per lead',
+      '10 electrodes: each lead is a different view made from the electrodes, not one sticker per lead',
+      '6 electrodes, doubled',
+      '3 electrodes moved around the chest',
+    ],
+    answer: 1,
+    explanation: 'The 4 limb electrodes give 6 limb leads and the 6 chest electrodes give 6 chest leads. A lead is a view of the heart from one angle, so 10 stickers can produce 12 views. The right leg electrode is an earth only.',
+  },
+  {
+    question: 'Which electrode position is correct for V4?',
+    options: ['4th intercostal space, right of the sternum', '5th intercostal space, mid-clavicular line', 'Mid-axillary line, 5th space', 'Left wrist'],
+    answer: 1,
+    explanation: 'V4 sits in the 5th intercostal space on the mid-clavicular line. V5 and V6 then go straight across at the same level.',
+  },
   {
     question: 'What happens if the SA node fails to fire?',
     options: [
@@ -1172,6 +1228,94 @@ export default function EcgCardiacConductionPage() {
             ))}
           </tbody>
         </table>
+
+        <h2 className="ecg-section-title">Where the Stickers Go: 3-Lead vs 12-Lead</h2>
+        <div className="ecg-pearl" style={{ marginBottom: '28px' }}>
+          <p className="ecg-pearl-label">The big idea</p>
+          <p>A lead is not a sticker. A lead is a view of the heart&apos;s electricity from one angle. The 12-lead ECG uses just 10 stickers to make 12 views: the 4 limb stickers create 6 limb leads (I, II, III, aVR, aVL, aVF) and the 6 chest stickers create 6 chest leads (V1&ndash;V6). The right leg sticker is only an earth, so it gives no view of its own.</p>
+        </div>
+
+        <table className="ecg-table" style={{ marginBottom: '32px' }}>
+          <thead>
+            <tr>
+              <th />
+              <th>3-lead</th>
+              <th>5-lead</th>
+              <th>12-lead</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leadCompareRows.map((row) => (
+              <tr key={row.item}>
+                <td>{row.item}</td>
+                <td>{row.three}</td>
+                <td>{row.five}</td>
+                <td>{row.twelve}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <h3 className="ecg-subtitle">3-lead: rhythm monitoring</h3>
+        <ThreeLeadFigure />
+        <table className="ecg-table" style={{ marginBottom: '16px' }}>
+          <thead>
+            <tr><th>Electrode</th><th>Where it goes</th></tr>
+          </thead>
+          <tbody>
+            {threeLeadRows.map((row) => (
+              <tr key={row.colour}><td>{row.colour}</td><td>{row.where}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="ecg-pearl" style={{ marginBottom: '36px' }}>
+          <p className="ecg-pearl-label">Why it works</p>
+          <p>Each side of the triangle is one lead, made from two electrodes: lead I from right arm to left arm, lead II from right arm to left leg, lead III from left arm to left leg. Lead II runs roughly along the direction the heartbeat travels, so the P waves and QRS look clearest, which is why it is the usual choice for watching rhythm.</p>
+        </div>
+
+        <h3 className="ecg-subtitle">12-lead: the full picture</h3>
+        <TwelveLeadFigure />
+        <table className="ecg-table" style={{ marginBottom: '16px' }}>
+          <thead>
+            <tr><th>Limb electrode</th><th>Where it goes</th><th>Job</th></tr>
+          </thead>
+          <tbody>
+            {limbRows.map((row) => (
+              <tr key={row.colour}><td>{row.colour}</td><td>{row.where}</td><td>{row.lead}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <table className="ecg-table" style={{ marginBottom: '16px' }}>
+          <thead>
+            <tr><th>Chest lead</th><th>Usual colour</th><th>Where it goes</th></tr>
+          </thead>
+          <tbody>
+            {chestRows.map((row) => (
+              <tr key={row.lead}><td>{row.lead}</td><td>{row.colour}</td><td>{row.where}</td></tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className="ecg-pearl" style={{ marginBottom: '28px' }}>
+          <p className="ecg-pearl-label">Two planes, twelve views</p>
+          <p>The limb leads look at the heart from the sides, like standing in front of the body, so they see the frontal plane. The chest leads look from the front towards the back, like looking down through a slice, so they see the horizontal plane. Together they surround the heart, which is why 12 leads can show which wall is affected.</p>
+        </div>
+
+        <table className="ecg-table" style={{ marginBottom: '32px' }}>
+          <thead>
+            <tr><th>Wall of the heart</th><th>Leads that look at it</th></tr>
+          </thead>
+          <tbody>
+            {territoryRows.map((row) => (
+              <tr key={row.wall}><td>{row.wall}</td><td>{row.leads}</td></tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className="ecg-pearl" style={{ marginBottom: '32px' }}>
+          <p className="ecg-pearl-label">Sticker tips</p>
+          <p>Use clean, dry skin and clip hair if the sticker will not stick. Avoid bony areas and thick muscle. On breast tissue place chest electrodes under the breast, not on it. Count the intercostal space from the sternal angle rather than guessing, because electrodes placed too high or too low change the shape of the trace. Ask the patient to lie still and relaxed, because movement and tension create interference. Colour codes differ between standards, so check the labels on your device. In children the electrodes are the same, but follow local policy for extra right-sided leads and paediatric pads.</p>
+        </div>
 
         <h2 className="ecg-section-title">Common Arrhythmias Compared</h2>
         <table className="ecg-table" style={{ marginBottom: '32px' }}>

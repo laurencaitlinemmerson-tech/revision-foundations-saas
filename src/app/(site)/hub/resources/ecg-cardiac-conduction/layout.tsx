@@ -6,7 +6,7 @@ import { createHubResourceMetadata } from '@/lib/seo';
 const RESOURCE = {
   slug: 'ecg-cardiac-conduction',
   title: 'ECG & Cardiac Conduction | Nursing Deep Dive',
-  description: 'The conduction pathway, how to read a waveform, a structured rate-and-rhythm approach, common arrhythmias compared, and paediatric vs adult ECG differences — for children’s and adult nursing.',
+  description: 'The conduction pathway, how to read a waveform, where the electrodes go (3-lead vs 12-lead), a structured rate-and-rhythm approach, common arrhythmias compared, and paediatric vs adult ECG differences — for children’s and adult nursing.',
 } as const;
 
 export const metadata: Metadata = createHubResourceMetadata(RESOURCE);
