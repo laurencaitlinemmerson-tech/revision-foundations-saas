@@ -17,16 +17,12 @@ export default function QuickTopicSearch() {
 
   return (
     <div className="dash-search-shell" style={{ border: borderMid }}>
-      <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '12px' }}>
-        Quick lookup
-      </p>
-
       <h3 style={{ fontFamily: display, fontSize: '1.6rem', fontWeight: 400, lineHeight: 1.08, color: ink, marginBottom: '10px' }}>
-        Search guides, skills, and quick references.
+        Looking for something specific?
       </h3>
 
       <p style={{ fontFamily: serif, fontSize: '13px', color: mid, fontWeight: 300, lineHeight: 1.8, marginBottom: '16px', maxWidth: '36rem' }}>
-        Search across both adult and children's branches.
+        Search guides, skills, and quick references across both adult and children&apos;s branches.
       </p>
 
       <div className="dash-search-input" onClick={triggerGlobalSearch}>
@@ -55,8 +51,14 @@ export default function QuickTopicSearch() {
         .dash-search-shell {
           position: relative;
           background: var(--surface-page);
+          border-radius: var(--radius-sm);
           padding: 24px 26px;
           min-height: 100%;
+          transition: border-color 0.2s ease;
+        }
+        .dash-search-shell:hover {
+          border-color: var(--gold);
+          box-shadow: var(--shadow-sm);
         }
 
         .dash-search-input {
@@ -64,9 +66,14 @@ export default function QuickTopicSearch() {
           align-items: center;
           gap: 10px;
           border: 0.5px solid ${border};
+          border-radius: var(--radius-sm);
           background: rgba(255,255,255,0.94);
           padding: 12px 14px;
           cursor: pointer;
+          transition: border-color 0.2s ease;
+        }
+        .dash-search-input:hover {
+          border-color: var(--gold);
         }
 
         .dash-search-hint {

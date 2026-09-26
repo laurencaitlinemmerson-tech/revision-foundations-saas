@@ -23,29 +23,29 @@ const OPTIONS: EnergyOption[] = [
   {
     key: 'high',
     icon: '⚡',
-    label: 'High Energy',
-    desc: 'Ready for OSCE stations & 30-min mocks',
+    label: 'High energy',
+    desc: 'Good day for a full OSCE run or a longer mock.',
     accent: '#6B9E87',
   },
   {
     key: 'steady',
     icon: '☕',
-    label: 'Steady Focus',
-    desc: 'Core quiz sets & clinical guides',
+    label: 'Steady focus',
+    desc: 'A solid day for quizzes and guided reading.',
     accent: '#D4A574',
   },
   {
     key: 'low',
     icon: '🌙',
-    label: 'Low Energy',
-    desc: '5-min recall & soft review',
+    label: 'Low energy',
+    desc: 'Keep it light — a quick recall set is plenty.',
     accent: '#7BA7CC',
   },
   {
     key: 'crunch',
     icon: '🎯',
-    label: 'Exam Crunch',
-    desc: 'High-yield weak spots & red flags',
+    label: 'Crunch time',
+    desc: "Let's zero in on weak spots and red flags.",
     accent: '#C89BB0',
   },
 ];
@@ -84,6 +84,7 @@ export default function InteractiveEnergySelector({ onSelectEnergy }: Interactiv
       style={{
         background: 'var(--surface-raised, #FFFFFF)',
         border: '0.5px solid var(--hairline-firm, rgba(0,0,0,0.12))',
+        borderRadius: 'var(--radius-sm)',
         padding: '16px 20px',
         marginBottom: '16px',
       }}
@@ -91,18 +92,17 @@ export default function InteractiveEnergySelector({ onSelectEnergy }: Interactiv
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
         <p
           style={{
-            fontFamily: serif,
-            fontSize: '10px',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: muted,
+            fontFamily: display,
+            fontSize: '1rem',
+            fontWeight: 400,
+            color: ink,
             margin: 0,
           }}
         >
-          Daily Energy Check-In
+          How&apos;s your energy today?
         </p>
         <span style={{ fontFamily: serif, fontSize: '11px', color: mid, opacity: 0.7 }}>
-          Select to adapt today's plan
+          Today&apos;s plan will shift to match
         </span>
       </div>
 
@@ -119,6 +119,7 @@ export default function InteractiveEnergySelector({ onSelectEnergy }: Interactiv
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 padding: '10px 12px',
+                borderRadius: 'var(--radius-sm)',
                 border: `0.5px solid ${isSelected ? opt.accent : 'rgba(0,0,0,0.1)'}`,
                 background: isSelected ? `${opt.accent}12` : 'transparent',
                 cursor: 'pointer',

@@ -90,7 +90,7 @@ export default function DashboardClient({
     return 'Good evening';
   }, [hour]);
 
-  const title = firstName?.trim() ? `${greeting}, ${firstName.trim()}.` : `${greeting}.`;
+  const trimmedName = firstName?.trim() || null;
 
   // Returns motion props for a simple fade-up, or {} when reduced motion is on
   function fadeUp(delay = 0) {
@@ -148,7 +148,11 @@ export default function DashboardClient({
                 {...fadeUp(0.08)}
                 className="font-display text-[clamp(2.8rem,5vw,4.4rem)] leading-[1.02] tracking-[-0.01em] text-[var(--espresso)]"
               >
-                {title}
+                {trimmedName ? (
+                  <>{greeting}, <em>{trimmedName}</em>.</>
+                ) : (
+                  <>{greeting}.</>
+                )}
               </motion.h1>
 
               {/* Supporting copy */}
@@ -233,7 +237,7 @@ export default function DashboardClient({
               variants={railContainerVariants}
               initial="hidden"
               animate="visible"
-              className="border border-[var(--border)] bg-white lg:mt-10"
+              className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-white lg:mt-10 overflow-hidden"
             >
               {railLinks.map((link, index) => (
                 <motion.div

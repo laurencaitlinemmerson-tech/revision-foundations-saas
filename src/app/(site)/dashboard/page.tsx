@@ -101,6 +101,7 @@ function StatCard({
     <div className="dash-stat-card" style={{
       background: 'var(--surface-raised)',
       border: '0.5px solid var(--hairline-firm)',
+      borderRadius: 'var(--radius-sm)',
       padding: '24px 22px',
     }}>
       <p style={{
@@ -206,14 +207,14 @@ export default async function DashboardPage() {
 
         {/* ━━ 1 · PROGRESS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Your progress" accent="#D4A574" context="This week" />
+          <SectionDivider label="How you're doing" accent="#D4A574" context="This week" />
 
           {/* 4-col analytics row */}
           <div className="dash-analytics-row">
             <StatCard
               label="Study streak"
               value={effectiveStreak ? String(effectiveStreak.streakDays) : '—'}
-              unit={effectiveStreak ? 'days in a row' : 'No data yet'}
+              unit={effectiveStreak ? 'days in a row — keep it going' : 'today could be day one'}
             >
               {/* Streak pips — 7 squares mapped to last 7 days */}
               {effectiveStreak && (
@@ -232,7 +233,7 @@ export default async function DashboardPage() {
             <StatCard
               label="Quiz average"
               value={quizStats ? `${quizStats.averagePercent}%` : '—'}
-              unit={quizStats ? `${quizStats.totalAnswered} questions answered` : 'No quiz data yet'}
+              unit={quizStats ? `${quizStats.totalAnswered} questions answered` : 'run a quiz to fill this in'}
               delta={quizStats?.weekOnWeekDelta ? `${quizStats.weekOnWeekDelta}% from last week` : undefined}
               deltaUp={(quizStats?.weekOnWeekDelta ?? 0) > 0}
             />
@@ -256,7 +257,7 @@ export default async function DashboardPage() {
           {!quizStats && !osceStats && (
             <div style={{ marginTop: '16px' }}>
               <p style={{ fontFamily: serif, fontSize: '11px', fontWeight: 300, color: muted, marginBottom: '14px' }}>
-                Complete a session to see your stats. Start here:
+                Nothing to show yet — run one of these and your stats will start filling in.
               </p>
               <div className="dash-empty-actions">
                 {[
@@ -282,10 +283,10 @@ export default async function DashboardPage() {
 
           {/* Topic strength + quiz accuracy interactive drilldown */}
           <div className="dash-prog-pair" style={{ marginTop: '12px' }}>
-            <TopicStrengthDrilldown topics={topicStrength} title="Topic strength breakdown" />
+            <TopicStrengthDrilldown topics={topicStrength} title="Where you're strong" />
             <TopicStrengthDrilldown
               topics={topicStrength.map((t) => ({ ...t, pct: Math.min(t.pct + 14, 100) }))}
-              title="Quiz accuracy by area"
+              title="Where accuracy stands"
             />
           </div>
 
@@ -327,19 +328,19 @@ export default async function DashboardPage() {
 
         {/* ━━ 3 · REVISION WEEK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Sample revision week" id="revision-week" accent="#D4B896" context="Adjust to your schedule" />
+          <SectionDivider label="A week that could work for you" id="revision-week" accent="#D4B896" context="Adjust to your schedule" />
           <RevisionWeekPlanner />
         </section>
 
         {/* ━━ 4 · FIND ANYTHING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Find anything" id="search" accent="#7BA7CC" />
+          <SectionDivider label="Looking for something?" id="search" accent="#7BA7CC" />
           <QuickTopicSearch />
         </section>
 
         {/* ━━ 5 · SAVED FOLDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <section>
-          <SectionDivider label="Saved folders" id="saved-folders" accent="#D4B896" />
+          <SectionDivider label="Your saved pages" id="saved-folders" accent="#D4B896" />
           <SavedFoldersDashboard />
         </section>
 
@@ -429,11 +430,13 @@ export default async function DashboardPage() {
 
         /* ── Stat card hover ── */
         .dash-stat-card {
-          transition: transform 0.2s ease;
+          transition: transform 0.2s ease, border-color 0.2s ease;
           cursor: default;
         }
         .dash-stat-card:hover {
-          transform: scale(1.02);
+          border-color: var(--gold);
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-sm);
         }
 
         /* ── Progress bar animate-in ── */

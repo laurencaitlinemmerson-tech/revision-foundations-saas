@@ -136,38 +136,38 @@ function getEnergySuggestion(level: string): Suggestion | null {
       headline: 'Low energy today? Keep it short and calm.',
       text: 'No pressure for full mock exams today. Try a quick 5-question recall set or read a single clinical summary.',
       href: '/quiz',
-      cta: 'Start 5-min Quiz',
+      cta: 'Start a 5-minute quiz',
       accent: 'var(--blue-600, #7BA7CC)',
       accentSoft: 'rgba(123,167,204,0.15)',
       effort: '5 min',
       secondaryHref: '/dashboard#saved-folders',
-      secondaryCta: 'Browse saved pages',
+      secondaryCta: 'Or browse saved pages',
     };
   }
   if (level === 'high') {
     return {
-      headline: 'High energy! Tackle an OSCE station mock.',
-      text: 'You have full focus today. Run a timed 10-minute paediatric or clinical OSCE station checklist to max out retention.',
+      headline: 'Good energy today — put it to use.',
+      text: 'You said you’re feeling sharp, so a full OSCE station run is worth the focus. Ten timed minutes, then reassess.',
       href: '/osce',
-      cta: 'Launch OSCE Station',
+      cta: 'Launch an OSCE station',
       accent: 'var(--teal-600, #6B9E87)',
       accentSoft: 'rgba(107,158,135,0.15)',
       effort: '12 min',
       secondaryHref: '/quiz',
-      secondaryCta: 'Run 15-question quiz',
+      secondaryCta: 'Or run a 15-question quiz',
     };
   }
   if (level === 'crunch') {
     return {
-      headline: 'Exam crunch mode: targeted weak spots.',
-      text: 'Focus exclusively on your lowest scoring topics and high-yield clinical red flags.',
+      headline: "Let's zero in on your weak spots.",
+      text: 'No wasted time today — just your lowest-scoring topics and the red flags most likely to come up.',
       href: '/dashboard#search',
-      cta: 'Search High-Yield Guides',
+      cta: 'Search your weak topics',
       accent: 'var(--amber-600, #C89BB0)',
       accentSoft: 'rgba(200,155,176,0.15)',
       effort: '15 min',
       secondaryHref: '/quiz',
-      secondaryCta: 'Practice weak topics',
+      secondaryCta: 'Practise them in the quiz',
     };
   }
   return null;

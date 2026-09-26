@@ -56,9 +56,11 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
 
   return (
     <div
+      className="dash-topic-panel"
       style={{
         background: 'var(--surface-raised, #FFFFFF)',
         border: '0.5px solid var(--hairline-firm, rgba(0,0,0,0.12))',
+        borderRadius: 'var(--radius-sm)',
         padding: '24px 26px',
       }}
     >
@@ -76,7 +78,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
           {title}
         </p>
         <span style={{ fontFamily: serif, fontSize: '10px', color: muted, opacity: 0.8 }}>
-          Click any topic for drilldown
+          Tap a topic to see more
         </span>
       </div>
 
@@ -94,6 +96,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
               key={t.label}
               style={{
                 border: `0.5px solid ${isExpanded ? t.color : 'transparent'}`,
+                borderRadius: 'var(--radius-sm)',
                 padding: isExpanded ? '12px 14px' : '0',
                 background: isExpanded ? 'rgba(0,0,0,0.02)' : 'transparent',
                 transition: 'all 0.25s ease',
@@ -152,7 +155,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
                         marginBottom: '6px',
                       }}
                     >
-                      High-Yield Red Flags
+                      Red flags worth remembering
                     </p>
                     <ul style={{ margin: 0, paddingLeft: '16px', fontFamily: serif, fontSize: '11.5px', color: ink }}>
                       {details.redFlags.map((flag, fIdx) => (
@@ -171,6 +174,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
                         alignItems: 'center',
                         gap: '6px',
                         padding: '6px 12px',
+                        borderRadius: 'var(--radius-sm)',
                         background: ink,
                         color: 'white',
                         fontFamily: serif,
@@ -178,7 +182,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
                         textDecoration: 'none',
                       }}
                     >
-                      <span>Practise {t.label} Quiz →</span>
+                      <span>Practise {t.label.toLowerCase()} →</span>
                     </Link>
                     <Link
                       href={`/dashboard#search`}
@@ -187,6 +191,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
                         alignItems: 'center',
                         gap: '6px',
                         padding: '6px 12px',
+                        borderRadius: 'var(--radius-sm)',
                         border: '0.5px solid rgba(0,0,0,0.15)',
                         color: ink,
                         fontFamily: serif,
@@ -195,7 +200,7 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
                         background: 'white',
                       }}
                     >
-                      <span>Find {t.label} Guides</span>
+                      <span>Find guides on this</span>
                     </Link>
                   </div>
                 </div>
@@ -204,6 +209,16 @@ export default function TopicStrengthDrilldown({ topics, title }: TopicStrengthD
           );
         })}
       </div>
+
+      <style>{`
+        .dash-topic-panel {
+          transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .dash-topic-panel:hover {
+          border-color: var(--gold);
+          box-shadow: var(--shadow-sm);
+        }
+      `}</style>
     </div>
   );
 }

@@ -237,6 +237,8 @@ export default function RevisionWeekPlanner() {
             style={{
               background: 'var(--surface-raised)',
               border: border,
+              borderRadius: 'var(--radius-sm)',
+              overflow: 'hidden',
               opacity: d.rest ? 0.7 : 1,
             }}
           >
@@ -287,7 +289,7 @@ export default function RevisionWeekPlanner() {
               fontFamily: serif, fontSize: '9px', color: '#C4B4A8',
               padding: '0 12px 10px', fontWeight: 300,
             }}>
-              {d.durationHrs ? `~${d.durationHrs} hrs` : 'Off'}
+              {d.durationHrs ? `~${d.durationHrs} hrs` : 'Rest — enjoy it'}
             </p>
           </div>
         ))}
@@ -344,7 +346,8 @@ export default function RevisionWeekPlanner() {
         }
         .rwp-day-tile:hover {
           transform: translateY(-2px);
-          border-color: var(--hairline-firm) !important;
+          border-color: var(--gold) !important;
+          box-shadow: var(--shadow-sm);
         }
         @media (prefers-reduced-motion: reduce) {
           .rwp-day-tile { transition: none; }

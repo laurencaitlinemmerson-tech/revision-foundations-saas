@@ -107,6 +107,7 @@ export default function InteractiveDailyChecklist() {
       style={{
         background: 'var(--surface-raised, #FFFFFF)',
         border: '0.5px solid var(--hairline-firm, rgba(0,0,0,0.12))',
+        borderRadius: 'var(--radius-sm)',
         padding: '22px 24px',
         marginTop: '16px',
       }}
@@ -124,7 +125,7 @@ export default function InteractiveDailyChecklist() {
               margin: 0,
             }}
           >
-            Today's Micro-Wins Checklist
+Today&apos;s micro-wins
           </p>
           <p
             style={{
@@ -135,7 +136,11 @@ export default function InteractiveDailyChecklist() {
               fontStyle: 'italic',
             }}
           >
-            {completedCount} of {goals.length} micro-goals completed ({pct}%)
+            {completedCount === 0
+              ? `Nothing ticked off yet — ${goals.length} small wins today`
+              : completedCount === goals.length
+              ? "All done — that's enough for today"
+              : `${completedCount} of ${goals.length} done — nice work`}
           </p>
         </div>
 

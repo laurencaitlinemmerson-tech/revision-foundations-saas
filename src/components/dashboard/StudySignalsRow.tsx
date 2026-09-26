@@ -83,7 +83,7 @@ export default function StudySignalsRow() {
         color: muted,
         marginBottom: '10px',
       }}>
-        Useful signals
+        Where things stand
       </p>
 
       <div className="dash-signals-grid">
@@ -148,9 +148,16 @@ export default function StudySignalsRow() {
 
         .dash-signal-card {
           border: 0.5px solid ${border};
+          border-radius: var(--radius-sm);
           background: var(--surface-raised);
           padding: 18px 18px 20px;
           min-height: 188px;
+          transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .dash-signal-card:hover {
+          border-color: var(--gold);
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-sm);
         }
 
         .dash-signal-label {

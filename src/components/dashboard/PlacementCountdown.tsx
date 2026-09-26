@@ -87,16 +87,16 @@ export default function PlacementCountdown() {
   const past     = dates.filter(d => daysUntil(d.date) < 0);
 
   return (
-    <div style={{ border, background: 'white', padding: '22px 26px' }}>
+    <div className="dash-countdown-panel" style={{ border, borderRadius: 'var(--radius-sm)', background: 'white', padding: '22px 26px' }}>
       {/* Header */}
       <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '16px' }}>
-        Upcoming dates
+        What&apos;s coming up
       </p>
 
       {/* Date list */}
       {dates.length === 0 && !adding && (
         <p style={{ fontFamily: serif, fontSize: '12px', fontWeight: 300, color: muted, marginBottom: '14px' }}>
-          No dates set yet.
+          Nothing on the calendar yet — add your placement or exam date and we&apos;ll count it down for you.
         </p>
       )}
 
@@ -165,6 +165,7 @@ export default function PlacementCountdown() {
                 onClick={() => setNewLabel(p)}
                 style={{
                   fontFamily: serif, fontSize: '11px', padding: '4px 10px',
+                  borderRadius: '999px',
                   background: newLabel === p ? ink : 'transparent',
                   color: newLabel === p ? 'var(--surface-page)' : mid,
                   border: '0.5px solid var(--hairline-firm)',
@@ -219,6 +220,16 @@ export default function PlacementCountdown() {
           + Add a date
         </button>
       )}
+
+      <style>{`
+        .dash-countdown-panel {
+          transition: border-color 0.2s ease;
+        }
+        .dash-countdown-panel:hover {
+          border-color: var(--gold);
+          box-shadow: var(--shadow-sm);
+        }
+      `}</style>
     </div>
   );
 }

@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { getOsceScores, type OsceScore } from '@/lib/dashboardTracking';
 
-const serif = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const display = "'Playfair Display', Georgia, serif";
-const ink = 'var(--ink-strong)';
-const mid = 'var(--ink-soft)';
-const muted = 'var(--ink-faint)';
+const serif = "var(--font-body)";
+const display = "var(--font-display)";
+const ink = 'var(--espresso)';
+const mid = 'var(--charcoal)';
+const muted = 'var(--charcoal-light)';
 const borderMid = 'var(--hairline-firm)';
 
 const SEED_SCORES: OsceScore[] = [
@@ -60,7 +60,7 @@ function Sparkline({ scores }: { scores: OsceScore[] }) {
           {last}%
         </p>
         <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.12em', color: muted }}>
-          {up ? '↑' : '↓'} last station
+          {up ? '↑ climbing' : '↓ dipped a little'} · last station
         </p>
       </div>
     </div>
@@ -89,17 +89,21 @@ export default function OsceSparkline() {
   const latest = scores[scores.length - 1];
 
   return (
-    <div style={{ border: `0.5px solid ${borderMid}`, background: 'white', padding: '24px 24px 28px' }}>
+    <div className="dash-osce-panel" style={{ border: `0.5px solid ${borderMid}`, borderRadius: 'var(--radius-sm)', background: 'white', padding: '24px 24px 28px' }}>
       <p style={{ fontFamily: serif, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: muted, marginBottom: '18px' }}>
-        OSCE score trend
+        Your OSCE progress
       </p>
       <Sparkline scores={scores} />
       {latest && (
         <p style={{ fontFamily: serif, fontSize: '11px', color: mid, marginTop: '14px' }}>
           {latest.stationName}
-          {isPlaceholder && <span style={{ color: muted }}> · example data until you run stations</span>}
+          {isPlaceholder && <span style={{ color: muted }}> · example scores until you log your first station</span>}
         </p>
       )}
+      <style>{`
+        .dash-osce-panel { transition: border-color 0.2s ease, transform 0.2s ease; }
+        .dash-osce-panel:hover { border-color: var(--gold); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+      `}</style>
     </div>
   );
 }
