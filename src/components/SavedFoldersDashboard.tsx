@@ -1,7 +1,6 @@
 'use client';
 
-import { startTransition, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { startTransition, useRef, useState } from 'react';
 import CreateFolderModal from '@/components/CreateFolderModal';
 import DeleteFolderModal from '@/components/DeleteFolderModal';
 import EditFolderModal from '@/components/EditFolderModal';
@@ -10,15 +9,21 @@ import FolderView from '@/components/FolderView';
 import { useBookmarks } from '@/lib/hooks/useBookmarks';
 import { useFolders } from '@/lib/hooks/useFolders';
 import { showToast } from '@/lib/toast';
+import './folders.css';
 
-interface SavedFoldersDashboardProps {
-  showOverview?: boolean;
-}
-
-export default function SavedFoldersDashboard({ showOverview = true }: SavedFoldersDashboardProps) {
+export default function SavedFoldersDashboard() {
   const { folders, loading, error, refetch, createFolder, updateFolder, deleteFolder, isCreating, isUpdating, isDeleting } = useFolders();
 
+  const rootRef = useRef<HTMLDivElement>(null);
   const [activeFolderId, setActiveFolderId] = useState<number | null>(null);
+
+  // Opening or leaving a folder changes the height of this section a lot, so bring
+  // its top back into view once the new content is in place.
+  function showFolder(id: number | null) {
+    startTransition(() => setActiveFolderId(id));
+    requestAnimationFrame(() => rootRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }
+
   const [createOpen, setCreateOpen] = useState(false);
   const [editFolderId, setEditFolderId] = useState<number | null>(null);
   const [deleteFolderId, setDeleteFolderId] = useState<number | null>(null);
@@ -26,8 +31,6 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
   const activeFolder = folders.find((f) => f.id === activeFolderId) ?? null;
   const editFolder = folders.find((f) => f.id === editFolderId) ?? null;
   const deleteTarget = folders.find((f) => f.id === deleteFolderId) ?? null;
-
-  const totalSavedItems = folders.reduce((total, folder) => total + folder.itemCount, 0);
 
   const { bookmarks, loading: bookmarksLoading, error: bookmarksError, refetch: refetchBookmarks, removeBookmark, isRemoving } = useBookmarks(activeFolderId ?? null);
 
@@ -89,76 +92,33 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
   }
 
   return (
-    <>
-      {showOverview && !activeFolder && folders.length > 0 ? (
-        <div className="mb-6 overflow-hidden border border-[var(--border)] bg-[var(--surface-page)] px-6 py-6 md:px-8">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-end">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--charcoal)]/70">Saved library</p>
-              <h3 className="mt-2 font-display text-[2rem] leading-[1.04] text-[var(--espresso)]">
-                Your quickest route back to the pages you actually reuse.
-              </h3>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--charcoal)]">
-                Use folders for repeat reads and pages you want close to hand. Less hunting, more re-entry.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="border border-[var(--border)] bg-white px-4 py-4">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/60">Folders</p>
-                <p className="mt-1 font-display text-[1.8rem] leading-none text-[var(--espresso)]">{folders.length}</p>
-              </div>
-              <div className="border border-[var(--border)] bg-white px-4 py-4">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--charcoal)]/60">Saved pages</p>
-                <p className="mt-1 font-display text-[1.8rem] leading-none text-[var(--espresso)]">{totalSavedItems}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <AnimatePresence mode="wait" initial={false}>
+    <div ref={rootRef} className="fld-root">
+      <div key={activeFolder ? `folder-${activeFolder.id}` : 'folder-grid'} className="fld-fade">
         {activeFolder ? (
-          <motion.div
-            key={`folder-${activeFolder.id}`}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-          >
-            <FolderView
-              folder={activeFolder}
-              items={bookmarks}
-              loading={bookmarksLoading}
-              error={bookmarksError}
-              isRemoving={isRemoving}
-              onRetry={() => { void refetchBookmarks(); }}
-              onBack={() => { startTransition(() => setActiveFolderId(null)); }}
-              onRemove={handleRemoveBookmark}
-            />
-          </motion.div>
+          <FolderView
+            folder={activeFolder}
+            items={bookmarks}
+            loading={bookmarksLoading}
+            error={bookmarksError}
+            isRemoving={isRemoving}
+            onRetry={() => { void refetchBookmarks(); }}
+            onBack={() => showFolder(null)}
+            onRemove={handleRemoveBookmark}
+          />
         ) : (
-          <motion.div
-            key="folder-grid"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-          >
-            <FolderGrid
-              folders={folders}
-              folderPreviews={folderPreviews}
-              loading={loading}
-              error={error}
-              onRetry={() => { void refetch(); }}
-              onOpenFolder={(folderId) => { startTransition(() => setActiveFolderId(folderId)); }}
-              onCreateFolder={() => setCreateOpen(true)}
-              onEditFolder={(folderId) => setEditFolderId(folderId)}
-              onDeleteFolder={(folderId) => setDeleteFolderId(folderId)}
-            />
-          </motion.div>
+          <FolderGrid
+            folders={folders}
+            folderPreviews={folderPreviews}
+            loading={loading}
+            error={error}
+            onRetry={() => { void refetch(); }}
+            onOpenFolder={(folderId) => showFolder(folderId)}
+            onCreateFolder={() => setCreateOpen(true)}
+            onEditFolder={(folderId) => setEditFolderId(folderId)}
+            onDeleteFolder={(folderId) => setDeleteFolderId(folderId)}
+          />
         )}
-      </AnimatePresence>
+      </div>
 
       <CreateFolderModal
         key={createOpen ? 'create-open' : 'create-closed'}
@@ -185,6 +145,6 @@ export default function SavedFoldersDashboard({ showOverview = true }: SavedFold
         onClose={() => setDeleteFolderId(null)}
         onConfirm={handleDeleteFolder}
       />
-    </>
+    </div>
   );
 }

@@ -5,10 +5,10 @@ import ModalShell from '@/components/ModalShell';
 import type { Folder } from '@/lib/bookmarks/types';
 
 const COLOUR_OPTIONS = [
-  { id: 'sage',  hex: '#8BBCAA' },
-  { id: 'warm',  hex: '#D4A574' },
-  { id: 'slate', hex: '#7BA7CC' },
-  { id: 'rose',  hex: '#C89BB0' },
+  { id: 'sage',  hex: '#3B8F7A' },
+  { id: 'warm',  hex: '#A6906B' },
+  { id: 'slate', hex: '#4F79A8' },
+  { id: 'rose',  hex: '#B0664A' },
   { id: 'ink',   hex: '#3D3530' },
   { id: 'sand',  hex: '#C4B49A' },
 ];
@@ -76,7 +76,7 @@ export default function EditFolderModal({
             <div
               className="h-10 w-10 flex-shrink-0"
               style={{
-                background: COLOUR_OPTIONS.find((c) => c.id === emoji)?.hex ?? '#8BBCAA',
+                background: COLOUR_OPTIONS.find((c) => c.id === emoji)?.hex ?? '#3B8F7A',
               }}
             />
             <div>

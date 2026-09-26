@@ -5,10 +5,10 @@ import ModalShell from '@/components/ModalShell';
 import type { Folder } from '@/lib/bookmarks/types';
 
 const COLOUR_MAP: Record<string, string> = {
-  sage:  '#8BBCAA',
-  warm:  '#D4A574',
-  slate: '#7BA7CC',
-  rose:  '#C89BB0',
+  sage:  '#3B8F7A',
+  warm:  '#A6906B',
+  slate: '#4F79A8',
+  rose:  '#B0664A',
   ink:   '#3D3530',
   sand:  '#C4B49A',
 };
