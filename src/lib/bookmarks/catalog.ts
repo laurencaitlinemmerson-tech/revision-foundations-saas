@@ -225,6 +225,30 @@ const catalog: CatalogItem[] = [
     tags: ['Paeds', 'Y1 Essentials', 'Endocrine'],
   },
   {
+    hubItemId: 'anaphylaxis',
+    title: 'Anaphylaxis',
+    href: '/hub/resources/anaphylaxis',
+    tags: ['Paeds', 'Year 2', 'Emergency/ABCDE'],
+  },
+  {
+    hubItemId: 'paediatric-seizures',
+    title: 'Seizures & Status Epilepticus',
+    href: '/hub/resources/paediatric-seizures',
+    tags: ['Paeds', 'Year 2', 'Emergency/ABCDE', 'Neuro'],
+  },
+  {
+    hubItemId: 'childhood-cancer-neutropenic-sepsis',
+    title: 'Childhood Cancers & Neutropenic Sepsis',
+    href: '/hub/resources/childhood-cancer-neutropenic-sepsis',
+    tags: ['Paeds', 'Year 2', 'Emergency/ABCDE'],
+  },
+  {
+    hubItemId: 'sickle-cell-thalassaemia',
+    title: 'Sickle Cell Disease & Thalassaemia',
+    href: '/hub/resources/sickle-cell-thalassaemia',
+    tags: ['Paeds', 'Year 2'],
+  },
+  {
     hubItemId: 'pharmacokinetics',
     title: 'Pharmacokinetics',
     href: '/hub/resources/pharmacokinetics',
