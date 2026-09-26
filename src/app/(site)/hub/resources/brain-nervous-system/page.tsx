@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import BrainDiagram from '@/components/hub/BrainDiagram';
@@ -402,6 +403,43 @@ const CSS = `
   .ns-content-grid { grid-template-columns: 1fr; }
   .ns-info-grid { grid-template-columns: 1fr; }
 }
+/* ── Polish layer ───────────────────────────────────────────── */
+.ns-kicker { color: var(--gold-deep, #8a7350); }
+.ns-headline { font-size: 56px; }
+.ns-byline { border-bottom: none; padding-bottom: 6px; margin-bottom: 0; }
+.ns-pulse { display: block; width: 100%; height: 40px; margin-bottom: 40px; overflow: visible; }
+.ns-pulse path { stroke: var(--gold, #cbae78); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; animation: ns-pulse-draw 2.6s ease-out 0.3s forwards; }
+@keyframes ns-pulse-draw { to { stroke-dashoffset: 0; } }
+.ns-golden { gap: 14px; border: none; }
+.ns-golden-cell { border: 0.5px solid var(--hairline-firm); border-radius: 2px; background: var(--surface-page); transition: transform 0.2s ease, border-color 0.2s ease; }
+.ns-golden-cell:last-child { border-right: 0.5px solid var(--hairline-firm); }
+.ns-golden-cell:hover { transform: translateY(-2px); border-color: var(--gold); }
+.ns-golden-numeral { color: var(--gold); font-size: 34px; }
+.ns-section-title { border: none; padding: 18px 0 0; margin-top: 56px; font-size: 28px; position: relative; }
+.ns-section-title::before { content: ''; position: absolute; top: 0; left: 0; width: 44px; height: 3px; border-radius: 999px; background: var(--gold); }
+.ns-content-grid, .ns-table { border-radius: 2px; }
+.ns-content-grid { overflow: hidden; border-color: var(--hairline-firm); }
+.ns-table { border-collapse: separate; border-spacing: 0; overflow: hidden; border-color: var(--hairline-firm); }
+.ns-table th { background: transparent; color: var(--gold-deep, #8a7350); border-bottom-color: var(--hairline-firm); }
+.ns-table td { padding-top: 12px; padding-bottom: 12px; line-height: 1.65; }
+.ns-table td:first-child { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: var(--ink-strong); }
+.ns-table tbody tr:nth-child(even) td { background: rgba(203, 174, 120, 0.06); }
+.ns-table tbody tr:hover td { background: rgba(203, 174, 120, 0.14); }
+.ns-step { border-top-color: var(--hairline-soft); }
+.ns-step-letter { text-shadow: none; }
+.ns-step-name { font-size: 34px; }
+.ns-step-badge, .ns-red-pill { border-radius: 999px; }
+.ns-pearl { background: transparent; border: 0.5px solid var(--hairline-firm); border-left: 3px solid var(--gold); border-radius: 2px; padding: 18px 24px; }
+.ns-pearl-label { color: var(--gold-deep, #8a7350); font-size: 10px; letter-spacing: 0.18em; margin-bottom: 8px; }
+.ns-pearl p { color: var(--ink-mid); font-size: 13.5px; line-height: 1.75; }
+.ns-diagram { border-radius: 2px; border-color: var(--hairline-firm); background: var(--surface-page); }
+.ns-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.ns-reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .ns-pulse path { animation: none; stroke-dashoffset: 0; }
+  .ns-reveal { opacity: 1; transform: none; transition: none; }
+}
+@media (max-width: 860px) { .ns-headline { font-size: 36px; } .ns-step-name { font-size: 26px; } }
 `;
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -745,6 +783,20 @@ const quizQuestions = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function BrainNervousSystemPage() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>('.ns-guide .ns-step, .ns-guide .ns-diagram, .ns-guide .ns-golden-cell, .ns-guide .ns-pearl'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    els.forEach((el) => {
+      if (el.getBoundingClientRect().top > window.innerHeight) { el.classList.add('ns-reveal'); io.observe(el); }
+    });
+    return () => io.disconnect();
+  }, []);
+
   return (
     <PremiumHubPageGate resourceTitle="Brain & Nervous System Assessment">
       <div className="ns-guide">
@@ -764,6 +816,9 @@ export default function BrainNervousSystemPage() {
           How the nervous system detects, processes, and responds, what to check during neuro observations, and which signs mean a child needs help urgently.
         </p>
         <p className="ns-byline">Children&apos;s nursing &middot; Neurological assessment &middot; The Nurse Lab</p>
+        <svg className="ns-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L520,30 L536,30 L544,24 L552,30 L572,30 L578,36 L586,4 L594,44 L600,30 L620,30 L636,20 L652,30 L1000,30" fill="none" pathLength={1} />
+        </svg>
         <EditorialSaveButton
           hubItemId="brain-nervous-system"
           hubItemTitle="Brain & Nervous System Assessment"

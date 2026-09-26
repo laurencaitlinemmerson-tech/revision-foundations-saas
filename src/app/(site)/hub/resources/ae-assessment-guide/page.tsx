@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
@@ -444,6 +444,43 @@ const CSS = `
 .ae-badge-d { background: var(--purple-50); color: var(--purple-800); }
 .ae-letter-e { color: var(--gray-600); }
 .ae-badge-e { background: var(--surface-sunken); color: var(--gray-800); }
+/* ── Polish layer ───────────────────────────────────────────── */
+.ae-kicker { color: var(--gold-deep, #8a7350); }
+.ae-headline { font-size: 56px; }
+.ae-byline { border-bottom: none; padding-bottom: 6px; margin-bottom: 0; }
+.ae-pulse { display: block; width: 100%; height: 40px; margin-bottom: 40px; overflow: visible; }
+.ae-pulse path { stroke: var(--gold, #cbae78); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; animation: ae-pulse-draw 2.6s ease-out 0.3s forwards; }
+@keyframes ae-pulse-draw { to { stroke-dashoffset: 0; } }
+.ae-golden { gap: 14px; border: none; }
+.ae-golden-cell { border: 0.5px solid var(--hairline-firm); border-radius: 2px; background: var(--surface-page); transition: transform 0.2s ease, border-color 0.2s ease; }
+.ae-golden-cell:last-child { border-right: 0.5px solid var(--hairline-firm); }
+.ae-golden-cell:hover { transform: translateY(-2px); border-color: var(--gold); }
+.ae-golden-numeral { color: var(--gold); font-size: 34px; }
+.ae-section-title { border: none; padding: 18px 0 0; margin-top: 56px; font-size: 28px; position: relative; }
+.ae-section-title::before { content: ''; position: absolute; top: 0; left: 0; width: 44px; height: 3px; border-radius: 999px; background: var(--gold); }
+.ae-content-grid, .ae-table { border-radius: 2px; }
+.ae-content-grid { overflow: hidden; border-color: var(--hairline-firm); }
+.ae-table { border-collapse: separate; border-spacing: 0; overflow: hidden; border-color: var(--hairline-firm); }
+.ae-table th { background: transparent; color: var(--gold-deep, #8a7350); border-bottom-color: var(--hairline-firm); }
+.ae-table td { padding-top: 12px; padding-bottom: 12px; line-height: 1.65; }
+.ae-table td:first-child { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: var(--ink-strong); }
+.ae-table tbody tr:nth-child(even) td { background: rgba(203, 174, 120, 0.06); }
+.ae-table tbody tr:hover td { background: rgba(203, 174, 120, 0.14); }
+.ae-step { border-top-color: var(--hairline-soft); }
+.ae-step-letter { text-shadow: none; }
+.ae-step-name { font-size: 34px; }
+.ae-step-badge, .ae-red-pill { border-radius: 999px; }
+.ae-pearl { background: transparent; border: 0.5px solid var(--hairline-firm); border-left: 3px solid var(--gold); border-radius: 2px; padding: 18px 24px; }
+.ae-pearl-label { color: var(--gold-deep, #8a7350); font-size: 10px; letter-spacing: 0.18em; margin-bottom: 8px; }
+.ae-pearl p { color: var(--ink-mid); font-size: 13.5px; line-height: 1.75; }
+.ae-diagram { border-radius: 2px; border-color: var(--hairline-firm); background: var(--surface-page); }
+.ae-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.ae-reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .ae-pulse path { animation: none; stroke-dashoffset: 0; }
+  .ae-reveal { opacity: 1; transform: none; transition: none; }
+}
+@media (max-width: 860px) { .ae-headline { font-size: 36px; } .ae-step-name { font-size: 26px; } }
 `;
 
 
@@ -694,6 +731,20 @@ const quizQuestions = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AEAssessmentGuidePage() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>('.ae-guide .ae-step, .ae-guide .ae-diagram, .ae-guide .ae-golden-cell, .ae-guide .ae-pearl'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    els.forEach((el) => {
+      if (el.getBoundingClientRect().top > window.innerHeight) { el.classList.add('ae-reveal'); io.observe(el); }
+    });
+    return () => io.disconnect();
+  }, []);
+
   const [checked, setChecked] = useState<Set<number>>(new Set());
 
   const toggle = (i: number) =>
@@ -727,6 +778,9 @@ export default function AEAssessmentGuidePage() {
           The A–E guide students usually wish they had sooner: the real framework, explained in wording you can actually think with under pressure.
         </p>
         <p className="ae-byline">Children&apos;s nursing · Paediatric OSCE prep · The Nurse Lab</p>
+        <svg className="ae-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L520,30 L536,30 L544,24 L552,30 L572,30 L578,36 L586,4 L594,44 L600,30 L620,30 L636,20 L652,30 L1000,30" fill="none" pathLength={1} />
+        </svg>
         <EditorialSaveButton
           hubItemId="ae-assessment-guide"
           hubItemTitle="A–E Assessment Framework"

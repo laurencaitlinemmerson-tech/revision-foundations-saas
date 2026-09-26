@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
@@ -396,11 +397,62 @@ const CSS = `
   .dc-grid-2-col { border-right: none; border-bottom: 0.5px solid var(--hairline-firm); }
   .dc-grid-2-col:last-child { border-bottom: none; }
 }
+/* ── Polish layer ───────────────────────────────────────────── */
+.dc-kicker { color: var(--gold-deep, #8a7350); }
+.dc-headline { font-size: 56px; }
+.dc-byline { border-bottom: none; padding-bottom: 6px; margin-bottom: 0; }
+.dc-pulse { display: block; width: 100%; height: 40px; margin-bottom: 40px; overflow: visible; }
+.dc-pulse path { stroke: var(--gold, #cbae78); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; animation: dc-pulse-draw 2.6s ease-out 0.3s forwards; }
+@keyframes dc-pulse-draw { to { stroke-dashoffset: 0; } }
+.dc-golden { gap: 14px; border: none; }
+.dc-golden-cell { border: 0.5px solid var(--hairline-firm); border-radius: 2px; background: var(--surface-page); transition: transform 0.2s ease, border-color 0.2s ease; }
+.dc-golden-cell:last-child { border-right: 0.5px solid var(--hairline-firm); }
+.dc-golden-cell:hover { transform: translateY(-2px); border-color: var(--gold); }
+.dc-golden-numeral { color: var(--gold); font-size: 34px; }
+.dc-section-title { border: none; padding: 18px 0 0; margin-top: 56px; font-size: 28px; position: relative; }
+.dc-section-title::before { content: ''; position: absolute; top: 0; left: 0; width: 44px; height: 3px; border-radius: 999px; background: var(--gold); }
+.dc-content-grid, .dc-table { border-radius: 2px; }
+.dc-content-grid { overflow: hidden; border-color: var(--hairline-firm); }
+.dc-table { border-collapse: separate; border-spacing: 0; overflow: hidden; border-color: var(--hairline-firm); }
+.dc-table th { background: transparent; color: var(--gold-deep, #8a7350); border-bottom-color: var(--hairline-firm); }
+.dc-table td { padding-top: 12px; padding-bottom: 12px; line-height: 1.65; }
+.dc-table td:first-child { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: var(--ink-strong); }
+.dc-table tbody tr:nth-child(even) td { background: rgba(203, 174, 120, 0.06); }
+.dc-table tbody tr:hover td { background: rgba(203, 174, 120, 0.14); }
+.dc-step { border-top-color: var(--hairline-soft); }
+.dc-step-letter { text-shadow: none; }
+.dc-step-name { font-size: 34px; }
+.dc-step-badge, .dc-red-pill { border-radius: 999px; }
+.dc-pearl { background: transparent; border: 0.5px solid var(--hairline-firm); border-left: 3px solid var(--gold); border-radius: 2px; padding: 18px 24px; }
+.dc-pearl-label { color: var(--gold-deep, #8a7350); font-size: 10px; letter-spacing: 0.18em; margin-bottom: 8px; }
+.dc-pearl p { color: var(--ink-mid); font-size: 13.5px; line-height: 1.75; }
+.dc-diagram { border-radius: 2px; border-color: var(--hairline-firm); background: var(--surface-page); }
+.dc-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.dc-reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .dc-pulse path { animation: none; stroke-dashoffset: 0; }
+  .dc-reveal { opacity: 1; transform: none; transition: none; }
+}
+@media (max-width: 860px) { .dc-headline { font-size: 36px; } .dc-step-name { font-size: 26px; } }
 `;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Y1DocumentationPage() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>('.dc-guide .dc-step, .dc-guide .dc-diagram, .dc-guide .dc-golden-cell, .dc-guide .dc-pearl'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    els.forEach((el) => {
+      if (el.getBoundingClientRect().top > window.innerHeight) { el.classList.add('dc-reveal'); io.observe(el); }
+    });
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div className="dc-guide">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
@@ -419,6 +471,9 @@ export default function Y1DocumentationPage() {
           How to write notes that are clear, useful, and safe, without overcomplicating what good documentation looks like.
         </p>
         <p className="dc-byline">The Nurse Lab · Nursing Hub</p>
+        <svg className="dc-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L520,30 L536,30 L544,24 L552,30 L572,30 L578,36 L586,4 L594,44 L600,30 L620,30 L636,20 L652,30 L1000,30" fill="none" pathLength={1} />
+        </svg>
         <EditorialSaveButton
           hubItemId="y1-documentation"
           hubItemTitle="Documentation & Record Keeping"

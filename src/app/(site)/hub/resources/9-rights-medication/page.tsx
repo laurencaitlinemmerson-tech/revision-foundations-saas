@@ -1,5 +1,6 @@
 'use client';
-/* eslint-disable react/no-unescaped-entities */
+
+import { useEffect } from 'react';/* eslint-disable react/no-unescaped-entities */
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
@@ -417,11 +418,62 @@ const CSS = `
   .nr-content-col { border-right: none; border-bottom: 0.5px solid var(--hairline-firm); }
   .nr-content-col:last-child { border-bottom: none; }
 }
+/* ── Polish layer ───────────────────────────────────────────── */
+.nr-kicker { color: var(--gold-deep, #8a7350); }
+.nr-headline { font-size: 56px; }
+.nr-byline { border-bottom: none; padding-bottom: 6px; margin-bottom: 0; }
+.nr-pulse { display: block; width: 100%; height: 40px; margin-bottom: 40px; overflow: visible; }
+.nr-pulse path { stroke: var(--gold, #cbae78); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; animation: nr-pulse-draw 2.6s ease-out 0.3s forwards; }
+@keyframes nr-pulse-draw { to { stroke-dashoffset: 0; } }
+.nr-golden { gap: 14px; border: none; }
+.nr-golden-cell { border: 0.5px solid var(--hairline-firm); border-radius: 2px; background: var(--surface-page); transition: transform 0.2s ease, border-color 0.2s ease; }
+.nr-golden-cell:last-child { border-right: 0.5px solid var(--hairline-firm); }
+.nr-golden-cell:hover { transform: translateY(-2px); border-color: var(--gold); }
+.nr-golden-numeral { color: var(--gold); font-size: 34px; }
+.nr-section-title { border: none; padding: 18px 0 0; margin-top: 56px; font-size: 28px; position: relative; }
+.nr-section-title::before { content: ''; position: absolute; top: 0; left: 0; width: 44px; height: 3px; border-radius: 999px; background: var(--gold); }
+.nr-content-grid, .nr-table { border-radius: 2px; }
+.nr-content-grid { overflow: hidden; border-color: var(--hairline-firm); }
+.nr-table { border-collapse: separate; border-spacing: 0; overflow: hidden; border-color: var(--hairline-firm); }
+.nr-table th { background: transparent; color: var(--gold-deep, #8a7350); border-bottom-color: var(--hairline-firm); }
+.nr-table td { padding-top: 12px; padding-bottom: 12px; line-height: 1.65; }
+.nr-table td:first-child { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: var(--ink-strong); }
+.nr-table tbody tr:nth-child(even) td { background: rgba(203, 174, 120, 0.06); }
+.nr-table tbody tr:hover td { background: rgba(203, 174, 120, 0.14); }
+.nr-step { border-top-color: var(--hairline-soft); }
+.nr-step-letter { text-shadow: none; }
+.nr-step-name { font-size: 34px; }
+.nr-step-badge, .nr-red-pill { border-radius: 999px; }
+.nr-pearl { background: transparent; border: 0.5px solid var(--hairline-firm); border-left: 3px solid var(--gold); border-radius: 2px; padding: 18px 24px; }
+.nr-pearl-label { color: var(--gold-deep, #8a7350); font-size: 10px; letter-spacing: 0.18em; margin-bottom: 8px; }
+.nr-pearl p { color: var(--ink-mid); font-size: 13.5px; line-height: 1.75; }
+.nr-diagram { border-radius: 2px; border-color: var(--hairline-firm); background: var(--surface-page); }
+.nr-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.nr-reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .nr-pulse path { animation: none; stroke-dashoffset: 0; }
+  .nr-reveal { opacity: 1; transform: none; transition: none; }
+}
+@media (max-width: 860px) { .nr-headline { font-size: 36px; } .nr-step-name { font-size: 26px; } }
 `;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function NineRightsMedicationPage() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>('.nr-guide .nr-step, .nr-guide .nr-diagram, .nr-guide .nr-golden-cell, .nr-guide .nr-pearl'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    els.forEach((el) => {
+      if (el.getBoundingClientRect().top > window.innerHeight) { el.classList.add('nr-reveal'); io.observe(el); }
+    });
+    return () => io.disconnect();
+  }, []);
+
   return (
     <PremiumHubPageGate resourceTitle="Medication Administration & Safety">
       <div className="nr-guide">
@@ -441,6 +493,9 @@ export default function NineRightsMedicationPage() {
           The medication checks you need for OSCEs and placement, written in the kind of language students actually use.
         </p>
         <p className="nr-byline">The Nurse Lab · Nursing Hub</p>
+        <svg className="nr-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L520,30 L536,30 L544,24 L552,30 L572,30 L578,36 L586,4 L594,44 L600,30 L620,30 L636,20 L652,30 L1000,30" fill="none" pathLength={1} />
+        </svg>
         <EditorialSaveButton
           hubItemId="9-rights-medication"
           hubItemTitle="9 Rights of Medication Administration"
