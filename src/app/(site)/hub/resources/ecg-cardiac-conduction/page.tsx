@@ -1,15 +1,18 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
+import ConductionDiagram from '@/components/hub/ConductionDiagram';
+import { InteractiveHeart, InteractiveEcgBeat } from '@/components/hub/InteractiveHeart';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
 const CSS = `
 
-.ecg-guide *, .ecg-guide *::before, .ecg-guide *::after { box-sizing: border-box; box-shadow: none !important; }
+.ecg-guide *, .ecg-guide *::before, .ecg-guide *::after { box-sizing: border-box; }
 
 .ecg-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -134,6 +137,49 @@ const CSS = `
   color: var(--ink-faint);
   text-align: center;
   margin-top: 14px;
+}
+
+.ecg-key {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+@media (max-width: 720px) {
+  .ecg-key { grid-template-columns: 1fr; }
+}
+.ecg-key-col {
+  border: 0.5px solid var(--hairline-firm);
+  padding: 18px 20px;
+}
+.ecg-key-title {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 12px;
+}
+.ecg-key-item {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 0.5px solid var(--hairline-soft);
+  font-size: 12.5px;
+  line-height: 1.6;
+  font-weight: 300;
+  color: var(--ink-soft);
+}
+.ecg-key-item:first-of-type { border-top: none; }
+.ecg-key-item strong {
+  display: block;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+.ecg-key-dot {
+  flex: 0 0 12px;
+  height: 12px;
+  border-radius: 999px;
+  margin-top: 5px;
 }
 
 .ecg-rhythm-card {
@@ -447,6 +493,133 @@ const CSS = `
   .ecg-step { grid-template-columns: 52px 1fr; }
   .ecg-step-letter { font-size: 38px; }
   .ecg-step-content { padding-left: 18px; }
+}
+/* ── Polish layer ───────────────────────────────────────────── */
+.ecg-guide { background: var(--surface-page); }
+.ecg-kicker { color: var(--gold-deep, #8a7350); }
+.ecg-headline { font-size: 60px; }
+.ecg-byline { border-bottom: none; padding-bottom: 6px; margin-bottom: 0; }
+.ecg-pulse {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin-bottom: 40px;
+  overflow: visible;
+}
+.ecg-pulse path {
+  stroke: var(--gold, #cbae78);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ecg-pulse-draw 2.6s ease-out 0.3s forwards;
+}
+@keyframes ecg-pulse-draw { to { stroke-dashoffset: 0; } }
+
+.ecg-golden {
+  gap: 14px;
+  border: none;
+}
+.ecg-golden-cell {
+  border: 0.5px solid var(--hairline-firm);
+  border-radius: 2px;
+  background: var(--surface-page);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.ecg-golden-cell:last-child { border-right: 0.5px solid var(--hairline-firm); }
+.ecg-golden-cell:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: var(--shadow-sm); }
+.ecg-golden-numeral { color: var(--gold); font-size: 34px; }
+
+.ecg-diagram {
+  border-radius: 2px;
+  padding: 28px;
+  border-color: var(--hairline-firm);
+  background: var(--surface-page);
+  margin-bottom: 28px;
+}
+.ecg-diagram-caption { letter-spacing: 0.12em; }
+
+.ecg-key { grid-template-columns: 1fr; }
+.ecg-key-col {
+  border-radius: 2px;
+  padding: 22px 26px;
+  background: var(--surface-sunken);
+  border-color: var(--hairline-firm);
+}
+.ecg-key-col.wide { columns: 2; column-gap: 40px; }
+.ecg-key-col.wide .ecg-key-title { column-span: all; }
+.ecg-key-col.wide .ecg-key-item { break-inside: avoid; }
+@media (max-width: 720px) { .ecg-key-col.wide { columns: 1; } }
+.ecg-key-dot { box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05); }
+
+.ecg-section-title {
+  border: none;
+  padding: 18px 0 0;
+  margin-top: 56px;
+  font-size: 28px;
+  position: relative;
+}
+.ecg-section-title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--gold);
+}
+
+.ecg-rhythm-card {
+  border-radius: 2px;
+  border-color: var(--hairline-firm);
+  border-left: 4px solid var(--hairline-firm);
+  background: var(--surface-page);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.ecg-rhythm-card:has(.ecg-rhythm-badge.normal) { border-left-color: var(--teal-600); }
+.ecg-rhythm-card:has(.ecg-rhythm-badge.abnormal) { border-left-color: var(--red-600); }
+.ecg-rhythm-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.ecg-rhythm-name { font-size: 20px; }
+.ecg-rhythm-svg-wrap {
+  border-radius: 2px;
+  padding: 14px 16px;
+  border-color: var(--hairline-firm);
+  background-color: rgba(214, 96, 96, 0.035);
+  background-image:
+    linear-gradient(rgba(214, 96, 96, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 96, 96, 0.22) 1px, transparent 1px),
+    linear-gradient(rgba(214, 96, 96, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 96, 96, 0.09) 1px, transparent 1px);
+  background-size: 60px 60px, 60px 60px, 12px 12px, 12px 12px;
+}
+.ecg-rhythm-svg-wrap svg path { stroke-linecap: round; stroke-linejoin: round; }
+
+.ecg-content-grid, .ecg-table { border-radius: 2px; }
+.ecg-content-grid { overflow: hidden; border-color: var(--hairline-firm); }
+.ecg-table { border-collapse: separate; border-spacing: 0; overflow: hidden; border-color: var(--hairline-firm); }
+.ecg-table tbody tr:nth-child(even) td { background: rgba(203, 174, 120, 0.06); }
+.ecg-table tbody tr:hover td { background: rgba(203, 174, 120, 0.14); }
+.ecg-step { border-top-color: var(--hairline-soft); }
+.ecg-step-letter { text-shadow: 0 6px 24px rgba(203, 174, 120, 0.35); }
+.ecg-step-badge, .ecg-red-pill { border-radius: 999px; }
+.ecg-pearl { border-radius: 2px; border-left: 3px solid var(--gold); }
+
+.ecg-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.ecg-reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .ecg-pulse path { animation: none; stroke-dashoffset: 0; }
+  .ecg-reveal { opacity: 1; transform: none; transition: none; }
+}
+@media (max-width: 860px) {
+  .ecg-headline { font-size: 36px; }
+  .ecg-diagram { padding: 18px; border-radius: 2px; }
+  .ecg-golden-cell:nth-child(2) { border-right: 0.5px solid var(--hairline-firm); }
+}
+@media (max-width: 520px) {
+  .ecg-golden-cell { border-bottom: 0.5px solid var(--hairline-firm); }
 }
 `;
 
@@ -816,6 +989,27 @@ const quizQuestions = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function EcgCardiacConductionPage() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>('.ecg-guide .ecg-step, .ecg-guide .ecg-rhythm-card, .ecg-guide .ecg-diagram, .ecg-guide .ecg-key-col, .ecg-guide .ecg-golden-cell'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    els.forEach((el) => {
+      if (el.getBoundingClientRect().top > window.innerHeight) {
+        el.classList.add('ecg-reveal');
+        io.observe(el);
+      }
+    });
+    return () => io.disconnect();
+  }, []);
+
+
   return (
     <div className="ecg-guide">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
@@ -832,6 +1026,9 @@ export default function EcgCardiacConductionPage() {
           Where the heartbeat actually starts, how to read a waveform, a structured way to approach any rhythm strip, and the common arrhythmias compared side by side &mdash; for both branches.
         </p>
         <p className="ecg-byline">Children&apos;s &amp; adult nursing &middot; The Nurse Lab</p>
+        <svg className="ecg-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L520,30 L536,30 L544,24 L552,30 L572,30 L578,36 L586,4 L594,44 L600,30 L620,30 L636,20 L652,30 L1000,30" fill="none" pathLength={1} />
+        </svg>
         <EditorialSaveButton
           hubItemId="ecg-cardiac-conduction"
           hubItemTitle="ECG & Cardiac Conduction"
@@ -843,8 +1040,8 @@ export default function EcgCardiacConductionPage() {
         </div>
 
         <div className="ecg-diagram">
-          <img src="/hub-diagrams/ecg-conduction-pathway.svg" alt="Hand-drawn diagram of the heart and the direction of blood flow through its chambers" loading="lazy" />
-          <p className="ecg-diagram-caption">The heart and its blood flow &mdash; worth holding in mind as you read the conduction pathway below</p>
+          <InteractiveHeart />
+          <p className="ecg-diagram-caption">Tap the dots to explore the heart, or follow one full loop of blood &mdash; worth holding in mind as you read the conduction pathway below</p>
         </div>
 
         <div className="ecg-golden">
@@ -906,6 +1103,30 @@ export default function EcgCardiacConductionPage() {
             </div>
           </div>
         ))}
+
+        <div className="ecg-diagram">
+          <ConductionDiagram />
+          <p className="ecg-diagram-caption">The conduction system, step by step &mdash; each label shows what happens and where it appears on the ECG</p>
+        </div>
+
+        <h2 className="ecg-section-title">Try it: Explore One Heartbeat</h2>
+        <div className="ecg-diagram">
+          <InteractiveEcgBeat />
+          <p className="ecg-diagram-caption">Drag the handle along the trace, or tap a wave, segment or interval</p>
+        </div>
+
+        <div className="ecg-key">
+          <div className="ecg-key-col wide">
+            <p className="ecg-key-title">Reading the trace</p>
+            <div className="ecg-key-item"><span className="ecg-key-dot" style={{ background: 'var(--ink-mid)' }} /><span><strong>P wave</strong>Atrial depolarisation: the atria contract.</span></div>
+            <div className="ecg-key-item"><span className="ecg-key-dot" style={{ background: '#3aa15a' }} /><span><strong>PR segment (green)</strong>The flat line while the AV node delays the signal.</span></div>
+            <div className="ecg-key-item"><span className="ecg-key-dot" style={{ background: '#f5a623' }} /><span><strong>PR interval (orange)</strong>Start of the P wave to the start of the QRS: the whole trip from atria to ventricles. Normally 0.12&ndash;0.20 s.</span></div>
+            <div className="ecg-key-item"><span className="ecg-key-dot" style={{ background: '#e5484d' }} /><span><strong>QRS complex (red)</strong>Ventricular depolarisation: the big squeeze. Q is the first small dip, R the tall spike, S the dip after. Normally narrow (under 0.12 s). The atria are also resetting here, but it is hidden by the QRS.</span></div>
+            <div className="ecg-key-item"><span className="ecg-key-dot" style={{ background: '#8b6fc0' }} /><span><strong>ST segment (purple)</strong>The ventricles are fully depolarised and the trace is normally flat. Raised or dipped ST can point to cardiac ischaemia or infarction.</span></div>
+            <div className="ecg-key-item"><span className="ecg-key-dot" style={{ background: 'var(--ink-mid)' }} /><span><strong>T wave</strong>Ventricular repolarisation: the ventricles reset ready for the next beat.</span></div>
+            <div className="ecg-key-item"><span className="ecg-key-dot" style={{ background: '#3b7fc0' }} /><span><strong>QT interval (blue)</strong>Start of QRS to the end of the T wave: the ventricles&apos; whole electrical cycle. Too long can trigger dangerous rhythms.</span></div>
+          </div>
+        </div>
 
         <h2 className="ecg-section-title">Conduction Pathway Reference</h2>
         <table className="ecg-table" style={{ marginBottom: '32px' }}>

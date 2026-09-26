@@ -2,6 +2,7 @@ import { generatePageMetadata } from '@/lib/seo';
 import Testimonials from '@/components/Testimonials';
 import HeroSection from '@/components/home/HeroSection';
 import ToolsShowcase from '@/components/home/ToolsShowcase';
+import HandDrawnShowcase from '@/components/home/HandDrawnShowcase';
 import WhatsIncluded from '@/components/home/WhatsIncluded';
 import AccessibilityNote from '@/components/home/AccessibilityNote';
 import AccessPaths from '@/components/home/AccessPaths';
@@ -24,6 +25,7 @@ export default function HomePage() {
       <Testimonials compact />
       <SamplePreviews />
       <ToolsShowcase />
+      <HandDrawnShowcase />
       <WhatsIncluded />
       <AccessibilityNote />
       <AccessPaths />
