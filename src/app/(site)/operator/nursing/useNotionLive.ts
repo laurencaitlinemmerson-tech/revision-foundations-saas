@@ -28,11 +28,27 @@ export type LiveState = 'off' | 'loading' | 'live' | 'partial' | 'error';
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 const PRIORITY = (p: string): Deadline['priority'] => (/urgent/i.test(p) ? 'Urgent' : /high/i.test(p) ? 'High' : /medium/i.test(p) ? 'Medium' : undefined);
 
-function mergeDeadlines(live: LiveDeadline[]): Deadline[] {
+/** How each snapshot deadline is spelled in Notion: a phrase its title contains, and optionally the module code too. */
+const MATCH: Record<string, { kw: string; mod?: string }> = {
+  case: { kw: 'case study' },
+  essay: { kw: 'essay', mod: '5knic011' },
+  pharm: { kw: 'mcq' },
+  numeracy: { kw: 'numeracy assessment' },
+  haem: { kw: 'haemoglobinopathies' },
+  npia: { kw: 'nursing process in action' },
+};
+
+export function mergeDeadlines(live: LiveDeadline[]): Deadline[] {
   const today = new Date().toISOString().slice(0, 10);
   const used = new Set<string>();
   const merged = DEADLINES.map((snap) => {
-    const hit = live.find((l) => !used.has(l.title) && (norm(l.title).includes(norm(snap.title)) || norm(snap.title).includes(norm(l.title))));
+    const m = MATCH[snap.id];
+    const hit = live.find((l) => {
+      if (used.has(l.title) || l.year === 'Year 1') return false;
+      const t = norm(l.title);
+      if (m) return t.includes(m.kw) && (!m.mod || t.includes(m.mod));
+      return t.includes(norm(snap.title)) || norm(snap.title).includes(t);
+    });
     if (!hit) return snap;
     used.add(hit.title);
     return {

@@ -59,8 +59,14 @@ const num = (p?: Props): number | null => (typeof p?.number === 'number' ? p.num
 const date = (p?: Props): { start: string; end: string | null } | null => (p?.date?.start ? { start: p.date.start, end: p.date.end ?? null } : null);
 const clean = (s: string) => s.replace(/[^\p{L}\p{N}\s/&%.-]/gu, '').trim();
 
-/** Wall-clock HH:MM from a Notion datetime. Notion sends the rota with a Z suffix but the times are local. */
-const clock = (s: string | null) => (s && s.includes('T') ? s.slice(11, 16) : null);
+/** UK wall-clock HH:MM from a Notion datetime (which carries its own UTC offset), or null for a date-only value. */
+const clock = (s: string | null) =>
+  s && s.includes('T')
+    ? new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(s))
+    : null;
+
+/** "Eagle LD " -> "Eagle", "Placement LD (PH)" -> "Placement". */
+const wardOf = (t: string) => t.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s+(LD|ND|N|E|L)\s*$/i, '').trim() || 'Placement';
 
 async function deadlines(token: string) {
   const rows = await queryAll(token, PLANNER);
@@ -102,12 +108,16 @@ async function hours(token: string) {
       if (type === 'Simulated') acc.y2Simulated += h;
       else if (clinical.has(type) || type === 'Placeholder') acc.y2Placements += h;
     }
-    if (year === 'Year 2' && d && clinical.has(type)) {
+    // Upcoming shifts are often still "Placeholder" until the rota is confirmed, so
+    // any timed Year 2 entry that is not a simulation day or a projected block counts.
+    const timed = Boolean(d && d.start.includes('T'));
+    const isShift = clinical.has(type) || (type === 'Placeholder' && !/projected|simulat/i.test(title(p['Shift'])));
+    if (year === 'Year 2' && d && timed && isShift) {
       rota.push({
         date: d.start.slice(0, 10),
         start: clock(d.start) ?? '',
         end: clock(d.end) ?? '',
-        ward: title(p['Shift']) || 'Placement',
+        ward: wardOf(title(p['Shift'])),
         missingHours: !h,
       });
     }
