@@ -215,7 +215,7 @@ export default function NursingClient() {
             <Heading label="Next shift" id="up-next" context={nextStatus === 'current' ? 'Placement in progress' : 'Placement starts soon'} />
             <div className="ns-next">
               <div className="ns-next-main">
-                <p className="ns-eyebrow">Year {nextPlacement.year} placement · {nextPlacement.name}</p>
+                <p className="ns-eyebrow">Year {nextPlacement.year} placement · {nextPlacement.name}{nextPlacement.specialty ? ` · ${nextPlacement.specialty}` : ''}</p>
                 {nextShift ? (
                   <>
                     <h3 className="ns-next-title">{fmtLong(nextShift.date)}</h3>
@@ -237,7 +237,7 @@ export default function NursingClient() {
 
                 <div className="ns-guides">
                   <p className="ns-eyebrow">Revise before you go</p>
-                  {PLACEMENT_GUIDES.map((g) => (
+                  {[...(nextPlacement.guides ?? []), ...PLACEMENT_GUIDES].map((g) => (
                     <Link key={g.href} href={g.href} className="ns-link">
                       <span>{g.label}</span><span aria-hidden="true">→</span>
                     </Link>

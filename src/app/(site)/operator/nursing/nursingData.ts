@@ -172,12 +172,19 @@ export type Placement = {
   start: string | null; // ISO
   end: string | null;
   signOff?: boolean;
+  guides?: { label: string; href: string }[]; // specialty revision, shown ahead of PLACEMENT_GUIDES
 };
 
 export const PLACEMENTS: Placement[] = [
   { name: 'February 2026', year: 1, specialty: 'Oncology', start: '2026-02-02', end: '2026-03-15' },
   { name: 'July 2026', year: 1, specialty: 'Neurosurgery', start: '2026-07-13', end: '2026-08-15' },
-  { name: 'October 2026', year: 2, specialty: null, start: '2026-09-28', end: '2026-11-08' },
+  {
+    name: 'October 2026', year: 2, specialty: 'Renal', start: '2026-09-28', end: '2026-11-08',
+    guides: [
+      { label: 'Renal system', href: '/hub/resources/renal-system' },
+      { label: 'Fluids, electrolytes and homeostasis', href: '/hub/resources/fluids-electrolytes-homeostasis' },
+    ],
+  },
   { name: 'February 2027', year: 2, specialty: null, start: '2027-02-22', end: '2027-03-21' },
   { name: 'July 2027', year: 2, specialty: null, start: null, end: null },
   { name: 'November 2027', year: 3, specialty: null, start: null, end: null },
