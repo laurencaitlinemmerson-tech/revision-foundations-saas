@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import EditorialSaveButton from '@/components/EditorialSaveButton';
+import AnnotatedDiagram from '@/components/hub/AnnotatedDiagram';
 import SelfTestQuiz from '@/components/SelfTestQuiz';
 import { SourceLinks } from '@/components/hub/StudyComponents';
 
@@ -809,6 +810,14 @@ export default function RenalSystemPage() {
         </div>
 
         {/* Golden rules */}
+        <AnnotatedDiagram
+          src="/hub-diagrams/organ-kidney.webp"
+          width={930}
+          height={1050}
+          alt="Cross-section of the kidney showing the outer cortex and capsule, the inner pyramids, the branching renal blood vessels, the renal pelvis and the ureter. The leader lines are left blank for you to label."
+          caption="Cross-section of the kidney &mdash; try naming what each line points to before checking your notes"
+          minWidth={420}
+        />
         <div className="rn-golden">
           {[
             {
