@@ -8,6 +8,7 @@ import { SourceLinks } from '@/components/hub/StudyComponents';
 import ConductionDiagram from '@/components/hub/ConductionDiagram';
 import SheetLinks from '@/components/hub/SheetLinks';
 import { TwelveLeadFigure, ThreeLeadFigure } from '@/components/hub/EcgElectrodes';
+import EcgTrace from '@/components/hub/EcgTrace';
 import { InteractiveHeart, InteractiveEcgBeat } from '@/components/hub/InteractiveHeart';
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -964,6 +965,15 @@ const territoryRows = [
   { wall: 'Inferior', leads: 'II, III, aVF' },
 ];
 
+const sinusChecklist = [
+  { step: 'Rate', finding: 'About 66 beats a minute on average. Between two of these beats the R\u2013R interval is about 4 large boxes, and 300 \u00f7 4 is roughly 75', normal: '60\u2013100 in an adult' },
+  { step: 'Rhythm', finding: 'Regular overall. The gaps between beats shorten and lengthen slightly with breathing, which is called sinus arrhythmia', normal: 'Normal and common in young people' },
+  { step: 'P waves', finding: 'A P wave before every QRS, all the same shape and upright in lead I', normal: 'One P for every QRS means the SA node is in charge' },
+  { step: 'PR interval', finding: 'About 4 small boxes, roughly 0.16 to 0.18 s', normal: '0.12\u20130.20 s (3 to 5 small boxes)' },
+  { step: 'QRS', finding: 'Narrow and sharp, under 3 small boxes', normal: 'Under 0.12 s' },
+  { step: 'ST segment and T wave', finding: 'ST segment sits on the baseline and the T wave is upright and rounded', normal: 'No ST shift, T upright in lead I' },
+];
+
 const quizQuestions = [
   {
     question: 'A 12-lead ECG uses how many electrodes, and why does that give 12 leads?',
@@ -1228,6 +1238,23 @@ export default function EcgCardiacConductionPage() {
             ))}
           </tbody>
         </table>
+
+        <h2 className="ecg-section-title">A Real Sinus Rhythm, Labelled</h2>
+        <EcgTrace />
+        <table className="ecg-table" style={{ marginBottom: '16px' }}>
+          <thead>
+            <tr><th>Check</th><th>What this trace shows</th><th>Normal</th></tr>
+          </thead>
+          <tbody>
+            {sinusChecklist.map((row) => (
+              <tr key={row.step}><td>{row.step}</td><td>{row.finding}</td><td>{row.normal}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="ecg-pearl" style={{ marginBottom: '32px' }}>
+          <p className="ecg-pearl-label">Clinical pearl</p>
+          <p>This is one lead, recorded from a smartwatch, so it is a good picture of rate and rhythm but it cannot show which wall of the heart is affected or rule out a heart attack. That needs the 12-lead below. &ldquo;Sinus&rdquo; means the beat starts in the SA node, and the proof is a P wave in front of every QRS.</p>
+        </div>
 
         <h2 className="ecg-section-title">Where the Stickers Go: 3-Lead vs 12-Lead</h2>
         <div className="ecg-pearl" style={{ marginBottom: '28px' }}>
