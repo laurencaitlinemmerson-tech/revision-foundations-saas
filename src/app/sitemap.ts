@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/hub/childrens',
     '/hub/glossary',
     '/hub/questions',
+    '/hub/colouring-sheets',
     '/osce',
     '/quiz',
     '/privacy',
