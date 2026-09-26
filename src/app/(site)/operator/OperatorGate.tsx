@@ -88,13 +88,13 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', padding: 24 }}>
       <form
         onSubmit={submit}
-        style={{ width: '100%', maxWidth: 400, textAlign: 'left', padding: '30px 30px 32px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, background: '#FFFFFF' }}
+        style={{ width: '100%', maxWidth: 400, textAlign: 'left', padding: '30px 30px 32px', border: '0.5px solid rgba(0,0,0,0.14)', borderRadius: 2, background: '#FFFFFF' }}
       >
         <div style={{ fontFamily: sans, fontSize: 10.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#8E8A82', marginBottom: 10 }}>
           Operator · Restricted
         </div>
         <h1 style={{ fontFamily: display, fontWeight: 500, fontSize: 30, lineHeight: 1.1, color: '#1A1A18', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
-          The Operator <em style={{ fontStyle: 'italic', color: '#C06C84' }}>Log</em>
+          Operator <em style={{ fontStyle: 'italic', color: '#8F7A54' }}>Log</em>
         </h1>
         <p style={{ fontFamily: sans, fontSize: 13, color: '#8E8A82', margin: '0 0 24px', lineHeight: 1.55 }}>
           A private fitness &amp; nursing log. Enter your password to continue.
@@ -114,7 +114,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           onChange={(e) => setPw(e.target.value)}
           style={{
             width: '100%', background: '#FFFFFF', outline: 'none',
-            border: `1px solid ${err ? '#AA7F68' : 'rgba(0,0,0,0.08)'}`, borderRadius: 6,
+            border: `1px solid ${err ? '#AA7F68' : 'rgba(0,0,0,0.08)'}`, borderRadius: 2,
             fontFamily: sans, fontSize: 14, color: '#1A1A18',
             padding: '10px 12px', marginBottom: err ? 8 : 20, transition: 'border-color 0.2s',
           }}
@@ -124,7 +124,7 @@ function Lock({ onUnlock }: { onUnlock: () => void }) {
           type="submit"
           disabled={loading}
           style={{
-            width: '100%', background: '#1A1A18', color: '#FFFFFF', border: 0, borderRadius: 6, cursor: 'pointer',
+            width: '100%', background: '#1A1A18', color: '#FFFFFF', border: 0, borderRadius: 2, cursor: 'pointer',
             padding: '12px 20px', fontFamily: sans, fontSize: 12, fontWeight: 600,
             letterSpacing: '0.08em', textTransform: 'uppercase', opacity: loading ? 0.6 : 1,
           }}

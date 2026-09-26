@@ -4,7 +4,7 @@ The operator's Training dashboard at `/operator`. Warm-editorial structure — c
 ground, hairline rules, serif display type — with plum and rose carrying the data.
 
 Scoped entirely to `.training-shell`, so none of it leaks into the marketing site
-or the older Daily log at `/operator/daily-log`, which runs its own tokens.
+or the Nursing page at `/operator/nursing`, which uses the student dashboard's tokens.
 
 ---
 

@@ -2417,7 +2417,7 @@ export function deriveVals(
           select: () => set({ selectedDay: st.selectedDay === date ? null : date }),
           // A quiet wash behind a day that carried work, so the month reads at a glance.
           tint: future ? 'transparent'
-            : s ? (s.strength ? 'rgba(95,68,114,0.10)' : 'rgba(192,108,132,0.10)')
+            : s ? (s.strength ? 'rgba(95,68,114,0.10)' : 'rgba(166,144,107,0.14)')
               : steps >= TARGETS.stepGoal ? 'rgba(95,68,114,0.04)' : 'transparent',
         };
       }),

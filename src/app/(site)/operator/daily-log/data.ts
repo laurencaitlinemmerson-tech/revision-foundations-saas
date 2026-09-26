@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { storedOperatorPassword } from '../OperatorGate';
-import type { Reading } from './logic';
 
 /**
  * Live operator data.
@@ -12,6 +11,9 @@ import type { Reading } from './logic';
  * consumes. Anything missing stays `null` so the derivation can fall back to the
  * design's seed values rather than render blanks or NaN.
  */
+
+/** One weigh-in: an ISO date and a weight in kg. */
+export type Reading = { date: string; weight: number };
 
 export type HealthDay = {
   date: string;

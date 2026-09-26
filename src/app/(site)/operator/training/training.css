@@ -82,6 +82,40 @@
   .training-shell .training-split > * { border-right: 0 !important; }
 }
 
+/* ── Site-wide look: gold accents, gold-bar headings, heartbeat line ────── */
+.training-shell { --gold: #A6906B; --gold-deep: #8F7A54; }
+
+.training-shell .tr-head { position: relative; padding-top: 22px; margin-top: 8px; }
+.training-shell .tr-bar { position: absolute; top: 0; left: 0; width: 44px; height: 3px; border-radius: 999px; background: var(--gold); }
+.training-shell h1 em, .training-shell h2 em { font-style: italic; color: var(--gold-deep); }
+
+.training-shell .tr-pulse { display: block; width: min(520px, 100%); height: 34px; margin: 4px 0 12px; overflow: visible; }
+.training-shell .tr-pulse path {
+  stroke: var(--gold); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: tr-pulse-draw 2.4s ease-out 0.3s forwards;
+}
+@keyframes tr-pulse-draw { to { stroke-dashoffset: 0; } }
+
+/* Active nav row: gold wash + gold edge instead of lilac. */
+.training-shell .training-nav button[aria-current="page"] {
+  background: rgba(203, 174, 120, 0.16) !important;
+  color: var(--ink) !important;
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.training-shell .training-nav button[aria-current="page"] span:first-child { color: var(--gold-deep) !important; }
+.training-shell .tr-nav-link:hover span:last-child { color: var(--gold-deep); }
+@media (min-width: 901px) {
+  .training-shell .training-nav button, .training-shell .tr-nav-link { padding-top: 11px !important; padding-bottom: 11px !important; }
+  .training-shell .training-aside { padding-top: 32px !important; }
+}
+.training-shell .training-aside div[style*="border-radius: 50%"] { background: rgba(203, 174, 120, 0.32) !important; }
+
+@media (max-width: 900px) {
+  .training-shell .tr-nav-link { white-space: nowrap; border-bottom: 0 !important; border-right: 0.5px solid var(--rule-soft); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .training-shell * { transition: none !important; }
+  .training-shell .tr-pulse path { animation: none; stroke-dashoffset: 0; }
 }

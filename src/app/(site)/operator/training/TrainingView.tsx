@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { TrainingVals } from './logic';
 import {
@@ -84,12 +85,17 @@ function Eyebrow({ children }: { children: ReactNode }) {
 }
 
 function SectionHeading({ title, aside }: { title: string; aside?: string }) {
+  const words = title.split(' ');
+  const last = words.pop();
   return (
-    <div style={{
+    <div className="tr-head" style={{
       display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
       gap: 16, borderBottom: RULE, paddingBottom: 12,
     }}>
-      <h2 style={{ ...display(24), margin: 0 }}>{title}</h2>
+      <span className="tr-bar" aria-hidden="true" />
+      <h2 style={{ ...display(24), margin: 0 }}>
+        {words.length ? `${words.join(' ')} ` : ''}<em>{last}</em>
+      </h2>
       {aside && (
         <span style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: MUTED }}>
           {aside}
@@ -548,6 +554,14 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
               <span>{item.label}</span>
             </button>
           ))}
+          <Link
+            href="/operator/nursing"
+            className="hv-nav tr-nav-link"
+            style={{ display: 'flex', alignItems: 'baseline', gap: 12, padding: '15px 28px', borderBottom: RULE_SOFT, fontSize: 14, fontWeight: 300, color: SOFT }}
+          >
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: MUTED, minWidth: 18 }}>→</span>
+            <span>Nursing</span>
+          </Link>
         </nav>
         <div style={{ marginTop: 'auto', padding: CARD_PAD, borderTop: RULE }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -573,7 +587,14 @@ export default function TrainingView({ v }: { v: TrainingVals }) {
         }}>
           <div>
             <Eyebrow>{v.todayLabel}</Eyebrow>
-            <h1 style={{ ...display(38), margin: '10px 0 8px' }}>{v.pageTitle}</h1>
+            <h1 style={{ ...display(38), margin: '10px 0 8px' }}>
+              {v.pageTitle.startsWith('Good ') && v.pageTitle.includes(', ')
+                ? (<>{v.pageTitle.split(', ')[0]}, <em>{v.pageTitle.split(', ').slice(1).join(', ')}</em></>)
+                : v.pageTitle}
+            </h1>
+            <svg className="tr-pulse" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0,30 L180,30 L196,30 L204,24 L212,30 L232,30 L238,36 L246,4 L254,44 L260,30 L280,30 L296,20 L312,30 L1000,30" fill="none" />
+            </svg>
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.65, color: SOFT, maxWidth: '54ch', textWrap: 'pretty' }}>
               {v.pageSub}
             </p>

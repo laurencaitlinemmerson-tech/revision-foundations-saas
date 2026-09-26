@@ -10,8 +10,7 @@ export const metadata: Metadata = {
 /**
  * The operator dashboard — Training.
  *
- * The previous Daily log dashboard is still available at /operator/daily-log;
- * both sit behind the same password gate.
+ * Sits behind the operator password gate, alongside /operator/nursing.
  */
 export default function OperatorPage() {
   return (
