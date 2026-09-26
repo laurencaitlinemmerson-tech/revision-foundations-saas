@@ -32,7 +32,7 @@ const TOOLBAR_CSS = `
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   border: 0.5px solid var(--hairline-firm);
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: none;
   z-index: 9998;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   transition: opacity 0.25s, transform 0.25s;

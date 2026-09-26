@@ -51,6 +51,8 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
 
     // ── Hide interactive / non-print elements ──
     const hidden: HTMLElement[] = [];
+    const restoreImages: Array<() => void> = [];
+    const swaps: Array<() => void> = [];
     const hide = (node: HTMLElement | null) => {
       if (!node) return;
       node.style.display = 'none';
@@ -75,6 +77,84 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
         const text = h2.textContent?.trim().toLowerCase() || '';
         if (text.includes('self-test') || text.includes('checklist')) hide(h2);
       });
+
+      // Tap-only diagram controls mean nothing on paper
+      el.querySelectorAll<HTMLElement>('.ih-dot, .ih-bar, .ih-progress, .ad-sheet, .hf-sheet').forEach(hide);
+      el.querySelectorAll<HTMLElement>('.ih-panel').forEach((panel) => {
+        if (panel.querySelector('.ih-hint')) hide(panel);
+      });
+
+      // html2canvas cannot draw an <image> inside an inline SVG unless it is embedded
+      const toDataUrl = async (url: string) => {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(blob);
+        });
+      };
+      await Promise.all(
+        Array.from(el.querySelectorAll<SVGImageElement>('svg image')).map(async (img) => {
+          const original = img.getAttribute('href') ?? img.getAttribute('xlink:href');
+          if (!original || original.startsWith('data:')) return;
+          try {
+            const dataUrl = await toDataUrl(original);
+            img.setAttribute('href', dataUrl);
+            restoreImages.push(() => img.setAttribute('href', original));
+          } catch {
+            /* leave the original reference if it cannot be fetched */
+          }
+        }),
+      );
+
+      // Render the labelled organ diagrams to pictures ourselves (styles baked in),
+      // because html2canvas draws inline SVG text and images unreliably.
+      const svgProps = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'font-family', 'font-size', 'font-weight', 'letter-spacing', 'opacity', 'text-anchor'];
+      for (const svg of Array.from(el.querySelectorAll<SVGSVGElement>('svg.ad-svg, svg.cd-svg'))) {
+        try {
+          const vb = svg.viewBox.baseVal;
+          const w = 1600;
+          const h = Math.round((w * vb.height) / vb.width);
+          const clone = svg.cloneNode(true) as SVGSVGElement;
+          const originals = svg.querySelectorAll('*');
+          const clones = clone.querySelectorAll('*');
+          originals.forEach((node, i) => {
+            const cs = getComputedStyle(node);
+            clones[i].setAttribute('style', svgProps.map((prop) => `${prop}:${cs.getPropertyValue(prop)}`).join(';'));
+            clones[i].removeAttribute('class');
+          });
+          clone.removeAttribute('class');
+          clone.removeAttribute('style');
+          clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+          clone.setAttribute('width', String(w));
+          clone.setAttribute('height', String(h));
+          const xml = new XMLSerializer().serializeToString(clone);
+          const picture = new Image();
+          await new Promise<void>((resolve, reject) => {
+            picture.onload = () => resolve();
+            picture.onerror = () => reject(new Error('svg render failed'));
+            picture.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(xml)}`;
+          });
+          const raster = document.createElement('canvas');
+          raster.width = w;
+          raster.height = h;
+          raster.getContext('2d')!.drawImage(picture, 0, 0, w, h);
+          const replacement = document.createElement('img');
+          replacement.src = raster.toDataURL('image/png');
+          replacement.alt = '';
+          replacement.style.cssText = 'display:block;width:100%;height:auto';
+          svg.parentElement?.insertBefore(replacement, svg);
+          svg.style.display = 'none';
+          swaps.push(() => {
+            replacement.remove();
+            svg.style.display = '';
+          });
+        } catch {
+          /* fall back to the live SVG */
+        }
+      }
 
       el.classList.add('pdf-generating');
 
@@ -141,6 +221,8 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
       pdf.save(`${title}-TheNurseLab.pdf`);
     } finally {
       el.classList.remove('pdf-generating');
+      swaps.forEach((undo) => undo());
+      restoreImages.forEach((undo) => undo());
       hidden.forEach((node) => { node.style.display = ''; });
       setGenerating(false);
     }
@@ -153,13 +235,21 @@ export default function ResourcePDFWrapper({ children }: ResourcePDFWrapperProps
 
       {/* ── Quiz/OSCE cross-link — hidden during PDF generation ── */}
       <div className="resource-quiz-cta">
-        <p className="resource-quiz-cta-label">Also practice with</p>
+        <p className="resource-quiz-cta-label">Also practise with</p>
         <div className="resource-quiz-cta-links">
           <Link href="/quiz" className="resource-quiz-cta-link">
-            Core Quiz — test your recall →
+            <span>
+              <span className="resource-quiz-cta-title">Core Quiz</span>
+              <span className="resource-quiz-cta-sub">Test your recall</span>
+            </span>
+            <span className="resource-quiz-cta-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/osce" className="resource-quiz-cta-link">
-            OSCE Stations — apply it clinically →
+            <span>
+              <span className="resource-quiz-cta-title">OSCE Stations</span>
+              <span className="resource-quiz-cta-sub">Apply it clinically</span>
+            </span>
+            <span className="resource-quiz-cta-arrow" aria-hidden="true">→</span>
           </Link>
         </div>
       </div>
@@ -227,7 +317,7 @@ const PDF_CSS = `
     border: none;
     cursor: pointer;
     transition: opacity 0.2s;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    box-shadow: none;
   }
   .pdf-download-btn:hover {
     opacity: 0.82;
@@ -260,6 +350,18 @@ const PDF_CSS = `
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
+  }
+
+  .pdf-generating .ad-scroll,
+  .pdf-generating .ih-scroll,
+  .pdf-generating .cd-scroll {
+    overflow: visible !important;
+  }
+  .pdf-generating .ad-svg,
+  .pdf-generating .cd-svg,
+  .pdf-generating .ih-stage,
+  .pdf-generating .ih-ecg {
+    min-width: 0 !important;
   }
 
   .pdf-generating [class*="-wrap"] {
@@ -364,7 +466,7 @@ const PDF_CSS = `
     gap: 0;
     background: var(--surface-page);
     border: 0.5px solid var(--hairline-firm);
-    box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    box-shadow: none;
     animation: nudge-in 0.25s ease;
   }
   @keyframes nudge-in {
@@ -401,42 +503,64 @@ const PDF_CSS = `
 
   /* ── Quiz/OSCE cross-link CTA ── */
   .resource-quiz-cta {
-    margin-top: 48px;
-    padding: 24px 28px;
-    border: 0.5px solid var(--hairline-soft);
-    background: var(--surface-sunken);
+    max-width: 980px;
+    margin: 56px auto 0;
+    padding: 0 40px;
   }
   .resource-quiz-cta-label {
     font-family: 'Inter', -apple-system, sans-serif;
     font-size: 10px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-bottom: 14px;
+    color: var(--gold-deep, #8a7350);
+    font-weight: 500;
+    margin: 0 0 14px;
   }
   .resource-quiz-cta-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 0.5px solid var(--hairline-firm);
   }
   .resource-quiz-cta-link {
-    font-family: 'Inter', -apple-system, sans-serif;
-    font-size: 13px;
-    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    text-decoration: none;
     color: var(--ink-strong);
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    text-decoration-color: rgba(0,0,0,0.25);
+    transition: background 0.2s ease;
   }
-  .resource-quiz-cta-link:hover {
-    text-decoration-color: #1A1815;
+  .resource-quiz-cta-link + .resource-quiz-cta-link { border-left: 0.5px solid var(--hairline-firm); }
+  .resource-quiz-cta-link:hover { background: var(--surface-sunken); }
+  .resource-quiz-cta-title {
+    display: block;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    line-height: 1.2;
+    font-weight: 400;
+    transition: color 0.2s ease;
+  }
+  .resource-quiz-cta-link:hover .resource-quiz-cta-title { color: var(--gold-deep, #8a7350); }
+  .resource-quiz-cta-sub {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-soft);
+  }
+  .resource-quiz-cta-arrow { color: var(--gold); transition: transform 0.2s ease; }
+  .resource-quiz-cta-link:hover .resource-quiz-cta-arrow { transform: translateX(4px); }
+  @media (max-width: 720px) {
+    .resource-quiz-cta { padding: 0 20px; }
+    .resource-quiz-cta-links { grid-template-columns: 1fr; }
+    .resource-quiz-cta-link + .resource-quiz-cta-link { border-left: none; border-top: 0.5px solid var(--hairline-firm); }
   }
 
   /* ── Discussion wrapper ── */
   .resource-discussion-wrap {
-    margin-top: 48px;
-    padding-top: 32px;
-    border-top: 0.5px solid var(--hairline-soft);
+    margin-top: 0;
   }
 
   /* Hide non-print sections during PDF generation */

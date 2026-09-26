@@ -33,7 +33,7 @@ export default function ResourceBookmark({ resourceId }: ResourceBookmarkProps) 
       style={{
         flexShrink: 0,
         background: bookmarked ? 'var(--surface-sunken)' : '#FFFFFF',
-        boxShadow: '0 1px 0 rgba(26,24,21,0.04)',
+        boxShadow: 'none',
       }}
     >
       {bookmarked ? (

@@ -171,7 +171,7 @@ const CSS = `
 .qt-answers-header {
   border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.95) 100%);
-  box-shadow: 0 22px 42px rgba(26,24,21,0.05);
+  box-shadow: none;
   padding: 24px 28px;
   margin-bottom: 24px;
   display: flex;
@@ -277,7 +277,7 @@ const CSS = `
   position: relative;
   overflow: hidden;
   border: 0.5px solid var(--hairline-firm);
-  box-shadow: 0 18px 34px rgba(26,24,21,0.04);
+  box-shadow: none;
 }
 .qt-answer::after {
   content: '';
@@ -296,7 +296,7 @@ const CSS = `
 .qt-answer.accepted {
   background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(240,249,247,0.78) 100%);
   border-color: rgba(15,110,86,0.18);
-  box-shadow: 0 24px 44px rgba(15,110,86,0.08);
+  box-shadow: none;
 }
 
 .qt-answer-stripe {
@@ -407,7 +407,7 @@ const CSS = `
 .qt-reply {
   border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.96) 100%);
-  box-shadow: 0 24px 48px rgba(26,24,21,0.05);
+  box-shadow: none;
   padding: 28px 32px;
   position: relative;
   overflow: hidden;
@@ -489,7 +489,7 @@ const CSS = `
   border: 0.5px solid var(--hairline-firm);
   background: rgba(255,255,255,0.9);
   padding: 18px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow: none;
 }
 
 .qt-form-textarea {
@@ -684,7 +684,7 @@ const CSS = `
 .qt-sidebar-panel {
   border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.94) 100%);
-  box-shadow: 0 20px 36px rgba(26,24,21,0.05);
+  box-shadow: none;
   overflow: hidden;
 }
 

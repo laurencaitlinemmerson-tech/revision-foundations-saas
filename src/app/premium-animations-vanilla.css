@@ -218,7 +218,7 @@
 }
 
 .card-lift:hover {
-  box-shadow: 0 8px 24px rgba(48, 25, 6, 0.09);
+  box-shadow: none;
 }
 
 .card-lift:hover::after {
@@ -378,12 +378,12 @@
   font-weight: 600;
   border: 2px solid var(--lavender);
   transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
 .review-link:hover {
   background: var(--lilac-soft);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
 }
 
 .review-link:active {
@@ -432,7 +432,7 @@
   }
   
   .card-lift:hover {
-    box-shadow: 0 4px 16px rgba(48, 25, 6, 0.08);
+    box-shadow: none;
   }
 }
 

@@ -78,7 +78,7 @@ export const CSS = `
   align-items: end;
   border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,244,239,0.96) 100%);
-  box-shadow: 0 26px 48px rgba(26,24,21,0.05);
+  box-shadow: none;
   padding: 34px 36px 32px;
   margin-bottom: 36px;
 }
@@ -287,7 +287,7 @@ export const CSS = `
   overflow: hidden;
   border: 0.5px solid var(--hairline-firm);
   background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(247,244,239,0.96) 100%);
-  box-shadow: 0 24px 48px rgba(26,24,21,0.05);
+  box-shadow: none;
   padding: 24px 26px 22px;
   margin-bottom: 36px;
 }
@@ -444,7 +444,7 @@ export const CSS = `
   background: #1A1815;
   color: var(--surface-page);
   border-color: #1A1815;
-  box-shadow: 0 12px 24px rgba(26,24,21,0.12);
+  box-shadow: none;
 }
 
 .qb-active-filters {
@@ -499,7 +499,7 @@ export const CSS = `
   border: 0.5px solid var(--hairline-firm);
   text-decoration: none;
   background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,250,248,1) 100%);
-  box-shadow: 0 20px 36px rgba(26,24,21,0.04);
+  box-shadow: none;
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
 .qb-q-row::before {
@@ -534,7 +534,7 @@ export const CSS = `
 }
 .qb-q-row:hover {
   transform: translateY(-3px);
-  box-shadow: 0 28px 48px rgba(26,24,21,0.08);
+  box-shadow: none;
 }
 
 .qb-q-row-top {

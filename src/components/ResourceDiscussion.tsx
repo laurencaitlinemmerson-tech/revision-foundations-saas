@@ -78,7 +78,8 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
   };
 
   return (
-    <div className="mt-12 border-t border-black/10 pt-8">
+    <div className="mx-auto mt-12 max-w-[980px] px-6 md:px-10">
+      <div className="border-t border-black/10 pt-8">
       <h2
         className="mb-6 flex items-center gap-2 text-lg"
         style={{
@@ -118,7 +119,7 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
           </button>
         </form>
       ) : (
-        <div className="mb-6 border border-black/8 bg-[var(--surface-sunken)] p-5 text-center">
+        <div className="mb-6 border-[0.5px] border-[var(--hairline-firm)] p-5 text-center">
           <p className="mb-3 text-sm" style={{ color: 'var(--ink-soft)' }}>
             Sign in or create an account to join the discussion.
           </p>
@@ -164,6 +165,7 @@ export default function ResourceDiscussion({ slug }: { slug: string }) {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

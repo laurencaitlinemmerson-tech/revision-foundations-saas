@@ -242,7 +242,7 @@ export default async function OnboardingPage({
               background: rgba(255, 255, 255, 0.72);
               border: 1px solid rgba(28, 24, 19, 0.1);
               padding: 22px 22px 24px;
-              box-shadow: 0 18px 42px rgba(28, 24, 19, 0.07);
+              box-shadow: none;
             }
             .ob-recommendation-label {
               margin: 0 0 10px;
