@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { parseSessionDetail } from '@/lib/health/sessionDetail';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
@@ -13,7 +14,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { FITNESS_FALLBACK_TYPE } from '@/lib/operatorFitnessStorage';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 function num(value: unknown): number | null {

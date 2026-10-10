@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { consentUrl, googleClientConfigured, redirectUri, signState } from '@/lib/operatorGoogle';
 
 /**
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 export async function POST(req: NextRequest) {

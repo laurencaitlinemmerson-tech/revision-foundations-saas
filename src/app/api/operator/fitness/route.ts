@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import {
   deleteFitnessReading,
   listFitnessReadings,
@@ -8,7 +9,7 @@ import { isPlausibleWeightKg } from '@/lib/fitnessValidation';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 export async function GET(req: NextRequest) {

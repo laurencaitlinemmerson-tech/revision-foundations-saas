@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { deleteLift, listLifts, saveLift } from '@/lib/operatorLiftStorage';
 
 /** The lift log — the only operator data that is entered rather than synced. */
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 export async function GET(req: NextRequest) {

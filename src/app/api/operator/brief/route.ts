@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { buildDailyBrief } from '@/lib/health/dailyBrief';
 import { JOURNEY } from '@/app/(site)/operator/training/targets';
 
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 export async function GET(req: NextRequest) {

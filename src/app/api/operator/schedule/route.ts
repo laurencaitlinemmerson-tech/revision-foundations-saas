@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { googleClientConfigured, loadAuth, redirectUri } from '@/lib/operatorGoogle';
 import { fetchTimetable } from '@/lib/operatorTimetable';
 
@@ -29,7 +30,7 @@ export const dynamic = 'force-dynamic';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 type Entry = { start: Date; end: Date | null; title: string; allDay: boolean; source: string };

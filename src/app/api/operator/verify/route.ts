@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
@@ -8,9 +9,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Password required' }, { status: 400 });
   }
 
-  const correct = process.env.OPERATOR_PASSWORD ?? 'operator2026';
-
-  if (password === correct) {
+  if (operatorPasswordMatches(password)) {
     return NextResponse.json({ success: true });
   }
 

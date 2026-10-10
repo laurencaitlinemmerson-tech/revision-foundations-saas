@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { buildDailyBrief, renderBriefText, renderWeeklyText } from '@/lib/health/dailyBrief';
 
 /**
@@ -61,7 +62,7 @@ function authed(req: NextRequest) {
   }
 
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return constantTimeEquals(pw, process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 function numberParam(value: string | null) {

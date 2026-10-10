@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { findWhatWorked, type DayRow, type WeighRow, type WorkoutRow } from '@/lib/health/whatWorked';
 import { FITNESS_FALLBACK_TYPE } from '@/lib/operatorFitnessStorage';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
@@ -15,7 +16,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 /** Supabase caps a select at a thousand rows, and the record is longer. */

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 /**
@@ -16,7 +17,7 @@ const KINDS: PlanKind[] = ['strength', 'cardio', 'other', 'rest'];
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 type Row = { weekday: number; kind: string; label: string | null };

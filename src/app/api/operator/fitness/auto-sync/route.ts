@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 import { upsertFitnessReading } from '@/lib/operatorFitnessStorage';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
@@ -25,7 +26,7 @@ function authed(req: NextRequest) {
   if (syncToken && bearer === `Bearer ${syncToken}`) return true;
 
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 function parseNumber(value: unknown) {

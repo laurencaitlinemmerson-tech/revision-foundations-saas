@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { operatorPasswordMatches } from '@/lib/operatorAuth';
 
 /**
  * Live nursing data from Notion, so the Nursing and Study pages stop depending on
@@ -29,7 +30,7 @@ const CACHE_MS = 5 * 60 * 1000;
 
 function authed(req: NextRequest) {
   const pw = req.headers.get('x-operator-pw') ?? '';
-  return pw === (process.env.OPERATOR_PASSWORD ?? 'operator2026');
+  return operatorPasswordMatches(pw);
 }
 
 type Props = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
