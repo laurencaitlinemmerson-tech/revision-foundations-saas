@@ -5,6 +5,19 @@ const CSS = `
 
 .nd-guide *, .nd-guide *::before, .nd-guide *::after { box-sizing: border-box; box-shadow: none !important; }
 
+.nd-skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #1A1815;
+  color: #FAFAF8;
+  padding: 8px 16px;
+  font-size: 14px;
+  text-decoration: none;
+  z-index: 100;
+}
+.nd-skip-link:focus { top: 0; }
+
 .nd-guide {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 300;
@@ -440,7 +453,7 @@ const CSS = `
 
 .nd-route-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 44px;
 }
@@ -633,6 +646,13 @@ const START_PATHS = [
     text: 'If you are getting stuck deciding what order to do things in, use the general guide as the scaffold instead of making a fresh plan from scratch.',
     href: '/how-to-use',
     cta: 'Read the study method →',
+  },
+  {
+    label: 'Want structured reference material?',
+    title: 'Use the hub as your reading library.',
+    text: 'The hub holds focused topic guides — anatomy, pharmacology, clinical skills, and more. Each guide is short enough to read in one sitting and contained enough that you know when you are done.',
+    href: '/hub',
+    cta: 'Browse hub guides →',
   },
   {
     label: 'Need the page to feel easier first?',
@@ -979,8 +999,8 @@ const SECTIONS = [
       'When you revise with anxiety, the goal is not to feel calm. It is to show yourself, over and over, that you can do the thing even when the feeling is there.',
     primaryHref: '/quiz',
     primaryLabel: 'Gentle 5-question warm-up',
-    secondaryHref: '/dashboard',
-    secondaryLabel: 'Back to dashboard →',
+    secondaryHref: '/hub',
+    secondaryLabel: 'Browse hub guides →',
     hubLinks: [
       { href: '/hub/resources/placement-survival', label: 'Placement survival' },
       { href: '/hub/resources/ae-assessment-guide', label: 'A&E assessment guide' },
@@ -993,6 +1013,7 @@ export default function NeurodivergentGuidePage() {
   return (
     <div className="nd-guide">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <a href="#main-content" className="nd-skip-link">Skip to main content</a>
 
       <main id="main-content" className="nd-wrap">
         <Link href="/dashboard" className="nd-back">
