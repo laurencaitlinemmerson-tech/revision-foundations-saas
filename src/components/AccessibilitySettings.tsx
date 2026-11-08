@@ -341,7 +341,7 @@ export default function AccessibilitySettings() {
 
           <div className="a11y-row">
             <label htmlFor="a11y-theme">
-              <span className="a11y-row-label">Night reading mode</span>
+              <span className="a11y-row-label">Light reading mode</span>
               <span className="a11y-row-hint">Warm dark background for late revision. Easier on your eyes than a bright screen in a dark room.</span>
             </label>
             <input

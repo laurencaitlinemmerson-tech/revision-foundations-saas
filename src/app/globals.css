@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400;1,14..32,500;1,14..32,600;1,14..32,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,300;1,8..60,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400;1,14..32,500;1,14..32,600;1,14..32,700&display=swap');
 @import "tailwindcss";
 
 /* Lenis smooth scroll */
@@ -26,73 +26,93 @@ html.lenis, html.lenis body {
    DESIGN SYSTEM - CSS VARIABLES
    ============================================= */
 :root {
-  color-scheme: light;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  /* Warm-editorial (social-hub vibe): display type is Playfair Display serif. */
-  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  color-scheme: dark;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica, sans-serif;
   --font-body-dyslexic: 'Atkinson Hyperlegible', 'Arial', sans-serif;
 
-  /* Primary Palette - Editorial Paper */
-  --cream: #FDFDFB;
-  --cream-pink: #F7F4EF;
-  --linen-light: #F5F3F0;
-  --linen-deep: #D8D3CB;
-  --linen-medium: #C8C4BE;
+  /* Core surfaces — Apple dark */
+  --surface-page:   #000000;
+  --surface-raised: #1C1C1E;
+  --surface-sunken: #111113;
+  --hairline-soft:  rgba(255,255,255,0.08);
+  --hairline-firm:  rgba(255,255,255,0.14);
 
-  /* Earthy accent palette */
-  --peach-warm: #EFCBB6;
-  --salmon: #FFBDB1;
-  --straw: #DFD49D;
-  --apricot: #FFDFB5;
-  --stone: #D1D1C8;
+  /* Ink ramp — white on black */
+  --ink-strong: #F5F5F7;
+  --ink-mid:    rgba(245,245,247,0.87);
+  --ink-soft:   rgba(245,245,247,0.60);
+  --ink-faint:  rgba(245,245,247,0.40);
 
-  /* Text & dark tones */
-  --charcoal: #5A5750;
-  --charcoal-light: #5A5750;
-  --espresso: #1A1815;
+  /* Accent — Apple vivid blue */
+  --gold:      #2997FF;
+  --gold-deep: #0071E3;
 
-  /* CHANGE 1: New amber tokens */
-  --amber: #C8700A;
-  --amber-bg: #FDF3E3;
-  --amber-text: #7A3F04;
+  /* Action tokens */
+  --action-bg:       #0071E3;
+  --action-text:     #FFFFFF;
+  --action-bg-hover: #0077ED;
 
-  /* Social-hub editorial: gold accent + warm neutrals (portal-wide vibe).
-     --gold stays as-is for large display type and rules; --gold-deep is
-     darkened from #8F7A54 (4.06:1) to clear 4.5:1, since it is used as
-     accent text inside headings. */
-  --gold: #A6906B;
-  --gold-deep: #7A6437;
-  --hairline: #E7E4DD;
-  --wash: #F6F4EF;
-  --ink: #1E1E1C;
+  /* Amber / warning */
+  --amber: #FF9F0A;
+  --amber-bg: rgba(255,159,10,0.14);
+  --amber-text: #FF9F0A;
 
-  /* Keep these mapped for broad compatibility */
-  --lavender: #EFCBB6;
-  --lavender-dark: #D4A899;
-  --purple: #504C44;
-  --plum: #504C44;
-  --plum-dark: #301906;
-  --lilac-soft: #F7F3EF;
-  --lilac: #E8E0D8;
-  --lilac-medium: #DDD5CB;
-  --pink-soft: #FFBDB1;
-  --pink: #D4A899;
-  --mint: #DFD49D;
-  --peach: #FFDFB5;
+  /* Legacy compatibility — map warm names to dark values */
+  --cream:         #000000;
+  --cream-pink:    #0A0A0C;
+  --linen-light:   #1C1C1E;
+  --linen-deep:    #3A3A3C;
+  --linen-medium:  #2C2C2E;
+  --bg-primary:    #000000;
+  --bg-secondary:  #1C1C1E;
+  --bg-card:       #1C1C1E;
+  --wash:          #0A0A0C;
+  --hairline:      rgba(255,255,255,0.10);
+  --espresso:      #F5F5F7;
+  --ink:           #F5F5F7;
+  --charcoal:      rgba(245,245,247,0.87);
+  --charcoal-light:rgba(245,245,247,0.60);
+  --text-primary:  rgba(245,245,247,0.87);
+  --text-secondary:rgba(245,245,247,0.60);
+  --text-muted:    rgba(245,245,247,0.40);
 
-  /* Semantic colors
-     These were alpha-blended values that measured 3.81:1 and 2.42:1 on cream —
-     both under the 4.5:1 floor for body text. Now solid values from the ink
-     ramp at 7.49:1 and 5.08:1. */
-  --text-primary: var(--charcoal);
-  --text-secondary: #55524B;
-  --text-muted: #6B6760;
+  /* Legacy tints — mapped to subtle dark variants */
+  --lavender:      rgba(41,151,255,0.15);
+  --lavender-dark: rgba(41,151,255,0.25);
+  --purple:        rgba(245,245,247,0.87);
+  --plum:          rgba(245,245,247,0.87);
+  --plum-dark:     #F5F5F7;
+  --lilac-soft:    #0A0A0C;
+  --lilac:         #1C1C1E;
+  --lilac-medium:  #2C2C2E;
+  --pink-soft:     rgba(255,69,58,0.15);
+  --pink:          rgba(255,69,58,0.25);
+  --mint:          rgba(48,209,88,0.15);
+  --peach:         rgba(255,159,10,0.15);
+  --peach-warm:    rgba(41,151,255,0.30);
+  --salmon:        rgba(255,69,58,0.15);
+  --straw:         rgba(255,214,10,0.15);
+  --apricot:       rgba(255,159,10,0.15);
+  --stone:         #3A3A3C;
 
-  /* Background */
-  --bg-primary: var(--cream);
-  --bg-secondary: #F5F3F0;
-  --bg-card: #FFFFFF;
-  
+  /* Nav / glass */
+  --nav-bg:          rgba(0,0,0,0.72);
+  --nav-bg-scrolled: rgba(0,0,0,0.90);
+  --surface-translucent: rgba(28,28,30,0.72);
+
+  /* Inverse surface (footers etc — now lighter against dark page) */
+  --surface-inverse:      #F5F5F7;
+  --surface-inverse-text: #1D1D1F;
+
+  /* FAB */
+  --fab-bg:   #0071E3;
+  --fab-text: #FFFFFF;
+
+  /* Borders */
+  --border:        rgba(255,255,255,0.12);
+  --border-strong: rgba(255,255,255,0.25);
+
   /* Spacing scale */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -101,37 +121,37 @@ html.lenis, html.lenis body {
   --space-xl: 2rem;
   --space-2xl: 3rem;
   --space-3xl: 4rem;
-  
-  /* Radius scale */
-  --radius-sm: 0.5rem;
-  --radius-md: 1rem;
+
+  /* Radius scale — Apple uses generous rounding */
+  --radius-sm: 0.75rem;
+  --radius-md: 1.125rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
   --radius-full: 9999px;
-  
-  /* Shadows - warm, subtle */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-xl: none;
-  
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-smooth: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Semantic colour palette — use to encode meaning per content category */
-  --blue-50: #E6F1FB; --blue-200: #85B7EB; --blue-600: #185FA5; --blue-800: #0C447C;
-  --teal-50: #E1F5EE; --teal-600: #0F6E56; --teal-800: #085041;
-  --coral-50: #FAECE7; --coral-600: #993C1D; --coral-800: #712B13;
-  --purple-50: #EEEDFE; --purple-600: #534AB7; --purple-800: #3C3489;
-  --amber-50: #FAEEDA; --amber-600: #854F0B; --amber-800: #633806;
-  --sage-50: #EEF2ED; --sage-200: #B8CCBA; --sage-600: #4A6B50; --sage-800: #344D38;
-  --red-50: #FCEBEB; --red-600: #A32D2D;
-  --gray-50: #F1EFE8; --gray-600: #5F5E5A; --gray-800: #444441;
-  --border: rgba(0,0,0,0.12);
-  --border-strong: rgba(0,0,0,0.25);
+  /* Shadows — depth reads differently on dark */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.60);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.70);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.80);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.85);
+
+  /* Transitions — slightly more cinematic */
+  --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 650ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Semantic colour palette — dark-mode tuned values */
+  --blue-50: #152634; --blue-200: #2A4A6B; --blue-600: #9CC7F0; --blue-800: #C3DEF7;
+  --teal-50: #132A25; --teal-600: #8FD3C0; --teal-800: #B4E3D6;
+  --coral-50: #37201B; --coral-600: #F3A491; --coral-800: #F8C6BA;
+  --purple-50: #25213C; --purple-600: #B5AAF0; --purple-800: #D0C9F6;
+  --amber-50: #332A17; --amber-600: #E5C283; --amber-800: #F0D9AE;
+  --sage-50: #1E2820; --sage-200: #3B483A; --sage-600: #AFC9A6; --sage-800: #C9DCC3;
+  --red-50: #37201B; --red-600: #F3A491;
+  --gray-50: #252220; --gray-600: #A8A29A; --gray-800: #C9C4BC;
+  --border: rgba(255,255,255,0.12);
+  --border-strong: rgba(255,255,255,0.25);
 
   /* =============================================
      STUDY COLOUR SYSTEM
@@ -152,123 +172,7 @@ html.lenis, html.lenis body {
      Do not hand-edit these without re-running the audit.
      ============================================= */
 
-  /* --- Topic families (categorical) --- */
-  --topic-assessment-surface: #E8F0FA;
-  --topic-assessment-border:  #ABC3DC;
-  --topic-assessment-text:    #15558F;
-  --topic-assessment-solid:   #2A6DAD;
-
-  --topic-emergency-surface:  #FBEAE7;
-  --topic-emergency-border:   #E3B5AB;
-  --topic-emergency-text:     #A32D18;
-  --topic-emergency-solid:    #BF3E24;
-
-  --topic-meds-surface:       #EEEBFA;
-  --topic-meds-border:        #C0B8E5;
-  --topic-meds-text:          #4C3F9E;
-  --topic-meds-solid:         #5F51BC;
-
-  --topic-skills-surface:     #E2F2ED;
-  --topic-skills-border:      #A0C9BD;
-  --topic-skills-text:        #0E6250;
-  --topic-skills-solid:       #157A64;
-
-  --topic-anatomy-surface:    #FBEDE4;
-  --topic-anatomy-border:     #DFBBA2;
-  --topic-anatomy-text:       #8F4715;
-  --topic-anatomy-solid:      #AB591E;
-
-  --topic-professional-surface: #EDF1EA;
-  --topic-professional-border:  #B7C5AE;
-  --topic-professional-text:    #42603C;
-  --topic-professional-solid:   #54764C;
-
-  --topic-foundations-surface: #FAF0DC;
-  --topic-foundations-border:  #D7BF8B;
-  --topic-foundations-text:    #7A5008;
-  --topic-foundations-solid:   #96650F;
-
-  /* --- Feedback states --- */
-  --state-correct-surface:   #E2F2ED;
-  --state-correct-border:    #A0C9BD;
-  --state-correct-text:      #0E6250;
-  --state-correct-solid:     #157A64;
-
-  --state-incorrect-surface: #FBEAE7;
-  --state-incorrect-border:  #E3B5AB;
-  --state-incorrect-text:    #A32D18;
-  --state-incorrect-solid:   #BF3E24;
-
-  --state-warning-surface:   #FAF0DC;
-  --state-warning-border:    #D7BF8B;
-  --state-warning-text:      #7A5008;
-  --state-warning-solid:     #96650F;
-
-  --state-info-surface:      #E8F0FA;
-  --state-info-border:       #ABC3DC;
-  --state-info-text:         #15558F;
-  --state-info-solid:        #2A6DAD;
-
-  --state-locked-surface:    #F1EFE9;
-  --state-locked-border:     #C5C2B9;
-  --state-locked-text:       #55524B;
-  --state-locked-solid:      #6B6760;
-
-  /* --- Mastery ramp (sequential, low -> high) --- */
-  --mastery-0: #E4E1DA;
-  --mastery-1: #BFD6CD;
-  --mastery-2: #8FBFAE;
-  --mastery-3: #4E9A82;
-  --mastery-4: #157A64;
-
-  /* --- Neutral ink ramp ---
-     Replaces the old alpha-based --text-secondary / --text-muted, which
-     rendered at 3.81:1 and 2.42:1 on cream: both below the 4.5:1 floor. */
-  --ink-strong: #1A1815;
-  --ink-mid:    #3A3833;
-  --ink-soft:   #55524B;
-  --ink-faint:  #6B6760;
-
-  /* Page + card surfaces, so night mode has a single place to swap them */
-  --surface-page:   #FDFDFB;
-  --surface-raised: #FFFFFF;
-  --surface-sunken: #F5F3F0;
-  --hairline-soft:  rgba(0,0,0,0.08);
-  --hairline-firm:  rgba(0,0,0,0.14);
-
-  /* The accessibility launcher stays a dark pill in both themes — inverting it
-     to a bright pill would make it the loudest thing on a night-mode page. */
-  --fab-bg:   #1A1815;
-  --fab-text: #FAFAF8;
-
-  /* Primary action. This pair inverts together in night mode, so the highest
-     contrast element on the page stays the highest contrast element. Keep the
-     two in sync — setting one without the other is how you get invisible text. */
-  --action-bg:       #1A1815;
-  --action-text:     #FAFAF8;
-  --action-bg-hover: #3A3833;
-
-  /* Inverted panels (footers, dark callouts) that should stay dark in both
-     themes rather than flipping. */
-  --surface-inverse:      #1A1815;
-  --surface-inverse-text: #FAFAF8;
-
-  /* Translucent nav — sits over page content with a backdrop blur, so it needs
-     an alpha value rather than a solid surface token. */
-  --nav-bg:          rgba(250,250,248,0.90);
-  --nav-bg-scrolled: rgba(250,250,248,0.97);
-  --surface-translucent: rgba(255,255,255,0.80);
-}
-
-/* =============================================
-   NIGHT READING MODE
-   Warm dark rather than pure black: #191713 instead of #000. Pure black on
-   a bright OLED panel maximises halation around light text, which is the
-   opposite of what you want at 1am the night before an OSCE.
-   ============================================= */
-html[data-a11y-theme='night'] {
-  color-scheme: dark;
-
+  /* --- Topic families (categorical) — dark-mode tuned --- */
   --topic-assessment-surface: #152634;
   --topic-assessment-border:  #30485C;
   --topic-assessment-text:    #9CC7F0;
@@ -304,6 +208,7 @@ html[data-a11y-theme='night'] {
   --topic-foundations-text:    #E5C283;
   --topic-foundations-solid:   #D3AC64;
 
+  /* --- Feedback states --- */
   --state-correct-surface:   #132A25;
   --state-correct-border:    #2F4D45;
   --state-correct-text:      #8FD3C0;
@@ -329,93 +234,162 @@ html[data-a11y-theme='night'] {
   --state-locked-text:       #A8A29A;
   --state-locked-solid:      #8D8880;
 
+  /* --- Mastery ramp --- */
   --mastery-0: #332F2B;
   --mastery-1: #2F4D45;
   --mastery-2: #47826F;
   --mastery-3: #5FAE94;
   --mastery-4: #8FD3C0;
+}
 
-  --ink-strong: #F5F2EC;
-  --ink-mid:    #DED9D0;
-  --ink-soft:   #ADA79D;
-  --ink-faint:  #8D8880;
+/* =============================================
+   LIGHT READING MODE
+   Warm editorial palette for users who prefer light — the inverse of the
+   default dark theme. Toggle with the accessibility settings panel.
+   ============================================= */
+html[data-a11y-theme='night'] {
+  color-scheme: light;
 
-  --surface-page:   #191713;
-  --surface-raised: #211E1A;
-  --surface-sunken: #131110;
-  --hairline-soft:  rgba(255,255,255,0.10);
-  --hairline-firm:  rgba(255,255,255,0.18);
+  --topic-assessment-surface: #E8F0FA;
+  --topic-assessment-border:  #ABC3DC;
+  --topic-assessment-text:    #15558F;
+  --topic-assessment-solid:   #2A6DAD;
 
-  --fab-bg:   #2C2822;
-  --fab-text: #F5F2EC;
+  --topic-emergency-surface:  #FBEAE7;
+  --topic-emergency-border:   #E3B5AB;
+  --topic-emergency-text:     #A32D18;
+  --topic-emergency-solid:    #BF3E24;
 
-  /* Inverted: on a dark page the light button is the loud one. */
-  --action-bg:       #F0EBE2;
-  --action-text:     #191713;
-  --action-bg-hover: #FFFFFF;
+  --topic-meds-surface:       #EEEBFA;
+  --topic-meds-border:        #C0B8E5;
+  --topic-meds-text:          #4C3F9E;
+  --topic-meds-solid:         #5F51BC;
 
-  /* Already dark — nudged up so an inverse panel still separates from page. */
-  --surface-inverse:      #2C2822;
-  --surface-inverse-text: #F5F2EC;
+  --topic-skills-surface:     #E2F2ED;
+  --topic-skills-border:      #A0C9BD;
+  --topic-skills-text:        #0E6250;
+  --topic-skills-solid:       #157A64;
 
-  --nav-bg:          rgba(25,23,19,0.90);
-  --nav-bg-scrolled: rgba(25,23,19,0.97);
-  --surface-translucent: rgba(44,40,34,0.80);
+  --topic-anatomy-surface:    #FBEDE4;
+  --topic-anatomy-border:     #DFBBA2;
+  --topic-anatomy-text:       #8F4715;
+  --topic-anatomy-solid:      #AB591E;
 
-  /* Remap the legacy warm-editorial tokens so existing markup follows along
-     instead of leaving light-mode cream backgrounds stranded in the dark. */
-  --cream:        #191713;
-  --cream-pink:   #201D19;
-  --linen-light:  #211E1A;
-  --linen-deep:   #35312C;
-  --linen-medium: #423D37;
-  --wash:         #201D19;
-  --bg-primary:   #191713;
-  --bg-secondary: #211E1A;
-  --bg-card:      #211E1A;
-  --hairline:     rgba(255,255,255,0.10);
+  --topic-professional-surface: #EDF1EA;
+  --topic-professional-border:  #B7C5AE;
+  --topic-professional-text:    #42603C;
+  --topic-professional-solid:   #54764C;
 
-  --espresso:        #F5F2EC;
-  --ink:             #F5F2EC;
-  --charcoal:        #DED9D0;
-  --charcoal-light:  #ADA79D;
-  --text-primary:    #DED9D0;
-  --text-secondary:  #ADA79D;
-  --text-muted:      #8D8880;
+  --topic-foundations-surface: #FAF0DC;
+  --topic-foundations-border:  #D7BF8B;
+  --topic-foundations-text:    #7A5008;
+  --topic-foundations-solid:   #96650F;
 
-  --gold:      #CBAE78;
-  --gold-deep: #DCC190;
-  --purple:    #DED9D0;
-  --plum:      #DED9D0;
+  --state-correct-surface:   #E2F2ED;
+  --state-correct-border:    #A0C9BD;
+  --state-correct-text:      #0E6250;
+  --state-correct-solid:     #157A64;
 
-  --border:        rgba(255,255,255,0.16);
-  --border-strong: rgba(255,255,255,0.30);
+  --state-incorrect-surface: #FBEAE7;
+  --state-incorrect-border:  #E3B5AB;
+  --state-incorrect-text:    #A32D18;
+  --state-incorrect-solid:   #BF3E24;
 
-  /* Legacy warm-editorial accents. These are pale tints in light mode, so
-     without a night value they stay bright and strand dark text on them. */
-  --peach-warm:   #4A3A30;
-  --salmon:       #4E332E;
-  --straw:        #453F28;
-  --apricot:      #4A3B27;
-  --stone:        #3A3A34;
-  --amber-bg:     #332A17;
-  --lavender:     #4A3A30;
-  --lilac-soft:   #262320;
-  --lilac:        #35312C;
-  --lilac-medium: #3E3931;
-  --pink-soft:    #4E332E;
-  --mint:         #2F4D45;
-  --peach:        #4A3B27;
-  --sage-200:     #3B483A;
+  --state-warning-surface:   #FAF0DC;
+  --state-warning-border:    #D7BF8B;
+  --state-warning-text:      #7A5008;
+  --state-warning-solid:     #96650F;
 
-  --blue-50: #152634;   --blue-600: #9CC7F0;  --blue-800: #C3DEF7;
-  --teal-50: #132A25;   --teal-600: #8FD3C0;  --teal-800: #B4E3D6;
-  --coral-50: #37201B;  --coral-600: #F3A491; --coral-800: #F8C6BA;
-  --purple-50: #25213C; --purple-600: #B5AAF0; --purple-800: #D0C9F6;
-  --amber-50: #332A17;  --amber-600: #E5C283; --amber-800: #F0D9AE;
-  --sage-50: #1E2820;   --sage-600: #AFC9A6;  --sage-800: #C9DCC3;
-  --red-50: #37201B;    --red-600: #F3A491;
-  --gray-50: #252220;   --gray-600: #A8A29A;  --gray-800: #C9C4BC;
+  --state-info-surface:      #E8F0FA;
+  --state-info-border:       #ABC3DC;
+  --state-info-text:         #15558F;
+  --state-info-solid:        #2A6DAD;
+
+  --state-locked-surface:    #F1EFE9;
+  --state-locked-border:     #C5C2B9;
+  --state-locked-text:       #55524B;
+  --state-locked-solid:      #6B6760;
+
+  --mastery-0: #E4E1DA;
+  --mastery-1: #BFD6CD;
+  --mastery-2: #8FBFAE;
+  --mastery-3: #4E9A82;
+  --mastery-4: #157A64;
+
+  --ink-strong: #1A1815;
+  --ink-mid:    #3A3833;
+  --ink-soft:   #55524B;
+  --ink-faint:  #6B6760;
+
+  --surface-page:   #FDFDFB;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #F5F3F0;
+  --hairline-soft:  rgba(0,0,0,0.08);
+  --hairline-firm:  rgba(0,0,0,0.14);
+
+  --fab-bg:   #1A1815;
+  --fab-text: #FAFAF8;
+
+  --action-bg:       #1A1815;
+  --action-text:     #FAFAF8;
+  --action-bg-hover: #3A3833;
+
+  --surface-inverse:      #1A1815;
+  --surface-inverse-text: #FAFAF8;
+
+  --nav-bg:          rgba(253,253,251,0.90);
+  --nav-bg-scrolled: rgba(253,253,251,0.97);
+  --surface-translucent: rgba(255,255,255,0.80);
+
+  --cream:        #FDFDFB;
+  --cream-pink:   #F7F4EF;
+  --linen-light:  #F5F3F0;
+  --linen-deep:   #D8D3CB;
+  --linen-medium: #C8C4BE;
+  --wash:         #F6F4EF;
+  --bg-primary:   #FDFDFB;
+  --bg-secondary: #F5F3F0;
+  --bg-card:      #FFFFFF;
+  --hairline:     #E7E4DD;
+
+  --espresso:        #1A1815;
+  --ink:             #1E1E1C;
+  --charcoal:        #5A5750;
+  --charcoal-light:  #5A5750;
+  --text-primary:    #5A5750;
+  --text-secondary:  #55524B;
+  --text-muted:      #6B6760;
+
+  --gold:      #A6906B;
+  --gold-deep: #7A6437;
+
+  --lavender:      #EFCBB6;
+  --lavender-dark: #D4A899;
+  --purple:        #504C44;
+  --plum:          #504C44;
+  --lilac-soft:    #F7F3EF;
+  --lilac:         #E8E0D8;
+  --lilac-medium:  #DDD5CB;
+  --pink-soft:     #FFBDB1;
+  --peach-warm:    #EFCBB6;
+  --mint:          #DFD49D;
+  --peach:         #FFDFB5;
+  --stone:         #D1D1C8;
+  --amber-bg:      #FDF3E3;
+  --amber-text:    #7A3F04;
+  --sage-200:      #B8CCBA;
+
+  --blue-50: #E6F1FB;  --blue-600: #185FA5;  --blue-800: #0C447C;
+  --teal-50: #E1F5EE;  --teal-600: #0F6E56;  --teal-800: #085041;
+  --coral-50: #FAECE7; --coral-600: #993C1D; --coral-800: #712B13;
+  --purple-50: #EEEDFE;--purple-600: #534AB7;--purple-800: #3C3489;
+  --amber-50: #FAEEDA; --amber-600: #854F0B; --amber-800: #633806;
+  --sage-50: #EEF2ED;  --sage-600: #4A6B50;  --sage-800: #344D38;
+  --red-50: #FCEBEB;   --red-600: #A32D2D;
+  --gray-50: #F1EFE8;  --gray-600: #5F5E5A;  --gray-800: #444441;
+
+  --border:        rgba(0,0,0,0.12);
+  --border-strong: rgba(0,0,0,0.25);
 
   --shadow-sm: none;
   --shadow-md: none;
@@ -423,52 +397,44 @@ html[data-a11y-theme='night'] {
   --shadow-xl: none;
 }
 
-/* Night mode has to reach hardcoded light values in components that predate
-   the token layer. Scoped to the night attribute so light mode is untouched. */
-html[data-a11y-theme='night'] body {
+/* Body follows tokens in both themes */
+html body {
   background: var(--surface-page);
   color: var(--ink-mid);
 }
 
 /* ---------------------------------------------------------------------------
-   Tailwind compatibility layer for night mode.
+   Tailwind compatibility layer.
 
-   A number of components style themselves with Tailwind palette utilities
-   rather than tokens. `bg-white` is the dangerous one: it pins a card to #fff
-   while the text colour follows the theme to near-white, which renders the
-   text invisible. These overrides re-point the utilities at tokens.
-
-   The attribute selector plus class beats a bare utility on specificity, so
-   these win without !important.
-
-   Deliberately NOT overridden:
-     .text-white  — sits on dark buttons and scrims, where white stays correct
-     .bg-black    — modal scrims, which should stay black in both themes
+   The default theme is now dark. These overrides re-point Tailwind utilities
+   at our tokens in BOTH themes so hardcoded Tailwind colours don't pierce the
+   design system. The light-reading override (`data-a11y-theme='night'`) restores
+   warm-light values, so these stay consistently token-driven.
    --------------------------------------------------------------------------- */
-html[data-a11y-theme='night'] .bg-white { background-color: var(--surface-raised); }
-html[data-a11y-theme='night'] .border-black { border-color: var(--hairline-firm); }
+.bg-white { background-color: var(--surface-raised); }
+.border-black { border-color: var(--hairline-firm); }
 
-html[data-a11y-theme='night'] .bg-red-50,
-html[data-a11y-theme='night'] .bg-red-100 { background-color: var(--state-incorrect-surface); }
-html[data-a11y-theme='night'] .border-red-100,
-html[data-a11y-theme='night'] .border-red-200 { border-color: var(--state-incorrect-border); }
-html[data-a11y-theme='night'] .text-red-600,
-html[data-a11y-theme='night'] .text-red-700,
-html[data-a11y-theme='night'] .text-red-800,
-html[data-a11y-theme='night'] .text-red-900 { color: var(--state-incorrect-text); }
+.bg-red-50,
+.bg-red-100 { background-color: var(--state-incorrect-surface); }
+.border-red-100,
+.border-red-200 { border-color: var(--state-incorrect-border); }
+.text-red-600,
+.text-red-700,
+.text-red-800,
+.text-red-900 { color: var(--state-incorrect-text); }
 
-html[data-a11y-theme='night'] .bg-green-50,
-html[data-a11y-theme='night'] .bg-emerald-50,
-html[data-a11y-theme='night'] .bg-emerald-100 { background-color: var(--state-correct-surface); }
-html[data-a11y-theme='night'] .border-green-200,
-html[data-a11y-theme='night'] .border-emerald-200 { border-color: var(--state-correct-border); }
-html[data-a11y-theme='night'] .text-green-800,
-html[data-a11y-theme='night'] .text-emerald-600,
-html[data-a11y-theme='night'] .text-emerald-900 { color: var(--state-correct-text); }
+.bg-green-50,
+.bg-emerald-50,
+.bg-emerald-100 { background-color: var(--state-correct-surface); }
+.border-green-200,
+.border-emerald-200 { border-color: var(--state-correct-border); }
+.text-green-800,
+.text-emerald-600,
+.text-emerald-900 { color: var(--state-correct-text); }
 
-html[data-a11y-theme='night'] .bg-amber-50 { background-color: var(--state-warning-surface); }
-html[data-a11y-theme='night'] .border-amber-200 { border-color: var(--state-warning-border); }
-html[data-a11y-theme='night'] .text-amber-800 { color: var(--state-warning-text); }
+.bg-amber-50 { background-color: var(--state-warning-surface); }
+.border-amber-200 { border-color: var(--state-warning-border); }
+.text-amber-800 { color: var(--state-warning-text); }
 
 
 /* Dark mode transition for smooth switching */
@@ -491,8 +457,8 @@ body {
 }
 
 body {
-  background: var(--cream);
-  color: var(--charcoal);
+  background: var(--surface-page);
+  color: var(--ink-mid);
   min-height: 100vh;
   line-height: 1.7;
   transition: background-color var(--transition-slow), color var(--transition-slow);
@@ -503,41 +469,41 @@ body {
    TYPOGRAPHY
    ============================================= */
 
-/* Base headings — CHANGE 3: font-weight: 600 → 400 */
+/* Base headings — Apple SF Pro Display stack, tight tracking */
 h1, h2, h3, .font-display {
   font-family: var(--font-display);
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
-  color: var(--espresso);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--ink-strong);
 }
 
-h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
-h2 { font-size: clamp(1.6rem, 3.5vw, 2.25rem); }
-h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
+h1 { font-size: clamp(2.25rem, 6vw, 4rem); }
+h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
 
-/* Signature editorial accent: italic gold inside a heading, e.g. Social <em>Hub</em> */
+/* Accent inside headings — vivid blue */
 h1 em, h2 em, h3 em, .brand-title em, .display-accent {
-  font-style: italic;
-  color: var(--gold-deep);
+  font-style: normal;
+  color: var(--gold);
 }
 
 /* Brand Title */
 .brand-title {
   font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.015em;
-  color: var(--espresso);
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--ink-strong);
 }
 
 /* Brand title size variants */
 .brand-title-xl {
-  font-size: clamp(2.5rem, 7vw, 4rem);
+  font-size: clamp(2.75rem, 8vw, 5rem);
 }
 
 .brand-title-lg {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
 }
 
 .brand-title-md {
@@ -546,9 +512,7 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
 
 /* Forced colors accessibility fallback */
 @media (forced-colors: active) {
-  .brand-title {
-    color: var(--espresso);
-  }
+  .brand-title { color: var(--ink-strong); }
 }
 
 /* Text utilities */
@@ -557,39 +521,41 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
 }
 
 /* Backgrounds */
-.bg-cream { background: var(--cream); }
-.bg-lilac { background: var(--linen-light); }
+.bg-cream { background: var(--surface-page); }
+.bg-lilac { background: var(--surface-raised); }
 
 .gradient-hero {
-  background: var(--cream);
+  background: var(--surface-page);
   position: relative;
 }
 
 .gradient-purple {
-  background: var(--espresso);
+  background: var(--surface-raised);
 }
 
 
 /* =============================================
-   CARDS
+   CARDS — Apple glassmorphism
    ============================================= */
 .card {
-  background: var(--bg-card);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   padding: var(--space-xl);
-  box-shadow: none;
-  border: 0.5px solid var(--hairline-firm);
-  border-radius: 2px;
+  box-shadow: var(--shadow-md);
+  border: 0.5px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
   transition: transform var(--transition-smooth),
               box-shadow var(--transition-smooth),
               border-color var(--transition-base),
               background-color var(--transition-base);
 }
 
-
 @media (hover: hover) {
   .card:hover {
-    border-color: var(--gold);
-    transform: translateY(-1px);
+    border-color: rgba(41,151,255,0.35);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(41,151,255,0.15);
   }
 }
 
@@ -599,56 +565,86 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
 
 .card-no-hover:hover {
   transform: none;
+  box-shadow: var(--shadow-md);
 }
 
 .card-glass {
-  background: var(--linen-light);
-  border: 0.5px solid var(--hairline-firm);
-  border-radius: 2px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
   padding: var(--space-xl);
 }
 
-
 .card-dark {
-  background: var(--espresso);
+  background: var(--surface-raised);
   padding: var(--space-xl);
-  border: 0.5px solid rgba(255,255,255,0.12);
-  border-radius: 2px;
+  border: 0.5px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+}
+
+/* Light reading mode — solid card surface */
+html[data-a11y-theme='night'] .card {
+  background: var(--bg-card);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0.5px solid var(--hairline-firm);
+  border-radius: 18px;
+  box-shadow: none;
+}
+html[data-a11y-theme='night'] .card:hover {
+  border-color: var(--gold);
+  box-shadow: none;
+}
+html[data-a11y-theme='night'] .card-glass {
+  background: var(--linen-light);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-a11y-theme='night'] .card-dark {
+  background: var(--espresso);
 }
 
 /* =============================================
-   BUTTONS
+   BUTTONS — Apple pill style
    ============================================= */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--espresso);
-  color: var(--cream);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0071E3;
+  color: #FFFFFF;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 400;
-  letter-spacing: 0.01em;
-  padding: 0.7rem 1.5rem;
+  letter-spacing: -0.01em;
+  padding: 0.75rem 1.75rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 980px;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
 .btn-primary:hover {
-  background: var(--gold-deep);
+  background: #0077ED;
+  transform: scale(1.015);
+}
+
+.btn-primary:active {
+  transform: scale(0.985);
 }
 
 .btn-primary:focus-visible {
-  outline: 3px solid var(--peach-warm);
+  outline: 3px solid rgba(41,151,255,0.6);
   outline-offset: 2px;
 }
 
 .btn-primary:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
@@ -656,61 +652,82 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: transparent;
-  color: var(--espresso);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: rgba(255,255,255,0.08);
+  color: var(--ink-strong);
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 400;
-  letter-spacing: 0.01em;
-  padding: 0.7rem 1.5rem;
-  border: 0.5px solid rgba(0,0,0,0.1);
-  border-radius: 6px;
+  letter-spacing: -0.01em;
+  padding: 0.75rem 1.75rem;
+  border: 0.5px solid rgba(255,255,255,0.14);
+  border-radius: 980px;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 .btn-secondary:hover {
-  background: var(--wash);
-  border-color: var(--gold);
-  color: var(--gold-deep);
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.25);
+  transform: scale(1.015);
+}
+
+.btn-secondary:active {
+  transform: scale(0.985);
 }
 
 .btn-secondary:focus-visible {
-  outline: 3px solid var(--peach-warm);
+  outline: 3px solid rgba(41,151,255,0.6);
   outline-offset: 2px;
 }
-
 
 .btn-outline-white {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: rgba(255,255,255,0.10);
+  color: #FFFFFF;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 400;
-  letter-spacing: 0.01em;
-  padding: 0.7rem 1.5rem;
-  border-radius: 8px;
-  border: 0.5px solid rgba(255, 255, 255, 0.3);
+  letter-spacing: -0.01em;
+  padding: 0.75rem 1.75rem;
+  border-radius: 980px;
+  border: 0.5px solid rgba(255,255,255,0.28);
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 .btn-outline-white:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.50);
+  transform: scale(1.015);
 }
 
 .btn-outline-white:active {
-  transform: scale(0.98);
+  transform: scale(0.985);
 }
 
 .btn-outline-white:focus-visible {
-  outline: 3px solid rgba(255, 255, 255, 0.5);
+  outline: 3px solid rgba(255,255,255,0.5);
   outline-offset: 2px;
+}
+
+/* Light reading mode button overrides */
+html[data-a11y-theme='night'] .btn-primary {
+  background: #1A1815;
+  color: #FAFAF8;
+}
+html[data-a11y-theme='night'] .btn-primary:hover { background: #3A3833; }
+html[data-a11y-theme='night'] .btn-secondary {
+  background: transparent;
+  color: #1A1815;
+  border-color: rgba(0,0,0,0.12);
+}
+html[data-a11y-theme='night'] .btn-secondary:hover {
+  background: var(--wash);
+  border-color: var(--gold);
+  color: var(--gold-deep);
 }
 
 /* =============================================
@@ -867,46 +884,68 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
 }
 
 /* =============================================
-   ANIMATIONS
+   ANIMATIONS — Apple cinematic style
    ============================================= */
+
+/* Cinematic reveal: scale + fade (Apple product page signature move) */
+@keyframes appleReveal {
+  from { opacity: 0; transform: scale(0.94) translateY(24px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+@keyframes appleFadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-10px); }
 }
 
 .float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
-  animation: fadeIn 0.5s var(--transition-smooth) forwards;
+  animation: fadeIn 0.7s var(--transition-smooth) forwards;
 }
 
-/* Scroll reveal animation */
+/* Scroll reveal animation — Apple-scale motion */
 .animate-on-scroll {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s var(--transition-smooth), 
-              transform 0.6s var(--transition-smooth);
+  transform: scale(0.96) translateY(28px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-on-scroll[data-animate="in"] {
   opacity: 1;
-  transform: translateY(0);
+  transform: scale(1) translateY(0);
 }
 
-/* Staggered delays */
+/* Staggered delays — longer cadence for more cinematic feel */
 .animate-on-scroll:nth-child(1) { transition-delay: 0ms; }
-.animate-on-scroll:nth-child(2) { transition-delay: 75ms; }
-.animate-on-scroll:nth-child(3) { transition-delay: 150ms; }
-.animate-on-scroll:nth-child(4) { transition-delay: 225ms; }
-.animate-on-scroll:nth-child(5) { transition-delay: 300ms; }
-.animate-on-scroll:nth-child(6) { transition-delay: 375ms; }
+.animate-on-scroll:nth-child(2) { transition-delay: 100ms; }
+.animate-on-scroll:nth-child(3) { transition-delay: 200ms; }
+.animate-on-scroll:nth-child(4) { transition-delay: 300ms; }
+.animate-on-scroll:nth-child(5) { transition-delay: 400ms; }
+.animate-on-scroll:nth-child(6) { transition-delay: 500ms; }
+
+/* Apple-style glow pulse on interactive elements */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,113,227,0); }
+  50% { box-shadow: 0 0 32px 8px rgba(0,113,227,0.25); }
+}
+
+.glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
 
 
 /* =============================================
@@ -917,16 +956,16 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--lilac-soft);
+  background: var(--surface-sunken);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--lilac-medium);
+  background: rgba(255,255,255,0.18);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--lavender);
+  background: rgba(255,255,255,0.30);
 }
 
 /* Focus */
@@ -1025,26 +1064,27 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
   transform: translateZ(0);
 }
 
+/* Glows — Apple-style dark ambient colour orbs */
 .rf-blob-1 {
-  width: 500px;
-  height: 500px;
-  background: var(--lavender);
-  top: -120px;
-  right: -120px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0,113,227,0.18) 0%, transparent 70%);
+  top: -160px;
+  right: -160px;
 }
 
 .rf-blob-2 {
-  width: 360px;
-  height: 360px;
-  background: var(--pink-soft);
-  bottom: -80px;
-  left: -80px;
+  width: 440px;
+  height: 440px;
+  background: radial-gradient(circle, rgba(94,92,230,0.14) 0%, transparent 70%);
+  bottom: -100px;
+  left: -100px;
 }
 
 .rf-blob-3 {
-  width: 260px;
-  height: 260px;
-  background: var(--peach);
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(41,151,255,0.10) 0%, transparent 70%);
   top: 45%;
   left: 12%;
   transform: translateY(-50%);
@@ -1060,19 +1100,19 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
 }
 
 /* =============================================
-   AUTO REVEAL (AutoAnimate)
+   AUTO REVEAL
    ============================================= */
 .rf-reveal {
   opacity: 0;
-  transform: translateY(18px) scale(0.996);
-  transition: opacity 700ms cubic-bezier(.2,.9,.2,1), 
-              transform 700ms cubic-bezier(.2,.9,.2,1);
+  transform: scale(0.95) translateY(24px);
+  transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .rf-in {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: scale(1) translateY(0);
 }
 
 /* =============================================
@@ -1132,14 +1172,14 @@ h1 em, h2 em, h3 em, .brand-title em, .display-accent {
 /* Scroll reveal animations */
 .scroll-reveal {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.96) translateY(36px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scroll-reveal.revealed {
   opacity: 1;
-  transform: translateY(0);
+  transform: scale(1) translateY(0);
 }
 
 /* Staggered reveal delays */
