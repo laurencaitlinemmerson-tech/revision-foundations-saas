@@ -28,7 +28,7 @@ export const MUSCLE_NAMES: Record<MuscleKey, string> = {
 type Rule = { keys: string[]; primary: MuscleKey[]; secondary: MuscleKey[] };
 
 const RULES: Rule[] = [
-  { keys: ['glute kickback', 'cable kickback', 'donkey kick'], primary: ['glutes'], secondary: ['hamstrings'] },
+  { keys: ['glute kickback', 'cable kickback', 'kick back', 'leg kickback', 'donkey kick'], primary: ['glutes'], secondary: ['hamstrings'] },
   { keys: ['rear delt', 'reverse fly', 'rear fly', 'face pull'], primary: ['deltsRear'], secondary: ['midBack', 'traps'] },
   { keys: ['lateral raise', 'side raise'], primary: ['deltsSide'], secondary: ['traps'] },
   { keys: ['front raise'], primary: ['deltsFront'], secondary: [] },
@@ -47,8 +47,8 @@ const RULES: Rule[] = [
   { keys: ['romanian', 'rdl', 'stiff leg', 'good morning'], primary: ['hamstrings', 'glutes'], secondary: ['lowerBack'] },
   { keys: ['deadlift'], primary: ['glutes', 'hamstrings', 'lowerBack'], secondary: ['traps', 'quads', 'forearms'] },
   { keys: ['hip thrust', 'glute bridge', 'kickback', 'booty', 'glute'], primary: ['glutes'], secondary: ['hamstrings'] },
-  { keys: ['abductor'], primary: ['glutes'], secondary: [] },
-  { keys: ['adductor'], primary: ['adductors'], secondary: [] },
+  { keys: ['abduct', 'hip abduction'], primary: ['glutes'], secondary: [] },
+  { keys: ['adduct'], primary: ['adductors'], secondary: [] },
   { keys: ['leg extension'], primary: ['quads'], secondary: [] },
   { keys: ['squat', 'leg press', 'hack', 'lunge', 'split squat', 'bulgarian', 'step up', 'step-up'], primary: ['quads', 'glutes'], secondary: ['hamstrings', 'adductors', 'calves'] },
   { keys: ['calf'], primary: ['calves'], secondary: [] },
