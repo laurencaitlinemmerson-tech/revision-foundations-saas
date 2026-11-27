@@ -79,7 +79,9 @@ export async function listLifts(fromDate?: string) {
     let query = supabaseAdmin
       .from('operator_lifts')
       .select('*')
-      .order('performed_on', { ascending: true });
+      .order('performed_on', { ascending: true })
+      // Within a day, the order the lifts were logged, which is the order they were done.
+      .order('created_at', { ascending: true });
     if (fromDate) query = query.gte('performed_on', fromDate);
 
     const { data, error } = await query;
