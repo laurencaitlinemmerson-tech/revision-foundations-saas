@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "everfit:sync": "node scripts/everfit-sync.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.10",
@@ -34,6 +35,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.5",
+    "everfit-mcp": "0.0.4",
     "puppeteer": "^24.36.1",
     "tailwindcss": "^4",
     "typescript": "^5"
