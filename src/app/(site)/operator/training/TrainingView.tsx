@@ -10,6 +10,7 @@ import {
   SOFT, SPARK, TINT, TRACK, TRACK_PREV,
 } from './palette';
 import { BarSeries, Figure, LineSeries, Sparkline } from './charts';
+import MuscleMapPanel from './MuscleMapPanel';
 import { TAGS } from './palette';
 
 /**
@@ -1309,6 +1310,8 @@ function Dashboard({ v }: { v: TrainingVals }) {
           </div>
         )}
       </section>
+
+      <MuscleMapPanel m={v.muscleMap} />
 
       <section className="training-pair" style={{ marginTop: SECTION_GAP, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GRID_GAP }}>
         <div>

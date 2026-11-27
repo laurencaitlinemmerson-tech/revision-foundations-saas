@@ -1,5 +1,6 @@
 import type { HealthDay, LiveData, Lift, WeighIn, Workout } from '../daily-log/data';
 import { MUSCLE_GROUPS, equipmentOf, muscleGroupOf, sessionNameFor, type MuscleGroup } from './exercises';
+import { buildMuscleMap } from './muscleMap';
 import {
   DAY, DIMENSIONS, baselineOf, breakdownOf, overallScore, partsFor, scoreAll, statsFor,
   type Baseline, type DimensionRow, type Sources,
@@ -2929,6 +2930,9 @@ export function deriveVals(
 
     /* head to head */
     h2h,
+
+    /* the latest lifting session, drawn on the body — every lift, not the focus filter */
+    muscleMap: buildMuscleMap(live.lifts ?? []),
 
     /* which screen */
     screen: st.screen,

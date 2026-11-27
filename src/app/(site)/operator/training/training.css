@@ -79,6 +79,8 @@
   .training-shell .training-split,
   .training-shell .training-split-3,
   .training-shell .training-pair { grid-template-columns: 1fr !important; }
+  .training-shell .mm-row { grid-template-columns: 1fr auto !important; }
+  .training-shell .mm-row > [role="img"] { grid-column: 1 / -1; grid-row: 2; }
   .training-shell .training-split > * { border-right: 0 !important; }
 }
 
